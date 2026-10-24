@@ -3,8 +3,11 @@
 namespace App\Widgets;
 
 use App\Widgets\Builtin\ContainerWidget;
+use App\Widgets\Builtin\CustomHtmlWidget;
 use App\Widgets\Builtin\HeadingWidget;
 use App\Widgets\Builtin\HeroSlideWidget;
+use App\Widgets\Builtin\AnimatedHeroWidget;
+use App\Widgets\Builtin\VideoHeroWidget;
 use App\Widgets\Builtin\ImageWidget;
 use App\Widgets\Builtin\LogoWidget;
 use App\Widgets\Builtin\MenuWidget;
@@ -17,6 +20,8 @@ class WidgetList
     {
         return [
             new HeroSlideWidget(),
+            new AnimatedHeroWidget(),
+            new VideoHeroWidget(),
             new HeadingWidget(),
             new TextWidget(),
             new ImageWidget(),
@@ -24,6 +29,7 @@ class WidgetList
             new LogoWidget(),
             new MenuWidget(),
             new PostsWidget(),
+            new CustomHtmlWidget(),
         ];
     }
 }
