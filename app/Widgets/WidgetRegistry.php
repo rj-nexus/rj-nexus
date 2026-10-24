@@ -330,15 +330,6 @@ class WidgetRegistry
 
     protected static function builtinClasses(): array
     {
-        return [
-            HeroSlideWidget::class,
-            HeadingWidget::class,
-            TextWidget::class,
-            ImageWidget::class,
-            ContainerWidget::class,
-            LogoWidget::class,
-            MenuWidget::class,
-            PostsWidget::class,
-        ];
+        return array_map(fn($w) => get_class($w), WidgetList::get());
     }
 }
