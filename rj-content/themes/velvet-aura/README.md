@@ -1,8 +1,6 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/rj-nexus/velvet-aura/main/assets/images/velvetlogo_dark.png" alt="VelvetAura Logo" width="250">
+  <img src="https://raw.githubusercontent.com/rj-nexus/velvet-aura/main/assets/images/logo_banner.png" alt="VelvetAura" width="100%">
 </p>
-
-<h1 align="center">VelvetAura</h1>
 
 <p align="center">
   A premium, modern e-commerce theme exclusively designed for RJ CMS and RJ Commerce. VelvetAura offers a luxurious, high-end shopping experience with deep RJBuilder integration.
@@ -39,11 +37,11 @@
 VelvetAura comes with 4 custom widgets specifically designed for the RJBuilder. You can find them under the **Velvet Aura** category in the builder panel:
 
 1. **Velvet Header:**
-   - Select between 3 header styles.
+   - Select between 3 header styles (visual image selection).
    - Edit the announcement bar text.
    - Upload a custom logo override.
 2. **Velvet Footer:**
-   - Select between 3 footer styles.
+   - Select between 3 footer styles (visual image selection).
    - Edit the company description and copyright text.
    - Upload a custom logo override.
    - Change the giant background text (Style 3 only).
@@ -61,7 +59,6 @@ If you want to customize the theme, here is a quick overview of the directory st
 - `assets/` - Contains images, logos, and other static assets.
 - `src/` - Contains the `VelvetAuraServiceProvider` and custom Widget classes.
 - `views/` - Contains the Blade templates.
-  - `layouts/` - Main layout files.
   - `partials/headers/` - The 3 header styles.
   - `partials/footers/` - The 3 footer styles.
   - `widgets/` - Views for the custom RJBuilder widgets.
@@ -79,4 +76,9 @@ If you want to customize the theme, here is a quick overview of the directory st
 
 ## License
 
-This theme is open-sourced software licensed under the [MIT License](LICENSE).
+This theme is licensed under the **Creative Commons Attribution-NoDerivatives 4.0 International (CC BY-ND 4.0)**.
+
+- **You CAN:** Use this theme for free on unlimited personal or commercial websites.
+- **YOU CANNOT:** Modify, alter, or create derivative works of the source code. The theme must be used as-is.
+
+See the [LICENSE](LICENSE) file for more details.

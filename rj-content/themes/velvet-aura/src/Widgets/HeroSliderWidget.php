@@ -28,42 +28,12 @@ class HeroSliderWidget extends BaseWidget
 
     public function description(): string
     {
-        return __('A full-width luxury hero section with background image, title, and CTA button.');
+        return __('A full-width luxury hero slider with up to 3 slides, background images, titles, and CTA buttons.');
     }
 
     public function schema(): array
     {
         return [
-            [
-                'name' => 'bg_image',
-                'type' => 'image',
-                'label' => __('Background Image'),
-                'default' => '',
-            ],
-            [
-                'name' => 'title',
-                'type' => 'text',
-                'label' => __('Main Title'),
-                'default' => __('The Cocktails Collection'),
-            ],
-            [
-                'name' => 'subtitle',
-                'type' => 'text',
-                'label' => __('Subtitle'),
-                'default' => __('Perfumes inspired by the art of mixology'),
-            ],
-            [
-                'name' => 'button_text',
-                'type' => 'text',
-                'label' => __('Button Text'),
-                'default' => __('Discover The Collection'),
-            ],
-            [
-                'name' => 'button_url',
-                'type' => 'text',
-                'label' => __('Button URL'),
-                'default' => '/shop',
-            ],
             [
                 'name' => 'height',
                 'type' => 'select',
@@ -74,6 +44,102 @@ class HeroSliderWidget extends BaseWidget
                     'min-h-[80vh]' => __('Large'),
                     'min-h-screen' => __('Full Screen'),
                 ],
+            ],
+            [
+                'name' => 'autoplay_speed',
+                'type' => 'number',
+                'label' => __('Autoplay Speed (ms)'),
+                'default' => 5000,
+            ],
+            [
+                'name' => 's1_image',
+                'type' => 'media',
+                'label' => __('Slide 1 - Background Image'),
+                'default' => '',
+            ],
+            [
+                'name' => 's1_title',
+                'type' => 'text',
+                'label' => __('Slide 1 - Main Title'),
+                'default' => __('The Cocktails Collection'),
+            ],
+            [
+                'name' => 's1_subtitle',
+                'type' => 'text',
+                'label' => __('Slide 1 - Subtitle'),
+                'default' => __('Perfumes inspired by the art of mixology'),
+            ],
+            [
+                'name' => 's1_btn_text',
+                'type' => 'text',
+                'label' => __('Slide 1 - Button Text'),
+                'default' => __('Discover The Collection'),
+            ],
+            [
+                'name' => 's1_btn_url',
+                'type' => 'text',
+                'label' => __('Slide 1 - Button URL'),
+                'default' => '/shop',
+            ],
+            [
+                'name' => 's2_image',
+                'type' => 'media',
+                'label' => __('Slide 2 - Background Image'),
+                'default' => '',
+            ],
+            [
+                'name' => 's2_title',
+                'type' => 'text',
+                'label' => __('Slide 2 - Main Title'),
+                'default' => '',
+            ],
+            [
+                'name' => 's2_subtitle',
+                'type' => 'text',
+                'label' => __('Slide 2 - Subtitle'),
+                'default' => '',
+            ],
+            [
+                'name' => 's2_btn_text',
+                'type' => 'text',
+                'label' => __('Slide 2 - Button Text'),
+                'default' => __('Explore Now'),
+            ],
+            [
+                'name' => 's2_btn_url',
+                'type' => 'text',
+                'label' => __('Slide 2 - Button URL'),
+                'default' => '/shop',
+            ],
+            [
+                'name' => 's3_image',
+                'type' => 'media',
+                'label' => __('Slide 3 - Background Image'),
+                'default' => '',
+            ],
+            [
+                'name' => 's3_title',
+                'type' => 'text',
+                'label' => __('Slide 3 - Main Title'),
+                'default' => '',
+            ],
+            [
+                'name' => 's3_subtitle',
+                'type' => 'text',
+                'label' => __('Slide 3 - Subtitle'),
+                'default' => '',
+            ],
+            [
+                'name' => 's3_btn_text',
+                'type' => 'text',
+                'label' => __('Slide 3 - Button Text'),
+                'default' => __('Shop Now'),
+            ],
+            [
+                'name' => 's3_btn_url',
+                'type' => 'text',
+                'label' => __('Slide 3 - Button URL'),
+                'default' => '/shop',
             ],
         ];
     }
