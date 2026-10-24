@@ -5,6 +5,7 @@ namespace App\Widgets;
 use App\Models\UploadedWidget;
 use App\Widgets\Builtin\ContainerWidget;
 use App\Widgets\Builtin\HeadingWidget;
+use App\Widgets\Builtin\HeroSlideWidget;
 use App\Widgets\Builtin\ImageWidget;
 use App\Widgets\Builtin\LogoWidget;
 use App\Widgets\Builtin\MenuWidget;
@@ -30,15 +31,7 @@ class WidgetRegistry
             return static::$cache;
         }
 
-        $builtin = [
-            new HeadingWidget(),
-            new TextWidget(),
-            new ImageWidget(),
-            new ContainerWidget(),
-            new LogoWidget(),
-            new MenuWidget(),
-            new PostsWidget(),
-        ];
+        $builtin = WidgetList::get();
 
         $plugin = static::discoverFromPlugins();
 
@@ -338,6 +331,7 @@ class WidgetRegistry
     protected static function builtinClasses(): array
     {
         return [
+            HeroSlideWidget::class,
             HeadingWidget::class,
             TextWidget::class,
             ImageWidget::class,
