@@ -239,6 +239,7 @@ class ThemeManager
         Cache::forget('rj_active_theme');
         Cache::forget('rj_theme_schema');
         Cache::forget('rj_theme_customizations');
+        Cache::forget('rj_widget_registry');
     }
 
     public function checkForUpdates(): array
