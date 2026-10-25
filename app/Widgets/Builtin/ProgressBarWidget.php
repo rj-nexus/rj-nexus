@@ -6,7 +6,7 @@ use App\Widgets\BaseWidget;
 
 class ProgressBarWidget extends BaseWidget
 {
-    private const MAX_ITEMS = 20;
+    private const MAX_ITEMS = 8;
 
     private const HEIGHTS = ['h-2' => 8, 'h-3' => 12, 'h-4' => 16, 'h-6' => 24];
 
@@ -47,18 +47,29 @@ class ProgressBarWidget extends BaseWidget
                 'name' => 'layout',
                 'type' => 'select',
                 'label' => __('Layout'),
-                'default' => 'vertical',
+                'default' => 'grid',
                 'tab' => 'style',
                 'options' => [
-                    'vertical' => __('Vertical List'),
-                    'grid-2' => __('2 Columns Grid'),
-                    'circles' => __('Circles (icon in the center)'),
+                    'grid' => __('Horizontal Grid'),
+                    'circles' => __('Circles'),
+                ],
+            ],
+            [
+                'name' => 'columns',
+                'type' => 'select',
+                'label' => __('Columns'),
+                'default' => '4',
+                'tab' => 'style',
+                'options' => [
+                    '2' => __('2 Columns'),
+                    '3' => __('3 Columns'),
+                    '4' => __('4 Columns'),
                 ],
             ],
             [
                 'name' => 'style',
                 'type' => 'select',
-                'label' => __('Style'),
+                'label' => __('Bar Style'),
                 'default' => 'modern',
                 'tab' => 'style',
                 'options' => [
@@ -83,22 +94,12 @@ class ProgressBarWidget extends BaseWidget
             ],
         ];
 
-        for ($i = 1; $i <= 5; $i++) {
+        for ($i = 1; $i <= 8; $i++) {
             $schema[] = ['name' => 'p' . $i . '_icon', 'type' => 'icon', 'label' => __('Item ' . $i . ' - Icon'), 'default' => $i === 1 ? 'ph:code' : '', 'tab' => 'content'];
             $schema[] = ['name' => 'p' . $i . '_label', 'type' => 'text', 'label' => __('Item ' . $i . ' - Label'), 'default' => $i === 1 ? __('PHP') : '', 'tab' => 'content'];
             $schema[] = ['name' => 'p' . $i . '_value', 'type' => 'number', 'label' => __('Item ' . $i . ' - Percentage (0-100)'), 'default' => $i === 1 ? 90 : '', 'tab' => 'content', 'min' => 0, 'max' => 100];
             $schema[] = ['name' => 'p' . $i . '_color', 'type' => 'color', 'label' => __('Item ' . $i . ' - Color'), 'default' => $i === 1 ? '#8b5cf6' : '#3b82f6', 'tab' => 'style'];
         }
-
-        $schema[] = [
-            'name' => 'extra_items',
-            'type' => 'textarea',
-            'label' => __('Extra Items'),
-            'default' => '',
-            'tab' => 'content',
-            'placeholder' => "ph:database | MySQL | 85 | #f59e0b\nph:lightning | Laravel | 92\nJavaScript | 78",
-            'help' => __('One item per line: "icon | label | percent | #color". Icon and color are optional. Up to 20 items in total.'),
-        ];
 
         return $schema;
     }
@@ -107,7 +108,7 @@ class ProgressBarWidget extends BaseWidget
     {
         $items = [];
 
-        for ($i = 1; $i <= 5; $i++) {
+        for ($i = 1; $i <= 8; $i++) {
             $label = trim((string) ($settings['p' . $i . '_label'] ?? ''));
             if ($label === '') {
                 continue;
@@ -119,10 +120,6 @@ class ProgressBarWidget extends BaseWidget
                 'value' => max(0, min(100, (int) ($settings['p' . $i . '_value'] ?? 0))),
                 'color' => $this->hex($settings['p' . $i . '_color'] ?? null, '#8b5cf6'),
             ];
-        }
-
-        foreach ($this->parseExtra((string) ($settings['extra_items'] ?? '')) as $extra) {
-            $items[] = $extra;
         }
 
         $items = array_slice($items, 0, self::MAX_ITEMS);
@@ -148,7 +145,8 @@ class ProgressBarWidget extends BaseWidget
         $opts = [
             'title' => trim((string) ($settings['section_title'] ?? '')),
             'subtitle' => trim((string) ($settings['section_subtitle'] ?? '')),
-            'layout' => $this->pick($settings['layout'] ?? 'vertical', ['vertical', 'grid-2', 'circles'], 'vertical'),
+            'layout' => $this->pick($settings['layout'] ?? 'grid', ['grid', 'circles'], 'grid'),
+            'cols' => $this->pick($settings['columns'] ?? '4', ['2', '3', '4'], '4'),
             'style' => $style,
             'percent' => $this->toBool($settings['show_percent'] ?? null, true),
             'bar_h' => $barH,
@@ -161,43 +159,9 @@ class ProgressBarWidget extends BaseWidget
         return view('rjbuilder.widgets.builtin.progress-bar', compact('items', 'opts', 'uid'))->render();
     }
 
-    private function parseExtra(string $raw): array
-    {
-        $out = [];
-
-        foreach (preg_split('/\R/u', $raw) ?: [] as $line) {
-            $line = trim($line);
-            if ($line === '') {
-                continue;
-            }
-
-            $f = array_map('trim', explode('|', $line));
-
-            $icon = '';
-            if (count($f) > 1 && preg_match('/^[a-z0-9_-]+:[a-z0-9_-]+$/i', $f[0])) {
-                $icon = array_shift($f);
-            }
-
-            $label = $f[0] ?? '';
-            if ($label === '') {
-                continue;
-            }
-
-            $out[] = [
-                'icon' => $icon,
-                'label' => $label,
-                'value' => max(0, min(100, (int) preg_replace('/\D/', '', (string) ($f[1] ?? '0')))),
-                'color' => $this->hex($f[2] ?? null, '#6366f1'),
-            ];
-        }
-
-        return $out;
-    }
-
     private function pick(mixed $value, array $allowed, string $default): string
     {
         $value = (string) $value;
-
         return in_array($value, $allowed, true) ? $value : $default;
     }
 
@@ -206,14 +170,12 @@ class ProgressBarWidget extends BaseWidget
         if ($value === null || $value === '') {
             return $default;
         }
-
         return filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? $default;
     }
 
     private function hex(mixed $value, string $default): string
     {
         $value = trim((string) $value);
-
         return preg_match('/^#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i', $value) ? $value : $default;
     }
 }
