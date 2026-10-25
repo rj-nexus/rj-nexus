@@ -15,11 +15,30 @@ class ImageComparisonWidget extends BaseWidget
         'h-[600px]' => 'height:600px;',
     ];
 
+    private const WIDTHS = [
+        'sm' => '640px',
+        'md' => '820px',
+        'lg' => '1080px',
+        'full' => '100%',
+    ];
+
+    private const MARGINS = [
+        'left' => '0 auto 0 0',
+        'center' => '0 auto',
+        'right' => '0 0 0 auto',
+    ];
+
     private const RADII = [
-        'none' => '0px',
-        'sm' => '8px',
-        'md' => '16px',
-        'lg' => '28px',
+        'none' => 0,
+        'sm' => 8,
+        'md' => 16,
+        'lg' => 28,
+    ];
+
+    private const FRAME_PADS = [
+        'card' => 10,
+        'line' => 6,
+        'none' => 0,
     ];
 
     private const HANDLE_SIZES = [
@@ -56,7 +75,7 @@ class ImageComparisonWidget extends BaseWidget
 
     public function description(): string
     {
-        return __('A draggable before/after slider with horizontal or vertical mode, keyboard support, intro animation and clickable labels.');
+        return __('A framed, draggable before/after slider with horizontal or vertical mode, keyboard support, intro animation and clickable labels.');
     }
 
     private function yesNo(): array
@@ -83,29 +102,43 @@ class ImageComparisonWidget extends BaseWidget
             ],
 
             [
-                'name' => 'orientation',
+                'name' => 'width',
                 'type' => 'select',
-                'label' => __('Direction'),
-                'default' => 'horizontal',
+                'label' => __('Max Width'),
+                'default' => 'md',
                 'tab' => 'style',
                 'options' => [
-                    'horizontal' => __('Horizontal (left / right)'),
-                    'vertical' => __('Vertical (top / bottom)'),
+                    'sm' => __('Small (640px)'),
+                    'md' => __('Medium (820px)'),
+                    'lg' => __('Large (1080px)'),
+                    'full' => __('Full width'),
                 ],
             ],
             [
-                'name' => 'interaction',
+                'name' => 'align',
                 'type' => 'select',
-                'label' => __('Interaction'),
-                'default' => 'drag',
+                'label' => __('Alignment'),
+                'default' => 'center',
                 'tab' => 'style',
                 'options' => [
-                    'drag' => __('Drag or click'),
-                    'hover' => __('Follow mouse on hover'),
+                    'left' => __('Left'),
+                    'center' => __('Center'),
+                    'right' => __('Right'),
                 ],
             ],
-            ['name' => 'intro', 'type' => 'select', 'label' => __('Intro Animation'), 'default' => '1', 'tab' => 'style', 'options' => $this->yesNo()],
-            ['name' => 'show_hint', 'type' => 'select', 'label' => __('Show "Drag" Hint'), 'default' => '1', 'tab' => 'style', 'options' => $this->yesNo()],
+            [
+                'name' => 'frame',
+                'type' => 'select',
+                'label' => __('Frame'),
+                'default' => 'card',
+                'tab' => 'style',
+                'options' => [
+                    'card' => __('Card (white frame + shadow)'),
+                    'line' => __('Line (thin border with gap)'),
+                    'none' => __('None'),
+                ],
+            ],
+            ['name' => 'frame_color', 'type' => 'color', 'label' => __('Frame Border Color'), 'default' => '#e2e8f0', 'tab' => 'style'],
             [
                 'name' => 'height',
                 'type' => 'select',
@@ -135,6 +168,30 @@ class ImageComparisonWidget extends BaseWidget
                 ],
             ],
             ['name' => 'shadow', 'type' => 'select', 'label' => __('Drop Shadow'), 'default' => '1', 'tab' => 'style', 'options' => $this->yesNo()],
+            [
+                'name' => 'orientation',
+                'type' => 'select',
+                'label' => __('Direction'),
+                'default' => 'horizontal',
+                'tab' => 'style',
+                'options' => [
+                    'horizontal' => __('Horizontal (left / right)'),
+                    'vertical' => __('Vertical (top / bottom)'),
+                ],
+            ],
+            [
+                'name' => 'interaction',
+                'type' => 'select',
+                'label' => __('Interaction'),
+                'default' => 'drag',
+                'tab' => 'style',
+                'options' => [
+                    'drag' => __('Drag or click'),
+                    'hover' => __('Follow mouse on hover'),
+                ],
+            ],
+            ['name' => 'intro', 'type' => 'select', 'label' => __('Intro Animation'), 'default' => '1', 'tab' => 'style', 'options' => $this->yesNo()],
+            ['name' => 'show_hint', 'type' => 'select', 'label' => __('Show "Drag" Hint'), 'default' => '1', 'tab' => 'style', 'options' => $this->yesNo()],
             [
                 'name' => 'handle_style',
                 'type' => 'select',
@@ -206,6 +263,7 @@ class ImageComparisonWidget extends BaseWidget
         $afterLabel = trim((string) ($settings['after_label'] ?? __('After')));
         $color = $this->color($settings['slider_color'] ?? null, '#ffffff');
         $heightKey = (string) ($settings['height'] ?? 'aspect-video');
+        $frame = $this->pick($settings['frame'] ?? 'card', array_keys(self::FRAME_PADS), 'card');
 
         $content = [
             'before' => $before,
@@ -217,7 +275,12 @@ class ImageComparisonWidget extends BaseWidget
 
         $opts = [
             'height_css' => self::HEIGHTS[$heightKey] ?? self::HEIGHTS['aspect-video'],
-            'radius' => self::RADII[$this->pick($settings['radius'] ?? 'md', array_keys(self::RADII), 'md')],
+            'max_width' => self::WIDTHS[$this->pick($settings['width'] ?? 'md', array_keys(self::WIDTHS), 'md')],
+            'margin' => self::MARGINS[$this->pick($settings['align'] ?? 'center', array_keys(self::MARGINS), 'center')],
+            'frame' => $frame,
+            'frame_pad' => self::FRAME_PADS[$frame],
+            'frame_color' => $this->color($settings['frame_color'] ?? null, '#e2e8f0'),
+            'radius_px' => self::RADII[$this->pick($settings['radius'] ?? 'md', array_keys(self::RADII), 'md')],
             'shadow' => $this->flag($settings['shadow'] ?? null, true),
             'orientation' => $this->pick($settings['orientation'] ?? 'horizontal', ['horizontal', 'vertical'], 'horizontal'),
             'interaction' => $this->pick($settings['interaction'] ?? 'drag', ['drag', 'hover'], 'drag'),
