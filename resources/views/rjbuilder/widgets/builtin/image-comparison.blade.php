@@ -1,13 +1,20 @@
 @php
     $vertical = $o['orientation'] === 'vertical';
+    $framed = $o['frame'] !== 'none';
 @endphp
 
 <style>
-    #{{ $uid }} { margin: 0; padding: 0; width: 100%; }
+    #{{ $uid }} { margin: {{ $o['margin'] }}; padding: 0; width: 100%; max-width: {{ $o['max_width'] }}; --r: {{ $o['radius_px'] }}px; --pad: {{ $o['frame_pad'] }}px; }
     #{{ $uid }} *, #{{ $uid }} *::before, #{{ $uid }} *::after { box-sizing: border-box; }
 
+    /* ---------- Frame ---------- */
+    #{{ $uid }} .rjic-frame { padding: var(--pad); border-radius: var(--r); }
+    #{{ $uid }}[data-frame="card"] .rjic-frame { background: #fff; border: 1px solid {{ $o['frame_color'] }}; @if($o['shadow']) box-shadow: 0 1px 2px rgba(15, 23, 42, .05), 0 22px 44px -16px rgba(15, 23, 42, .28); @endif }
+    #{{ $uid }}[data-frame="line"] .rjic-frame { background: transparent; border: 1.5px solid {{ $o['frame_color'] }}; }
+    #{{ $uid }}[data-frame="none"] .rjic-frame { padding: 0; border: 0; background: transparent; }
+
     /* ---------- Stage ---------- */
-    #{{ $uid }} .rjic-stage { position: relative; width: 100%; {{ $o['height_css'] }} overflow: hidden; border-radius: {{ $o['radius'] }}; background: #0f172a; isolation: isolate; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; touch-action: {{ $vertical ? 'pan-x' : 'pan-y' }}; cursor: {{ $vertical ? 'ns-resize' : 'ew-resize' }}; @if($o['shadow']) box-shadow: 0 20px 50px -12px rgba(15, 23, 42, .35); @endif --n: {{ $o['start'] }}; --p: calc(var(--n) * 1%); --sc: {{ $o['color'] }}; --fg: {{ $o['fg'] }}; --hs: {{ $o['handle_px'] }}px; --lw: {{ $o['line_px'] }}px; }
+    #{{ $uid }} .rjic-stage { position: relative; width: 100%; {{ $o['height_css'] }} max-height: min(78vh, 720px); overflow: hidden; border-radius: max(0px, calc(var(--r) - var(--pad))); background: #0f172a; isolation: isolate; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; touch-action: {{ $vertical ? 'pan-x' : 'pan-y' }}; cursor: {{ $vertical ? 'ns-resize' : 'ew-resize' }}; @if($o['shadow'] && !$framed) box-shadow: 0 20px 50px -12px rgba(15, 23, 42, .35); @endif --n: {{ $o['start'] }}; --p: calc(var(--n) * 1%); --sc: {{ $o['color'] }}; --fg: {{ $o['fg'] }}; --hs: {{ $o['handle_px'] }}px; --lw: {{ $o['line_px'] }}px; }
 
     #{{ $uid }} .rjic-img { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: cover; display: block; pointer-events: none; -webkit-user-drag: none; user-select: none; }
     #{{ $uid }} .rjic-after { z-index: 0; }
@@ -58,14 +65,13 @@
     #{{ $uid }} .rjic-hint svg { width: 14px; height: 14px; display: block; }
     #{{ $uid }} .rjic-stage.rjic-touched .rjic-hint { opacity: 0; visibility: hidden; animation: none; }
 
-    #{{ $uid }} .rjic-caption { margin: 12px 0 0; padding: 0; text-align: center; font-size: .875rem; line-height: 1.5; opacity: .7; }
+    #{{ $uid }} .rjic-caption { margin: 14px 0 0; padding: 0; text-align: center; font-size: .875rem; line-height: 1.5; opacity: .7; }
 
     @keyframes rjic-pulse { 0% { opacity: .7; transform: scale(.9); } 100% { opacity: 0; transform: scale(1.5); } }
     @keyframes rjic-hint { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-4px); } }
-    #{{ $uid }} .rjic-stage[data-orient="vertical"] .rjic-hint { animation-name: rjic-hint-v; }
-    @keyframes rjic-hint-v { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-4px); } }
 
     @media (max-width: 640px) {
+        #{{ $uid }} { --pad: {{ max(0, (int) round($o['frame_pad'] * 0.6)) }}px; }
         #{{ $uid }} .rjic-label { padding: 7px 11px; font-size: .65rem; }
         #{{ $uid }} .rjic-lb { left: 10px; }
         #{{ $uid }} .rjic-la { right: 10px; }
@@ -79,45 +85,47 @@
     }
 </style>
 
-<figure id="{{ $uid }}" class="rjic">
-    <div class="rjic-stage"
-         data-orient="{{ $o['orientation'] }}"
-         data-handle="{{ $o['handle_style'] }}"
-         data-lpos="{{ $o['label_pos'] }}"
-         data-start="{{ $o['start'] }}"
-         data-interaction="{{ $o['interaction'] }}"
-         data-intro="{{ $o['intro'] ? 1 : 0 }}"
-         data-lb="{{ $c['before_label'] }}"
-         data-la="{{ $c['after_label'] }}">
+<figure id="{{ $uid }}" class="rjic" data-frame="{{ $o['frame'] }}">
+    <div class="rjic-frame">
+        <div class="rjic-stage"
+             data-orient="{{ $o['orientation'] }}"
+             data-handle="{{ $o['handle_style'] }}"
+             data-lpos="{{ $o['label_pos'] }}"
+             data-start="{{ $o['start'] }}"
+             data-interaction="{{ $o['interaction'] }}"
+             data-intro="{{ $o['intro'] ? 1 : 0 }}"
+             data-lb="{{ $c['before_label'] }}"
+             data-la="{{ $c['after_label'] }}">
 
-        <img class="rjic-img rjic-after" src="{{ $c['after'] }}" alt="{{ $c['after_label'] }}" draggable="false" decoding="async">
-        <img class="rjic-img rjic-before" src="{{ $c['before'] }}" alt="{{ $c['before_label'] }}" draggable="false" decoding="async">
+            <img class="rjic-img rjic-after" src="{{ $c['after'] }}" alt="{{ $c['after_label'] }}" draggable="false" decoding="async">
+            <img class="rjic-img rjic-before" src="{{ $c['before'] }}" alt="{{ $c['before_label'] }}" draggable="false" decoding="async">
 
-        @if ($o['labels'])
-            <button type="button" class="rjic-label rjic-lb" data-go="100">{{ $c['before_label'] }}</button>
-            <button type="button" class="rjic-label rjic-la" data-go="0">{{ $c['after_label'] }}</button>
-        @endif
+            @if ($o['labels'])
+                <button type="button" class="rjic-label rjic-lb" data-go="100">{{ $c['before_label'] }}</button>
+                <button type="button" class="rjic-label rjic-la" data-go="0">{{ $c['after_label'] }}</button>
+            @endif
 
-        <div class="rjic-line" aria-hidden="true"></div>
+            <div class="rjic-line" aria-hidden="true"></div>
 
-        <div class="rjic-handle"
-             role="slider"
-             tabindex="0"
-             aria-label="{{ __('Image comparison slider') }}"
-             aria-orientation="{{ $o['orientation'] }}"
-             aria-valuemin="0"
-             aria-valuemax="100"
-             aria-valuenow="{{ $o['start'] }}">
-            <svg fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8 9l-4 3 4 3M16 9l4 3-4 3"/></svg>
-        </div>
-
-        @if ($o['hint'])
-            <div class="rjic-hint" aria-hidden="true">
-                <svg fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 6l-6 6 6 6"/></svg>
-                <span>{{ __('Drag to compare') }}</span>
-                <svg fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6"/></svg>
+            <div class="rjic-handle"
+                 role="slider"
+                 tabindex="0"
+                 aria-label="{{ __('Image comparison slider') }}"
+                 aria-orientation="{{ $o['orientation'] }}"
+                 aria-valuemin="0"
+                 aria-valuemax="100"
+                 aria-valuenow="{{ $o['start'] }}">
+                <svg fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8 9l-4 3 4 3M16 9l4 3-4 3"/></svg>
             </div>
-        @endif
+
+            @if ($o['hint'])
+                <div class="rjic-hint" aria-hidden="true">
+                    <svg fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 6l-6 6 6 6"/></svg>
+                    <span>{{ __('Drag to compare') }}</span>
+                    <svg fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6"/></svg>
+                </div>
+            @endif
+        </div>
     </div>
 
     @if ($c['caption'] !== '')
