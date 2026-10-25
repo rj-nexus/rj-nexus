@@ -5,12 +5,12 @@
 
 <style>
     @keyframes rjpRise-{{ $uid }} {
-        from { opacity: 0; transform: translateY(20px) scale(0.95); }
+        from { opacity: 0; transform: translateY(15px) scale(0.98); }
         to   { opacity: 1; transform: translateY(0) scale(1); }
     }
     @keyframes rjpGlow-{{ $uid }} {
-        0%, 100% { filter: drop-shadow(0 0 6px var(--c)); }
-        50%      { filter: drop-shadow(0 0 14px var(--c)); }
+        0%, 100% { filter: drop-shadow(0 0 4px var(--c)); }
+        50%      { filter: drop-shadow(0 0 12px var(--c)); }
     }
     @keyframes rjpShine-{{ $uid }} {
         0% { transform: translateX(-150%); }
@@ -19,69 +19,45 @@
 
     #{{ $uid }} {
         width: 100%;
-        padding: 40px 16px;
-        display: flex;
-        justify-content: center;
-    }
-
-    #{{ $uid }} .rjp-card {
-        position: relative;
-        width: 100%;
-        max-width: 80rem;
-        padding: 48px 40px;
-        background: #ffffff;
-        border-radius: 32px;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 10px 40px -10px rgba(15,23,42,0.08);
-        overflow: hidden;
+        padding: 32px 16px;
     }
 
     #{{ $uid }} .rjp-head-wrap {
-        margin-bottom: 40px;
+        margin-bottom: 32px;
         text-align: center;
     }
 
     #{{ $uid }} .rjp-sec-title {
         margin: 0;
-        font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+        font-size: 1.5rem;
         font-weight: 800;
         color: #0f172a;
-        letter-spacing: -0.03em;
-        line-height: 1.15;
-    }
-
-    #{{ $uid }} .rjp-sec-title::after {
-        content: "";
-        display: block;
-        width: 56px;
-        height: 4px;
-        margin: 16px auto 0;
-        border-radius: 4px;
-        background: linear-gradient(90deg, #6366f1, #a855f7);
     }
 
     #{{ $uid }} .rjp-sec-sub {
-        margin: 14px auto 0;
-        max-width: 32rem;
+        margin: 6px auto 0;
         color: #64748b;
-        font-size: 1rem;
-        line-height: 1.6;
+        font-size: 0.95rem;
     }
 
     #{{ $uid }} .rjp-grid {
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
-        gap: 32px 24px;
+        align-items: flex-start;
+        gap: 32px;
+        max-width: 1200px;
+        margin: 0 auto;
     }
 
     #{{ $uid }} .rjp-item {
         position: relative;
-        flex: 0 1 280px;
-        max-width: 320px;
+        width: 100%;
+        max-width: 260px;
         display: flex;
         flex-direction: column;
         opacity: 0;
+        padding: 10px 0;
     }
 
     #{{ $uid }}.rjp-in .rjp-item {
@@ -94,61 +70,53 @@
         display: flex;
         align-items: center;
         gap: 12px;
-        margin-bottom: 12px;
-        width: 100%;
+        margin-bottom: 10px;
     }
 
     #{{ $uid }} .rjp-ico {
         flex: none;
         display: grid;
         place-items: center;
-        width: 36px;
-        height: 36px;
-        border-radius: 10px;
-        color: var(--c);
-        background: color-mix(in srgb, var(--c) 12%, transparent);
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        color: #64748b;
+        background: #f1f5f9;
         transition: all 0.3s ease;
     }
 
-    #{{ $uid }} .rjp-ico svg,
-    #{{ $uid }} .rjp-ico img {
-        width: 18px;
-        height: 18px;
-        max-width: none;
-        display: block;
+    #{{ $uid }} .rjp-ico svg, #{{ $uid }} .rjp-ico img {
+        width: 16px; height: 16px;
+    }
+
+    #{{ $uid }} .rjp-item:hover .rjp-ico {
+        color: #fff;
+        background: var(--c);
+        transform: scale(1.1);
     }
 
     #{{ $uid }} .rjp-label {
         flex: 1;
-        min-width: 0;
         margin: 0;
         font-size: 0.95rem;
-        font-weight: 700;
-        color: #1e293b;
+        font-weight: 600;
+        color: #334155;
     }
 
     #{{ $uid }} .rjp-pct {
-        flex: none;
-        font-size: 1.15rem;
+        font-size: 1rem;
         font-weight: 800;
         color: var(--c);
         font-variant-numeric: tabular-nums;
     }
 
-    #{{ $uid }} .rjp-pct small {
-        font-size: 0.65em;
-        opacity: 0.7;
-        margin-left: 1px;
-    }
-
     #{{ $uid }} .rjp-track {
         position: relative;
         width: 100%;
-        height: {{ $opts['bar_h'] }}px;
+        height: 8px;
         border-radius: 999px;
-        background: #f1f5f9;
+        background: #e2e8f0;
         overflow: hidden;
-        box-shadow: inset 0 1px 2px rgba(15,23,42,0.08);
     }
 
     #{{ $uid }} .rjp-fill {
@@ -156,9 +124,8 @@
         height: 100%;
         width: 0;
         border-radius: inherit;
-        background: linear-gradient(90deg, var(--c), color-mix(in srgb, var(--c) 60%, #ffffff));
-        overflow: hidden;
-        transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+        background: var(--c);
+        transition: width 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
         transition-delay: calc(var(--i, 0) * 80ms + 100ms);
     }
 
@@ -166,13 +133,12 @@
         width: calc(var(--v) * 1%);
     }
 
-    #{{ $uid }} .rjp-fill::after {
+    #{{ $uid }} .rjp-item:hover .rjp-fill::after {
         content: "";
         position: absolute;
         inset: 0;
-        background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%);
-        animation: rjpShine-{{ $uid }} 2s ease-in-out infinite;
-        animation-delay: calc(var(--i, 0) * 80ms + 1s);
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.7), transparent);
+        animation: rjpShine-{{ $uid }} 1.5s linear infinite;
     }
 
     /* ---------- Circles ---------- */
@@ -181,49 +147,57 @@
         flex-direction: column;
         align-items: center;
         text-align: center;
-        width: 100%;
+        padding: 10px; /* Kölgələrin kəsilməməsi üçün */
     }
 
     #{{ $uid }} .rjp-ring {
         position: relative;
-        width: 140px;
-        height: 140px;
-        margin-bottom: 16px;
+        width: 110px;
+        height: 110px;
         display: flex;
         align-items: center;
         justify-content: center;
+        transition: transform 0.4s ease;
     }
 
+    #{{ $uid }} .rjp-item:hover .rjp-ring {
+        transform: scale(1.05);
+    }
+
+    /* overflow: visible - Kölgələrin və glownun kəsilməməsi üçün ən vacib hissə */
     #{{ $uid }} .rjp-ring svg.rjp-svg {
         position: absolute;
         inset: 0;
         width: 100%;
         height: 100%;
-        overflow: visible;
         transform: rotate(-90deg);
+        overflow: visible;
     }
 
     #{{ $uid }} .rjp-ring-bg {
         fill: none;
-        stroke: #f1f5f9;
-        stroke-width: {{ $opts['ring_w'] }};
+        stroke: #e2e8f0;
+        stroke-width: 8;
     }
 
     #{{ $uid }} .rjp-ring-fg {
         fill: none;
-        stroke-width: {{ $opts['ring_w'] }};
-        stroke-linecap: round;
         stroke: var(--c);
+        stroke-width: 8;
+        stroke-linecap: round;
         stroke-dasharray: {{ $opts['circ'] }};
-        stroke-dashoffset: {{ $opts['circ'] }};
-        filter: drop-shadow(0 0 6px var(--c));
-        transition: stroke-dashoffset 1.4s cubic-bezier(0.22, 1, 0.36, 1);
+        stroke-dashoffset: var(--off);
+        transition: stroke-dashoffset 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
         transition-delay: calc(var(--i, 0) * 80ms + 100ms);
+    }
+
+    #{{ $uid }}.rjp-ready .rjp-ring-fg {
+        stroke-dashoffset: {{ $opts['circ'] }};
     }
 
     #{{ $uid }}.rjp-in .rjp-ring-fg {
         stroke-dashoffset: var(--off);
-        animation: rjpGlow-{{ $uid }} 3s ease-in-out infinite alternate;
+        animation: rjpGlow-{{ $uid }} 2s ease-in-out infinite alternate;
     }
 
     #{{ $uid }} .rjp-center {
@@ -233,46 +207,36 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 4px;
     }
 
     #{{ $uid }} .rjp-center .rjp-ico {
-        width: 44px;
-        height: 44px;
+        width: 36px;
+        height: 36px;
         border-radius: 50%;
+        margin-bottom: 4px;
         background: color-mix(in srgb, var(--c) 10%, transparent);
         color: var(--c);
-        margin-bottom: 2px;
-        transition: transform 0.3s ease;
-    }
-
-    #{{ $uid }} .rjp-ring:hover .rjp-center .rjp-ico {
-        transform: scale(1.1) rotate(-5deg);
     }
 
     #{{ $uid }} .rjp-center .rjp-ico svg,
     #{{ $uid }} .rjp-center .rjp-ico img {
-        width: 22px;
-        height: 22px;
+        width: 18px;
+        height: 18px;
     }
 
     #{{ $uid }} .rjp-center .rjp-pct {
-        font-size: 1.35rem;
-        color: var(--c);
-    }
-
-    #{{ $uid }} .rjp-ring-wrap .rjp-label {
-        margin-top: 4px;
-        font-size: 1.05rem;
-        font-weight: 700;
+        font-size: 1rem;
+        font-weight: 800;
         color: #0f172a;
     }
 
+    #{{ $uid }} .rjp-ring-wrap .rjp-label {
+        margin-top: 8px;
+        font-size: 0.95rem;
+    }
+
     @media (prefers-reduced-motion: reduce) {
-        #{{ $uid }} * {
-            animation: none !important;
-            transition: none !important;
-        }
+        #{{ $uid }} * { animation: none !important; transition: none !important; }
         #{{ $uid }} .rjp-item { opacity: 1; }
         #{{ $uid }} .rjp-fill { width: calc(var(--v) * 1%); }
         #{{ $uid }} .rjp-ring-fg { stroke-dashoffset: var(--off); }
@@ -280,8 +244,7 @@
 </style>
 
 <section id="{{ $uid }}">
-    <div class="rjp-card">
-
+    <div>
         @if ($opts['title'] !== '' || $opts['subtitle'] !== '')
             <div class="rjp-head-wrap">
                 @if ($opts['title'] !== '')
@@ -300,24 +263,21 @@
                 @endphp
 
                 <div class="rjp-item"
-                     style="--c: {{ $item['color'] }}; --v: {{ $item['value'] }}; --off: {{ $item['off'] }}; --i: {{ min($loop->index, 12) }};"
-                     role="progressbar"
-                     aria-label="{{ $item['label'] }}"
-                     aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ $item['value'] }}">
+                     style="--c: {{ $item['color'] }}; --v: {{ $item['value'] }}; --off: {{ $item['off'] }}; --i: {{ min($loop->index, 12) }};">
 
                     @if ($circles)
                         <div class="rjp-ring-wrap">
                             <div class="rjp-ring">
                                 <svg class="rjp-svg" viewBox="0 0 120 120" aria-hidden="true">
-                                    <circle class="rjp-ring-bg" cx="60" cy="60" r="52"/>
-                                    <circle class="rjp-ring-fg" cx="60" cy="60" r="52"/>
+                                    <circle class="rjp-ring-bg" cx="60" cy="60" r="48"/>
+                                    <circle class="rjp-ring-fg" cx="60" cy="60" r="48"/>
                                 </svg>
                                 <div class="rjp-center">
                                     @if ($hasIcon)
-                                        <span class="rjp-ico" aria-hidden="true">{!! rj_icon($item['icon'], 'w-6 h-6') !!}</span>
+                                        <span class="rjp-ico">{!! rj_icon($item['icon'], 'w-4 h-4') !!}</span>
                                     @endif
                                     @if ($opts['percent'])
-                                        <span class="rjp-pct"><span class="rjp-num" data-to="{{ $item['value'] }}">{{ $item['value'] }}</span><small>%</small></span>
+                                        <span class="rjp-pct"><span class="rjp-num" data-to="{{ $item['value'] }}">{{ $item['value'] }}</span>%</span>
                                     @endif
                                 </div>
                             </div>
@@ -326,11 +286,11 @@
                     @else
                         <div class="rjp-head">
                             @if ($hasIcon)
-                                <span class="rjp-ico" aria-hidden="true">{!! rj_icon($item['icon'], 'w-4 h-4') !!}</span>
+                                <span class="rjp-ico">{!! rj_icon($item['icon'], 'w-4 h-4') !!}</span>
                             @endif
                             <h3 class="rjp-label">{{ $item['label'] }}</h3>
                             @if ($opts['percent'])
-                                <span class="rjp-pct"><span class="rjp-num" data-to="{{ $item['value'] }}">{{ $item['value'] }}</span><small>%</small></span>
+                                <span class="rjp-pct"><span class="rjp-num" data-to="{{ $item['value'] }}">{{ $item['value'] }}</span>%</span>
                             @endif
                         </div>
                         <div class="rjp-track">
@@ -390,7 +350,7 @@
                 play();
                 io.disconnect();
             }
-        }, { threshold: 0.15 });
+        }, { threshold: 0.1 });
         io.observe(root);
     } else {
         play();
