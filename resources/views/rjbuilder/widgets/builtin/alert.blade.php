@@ -7,6 +7,7 @@
     @keyframes rjAlertShine { from { transform: translateX(-130%) skewX(-20deg); } to { transform: translateX(260%) skewX(-20deg); } }
     @keyframes rjAlertRing  { 0% { transform: scale(1); opacity: .6; } 100% { transform: scale(1.9); opacity: 0; } }
     @keyframes rjAlertBar   { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+    @keyframes rjAlertWiggle { 0%,100% { transform: rotate(0); } 25% { transform: rotate(-12deg); } 50% { transform: rotate(10deg); } 75% { transform: rotate(-6deg); } }
 </style>
 @endonce
 
@@ -38,6 +39,21 @@
         transition: opacity .35s ease, transform .35s ease;
     }
     #{{ $uid }} .al-card.al-hide { opacity: 0; transform: translateY(-8px) scale(.96); }
+    #{{ $uid }} .al-card {
+    transition: opacity .35s ease, transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s ease;
+}
+#{{ $uid }} .al-card:not(.al-hide):hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 20px 40px -14px rgba(var(--al-rgb), .6), 0 4px 10px rgba(0,0,0,.06);
+}
+#{{ $uid }} .al-card:not(.al-hide):hover .al-icon {
+    animation: rjAlertWiggle .6s ease;
+}
+#{{ $uid }} .al-card:not(.al-hide):hover .al-title {
+    transform: translateX(2px);
+}
+#{{ $uid }} .al-title { transition: transform .3s ease; }
+
 
     /* Üslublar */
     #{{ $uid }} .al-soft {
