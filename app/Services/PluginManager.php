@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Plugin;
+use App\Widgets\WidgetRegistry;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Artisan;
@@ -149,7 +150,7 @@ class PluginManager
 
             $plugin->markAsActive();
 
-            \App\Widgets\WidgetRegistry::reset();
+            WidgetRegistry::reset();
 
             return ['success' => true, 'message' => __('Plugin activated.')];
         } catch (\Throwable $e) {
@@ -174,7 +175,7 @@ class PluginManager
 
             $plugin->markAsInactive();
 
-            \App\Widgets\WidgetRegistry::reset();
+            WidgetRegistry::reset();
 
             return ['success' => true, 'message' => __('Plugin deactivated.')];
         } catch (\Throwable $e) {
@@ -197,7 +198,7 @@ class PluginManager
 
             $plugin->delete();
 
-            \App\Widgets\WidgetRegistry::reset();
+            WidgetRegistry::reset();
 
             return ['success' => true, 'message' => __('Plugin deleted.')];
         } catch (\Throwable $e) {
@@ -356,6 +357,8 @@ class PluginManager
 
         $this->discover();
 
+        WidgetRegistry::reset();
+
         return ['success' => true, 'message' => __('Plugin uploaded.')];
     }
 
@@ -496,7 +499,7 @@ class PluginManager
 
             Artisan::call('migrate', ['--force' => true]);
 
-            \App\Widgets\WidgetRegistry::reset();
+            WidgetRegistry::reset();
 
             return ['success' => true, 'message' => __('Plugin updated successfully to v:version', ['version' => $plugin->version])];
         } catch (\Throwable $e) {
