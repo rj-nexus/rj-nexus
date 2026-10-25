@@ -12,6 +12,9 @@
     #{{ $uid }} .rj-tab-btn {
         color: {{ $inactiveColor }};
         transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
     }
     #{{ $uid }} .rj-tab-btn:hover {
         color: {{ $activeColor }};
@@ -20,6 +23,7 @@
     @if($style === 'underline')
         #{{ $uid }} .rj-tab-btn {
             border-bottom: 2px solid transparent;
+            padding-bottom: 10px;
         }
         #{{ $uid }} .rj-tab-btn.is-active {
             color: {{ $activeColor }} !important;
@@ -28,7 +32,7 @@
     @elseif($style === 'pills')
         #{{ $uid }} .rj-tab-btn {
             border-radius: 9999px;
-            padding: 8px 20px;
+            padding: 10px 24px;
         }
         #{{ $uid }} .rj-tab-btn:hover {
             background-color: rgba(0,0,0,0.05);
@@ -41,7 +45,7 @@
         #{{ $uid }} .rj-tab-btn {
             border: 1px solid #e2e8f0;
             border-radius: 8px;
-            padding: 8px 20px;
+            padding: 10px 24px;
             background-color: #f8fafc;
         }
         #{{ $uid }} .rj-tab-btn.is-active {
@@ -70,9 +74,12 @@
     <div class="flex flex-wrap gap-4 md:gap-8 mb-8 border-b border-slate-200 pb-2 {{ $alignClass }}">
         @foreach($tabs as $index => $tab)
             <button type="button"
-                    class="rj-tab-btn text-sm md:text-base font-bold focus:outline-none pb-2 {{ $index === 0 ? 'is-active' : '' }}"
+                    class="rj-tab-btn text-sm md:text-base font-bold focus:outline-none {{ $index === 0 ? 'is-active' : '' }}"
                     data-target="pane-{{ $index }}">
-                {{ $tab['title'] }}
+                @if(!empty($tab['icon']))
+                    {!! rj_icon($tab['icon'], 'w-5 h-5') !!}
+                @endif
+                <span>{{ $tab['title'] }}</span>
             </button>
         @endforeach
     </div>
