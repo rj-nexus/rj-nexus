@@ -1,138 +1,224 @@
 @php
-    $columns = $settings['columns'] ?? '3';
-    $style = $settings['style'] ?? 'light';
-
-    $isDark = $style === 'dark';
-    $cardBg = $isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200';
-    $textColor = $isDark ? 'text-white' : 'text-slate-900';
-    $subColor = $isDark ? 'text-slate-400' : 'text-slate-500';
-    $borderAccent = $isDark ? 'border-slate-700' : 'border-slate-200';
-
-    $totalMembers = count($members);
-    $initialShow = 4;
+    $total = count($members);
+    $hasMore = $total > $opts['initial'];
 @endphp
 
 <style>
-    #{{ $uid }} .rj-team-card {
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    #{{ $uid }} { --ac: {{ $opts['accent'] }}; --t: #0f172a; --m: #64748b; --bd: #e2e8f0; --ph: #f1f5f9; width: 100%; padding: 56px 16px; }
+    #{{ $uid }}[data-style="dark"] { --t: #fff; --m: #94a3b8; --bd: #334155; --ph: #1e293b; }
+    #{{ $uid }} *, #{{ $uid }} *::before, #{{ $uid }} *::after { box-sizing: border-box; }
+    #{{ $uid }} .rjtm-wrap { max-width: 1200px; margin: 0 auto; }
+
+    /* ---------- Header ---------- */
+    #{{ $uid }} .rjtm-head { margin-bottom: 44px; text-align: center; }
+    #{{ $uid }} .rjtm-title { margin: 0; padding: 0; font-size: clamp(1.9rem, 4.2vw, 2.8rem); font-weight: 800; line-height: 1.12; letter-spacing: -.03em; color: var(--t); }
+    #{{ $uid }} .rjtm-title::after { content: ""; display: block; width: 56px; height: 4px; margin: 18px auto 0; border-radius: 4px; background: var(--ac); }
+    #{{ $uid }} .rjtm-sub { margin: 16px auto 0; max-width: 36rem; color: var(--m); line-height: 1.7; font-size: 1.05rem; }
+
+    /* ---------- Grid ---------- */
+    #{{ $uid }} .rjtm-grid { display: grid; gap: 40px 32px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    #{{ $uid }}[data-cols="2"] .rjtm-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    #{{ $uid }}[data-cols="4"] .rjtm-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    @media (max-width: 1023px) { #{{ $uid }}[data-cols="3"] .rjtm-grid, #{{ $uid }}[data-cols="4"] .rjtm-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 639px) { #{{ $uid }} { padding: 36px 12px; } #{{ $uid }}[data-cols] .rjtm-grid { grid-template-columns: minmax(0, 1fr); gap: 32px; } }
+
+    /* ---------- Card ---------- */
+    #{{ $uid }} .rjtm-card { position: relative; display: flex; flex-direction: column; transition: transform .5s cubic-bezier(.2,.8,.2,1); }
+    #{{ $uid }} .rjtm-card[hidden] { display: none; }
+    #{{ $uid }} .rjtm-card:hover { transform: translateY(-8px); }
+
+    #{{ $uid }} .rjtm-photo { position: relative; width: 100%; aspect-ratio: 4 / 5; overflow: hidden; border-radius: 24px; border: 2px solid var(--bd); background: var(--ph); transition: border-color .4s ease, box-shadow .4s ease; }
+    #{{ $uid }} .rjtm-card:hover .rjtm-photo { border-color: var(--ac); box-shadow: 0 26px 46px -24px var(--ac); }
+    #{{ $uid }} .rjtm-photo img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; max-width: none; object-fit: cover; object-position: center; transition: transform .7s cubic-bezier(.2,.8,.2,1); }
+    #{{ $uid }} .rjtm-card:hover .rjtm-photo img { transform: scale(1.08); }
+    #{{ $uid }} .rjtm-avatar { position: absolute; inset: 0; display: grid; place-items: center; font-size: clamp(3rem, 8vw, 4.5rem); font-weight: 800; letter-spacing: -.03em; color: var(--ac); background: radial-gradient(circle at 30% 20%, color-mix(in srgb, var(--ac) 22%, transparent), transparent 65%), var(--ph); }
+
+    /* ---------- Social overlay ---------- */
+    #{{ $uid }} .rjtm-ov { position: absolute; inset: 0; display: flex; align-items: flex-end; justify-content: center; padding: 22px 14px; background: linear-gradient(to top, rgba(2,6,23,.72), transparent 55%); opacity: 0; transition: opacity .4s ease; }
+    #{{ $uid }} .rjtm-card:hover .rjtm-ov, #{{ $uid }} .rjtm-card:focus-within .rjtm-ov { opacity: 1; }
+    #{{ $uid }} .rjtm-soc { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 0; padding: 0; list-style: none; }
+    #{{ $uid }} .rjtm-soc li { margin: 0; padding: 0; list-style: none; opacity: 0; transform: translateY(14px) scale(.85); transition: opacity .35s ease, transform .5s cubic-bezier(.34,1.56,.64,1); transition-delay: calc(var(--k, 0) * 45ms); }
+    #{{ $uid }} .rjtm-card:hover .rjtm-soc li, #{{ $uid }} .rjtm-card:focus-within .rjtm-soc li { opacity: 1; transform: none; }
+
+    #{{ $uid }} .rjtm-soc a { --bc: var(--ac); position: relative; display: grid; place-items: center; width: 42px; height: 42px; border-radius: 50%; color: #fff !important; text-decoration: none !important; background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.35); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); transition: background-color .3s ease, color .3s ease, border-color .3s ease, transform .3s ease, box-shadow .3s ease; }
+    #{{ $uid }}[data-brand="1"] .rjtm-soc a { --bc: var(--c, var(--ac)); }
+    #{{ $uid }} .rjtm-soc a:hover, #{{ $uid }} .rjtm-soc a:focus-visible { background: var(--bc); border-color: var(--bc); transform: translateY(-4px) scale(1.1); box-shadow: 0 12px 22px -8px var(--bc); outline: none; }
+    #{{ $uid }} .rjtm-soc a svg { display: block; width: 19px; height: 19px; max-width: none; }
+    /* very light/dark brand colors: keep the glyph readable on hover */
+    #{{ $uid }} .rjtm-soc a[data-key="snapchat"]:hover { color: #111 !important; }
+
+    /* tooltip */
+    #{{ $uid }} .rjtm-soc a::after { content: attr(data-label); position: absolute; bottom: calc(100% + 10px); left: 50%; padding: 5px 10px; border-radius: 8px; background: #0f172a; color: #fff; font-size: .7rem; font-weight: 600; line-height: 1; white-space: nowrap; pointer-events: none; opacity: 0; transform: translate(-50%, 6px); transition: opacity .25s ease, transform .25s ease; }
+    #{{ $uid }} .rjtm-soc a:hover::after, #{{ $uid }} .rjtm-soc a:focus-visible::after { opacity: 1; transform: translate(-50%, 0); }
+
+    /* touch devices have no hover: always show the icons */
+    @media (hover: none) {
+        #{{ $uid }} .rjtm-ov { opacity: 1; }
+        #{{ $uid }} .rjtm-soc li { opacity: 1; transform: none; }
+        #{{ $uid }} .rjtm-soc a::after { display: none; }
+        #{{ $uid }} .rjtm-card:hover { transform: none; }
     }
-    #{{ $uid }} .rj-team-card:hover {
-        transform: translateY(-8px);
-    }
-    #{{ $uid }} .rj-team-img {
-        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    #{{ $uid }} .rj-team-card:hover .rj-team-img {
-        transform: scale(1.08);
-    }
-    #{{ $uid }} .rj-team-social {
-        opacity: 0;
-        transform: translateY(10px);
-        transition: all 0.3s ease;
-    }
-    #{{ $uid }} .rj-team-card:hover .rj-team-social {
-        opacity: 1;
-        transform: translateY(0);
-    }
-    #{{ $uid }} .rj-team-hidden {
-        display: none;
+
+    /* ---------- Info ---------- */
+    #{{ $uid }} .rjtm-info { position: relative; margin-top: 26px; padding: 0 8px; text-align: center; }
+    #{{ $uid }} .rjtm-info::before { content: ""; position: absolute; top: -14px; left: 50%; width: 48px; height: 4px; margin-left: -24px; border-radius: 4px; background: var(--ac); transform: scaleX(0); transition: transform .5s cubic-bezier(.2,.8,.2,1); }
+    #{{ $uid }} .rjtm-card:hover .rjtm-info::before { transform: scaleX(1); }
+    #{{ $uid }} .rjtm-name { margin: 0; padding: 0; font-size: 1.25rem; font-weight: 800; letter-spacing: -.01em; line-height: 1.3; color: var(--t); }
+    #{{ $uid }} .rjtm-pos { margin: 6px 0 0; font-size: .92rem; font-weight: 500; color: var(--m); }
+
+    #{{ $uid }} .rjtm-btn { display: inline-flex; align-items: center; gap: 8px; margin-top: 18px; padding: 10px 24px; border: 1px solid var(--bd); border-radius: 999px; color: var(--t) !important; font-size: .72rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; line-height: 1; text-decoration: none !important; transition: background-color .3s ease, color .3s ease, border-color .3s ease, transform .3s ease; }
+    #{{ $uid }} .rjtm-btn svg { width: 14px; height: 14px; transition: transform .3s ease; }
+    #{{ $uid }} .rjtm-btn:hover, #{{ $uid }} .rjtm-btn:focus-visible { background: var(--ac); border-color: var(--ac); color: #fff !important; transform: translateY(-2px); }
+    #{{ $uid }} .rjtm-btn:hover svg { transform: translateX(4px); }
+
+    /* ---------- Show more ---------- */
+    #{{ $uid }} .rjtm-more-wrap { margin-top: 48px; text-align: center; }
+    #{{ $uid }} .rjtm-more { all: unset; box-sizing: border-box; display: inline-flex; align-items: center; gap: 10px; padding: 14px 32px; border-radius: 999px; background: var(--t); color: var(--ph); font-size: .85rem; font-weight: 700; cursor: pointer; box-shadow: 0 14px 30px -14px rgba(0,0,0,.5); transition: transform .3s ease, background-color .3s ease, color .3s ease; }
+    #{{ $uid }}[data-style="dark"] .rjtm-more { background: #fff; color: #0f172a; }
+    #{{ $uid }} .rjtm-more:hover { background: var(--ac); color: #fff; transform: translateY(-3px); }
+    #{{ $uid }} .rjtm-more:focus-visible { outline: 2px solid var(--ac); outline-offset: 3px; }
+    #{{ $uid }} .rjtm-more svg { width: 16px; height: 16px; transition: transform .4s ease; }
+    #{{ $uid }} .rjtm-more[aria-expanded="true"] svg { transform: rotate(180deg); }
+
+    /* ---------- Animations ---------- */
+    #{{ $uid }}.rjtm-ready:not(.rjtm-in) .rjtm-card { opacity: 0; }
+    #{{ $uid }}.rjtm-in .rjtm-card { animation: rjtm-rise .9s cubic-bezier(.2,.8,.2,1) backwards; animation-delay: calc(var(--i, 0) * 90ms); }
+    #{{ $uid }} .rjtm-card.rjtm-pop { animation: rjtm-rise .8s cubic-bezier(.2,.8,.2,1) backwards; animation-delay: calc(var(--p, 0) * 80ms); }
+    @keyframes rjtm-rise { from { opacity: 0; transform: translateY(32px) scale(.96); } }
+
+    @media (prefers-reduced-motion: reduce) {
+        #{{ $uid }} *, #{{ $uid }} *::before, #{{ $uid }} *::after { animation: none !important; transition-duration: .01ms !important; transition-delay: 0ms !important; }
+        #{{ $uid }}.rjtm-ready:not(.rjtm-in) .rjtm-card { opacity: 1; }
     }
 </style>
 
-<div id="{{ $uid }}" class="w-full py-12">
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-{{ $columns }} gap-8 md:gap-12">
-        @foreach($members as $index => $member)
-            <div class="rj-team-card group relative flex flex-col {{ $index >= $initialShow ? 'rj-team-hidden' : '' }}" data-index="{{ $index }}">
+<section id="{{ $uid }}"
+         data-style="{{ $opts['style'] }}"
+         data-cols="{{ $opts['cols'] }}"
+         data-brand="{{ $opts['brand'] ? '1' : '0' }}"
+         data-initial="{{ $opts['initial'] }}">
+    <div class="rjtm-wrap">
 
-                <div class="relative w-full rounded-2xl overflow-hidden border-2 {{ $borderAccent }} {{ $isDark ? 'bg-slate-800' : 'bg-slate-50' }} aspect-[4/5]">
-                    @if(!empty($member['image']))
-                        <img src="{{ $member['image'] }}" class="rj-team-img w-full h-full object-cover object-center" alt="{{ $member['name'] }}">
-                    @else
-                        <div class="w-full h-full flex items-center justify-center {{ $subColor }}">
-                            <svg class="w-16 h-16 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                        </div>
-                    @endif
-
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-6">
-                        <div class="rj-team-social flex items-center gap-3">
-                            @if(!empty($member['facebook']) && $member['facebook'] !== '#')
-                                <a href="{{ $member['facebook'] }}" target="_blank" class="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md text-white flex items-center justify-center hover:bg-white hover:text-indigo-600 transition-colors">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                                </a>
-                            @endif
-                            @if(!empty($member['twitter']) && $member['twitter'] !== '#')
-                                <a href="{{ $member['twitter'] }}" target="_blank" class="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md text-white flex items-center justify-center hover:bg-white hover:text-indigo-600 transition-colors">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                                </a>
-                            @endif
-                            @if(!empty($member['linkedin']) && $member['linkedin'] !== '#')
-                                <a href="{{ $member['linkedin'] }}" target="_blank" class="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md text-white flex items-center justify-center hover:bg-white hover:text-indigo-600 transition-colors">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-                                </a>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-
-                <div class="relative mt-6 text-center px-2">
-                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-12 h-1 bg-indigo-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <h3 class="text-xl font-extrabold {{ $textColor }} tracking-tight">{{ $member['name'] }}</h3>
-                    @if(!empty($member['position']))
-                        <p class="text-sm font-medium {{ $subColor }} mt-1">{{ $member['position'] }}</p>
-                    @endif
-
-                    @if(!empty($member['btn_text']) && !empty($member['btn_url']))
-                        <div class="mt-5">
-                            <a href="{{ $member['btn_url'] }}" class="inline-flex items-center justify-center px-6 py-2 border border-slate-300 {{ $isDark ? 'border-slate-700 hover:border-indigo-500' : 'hover:border-slate-900' }} text-xs font-bold uppercase tracking-widest {{ $textColor }} rounded-full transition-colors">
-                                {{ $member['btn_text'] }}
-                            </a>
-                        </div>
-                    @endif
-                </div>
+        @if ($opts['title'] !== '' || $opts['subtitle'] !== '')
+            <div class="rjtm-head">
+                @if ($opts['title'] !== '')
+                    <h2 class="rjtm-title">{{ $opts['title'] }}</h2>
+                @endif
+                @if ($opts['subtitle'] !== '')
+                    <p class="rjtm-sub">{{ $opts['subtitle'] }}</p>
+                @endif
             </div>
-        @endforeach
-    </div>
+        @endif
 
-    @if($totalMembers > $initialShow)
-        <div class="mt-12 text-center">
-            <button type="button" class="rj-team-more-btn inline-flex items-center gap-2 px-8 py-3 bg-slate-900 text-white font-bold text-sm rounded-full hover:bg-slate-800 transition-colors shadow-lg">
-                <span>{{ __('Show More') }}</span>
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
-            </button>
+        <div class="rjtm-grid">
+            @foreach ($members as $member)
+                @php
+                    $extra = $loop->index >= $opts['initial'];
+                    $initials = mb_strtoupper(collect(preg_split('/\s+/u', trim($member['name'])))->filter()->take(2)->map(fn ($w) => mb_substr($w, 0, 1))->implode(''));
+                @endphp
+
+                <article class="rjtm-card" style="--i: {{ min($loop->index, 11) }};" data-extra="{{ $extra ? '1' : '0' }}" @if ($extra) hidden @endif>
+                    <div class="rjtm-photo">
+                        @if (!empty($member['image']))
+                            <img src="{{ $member['image'] }}" alt="{{ $member['name'] }}" loading="lazy" decoding="async">
+                        @else
+                            <div class="rjtm-avatar" aria-hidden="true">{{ $initials }}</div>
+                        @endif
+
+                        @if (!empty($member['socials']))
+                            <div class="rjtm-ov">
+                                <ul class="rjtm-soc">
+                                    @foreach ($member['socials'] as $s)
+                                        <li style="--k: {{ $loop->index }};">
+                                            <a href="{{ $s['url'] }}"
+                                               data-key="{{ $s['key'] }}"
+                                               data-label="{{ $s['label'] }}"
+                                               aria-label="{{ $member['name'] }} - {{ $s['label'] }}"
+                                               style="--c: {{ $s['color'] }};"
+                                               @if ($s['external']) target="_blank" rel="noopener noreferrer" @endif>
+                                                {!! $s['svg'] !!}
+                                            </a>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+                    </div>
+
+                    <div class="rjtm-info">
+                        <h3 class="rjtm-name">{{ $member['name'] }}</h3>
+                        @if (!empty($member['position']))
+                            <p class="rjtm-pos">{{ $member['position'] }}</p>
+                        @endif
+
+                        @if (!empty($member['btn_text']) && !empty($member['btn_url']) && $member['btn_url'] !== '#')
+                            <a href="{{ $member['btn_url'] }}" class="rjtm-btn">
+                                <span>{{ $member['btn_text'] }}</span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6l6 6-6 6"/></svg>
+                            </a>
+                        @endif
+                    </div>
+                </article>
+            @endforeach
         </div>
-    @endif
-</div>
+
+        @if ($hasMore)
+            <div class="rjtm-more-wrap">
+                <button type="button" class="rjtm-more" aria-expanded="false" data-more="{{ $opts['more'] }}" data-less="{{ $opts['less'] }}">
+                    <span>{{ $opts['more'] }}</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 9l-7 7-7-7"/></svg>
+                </button>
+            </div>
+        @endif
+    </div>
+</section>
 
 <script>
-(function() {
-    function initTeam_{{ str_replace('-', '_', $uid) }}() {
-        const root = document.getElementById('{{ $uid }}');
-        if (!root || root.dataset.initialized) return;
-        root.dataset.initialized = 'true';
+(function () {
+    var root = document.getElementById('{{ $uid }}');
+    if (!root || root.dataset.ready) { return; }
+    root.dataset.ready = '1';
 
-        const btn = root.querySelector('.rj-team-more-btn');
-        const hiddenItems = root.querySelectorAll('.rj-team-hidden');
+    var btn = root.querySelector('.rjtm-more');
+    var extras = [].slice.call(root.querySelectorAll('.rjtm-card[data-extra="1"]'));
 
-        if (btn && hiddenItems.length > 0) {
-            btn.addEventListener('click', () => {
-                hiddenItems.forEach(item => {
-                    item.classList.remove('rj-team-hidden');
-                    item.style.opacity = '0';
-                    item.style.transform = 'translateY(20px)';
+    if (btn && extras.length) {
+        var label = btn.querySelector('span');
 
-                    setTimeout(() => {
-                        item.style.opacity = '1';
-                        item.style.transform = 'translateY(0)';
-                    }, 50);
-                });
-                btn.parentElement.style.display = 'none';
+        btn.addEventListener('click', function () {
+            var open = btn.getAttribute('aria-expanded') !== 'true';
+
+            extras.forEach(function (card, k) {
+                card.classList.remove('rjtm-pop');
+                if (open) {
+                    card.hidden = false;
+                    card.style.setProperty('--p', k);
+                    void card.offsetWidth;
+                    card.classList.add('rjtm-pop');
+                } else {
+                    card.hidden = true;
+                }
             });
-        }
+
+            btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+            label.textContent = open ? btn.dataset.less : btn.dataset.more;
+
+            if (!open) {
+                root.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+            }
+        });
     }
 
-    initTeam_{{ str_replace('-', '_', $uid) }}();
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initTeam_{{ str_replace('-', '_', $uid) }});
+    // Reveal on scroll
+    root.classList.add('rjtm-ready');
+    function show() { root.classList.add('rjtm-in'); }
+    if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (entries) {
+            if (entries[0].isIntersecting) { show(); io.disconnect(); }
+        }, { threshold: 0.1 });
+        io.observe(root);
+    } else {
+        show();
     }
 })();
 </script>
