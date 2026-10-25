@@ -1,177 +1,153 @@
 @php
-    $totalSlides = count($images);
-    $endImage = end($images);
-    $finalBg = !empty($settings['final_bg_image']) ? $settings['final_bg_image'] : $endImage;
-    $isBlurred = empty($settings['final_bg_image']);
+    $count = count($slides);
+    $sectionHeight = ($count + 1) * $o['step_vh'];
+    $pad = fn ($n) => str_pad((string) $n, 2, '0', STR_PAD_LEFT);
 @endphp
 
 <style>
-    #{{ $uid }} {
-        position: relative;
-        z-index: 0;
-        isolation: isolate;
-    }
-    #{{ $uid }} .sc-stage {
-        height: 100vh;
-        height: 100svh;
-        top: 0;
-    }
-    #{{ $uid }} .sc-slide {
-        will-change: clip-path;
-        backface-visibility: hidden;
-    }
-    #{{ $uid }} .sc-slide:not(:first-child) {
-        visibility: hidden;
-    }
-    #{{ $uid }} .sc-image {
-        transform-origin: 50% 50%;
-        will-change: transform;
-    }
-    #{{ $uid }} .sc-dim {
-        background: #020617;
-        opacity: 0;
-        pointer-events: none;
-    }
-    #{{ $uid }} .sc-cta-shade {
-        background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.55) 0%, rgba(15, 23, 42, 0.92) 100%);
-    }
-    #{{ $uid }} .sc-content {
-        will-change: transform, opacity;
-    }
-    #{{ $uid }} .sc-ghost {
-        position: absolute;
-        top: 10%;
-        right: 4vw;
-        font-size: clamp(8rem, 28vw, 26rem);
-        font-weight: 900;
-        line-height: .8;
-        letter-spacing: -.04em;
-        color: transparent;
-        -webkit-text-stroke: 2px rgba(255, 255, 255, .2);
-        pointer-events: none;
-        user-select: none;
-        will-change: transform, opacity;
-    }
-    #{{ $uid }} .sc-word {
-        display: inline-block;
-        overflow: hidden;
-        vertical-align: top;
-        padding-bottom: .12em;
-        margin-bottom: -.12em;
-    }
-    #{{ $uid }} .sc-word > span {
-        display: inline-block;
-        will-change: transform;
-    }
-    #{{ $uid }}.sc-ready [data-reveal] {
-        opacity: 0;
-        will-change: transform, opacity;
-    }
-    #{{ $uid }} .sc-hud {
-        position: absolute;
-        inset: 0;
-        z-index: 50;
-        pointer-events: none;
-    }
-    #{{ $uid }} .sc-progress {
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        height: 3px;
-        background: rgba(255, 255, 255, .12);
-    }
-    #{{ $uid }} .sc-progress > span {
-        display: block;
-        height: 100%;
-        background: #fff;
-        transform-origin: 0 50%;
-        transform: scaleX(0);
-    }
-    #{{ $uid }} .sc-dots {
-        position: absolute;
-        right: 1.5rem;
-        top: 50%;
-        transform: translateY(-50%);
-        display: flex;
-        flex-direction: column;
-        gap: 14px;
-        pointer-events: auto;
-    }
-    #{{ $uid }} .sc-dot {
-        width: 10px;
-        height: 10px;
-        padding: 0;
-        border-radius: 999px;
-        border: 1.5px solid rgba(255, 255, 255, .7);
-        background: transparent;
-        cursor: pointer;
-        transition: height .5s cubic-bezier(.4, 0, .2, 1), background .3s ease;
-    }
-    #{{ $uid }} .sc-dot.is-active {
-        height: 28px;
-        background: #fff;
-    }
-    #{{ $uid }} .sc-counter {
-        position: absolute;
-        right: 1.5rem;
-        bottom: 2.5rem;
-        display: flex;
-        align-items: baseline;
-        gap: .5rem;
-        color: #fff;
-        transition: opacity .4s ease;
-    }
-    #{{ $uid }} .sc-current {
-        font-size: 2.5rem;
-        font-weight: 800;
-        line-height: 1;
-        font-variant-numeric: tabular-nums;
-    }
-    #{{ $uid }} .sc-total {
-        font-size: .875rem;
-        font-weight: 600;
-        color: rgba(255, 255, 255, .55);
-    }
+    #{{ $uid }} { position: relative; z-index: 0; isolation: isolate; width: 100%; height: {{ $sectionHeight }}vh; background: #020617; --rjsc-accent: {{ $o['accent'] }}; }
+    #{{ $uid }} *, #{{ $uid }} *::before, #{{ $uid }} *::after { box-sizing: border-box; }
+
+    /* ---------- Pinned stage ---------- */
+    #{{ $uid }} .rjsc-stage { position: sticky; top: 0; width: 100%; height: 100vh; height: 100svh; overflow: hidden; }
+    #{{ $uid }} .rjsc-stage.rjsc-fallback { position: absolute; top: 0; left: 0; right: 0; will-change: transform; }
+
+    /* ---------- Slides ---------- */
+    #{{ $uid }} .rjsc-slide { position: absolute; inset: 0; overflow: hidden; will-change: clip-path; backface-visibility: hidden; }
+    #{{ $uid }} .rjsc-slide:not(:first-child) { visibility: hidden; }
+    #{{ $uid }} .rjsc-image { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: cover; display: block; transform-origin: 50% 50%; will-change: transform, filter; }
+    #{{ $uid }} .rjsc-image.rjsc-blurred { opacity: .6; }
+    #{{ $uid }} .rjsc-shade { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(to top, #020617 0%, rgba(2, 6, 23, .25) 50%, transparent 100%); }
+    #{{ $uid }} .rjsc-side { position: absolute; inset: 0; pointer-events: none; }
+    #{{ $uid }} .rjsc-slide[data-align="left"] .rjsc-side { background: linear-gradient(90deg, rgba(2, 6, 23, .82) 0%, rgba(2, 6, 23, .4) 42%, transparent 78%); }
+    #{{ $uid }} .rjsc-slide[data-align="right"] .rjsc-side { background: linear-gradient(270deg, rgba(2, 6, 23, .82) 0%, rgba(2, 6, 23, .4) 42%, transparent 78%); }
+    #{{ $uid }} .rjsc-slide[data-align="center"] .rjsc-side { background: radial-gradient(ellipse at center, rgba(2, 6, 23, .55) 0%, transparent 78%); }
+    #{{ $uid }} .rjsc-dim { position: absolute; inset: 0; background: #020617; opacity: 0; pointer-events: none; }
+
+    #{{ $uid }} .rjsc-final .rjsc-shade { background: radial-gradient(ellipse at center, rgba(15, 23, 42, .55) 0%, rgba(15, 23, 42, .92) 100%); }
+    #{{ $uid }} .rjsc-final .rjsc-side { display: none; }
+
+    /* Ghost number */
+    #{{ $uid }} .rjsc-ghost { position: absolute; top: 10%; right: 4vw; font-size: clamp(8rem, 28vw, 26rem); font-weight: 900; line-height: .8; letter-spacing: -.04em; color: transparent; -webkit-text-stroke: 2px rgba(255, 255, 255, .2); pointer-events: none; user-select: none; will-change: transform, opacity; }
+    #{{ $uid }} .rjsc-slide[data-align="right"] .rjsc-ghost { right: auto; left: 4vw; }
+
+    /* ---------- Content ---------- */
+    #{{ $uid }} .rjsc-content { position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 64px max(88px, 7vw) 96px max(24px, 7vw); will-change: transform, opacity; }
+    #{{ $uid }} .rjsc-slide[data-align="left"] .rjsc-content { align-items: flex-start; text-align: left; }
+    #{{ $uid }} .rjsc-slide[data-align="right"] .rjsc-content { align-items: flex-end; text-align: right; }
+    #{{ $uid }} .rjsc-card { display: flex; flex-direction: column; align-items: inherit; gap: 20px; width: 100%; max-width: 48rem; }
+
+    #{{ $uid }} .rjsc-label { display: inline-flex; align-items: center; gap: 14px; margin: 0; font-size: .75rem; font-weight: 700; letter-spacing: .28em; text-transform: uppercase; color: var(--rjsc-accent); }
+    #{{ $uid }} .rjsc-label::before { content: ""; width: 36px; height: 2px; background: var(--rjsc-accent); }
+    #{{ $uid }} .rjsc-title { margin: 0; padding: 0; font-size: clamp(2.25rem, 6vw, 5.5rem); font-weight: 900; line-height: 1.04; letter-spacing: -.03em; color: #fff; text-shadow: 0 2px 30px rgba(0, 0, 0, .35); }
+    #{{ $uid }} .rjsc-final .rjsc-title { font-size: clamp(2.5rem, 7vw, 6rem); }
+    #{{ $uid }} .rjsc-accent { color: var(--rjsc-accent); }
+    #{{ $uid }} .rjsc-text { margin: 0; max-width: 36rem; font-size: clamp(1rem, 1.6vw, 1.3rem); line-height: 1.65; color: rgba(255, 255, 255, .85); text-shadow: 0 1px 14px rgba(0, 0, 0, .35); }
+    #{{ $uid }} .rjsc-btn { display: inline-flex; align-items: center; gap: 12px; margin-top: 8px; padding: 16px 32px; border-radius: 999px; background: #fff; color: #0f172a !important; font-size: .85rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; text-decoration: none !important; box-shadow: 0 18px 40px rgba(0, 0, 0, .35); transition: background-color .3s ease, color .3s ease, transform .3s ease; }
+    #{{ $uid }} .rjsc-btn:hover, #{{ $uid }} .rjsc-btn:focus-visible { background: var(--rjsc-accent); color: #fff !important; transform: translateY(-3px); }
+    #{{ $uid }} .rjsc-btn svg { width: 18px; height: 18px; transition: transform .3s ease; }
+    #{{ $uid }} .rjsc-btn:hover svg { transform: translateX(5px); }
+
+    #{{ $uid }} .rjsc-word { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .12em; margin-bottom: -.12em; }
+    #{{ $uid }} .rjsc-word > span { display: inline-block; will-change: transform; }
+    #{{ $uid }}.rjsc-ready [data-reveal] { opacity: 0; will-change: transform, opacity; }
+
+    /* ---------- HUD ---------- */
+    #{{ $uid }} .rjsc-hud { position: absolute; inset: 0; z-index: 50; pointer-events: none; }
+    #{{ $uid }} .rjsc-progress { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(255, 255, 255, .12); }
+    #{{ $uid }} .rjsc-progress > span { display: block; height: 100%; background: var(--rjsc-accent); transform-origin: 0 50%; transform: scaleX(0); }
+    #{{ $uid }} .rjsc-dots { position: absolute; right: 1.25rem; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 14px; pointer-events: auto; }
+    #{{ $uid }} .rjsc-dot { width: 10px; height: 10px; margin: 0; padding: 0; border-radius: 999px; border: 1.5px solid rgba(255, 255, 255, .7); background: transparent; cursor: pointer; transition: height .5s cubic-bezier(.4, 0, .2, 1), background .3s ease; }
+    #{{ $uid }} .rjsc-dot.rjsc-active { height: 28px; background: #fff; }
+    #{{ $uid }} .rjsc-counter { position: absolute; right: 1.5rem; bottom: 2.5rem; display: flex; align-items: baseline; gap: .5rem; color: #fff; transition: opacity .4s ease; }
+    #{{ $uid }} .rjsc-current { font-size: 2.5rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+    #{{ $uid }} .rjsc-total { font-size: .875rem; font-weight: 600; color: rgba(255, 255, 255, .55); }
+    #{{ $uid }} .rjsc-hint { position: absolute; left: 50%; bottom: 28px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 10px; color: rgba(255, 255, 255, .8); font-size: .7rem; font-weight: 600; letter-spacing: .3em; text-transform: uppercase; }
+    #{{ $uid }} .rjsc-hint i { display: block; width: 1px; height: 38px; background: linear-gradient(to bottom, #fff, transparent); transform-origin: top; animation: rjsc-hint 1.8s ease-in-out infinite; }
+    @keyframes rjsc-hint { 0% { transform: scaleY(0); } 50% { transform: scaleY(1); } 100% { transform: scaleY(0); transform-origin: bottom; } }
+
     @media (min-width: 768px) {
-        #{{ $uid }} .sc-dots, #{{ $uid }} .sc-counter { right: 2.5rem; }
+        #{{ $uid }} .rjsc-dots { right: 2.5rem; }
+        #{{ $uid }} .rjsc-counter { right: 2.5rem; }
+    }
+
+    @media (max-width: 640px) {
+        #{{ $uid }} .rjsc-content { padding: 48px 56px 88px 24px; }
+        #{{ $uid }} .rjsc-counter { display: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        #{{ $uid }} .rjsc-hint i { animation: none; }
     }
 </style>
 
-<section id="{{ $uid }}" class="relative bg-slate-950" style="height: {{ ($totalSlides + 1) * 140 }}vh;">
-    <div class="sc-stage sticky w-full overflow-hidden">
+<section id="{{ $uid }}" aria-roledescription="carousel" aria-label="{{ __('Animated Scroll Hero') }}">
+    <div class="rjsc-stage">
 
-        @foreach ($images as $i => $img)
-            <article class="sc-slide absolute inset-0" style="z-index: {{ $i + 1 }};">
-                <img src="{{ $img }}" class="sc-image absolute inset-0 w-full h-full object-cover" alt="Slide {{ $i + 1 }}">
-                <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
-                <div class="sc-ghost" aria-hidden="true">{{ str_pad($i + 1, 2, '0', STR_PAD_LEFT) }}</div>
-                <div class="sc-dim absolute inset-0"></div>
+        @foreach ($slides as $i => $s)
+            @php
+                $n = 0;
+                $hasBtn = $s['btn_text'] !== '' && $s['btn_url'] !== '';
+                $hasText = $s['label'] !== '' || $s['title_html'] !== '' || $s['text'] !== '' || $hasBtn;
+            @endphp
+            <article class="rjsc-slide" data-align="{{ $s['align'] }}" style="z-index: {{ $i + 1 }};">
+                <img class="rjsc-image" src="{{ $s['image'] }}" alt="{{ $s['title'] }}" decoding="async" @if($i === 0) fetchpriority="high" @endif>
+                <div class="rjsc-shade"></div>
+                @if ($hasText)
+                    <div class="rjsc-side"></div>
+                @endif
+                <div class="rjsc-ghost" aria-hidden="true">{{ $pad($i + 1) }}</div>
+
+                @if ($hasText)
+                    <div class="rjsc-content">
+                        <div class="rjsc-card">
+                            @if ($s['label'] !== '')
+                                <div data-reveal="0" data-start=".2"><span class="rjsc-label">{{ $s['label'] }}</span></div>
+                            @endif
+
+                            @if ($s['title_html'] !== '')
+                                <h2 data-split class="rjsc-title">{!! $s['title_html'] !!}</h2>
+                            @endif
+
+                            @if ($s['text'] !== '')
+                                <div data-reveal="1" data-start=".6"><p class="rjsc-text">{!! nl2br(e($s['text'])) !!}</p></div>
+                            @endif
+
+                            @if ($hasBtn)
+                                <div data-reveal="2" data-start=".68">
+                                    <a href="{{ $s['btn_url'] }}" class="rjsc-btn">
+                                        <span>{{ $s['btn_text'] }}</span>
+                                        <svg fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                                    </a>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                @endif
+
+                <div class="rjsc-dim"></div>
             </article>
         @endforeach
 
-        <article class="sc-slide absolute inset-0" style="z-index: {{ $totalSlides + 1 }};">
-            <img src="{{ $finalBg }}" class="sc-image absolute inset-0 w-full h-full object-cover {{ $isBlurred ? 'blur-2xl scale-110 opacity-60' : '' }}" alt="Final Slide">
+        <article class="rjsc-slide rjsc-final" data-align="center" style="z-index: {{ $count + 1 }};">
+            <img class="rjsc-image {{ $final['blurred'] ? 'rjsc-blurred' : '' }}" src="{{ $final['image'] }}" alt="{{ $final['title'] }}" data-base-blur="{{ $final['blurred'] ? 24 : 0 }}" decoding="async">
+            <div class="rjsc-shade"></div>
 
-            <div class="sc-cta-shade absolute inset-0"></div>
+            <div class="rjsc-content">
+                <div class="rjsc-card">
+                    @if ($final['label'] !== '')
+                        <div data-reveal="0" data-start=".2"><span class="rjsc-label">{{ $final['label'] }}</span></div>
+                    @endif
 
-            <div class="sc-content absolute inset-0 flex items-center justify-center">
-                <div class="text-center px-6 max-w-4xl mx-auto">
-                    <div data-reveal="0">
-                        <div class="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-6">
-                            {{ $settings['final_subtitle'] ?? __('Premium Collection') }}
-                        </div>
-                    </div>
+                    @if ($final['title_html'] !== '')
+                        <h2 data-split class="rjsc-title">{!! $final['title_html'] !!}</h2>
+                    @endif
 
-                    <h2 data-split class="text-4xl md:text-7xl font-black text-white leading-tight mb-8">{{ $settings['final_title'] ?? __('Discover More') }}</h2>
-
-                    @if(!empty($settings['final_btn_text']) && !empty($settings['final_btn_url']))
-                        <div data-reveal="2">
-                            <a href="{{ $settings['final_btn_url'] }}" class="inline-flex items-center gap-3 px-10 py-5 rounded-full bg-white text-slate-900 font-bold hover:bg-slate-100 transition shadow-2xl">
-                                {{ $settings['final_btn_text'] }}
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-                                </svg>
+                    @if ($final['btn_text'] !== '' && $final['btn_url'] !== '')
+                        <div data-reveal="2" data-start=".68">
+                            <a href="{{ $final['btn_url'] }}" class="rjsc-btn">
+                                <span>{{ $final['btn_text'] }}</span>
+                                <svg fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                             </a>
                         </div>
                     @endif
@@ -179,98 +155,160 @@
             </div>
         </article>
 
-        <div class="sc-hud">
-            <div class="sc-counter">
-                <span class="sc-current">01</span>
-                <span class="sc-total">/ {{ str_pad($totalSlides, 2, '0', STR_PAD_LEFT) }}</span>
-            </div>
+        <div class="rjsc-hud">
+            @if ($o['show_counter'])
+                <div class="rjsc-counter" aria-hidden="true">
+                    <span class="rjsc-current">01</span>
+                    <span class="rjsc-total">/ {{ $pad($count) }}</span>
+                </div>
+            @endif
 
-            <div class="sc-dots">
-                @for ($k = 0; $k < $totalSlides; $k++)
-                    <button type="button" class="sc-dot" aria-label="{{ $k + 1 }}"></button>
-                @endfor
-            </div>
+            @if ($o['show_dots'])
+                <div class="rjsc-dots">
+                    @for ($k = 0; $k < $count; $k++)
+                        <button type="button" class="rjsc-dot" aria-label="{{ __('Go to slide') }} {{ $k + 1 }}"></button>
+                    @endfor
+                </div>
+            @endif
 
-            <div class="sc-progress"><span></span></div>
+            @if ($o['show_hint'])
+                <div class="rjsc-hint" aria-hidden="true"><span>{{ __('Scroll') }}</span><i></i></div>
+            @endif
+
+            <div class="rjsc-progress"><span></span></div>
         </div>
     </div>
 </section>
 
 <script>
-(function() {
-    function initScrollShowcase() {
-        const root = document.getElementById('{{ $uid }}');
-        if (!root) return;
+(function () {
+    function init() {
+        var root = document.getElementById('{{ $uid }}');
+        if (!root || root.dataset.ready) { return; }
+        root.dataset.ready = '1';
 
-        const slideEls = Array.from(root.querySelectorAll('.sc-slide'));
-        const S = slideEls.length;
-        if (S < 2) return;
+        var stage = root.querySelector('.rjsc-stage');
+        var slideEls = Array.prototype.slice.call(root.querySelectorAll('.rjsc-slide'));
+        var S = slideEls.length;
+        if (S < 2) { return; }
 
-        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var revealMode = '{{ $o['reveal'] }}';
 
-        const clamp = function (v, a, b) { return Math.min(Math.max(v, a === undefined ? 0 : a), b === undefined ? 1 : b); };
-        const easeOut = function (t) { return 1 - Math.pow(1 - t, 3); };
-        const easeInOut = function (t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
-        const easeOutExpo = function (t) { return t === 1 ? 1 : 1 - Math.pow(2, -10 * t); };
-        const pad = function (n) { return n < 10 ? '0' + n : String(n); };
+        function clamp(v, a, b) { return Math.min(Math.max(v, a === undefined ? 0 : a), b === undefined ? 1 : b); }
+        function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+        function easeInOut(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+        function easeOutExpo(t) { return t === 1 ? 1 : 1 - Math.pow(2, -10 * t); }
+        function pad(n) { return n < 10 ? '0' + n : String(n); }
 
+        // Split titles into words (keeps highlighted words)
         root.querySelectorAll('[data-split]').forEach(function (el) {
-            const text = el.textContent.trim();
-            el.setAttribute('aria-label', text);
+            var label = el.textContent.trim();
+            var tokens = [];
+            Array.prototype.forEach.call(el.childNodes, function (node) {
+                var cls = node.nodeType === 1 ? node.className : '';
+                node.textContent.trim().split(/\s+/).forEach(function (w) {
+                    if (w) { tokens.push({ w: w, cls: cls }); }
+                });
+            });
+            el.setAttribute('aria-label', label);
             el.textContent = '';
-            text.split(/\s+/).forEach(function (word, idx, arr) {
-                const outer = document.createElement('span');
-                outer.className = 'sc-word';
+            tokens.forEach(function (t, idx) {
+                var outer = document.createElement('span');
+                outer.className = 'rjsc-word';
                 outer.setAttribute('aria-hidden', 'true');
-                const inner = document.createElement('span');
-                inner.textContent = word;
+                var inner = document.createElement('span');
+                inner.textContent = t.w;
+                if (t.cls) { inner.className = t.cls; }
                 outer.appendChild(inner);
                 el.appendChild(outer);
-                if (idx < arr.length - 1) el.appendChild(document.createTextNode(' '));
+                if (idx < tokens.length - 1) { el.appendChild(document.createTextNode(' ')); }
             });
         });
 
-        root.classList.add('sc-ready');
+        root.classList.add('rjsc-ready');
 
-        const items = slideEls.map(function (el, i) {
+        var items = slideEls.map(function (el, i) {
+            var image = el.querySelector('.rjsc-image');
+            var baseBlur = image ? (parseFloat(image.getAttribute('data-base-blur')) || 0) : 0;
             return {
                 el: el,
                 i: i,
-                mode: i % 2 === 0 ? 'inset' : 'circle',
-                image: el.querySelector('.sc-image'),
-                dim: el.querySelector('.sc-dim'),
-                ghost: el.querySelector('.sc-ghost'),
-                content: el.querySelector('.sc-content'),
-                words: Array.from(el.querySelectorAll('.sc-word > span')),
-                reveals: Array.from(el.querySelectorAll('[data-reveal]'))
+                mode: revealMode === 'mixed' ? (i % 2 === 0 ? 'inset' : 'circle') : revealMode,
+                image: image,
+                baseBlur: baseBlur,
+                baseScale: baseBlur ? 1.15 : 1,
+                dim: el.querySelector('.rjsc-dim'),
+                ghost: el.querySelector('.rjsc-ghost'),
+                content: el.querySelector('.rjsc-content'),
+                words: Array.prototype.slice.call(el.querySelectorAll('.rjsc-word > span')),
+                reveals: Array.prototype.slice.call(el.querySelectorAll('[data-reveal]'))
             };
         });
 
-        const bar = root.querySelector('.sc-progress > span');
-        const dots = Array.from(root.querySelectorAll('.sc-dot'));
-        const counter = root.querySelector('.sc-counter');
-        const currentLabel = root.querySelector('.sc-current');
+        var bar = root.querySelector('.rjsc-progress > span');
+        var dots = Array.prototype.slice.call(root.querySelectorAll('.rjsc-dot'));
+        var counter = root.querySelector('.rjsc-counter');
+        var currentLabel = root.querySelector('.rjsc-current');
+        var hint = root.querySelector('.rjsc-hint');
 
-        let target = 0;
-        let current = 0;
-        let introT = reduceMotion ? 1 : 0;
-        let introStart = null;
-        let rafId = null;
+        var target = 0;
+        var current = 0;
+        var introT = reduceMotion ? 1 : 0;
+        var introStart = null;
+        var rafId = null;
+
+        // ---------- Pin handling (sticky -> overflow fix -> transform fallback) ----------
+        var pinMode = 'sticky';
+        var relaxed = false;
+
+        function relaxAncestors() {
+            for (var el = root.parentElement; el && el !== document.body && el !== document.documentElement; el = el.parentElement) {
+                var cs = getComputedStyle(el);
+                if (cs.overflowX === 'hidden' || cs.overflowY === 'hidden') {
+                    el.style.overflow = 'clip';
+                }
+            }
+        }
+
+        function ensurePin(rect, vh) {
+            if (pinMode === 'transform') { return; }
+            if (rect.top > -8 || rect.bottom < vh + 8) { return; }
+            if (Math.abs(stage.getBoundingClientRect().top) <= 2) { return; }
+
+            if (!relaxed) {
+                relaxed = true;
+                relaxAncestors();
+                if (Math.abs(stage.getBoundingClientRect().top) <= 2) { return; }
+            }
+
+            pinMode = 'transform';
+            stage.classList.add('rjsc-fallback');
+        }
 
         function readTarget() {
-            const rect = root.getBoundingClientRect();
-            const total = root.offsetHeight - window.innerHeight;
+            var rect = root.getBoundingClientRect();
+            var vh = window.innerHeight;
+            var total = root.offsetHeight - vh;
             if (total <= 0) { target = 0; return; }
-            const raw = clamp(-rect.top / total) * (S - 1);
-            const base = Math.min(Math.floor(raw), S - 1);
-            const frac = raw - base;
+
+            ensurePin(rect, vh);
+            if (pinMode === 'transform') {
+                stage.style.transform = 'translate3d(0,' + clamp(-rect.top, 0, total).toFixed(1) + 'px,0)';
+            }
+
+            var raw = clamp(-rect.top / total) * (S - 1);
+            var base = Math.min(Math.floor(raw), S - 1);
+            var frac = raw - base;
             target = base + easeInOut(clamp((frac - 0.1) / 0.8));
         }
 
+        // ---------- Render ----------
         function render(pos) {
-            const intro = easeOutExpo(introT);
+            var intro = easeOutExpo(introT);
+
             items.forEach(function (it) {
-                const d = pos - it.i;
+                var d = pos - it.i;
                 if (d <= -1.05 || d >= 1.05) {
                     it.el.style.visibility = 'hidden';
                     it.el.style.pointerEvents = 'none';
@@ -279,17 +317,17 @@
                 it.el.style.visibility = 'visible';
                 it.el.style.pointerEvents = Math.abs(d) < 0.5 ? 'auto' : 'none';
 
-                const enter = it.i === 0 ? intro : clamp(1 + d);
-                const exit = clamp(d);
+                var enter = it.i === 0 ? intro : clamp(1 + d);
+                var exit = clamp(d);
 
-                let clip = 'none';
+                var clip = 'none';
                 if (it.i > 0 && enter < 1) {
                     if (it.mode === 'circle') {
-                        const r = easeOut(enter) * 150;
+                        var r = easeOut(enter) * 150;
                         clip = 'circle(' + r.toFixed(2) + '% at 50% 100%)';
                     } else {
-                        const off = (1 - easeOut(enter)) * 100;
-                        const rad = ((1 - enter) * 80).toFixed(1);
+                        var off = (1 - easeOut(enter)) * 100;
+                        var rad = ((1 - enter) * 80).toFixed(1);
                         clip = 'inset(0 0 0 ' + off.toFixed(2) + '% round ' + rad + 'px 0 0 ' + rad + 'px)';
                     }
                 }
@@ -297,82 +335,86 @@
                 it.el.style.webkitClipPath = clip;
 
                 if (it.image) {
-                    const scale = (1.25 - 0.25 * enter) * (1 + exit * 0.15);
-                    let tx = 0, ty = -exit * 6;
+                    var scale = (1.25 - 0.25 * enter) * (1 + exit * 0.15) * it.baseScale;
+                    var tx = 0, ty = -exit * 6;
                     if (it.i > 0) {
-                        if (it.mode === 'circle') ty += (1 - enter) * 10;
-                        else tx = (1 - enter) * 12;
+                        if (it.mode === 'circle') { ty += (1 - enter) * 10; }
+                        else { tx = (1 - enter) * 12; }
                     }
-                    const blurAmt = exit * 14 + (it.i > 0 ? (1 - enter) * 6 : 0);
-                    const bright = 1 - exit * 0.45 - (it.i > 0 ? (1 - enter) * 0.25 : 0);
-                    const sat = 1 - exit * 0.3;
+                    var blurAmt = exit * 14 + (it.i > 0 ? (1 - enter) * 6 : 0) + it.baseBlur;
+                    var bright = 1 - exit * 0.45 - (it.i > 0 ? (1 - enter) * 0.25 : 0);
+                    var sat = 1 - exit * 0.3;
                     it.image.style.transform = 'translate3d(' + tx.toFixed(2) + '%,' + ty.toFixed(2) + '%,0) scale(' + scale.toFixed(4) + ')';
                     it.image.style.filter = 'blur(' + blurAmt.toFixed(2) + 'px) brightness(' + bright.toFixed(3) + ') saturate(' + sat.toFixed(3) + ')';
                 }
 
-                if (it.dim) it.dim.style.opacity = (exit * 0.7).toFixed(3);
+                if (it.dim) { it.dim.style.opacity = (exit * 0.7).toFixed(3); }
+
                 if (it.ghost) {
                     it.ghost.style.transform = 'translate3d(' + (-d * 30).toFixed(2) + 'vw,0,0)';
                     it.ghost.style.opacity = ((1 - Math.abs(d)) * (it.i === 0 ? intro : 1) * 0.9).toFixed(3);
                 }
+
                 if (it.content) {
-                    const co = 1 - clamp(exit * 1.8);
+                    var co = 1 - clamp(exit * 1.8);
                     it.content.style.opacity = co.toFixed(3);
                     it.content.style.transform = 'translate3d(0,' + (-exit * 80).toFixed(1) + 'px,0)';
                     it.content.style.filter = 'blur(' + (exit * 6).toFixed(2) + 'px)';
                 }
 
-                const wl = it.words.length;
-                const step = 0.25 / Math.max(wl, 1);
+                var wl = it.words.length;
+                var step = 0.25 / Math.max(wl, 1);
                 it.words.forEach(function (w, k) {
-                    const local = clamp((enter - 0.35 - k * step) / 0.35);
-                    const e = easeOutExpo(local);
+                    var local = clamp((enter - 0.35 - k * step) / 0.35);
+                    var e = easeOutExpo(local);
                     w.style.transform = 'translate3d(0,' + ((1 - e) * 120).toFixed(2) + '%,0)';
                     w.style.opacity = e.toFixed(3);
                 });
 
-                it.reveals.forEach(function (r) {
-                    const idx = parseInt(r.getAttribute('data-reveal'), 10) || 0;
-                    const local = clamp((enter - 0.55 - idx * 0.05) / 0.3);
-                    const e = easeOut(local);
-                    r.style.opacity = e.toFixed(3);
-                    r.style.transform = 'translate3d(0,' + ((1 - e) * 35).toFixed(1) + 'px,0)';
-                    r.style.filter = 'blur(' + ((1 - e) * 4).toFixed(2) + 'px)';
+                it.reveals.forEach(function (rv) {
+                    var idx = parseInt(rv.getAttribute('data-reveal'), 10) || 0;
+                    var start = parseFloat(rv.getAttribute('data-start')) || 0.55;
+                    var local = clamp((enter - start - idx * 0.04) / 0.3);
+                    var e = easeOut(local);
+                    rv.style.opacity = e.toFixed(3);
+                    rv.style.transform = 'translate3d(0,' + ((1 - e) * 35).toFixed(1) + 'px,0)';
+                    rv.style.filter = 'blur(' + ((1 - e) * 4).toFixed(2) + 'px)';
                 });
             });
 
-            const idx = clamp(Math.round(pos), 0, S - 1);
-            if (bar) bar.style.transform = 'scaleX(' + (pos / (S - 1)).toFixed(4) + ')';
-            dots.forEach(function (dot, k) { dot.classList.toggle('is-active', k === idx); });
+            var idx = clamp(Math.round(pos), 0, S - 1);
+            if (bar) { bar.style.transform = 'scaleX(' + (pos / (S - 1)).toFixed(4) + ')'; }
+            dots.forEach(function (dot, k) { dot.classList.toggle('rjsc-active', k === idx); });
             if (counter) {
-                const onSculpture = idx < S - 1;
-                counter.style.opacity = onSculpture ? '1' : '0';
-                if (onSculpture && currentLabel) currentLabel.textContent = pad(idx + 1);
+                var onSlides = idx < S - 1;
+                counter.style.opacity = onSlides ? '1' : '0';
+                if (onSlides && currentLabel) { currentLabel.textContent = pad(idx + 1); }
             }
+            if (hint) { hint.style.opacity = (clamp(1 - pos * 4) * intro).toFixed(3); }
         }
 
         function tick(now) {
             rafId = null;
             if (introT < 1) {
-                if (introStart === null) introStart = now;
+                if (introStart === null) { introStart = now; }
                 introT = clamp((now - introStart) / 1600);
             }
-            const k = reduceMotion ? 1 : 0.085;
+            var k = reduceMotion ? 1 : 0.085;
             current += (target - current) * k;
-            if (Math.abs(target - current) < 0.0004) current = target;
+            if (Math.abs(target - current) < 0.0004) { current = target; }
             render(current);
             if (current !== target || introT < 1) {
                 rafId = requestAnimationFrame(tick);
             }
         }
 
-        function request() { if (rafId === null) rafId = requestAnimationFrame(tick); }
+        function request() { if (rafId === null) { rafId = requestAnimationFrame(tick); } }
         function onScroll() { readTarget(); request(); }
 
         dots.forEach(function (dot, k) {
             dot.addEventListener('click', function () {
-                const total = root.offsetHeight - window.innerHeight;
-                const top = root.getBoundingClientRect().top + window.scrollY;
+                var total = root.offsetHeight - window.innerHeight;
+                var top = root.getBoundingClientRect().top + window.scrollY;
                 window.scrollTo({ top: top + (k / (S - 1)) * total, behavior: reduceMotion ? 'auto' : 'smooth' });
             });
         });
@@ -382,16 +424,16 @@
 
         readTarget();
         current = target;
-        if (target > 0.01 || root.getBoundingClientRect().top < -50) introT = 1;
+        if (target > 0.01 || root.getBoundingClientRect().top < -50) { introT = 1; }
 
         render(current);
         request();
     }
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initScrollShowcase);
+        document.addEventListener('DOMContentLoaded', init);
     } else {
-        initScrollShowcase();
+        init();
     }
 })();
 </script>
