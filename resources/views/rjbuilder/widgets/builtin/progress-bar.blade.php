@@ -5,26 +5,18 @@
 @endphp
 
 <style>
+    @keyframes rjpRise-{{ $uid }} {
+        from { opacity: 0; transform: translateY(20px) scale(0.95); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
     @keyframes rjpShine-{{ $uid }} {
         0% { transform: translateX(-150%) skewX(-20deg); }
         100% { transform: translateX(150%) skewX(-20deg); }
     }
-    @keyframes rjpGlow-{{ $uid }} {
-        0%, 100% { box-shadow: 0 0 12px -2px var(--c); }
-        50% { box-shadow: 0 0 24px 2px var(--c); }
-    }
-    @keyframes rjpRise-{{ $uid }} {
-        from { opacity: 0; transform: translateY(24px) scale(0.95); }
-        to { opacity: 1; transform: translateY(0) scale(1); }
-    }
-    @keyframes rjpPulse-{{ $uid }} {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-    }
 
     #{{ $uid }} {
         width: 100%;
-        padding: 24px;
+        padding: 32px 16px;
         display: flex;
         justify-content: center;
     }
@@ -33,20 +25,12 @@
         position: relative;
         width: 100%;
         max-width: 80rem;
-        padding: 48px 32px;
+        padding: 48px 40px;
         background: #ffffff;
         border-radius: 32px;
         border: 1px solid #e2e8f0;
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02), 0 20px 40px -20px rgba(15,23,42,0.15);
+        box-shadow: 0 10px 30px -10px rgba(15,23,42,0.08);
         overflow: hidden;
-    }
-
-    #{{ $uid }} .rjp-card::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: radial-gradient(circle at 100% 0%, rgba(99,102,241,0.06), transparent 50%);
-        pointer-events: none;
     }
 
     #{{ $uid }} .rjp-head-wrap {
@@ -87,6 +71,7 @@
         display: grid;
         gap: 32px 24px;
         grid-template-columns: 1fr;
+        place-items: center;
         position: relative;
         z-index: 1;
     }
@@ -103,17 +88,13 @@
         position: relative;
         display: flex;
         flex-direction: column;
+        width: 100%;
         opacity: 0;
-        transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     #{{ $uid }}.rjp-in .rjp-item {
-        animation: rjpRise-{{ $uid }} 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-        animation-delay: calc(var(--i, 0) * 90ms);
-    }
-
-    #{{ $uid }} .rjp-item:hover {
-        transform: translateY(-4px);
+        animation: rjpRise-{{ $uid }} 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        animation-delay: calc(var(--i, 0) * 80ms);
     }
 
     #{{ $uid }} .rjp-head {
@@ -121,6 +102,7 @@
         align-items: center;
         gap: 12px;
         margin-bottom: 12px;
+        width: 100%;
     }
 
     #{{ $uid }} .rjp-ico {
@@ -132,7 +114,7 @@
         border-radius: 10px;
         color: var(--c);
         background: color-mix(in srgb, var(--c) 12%, transparent);
-        transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        transition: all 0.3s ease;
     }
 
     #{{ $uid }} .rjp-ico svg,
@@ -141,13 +123,6 @@
         height: 18px;
         max-width: none;
         display: block;
-    }
-
-    #{{ $uid }} .rjp-item:hover .rjp-ico {
-        background: var(--c);
-        color: #fff;
-        transform: rotate(-8deg) scale(1.1);
-        box-shadow: 0 8px 20px -6px var(--c);
     }
 
     #{{ $uid }} .rjp-label {
@@ -167,11 +142,6 @@
         color: var(--c);
         font-variant-numeric: tabular-nums;
         letter-spacing: -0.02em;
-        transition: transform 0.3s ease;
-    }
-
-    #{{ $uid }} .rjp-item:hover .rjp-pct {
-        transform: scale(1.08);
     }
 
     #{{ $uid }} .rjp-pct small {
@@ -198,7 +168,7 @@
         background: linear-gradient(90deg, var(--c), color-mix(in srgb, var(--c) 60%, #ffffff));
         overflow: hidden;
         transition: width 1.4s cubic-bezier(0.22, 1, 0.36, 1);
-        transition-delay: calc(var(--i, 0) * 90ms + 150ms);
+        transition-delay: calc(var(--i, 0) * 80ms + 100ms);
     }
 
     #{{ $uid }}.rjp-in .rjp-fill {
@@ -209,36 +179,9 @@
         content: "";
         position: absolute;
         inset: 0;
-        background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.6) 50%, transparent 100%);
-        animation: rjpShine-{{ $uid }} 2.2s ease-in-out infinite;
-        animation-delay: calc(var(--i, 0) * 90ms + 1.2s);
-    }
-
-    #{{ $uid }}[data-style="minimal"] .rjp-ico {
-        display: none;
-    }
-
-    #{{ $uid }}[data-style="minimal"] .rjp-track {
-        border-radius: 0;
-        height: 4px;
-        box-shadow: none;
-    }
-
-    #{{ $uid }}[data-style="minimal"] .rjp-fill {
-        border-radius: 0;
-    }
-
-    #{{ $uid }}[data-style="minimal"] .rjp-fill::after {
-        display: none;
-    }
-
-    #{{ $uid }}[data-style="thick"] .rjp-track {
-        border-radius: 12px;
-    }
-
-    #{{ $uid }}[data-style="thick"] .rjp-fill {
-        border-radius: 12px;
-        animation: rjpGlow-{{ $uid }} 2.5s ease-in-out infinite;
+        background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%);
+        animation: rjpShine-{{ $uid }} 2s ease-in-out infinite;
+        animation-delay: calc(var(--i, 0) * 80ms + 1s);
     }
 
     #{{ $uid }} .rjp-ring-wrap {
@@ -246,6 +189,7 @@
         flex-direction: column;
         align-items: center;
         text-align: center;
+        width: 100%;
     }
 
     #{{ $uid }} .rjp-ring {
@@ -260,6 +204,7 @@
         height: 100%;
         overflow: visible;
         transform: rotate(-90deg);
+        transform-origin: 50% 50%;
     }
 
     #{{ $uid }} .rjp-ring-bg {
@@ -275,9 +220,9 @@
         stroke: var(--c);
         stroke-dasharray: {{ $opts['circ'] }};
         stroke-dashoffset: {{ $opts['circ'] }};
-        filter: drop-shadow(0 0 6px var(--c));
+        filter: drop-shadow(0 0 8px var(--c));
         transition: stroke-dashoffset 1.6s cubic-bezier(0.22, 1, 0.36, 1);
-        transition-delay: calc(var(--i, 0) * 90ms + 150ms);
+        transition-delay: calc(var(--i, 0) * 80ms + 100ms);
     }
 
     #{{ $uid }}.rjp-in .rjp-ring-fg {
@@ -291,12 +236,12 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 4px;
+        gap: 6px;
     }
 
     #{{ $uid }} .rjp-center .rjp-ico {
-        width: 44px;
-        height: 44px;
+        width: 48px;
+        height: 48px;
         border-radius: 50%;
         background: transparent;
         color: var(--c);
@@ -304,17 +249,17 @@
 
     #{{ $uid }} .rjp-center .rjp-ico svg,
     #{{ $uid }} .rjp-center .rjp-ico img {
-        width: 32px;
-        height: 32px;
+        width: 36px;
+        height: 36px;
     }
 
     #{{ $uid }} .rjp-center .rjp-pct {
-        font-size: 1.4rem;
-        margin-top: 2px;
+        font-size: 1.5rem;
+        margin-top: 0;
     }
 
     #{{ $uid }} .rjp-ring-wrap .rjp-label {
-        margin-top: 8px;
+        margin-top: 4px;
         font-size: 1rem;
         text-align: center;
     }
@@ -324,19 +269,13 @@
             animation: none !important;
             transition: none !important;
         }
-        #{{ $uid }} .rjp-item {
-            opacity: 1;
-        }
-        #{{ $uid }} .rjp-fill {
-            width: calc(var(--v) * 1%);
-        }
-        #{{ $uid }} .rjp-ring-fg {
-            stroke-dashoffset: var(--off);
-        }
+        #{{ $uid }} .rjp-item { opacity: 1; }
+        #{{ $uid }} .rjp-fill { width: calc(var(--v) * 1%); }
+        #{{ $uid }} .rjp-ring-fg { stroke-dashoffset: var(--off); }
     }
 </style>
 
-<section id="{{ $uid }}" data-style="{{ $opts['style'] }}">
+<section id="{{ $uid }}">
     <div class="rjp-card">
 
         @if ($opts['title'] !== '' || $opts['subtitle'] !== '')
@@ -430,7 +369,7 @@
         if (reduce) return;
         items.forEach(function (item, k) {
             [].forEach.call(item.querySelectorAll('.rjp-num'), function (n) {
-                count(n, k * 90 + 150);
+                count(n, k * 80 + 100);
             });
         });
     }
