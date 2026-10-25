@@ -81,18 +81,22 @@ class TabsWidget extends BaseWidget
 
             // Tab 1
             ['name' => 't1_title', 'type' => 'text', 'label' => __('Tab 1 - Title'), 'default' => __('Description'), 'tab' => 'content'],
+            ['name' => 't1_icon', 'type' => 'icon', 'label' => __('Tab 1 - Icon'), 'default' => 'ph:file-text', 'tab' => 'content'],
             ['name' => 't1_content', 'type' => 'textarea', 'label' => __('Tab 1 - Content (HTML supported)'), 'default' => __('<p>This is the description tab content.</p>'), 'tab' => 'content'],
 
             // Tab 2
             ['name' => 't2_title', 'type' => 'text', 'label' => __('Tab 2 - Title'), 'default' => __('Shipping & Returns'), 'tab' => 'content'],
+            ['name' => 't2_icon', 'type' => 'icon', 'label' => __('Tab 2 - Icon'), 'default' => 'ph:truck', 'tab' => 'content'],
             ['name' => 't2_content', 'type' => 'textarea', 'label' => __('Tab 2 - Content (HTML supported)'), 'default' => __('<p>Details about shipping and return policies go here.</p>'), 'tab' => 'content'],
 
             // Tab 3
             ['name' => 't3_title', 'type' => 'text', 'label' => __('Tab 3 - Title'), 'default' => __('Reviews'), 'tab' => 'content'],
+            ['name' => 't3_icon', 'type' => 'icon', 'label' => __('Tab 3 - Icon'), 'default' => 'ph:star', 'tab' => 'content'],
             ['name' => 't3_content', 'type' => 'textarea', 'label' => __('Tab 3 - Content (HTML supported)'), 'default' => __('<p>Customer reviews will appear here.</p>'), 'tab' => 'content'],
 
             // Tab 4
             ['name' => 't4_title', 'type' => 'text', 'label' => __('Tab 4 - Title'), 'default' => '', 'tab' => 'content'],
+            ['name' => 't4_icon', 'type' => 'icon', 'label' => __('Tab 4 - Icon'), 'default' => '', 'tab' => 'content'],
             ['name' => 't4_content', 'type' => 'textarea', 'label' => __('Tab 4 - Content (HTML supported)'), 'default' => '', 'tab' => 'content'],
         ];
     }
@@ -104,6 +108,7 @@ class TabsWidget extends BaseWidget
             if (!empty($settings['t'.$i.'_title'])) {
                 $tabs[] = [
                     'title' => $settings['t'.$i.'_title'],
+                    'icon' => $settings['t'.$i.'_icon'] ?? '',
                     'content' => $settings['t'.$i.'_content'] ?? '',
                 ];
             }
