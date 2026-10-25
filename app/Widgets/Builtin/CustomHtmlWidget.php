@@ -78,9 +78,12 @@ class CustomHtmlWidget extends BaseWidget
     {
         $code = $settings['code'] ?? '';
         $isFullWidth = !empty($settings['full_width']);
-        $mode = in_array($settings['isolation'] ?? 'iframe', ['iframe', 'shadow', 'none'], true)
-            ? $settings['isolation']
-            : 'iframe';
+
+        $mode = $settings['isolation'] ?? 'iframe';
+        if (!in_array($mode, ['iframe', 'shadow', 'none'], true)) {
+            $mode = 'iframe';
+        }
+
         $siteCss = !empty($settings['site_css']);
 
         if (trim($code) === '') {
