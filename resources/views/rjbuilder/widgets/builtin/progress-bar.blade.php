@@ -13,6 +13,10 @@
         0% { transform: translateX(-150%) skewX(-20deg); }
         100% { transform: translateX(150%) skewX(-20deg); }
     }
+    @keyframes rjpPulseGlow-{{ $uid }} {
+        0%, 100% { filter: drop-shadow(0 0 8px var(--c)); }
+        50% { filter: drop-shadow(0 0 16px var(--c)); }
+    }
 
     #{{ $uid }} {
         width: 100%;
@@ -29,7 +33,7 @@
         background: #ffffff;
         border-radius: 32px;
         border: 1px solid #e2e8f0;
-        box-shadow: 0 10px 30px -10px rgba(15,23,42,0.08);
+        box-shadow: 0 10px 40px -10px rgba(15,23,42,0.08);
         overflow: hidden;
     }
 
@@ -69,7 +73,7 @@
 
     #{{ $uid }} .rjp-grid {
         display: grid;
-        gap: 32px 24px;
+        gap: 40px 24px;
         grid-template-columns: 1fr;
         place-items: center;
         position: relative;
@@ -97,6 +101,7 @@
         animation-delay: calc(var(--i, 0) * 80ms);
     }
 
+    /* ---------- Linear (Yastı barlar üçün) ---------- */
     #{{ $uid }} .rjp-head {
         display: flex;
         align-items: center;
@@ -184,6 +189,7 @@
         animation-delay: calc(var(--i, 0) * 80ms + 1s);
     }
 
+    /* ---------- Circles (Dairələr üçün) ---------- */
     #{{ $uid }} .rjp-ring-wrap {
         display: flex;
         flex-direction: column;
@@ -194,12 +200,17 @@
 
     #{{ $uid }} .rjp-ring {
         position: relative;
-        width: 140px;
-        height: 140px;
+        width: 150px;
+        height: 150px;
         margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
-    #{{ $uid }} .rjp-ring svg {
+    #{{ $uid }} .rjp-ring svg.rjp-svg {
+        position: absolute;
+        inset: 0;
         width: 100%;
         height: 100%;
         overflow: visible;
@@ -220,47 +231,57 @@
         stroke: var(--c);
         stroke-dasharray: {{ $opts['circ'] }};
         stroke-dashoffset: {{ $opts['circ'] }};
-        filter: drop-shadow(0 0 8px var(--c));
+        filter: drop-shadow(0 0 6px var(--c));
         transition: stroke-dashoffset 1.6s cubic-bezier(0.22, 1, 0.36, 1);
         transition-delay: calc(var(--i, 0) * 80ms + 100ms);
     }
 
     #{{ $uid }}.rjp-in .rjp-ring-fg {
         stroke-dashoffset: var(--off);
+        animation: rjpPulseGlow-{{ $uid }} 3s ease-in-out infinite alternate;
     }
 
     #{{ $uid }} .rjp-center {
-        position: absolute;
-        inset: 0;
+        position: relative;
+        z-index: 2;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 6px;
+        gap: 4px;
     }
 
     #{{ $uid }} .rjp-center .rjp-ico {
-        width: 48px;
-        height: 48px;
+        width: 44px;
+        height: 44px;
         border-radius: 50%;
-        background: transparent;
+        background: color-mix(in srgb, var(--c) 10%, transparent);
         color: var(--c);
+        margin-bottom: 2px;
+        transition: transform 0.3s ease;
+    }
+
+    #{{ $uid }} .rjp-ring:hover .rjp-center .rjp-ico {
+        transform: scale(1.1) rotate(-5deg);
     }
 
     #{{ $uid }} .rjp-center .rjp-ico svg,
     #{{ $uid }} .rjp-center .rjp-ico img {
-        width: 36px;
-        height: 36px;
+        width: 24px;
+        height: 24px;
     }
 
     #{{ $uid }} .rjp-center .rjp-pct {
-        font-size: 1.5rem;
+        font-size: 1.35rem;
         margin-top: 0;
+        color: var(--c);
     }
 
     #{{ $uid }} .rjp-ring-wrap .rjp-label {
         margin-top: 4px;
-        font-size: 1rem;
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #0f172a;
         text-align: center;
     }
 
@@ -304,13 +325,13 @@
                     @if ($circles)
                         <div class="rjp-ring-wrap">
                             <div class="rjp-ring">
-                                <svg viewBox="0 0 120 120" aria-hidden="true">
+                                <svg class="rjp-svg" viewBox="0 0 120 120" aria-hidden="true">
                                     <circle class="rjp-ring-bg" cx="60" cy="60" r="52"/>
                                     <circle class="rjp-ring-fg" cx="60" cy="60" r="52"/>
                                 </svg>
                                 <div class="rjp-center">
                                     @if ($hasIcon)
-                                        <span class="rjp-ico" aria-hidden="true">{!! rj_icon($item['icon'], 'w-8 h-8') !!}</span>
+                                        <span class="rjp-ico" aria-hidden="true">{!! rj_icon($item['icon'], 'w-6 h-6') !!}</span>
                                     @endif
                                     @if ($opts['percent'])
                                         <span class="rjp-pct"><span class="rjp-num" data-to="{{ $item['value'] }}">{{ $item['value'] }}</span><small>%</small></span>
