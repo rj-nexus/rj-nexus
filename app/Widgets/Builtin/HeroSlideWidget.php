@@ -37,16 +37,52 @@ class HeroSlideWidget extends BaseWidget
             [
                 'name' => 'height',
                 'type' => 'select',
-                'label' => __('Section Height'),
-                'default' => 'min-h-[70vh]',
+                'label' => __('Hero Size'),
+                'default' => 'aspect-[21/9]',
                 'tab' => 'content',
                 'options' => [
-                    'min-h-[40vh]' => __('Small (40vh)'),
-                    'min-h-[60vh]' => __('Medium (60vh)'),
-                    'min-h-[70vh]' => __('Large (70vh)'),
-                    'min-h-[90vh]' => __('Extra Large (90vh)'),
+                    'aspect-video' => __('Standard (16:9)'),
+                    'aspect-[21/9]' => __('Cinematic (21:9)'),
+                    'h-[500px]' => __('Fixed Medium (500px)'),
+                    'h-[700px]' => __('Fixed Large (700px)'),
                     'min-h-screen' => __('Full Screen'),
                 ]
+            ],
+            [
+                'name' => 'image_position',
+                'type' => 'select',
+                'label' => __('Image Focus Point'),
+                'default' => 'center',
+                'tab' => 'style',
+                'options' => [
+                    'center' => __('Center'),
+                    'top' => __('Top'),
+                    'bottom' => __('Bottom'),
+                ]
+            ],
+            [
+                'name' => 'image_blur',
+                'type' => 'range',
+                'label' => __('Image Blur (px)'),
+                'default' => 0,
+                'min' => 0,
+                'max' => 20,
+                'tab' => 'style',
+            ],
+            [
+                'name' => 'transition_duration',
+                'type' => 'number',
+                'label' => __('Slide Transition Speed (ms)'),
+                'default' => 1000,
+                'tab' => 'style',
+            ],
+            [
+                'name' => 'autoplay_speed',
+                'type' => 'number',
+                'label' => __('Autoplay Delay (ms)'),
+                'default' => 5000,
+                'tab' => 'style',
+                'help' => __('Set to 0 to disable autoplay.')
             ],
 
             // Slide 1
@@ -71,14 +107,6 @@ class HeroSlideWidget extends BaseWidget
             ['name' => 's3_btn_url', 'type' => 'text', 'label' => __('Slide 3 - Button URL'), 'default' => '/about', 'tab' => 'content'],
 
             // Global Style
-            [
-                'name' => 'autoplay_speed',
-                'type' => 'number',
-                'label' => __('Autoplay Speed (ms)'),
-                'default' => 5000,
-                'tab' => 'style',
-                'help' => __('Set to 0 to disable autoplay.')
-            ],
             ['name' => 'overlay_color', 'type' => 'color', 'label' => __('Overlay Color'), 'default' => '#000000', 'tab' => 'style'],
             ['name' => 'overlay_opacity', 'type' => 'range', 'label' => __('Overlay Opacity (%)'), 'default' => 40, 'min' => 0, 'max' => 100, 'tab' => 'style'],
             ['name' => 'title_color', 'type' => 'color', 'label' => __('Title Color'), 'default' => '#ffffff', 'tab' => 'style'],
