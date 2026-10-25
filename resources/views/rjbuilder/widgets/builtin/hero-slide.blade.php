@@ -1,6 +1,9 @@
 @php
-    $height = $settings['height'] ?? 'h-[70vh]';
+    $height = $settings['height'] ?? 'aspect-[21/9]';
+    $transitionDuration = (int)($settings['transition_duration'] ?? 1000);
     $autoplaySpeed = (int)($settings['autoplay_speed'] ?? 5000);
+    $imageBlur = (int)($settings['image_blur'] ?? 0);
+    $imagePosition = $settings['image_position'] ?? 'center';
 
     $overlayColor = $settings['overlay_color'] ?? '#000000';
     $overlayOpacity = ($settings['overlay_opacity'] ?? 40) / 100;
@@ -15,16 +18,22 @@
 @endphp
 
 <style>
-    /* Ken Burns Animasiyası (Şəkil yavaş-yavaş yaxınlaşır) */
-    @keyframes kenburns {
+    @keyframes kenburns-{{ $uid }} {
         0% { transform: scale(1); }
-        100% { transform: scale(1.15); }
+        100% { transform: scale(1.1); }
+    }
+
+    #{{ $uid }} .rj-slide-bg {
+        object-position: {{ $imagePosition }};
+        filter: blur({{ $imageBlur }}px);
+        transition: transform 6s ease-out, opacity {{ $transitionDuration }}ms ease-in-out;
     }
 
     #{{ $uid }} .rj-slide {
         opacity: 0;
         visibility: hidden;
-        transition: opacity 1s ease-in-out, visibility 1s ease-in-out;
+        transition: opacity {{ $transitionDuration }}ms ease-in-out, visibility {{ $transitionDuration }}ms ease-in-out;
+        background-color: #000;
     }
 
     #{{ $uid }} .rj-slide.is-active {
@@ -34,13 +43,12 @@
     }
 
     #{{ $uid }} .rj-slide.is-active .rj-slide-bg {
-        animation: kenburns 12s ease-out forwards;
+        animation: kenburns-{{ $uid }} 8s ease-out forwards;
     }
 
-    /* Yazıların zərif çıxışı */
     #{{ $uid }} .rj-slide-content {
         opacity: 0;
-        transform: translateY(30px);
+        transform: translateY(20px);
         transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
 
@@ -56,7 +64,7 @@
     #{{ $uid }} .rj-hero-btn {
         background-color: {{ $btnBg }} !important;
         color: {{ $btnText }} !important;
-        transition: all 0.4s ease;
+        transition: all 0.3s ease;
     }
     #{{ $uid }} .rj-hero-btn:hover {
         background-color: {{ $btnHoverBg }} !important;
@@ -65,17 +73,16 @@
         box-shadow: 0 10px 20px rgba(0,0,0,0.2);
     }
 
-    /* Naviqasiya Nöqtələri */
     #{{ $uid }} .rj-dot {
         width: 10px;
         height: 10px;
         border-radius: 999px;
         background-color: rgba(255,255,255,0.4);
-        transition: all 0.4s ease;
+        transition: all 0.3s ease;
         cursor: pointer;
     }
     #{{ $uid }} .rj-dot.is-active {
-        width: 32px;
+        width: 30px;
         background-color: #fff;
     }
 </style>
@@ -86,13 +93,10 @@
 
     @foreach ($slides as $index => $slide)
         <div class="rj-slide absolute inset-0 {{ $index === 0 ? 'is-active' : '' }}" data-index="{{ $index }}">
-            <!-- Şəkil və Ken Burns -->
-            <img src="{{ $slide['image'] }}" class="rj-slide-bg absolute inset-0 w-full h-full object-cover object-center" alt="">
+            <img src="{{ $slide['image'] }}" class="rj-slide-bg absolute inset-0 w-full h-full object-cover" alt="">
 
-            <!-- Overlay (Qaraltı) -->
             <div class="absolute inset-0" style="background-color: {{ $overlayColor }}; opacity: {{ $overlayOpacity }};"></div>
 
-            <!-- Məzmun -->
             <div class="relative z-20 h-full flex flex-col items-center justify-center text-center px-4 max-w-5xl mx-auto space-y-6">
                 @if(!empty($slide['title']))
                     <h1 class="rj-slide-content text-4xl md:text-5xl lg:text-7xl font-extrabold tracking-tight leading-tight" style="color: {{ $titleColor }};">
@@ -118,7 +122,6 @@
     @endforeach
 
     @if(count($slides) > 1)
-        <!-- Oxlar (Hover zamanı görünür) -->
         <div class="absolute inset-y-0 left-0 right-0 flex items-center justify-between px-4 z-30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
             <button class="rj-prev p-3 rounded-full bg-black/20 text-white hover:bg-black/60 backdrop-blur-md transition-all focus:outline-none pointer-events-auto">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
@@ -128,7 +131,6 @@
             </button>
         </div>
 
-        <!-- Nöqtələr -->
         <div class="absolute bottom-8 left-0 right-0 flex justify-center gap-3 z-30">
             @foreach ($slides as $index => $slide)
                 <button class="rj-dot {{ $index === 0 ? 'is-active' : '' }}" data-slide-to="{{ $index }}"></button>
@@ -156,23 +158,34 @@
         if (slides.length <= 1) return;
 
         function goTo(index) {
-            slides.forEach(s => s.classList.remove('is-active'));
-            dots.forEach(d => d.classList.remove('is-active'));
+            slides.forEach((s, i) => {
+                if (i === index) {
+                    s.classList.add('is-active');
+                } else {
+                    s.classList.remove('is-active');
+                }
+            });
 
-            activeIndex = (index + slides.length) % slides.length;
+            dots.forEach((d, i) => {
+                if (i === index) {
+                    d.classList.add('is-active');
+                } else {
+                    d.classList.remove('is-active');
+                }
+            });
 
-            slides[activeIndex].classList.add('is-active');
-            if (dots[activeIndex]) dots[activeIndex].classList.add('is-active');
+            activeIndex = index;
 
-            // Reset Ken Burns animation
             const bg = slides[activeIndex].querySelector('.rj-slide-bg');
-            bg.style.animation = 'none';
-            bg.offsetHeight; // trigger reflow
-            bg.style.animation = null;
+            if (bg) {
+                bg.style.animation = 'none';
+                bg.offsetHeight;
+                bg.style.animation = null;
+            }
         }
 
-        function next() { goTo(activeIndex + 1); }
-        function prev() { goTo(activeIndex - 1); }
+        function next() { goTo((activeIndex + 1) % slides.length); }
+        function prev() { goTo((activeIndex - 1 + slides.length) % slides.length); }
 
         if (nextBtn) nextBtn.addEventListener('click', () => { next(); resetTimer(); });
         if (prevBtn) prevBtn.addEventListener('click', () => { prev(); resetTimer(); });
@@ -201,7 +214,6 @@
         startTimer();
     }
 
-    // Builder üçün dərhal işlədirik, Frontend üçün DOM yüklənəndə
     initSlider_{{ str_replace('-', '_', $uid) }}();
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initSlider_{{ str_replace('-', '_', $uid) }});
