@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Hooks\HookRegistry;
 use App\Services\PluginManager;
 use App\Services\ThemeManager;
+use App\Services\IconService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -13,9 +14,14 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(ThemeManager::class, fn($app) => new ThemeManager());
         $this->app->singleton(PluginManager::class, fn($app) => new PluginManager());
+        $this->app->singleton(IconService::class);
         $this->app->singleton(HookRegistry::class);
 
         require_once app_path('Helpers/plugins.php');
+
+        if (file_exists(app_path('Helpers/icons.php'))) {
+            require_once app_path('Helpers/icons.php');
+        }
     }
 
     public function boot(): void
