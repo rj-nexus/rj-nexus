@@ -1,11 +1,12 @@
 @once
 <style>
-    @keyframes rjAlertFade     { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes rjAlertSlide    { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: none; } }
-    @keyframes rjAlertZoom     { from { opacity: 0; transform: scale(.92); } to { opacity: 1; transform: none; } }
-    @keyframes rjAlertShake    { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-6px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(3px); } }
-    @keyframes rjAlertPulse    { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); } }
-    @keyframes rjAlertProgress { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+    @keyframes rjAlertPop   { 0% { opacity: 0; transform: translateY(14px) scale(.85); } 60% { opacity: 1; transform: translateY(-3px) scale(1.03); } 100% { opacity: 1; transform: none; } }
+    @keyframes rjAlertSlide { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: none; } }
+    @keyframes rjAlertFade  { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes rjAlertIcon  { 0% { transform: scale(0) rotate(-25deg); } 65% { transform: scale(1.18) rotate(6deg); } 100% { transform: scale(1) rotate(0); } }
+    @keyframes rjAlertShine { from { transform: translateX(-130%) skewX(-20deg); } to { transform: translateX(260%) skewX(-20deg); } }
+    @keyframes rjAlertRing  { 0% { transform: scale(1); opacity: .6; } 100% { transform: scale(1.9); opacity: 0; } }
+    @keyframes rjAlertBar   { from { transform: scaleX(1); } to { transform: scaleX(0); } }
 </style>
 @endonce
 
@@ -16,96 +17,101 @@
         --al-strong: {{ $cfg['strong'] }};
         --al-on: {{ $cfg['on_color'] }};
         --al-duration: {{ $cfg['auto_dismiss'] }}s;
+        display: flex;
+        justify-content: center;
+        padding: 1rem;
     }
 
-    /* Box */
-    #{{ $uid }} .al-box {
+    /* Kart: kompakt, mərkəzdə */
+    #{{ $uid }} .al-card {
         position: relative;
         overflow: hidden;
+        width: 100%;
+        max-width: 380px;
         display: flex;
-        align-items: flex-start;
-        gap: 1rem;
-        padding: 1.25rem;
+        align-items: center;
+        gap: .875rem;
+        padding: 1rem 1.125rem;
+        border-radius: 1.25rem;
         border: 1px solid transparent;
-        border-radius: 1rem;
-        box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 10px 25px -15px rgba(var(--al-rgb), .5);
+        box-shadow: 0 12px 30px -12px rgba(var(--al-rgb), .45), 0 2px 6px rgba(0,0,0,.05);
         transition: opacity .35s ease, transform .35s ease;
     }
-    #{{ $uid }} .al-box.al-hide {
-        opacity: 0;
-        transform: translateY(-8px) scale(.98);
-    }
+    #{{ $uid }} .al-card.al-hide { opacity: 0; transform: translateY(-8px) scale(.96); }
 
-    /* Entrance animations (backwards = animation never overrides the .al-hide state) */
-    #{{ $uid }} .al-anim-fade  { animation: rjAlertFade .5s ease-out backwards; }
-    #{{ $uid }} .al-anim-slide { animation: rjAlertSlide .6s cubic-bezier(.2,.8,.2,1) backwards; }
-    #{{ $uid }} .al-anim-zoom  { animation: rjAlertZoom .5s cubic-bezier(.2,.8,.2,1) backwards; }
-    #{{ $uid }} .al-anim-shake { animation: rjAlertShake .6s ease-in-out backwards; }
-
-    /* Styles */
+    /* Üslublar */
     #{{ $uid }} .al-soft {
-        background: rgba(var(--al-rgb), .1);
-        border-color: rgba(var(--al-rgb), .25);
+        background: linear-gradient(135deg, rgba(var(--al-rgb), .16), rgba(var(--al-rgb), .06));
+        border-color: rgba(var(--al-rgb), .28);
     }
     #{{ $uid }} .al-outline {
-        background: transparent;
-        border-color: var(--al-color);
+        background: rgba(255,255,255,.6);
+        border: 1.5px solid var(--al-color);
+    }
+    #{{ $uid }} .al-filled {
+        background: linear-gradient(135deg, var(--al-color), rgba(var(--al-rgb), .8));
+        color: var(--al-on);
+        box-shadow: 0 14px 32px -12px rgba(var(--al-rgb), .75);
     }
     #{{ $uid }} .al-soft .al-title,
     #{{ $uid }} .al-outline .al-title { color: var(--al-strong); }
-
     #{{ $uid }} .al-soft .al-text,
-    #{{ $uid }} .al-outline .al-text { color: var(--al-strong); opacity: .85; }
+    #{{ $uid }} .al-outline .al-text  { color: var(--al-strong); opacity: .85; }
+    #{{ $uid }} .al-filled .al-title  { color: var(--al-on); }
+    #{{ $uid }} .al-filled .al-text   { color: var(--al-on); opacity: .9; }
 
-    #{{ $uid }} .al-filled {
-        background: var(--al-color);
-        border-color: transparent;
-        color: var(--al-on);
-    }
-    #{{ $uid }} .al-filled .al-title { color: var(--al-on); }
-    #{{ $uid }} .al-filled .al-text  { color: var(--al-on); opacity: .9; }
+    /* Mətn */
+    #{{ $uid }} .al-body { flex: 1; min-width: 0; }
+    #{{ $uid }} .al-title { font-size: .95rem; font-weight: 700; line-height: 1.3; margin: 0 0 .15rem; }
+    #{{ $uid }} .al-text  { font-size: .8125rem; line-height: 1.5; }
 
-    /* Typography */
-    #{{ $uid }} .al-title { font-size: 1rem; font-weight: 700; line-height: 1.3; margin-bottom: .25rem; }
-    #{{ $uid }} .al-text  { font-size: .875rem; line-height: 1.6; }
-
-    /* Icon */
+    /* İkon */
     #{{ $uid }} .al-icon {
+        position: relative;
         flex-shrink: 0;
-        display: flex;
-        padding: .625rem;
-        border-radius: .75rem;
-        line-height: 0;
-        color: var(--al-color);
-        background: rgba(var(--al-rgb), .15);
+        width: 2.5rem;
+        height: 2.5rem;
+        display: grid;
+        place-items: center;
+        border-radius: 999px;
+        background: var(--al-color);
+        color: #fff;
+        box-shadow: 0 6px 16px -4px rgba(var(--al-rgb), .6);
     }
-    #{{ $uid }} .al-outline .al-icon { background: rgba(var(--al-rgb), .08); }
-    #{{ $uid }} .al-filled .al-icon {
-        color: var(--al-on);
-        background: color-mix(in srgb, var(--al-on) 18%, transparent);
-    }
-    #{{ $uid }} .al-pulse { animation: rjAlertPulse 2s ease-in-out infinite; }
+    #{{ $uid }} .al-filled .al-icon { background: rgba(255,255,255,.22); color: var(--al-on); box-shadow: none; }
+    #{{ $uid }} .al-icon svg { width: 1.25rem; height: 1.25rem; }
 
-    /* Close button */
+    /* Pulse halqası */
+    #{{ $uid }} .al-pulse::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: var(--al-color);
+        animation: rjAlertRing 1.8s ease-out infinite;
+    }
+
+    /* Bağlama düyməsi */
     #{{ $uid }} .al-close {
-        flex-shrink: 0;
-        margin-left: auto;
+        position: absolute;
+        top: .5rem;
+        right: .5rem;
         padding: .25rem;
+        border-radius: 999px;
         color: var(--al-color);
-        opacity: .55;
+        opacity: .5;
         transition: opacity .2s ease, transform .3s ease;
     }
     #{{ $uid }} .al-close:hover { opacity: 1; transform: rotate(90deg); }
     #{{ $uid }} .al-filled .al-close { color: var(--al-on); }
 
-    /* CTA button */
+    /* CTA */
     #{{ $uid }} .al-btn {
         display: inline-flex;
-        align-items: center;
-        margin-top: .75rem;
-        padding: .5rem 1rem;
-        border-radius: .6rem;
-        font-size: .8rem;
+        margin-top: .6rem;
+        padding: .4rem .9rem;
+        border-radius: 999px;
+        font-size: .75rem;
         font-weight: 600;
         text-decoration: none;
         background: var(--al-color);
@@ -115,39 +121,51 @@
     #{{ $uid }} .al-btn:hover { transform: translateY(-1px); filter: brightness(1.08); }
     #{{ $uid }} .al-filled .al-btn { background: var(--al-on); color: var(--al-color); }
 
-    /* Auto-hide progress bar */
+    /* Parıltı (bir dəfə) */
+    #{{ $uid }} .al-card::after {
+        content: "";
+        position: absolute;
+        top: 0; bottom: 0; left: 0;
+        width: 45%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,.4), transparent);
+        pointer-events: none;
+        animation: rjAlertShine 1.1s ease .45s 1 both;
+    }
+
+    /* Giriş animasiyaları */
+    #{{ $uid }} .al-anim-pop   { animation: rjAlertPop .6s cubic-bezier(.34,1.4,.64,1) backwards; }
+    #{{ $uid }} .al-anim-slide { animation: rjAlertSlide .5s cubic-bezier(.2,.8,.2,1) backwards; }
+    #{{ $uid }} .al-anim-fade  { animation: rjAlertFade .4s ease-out backwards; }
+    #{{ $uid }} .al-anim-pop .al-icon { animation: rjAlertIcon .6s .15s cubic-bezier(.34,1.56,.64,1) backwards; }
+    #{{ $uid }} .al-anim-none::after { display: none; }
+
+    /* Auto-hide progress */
     #{{ $uid }} .al-progress {
         position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 0;
+        left: 0; right: 0; bottom: 0;
         height: 3px;
         background: var(--al-color);
         opacity: .6;
         transform-origin: left;
-        animation: rjAlertProgress var(--al-duration) linear forwards;
+        animation: rjAlertBar var(--al-duration) linear forwards;
     }
     #{{ $uid }} .al-filled .al-progress { background: var(--al-on); }
 
-    /* Responsive + accessibility */
-    @media (max-width: 480px) {
-        #{{ $uid }} .al-box { padding: 1rem; gap: .75rem; }
-    }
     @media (prefers-reduced-motion: reduce) {
         #{{ $uid }}, #{{ $uid }} * { animation: none !important; transition: none !important; }
     }
 </style>
 
-<div id="{{ $uid }}" class="w-full max-w-4xl mx-auto my-6" role="alert" aria-live="polite">
-    <div class="al-box al-{{ $cfg['style'] }} al-anim-{{ $cfg['animation'] }}">
+<div id="{{ $uid }}" role="alert" aria-live="polite">
+    <div class="al-card al-{{ $cfg['style'] }} al-anim-{{ $cfg['animation'] }}">
 
         @if($cfg['show_icon'] && $cfg['icon'])
             <div class="al-icon {{ $cfg['pulse_icon'] ? 'al-pulse' : '' }}">
-                {!! rj_icon($cfg['icon'], 'w-6 h-6') !!}
+                {!! rj_icon($cfg['icon'], 'w-5 h-5') !!}
             </div>
         @endif
 
-        <div class="flex-1 min-w-0">
+        <div class="al-body">
             @if($cfg['title'])
                 <h4 class="al-title">{{ $cfg['title'] }}</h4>
             @endif
@@ -163,7 +181,7 @@
 
         @if($cfg['dismissible'])
             <button type="button" class="al-close" aria-label="Close">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
             </button>
@@ -180,7 +198,7 @@
     var el = document.getElementById(@json($uid));
     if (!el) return;
 
-    var box        = el.querySelector('.al-box');
+    var card       = el.querySelector('.al-card');
     var storageKey = @json($cfg['remember'] ? 'rj_alert_dismissed_' . $cfg['remember_key'] : null);
     var autoHide   = @json((int) $cfg['auto_dismiss']);
 
@@ -192,9 +210,8 @@
     } catch (e) {}
 
     function hide(userClosed) {
-        if (box.classList.contains('al-hide')) return;
-        box.classList.add('al-hide');
-
+        if (card.classList.contains('al-hide')) return;
+        card.classList.add('al-hide');
         if (userClosed && storageKey) {
             try { localStorage.setItem(storageKey, '1'); } catch (e) {}
         }
@@ -202,12 +219,8 @@
     }
 
     var closeBtn = el.querySelector('.al-close');
-    if (closeBtn) {
-        closeBtn.addEventListener('click', function () { hide(true); });
-    }
+    if (closeBtn) closeBtn.addEventListener('click', function () { hide(true); });
 
-    if (autoHide > 0) {
-        setTimeout(function () { hide(false); }, autoHide * 1000);
-    }
+    if (autoHide > 0) setTimeout(function () { hide(false); }, autoHide * 1000);
 })();
 </script>

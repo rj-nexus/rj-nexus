@@ -21,7 +21,7 @@ class AlertWidget extends BaseWidget
     ];
 
     private const STYLES     = ['soft', 'outline', 'filled'];
-    private const ANIMATIONS = ['none', 'fade', 'slide', 'zoom', 'shake'];
+    private const ANIMATIONS = ['none', 'fade', 'slide', 'pop'];
 
     public function id(): string
     {
@@ -86,20 +86,18 @@ class AlertWidget extends BaseWidget
                 ],
             ],
             [
-                'name'    => 'animation',
-                'type'    => 'select',
-                'label'   => __('Entrance Animation'),
-                'default' => 'slide',
-                'tab'     => 'style',
-                'options' => [
-                    'none'  => __('None'),
-                    'fade'  => __('Fade'),
-                    'slide' => __('Slide Down'),
-                    'zoom'  => __('Zoom'),
-                    'shake' => __('Shake'),
-                ],
-            ],
-
+    'name'    => 'animation',
+    'type'    => 'select',
+    'label'   => __('Entrance Animation'),
+    'default' => 'pop',
+    'tab'     => 'style',
+    'options' => [
+        'none'  => __('None'),
+        'fade'  => __('Fade'),
+        'slide' => __('Slide Down'),
+        'pop'   => __('Pop (Bouncy)'),
+    ],
+],
             // ---- CONTENT TAB ----
             [
                 'name'    => 'icon',
@@ -195,7 +193,7 @@ class AlertWidget extends BaseWidget
     {
         $type      = array_key_exists($s['type'] ?? '', self::TYPE_COLORS) ? $s['type'] : 'info';
         $style     = in_array($s['style'] ?? '', self::STYLES, true) ? $s['style'] : 'soft';
-        $animation = in_array($s['animation'] ?? '', self::ANIMATIONS, true) ? $s['animation'] : 'slide';
+        $animation = in_array($s['animation'] ?? '', self::ANIMATIONS, true) ? $s['animation'] : 'pop';
 
         $color = $this->normalizeHex($s['custom_color'] ?? '', self::TYPE_COLORS[$type]);
 
