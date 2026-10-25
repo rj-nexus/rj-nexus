@@ -1,6 +1,48 @@
 <script>
 function builderFields() {
     return {
+        iconPickerOpen: false,
+        iconTargetField: null,
+        iconSearch: '',
+        iconsLoading: false,
+        iconList: [],
+
+        openIconPicker(fieldName) {
+            this.iconTargetField = fieldName;
+            this.iconSearch = '';
+            this.iconList = [];
+            this.iconPickerOpen = true;
+            this.searchIcons();
+        },
+
+        selectIcon(iconName) {
+            if (this.iconTargetField) {
+                this.updateSetting(this.iconTargetField, iconName);
+            }
+            this.iconPickerOpen = false;
+        },
+
+        getIconSvg(iconName) {
+            if (!iconName) return '';
+            let urlName = iconName.replace(':', '/');
+            return '<img src="https://api.iconify.design/' + urlName + '.svg?color=%2364748b" style="width:100%; height:100%; object-fit:contain;" />';
+        },
+
+        async searchIcons() {
+            this.iconsLoading = true;
+            try {
+                const q = this.iconSearch || 'home';
+                const res = await fetch('https://api.iconify.design/search?query=' + encodeURIComponent(q) + '&limit=64');
+                const data = await res.json();
+                this.iconList = data.icons || [];
+            } catch (e) {
+                console.error(e);
+                this.iconList = [];
+            } finally {
+                this.iconsLoading = false;
+            }
+        },
+
         dimDefaults() {
             return { top: '', right: '', bottom: '', left: '', unit: 'px', linked: false };
         },
