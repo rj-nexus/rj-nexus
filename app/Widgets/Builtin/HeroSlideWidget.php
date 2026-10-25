@@ -9,11 +9,23 @@ class HeroSlideWidget extends BaseWidget
     private const MAX_SLIDES = 5;
 
     private const HEIGHTS = [
-        'aspect-video'  => 'aspect-ratio:16/9;min-height:420px;max-height:900px;',
-        'aspect-[21/9]' => 'aspect-ratio:21/9;min-height:420px;max-height:900px;',
+        'aspect-video'  => 'aspect-ratio:16/9;min-height:460px;max-height:900px;',
+        'aspect-[21/9]' => 'aspect-ratio:21/9;min-height:460px;max-height:900px;',
         'h-[500px]'     => 'height:500px;',
         'h-[700px]'     => 'height:700px;',
         'min-h-screen'  => 'min-height:100vh;min-height:100svh;',
+    ];
+
+    private const TITLE_SIZES = [
+        'sm' => 'clamp(1.75rem,4vw,3.25rem)',
+        'md' => 'clamp(2rem,5.5vw,4.5rem)',
+        'lg' => 'clamp(2.5rem,7.5vw,6.25rem)',
+    ];
+
+    private const BTN_RADIUS = [
+        'sm' => '4px',
+        'md' => '12px',
+        'pill' => '999px',
     ];
 
     public function id(): string
@@ -38,7 +50,7 @@ class HeroSlideWidget extends BaseWidget
 
     public function description(): string
     {
-        return __('A full-width slider hero with up to 5 slides, text overlays, CTA buttons, swipe and autoplay controls.');
+        return __('A full-width hero slider with up to 5 slides, per-slide text position, animated text, CTA buttons, swipe and autoplay controls.');
     }
 
     private function yesNo(): array
@@ -64,21 +76,10 @@ class HeroSlideWidget extends BaseWidget
                 ],
             ],
             [
-                'name' => 'effect',
-                'type' => 'select',
-                'label' => __('Transition Effect'),
-                'default' => 'fade',
-                'tab' => 'style',
-                'options' => [
-                    'fade' => __('Fade'),
-                    'slide' => __('Slide'),
-                ],
-            ],
-            [
                 'name' => 'text_align',
                 'type' => 'select',
-                'label' => __('Text Alignment'),
-                'default' => 'center',
+                'label' => __('Default Text Position (horizontal)'),
+                'default' => 'left',
                 'tab' => 'style',
                 'options' => [
                     'left' => __('Left'),
@@ -89,12 +90,60 @@ class HeroSlideWidget extends BaseWidget
             [
                 'name' => 'content_valign',
                 'type' => 'select',
-                'label' => __('Content Vertical Position'),
+                'label' => __('Default Text Position (vertical)'),
                 'default' => 'center',
                 'tab' => 'style',
                 'options' => [
+                    'top' => __('Top'),
                     'center' => __('Center'),
                     'bottom' => __('Bottom'),
+                ],
+            ],
+            [
+                'name' => 'content_style',
+                'type' => 'select',
+                'label' => __('Content Style'),
+                'default' => 'plain',
+                'tab' => 'style',
+                'options' => [
+                    'plain' => __('Plain text'),
+                    'glass' => __('Glass card'),
+                ],
+            ],
+            [
+                'name' => 'title_size',
+                'type' => 'select',
+                'label' => __('Title Size'),
+                'default' => 'md',
+                'tab' => 'style',
+                'options' => [
+                    'sm' => __('Small'),
+                    'md' => __('Medium'),
+                    'lg' => __('Large'),
+                ],
+            ],
+            [
+                'name' => 'text_animation',
+                'type' => 'select',
+                'label' => __('Text Animation'),
+                'default' => 'rise',
+                'tab' => 'style',
+                'options' => [
+                    'rise' => __('Rise'),
+                    'fade' => __('Fade'),
+                    'zoom' => __('Zoom'),
+                    'blur' => __('Blur in'),
+                ],
+            ],
+            [
+                'name' => 'effect',
+                'type' => 'select',
+                'label' => __('Transition Effect'),
+                'default' => 'fade',
+                'tab' => 'style',
+                'options' => [
+                    'fade' => __('Fade'),
+                    'slide' => __('Slide'),
                 ],
             ],
             [
@@ -119,6 +168,7 @@ class HeroSlideWidget extends BaseWidget
                 'tab' => 'style',
             ],
             ['name' => 'kenburns', 'type' => 'select', 'label' => __('Zoom Animation (Ken Burns)'), 'default' => '1', 'tab' => 'style', 'options' => $this->yesNo()],
+            ['name' => 'parallax', 'type' => 'select', 'label' => __('Mouse Parallax on Text'), 'default' => '1', 'tab' => 'style', 'options' => $this->yesNo()],
             [
                 'name' => 'transition_duration',
                 'type' => 'number',
@@ -136,27 +186,80 @@ class HeroSlideWidget extends BaseWidget
             ],
             ['name' => 'pause_on_hover', 'type' => 'select', 'label' => __('Pause on Hover'), 'default' => '1', 'tab' => 'style', 'options' => $this->yesNo()],
             ['name' => 'show_arrows', 'type' => 'select', 'label' => __('Show Arrows'), 'default' => '1', 'tab' => 'style', 'options' => $this->yesNo()],
-            ['name' => 'show_dots', 'type' => 'select', 'label' => __('Show Dots'), 'default' => '1', 'tab' => 'style', 'options' => $this->yesNo()],
+            ['name' => 'show_dots', 'type' => 'select', 'label' => __('Show Navigation'), 'default' => '1', 'tab' => 'style', 'options' => $this->yesNo()],
+            [
+                'name' => 'dots_style',
+                'type' => 'select',
+                'label' => __('Navigation Style'),
+                'default' => 'dots',
+                'tab' => 'style',
+                'options' => [
+                    'dots' => __('Dots'),
+                    'lines' => __('Lines'),
+                ],
+            ],
             ['name' => 'show_progress', 'type' => 'select', 'label' => __('Show Progress Bar'), 'default' => '1', 'tab' => 'style', 'options' => $this->yesNo()],
-            ['name' => 'show_counter', 'type' => 'select', 'label' => __('Show Slide Counter'), 'default' => '0', 'tab' => 'style', 'options' => $this->yesNo()],
+            ['name' => 'show_counter', 'type' => 'select', 'label' => __('Show Slide Counter'), 'default' => '1', 'tab' => 'style', 'options' => $this->yesNo()],
             ['name' => 'btn_new_tab', 'type' => 'select', 'label' => __('Open Buttons in New Tab'), 'default' => '0', 'tab' => 'style', 'options' => $this->yesNo()],
+            [
+                'name' => 'btn_radius',
+                'type' => 'select',
+                'label' => __('Button Shape'),
+                'default' => 'pill',
+                'tab' => 'style',
+                'options' => [
+                    'sm' => __('Square'),
+                    'md' => __('Rounded'),
+                    'pill' => __('Pill'),
+                ],
+            ],
         ];
 
         $slideDefaults = [
-            1 => ['title' => __('Welcome to Our Store'), 'subtitle' => __('Discover our latest collection.'), 'btn_text' => __('Shop Now'), 'btn_url' => '/shop'],
-            2 => ['title' => '', 'subtitle' => '', 'btn_text' => __('View Collection'), 'btn_url' => '/shop'],
-            3 => ['title' => '', 'subtitle' => '', 'btn_text' => __('Learn More'), 'btn_url' => '/about'],
-            4 => ['title' => '', 'subtitle' => '', 'btn_text' => __('Learn More'), 'btn_url' => '/about'],
-            5 => ['title' => '', 'subtitle' => '', 'btn_text' => __('Learn More'), 'btn_url' => '/about'],
+            1 => ['eyebrow' => __('New Collection'), 'title' => __('Welcome to *Our Store*'), 'subtitle' => __('Discover our latest collection.'), 'btn_text' => __('Shop Now'), 'btn_url' => '/shop'],
+            2 => ['eyebrow' => '', 'title' => '', 'subtitle' => '', 'btn_text' => __('View Collection'), 'btn_url' => '/shop'],
+            3 => ['eyebrow' => '', 'title' => '', 'subtitle' => '', 'btn_text' => __('Learn More'), 'btn_url' => '/about'],
+            4 => ['eyebrow' => '', 'title' => '', 'subtitle' => '', 'btn_text' => __('Learn More'), 'btn_url' => '/about'],
+            5 => ['eyebrow' => '', 'title' => '', 'subtitle' => '', 'btn_text' => __('Learn More'), 'btn_url' => '/about'],
         ];
 
         for ($i = 1; $i <= self::MAX_SLIDES; $i++) {
             $d = $slideDefaults[$i];
+
             $fields[] = ['name' => "s{$i}_image", 'type' => 'media', 'label' => __('Slide :n - Image', ['n' => $i]), 'default' => '', 'tab' => 'content'];
-            $fields[] = ['name' => "s{$i}_title", 'type' => 'text', 'label' => __('Slide :n - Title', ['n' => $i]), 'default' => $d['title'], 'tab' => 'content'];
+            $fields[] = ['name' => "s{$i}_eyebrow", 'type' => 'text', 'label' => __('Slide :n - Small Label', ['n' => $i]), 'default' => $d['eyebrow'], 'tab' => 'content'];
+            $fields[] = ['name' => "s{$i}_title", 'type' => 'text', 'label' => __('Slide :n - Title', ['n' => $i]), 'default' => $d['title'], 'tab' => 'content', 'help' => __('Wrap a word in *asterisks* to highlight it.')];
             $fields[] = ['name' => "s{$i}_subtitle", 'type' => 'textarea', 'label' => __('Slide :n - Subtitle', ['n' => $i]), 'default' => $d['subtitle'], 'tab' => 'content'];
             $fields[] = ['name' => "s{$i}_btn_text", 'type' => 'text', 'label' => __('Slide :n - Button Text', ['n' => $i]), 'default' => $d['btn_text'], 'tab' => 'content'];
             $fields[] = ['name' => "s{$i}_btn_url", 'type' => 'text', 'label' => __('Slide :n - Button URL', ['n' => $i]), 'default' => $d['btn_url'], 'tab' => 'content'];
+            $fields[] = ['name' => "s{$i}_btn2_text", 'type' => 'text', 'label' => __('Slide :n - Second Button Text', ['n' => $i]), 'default' => '', 'tab' => 'content'];
+            $fields[] = ['name' => "s{$i}_btn2_url", 'type' => 'text', 'label' => __('Slide :n - Second Button URL', ['n' => $i]), 'default' => '', 'tab' => 'content'];
+            $fields[] = [
+                'name' => "s{$i}_align",
+                'type' => 'select',
+                'label' => __('Slide :n - Text Position (horizontal)', ['n' => $i]),
+                'default' => 'inherit',
+                'tab' => 'content',
+                'options' => [
+                    'inherit' => __('Use default'),
+                    'left' => __('Left'),
+                    'center' => __('Center'),
+                    'right' => __('Right'),
+                ],
+            ];
+            $fields[] = [
+                'name' => "s{$i}_valign",
+                'type' => 'select',
+                'label' => __('Slide :n - Text Position (vertical)', ['n' => $i]),
+                'default' => 'inherit',
+                'tab' => 'content',
+                'options' => [
+                    'inherit' => __('Use default'),
+                    'top' => __('Top'),
+                    'center' => __('Center'),
+                    'bottom' => __('Bottom'),
+                ],
+            ];
         }
 
         return array_merge($fields, [
@@ -164,26 +267,31 @@ class HeroSlideWidget extends BaseWidget
                 'name' => 'overlay_style',
                 'type' => 'select',
                 'label' => __('Overlay Style'),
-                'default' => 'solid',
+                'default' => 'side',
                 'tab' => 'style',
                 'options' => [
                     'solid' => __('Solid'),
                     'gradient' => __('Gradient (bottom to top)'),
+                    'side' => __('Follows text position'),
                 ],
             ],
             ['name' => 'overlay_color', 'type' => 'color', 'label' => __('Overlay Color'), 'default' => '#000000', 'tab' => 'style'],
-            ['name' => 'overlay_opacity', 'type' => 'range', 'label' => __('Overlay Opacity (%)'), 'default' => 40, 'min' => 0, 'max' => 100, 'tab' => 'style'],
+            ['name' => 'overlay_opacity', 'type' => 'range', 'label' => __('Overlay Opacity (%)'), 'default' => 45, 'min' => 0, 'max' => 100, 'tab' => 'style'],
+            ['name' => 'accent_color', 'type' => 'color', 'label' => __('Accent Color'), 'default' => '#f59e0b', 'tab' => 'style'],
             ['name' => 'title_color', 'type' => 'color', 'label' => __('Title Color'), 'default' => '#ffffff', 'tab' => 'style'],
             ['name' => 'subtitle_color', 'type' => 'color', 'label' => __('Subtitle Color'), 'default' => '#f3f4f6', 'tab' => 'style'],
-            ['name' => 'btn_bg', 'type' => 'color', 'label' => __('Button Background'), 'default' => '#111827', 'tab' => 'style'],
-            ['name' => 'btn_text_color', 'type' => 'color', 'label' => __('Button Text Color'), 'default' => '#ffffff', 'tab' => 'style'],
-            ['name' => 'btn_hover_bg', 'type' => 'color', 'label' => __('Button Hover Background'), 'default' => '#374151', 'tab' => 'style'],
-            ['name' => 'btn_hover_text_color', 'type' => 'color', 'label' => __('Button Hover Text Color'), 'default' => '#ffffff', 'tab' => 'style'],
+            ['name' => 'btn_bg', 'type' => 'color', 'label' => __('Button Background'), 'default' => '#ffffff', 'tab' => 'style'],
+            ['name' => 'btn_text_color', 'type' => 'color', 'label' => __('Button Text Color'), 'default' => '#111827', 'tab' => 'style'],
+            ['name' => 'btn_hover_bg', 'type' => 'color', 'label' => __('Button Hover Background'), 'default' => '#f59e0b', 'tab' => 'style'],
+            ['name' => 'btn_hover_text_color', 'type' => 'color', 'label' => __('Button Hover Text Color'), 'default' => '#111827', 'tab' => 'style'],
         ]);
     }
 
     public function render(array $settings): string
     {
+        $defaultAlign = $this->pick($settings['text_align'] ?? 'left', ['left', 'center', 'right'], 'left');
+        $defaultValign = $this->pick($settings['content_valign'] ?? 'center', ['top', 'center', 'bottom'], 'center');
+
         $slides = [];
 
         for ($i = 1; $i <= self::MAX_SLIDES; $i++) {
@@ -193,12 +301,20 @@ class HeroSlideWidget extends BaseWidget
                 continue;
             }
 
+            $title = trim((string) ($settings["s{$i}_title"] ?? ''));
+
             $slides[] = [
                 'image' => $image,
-                'title' => trim((string) ($settings["s{$i}_title"] ?? '')),
+                'eyebrow' => trim((string) ($settings["s{$i}_eyebrow"] ?? '')),
+                'title' => str_replace('*', '', $title),
+                'title_html' => $title === '' ? '' : $this->accent($title),
                 'subtitle' => trim((string) ($settings["s{$i}_subtitle"] ?? '')),
                 'btn_text' => trim((string) ($settings["s{$i}_btn_text"] ?? '')),
                 'btn_url' => $this->safeUrl((string) ($settings["s{$i}_btn_url"] ?? '')),
+                'btn2_text' => trim((string) ($settings["s{$i}_btn2_text"] ?? '')),
+                'btn2_url' => $this->safeUrl((string) ($settings["s{$i}_btn2_url"] ?? '')),
+                'align' => $this->pick($settings["s{$i}_align"] ?? '', ['left', 'center', 'right'], $defaultAlign),
+                'valign' => $this->pick($settings["s{$i}_valign"] ?? '', ['top', 'center', 'bottom'], $defaultValign),
             ];
         }
 
@@ -214,42 +330,59 @@ class HeroSlideWidget extends BaseWidget
         }
 
         $heightKey = (string) ($settings['height'] ?? 'aspect-[21/9]');
+        $titleSize = $this->pick($settings['title_size'] ?? 'md', array_keys(self::TITLE_SIZES), 'md');
+        $btnRadius = $this->pick($settings['btn_radius'] ?? 'pill', array_keys(self::BTN_RADIUS), 'pill');
+        $textAnim = $this->pick($settings['text_animation'] ?? 'rise', ['rise', 'fade', 'zoom', 'blur'], 'rise');
+        $overlayOpacity = $this->int($settings['overlay_opacity'] ?? 45, 0, 100) / 100;
 
         $opts = [
             'height_css' => self::HEIGHTS[$heightKey] ?? self::HEIGHTS['aspect-[21/9]'],
             'effect' => $this->pick($settings['effect'] ?? 'fade', ['fade', 'slide'], 'fade'),
-            'text_align' => $this->pick($settings['text_align'] ?? 'center', ['left', 'center', 'right'], 'center'),
-            'content_valign' => $this->pick($settings['content_valign'] ?? 'center', ['center', 'bottom'], 'center'),
+            'content_style' => $this->pick($settings['content_style'] ?? 'plain', ['plain', 'glass'], 'plain'),
+            'title_font' => self::TITLE_SIZES[$titleSize],
+            'text_anim' => 'rjhs-' . $textAnim,
             'image_position' => $this->pick($settings['image_position'] ?? 'center', ['center', 'top', 'bottom'], 'center'),
             'image_blur' => $this->int($settings['image_blur'] ?? 0, 0, 20),
             'kenburns' => $this->flag($settings['kenburns'] ?? null, true),
+            'parallax' => $this->flag($settings['parallax'] ?? null, true),
             'transition' => $transition,
             'autoplay' => $autoplay,
             'kb_ms' => $autoplay > 0 ? $autoplay + $transition * 2 : 12000,
             'pause_on_hover' => $this->flag($settings['pause_on_hover'] ?? null, true),
             'show_arrows' => $this->flag($settings['show_arrows'] ?? null, true),
             'show_dots' => $this->flag($settings['show_dots'] ?? null, true),
+            'dots_style' => $this->pick($settings['dots_style'] ?? 'dots', ['dots', 'lines'], 'dots'),
             'show_progress' => $this->flag($settings['show_progress'] ?? null, true),
-            'show_counter' => $this->flag($settings['show_counter'] ?? null, false),
+            'show_counter' => $this->flag($settings['show_counter'] ?? null, true),
             'btn_new_tab' => $this->flag($settings['btn_new_tab'] ?? null, false),
-            'overlay_style' => $this->pick($settings['overlay_style'] ?? 'solid', ['solid', 'gradient'], 'solid'),
+            'btn_radius' => self::BTN_RADIUS[$btnRadius],
+            'overlay_style' => $this->pick($settings['overlay_style'] ?? 'side', ['solid', 'gradient', 'side'], 'side'),
             'overlay_color' => $this->color($settings['overlay_color'] ?? null, '#000000'),
-            'overlay_opacity' => round($this->int($settings['overlay_opacity'] ?? 40, 0, 100) / 100, 2),
+            'overlay_opacity' => round($overlayOpacity, 2),
+            'overlay_opacity_g' => round(min(1, $overlayOpacity * 1.7), 2),
+            'accent' => $this->color($settings['accent_color'] ?? null, '#f59e0b'),
             'title_color' => $this->color($settings['title_color'] ?? null, '#ffffff'),
             'subtitle_color' => $this->color($settings['subtitle_color'] ?? null, '#f3f4f6'),
-            'btn_bg' => $this->color($settings['btn_bg'] ?? null, '#111827'),
-            'btn_text' => $this->color($settings['btn_text_color'] ?? null, '#ffffff'),
-            'btn_hover_bg' => $this->color($settings['btn_hover_bg'] ?? null, '#374151'),
-            'btn_hover_text' => $this->color($settings['btn_hover_text_color'] ?? null, '#ffffff'),
+            'btn_bg' => $this->color($settings['btn_bg'] ?? null, '#ffffff'),
+            'btn_text' => $this->color($settings['btn_text_color'] ?? null, '#111827'),
+            'btn_hover_bg' => $this->color($settings['btn_hover_bg'] ?? null, '#f59e0b'),
+            'btn_hover_text' => $this->color($settings['btn_hover_text_color'] ?? null, '#111827'),
         ];
 
-        $uid = 'slider_' . substr(md5(uniqid('', true)), 0, 8);
+        $uid = 'rjhs_' . substr(md5(uniqid('', true)), 0, 8);
 
         return view('rjbuilder.widgets.builtin.hero-slide', [
             'o' => $opts,
             'slides' => $slides,
             'uid' => $uid,
         ])->render();
+    }
+
+    private function accent(string $text): string
+    {
+        $escaped = e($text);
+
+        return preg_replace('/\*(.+?)\*/u', '<span class="rjhs-accent">$1</span>', $escaped) ?? $escaped;
     }
 
     private function int(mixed $value, int $min, int $max): int
