@@ -53,7 +53,7 @@ class AdvancedSearchWidget extends BaseWidget
 
     public function description(): string
     {
-        return __('A live AJAX search bar with autocomplete, keyboard navigation, recent searches and highlighted results.');
+        return __('A live AJAX search bar with animated autocomplete, keyboard navigation, recent searches and highlighted results.');
     }
 
     private function yesNo(): array
@@ -70,6 +70,14 @@ class AdvancedSearchWidget extends BaseWidget
                 'label' => __('Placeholder Text'),
                 'default' => __('Search for products, posts...'),
                 'tab' => 'content',
+            ],
+            [
+                'name' => 'placeholder_words',
+                'type' => 'text',
+                'label' => __('Typewriter Phrases'),
+                'default' => '',
+                'tab' => 'content',
+                'help' => __('Optional. Separate phrases with | (e.g. Search for shoes...|Search for laptops...). Needs animation level "Rich".'),
             ],
             [
                 'name' => 'search_url',
@@ -111,6 +119,18 @@ class AdvancedSearchWidget extends BaseWidget
             ['name' => 'show_view_all', 'type' => 'select', 'label' => __('Show "View all results" Link'), 'default' => '1', 'tab' => 'content', 'options' => $this->yesNo()],
             ['name' => 'show_shortcut', 'type' => 'select', 'label' => __('Focus with "/" Key'), 'default' => '0', 'tab' => 'content', 'options' => $this->yesNo()],
 
+            [
+                'name' => 'animation',
+                'type' => 'select',
+                'label' => __('Animation Level'),
+                'default' => 'rich',
+                'tab' => 'style',
+                'options' => [
+                    'rich' => __('Rich (glow, ring, stagger, typewriter)'),
+                    'subtle' => __('Subtle'),
+                    'off' => __('Off'),
+                ],
+            ],
             [
                 'name' => 'style',
                 'type' => 'select',
@@ -198,6 +218,7 @@ class AdvancedSearchWidget extends BaseWidget
         $width = self::WIDTHS[$this->pick($settings['width'] ?? 'md', array_keys(self::WIDTHS), 'md')];
         $margin = self::MARGINS[$this->pick($settings['align'] ?? 'center', array_keys(self::MARGINS), 'center')];
         $accent = $this->color($settings['accent_color'] ?? null, '#4f46e5');
+        $anim = $this->pick($settings['animation'] ?? 'rich', ['rich', 'subtle', 'off'], 'rich');
 
         $placeholder = trim((string) ($settings['placeholder'] ?? ''));
         if ($placeholder === '') {
@@ -207,6 +228,8 @@ class AdvancedSearchWidget extends BaseWidget
         $cfg = [
             'searchUrl' => $searchUrl,
             'param' => $param,
+            'anim' => $anim,
+            'words' => $this->words((string) ($settings['placeholder_words'] ?? '')),
             'minChars' => $this->int($settings['min_chars'] ?? 2, 1, 5),
             'maxResults' => $this->int($settings['max_results'] ?? 8, 3, 15),
             'debounce' => $this->int($settings['debounce'] ?? 300, 150, 800),
@@ -242,6 +265,7 @@ class AdvancedSearchWidget extends BaseWidget
             'param' => $param,
             'prefill' => $prefill,
             'style' => $style,
+            'anim' => $anim,
             'py' => $size['py'],
             'fs' => $size['fs'],
             'radius' => $radius,
@@ -259,6 +283,13 @@ class AdvancedSearchWidget extends BaseWidget
             'o' => $opts,
             'uid' => $uid,
         ])->render();
+    }
+
+    private function words(string $raw): array
+    {
+        $parts = array_map(fn ($w) => mb_substr(trim($w), 0, 48), explode('|', $raw));
+
+        return array_slice(array_values(array_filter($parts, fn ($w) => $w !== '')), 0, 8);
     }
 
     private function searchUrl(string $url): string
