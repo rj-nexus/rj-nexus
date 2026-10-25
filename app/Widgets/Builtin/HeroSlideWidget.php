@@ -13,7 +13,7 @@ class HeroSlideWidget extends BaseWidget
 
     public function name(): string
     {
-        return __('Hero Slide');
+        return __('Hero Slider');
     }
 
     public function icon(): string
@@ -28,53 +28,18 @@ class HeroSlideWidget extends BaseWidget
 
     public function description(): string
     {
-        return __('A full-width hero section with a background image, text overlay, and a customizable CTA button.');
+        return __('A full-width slider hero with up to 3 slides, text overlays, and CTA buttons.');
     }
 
     public function schema(): array
     {
         return [
             [
-                'name' => 'image',
-                'type' => 'media',
-                'label' => __('Background Image'),
-                'default' => '',
-                'tab' => 'content',
-            ],
-            [
-                'name' => 'title',
-                'type' => 'text',
-                'label' => __('Title'),
-                'default' => __('Welcome to Our Store'),
-                'tab' => 'content',
-            ],
-            [
-                'name' => 'subtitle',
-                'type' => 'textarea',
-                'label' => __('Subtitle'),
-                'default' => __('Discover our latest collection and elevate your style.'),
-                'tab' => 'content',
-            ],
-            [
-                'name' => 'btn_text',
-                'type' => 'text',
-                'label' => __('Button Text'),
-                'default' => __('Shop Now'),
-                'tab' => 'content',
-            ],
-            [
-                'name' => 'btn_url',
-                'type' => 'text',
-                'label' => __('Button URL'),
-                'default' => '/shop',
-                'tab' => 'content',
-            ],
-            [
                 'name' => 'height',
                 'type' => 'select',
                 'label' => __('Section Height'),
                 'default' => 'min-h-[70vh]',
-                'tab' => 'style',
+                'tab' => 'content',
                 'options' => [
                     'min-h-[40vh]' => __('Small (40vh)'),
                     'min-h-[60vh]' => __('Medium (60vh)'),
@@ -83,69 +48,70 @@ class HeroSlideWidget extends BaseWidget
                     'min-h-screen' => __('Full Screen'),
                 ]
             ],
+
+            // Slide 1
+            ['name' => 's1_image', 'type' => 'media', 'label' => __('Slide 1 - Image'), 'default' => '', 'tab' => 'content'],
+            ['name' => 's1_title', 'type' => 'text', 'label' => __('Slide 1 - Title'), 'default' => __('Welcome to Our Store'), 'tab' => 'content'],
+            ['name' => 's1_subtitle', 'type' => 'textarea', 'label' => __('Slide 1 - Subtitle'), 'default' => __('Discover our latest collection.'), 'tab' => 'content'],
+            ['name' => 's1_btn_text', 'type' => 'text', 'label' => __('Slide 1 - Button Text'), 'default' => __('Shop Now'), 'tab' => 'content'],
+            ['name' => 's1_btn_url', 'type' => 'text', 'label' => __('Slide 1 - Button URL'), 'default' => '/shop', 'tab' => 'content'],
+
+            // Slide 2
+            ['name' => 's2_image', 'type' => 'media', 'label' => __('Slide 2 - Image'), 'default' => '', 'tab' => 'content'],
+            ['name' => 's2_title', 'type' => 'text', 'label' => __('Slide 2 - Title'), 'default' => '', 'tab' => 'content'],
+            ['name' => 's2_subtitle', 'type' => 'textarea', 'label' => __('Slide 2 - Subtitle'), 'default' => '', 'tab' => 'content'],
+            ['name' => 's2_btn_text', 'type' => 'text', 'label' => __('Slide 2 - Button Text'), 'default' => __('View Collection'), 'tab' => 'content'],
+            ['name' => 's2_btn_url', 'type' => 'text', 'label' => __('Slide 2 - Button URL'), 'default' => '/shop', 'tab' => 'content'],
+
+            // Slide 3
+            ['name' => 's3_image', 'type' => 'media', 'label' => __('Slide 3 - Image'), 'default' => '', 'tab' => 'content'],
+            ['name' => 's3_title', 'type' => 'text', 'label' => __('Slide 3 - Title'), 'default' => '', 'tab' => 'content'],
+            ['name' => 's3_subtitle', 'type' => 'textarea', 'label' => __('Slide 3 - Subtitle'), 'default' => '', 'tab' => 'content'],
+            ['name' => 's3_btn_text', 'type' => 'text', 'label' => __('Slide 3 - Button Text'), 'default' => __('Learn More'), 'tab' => 'content'],
+            ['name' => 's3_btn_url', 'type' => 'text', 'label' => __('Slide 3 - Button URL'), 'default' => '/about', 'tab' => 'content'],
+
+            // Global Style
             [
-                'name' => 'overlay_color',
-                'type' => 'color',
-                'label' => __('Overlay Color'),
-                'default' => '#000000',
+                'name' => 'autoplay_speed',
+                'type' => 'number',
+                'label' => __('Autoplay Speed (ms)'),
+                'default' => 5000,
                 'tab' => 'style',
+                'help' => __('Set to 0 to disable autoplay.')
             ],
-            [
-                'name' => 'overlay_opacity',
-                'type' => 'range',
-                'label' => __('Overlay Opacity (%)'),
-                'default' => 40,
-                'min' => 0,
-                'max' => 100,
-                'tab' => 'style',
-            ],
-            [
-                'name' => 'title_color',
-                'type' => 'color',
-                'label' => __('Title Color'),
-                'default' => '#ffffff',
-                'tab' => 'style',
-            ],
-            [
-                'name' => 'subtitle_color',
-                'type' => 'color',
-                'label' => __('Subtitle Color'),
-                'default' => '#f3f4f6',
-                'tab' => 'style',
-            ],
-            [
-                'name' => 'btn_bg',
-                'type' => 'color',
-                'label' => __('Button Background'),
-                'default' => '#111827',
-                'tab' => 'style',
-            ],
-            [
-                'name' => 'btn_text_color',
-                'type' => 'color',
-                'label' => __('Button Text Color'),
-                'default' => '#ffffff',
-                'tab' => 'style',
-            ],
-            [
-                'name' => 'btn_hover_bg',
-                'type' => 'color',
-                'label' => __('Button Hover Background'),
-                'default' => '#374151',
-                'tab' => 'style',
-            ],
-            [
-                'name' => 'btn_hover_text_color',
-                'type' => 'color',
-                'label' => __('Button Hover Text Color'),
-                'default' => '#ffffff',
-                'tab' => 'style',
-            ],
+            ['name' => 'overlay_color', 'type' => 'color', 'label' => __('Overlay Color'), 'default' => '#000000', 'tab' => 'style'],
+            ['name' => 'overlay_opacity', 'type' => 'range', 'label' => __('Overlay Opacity (%)'), 'default' => 40, 'min' => 0, 'max' => 100, 'tab' => 'style'],
+            ['name' => 'title_color', 'type' => 'color', 'label' => __('Title Color'), 'default' => '#ffffff', 'tab' => 'style'],
+            ['name' => 'subtitle_color', 'type' => 'color', 'label' => __('Subtitle Color'), 'default' => '#f3f4f6', 'tab' => 'style'],
+            ['name' => 'btn_bg', 'type' => 'color', 'label' => __('Button Background'), 'default' => '#111827', 'tab' => 'style'],
+            ['name' => 'btn_text_color', 'type' => 'color', 'label' => __('Button Text Color'), 'default' => '#ffffff', 'tab' => 'style'],
+            ['name' => 'btn_hover_bg', 'type' => 'color', 'label' => __('Button Hover Background'), 'default' => '#374151', 'tab' => 'style'],
+            ['name' => 'btn_hover_text_color', 'type' => 'color', 'label' => __('Button Hover Text Color'), 'default' => '#ffffff', 'tab' => 'style'],
         ];
     }
 
     public function render(array $settings): string
     {
-        return view('rjbuilder.widgets.builtin.hero-slide', compact('settings'))->render();
+        $slides = [];
+
+        for ($i = 1; $i <= 3; $i++) {
+            if (!empty($settings['s'.$i.'_image'])) {
+                $slides[] = [
+                    'image' => $settings['s'.$i.'_image'],
+                    'title' => $settings['s'.$i.'_title'] ?? '',
+                    'subtitle' => $settings['s'.$i.'_subtitle'] ?? '',
+                    'btn_text' => $settings['s'.$i.'_btn_text'] ?? '',
+                    'btn_url' => $settings['s'.$i.'_btn_url'] ?? '',
+                ];
+            }
+        }
+
+        if (empty($slides)) {
+            return '<div class="p-8 text-center text-gray-500 bg-gray-100 rounded-lg">' . __('Please add at least one slide image to display the slider.') . '</div>';
+        }
+
+        $uid = 'slider_' . substr(md5(uniqid()), 0, 6);
+
+        return view('rjbuilder.widgets.builtin.hero-slide', compact('settings', 'slides', 'uid'))->render();
     }
 }
