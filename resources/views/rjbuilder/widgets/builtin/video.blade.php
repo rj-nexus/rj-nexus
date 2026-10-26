@@ -1,189 +1,408 @@
-@php
-    $auto = $o['behavior'] === 'autoplay';
-@endphp
+<?php
 
-<style>
-    @keyframes rjv-ring-{{ $uid }} {
-        0% { transform: scale(1); opacity: .55; }
-        100% { transform: scale(1.9); opacity: 0; }
+namespace App\Widgets\Builtin;
+
+use App\Widgets\BaseWidget;
+
+class VideoHeroWidget extends BaseWidget
+{
+    private const HEIGHTS = [
+        'h-[60vh]' => 'height:60vh;height:60svh;min-height:420px;',
+        'h-[70vh]' => 'height:70vh;height:70svh;min-height:460px;max-height:820px;',
+        'h-[80vh]' => 'height:80vh;height:80svh;min-height:480px;',
+        'h-screen' => 'height:100vh;height:100svh;min-height:520px;',
+    ];
+
+    private const TITLE_SIZES = [
+        'sm' => 'clamp(1.75rem,4vw,3.25rem)',
+        'md' => 'clamp(2rem,5.5vw,4.5rem)',
+        'lg' => 'clamp(2.5rem,7.5vw,6.25rem)',
+    ];
+
+    private const BTN_RADIUS = [
+        'sm' => '4px',
+        'md' => '12px',
+        'pill' => '999px',
+    ];
+
+    public function id(): string
+    {
+        return 'video-hero';
     }
 
-    #{{ $uid }} { width: 100%; padding: 8px 0; }
-    #{{ $uid }} *, #{{ $uid }} *::before, #{{ $uid }} *::after { box-sizing: border-box; }
-
-    #{{ $uid }} .rjv-frame { position: relative; width: 100%; @if ($o['vertical']) max-width: 380px; @endif margin: 0 auto; aspect-ratio: {{ $o['aspect'] }}; border-radius: {{ $o['radius'] }}; overflow: hidden; isolation: isolate; background: #0b1020; box-shadow: 0 2px 4px rgba(15,23,42,.06), 0 28px 60px -28px rgba(15,23,42,.45); transition: box-shadow .5s ease, transform .5s cubic-bezier(.2,.8,.2,1); }
-    #{{ $uid }} .rjv-frame:hover { transform: translateY(-3px); box-shadow: 0 2px 4px rgba(15,23,42,.06), 0 40px 70px -28px rgba(15,23,42,.55); }
-
-    #{{ $uid }} .rjv-media { position: absolute; inset: 0; z-index: 1; opacity: 0; pointer-events: none; transition: opacity .5s ease; }
-    #{{ $uid }}.is-playing .rjv-media { opacity: 1; pointer-events: auto; }
-    #{{ $uid }} .rjv-media iframe, #{{ $uid }} .rjv-media video { display: block; width: 100%; height: 100%; max-width: none; border: 0; object-fit: cover; background: #000; }
-
-    #{{ $uid }} .rjv-facade { all: unset; box-sizing: border-box; position: absolute; inset: 0; z-index: 2; display: block; cursor: pointer; overflow: hidden; transition: opacity .5s ease, visibility 0s linear 0s; -webkit-tap-highlight-color: transparent; }
-    #{{ $uid }}.is-playing .rjv-facade { opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .5s ease, visibility 0s linear .5s; }
-    #{{ $uid }} .rjv-facade:focus-visible { outline: 3px solid {{ $o['play_bg'] }}; outline-offset: -6px; }
-
-    #{{ $uid }} .rjv-poster { position: absolute; inset: 0; display: block; width: 100%; height: 100%; max-width: none; object-fit: cover; transition: transform 1s cubic-bezier(.2,.8,.2,1); }
-    #{{ $uid }} .rjv-facade:hover .rjv-poster { transform: scale(1.06); }
-    #{{ $uid }} .rjv-empty { position: absolute; inset: 0; background: radial-gradient(circle at 30% 20%, rgba(139,92,246,.35), transparent 60%), #111827; }
-
-    #{{ $uid }} .rjv-shade { position: absolute; inset: 0; background: linear-gradient(to top, rgba(2,6,23,.65), rgba(2,6,23,.1) 55%, rgba(2,6,23,.25)); transition: opacity .5s ease; }
-    #{{ $uid }} .rjv-facade:hover .rjv-shade { opacity: .75; }
-
-    #{{ $uid }} .rjv-play { position: absolute; top: 50%; left: 50%; width: 84px; height: 84px; margin: -42px 0 0 -42px; display: grid; place-items: center; border-radius: 50%; background: {{ $o['play_bg'] }}; color: {{ $o['play_color'] }}; box-shadow: 0 18px 40px -10px {{ $o['play_bg'] }}; transition: transform .5s cubic-bezier(.34,1.56,.64,1); }
-    #{{ $uid }} .rjv-play::before, #{{ $uid }} .rjv-play::after { content: ""; position: absolute; inset: 0; border-radius: 50%; border: 2px solid {{ $o['play_bg'] }}; opacity: 0; animation: rjv-ring-{{ $uid }} 2.4s ease-out infinite; }
-    #{{ $uid }} .rjv-play::after { animation-delay: 1.2s; }
-    #{{ $uid }} .rjv-facade:hover .rjv-play { transform: scale(1.12); }
-    #{{ $uid }} .rjv-play svg { display: block; width: 32px; height: 32px; margin-left: 4px; max-width: none; }
-
-    #{{ $uid }} .rjv-cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 22px 26px; color: #fff; font-size: clamp(1rem, 2vw, 1.3rem); font-weight: 700; line-height: 1.3; letter-spacing: -.01em; text-shadow: 0 2px 14px rgba(0,0,0,.5); transform: translateY(6px); transition: transform .5s cubic-bezier(.2,.8,.2,1); }
-    #{{ $uid }} .rjv-facade:hover .rjv-cap { transform: none; }
-
-    @media (max-width: 639px) {
-        #{{ $uid }} .rjv-play { width: 68px; height: 68px; margin: -34px 0 0 -34px; }
-        #{{ $uid }} .rjv-play svg { width: 26px; height: 26px; }
-        #{{ $uid }} .rjv-cap { padding: 16px 18px; }
+    public function name(): string
+    {
+        return __('Video Hero');
     }
 
-    @media (prefers-reduced-motion: reduce) {
-        #{{ $uid }} *, #{{ $uid }} *::before, #{{ $uid }} *::after { animation: none !important; transition-duration: .01ms !important; transition-delay: 0ms !important; }
+    public function icon(): string
+    {
+        return '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>';
     }
-</style>
 
-<div id="{{ $uid }}"
-     class="{{ $auto ? 'is-playing' : '' }}"
-     data-behavior="{{ $o['behavior'] }}"
-     data-kind="{{ $o['kind'] }}"
-     data-src="{{ $o['src'] }}"
-     data-mute="{{ $o['mute'] ? 1 : 0 }}"
-     data-loop="{{ $o['loop'] ? 1 : 0 }}"
-     data-controls="{{ $o['controls'] ? 1 : 0 }}">
-    <div class="rjv-frame">
+    public function category(): string
+    {
+        return 'layout';
+    }
 
-        @unless ($auto)
-            <button type="button" class="rjv-facade" aria-label="{{ __('Play video') }}">
-                @if ($o['poster'] !== '')
-                    <img class="rjv-poster" src="{{ $o['poster'] }}" alt="" loading="lazy" decoding="async" @if ($o['poster_fallback'] !== '') data-fallback="{{ $o['poster_fallback'] }}" @endif>
-                @else
-                    <span class="rjv-empty"></span>
-                @endif
-                <span class="rjv-shade"></span>
-                <span class="rjv-play" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                </span>
-                @if ($o['caption'] !== '')
-                    <span class="rjv-cap">{{ $o['caption'] }}</span>
-                @endif
-            </button>
-        @endunless
+    public function description(): string
+    {
+        return __('A full-screen video background hero supporting local videos, YouTube and Vimeo, with animated text, two buttons and playback controls.');
+    }
 
-        <div class="rjv-media">
-            @if ($auto)
-                @if ($o['kind'] === 'file')
-                    <video src="{{ $o['src'] }}" autoplay muted playsinline @if ($o['loop']) loop @endif @if ($o['controls']) controls @endif></video>
-                @else
-                    <iframe src="{{ $o['src'] }}" title="{{ __('Video') }}" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen loading="lazy"></iframe>
-                @endif
-            @endif
-        </div>
+    private function yesNo(): array
+    {
+        return ['1' => __('Yes'), '0' => __('No')];
+    }
 
-    </div>
-</div>
+    public function schema(): array
+    {
+        return [
+            [
+                'name' => 'height',
+                'type' => 'select',
+                'label' => __('Section Height'),
+                'default' => 'h-[70vh]',
+                'tab' => 'content',
+                'options' => [
+                    'h-[60vh]' => __('Medium (60vh)'),
+                    'h-[70vh]' => __('Standard (70vh)'),
+                    'h-[80vh]' => __('Large (80vh)'),
+                    'h-screen' => __('Full Screen'),
+                ],
+            ],
+            [
+                'name' => 'video_source',
+                'type' => 'select',
+                'label' => __('Video Source'),
+                'default' => 'local',
+                'tab' => 'content',
+                'options' => [
+                    'local' => __('Local / Media Library'),
+                    'youtube' => __('YouTube'),
+                    'vimeo' => __('Vimeo'),
+                    'external' => __('External URL (MP4 / WebM)'),
+                ],
+            ],
+            [
+                'name' => 'video_file',
+                'type' => 'media',
+                'label' => __('Local Video (MP4)'),
+                'default' => '',
+                'tab' => 'content',
+                'help' => __('Used only if Source is set to Local.'),
+            ],
+            [
+                'name' => 'video_url',
+                'type' => 'text',
+                'label' => __('External Video URL'),
+                'default' => '',
+                'tab' => 'content',
+                'placeholder' => 'https://www.youtube.com/watch?v=...',
+                'help' => __('Used for YouTube, Vimeo, or External video URL.'),
+            ],
+            [
+                'name' => 'fallback_image',
+                'type' => 'media',
+                'label' => __('Fallback Image'),
+                'default' => '',
+                'tab' => 'content',
+                'help' => __('Shown while the video loads, if it fails, or when reduced motion is on.'),
+            ],
+            ['name' => 'eyebrow', 'type' => 'text', 'label' => __('Small Label'), 'default' => '', 'tab' => 'content'],
+            ['name' => 'title', 'type' => 'text', 'label' => __('Title'), 'default' => __('Experience the *Future*'), 'tab' => 'content', 'help' => __('Wrap a word in *asterisks* to highlight it.')],
+            ['name' => 'subtitle', 'type' => 'textarea', 'label' => __('Subtitle'), 'default' => __('Watch our latest collection in motion.'), 'tab' => 'content'],
+            ['name' => 'btn_text', 'type' => 'text', 'label' => __('Button Text'), 'default' => __('Discover Now'), 'tab' => 'content'],
+            ['name' => 'btn_url', 'type' => 'text', 'label' => __('Button URL'), 'default' => '/shop', 'tab' => 'content'],
+            ['name' => 'btn2_text', 'type' => 'text', 'label' => __('Second Button Text'), 'default' => '', 'tab' => 'content'],
+            ['name' => 'btn2_url', 'type' => 'text', 'label' => __('Second Button URL'), 'default' => '', 'tab' => 'content'],
 
-<script>
-(function () {
-    var root = document.getElementById('{{ $uid }}');
-    if (!root || root.dataset.ready) { return; }
-    root.dataset.ready = '1';
+            [
+                'name' => 'align',
+                'type' => 'select',
+                'label' => __('Text Position (horizontal)'),
+                'default' => 'center',
+                'tab' => 'style',
+                'options' => [
+                    'left' => __('Left'),
+                    'center' => __('Center'),
+                    'right' => __('Right'),
+                ],
+            ],
+            [
+                'name' => 'valign',
+                'type' => 'select',
+                'label' => __('Text Position (vertical)'),
+                'default' => 'center',
+                'tab' => 'style',
+                'options' => [
+                    'top' => __('Top'),
+                    'center' => __('Center'),
+                    'bottom' => __('Bottom'),
+                ],
+            ],
+            [
+                'name' => 'content_style',
+                'type' => 'select',
+                'label' => __('Content Style'),
+                'default' => 'plain',
+                'tab' => 'style',
+                'options' => [
+                    'plain' => __('Plain text'),
+                    'glass' => __('Glass card'),
+                ],
+            ],
+            [
+                'name' => 'title_size',
+                'type' => 'select',
+                'label' => __('Title Size'),
+                'default' => 'md',
+                'tab' => 'style',
+                'options' => [
+                    'sm' => __('Small'),
+                    'md' => __('Medium'),
+                    'lg' => __('Large'),
+                ],
+            ],
+            [
+                'name' => 'text_animation',
+                'type' => 'select',
+                'label' => __('Text Animation'),
+                'default' => 'rise',
+                'tab' => 'style',
+                'options' => [
+                    'rise' => __('Rise'),
+                    'fade' => __('Fade'),
+                    'zoom' => __('Zoom'),
+                    'blur' => __('Blur in'),
+                ],
+            ],
+            ['name' => 'show_controls', 'type' => 'select', 'label' => __('Show Video Controls'), 'default' => '1', 'tab' => 'style', 'options' => $this->yesNo()],
+            ['name' => 'show_hint', 'type' => 'select', 'label' => __('Show "Scroll" Hint'), 'default' => '1', 'tab' => 'style', 'options' => $this->yesNo()],
+            ['name' => 'btn_new_tab', 'type' => 'select', 'label' => __('Open Buttons in New Tab'), 'default' => '0', 'tab' => 'style', 'options' => $this->yesNo()],
+            [
+                'name' => 'btn_radius',
+                'type' => 'select',
+                'label' => __('Button Shape'),
+                'default' => 'pill',
+                'tab' => 'style',
+                'options' => [
+                    'sm' => __('Square'),
+                    'md' => __('Rounded'),
+                    'pill' => __('Pill'),
+                ],
+            ],
+            [
+                'name' => 'overlay_style',
+                'type' => 'select',
+                'label' => __('Overlay Style'),
+                'default' => 'side',
+                'tab' => 'style',
+                'options' => [
+                    'solid' => __('Solid'),
+                    'gradient' => __('Gradient (bottom to top)'),
+                    'side' => __('Follows text position'),
+                ],
+            ],
+            ['name' => 'overlay_color', 'type' => 'color', 'label' => __('Overlay Color'), 'default' => '#000000', 'tab' => 'style'],
+            ['name' => 'overlay_opacity', 'type' => 'range', 'label' => __('Overlay Opacity (%)'), 'default' => 40, 'min' => 0, 'max' => 100, 'tab' => 'style'],
+            ['name' => 'accent_color', 'type' => 'color', 'label' => __('Accent Color'), 'default' => '#f59e0b', 'tab' => 'style'],
+            ['name' => 'title_color', 'type' => 'color', 'label' => __('Title Color'), 'default' => '#ffffff', 'tab' => 'style'],
+            ['name' => 'subtitle_color', 'type' => 'color', 'label' => __('Subtitle Color'), 'default' => '#f3f4f6', 'tab' => 'style'],
+            ['name' => 'btn_bg', 'type' => 'color', 'label' => __('Button Background'), 'default' => '#ffffff', 'tab' => 'style'],
+            ['name' => 'btn_text_color', 'type' => 'color', 'label' => __('Button Text Color'), 'default' => '#111827', 'tab' => 'style'],
+            ['name' => 'btn_hover_bg', 'type' => 'color', 'label' => __('Button Hover Background'), 'default' => '#f59e0b', 'tab' => 'style'],
+            ['name' => 'btn_hover_text_color', 'type' => 'color', 'label' => __('Button Hover Text Color'), 'default' => '#111827', 'tab' => 'style'],
+        ];
+    }
 
-    var facade = root.querySelector('.rjv-facade');
-    var media = root.querySelector('.rjv-media');
-    var poster = root.querySelector('.rjv-poster');
-    var behavior = root.dataset.behavior;
-    var kind = root.dataset.kind;
-    var src = root.dataset.src;
-    var mute = root.dataset.mute === '1';
-    var loop = root.dataset.loop === '1';
-    var controls = root.dataset.controls === '1';
-    var canHover = window.matchMedia && window.matchMedia('(hover: hover)').matches;
+    public function render(array $settings): string
+    {
+        $video = $this->resolveVideo($settings);
 
-    if (poster && poster.dataset.fallback) {
-        var swapped = false;
-        var swap = function () {
-            if (swapped) { return; }
-            swapped = true;
-            poster.src = poster.dataset.fallback;
+        $title = trim((string) ($settings['title'] ?? ''));
+        $titleSize = $this->pick($settings['title_size'] ?? 'md', array_keys(self::TITLE_SIZES), 'md');
+        $btnRadius = $this->pick($settings['btn_radius'] ?? 'pill', array_keys(self::BTN_RADIUS), 'pill');
+        $textAnim = $this->pick($settings['text_animation'] ?? 'rise', ['rise', 'fade', 'zoom', 'blur'], 'rise');
+        $overlayOpacity = $this->int($settings['overlay_opacity'] ?? 40, 0, 100) / 100;
+        $heightKey = (string) ($settings['height'] ?? 'h-[70vh]');
+
+        $content = [
+            'eyebrow' => trim((string) ($settings['eyebrow'] ?? '')),
+            'title' => str_replace('*', '', $title),
+            'title_html' => $title === '' ? '' : $this->accent($title),
+            'subtitle' => trim((string) ($settings['subtitle'] ?? '')),
+            'btn_text' => trim((string) ($settings['btn_text'] ?? '')),
+            'btn_url' => $this->safeUrl((string) ($settings['btn_url'] ?? '')),
+            'btn2_text' => trim((string) ($settings['btn2_text'] ?? '')),
+            'btn2_url' => $this->safeUrl((string) ($settings['btn2_url'] ?? '')),
+        ];
+
+        $opts = [
+            'height_css' => self::HEIGHTS[$heightKey] ?? self::HEIGHTS['h-[70vh]'],
+            'align' => $this->pick($settings['align'] ?? 'center', ['left', 'center', 'right'], 'center'),
+            'valign' => $this->pick($settings['valign'] ?? 'center', ['top', 'center', 'bottom'], 'center'),
+            'content_style' => $this->pick($settings['content_style'] ?? 'plain', ['plain', 'glass'], 'plain'),
+            'title_font' => self::TITLE_SIZES[$titleSize],
+            'text_anim' => 'rjvh-' . $textAnim,
+            'show_controls' => $this->flag($settings['show_controls'] ?? null, true),
+            'show_hint' => $this->flag($settings['show_hint'] ?? null, true),
+            'btn_new_tab' => $this->flag($settings['btn_new_tab'] ?? null, false),
+            'btn_radius' => self::BTN_RADIUS[$btnRadius],
+            'overlay_style' => $this->pick($settings['overlay_style'] ?? 'side', ['solid', 'gradient', 'side'], 'side'),
+            'overlay_color' => $this->color($settings['overlay_color'] ?? null, '#000000'),
+            'overlay_opacity' => round($overlayOpacity, 2),
+            'overlay_opacity_g' => round(min(1, $overlayOpacity * 1.7), 2),
+            'accent' => $this->color($settings['accent_color'] ?? null, '#f59e0b'),
+            'title_color' => $this->color($settings['title_color'] ?? null, '#ffffff'),
+            'subtitle_color' => $this->color($settings['subtitle_color'] ?? null, '#f3f4f6'),
+            'btn_bg' => $this->color($settings['btn_bg'] ?? null, '#ffffff'),
+            'btn_text' => $this->color($settings['btn_text_color'] ?? null, '#111827'),
+            'btn_hover_bg' => $this->color($settings['btn_hover_bg'] ?? null, '#f59e0b'),
+            'btn_hover_text' => $this->color($settings['btn_hover_text_color'] ?? null, '#111827'),
+            'fallback' => $this->safeMediaUrl((string) ($settings['fallback_image'] ?? '')),
+        ];
+
+        $uid = 'rjvh_' . substr(md5(uniqid('', true)), 0, 8);
+
+        return view('rjbuilder.widgets.builtin.video-hero', [
+            'o' => $opts,
+            'c' => $content,
+            'v' => $video,
+            'uid' => $uid,
+        ])->render();
+    }
+
+    private function resolveVideo(array $settings): array
+    {
+        $none = ['kind' => 'none', 'url' => '', 'mime' => ''];
+
+        $source = $this->pick($settings['video_source'] ?? 'local', ['local', 'youtube', 'vimeo', 'external'], 'local');
+        $file = trim((string) ($settings['video_file'] ?? ''));
+        $url = trim((string) ($settings['video_url'] ?? ''));
+
+        if ($source === 'local' || $source === 'external') {
+            $src = $this->safeMediaUrl($source === 'local' ? $file : $url);
+
+            if ($src === '') {
+                return $none;
+            }
+
+            return ['kind' => 'file', 'url' => $src, 'mime' => $this->mime($src)];
+        }
+
+        if ($url === '') {
+            return $none;
+        }
+
+        if ($source === 'youtube') {
+            preg_match('/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i', $url, $m);
+            $id = $m[1] ?? '';
+
+            if (!preg_match('/^[A-Za-z0-9_-]{11}$/', $id)) {
+                return $none;
+            }
+
+            $origin = rawurlencode(request()->getSchemeAndHttpHost());
+
+            return [
+                'kind' => 'youtube',
+                'url' => 'https://www.youtube-nocookie.com/embed/' . $id
+                    . '?autoplay=1&mute=1&loop=1&playlist=' . $id
+                    . '&controls=0&rel=0&playsinline=1&modestbranding=1&disablekb=1&iv_load_policy=3&enablejsapi=1&origin=' . $origin,
+                'mime' => '',
+            ];
+        }
+
+        preg_match('/vimeo\.com\/(?:video\/)?([0-9]+)/i', $url, $m);
+        $id = $m[1] ?? '';
+
+        if ($id === '') {
+            return $none;
+        }
+
+        return [
+            'kind' => 'vimeo',
+            'url' => 'https://player.vimeo.com/video/' . $id . '?background=1&autoplay=1&loop=1&muted=1&autopause=0&dnt=1&byline=0&title=0&portrait=0',
+            'mime' => '',
+        ];
+    }
+
+    private function mime(string $url): string
+    {
+        $path = (string) parse_url($url, PHP_URL_PATH);
+
+        return match (strtolower(pathinfo($path, PATHINFO_EXTENSION))) {
+            'mp4', 'm4v' => 'video/mp4',
+            'webm' => 'video/webm',
+            'ogv', 'ogg' => 'video/ogg',
+            'mov' => 'video/quicktime',
+            default => '',
         };
-        poster.addEventListener('error', swap);
-        poster.addEventListener('load', function () {
-            if (poster.naturalWidth && poster.naturalWidth <= 120) { swap(); }
-        });
     }
 
-    if (behavior === 'autoplay') {
-        var autoVideo = media.querySelector('video');
-        if (autoVideo && 'IntersectionObserver' in window) {
-            new IntersectionObserver(function (entries) {
-                if (entries[0].isIntersecting) {
-                    var p = autoVideo.play();
-                    if (p && p.catch) { p.catch(function () {}); }
-                } else {
-                    autoVideo.pause();
-                }
-            }, { threshold: 0.25 }).observe(root);
+    private function accent(string $text): string
+    {
+        $escaped = e($text);
+
+        return preg_replace('/\*(.+?)\*/u', '<span class="rjvh-accent">$1</span>', $escaped) ?? $escaped;
+    }
+
+    private function int(mixed $value, int $min, int $max): int
+    {
+        return max($min, min($max, (int) $value));
+    }
+
+    private function color(mixed $value, string $default): string
+    {
+        $value = trim((string) $value);
+
+        return preg_match('/^#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i', $value) ? $value : $default;
+    }
+
+    private function pick(mixed $value, array $allowed, string $default): string
+    {
+        $value = (string) $value;
+
+        return in_array($value, $allowed, true) ? $value : $default;
+    }
+
+    private function flag(mixed $value, bool $default): bool
+    {
+        if ($value === null || $value === '') {
+            return $default;
         }
-        return;
+
+        return filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? $default;
     }
 
-    function build() {
-        if (media.firstElementChild) { return; }
+    private function safeUrl(string $url): string
+    {
+        $url = trim($url);
 
-        if (kind === 'file') {
-            var v = document.createElement('video');
-            v.src = src;
-            v.autoplay = true;
-            v.muted = mute;
-            v.loop = loop;
-            v.controls = controls;
-            v.playsInline = true;
-            v.setAttribute('playsinline', '');
-            media.appendChild(v);
-        } else {
-            var f = document.createElement('iframe');
-            f.src = src;
-            f.title = 'Video';
-            f.allow = 'autoplay; fullscreen; picture-in-picture';
-            f.setAttribute('allowfullscreen', '');
-            media.appendChild(f);
+        if ($url === '') {
+            return '';
         }
-    }
 
-    function play() {
-        build();
-        root.classList.add('is-playing');
-
-        var v = media.querySelector('video');
-        if (v) {
-            var p = v.play();
-            if (p && p.catch) { p.catch(function () {}); }
+        if (preg_match('/^[a-z][a-z0-9+.\-]*:/i', $url)) {
+            return preg_match('/^(https?|mailto|tel):/i', $url) ? $url : '';
         }
+
+        return $url;
     }
 
-    function stop() {
-        root.classList.remove('is-playing');
+    private function safeMediaUrl(string $url): string
+    {
+        $url = trim($url);
 
-        var v = media.querySelector('video');
-        if (v) {
-            v.pause();
-        } else {
-            media.innerHTML = '';
+        if ($url === '') {
+            return '';
         }
-    }
 
-    if (facade) { facade.addEventListener('click', play); }
+        if (preg_match('/^[a-z][a-z0-9+.\-]*:/i', $url)) {
+            return preg_match('/^https?:/i', $url) ? $url : '';
+        }
 
-    if (behavior === 'hover' && canHover) {
-        root.addEventListener('mouseenter', play);
-        root.addEventListener('mouseleave', stop);
+        return $url;
     }
-})();
-</script>
+}
