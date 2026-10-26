@@ -1,12 +1,37 @@
+@php
+    // Headroom around the button so hover lift, glow, rings and floating are never clipped by parent containers
+    $padTop = 6;
+    $padSide = 6;
+    $padBottom = 6;
+
+    $grow = function (int $t, int $s, int $b) use (&$padTop, &$padSide, &$padBottom) {
+        $padTop = max($padTop, $t);
+        $padSide = max($padSide, $s);
+        $padBottom = max($padBottom, $b);
+    };
+
+    if ($o['anim'] === 'hover-lift') { $grow(8, 12, 22); }
+    if ($o['anim'] === 'hover-glow') { $grow(24, 24, 24); }
+    if ($o['anim'] === 'hover-magnetic') { $grow(12, 16, 12); }
+    if ($o['idle'] === 'pulse') { $grow(18, 18, 18); }
+    if ($o['idle'] === 'float') { $grow(10, 6, 12); }
+    if ($o['idle'] === 'wiggle') { $grow(8, 8, 8); }
+    if ($o['shadow'] === 'soft' && !in_array($o['style'], ['ghost', 'neo'], true)) { $grow(4, 10, 20); }
+    if ($o['shadow'] === 'strong' && !in_array($o['style'], ['ghost', 'neo'], true)) { $grow(4, 12, 28); }
+    if ($o['style'] === 'neo') { $grow(6, 6, 14); }
+
+    if ($o['full']) { $padSide = min($padSide, 4); }
+@endphp
+
 <style>
-    #{{ $uid }} { display: flex; justify-content: {{ $o['justify'] }}; width: 100%; margin: 0; padding: 0; --bg: {{ $o['bg'] }}; --fg: {{ $o['fg'] }}; --hbg: {{ $o['hbg'] }}; --hfg: {{ $o['hfg'] }}; --brgb: {{ $o['brgb'] }}; --hrgb: {{ $o['hrgb'] }}; --r: {{ $o['radius'] }}; --py: {{ $o['py'] }}; --px: {{ $o['px'] }}; --fs: {{ $o['fs'] }}; --gap: {{ $o['gap'] }}; }
+    #{{ $uid }} { box-sizing: border-box; display: flex; justify-content: {{ $o['justify'] }}; width: 100%; margin: 0; padding: {{ $padTop }}px {{ $padSide }}px {{ $padBottom }}px; overflow: visible; --bg: {{ $o['bg'] }}; --fg: {{ $o['fg'] }}; --hbg: {{ $o['hbg'] }}; --hfg: {{ $o['hfg'] }}; --brgb: {{ $o['brgb'] }}; --hrgb: {{ $o['hrgb'] }}; --r: {{ $o['radius'] }}; --py: {{ $o['py'] }}; --px: {{ $o['px'] }}; --fs: {{ $o['fs'] }}; --gap: {{ $o['gap'] }}; }
     #{{ $uid }} *, #{{ $uid }} *::before, #{{ $uid }} *::after { box-sizing: border-box; }
 
     /* ---------- Structure ---------- */
-    #{{ $uid }} .rjb-enter { display: block; max-width: 100%; }
+    #{{ $uid }} .rjb-enter { display: block; max-width: 100%; overflow: visible; }
     #{{ $uid }}[data-full="1"] .rjb-enter { width: 100%; }
 
-    #{{ $uid }} .rjb-wrap { position: relative; display: inline-flex; max-width: 100%; border-radius: var(--r); transform: translate3d(var(--mx, 0px), var(--my, 0px), 0); transition: transform .25s ease-out; }
+    #{{ $uid }} .rjb-wrap { position: relative; display: inline-flex; max-width: 100%; overflow: visible; border-radius: var(--r); transform: translate3d(var(--mx, 0px), var(--my, 0px), 0); transition: transform .25s ease-out; }
     #{{ $uid }}[data-full="1"] .rjb-wrap { display: flex; width: 100%; }
 
     #{{ $uid }} .rjb-btn { position: relative; isolation: isolate; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; gap: var(--gap); max-width: 100%; margin: 0; padding: var(--py) var(--px); border: 2px solid transparent; border-radius: var(--r); font: inherit; font-size: var(--fs); font-weight: 700; line-height: 1.2; text-align: center; text-decoration: none !important; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background-color .3s ease, background-position .5s ease, color .3s ease, border-color .3s ease, box-shadow .3s ease, transform .3s cubic-bezier(.34, 1.56, .64, 1); }
@@ -73,7 +98,7 @@
 
     /* ---------- Entrance (JS only) ---------- */
     #{{ $uid }}.rjb-js .rjb-enter { opacity: 0; }
-    #{{ $uid }}.rjb-js.rjb-in .rjb-enter { animation: {{ $o['ent_anim'] }} .85s cubic-bezier(.2, .8, .2, 1) both; }
+    #{{ $uid }}.rjb-js.rjb-in .rjb-enter { opacity: 1; animation: {{ $o['ent_anim'] }} .85s cubic-bezier(.2, .8, .2, 1) backwards; }
 
     /* ---------- Keyframes ---------- */
     @keyframes rjb-ring { 0% { box-shadow: 0 0 0 0 rgba(var(--brgb), .55); } 75%, 100% { box-shadow: 0 0 0 16px rgba(var(--brgb), 0); } }
