@@ -19,6 +19,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'role',
         'status',
+        'kyc_status',
+        'kyc_verified_at',
     ];
 
     protected $hidden = [
@@ -36,6 +38,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'two_factor_secret' => 'encrypted',
             'two_factor_recovery_codes' => 'encrypted:array',
             'two_factor_confirmed_at' => 'datetime',
+            'kyc_verified_at' => 'datetime',
         ];
     }
 
@@ -47,6 +50,16 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isActive(): bool
     {
         return $this->status === 'active';
+    }
+
+    public function kycVerifications()
+    {
+        return $this->hasMany(KycVerification::class);
+    }
+
+    public function latestKyc()
+    {
+        return $this->hasOne(KycVerification::class)->latestOfMany();
     }
 
     public function hasEnabledTwoFactorAuthentication(): bool
@@ -83,7 +96,7 @@ class User extends Authenticatable implements MustVerifyEmail
         $this->forceFill([
             'two_factor_confirmed_at' => now(),
         ])->save();
-        
+
         $this->generateRecoveryCodes();
     }
 
