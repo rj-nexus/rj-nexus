@@ -72,10 +72,16 @@
         --r: {{ $radius }};
         --ir: {{ $iconRadius }};
         box-sizing: border-box;
-        min-height: 1px;
         position: relative;
-        display: block;
+        display: flow-root;
         width: 100%;
+        height: auto;
+        max-height: none;
+        min-height: -webkit-min-content;
+        min-height: min-content;
+        flex: 0 0 auto;
+        flex-shrink: 0;
+        align-self: stretch;
         color: inherit;
         text-decoration: none;
         outline: none;
@@ -133,6 +139,8 @@
         display: flex;
         gap: 22px;
         width: 100%;
+        height: auto;
+        flex-shrink: 0;
     }
     #{{ $uid }}.rj-ib--top .rj-ib-inner { flex-direction: column; }
     #{{ $uid }}.rj-ib--left .rj-ib-inner { flex-direction: row; align-items: flex-start; }
@@ -150,12 +158,18 @@
 
     #{{ $uid }} .rj-ib-icon {
         position: relative;
+        flex: 0 0 68px;
         flex-shrink: 0;
         display: flex;
         align-items: center;
         justify-content: center;
+        box-sizing: border-box;
         width: 68px;
         height: 68px;
+        min-width: 68px;
+        min-height: 68px;
+        max-width: 68px;
+        max-height: 68px;
         color: var(--c);
         background: var(--bg);
         border-radius: var(--ir);
@@ -163,8 +177,13 @@
     }
     #{{ $uid }}.rj-ib--ico-none .rj-ib-icon {
         background: transparent;
+        flex: 0 0 auto;
         width: auto;
         height: auto;
+        min-width: 0;
+        min-height: 0;
+        max-width: none;
+        max-height: none;
     }
     #{{ $uid }} .rj-ib-icon::before {
         content: "";
@@ -182,6 +201,7 @@
         width: 32px;
         height: 32px;
         display: block;
+        flex-shrink: 0;
         transition: transform .5s cubic-bezier(.34,1.56,.64,1);
     }
 
