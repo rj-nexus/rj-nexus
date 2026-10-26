@@ -159,23 +159,35 @@
     }
     #{{ $uid }} .tc-badge svg { width: 14px; height: 14px; }
 
-    /* Character */
+    /* Character: review speech bubble mascot */
     #{{ $uid }} .tc-char {
         display: none;
         flex-shrink: 0;
         width: 6.5rem;
         height: 6.5rem;
+        overflow: visible;
         animation: tc-{{ $uid }}-bob 3s ease-in-out infinite;
     }
     @media (min-width: 900px) {
         #{{ $uid }} .tc-char { display: block; }
     }
-    #{{ $uid }} .tc-body-fill { fill: var(--tc-accent); }
-    #{{ $uid }} .tc-antenna { stroke: var(--tc-accent); }
-    #{{ $uid }} .tc-antenna-ball { fill: var(--tc-star); }
-    #{{ $uid }} .tc-arm { transform-origin: 82px 62px; }
-    #{{ $uid }} .tc-arm path { stroke: var(--tc-accent); }
-    #{{ $uid }} .tc-cheek { fill: var(--tc-star); opacity: .45; }
+    #{{ $uid }} .tc-bubble { fill: var(--tc-accent); }
+    #{{ $uid }} .tc-limb { stroke: var(--tc-accent); }
+    #{{ $uid }} .tc-arm {
+        transform-origin: 86px 56px;
+    }
+    #{{ $uid }}:hover .tc-arm {
+        animation: tc-{{ $uid }}-wave .7s ease-in-out 2;
+    }
+    #{{ $uid }} .tc-cheek { fill: var(--tc-star); opacity: .5; }
+    #{{ $uid }} .tc-mouth { stroke: #0f172a; }
+    #{{ $uid }} .tc-spark {
+        fill: var(--tc-star);
+        transform-box: fill-box;
+        transform-origin: center;
+        animation: tc-{{ $uid }}-spark 2.4s ease-in-out infinite;
+    }
+    #{{ $uid }} .tc-spark.b { animation-delay: 1.2s; }
     #{{ $uid }} .tc-pupil { transition: transform .12s linear; fill: #0f172a; }
     #{{ $uid }} .tc-lid {
         fill: var(--tc-accent);
@@ -183,7 +195,6 @@
         transform-origin: top center;
         animation: tc-{{ $uid }}-blink 4.5s infinite;
     }
-    #{{ $uid }}:hover .tc-arm { animation: tc-{{ $uid }}-wave .7s ease-in-out 2; }
 
     /* Keyframes */
     @keyframes tc-{{ $uid }}-bob {
@@ -203,6 +214,10 @@
     @keyframes tc-{{ $uid }}-pop {
         0%, 100% { transform: translateY(0); }
         50% { transform: translateY(-3px); }
+    }
+    @keyframes tc-{{ $uid }}-spark {
+        0%, 100% { opacity: .2; transform: scale(.6); }
+        50% { opacity: 1; transform: scale(1); }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -254,29 +269,31 @@
         <svg class="tc-char" viewBox="0 0 100 100" aria-hidden="true">
             <ellipse cx="50" cy="96" rx="26" ry="4" fill="rgba(15,23,42,.08)"/>
 
-            <line class="tc-antenna" x1="50" y1="20" x2="50" y2="8" stroke-width="3" stroke-linecap="round"/>
-            <circle class="tc-antenna-ball" cx="50" cy="6" r="4"/>
+            <path class="tc-bubble" d="M22 62 L16 84 L40 70 Z"/>
+            <rect class="tc-bubble" x="12" y="14" width="76" height="58" rx="28"/>
 
-            <rect class="tc-body-fill" x="18" y="20" width="64" height="72" rx="26"/>
-
+            <path class="tc-limb" d="M14 56 Q4 62 8 74" stroke-width="6" stroke-linecap="round" fill="none"/>
             <g class="tc-arm">
-                <path d="M80 60 Q94 52 92 38" stroke-width="8" stroke-linecap="round" fill="none"/>
+                <path class="tc-limb" d="M86 56 Q98 50 94 38" stroke-width="6" stroke-linecap="round" fill="none"/>
             </g>
 
             <g class="tc-eye">
-                <ellipse cx="38" cy="50" rx="8" ry="9" fill="#ffffff"/>
-                <circle class="tc-pupil" cx="38" cy="51" r="4"/>
-                <ellipse class="tc-lid" cx="38" cy="50" rx="8" ry="9"/>
+                <ellipse cx="36" cy="40" rx="7.5" ry="8.5" fill="#ffffff"/>
+                <circle class="tc-pupil" cx="36" cy="41" r="3.8"/>
+                <ellipse class="tc-lid" cx="36" cy="40" rx="7.5" ry="8.5"/>
             </g>
             <g class="tc-eye">
-                <ellipse cx="62" cy="50" rx="8" ry="9" fill="#ffffff"/>
-                <circle class="tc-pupil" cx="62" cy="51" r="4"/>
-                <ellipse class="tc-lid" cx="62" cy="50" rx="8" ry="9"/>
+                <ellipse cx="64" cy="40" rx="7.5" ry="8.5" fill="#ffffff"/>
+                <circle class="tc-pupil" cx="64" cy="41" r="3.8"/>
+                <ellipse class="tc-lid" cx="64" cy="40" rx="7.5" ry="8.5"/>
             </g>
 
-            <circle class="tc-cheek" cx="28" cy="66" r="4"/>
-            <circle class="tc-cheek" cx="72" cy="66" r="4"/>
-            <path d="M43 70 Q50 76 57 70" stroke="#0f172a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <circle class="tc-cheek" cx="25" cy="53" r="4"/>
+            <circle class="tc-cheek" cx="75" cy="53" r="4"/>
+            <path class="tc-mouth" d="M43 53 Q50 60 57 53" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+            <circle class="tc-spark" cx="92" cy="12" r="3"/>
+            <circle class="tc-spark b" cx="6" cy="22" r="2.2"/>
         </svg>
 
     </div>
