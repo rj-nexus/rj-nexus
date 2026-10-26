@@ -1,11 +1,16 @@
 @php
     $image = $settings['image'] ?? '';
+    if (is_array($image)) {
+        $image = $image['url'] ?? ($image['image'] ?? ($image['src'] ?? (reset($image) ?: '')));
+    }
+    $image = is_string($image) ? trim($image) : '';
+
     $title = $settings['title'] ?? '';
     $description = $settings['description'] ?? '';
     $linkUrl = trim($settings['link_url'] ?? '');
     $linkTarget = ($settings['link_target'] ?? '_self') === '_blank' ? '_blank' : '_self';
     $style = in_array($settings['style'] ?? 'card', ['card', 'overlay', 'plain'], true) ? ($settings['style'] ?? 'card') : 'plain';
-    $ratio = $settings['image_ratio'] ?? 'aspect-[4/3]';
+    $ratioSetting = $settings['image_ratio'] ?? 'aspect-[4/3]';
     $align = ($settings['align'] ?? 'left') === 'center' ? 'center' : 'left';
     $hover = $settings['hover_effect'] ?? true;
     $radius = $settings['border_radius'] ?? 'rounded-2xl';
@@ -15,6 +20,17 @@
         $accent = '6366f1';
     }
 
+    $ratioCss = '4 / 3';
+    if (preg_match('/aspect-\[(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)\]/', $ratioSetting, $m)) {
+        $ratioCss = $m[1] . ' / ' . $m[2];
+    } elseif (strpos($ratioSetting, 'aspect-square') !== false) {
+        $ratioCss = '1 / 1';
+    } elseif (strpos($ratioSetting, 'aspect-video') !== false) {
+        $ratioCss = '16 / 9';
+    } elseif (preg_match('/^(\d+(?:\.\d+)?)\s*[\/:]\s*(\d+(?:\.\d+)?)$/', trim($ratioSetting), $m)) {
+        $ratioCss = $m[1] . ' / ' . $m[2];
+    }
+
     if ($linkUrl !== '' && preg_match('/^\s*(javascript|data|vbscript):/i', $linkUrl)) {
         $linkUrl = '';
     }
@@ -22,11 +38,10 @@
     $tag = $isLink ? 'a' : 'div';
     $rel = $linkTarget === '_blank' ? 'noopener noreferrer' : '';
 
-    $mediaClass = $style === 'overlay' ? '' : $ratio;
-    if ($style === 'plain') {
-        $mediaClass .= ' ' . $radius;
-    }
-    $rootClass = 'rj-ic rj-ic--' . $style . ' rj-ic--' . $align . ($hover ? ' rj-ic--hover' : '') . ' ' . ($style === 'plain' ? '' : $radius) . ($style === 'overlay' ? ' ' . $ratio : '');
+    $mediaClass = $style === 'plain' ? $radius : '';
+    $rootClass = 'rj-ic rj-ic--' . $style . ' rj-ic--' . $align . ($hover ? ' rj-ic--hover' : '') . ($style === 'plain' ? '' : ' ' . $radius);
+    $rootStyle = $style === 'overlay' ? 'aspect-ratio: ' . $ratioCss . ';' : '';
+    $mediaStyle = $style === 'overlay' ? '' : 'aspect-ratio: ' . $ratioCss . ';';
 @endphp
 
 @once
@@ -70,6 +85,7 @@
         position: relative;
         display: block;
         width: 100%;
+        min-height: 120px;
         overflow: hidden;
         background: #e2e8f0;
     }
@@ -77,6 +93,7 @@
         position: absolute;
         inset: 0;
         height: 100%;
+        min-height: 0;
     }
 
     #{{ $uid }} .rj-ic-media img {
@@ -256,15 +273,15 @@
     }
 </style>
 
-<{{ $tag }} id="{{ $uid }}" class="{{ trim($rootClass) }}"
+<{{ $tag }} id="{{ $uid }}" class="{{ trim($rootClass) }}" @if($rootStyle) style="{{ $rootStyle }}" @endif
     @if($isLink)
         href="{{ $linkUrl }}"
         target="{{ $linkTarget }}"
         @if($rel) rel="{{ $rel }}" @endif
     @endif
 >
-    <span class="rj-ic-media {{ trim($mediaClass) }}">
-        @if($image)
+    <span class="rj-ic-media {{ trim($mediaClass) }}" @if($mediaStyle) style="{{ $mediaStyle }}" @endif>
+        @if($image !== '')
             <img src="{{ $image }}" alt="{{ $title }}" loading="lazy">
         @else
             <span class="rj-ic-empty" aria-hidden="true">
@@ -282,7 +299,7 @@
     @if($title || $description)
         <span class="rj-ic-body">
             @if($title)
-                <h3 class="rj-ic-title">{{ $title }}</h3>
+                <span class="rj-ic-title" role="heading" aria-level="3">{{ $title }}</span>
                 <span class="rj-ic-line"></span>
             @endif
             @if($description)
