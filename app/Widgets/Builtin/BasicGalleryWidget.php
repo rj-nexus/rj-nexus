@@ -28,43 +28,57 @@ class BasicGalleryWidget extends BaseWidget
 
     public function description(): string
     {
-        return __('A modern, puzzle-like bento grid gallery with a sleek lightbox.');
+        return __('An organic, animated bento gallery with a keyboard and swipe enabled lightbox.');
     }
 
     public function schema(): array
     {
         $schema = [
-            ['name' => 'title', 'type' => 'text', 'label' => __('Section Title'), 'default' => '', 'tab' => 'content'],
-            ['name' => 'subtitle', 'type' => 'text', 'label' => __('Section Subtitle'), 'default' => '', 'tab' => 'content'],
             [
-                'name' => 'gap',
-                'type' => 'select',
-                'label' => __('Grid Gap'),
+                'name'    => 'title',
+                'type'    => 'text',
+                'label'   => __('Section Title'),
+                'default' => '',
+                'tab'     => 'content',
+            ],
+            [
+                'name'    => 'subtitle',
+                'type'    => 'text',
+                'label'   => __('Section Subtitle'),
+                'default' => '',
+                'tab'     => 'content',
+            ],
+            [
+                'name'    => 'gap',
+                'type'    => 'select',
+                'label'   => __('Grid Gap'),
                 'default' => 'gap-4',
-                'tab' => 'style',
+                'tab'     => 'style',
                 'options' => [
                     'gap-2' => __('Small'),
                     'gap-4' => __('Medium'),
                     'gap-6' => __('Large'),
-                ]
+                ],
             ],
             [
-                'name' => 'radius',
-                'type' => 'select',
-                'label' => __('Border Radius'),
-                'default' => 'rounded-2xl',
-                'tab' => 'style',
-                'options' => [
-                    'rounded-none' => __('None'),
-                    'rounded-xl' => __('Small'),
-                    'rounded-2xl' => __('Medium'),
-                    'rounded-3xl' => __('Large'),
-                ]
+                'name'   => 'images',
+                'type'   => 'repeater',
+                'label'  => __('Images'),
+                'tab'    => 'content',
+                'fields' => [
+                    ['name' => 'image', 'type' => 'media', 'label' => __('Image')],
+                ],
             ],
         ];
 
-        for ($i = 1; $i <= 5; $i++) {
-            $schema[] = ['name' => 'img_'.$i, 'type' => 'media', 'label' => __('Image '.$i), 'default' => '', 'tab' => 'content'];
+        for ($i = 1; $i <= 20; $i++) {
+            $schema[] = [
+                'name'    => 'img_' . $i,
+                'type'    => 'media',
+                'label'   => __('Image ') . $i,
+                'default' => '',
+                'tab'     => 'content',
+            ];
         }
 
         return $schema;
@@ -72,7 +86,8 @@ class BasicGalleryWidget extends BaseWidget
 
     public function render(array $settings): string
     {
-        $uid = 'gallery_' . substr(md5(uniqid()), 0, 6);
+        $uid = 'gallery_' . substr(md5(uniqid('', true)), 0, 8);
+
         return view('rjbuilder.widgets.builtin.basic-gallery', compact('settings', 'uid'))->render();
     }
 }
