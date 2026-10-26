@@ -71,6 +71,8 @@
         --bg: {{ $iconBg }};
         --r: {{ $radius }};
         --ir: {{ $iconRadius }};
+        box-sizing: border-box;
+        min-height: 1px;
         position: relative;
         display: block;
         width: 100%;
@@ -82,7 +84,6 @@
 
     #{{ $uid }}.rj-ib--card {
         padding: 32px;
-        overflow: hidden;
         border-radius: var(--r);
         background: #fff;
         border: 1px solid #e2e8f0;
@@ -93,7 +94,14 @@
         padding: 8px;
     }
 
-    #{{ $uid }}.rj-ib--card::before {
+    #{{ $uid }} .rj-ib-fx {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        border-radius: inherit;
+        pointer-events: none;
+    }
+    #{{ $uid }} .rj-ib-fx::before {
         content: "";
         position: absolute;
         left: 0;
@@ -105,7 +113,7 @@
         transform-origin: left;
         transition: transform .7s cubic-bezier(.2,.8,.2,1);
     }
-    #{{ $uid }}.rj-ib--card::after {
+    #{{ $uid }} .rj-ib-fx::after {
         content: "";
         position: absolute;
         right: -60px;
@@ -117,7 +125,6 @@
         opacity: 0;
         transform: scale(.6);
         transition: opacity .6s ease, transform .8s cubic-bezier(.2,.8,.2,1);
-        pointer-events: none;
     }
 
     #{{ $uid }} .rj-ib-inner {
@@ -179,11 +186,13 @@
     }
 
     #{{ $uid }} .rj-ib-text {
+        display: block;
         flex: 1 1 auto;
         min-width: 0;
         width: 100%;
     }
     #{{ $uid }} .rj-ib-title {
+        display: block;
         margin: 0;
         font-size: 21px;
         font-weight: 800;
@@ -207,6 +216,7 @@
     #{{ $uid }}.rj-ib--left .rj-ib-line { margin-left: 0; margin-right: auto; }
 
     #{{ $uid }} .rj-ib-desc {
+        display: block;
         margin: 12px 0 0;
         font-size: 14.5px;
         line-height: 1.7;
@@ -242,10 +252,10 @@
         border-color: rgba(var(--rgb), .6);
         box-shadow: 0 32px 54px -26px rgba(var(--rgb), .6);
     }
-    #{{ $uid }}.rj-ib--card:hover::before,
-    #{{ $uid }}.rj-ib--card:focus-visible::before { transform: scaleX(1); }
-    #{{ $uid }}.rj-ib--card:hover::after,
-    #{{ $uid }}.rj-ib--card:focus-visible::after { opacity: 1; transform: scale(1); }
+    #{{ $uid }}.rj-ib--card:hover .rj-ib-fx::before,
+    #{{ $uid }}.rj-ib--card:focus-visible .rj-ib-fx::before { transform: scaleX(1); }
+    #{{ $uid }}.rj-ib--card:hover .rj-ib-fx::after,
+    #{{ $uid }}.rj-ib--card:focus-visible .rj-ib-fx::after { opacity: 1; transform: scale(1); }
 
     #{{ $uid }}:hover .rj-ib-icon::before,
     #{{ $uid }}:focus-visible .rj-ib-icon::before {
@@ -338,25 +348,29 @@
         href="{{ $linkUrl }}"
     @endif
 >
-    <span class="rj-ib-inner">
+    @if($boxStyle === 'card')
+        <div class="rj-ib-fx" aria-hidden="true"></div>
+    @endif
+
+    <div class="rj-ib-inner">
         @if($icon)
-            <span class="rj-ib-icon" aria-hidden="true">
+            <div class="rj-ib-icon" aria-hidden="true">
                 {!! rj_icon($icon, 'w-8 h-8') !!}
-            </span>
+            </div>
         @endif
 
         @if($title || $description)
-            <span class="rj-ib-text" style="display:block;">
+            <div class="rj-ib-text">
                 @if($title)
-                    <span class="rj-ib-title" role="heading" aria-level="3" style="display:block;">{{ $title }}</span>
+                    <div class="rj-ib-title" role="heading" aria-level="3">{{ $title }}</div>
                     <span class="rj-ib-line"></span>
                 @endif
                 @if($description)
-                    <span class="rj-ib-desc" style="display:block;">{{ $description }}</span>
+                    <div class="rj-ib-desc">{{ $description }}</div>
                 @endif
-            </span>
+            </div>
         @endif
-    </span>
+    </div>
 
     @if($isLink)
         <span class="rj-ib-arrow" aria-hidden="true">
