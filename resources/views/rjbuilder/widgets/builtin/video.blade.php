@@ -11,7 +11,7 @@
     #{{ $uid }} { width: 100%; padding: 8px 0; }
     #{{ $uid }} *, #{{ $uid }} *::before, #{{ $uid }} *::after { box-sizing: border-box; }
 
-    #{{ $uid }} .rjv-frame { position: relative; width: 100%; @if ($o['vertical']) max-width: 380px; @endif margin: 0 auto; aspect-ratio: {{ $o['aspect'] }}; border-radius: {{ $o['radius'] }}; overflow: hidden; isolation: isolate; background: #0b1020; box-shadow: 0 2px 4px rgba(15,23,42,.06), 0 28px 60px -28px rgba(15,23,42,.45); transition: box-shadow .5s ease, transform .5s cubic-bezier(.2,.8,.2,1); }
+    #{{ $uid }} .rjv-frame { position: relative; width: 100%; max-width: {{ $o['max_width'] }}; max-width: {{ $o['max_width_sv'] }}; margin: 0 auto; aspect-ratio: {{ $o['aspect'] }}; border-radius: {{ $o['radius'] }}; overflow: hidden; isolation: isolate; background: #0b1020; box-shadow: 0 2px 4px rgba(15,23,42,.06), 0 28px 60px -28px rgba(15,23,42,.45); transition: box-shadow .5s ease, transform .5s cubic-bezier(.2,.8,.2,1); }
     #{{ $uid }} .rjv-frame:hover { transform: translateY(-3px); box-shadow: 0 2px 4px rgba(15,23,42,.06), 0 40px 70px -28px rgba(15,23,42,.55); }
 
     #{{ $uid }} .rjv-media { position: absolute; inset: 0; z-index: 1; opacity: 0; pointer-events: none; transition: opacity .5s ease; }

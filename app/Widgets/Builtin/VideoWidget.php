@@ -4,394 +4,308 @@ namespace App\Widgets\Builtin;
 
 use App\Widgets\BaseWidget;
 
-class VideoHeroWidget extends BaseWidget
+class VideoWidget extends BaseWidget
 {
-    private const HEIGHTS = [
-        'h-[60vh]' => 'height:60vh;height:60svh;min-height:420px;',
-        'h-[70vh]' => 'height:70vh;height:70svh;min-height:460px;max-height:820px;',
-        'h-[80vh]' => 'height:80vh;height:80svh;min-height:480px;',
-        'h-screen' => 'height:100vh;height:100svh;min-height:520px;',
+    private const ASPECTS = [
+        'aspect-video' => ['16 / 9', 1.7778],
+        'aspect-square' => ['1 / 1', 1.0],
+        'aspect-[9/16]' => ['9 / 16', 0.5625],
+        'aspect-[4/3]' => ['4 / 3', 1.3333],
     ];
 
-    private const TITLE_SIZES = [
-        'sm' => 'clamp(1.75rem,4vw,3.25rem)',
-        'md' => 'clamp(2rem,5.5vw,4.5rem)',
-        'lg' => 'clamp(2.5rem,7.5vw,6.25rem)',
+    private const RADII = [
+        'rounded-none' => '0px',
+        'rounded-xl' => '12px',
+        'rounded-2xl' => '22px',
+        'rounded-3xl' => '34px',
+        'rounded-full' => '999px',
     ];
 
-    private const BTN_RADIUS = [
-        'sm' => '4px',
-        'md' => '12px',
-        'pill' => '999px',
+    private const WIDTHS = [
+        'small' => 640,
+        'medium' => 900,
+        'large' => 1200,
+        'full' => 0,
+    ];
+
+    private const MAX_HEIGHTS = [
+        '60' => 60,
+        '70' => 70,
+        '80' => 80,
+        'none' => 0,
     ];
 
     public function id(): string
     {
-        return 'video-hero';
+        return 'video';
     }
 
     public function name(): string
     {
-        return __('Video Hero');
+        return __('Video Player');
     }
 
     public function icon(): string
     {
-        return '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>';
+        return '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
     }
 
     public function category(): string
     {
-        return 'layout';
+        return 'media';
     }
 
     public function description(): string
     {
-        return __('A full-screen video background hero supporting local videos, YouTube and Vimeo, with animated text, two buttons and playback controls.');
-    }
-
-    private function yesNo(): array
-    {
-        return ['1' => __('Yes'), '0' => __('No')];
+        return __('Embed videos from YouTube, Vimeo, Dailymotion, or self-hosted files with custom playback behaviors.');
     }
 
     public function schema(): array
     {
         return [
             [
-                'name' => 'height',
-                'type' => 'select',
-                'label' => __('Section Height'),
-                'default' => 'h-[70vh]',
-                'tab' => 'content',
-                'options' => [
-                    'h-[60vh]' => __('Medium (60vh)'),
-                    'h-[70vh]' => __('Standard (70vh)'),
-                    'h-[80vh]' => __('Large (80vh)'),
-                    'h-screen' => __('Full Screen'),
-                ],
-            ],
-            [
-                'name' => 'video_source',
+                'name' => 'source',
                 'type' => 'select',
                 'label' => __('Video Source'),
-                'default' => 'local',
+                'default' => 'youtube',
                 'tab' => 'content',
                 'options' => [
-                    'local' => __('Local / Media Library'),
                     'youtube' => __('YouTube'),
                     'vimeo' => __('Vimeo'),
-                    'external' => __('External URL (MP4 / WebM)'),
+                    'dailymotion' => __('Dailymotion'),
+                    'self_hosted' => __('Self-Hosted (MP4)'),
                 ],
-            ],
-            [
-                'name' => 'video_file',
-                'type' => 'media',
-                'label' => __('Local Video (MP4)'),
-                'default' => '',
-                'tab' => 'content',
-                'help' => __('Used only if Source is set to Local.'),
             ],
             [
                 'name' => 'video_url',
                 'type' => 'text',
-                'label' => __('External Video URL'),
-                'default' => '',
+                'label' => __('Video URL'),
+                'default' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
                 'tab' => 'content',
-                'placeholder' => 'https://www.youtube.com/watch?v=...',
-                'help' => __('Used for YouTube, Vimeo, or External video URL.'),
+                'help' => __('Paste the URL for YouTube, Vimeo, or Dailymotion.'),
             ],
             [
-                'name' => 'fallback_image',
+                'name' => 'video_file',
                 'type' => 'media',
-                'label' => __('Fallback Image'),
+                'label' => __('Self-Hosted Video File (MP4)'),
                 'default' => '',
                 'tab' => 'content',
-                'help' => __('Shown while the video loads, if it fails, or when reduced motion is on.'),
+                'help' => __('Upload an MP4 file. Used only if Source is Self-Hosted.'),
             ],
-            ['name' => 'eyebrow', 'type' => 'text', 'label' => __('Small Label'), 'default' => '', 'tab' => 'content'],
-            ['name' => 'title', 'type' => 'text', 'label' => __('Title'), 'default' => __('Experience the *Future*'), 'tab' => 'content', 'help' => __('Wrap a word in *asterisks* to highlight it.')],
-            ['name' => 'subtitle', 'type' => 'textarea', 'label' => __('Subtitle'), 'default' => __('Watch our latest collection in motion.'), 'tab' => 'content'],
-            ['name' => 'btn_text', 'type' => 'text', 'label' => __('Button Text'), 'default' => __('Discover Now'), 'tab' => 'content'],
-            ['name' => 'btn_url', 'type' => 'text', 'label' => __('Button URL'), 'default' => '/shop', 'tab' => 'content'],
-            ['name' => 'btn2_text', 'type' => 'text', 'label' => __('Second Button Text'), 'default' => '', 'tab' => 'content'],
-            ['name' => 'btn2_url', 'type' => 'text', 'label' => __('Second Button URL'), 'default' => '', 'tab' => 'content'],
-
             [
-                'name' => 'align',
+                'name' => 'poster_image',
+                'type' => 'media',
+                'label' => __('Poster Image (Thumbnail)'),
+                'default' => '',
+                'tab' => 'content',
+                'help' => __('Shown before the video plays. Overrides the automatic YouTube thumbnail.'),
+            ],
+            [
+                'name' => 'caption',
+                'type' => 'text',
+                'label' => __('Caption on Poster'),
+                'default' => '',
+                'tab' => 'content',
+            ],
+            [
+                'name' => 'behavior',
                 'type' => 'select',
-                'label' => __('Text Position (horizontal)'),
-                'default' => 'center',
+                'label' => __('Playback Behavior'),
+                'default' => 'static',
                 'tab' => 'style',
                 'options' => [
-                    'left' => __('Left'),
-                    'center' => __('Center'),
-                    'right' => __('Right'),
+                    'static' => __('Static Poster (Click to Play)'),
+                    'hover' => __('Hover to Play (muted, tap on touch devices)'),
+                    'autoplay' => __('Autoplay (Muted on load)'),
                 ],
             ],
             [
-                'name' => 'valign',
+                'name' => 'width',
                 'type' => 'select',
-                'label' => __('Text Position (vertical)'),
-                'default' => 'center',
+                'label' => __('Width'),
+                'default' => 'medium',
                 'tab' => 'style',
                 'options' => [
-                    'top' => __('Top'),
-                    'center' => __('Center'),
-                    'bottom' => __('Bottom'),
+                    'small' => __('Small (640px)'),
+                    'medium' => __('Medium (900px)'),
+                    'large' => __('Large (1200px)'),
+                    'full' => __('Full Width'),
                 ],
             ],
             [
-                'name' => 'content_style',
+                'name' => 'max_height',
                 'type' => 'select',
-                'label' => __('Content Style'),
-                'default' => 'plain',
+                'label' => __('Max Height (% of screen)'),
+                'default' => '70',
                 'tab' => 'style',
                 'options' => [
-                    'plain' => __('Plain text'),
-                    'glass' => __('Glass card'),
+                    '60' => __('60%'),
+                    '70' => __('70%'),
+                    '80' => __('80%'),
+                    'none' => __('No limit'),
                 ],
             ],
             [
-                'name' => 'title_size',
+                'name' => 'aspect_ratio',
                 'type' => 'select',
-                'label' => __('Title Size'),
-                'default' => 'md',
+                'label' => __('Aspect Ratio'),
+                'default' => 'aspect-video',
                 'tab' => 'style',
                 'options' => [
-                    'sm' => __('Small'),
-                    'md' => __('Medium'),
-                    'lg' => __('Large'),
+                    'aspect-video' => __('16:9 (Standard)'),
+                    'aspect-square' => __('1:1 (Square)'),
+                    'aspect-[9/16]' => __('9:16 (Vertical / Reels)'),
+                    'aspect-[4/3]' => __('4:3 (Classic)'),
                 ],
             ],
             [
-                'name' => 'text_animation',
+                'name' => 'border_radius',
                 'type' => 'select',
-                'label' => __('Text Animation'),
-                'default' => 'rise',
+                'label' => __('Border Radius'),
+                'default' => 'rounded-2xl',
                 'tab' => 'style',
                 'options' => [
-                    'rise' => __('Rise'),
-                    'fade' => __('Fade'),
-                    'zoom' => __('Zoom'),
-                    'blur' => __('Blur in'),
+                    'rounded-none' => __('None'),
+                    'rounded-xl' => __('Small'),
+                    'rounded-2xl' => __('Medium'),
+                    'rounded-3xl' => __('Large'),
+                    'rounded-full' => __('Full (Pill)'),
                 ],
             ],
-            ['name' => 'show_controls', 'type' => 'select', 'label' => __('Show Video Controls'), 'default' => '1', 'tab' => 'style', 'options' => $this->yesNo()],
-            ['name' => 'show_hint', 'type' => 'select', 'label' => __('Show "Scroll" Hint'), 'default' => '1', 'tab' => 'style', 'options' => $this->yesNo()],
-            ['name' => 'btn_new_tab', 'type' => 'select', 'label' => __('Open Buttons in New Tab'), 'default' => '0', 'tab' => 'style', 'options' => $this->yesNo()],
-            [
-                'name' => 'btn_radius',
-                'type' => 'select',
-                'label' => __('Button Shape'),
-                'default' => 'pill',
-                'tab' => 'style',
-                'options' => [
-                    'sm' => __('Square'),
-                    'md' => __('Rounded'),
-                    'pill' => __('Pill'),
-                ],
-            ],
-            [
-                'name' => 'overlay_style',
-                'type' => 'select',
-                'label' => __('Overlay Style'),
-                'default' => 'side',
-                'tab' => 'style',
-                'options' => [
-                    'solid' => __('Solid'),
-                    'gradient' => __('Gradient (bottom to top)'),
-                    'side' => __('Follows text position'),
-                ],
-            ],
-            ['name' => 'overlay_color', 'type' => 'color', 'label' => __('Overlay Color'), 'default' => '#000000', 'tab' => 'style'],
-            ['name' => 'overlay_opacity', 'type' => 'range', 'label' => __('Overlay Opacity (%)'), 'default' => 40, 'min' => 0, 'max' => 100, 'tab' => 'style'],
-            ['name' => 'accent_color', 'type' => 'color', 'label' => __('Accent Color'), 'default' => '#f59e0b', 'tab' => 'style'],
-            ['name' => 'title_color', 'type' => 'color', 'label' => __('Title Color'), 'default' => '#ffffff', 'tab' => 'style'],
-            ['name' => 'subtitle_color', 'type' => 'color', 'label' => __('Subtitle Color'), 'default' => '#f3f4f6', 'tab' => 'style'],
-            ['name' => 'btn_bg', 'type' => 'color', 'label' => __('Button Background'), 'default' => '#ffffff', 'tab' => 'style'],
-            ['name' => 'btn_text_color', 'type' => 'color', 'label' => __('Button Text Color'), 'default' => '#111827', 'tab' => 'style'],
-            ['name' => 'btn_hover_bg', 'type' => 'color', 'label' => __('Button Hover Background'), 'default' => '#f59e0b', 'tab' => 'style'],
-            ['name' => 'btn_hover_text_color', 'type' => 'color', 'label' => __('Button Hover Text Color'), 'default' => '#111827', 'tab' => 'style'],
+            ['name' => 'play_btn_bg', 'type' => 'color', 'label' => __('Play Button Background'), 'default' => '#8b5cf6', 'tab' => 'style'],
+            ['name' => 'play_btn_color', 'type' => 'color', 'label' => __('Play Button Icon Color'), 'default' => '#ffffff', 'tab' => 'style'],
+            ['name' => 'loop', 'type' => 'toggle', 'label' => __('Loop Video'), 'default' => false, 'tab' => 'style'],
+            ['name' => 'mute', 'type' => 'toggle', 'label' => __('Mute Audio (always on for Hover and Autoplay)'), 'default' => false, 'tab' => 'style'],
+            ['name' => 'show_controls', 'type' => 'toggle', 'label' => __('Show Player Controls'), 'default' => true, 'tab' => 'style'],
         ];
     }
 
     public function render(array $settings): string
     {
-        $video = $this->resolveVideo($settings);
-
-        $title = trim((string) ($settings['title'] ?? ''));
-        $titleSize = $this->pick($settings['title_size'] ?? 'md', array_keys(self::TITLE_SIZES), 'md');
-        $btnRadius = $this->pick($settings['btn_radius'] ?? 'pill', array_keys(self::BTN_RADIUS), 'pill');
-        $textAnim = $this->pick($settings['text_animation'] ?? 'rise', ['rise', 'fade', 'zoom', 'blur'], 'rise');
-        $overlayOpacity = $this->int($settings['overlay_opacity'] ?? 40, 0, 100) / 100;
-        $heightKey = (string) ($settings['height'] ?? 'h-[70vh]');
-
-        $content = [
-            'eyebrow' => trim((string) ($settings['eyebrow'] ?? '')),
-            'title' => str_replace('*', '', $title),
-            'title_html' => $title === '' ? '' : $this->accent($title),
-            'subtitle' => trim((string) ($settings['subtitle'] ?? '')),
-            'btn_text' => trim((string) ($settings['btn_text'] ?? '')),
-            'btn_url' => $this->safeUrl((string) ($settings['btn_url'] ?? '')),
-            'btn2_text' => trim((string) ($settings['btn2_text'] ?? '')),
-            'btn2_url' => $this->safeUrl((string) ($settings['btn2_url'] ?? '')),
-        ];
-
-        $opts = [
-            'height_css' => self::HEIGHTS[$heightKey] ?? self::HEIGHTS['h-[70vh]'],
-            'align' => $this->pick($settings['align'] ?? 'center', ['left', 'center', 'right'], 'center'),
-            'valign' => $this->pick($settings['valign'] ?? 'center', ['top', 'center', 'bottom'], 'center'),
-            'content_style' => $this->pick($settings['content_style'] ?? 'plain', ['plain', 'glass'], 'plain'),
-            'title_font' => self::TITLE_SIZES[$titleSize],
-            'text_anim' => 'rjvh-' . $textAnim,
-            'show_controls' => $this->flag($settings['show_controls'] ?? null, true),
-            'show_hint' => $this->flag($settings['show_hint'] ?? null, true),
-            'btn_new_tab' => $this->flag($settings['btn_new_tab'] ?? null, false),
-            'btn_radius' => self::BTN_RADIUS[$btnRadius],
-            'overlay_style' => $this->pick($settings['overlay_style'] ?? 'side', ['solid', 'gradient', 'side'], 'side'),
-            'overlay_color' => $this->color($settings['overlay_color'] ?? null, '#000000'),
-            'overlay_opacity' => round($overlayOpacity, 2),
-            'overlay_opacity_g' => round(min(1, $overlayOpacity * 1.7), 2),
-            'accent' => $this->color($settings['accent_color'] ?? null, '#f59e0b'),
-            'title_color' => $this->color($settings['title_color'] ?? null, '#ffffff'),
-            'subtitle_color' => $this->color($settings['subtitle_color'] ?? null, '#f3f4f6'),
-            'btn_bg' => $this->color($settings['btn_bg'] ?? null, '#ffffff'),
-            'btn_text' => $this->color($settings['btn_text_color'] ?? null, '#111827'),
-            'btn_hover_bg' => $this->color($settings['btn_hover_bg'] ?? null, '#f59e0b'),
-            'btn_hover_text' => $this->color($settings['btn_hover_text_color'] ?? null, '#111827'),
-            'fallback' => $this->safeMediaUrl((string) ($settings['fallback_image'] ?? '')),
-        ];
-
-        $uid = 'rjvh_' . substr(md5(uniqid('', true)), 0, 8);
-
-        return view('rjbuilder.widgets.builtin.video-hero', [
-            'o' => $opts,
-            'c' => $content,
-            'v' => $video,
-            'uid' => $uid,
-        ])->render();
-    }
-
-    private function resolveVideo(array $settings): array
-    {
-        $none = ['kind' => 'none', 'url' => '', 'mime' => ''];
-
-        $source = $this->pick($settings['video_source'] ?? 'local', ['local', 'youtube', 'vimeo', 'external'], 'local');
-        $file = trim((string) ($settings['video_file'] ?? ''));
+        $source = $this->pick($settings['source'] ?? 'youtube', ['youtube', 'vimeo', 'dailymotion', 'self_hosted'], 'youtube');
+        $behavior = $this->pick($settings['behavior'] ?? 'static', ['static', 'hover', 'autoplay'], 'static');
         $url = trim((string) ($settings['video_url'] ?? ''));
+        $file = $this->mediaUrl((string) ($settings['video_file'] ?? ''));
+        $poster = $this->mediaUrl((string) ($settings['poster_image'] ?? ''));
 
-        if ($source === 'local' || $source === 'external') {
-            $src = $this->safeMediaUrl($source === 'local' ? $file : $url);
+        $loop = $this->toBool($settings['loop'] ?? null, false);
+        $controls = $this->toBool($settings['show_controls'] ?? null, true);
+        $mute = $this->toBool($settings['mute'] ?? null, false) || $behavior !== 'static';
 
-            if ($src === '') {
-                return $none;
+        $kind = $source === 'self_hosted' ? 'file' : 'iframe';
+        $src = '';
+        $posterFallback = '';
+
+        if ($kind === 'file') {
+            if ($file === '') {
+                return $this->error(__('Please upload a video file.'));
             }
-
-            return ['kind' => 'file', 'url' => $src, 'mime' => $this->mime($src)];
-        }
-
-        if ($url === '') {
-            return $none;
-        }
-
-        if ($source === 'youtube') {
-            preg_match('/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i', $url, $m);
-            $id = $m[1] ?? '';
-
-            if (!preg_match('/^[A-Za-z0-9_-]{11}$/', $id)) {
-                return $none;
+            $src = $file;
+        } else {
+            $id = $this->videoId($source, $url);
+            if ($id === '') {
+                return $this->error(__('Invalid video URL. Please check the link.'));
             }
+            $src = $this->embedUrl($source, $id, $mute, $loop, $controls);
 
-            $origin = rawurlencode(request()->getSchemeAndHttpHost());
-
-            return [
-                'kind' => 'youtube',
-                'url' => 'https://www.youtube-nocookie.com/embed/' . $id
-                    . '?autoplay=1&mute=1&loop=1&playlist=' . $id
-                    . '&controls=0&rel=0&playsinline=1&modestbranding=1&disablekb=1&iv_load_policy=3&enablejsapi=1&origin=' . $origin,
-                'mime' => '',
-            ];
+            if ($source === 'youtube' && $poster === '') {
+                $poster = 'https://img.youtube.com/vi/' . $id . '/maxresdefault.jpg';
+                $posterFallback = 'https://img.youtube.com/vi/' . $id . '/hqdefault.jpg';
+            }
         }
 
-        preg_match('/vimeo\.com\/(?:video\/)?([0-9]+)/i', $url, $m);
-        $id = $m[1] ?? '';
+        [$aspect, $ratio] = self::ASPECTS[$settings['aspect_ratio'] ?? 'aspect-video'] ?? self::ASPECTS['aspect-video'];
+        $vertical = ($settings['aspect_ratio'] ?? '') === 'aspect-[9/16]';
 
-        if ($id === '') {
-            return $none;
+        $widthPx = self::WIDTHS[$this->pick($settings['width'] ?? 'medium', array_keys(self::WIDTHS), 'medium')];
+        if ($vertical) {
+            $widthPx = $widthPx === 0 ? 380 : min($widthPx, 380);
         }
 
-        return [
-            'kind' => 'vimeo',
-            'url' => 'https://player.vimeo.com/video/' . $id . '?background=1&autoplay=1&loop=1&muted=1&autopause=0&dnt=1&byline=0&title=0&portrait=0',
-            'mime' => '',
+        $maxVh = self::MAX_HEIGHTS[$this->pick($settings['max_height'] ?? '70', array_keys(self::MAX_HEIGHTS), '70')];
+
+        $maxWidth = $widthPx > 0 ? $widthPx . 'px' : '100%';
+        if ($maxVh > 0) {
+            $maxWidth = 'min(' . $maxWidth . ', calc(' . $maxVh . 'vh * ' . $ratio . '))';
+            $maxWidthSv = 'min(' . ($widthPx > 0 ? $widthPx . 'px' : '100%') . ', calc(' . $maxVh . 'svh * ' . $ratio . '))';
+        } else {
+            $maxWidthSv = $maxWidth;
+        }
+
+        $o = [
+            'kind' => $kind,
+            'src' => $src,
+            'poster' => $poster,
+            'poster_fallback' => $posterFallback,
+            'behavior' => $behavior,
+            'caption' => trim((string) ($settings['caption'] ?? '')),
+            'aspect' => $aspect,
+            'max_width' => $maxWidth,
+            'max_width_sv' => $maxWidthSv,
+            'radius' => self::RADII[$settings['border_radius'] ?? 'rounded-2xl'] ?? '22px',
+            'play_bg' => $this->hex($settings['play_btn_bg'] ?? null, '#8b5cf6'),
+            'play_color' => $this->hex($settings['play_btn_color'] ?? null, '#ffffff'),
+            'loop' => $loop,
+            'mute' => $mute,
+            'controls' => $controls,
         ];
+
+        $uid = 'video_' . substr(md5(uniqid('', true)), 0, 8);
+
+        return view('rjbuilder.widgets.builtin.video', compact('o', 'uid'))->render();
     }
 
-    private function mime(string $url): string
+    private function videoId(string $source, string $url): string
     {
-        $path = (string) parse_url($url, PHP_URL_PATH);
-
-        return match (strtolower(pathinfo($path, PATHINFO_EXTENSION))) {
-            'mp4', 'm4v' => 'video/mp4',
-            'webm' => 'video/webm',
-            'ogv', 'ogg' => 'video/ogg',
-            'mov' => 'video/quicktime',
-            default => '',
-        };
-    }
-
-    private function accent(string $text): string
-    {
-        $escaped = e($text);
-
-        return preg_replace('/\*(.+?)\*/u', '<span class="rjvh-accent">$1</span>', $escaped) ?? $escaped;
-    }
-
-    private function int(mixed $value, int $min, int $max): int
-    {
-        return max($min, min($max, (int) $value));
-    }
-
-    private function color(mixed $value, string $default): string
-    {
-        $value = trim((string) $value);
-
-        return preg_match('/^#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i', $value) ? $value : $default;
-    }
-
-    private function pick(mixed $value, array $allowed, string $default): string
-    {
-        $value = (string) $value;
-
-        return in_array($value, $allowed, true) ? $value : $default;
-    }
-
-    private function flag(mixed $value, bool $default): bool
-    {
-        if ($value === null || $value === '') {
-            return $default;
-        }
-
-        return filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? $default;
-    }
-
-    private function safeUrl(string $url): string
-    {
-        $url = trim($url);
-
         if ($url === '') {
             return '';
         }
 
-        if (preg_match('/^[a-z][a-z0-9+.\-]*:/i', $url)) {
-            return preg_match('/^(https?|mailto|tel):/i', $url) ? $url : '';
+        if ($source === 'youtube') {
+            preg_match('/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts|live)\/|.*[?&]v=)|youtu\.be\/)([A-Za-z0-9_-]{11})/i', $url, $m);
+
+            return $m[1] ?? '';
         }
 
-        return $url;
+        if ($source === 'vimeo') {
+            preg_match('/vimeo\.com\/(?:video\/)?([0-9]+)/i', $url, $m);
+
+            return $m[1] ?? '';
+        }
+
+        preg_match('/(?:dailymotion\.com\/video\/|dai\.ly\/)([a-z0-9]+)/i', $url, $m);
+
+        return $m[1] ?? '';
     }
 
-    private function safeMediaUrl(string $url): string
+    private function embedUrl(string $source, string $id, bool $mute, bool $loop, bool $controls): string
+    {
+        $m = $mute ? 1 : 0;
+        $l = $loop ? 1 : 0;
+        $c = $controls ? 1 : 0;
+
+        if ($source === 'youtube') {
+            $q = 'autoplay=1&mute=' . $m . '&controls=' . $c . '&rel=0&playsinline=1&modestbranding=1';
+            if ($loop) {
+                $q .= '&loop=1&playlist=' . $id;
+            }
+
+            return 'https://www.youtube-nocookie.com/embed/' . $id . '?' . $q;
+        }
+
+        if ($source === 'vimeo') {
+            return 'https://player.vimeo.com/video/' . $id . '?autoplay=1&muted=' . $m . '&loop=' . $l . '&controls=' . $c . '&dnt=1';
+        }
+
+        return 'https://www.dailymotion.com/embed/video/' . $id . '?autoplay=1&mute=' . $m . '&controls=' . ($controls ? 'true' : 'false');
+    }
+
+    private function error(string $message): string
+    {
+        return '<div style="margin:16px auto;max-width:40rem;padding:28px;border:1px dashed #fca5a5;border-radius:16px;background:#fef2f2;color:#dc2626;text-align:center;font-size:.95rem;">' . e($message) . '</div>';
+    }
+
+    private function mediaUrl(string $url): string
     {
         $url = trim($url);
 
@@ -404,5 +318,28 @@ class VideoHeroWidget extends BaseWidget
         }
 
         return $url;
+    }
+
+    private function pick(mixed $value, array $allowed, string $default): string
+    {
+        $value = (string) $value;
+
+        return in_array($value, $allowed, true) ? $value : $default;
+    }
+
+    private function toBool(mixed $value, bool $default): bool
+    {
+        if ($value === null || $value === '') {
+            return $default;
+        }
+
+        return filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? $default;
+    }
+
+    private function hex(mixed $value, string $default): string
+    {
+        $value = trim((string) $value);
+
+        return preg_match('/^#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i', $value) ? $value : $default;
     }
 }
