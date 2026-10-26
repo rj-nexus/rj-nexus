@@ -1,419 +1,417 @@
-@php
-    $title    = $settings['title'] ?? '';
-    $subtitle = $settings['subtitle'] ?? '';
-    $gapMap   = ['gap-2' => '8px', 'gap-4' => '16px', 'gap-6' => '24px'];
-    $gap      = $gapMap[$settings['gap'] ?? 'gap-4'] ?? '16px';
+<?php
 
-    $images = [];
-    if (!empty($settings['images']) && is_array($settings['images'])) {
-        foreach ($settings['images'] as $row) {
-            $images[] = is_array($row) ? ($row['image'] ?? '') : $row;
-        }
-    } else {
-        for ($i = 1; $i <= 20; $i++) {
-            if (!empty($settings['img_' . $i])) {
-                $images[] = $settings['img_' . $i];
-            }
-        }
-    }
-    $images = array_values(array_filter($images));
+namespace App\Widgets\Builtin;
 
-    $blobs = [
-        ['46% 54% 38% 62% / 45% 38% 62% 55%', '58% 42% 60% 40% / 40% 62% 38% 60%'],
-        ['62% 38% 55% 45% / 35% 60% 40% 65%', '40% 60% 45% 55% / 60% 38% 62% 40%'],
-        ['34% 66% 60% 40% / 58% 32% 68% 42%', '60% 40% 35% 65% / 45% 60% 40% 55%'],
-        ['55% 45% 40% 60% / 60% 50% 50% 40%', '45% 55% 62% 38% / 38% 62% 44% 56%'],
+use App\Widgets\BaseWidget;
+
+class Google360Widget extends BaseWidget
+{
+    private const RATIOS = [
+        'aspect-video' => '16 / 9',
+        'aspect-square' => '1 / 1',
+        'aspect-[4/3]' => '4 / 3',
+        'aspect-[21/9]' => '21 / 9',
     ];
 
-    $accents = ['#6366f1', '#ec4899', '#14b8a6', '#f59e0b', '#8b5cf6', '#0ea5e9'];
+    private const FIXED = [
+        'h-[400px]' => '400px',
+        'h-[500px]' => '500px',
+        'h-[600px]' => '600px',
+        'h-[80vh]' => 'min(80vh, 860px)',
+    ];
 
-    $sizes = [[2, 2], [1, 1], [1, 2], [2, 1], [1, 1], [1, 2], [2, 2], [1, 1]];
-@endphp
+    private const RADII = [
+        'rounded-none' => 0,
+        'rounded-xl' => 16,
+        'rounded-3xl' => 28,
+        'rounded-full' => 56,
+    ];
 
-@once
-<style>
-    @keyframes rjBgRise {
-        0%   { opacity: 0; transform: translateY(60px) scale(.8) rotate(-5deg); }
-        60%  { opacity: 1; transform: translateY(-8px) scale(1.03) rotate(1deg); }
-        100% { opacity: 1; transform: none; }
-    }
-    @keyframes rjBgBlob {
-        0%   { border-radius: var(--r1); }
-        100% { border-radius: var(--r2); }
-    }
-    @keyframes rjBgSpin {
-        to { transform: rotate(360deg); }
-    }
-    @keyframes rjBgFade {
-        from { opacity: 0; transform: translateY(14px); }
-        to   { opacity: 1; transform: none; }
-    }
-    @keyframes rjBgSwap {
-        from { opacity: 0; transform: scale(.94); }
-        to   { opacity: 1; transform: scale(1); }
-    }
-</style>
-@endonce
+    private const SHADOWS = [
+        'shadow-none' => 'none',
+        'shadow-md' => '0 4px 6px -1px rgba(15,23,42,.1), 0 2px 4px -2px rgba(15,23,42,.1)',
+        'shadow-xl' => '0 20px 25px -5px rgba(15,23,42,.14), 0 8px 10px -6px rgba(15,23,42,.1)',
+        'shadow-2xl' => '0 30px 60px -12px rgba(15,23,42,.35)',
+    ];
 
-<style>
-    #{{ $uid }} {
-        position: relative;
-        width: 100%;
-        padding: 40px 16px;
-        overflow: hidden;
-    }
+    private const WIDTHS = [
+        'md' => '900px',
+        'lg' => '1152px',
+        'full' => '100%',
+    ];
 
-    #{{ $uid }} .rj-bg-head {
-        text-align: center;
-        margin-bottom: 44px;
-    }
-    #{{ $uid }} .rj-bg-sub {
-        font-size: 12px;
-        font-weight: 700;
-        letter-spacing: .18em;
-        text-transform: uppercase;
-        color: #6366f1;
-        margin: 0 0 10px;
-        animation: rjBgFade .8s ease backwards;
-    }
-    #{{ $uid }} .rj-bg-title {
-        font-size: 30px;
-        font-weight: 800;
-        letter-spacing: -.02em;
-        color: #0f172a;
-        margin: 0;
-        animation: rjBgFade .8s .1s ease backwards;
-    }
-    @media (min-width: 768px) {
-        #{{ $uid }} .rj-bg-title { font-size: 44px; }
+    private const FRAME_WIDTHS = [
+        'thin' => 2,
+        'md' => 4,
+        'thick' => 8,
+    ];
+
+    public function id(): string
+    {
+        return 'google-360';
     }
 
-    #{{ $uid }} .rj-bg-grid {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        grid-auto-rows: clamp(150px, 16vw, 230px);
-        grid-auto-flow: row dense;
-        max-width: 1100px;
-        margin: 0 auto;
+    public function name(): string
+    {
+        return __('Google 360 Tour');
     }
-    @media (max-width: 640px) {
-        #{{ $uid }} .rj-bg-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            grid-auto-rows: clamp(130px, 40vw, 180px);
+
+    public function icon(): string
+    {
+        return '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2m0 14v2M3 12h2m14 0h2M5.6 5.6l1.4 1.4m10 10l1.4 1.4m0-12.8l-1.4 1.4m-10 10l-1.4 1.4"/></svg>';
+    }
+
+    public function category(): string
+    {
+        return 'media';
+    }
+
+    public function description(): string
+    {
+        return __('Embed a Google 360-degree virtual tour or Street View in a custom frame, with click-to-explore or Shift-to-zoom modes and fullscreen.');
+    }
+
+    public function schema(): array
+    {
+        return [
+            [
+                'name' => 'title',
+                'type' => 'text',
+                'label' => __('Section Title (Optional)'),
+                'default' => '',
+                'tab' => 'content',
+            ],
+            [
+                'name' => 'subtitle',
+                'type' => 'text',
+                'label' => __('Section Subtitle (Optional)'),
+                'default' => '',
+                'tab' => 'content',
+            ],
+            [
+                'name' => 'iframe_code',
+                'type' => 'textarea',
+                'label' => __('Google Maps / 360 Iframe Code'),
+                'default' => '',
+                'tab' => 'content',
+                'placeholder' => '<iframe src="https://www.google.com/maps/embed?pb=..." width="600" height="450" ...></iframe>',
+                'help' => __('Paste the full iframe code. Width, height and style are removed automatically and the tour is fitted to the widget size.'),
+            ],
+            [
+                'name' => 'badge',
+                'type' => 'text',
+                'label' => __('Badge Text'),
+                'default' => '360°',
+                'tab' => 'content',
+                'help' => __('Small label in the corner. Leave empty to hide.'),
+            ],
+            [
+                'name' => 'interaction',
+                'type' => 'select',
+                'label' => __('Interaction Mode'),
+                'default' => 'click',
+                'tab' => 'content',
+                'options' => [
+                    'click' => __('Click / tap to explore (page scrolls normally until activated)'),
+                    'shift' => __('Hold Shift to zoom & move (desktop)'),
+                    'free' => __('Always interactive'),
+                ],
+            ],
+
+            [
+                'name' => 'height',
+                'type' => 'select',
+                'label' => __('Height'),
+                'default' => 'embed',
+                'tab' => 'style',
+                'options' => [
+                    'embed' => __('From embed code (original proportions)'),
+                    'aspect-video' => __('Standard (16:9)'),
+                    'aspect-square' => __('Square (1:1)'),
+                    'aspect-[4/3]' => __('Classic (4:3)'),
+                    'aspect-[21/9]' => __('Cinematic (21:9)'),
+                    'h-[400px]' => __('Fixed (400px)'),
+                    'h-[500px]' => __('Fixed (500px)'),
+                    'h-[600px]' => __('Fixed (600px)'),
+                    'h-[80vh]' => __('Tall (80% of screen)'),
+                ],
+            ],
+            [
+                'name' => 'width',
+                'type' => 'select',
+                'label' => __('Max Width'),
+                'default' => 'lg',
+                'tab' => 'style',
+                'options' => [
+                    'md' => __('Medium (900px)'),
+                    'lg' => __('Large (1152px)'),
+                    'full' => __('Full width'),
+                ],
+            ],
+            [
+                'name' => 'border_radius',
+                'type' => 'select',
+                'label' => __('Border Radius'),
+                'default' => 'rounded-3xl',
+                'tab' => 'style',
+                'options' => [
+                    'rounded-none' => __('None'),
+                    'rounded-xl' => __('Medium'),
+                    'rounded-3xl' => __('Large'),
+                    'rounded-full' => __('Full Round (Pill)'),
+                ],
+            ],
+            [
+                'name' => 'frame_style',
+                'type' => 'select',
+                'label' => __('Frame Style'),
+                'default' => 'gradient',
+                'tab' => 'style',
+                'options' => [
+                    'gradient' => __('Animated gradient'),
+                    'card' => __('Card (white mat + colored border)'),
+                    'line' => __('Line (colored border only)'),
+                    'none' => __('None'),
+                ],
+            ],
+            [
+                'name' => 'frame_width',
+                'type' => 'select',
+                'label' => __('Border Thickness'),
+                'default' => 'md',
+                'tab' => 'style',
+                'options' => [
+                    'thin' => __('Thin (2px)'),
+                    'md' => __('Medium (4px)'),
+                    'thick' => __('Thick (8px)'),
+                ],
+            ],
+            [
+                'name' => 'overlay_color',
+                'type' => 'color',
+                'label' => __('Border Color'),
+                'default' => '#6366f1',
+                'tab' => 'style',
+            ],
+            [
+                'name' => 'fs_bg',
+                'type' => 'color',
+                'label' => __('Fullscreen Background'),
+                'default' => '#0b1220',
+                'tab' => 'style',
+                'help' => __('Color around the framed tour when it is shown fullscreen.'),
+            ],
+            [
+                'name' => 'box_shadow',
+                'type' => 'select',
+                'label' => __('Shadow'),
+                'default' => 'shadow-xl',
+                'tab' => 'style',
+                'options' => [
+                    'shadow-none' => __('None'),
+                    'shadow-md' => __('Small'),
+                    'shadow-xl' => __('Medium'),
+                    'shadow-2xl' => __('Large'),
+                ],
+            ],
+            [
+                'name' => 'hover_effect',
+                'type' => 'toggle',
+                'label' => __('Lift & Glow on Hover'),
+                'default' => true,
+                'tab' => 'style',
+            ],
+            [
+                'name' => 'entrance',
+                'type' => 'toggle',
+                'label' => __('Reveal Animation on Scroll'),
+                'default' => true,
+                'tab' => 'style',
+            ],
+            [
+                'name' => 'show_fullscreen',
+                'type' => 'toggle',
+                'label' => __('Show Fullscreen Button'),
+                'default' => true,
+                'tab' => 'style',
+            ],
+        ];
+    }
+
+    public function render(array $settings): string
+    {
+        $code = trim((string) ($settings['iframe_code'] ?? ''));
+
+        if ($code === '') {
+            return '';
         }
-    }
 
-    #{{ $uid }} .rj-bg-item {
-        position: relative;
-        cursor: pointer;
-        outline: none;
-        animation: rjBgRise 1s cubic-bezier(.34,1.3,.64,1) var(--d, 0s) both;
-    }
-    #{{ $uid }} .rj-bg-item:focus-visible .rj-bg-shape {
-        box-shadow: 0 0 0 3px #fff, 0 0 0 6px var(--a);
-    }
+        $embed = $this->parseEmbed($code);
 
-    #{{ $uid }} .rj-bg-ring {
-        position: absolute;
-        inset: -4px;
-        z-index: 0;
-        opacity: 0;
-        background: conic-gradient(from 0deg, var(--a), transparent 25%, var(--a) 50%, transparent 75%, var(--a));
-        border-radius: var(--r1);
-        animation: rjBgBlob 9s ease-in-out infinite alternate, rjBgSpin 3.5s linear infinite;
-        transition: opacity .5s ease;
-        pointer-events: none;
-    }
-
-    #{{ $uid }} .rj-bg-shape {
-        position: absolute;
-        inset: 0;
-        z-index: 1;
-        overflow: hidden;
-        border-radius: var(--r1);
-        background: #e2e8f0;
-        box-shadow: 0 20px 40px -18px rgba(15,23,42,.45);
-        animation: rjBgBlob 9s ease-in-out infinite alternate;
-        transition: transform .6s cubic-bezier(.34,1.4,.64,1), box-shadow .5s ease;
-    }
-
-    #{{ $uid }} .rj-bg-shape img {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-        transition: transform .9s cubic-bezier(.2,.8,.2,1);
-    }
-
-    #{{ $uid }} .rj-bg-shade {
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(to top, rgba(15,23,42,.6), rgba(15,23,42,0) 60%);
-        opacity: 0;
-        transition: opacity .5s ease;
-    }
-
-    #{{ $uid }} .rj-bg-zoom {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        width: 52px;
-        height: 52px;
-        margin: -26px 0 0 -26px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 999px;
-        color: #fff;
-        background: rgba(255,255,255,.22);
-        backdrop-filter: blur(6px);
-        border: 1px solid rgba(255,255,255,.45);
-        opacity: 0;
-        transform: scale(.4) rotate(-90deg);
-        transition: opacity .4s ease, transform .6s cubic-bezier(.34,1.56,.64,1);
-    }
-
-    #{{ $uid }} .rj-bg-item:hover .rj-bg-ring,
-    #{{ $uid }} .rj-bg-item:focus-visible .rj-bg-ring {
-        opacity: 1;
-    }
-    #{{ $uid }} .rj-bg-item:hover .rj-bg-shape,
-    #{{ $uid }} .rj-bg-item:focus-visible .rj-bg-shape {
-        transform: scale(1.04) rotate(-1.5deg);
-        box-shadow: 0 30px 50px -18px var(--a);
-    }
-    #{{ $uid }} .rj-bg-item:hover img,
-    #{{ $uid }} .rj-bg-item:focus-visible img {
-        transform: scale(1.14);
-    }
-    #{{ $uid }} .rj-bg-item:hover .rj-bg-shade,
-    #{{ $uid }} .rj-bg-item:focus-visible .rj-bg-shade {
-        opacity: 1;
-    }
-    #{{ $uid }} .rj-bg-item:hover .rj-bg-zoom,
-    #{{ $uid }} .rj-bg-item:focus-visible .rj-bg-zoom {
-        opacity: 1;
-        transform: scale(1) rotate(0deg);
-    }
-
-    #{{ $uid }} .rj-bg-empty {
-        max-width: 640px;
-        margin: 0 auto;
-        padding: 40px;
-        text-align: center;
-        color: #64748b;
-        background: #f8fafc;
-        border: 1px dashed #cbd5e1;
-        border-radius: 24px;
-    }
-
-    #{{ $uid }} .rj-bg-lb {
-        position: fixed;
-        inset: 0;
-        z-index: 99999;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        padding: 32px;
-        background: rgba(2,6,23,.92);
-        backdrop-filter: blur(10px);
-    }
-    #{{ $uid }} .rj-bg-lb.is-open {
-        display: flex;
-        animation: rjBgFade .35s ease both;
-    }
-    #{{ $uid }} .rj-bg-lb-img {
-        max-width: 100%;
-        max-height: 88vh;
-        object-fit: contain;
-        border-radius: 28px;
-        box-shadow: 0 40px 80px -20px rgba(0,0,0,.7);
-    }
-    #{{ $uid }} .rj-bg-lb-img.is-swap {
-        animation: rjBgSwap .45s cubic-bezier(.2,.8,.2,1) both;
-    }
-    #{{ $uid }} .rj-bg-btn {
-        position: absolute;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 52px;
-        height: 52px;
-        border-radius: 999px;
-        color: #fff;
-        background: rgba(255,255,255,.12);
-        border: 1px solid rgba(255,255,255,.25);
-        cursor: pointer;
-        transition: transform .3s cubic-bezier(.34,1.56,.64,1), background .3s ease;
-    }
-    #{{ $uid }} .rj-bg-btn:hover {
-        background: rgba(255,255,255,.25);
-        transform: scale(1.1);
-    }
-    #{{ $uid }} .rj-bg-close { top: 24px; right: 24px; }
-    #{{ $uid }} .rj-bg-prev  { left: 24px; top: 50%; margin-top: -26px; }
-    #{{ $uid }} .rj-bg-next  { right: 24px; top: 50%; margin-top: -26px; }
-    #{{ $uid }} .rj-bg-count {
-        position: absolute;
-        left: 50%;
-        bottom: 24px;
-        transform: translateX(-50%);
-        font-size: 13px;
-        font-weight: 600;
-        letter-spacing: .1em;
-        color: rgba(255,255,255,.7);
-    }
-
-    @media (max-width: 640px) {
-        #{{ $uid }} .rj-bg-prev  { left: 10px; }
-        #{{ $uid }} .rj-bg-next  { right: 10px; }
-        #{{ $uid }} .rj-bg-close { top: 12px; right: 12px; }
-        #{{ $uid }} .rj-bg-lb    { padding: 16px; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-        #{{ $uid }},
-        #{{ $uid }} *,
-        #{{ $uid }} *::before,
-        #{{ $uid }} *::after {
-            animation: none !important;
-            transition: none !important;
+        if ($embed['url'] === '') {
+            return '<div style="padding:24px;text-align:center;color:#64748b;background:#f1f5f9;border-radius:12px;font-size:.9rem;">'
+                . e(__('Could not find a valid https embed link in the pasted code.'))
+                . '</div>';
         }
-    }
-</style>
 
-<div id="{{ $uid }}">
-    @if($title || $subtitle)
-        <header class="rj-bg-head">
-            @if($subtitle)
-                <p class="rj-bg-sub">{{ $subtitle }}</p>
-            @endif
-            @if($title)
-                <h2 class="rj-bg-title">{{ $title }}</h2>
-            @endif
-        </header>
-    @endif
+        $title = mb_substr(trim((string) ($settings['title'] ?? '')), 0, 160);
+        $subtitle = mb_substr(trim((string) ($settings['subtitle'] ?? '')), 0, 160);
 
-    @if(!empty($images))
-        <div class="rj-bg-grid" style="gap: {{ $gap }};">
-            @foreach($images as $i => $img)
-                @php
-                    [$cs, $rs] = $sizes[$i % count($sizes)];
-                    [$r1, $r2] = $blobs[$i % count($blobs)];
-                    $accent    = $accents[$i % count($accents)];
-                @endphp
-                <figure class="rj-bg-item"
-                        style="grid-column: span {{ $cs }}; grid-row: span {{ $rs }}; --r1: {{ $r1 }}; --r2: {{ $r2 }}; --a: {{ $accent }}; --d: {{ number_format($i * 0.12, 2, '.', '') }}s;"
-                        data-src="{{ $img }}"
-                        tabindex="0"
-                        role="button"
-                        aria-label="{{ __('Open image') }} {{ $i + 1 }}">
-                    <span class="rj-bg-ring"></span>
-                    <div class="rj-bg-shape">
-                        <img src="{{ $img }}" alt="" loading="lazy">
-                        <span class="rj-bg-shade"></span>
-                        <span class="rj-bg-zoom">
-                            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
-                        </span>
-                    </div>
-                </figure>
-            @endforeach
-        </div>
-    @else
-        <div class="rj-bg-empty">{{ __('Please select at least one image for the gallery.') }}</div>
-    @endif
+        $heightKey = (string) ($settings['height'] ?? 'embed');
 
-    <div class="rj-bg-lb" role="dialog" aria-modal="true">
-        <button type="button" class="rj-bg-btn rj-bg-close" data-close aria-label="{{ __('Close') }}">
-            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
-        <button type="button" class="rj-bg-btn rj-bg-prev" data-prev aria-label="{{ __('Previous') }}">
-            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6"/></svg>
-        </button>
-        <img class="rj-bg-lb-img" src="" alt="">
-        <button type="button" class="rj-bg-btn rj-bg-next" data-next aria-label="{{ __('Next') }}">
-            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6"/></svg>
-        </button>
-        <span class="rj-bg-count"></span>
-    </div>
-</div>
+        if ($heightKey === 'embed') {
+            $ratio = $embed['ratio'] ?? (4 / 3);
+            $stageCss = 'aspect-ratio:' . round($ratio, 4) . ';min-height:240px;max-height:min(78vh,760px);';
+        } elseif (isset(self::RATIOS[$heightKey])) {
+            $stageCss = 'aspect-ratio:' . self::RATIOS[$heightKey] . ';min-height:240px;max-height:min(78vh,760px);';
+        } elseif (isset(self::FIXED[$heightKey])) {
+            $stageCss = 'height:' . self::FIXED[$heightKey] . ';';
+        } else {
+            $stageCss = 'aspect-ratio:16 / 9;min-height:240px;max-height:min(78vh,760px);';
+        }
 
-<script>
-(function () {
-    var root = document.getElementById(@json($uid));
-    if (!root) return;
+        $border = $this->color($settings['overlay_color'] ?? null, '') ?: '#6366f1';
+        $mode = $this->pick($settings['interaction'] ?? 'click', ['click', 'shift', 'free'], 'click');
+        $showFs = $this->flag($settings['show_fullscreen'] ?? null, true);
+        $badge = mb_substr(trim((string) ($settings['badge'] ?? '360°')), 0, 24);
 
-    var lb    = root.querySelector('.rj-bg-lb');
-    var img   = lb ? lb.querySelector('.rj-bg-lb-img') : null;
-    var count = lb ? lb.querySelector('.rj-bg-count') : null;
-    if (!lb || !img) return;
+        $cfg = [
+            'mode' => $mode,
+            'strings' => [
+                'click' => __('Click to explore'),
+                'tap' => __('Tap to explore'),
+                'shift' => __('Hold Shift to zoom & move'),
+                'activeClick' => __('Interactive'),
+                'activeShift' => __('Zoom & move on — release Shift to scroll the page'),
+                'enterFs' => __('Fullscreen'),
+                'exitFs' => __('Exit fullscreen'),
+            ],
+        ];
 
-    var items = Array.prototype.slice.call(root.querySelectorAll('.rj-bg-item'));
-    var srcs  = items.map(function (el) { return el.getAttribute('data-src'); });
-    var current = 0;
-    var startX  = null;
+        $opts = [
+            'stage_css' => $stageCss,
+            'shell_w' => self::WIDTHS[$this->pick($settings['width'] ?? 'lg', array_keys(self::WIDTHS), 'lg')],
+            'r_px' => self::RADII[$this->pick($settings['border_radius'] ?? 'rounded-3xl', array_keys(self::RADII), 'rounded-3xl')],
+            'fw_px' => self::FRAME_WIDTHS[$this->pick($settings['frame_width'] ?? 'md', array_keys(self::FRAME_WIDTHS), 'md')],
+            'frame' => $this->pick($settings['frame_style'] ?? 'gradient', ['gradient', 'card', 'line', 'none'], 'gradient'),
+            'bc' => $border,
+            'bcl' => $this->mix($border, '#ffffff', 0.55),
+            'bcd' => $this->mix($border, '#000000', 0.35),
+            'brgb' => $this->rgb($border),
+            'fs_bg' => $this->color($settings['fs_bg'] ?? null, '') ?: '#0b1220',
+            'shadow' => self::SHADOWS[$this->pick($settings['box_shadow'] ?? 'shadow-xl', array_keys(self::SHADOWS), 'shadow-xl')],
+            'hover' => $this->flag($settings['hover_effect'] ?? null, true),
+            'entrance' => $this->flag($settings['entrance'] ?? null, true),
+            'show_fs' => $showFs,
+            'mode' => $mode,
+            'badge' => $badge,
+            'config_json' => json_encode($cfg, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT),
+        ];
 
-    function show(i) {
-        current = (i + srcs.length) % srcs.length;
-        img.classList.remove('is-swap');
-        void img.offsetWidth;
-        img.src = srcs[current];
-        img.classList.add('is-swap');
-        if (count) count.textContent = (current + 1) + ' / ' + srcs.length;
+        $uid = 'rjg_' . substr(md5(uniqid('', true)), 0, 8);
+
+        return view('rjbuilder.widgets.builtin.google-360', [
+            'o' => $opts,
+            't' => ['title' => $title, 'subtitle' => $subtitle],
+            'iframeUrl' => $embed['url'],
+            'uid' => $uid,
+        ])->render();
     }
 
-    function open(i) {
-        show(i);
-        lb.classList.add('is-open');
-        document.body.style.overflow = 'hidden';
-    }
+    /**
+     * Extracts the src (and original proportions) from a pasted <iframe> or a plain URL.
+     * Width, height and inline styles of the pasted code are intentionally discarded.
+     */
+    private function parseEmbed(string $code): array
+    {
+        $result = ['url' => '', 'ratio' => null];
+        $src = '';
+        $w = null;
+        $h = null;
 
-    function close() {
-        lb.classList.remove('is-open');
-        document.body.style.overflow = '';
-    }
+        if (preg_match('/<iframe\b[^>]*>/is', $code, $tag)) {
+            $tagHtml = $tag[0];
 
-    items.forEach(function (el, i) {
-        el.addEventListener('click', function () { open(i); });
-        el.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                open(i);
+            if (preg_match('/(?<![\w-])src\s*=\s*(["\'])(.*?)\1/is', $tagHtml, $m)) {
+                $src = $m[2];
             }
-        });
-    });
-
-    lb.addEventListener('click', function (e) {
-        if (e.target === lb || e.target.closest('[data-close]')) close();
-    });
-
-    var prev = lb.querySelector('[data-prev]');
-    var next = lb.querySelector('[data-next]');
-    if (prev) prev.addEventListener('click', function (e) { e.stopPropagation(); show(current - 1); });
-    if (next) next.addEventListener('click', function (e) { e.stopPropagation(); show(current + 1); });
-
-    img.addEventListener('click', function (e) { e.stopPropagation(); });
-
-    document.addEventListener('keydown', function (e) {
-        if (!lb.classList.contains('is-open')) return;
-        if (e.key === 'Escape') close();
-        if (e.key === 'ArrowLeft') show(current - 1);
-        if (e.key === 'ArrowRight') show(current + 1);
-    });
-
-    lb.addEventListener('touchstart', function (e) {
-        startX = e.touches[0].clientX;
-    }, { passive: true });
-
-    lb.addEventListener('touchend', function (e) {
-        if (startX === null) return;
-        var dx = e.changedTouches[0].clientX - startX;
-        if (Math.abs(dx) > 50) {
-            if (dx < 0) show(current + 1); else show(current - 1);
+            if (preg_match('/(?<![\w-])width\s*=\s*(["\']?)(\d{2,5})\1/i', $tagHtml, $m)) {
+                $w = (int) $m[2];
+            }
+            if (preg_match('/(?<![\w-])height\s*=\s*(["\']?)(\d{2,5})\1/i', $tagHtml, $m)) {
+                $h = (int) $m[2];
+            }
+        } else {
+            $src = $code;
         }
-        startX = null;
-    }, { passive: true });
-})();
-</script>
+
+        $src = trim(html_entity_decode($src, ENT_QUOTES | ENT_HTML5));
+
+        if (str_starts_with($src, '//')) {
+            $src = 'https:' . $src;
+        }
+
+        if (!preg_match('#^https://[^\s"\'<>]+$#i', $src)) {
+            return $result;
+        }
+
+        $result['url'] = $src;
+
+        if ($w && $h) {
+            $result['ratio'] = max(0.6, min(3.2, $w / $h));
+        }
+
+        return $result;
+    }
+
+    private function color(mixed $value, string $default): string
+    {
+        $value = trim((string) $value);
+
+        return preg_match('/^#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/i', $value) ? $value : $default;
+    }
+
+    private function rgbArray(string $hex): array
+    {
+        $h = ltrim($hex, '#');
+
+        if (strlen($h) <= 4) {
+            $h = preg_replace('/(.)/', '$1$1', $h);
+        }
+
+        $h = substr($h, 0, 6);
+
+        return [hexdec(substr($h, 0, 2)), hexdec(substr($h, 2, 2)), hexdec(substr($h, 4, 2))];
+    }
+
+    private function rgb(string $hex): string
+    {
+        return implode(',', $this->rgbArray($hex));
+    }
+
+    private function mix(string $hex, string $with, float $t): string
+    {
+        $a = $this->rgbArray($hex);
+        $b = $this->rgbArray($with);
+
+        $out = array_map(fn ($x, $y) => (int) round($x + ($y - $x) * $t), $a, $b);
+
+        return sprintf('#%02x%02x%02x', $out[0], $out[1], $out[2]);
+    }
+
+    private function pick(mixed $value, array $allowed, string $default): string
+    {
+        $value = (string) $value;
+
+        return in_array($value, $allowed, true) ? $value : $default;
+    }
+
+    private function flag(mixed $value, bool $default): bool
+    {
+        if ($value === null || $value === '') {
+            return $default;
+        }
+
+        return filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? $default;
+    }
+}
