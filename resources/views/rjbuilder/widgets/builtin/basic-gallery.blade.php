@@ -175,13 +175,12 @@
     #{{ $uid }} .rj-bg-item {
         cursor: pointer;
         outline: none;
-        transform-box: fill-box;
-        transform-origin: center;
-        transition: transform .6s cubic-bezier(.34,1.4,.64,1), filter .4s ease;
         animation: rjBgRise .9s cubic-bezier(.34,1.3,.64,1) var(--d, 0s) backwards;
     }
     #{{ $uid }} .rj-bg-item image {
-        transition: opacity .4s ease;
+        transform-box: fill-box;
+        transform-origin: center;
+        transition: transform .9s cubic-bezier(.2,.8,.2,1), filter .5s ease;
     }
     #{{ $uid }} .rj-bg-edge {
         fill: none;
@@ -191,15 +190,15 @@
         transition: stroke .4s ease, stroke-width .4s ease;
         pointer-events: none;
     }
-    #{{ $uid }} .rj-bg-item:hover,
-    #{{ $uid }} .rj-bg-item:focus-visible {
-        transform: scale(1.05);
-        filter: drop-shadow(0 14px 16px rgba(15,23,42,.45));
+    #{{ $uid }} .rj-bg-item:hover image,
+    #{{ $uid }} .rj-bg-item:focus-visible image {
+        transform: scale(1.12);
+        filter: brightness(1.08) saturate(1.1);
     }
     #{{ $uid }} .rj-bg-item:hover .rj-bg-edge,
     #{{ $uid }} .rj-bg-item:focus-visible .rj-bg-edge {
         stroke: var(--a);
-        stroke-width: 2.2;
+        stroke-width: 2.5;
     }
 
     #{{ $uid }} .rj-bg-empty {
@@ -386,22 +385,11 @@
     }
 
     items.forEach(function (el, i) {
-        el.addEventListener('pointerenter', function () {
-            if (el.parentNode && el.parentNode.lastElementChild !== el) {
-                el.parentNode.appendChild(el);
-            }
-        });
         el.addEventListener('click', function () { open(i); });
         el.addEventListener('keydown', function (e) {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
                 open(i);
-            }
-        });
-        el.addEventListener('focus', function () {
-            if (el.parentNode && el.parentNode.lastElementChild !== el) {
-                el.parentNode.appendChild(el);
-                el.focus({ preventScroll: true });
             }
         });
     });
