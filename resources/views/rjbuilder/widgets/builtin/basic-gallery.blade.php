@@ -27,7 +27,16 @@
 
     $accents = ['#6366f1', '#ec4899', '#14b8a6', '#f59e0b', '#8b5cf6', '#0ea5e9'];
 
-    $sizes = [[2, 2], [1, 1], [1, 2], [2, 1], [1, 1], [1, 2], [2, 2], [1, 1]];
+    $slots = [
+        [1, 2, 1, 2],
+        [3, 1, 1, 1],
+        [4, 1, 1, 2],
+        [3, 1, 2, 1],
+        [1, 2, 3, 1],
+        [1, 2, 4, 1],
+        [3, 2, 3, 1],
+        [3, 2, 4, 1],
+    ];
 @endphp
 
 @once
@@ -91,22 +100,17 @@
     #{{ $uid }} .rj-bg-grid {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
-        grid-auto-rows: clamp(150px, 16vw, 230px);
-        grid-auto-flow: row dense;
+        grid-auto-rows: clamp(130px, 14vw, 200px);
         max-width: 1100px;
         margin: 0 auto;
-    }
-    @media (max-width: 640px) {
-        #{{ $uid }} .rj-bg-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            grid-auto-rows: clamp(130px, 40vw, 180px);
-        }
     }
 
     #{{ $uid }} .rj-bg-item {
         position: relative;
         cursor: pointer;
         outline: none;
+        min-width: 0;
+        min-height: 0;
         animation: rjBgRise 1s cubic-bezier(.34,1.3,.64,1) var(--d, 0s) both;
     }
     #{{ $uid }} .rj-bg-item:focus-visible .rj-bg-shape {
@@ -267,6 +271,18 @@
     }
 
     @media (max-width: 640px) {
+        #{{ $uid }} .rj-bg-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-auto-rows: clamp(120px, 38vw, 170px);
+        }
+        #{{ $uid }} .rj-bg-item {
+            grid-column: auto / span 1 !important;
+            grid-row: auto / span 1 !important;
+        }
+        #{{ $uid }} .rj-bg-item.rj-bg-lead {
+            grid-column: auto / span 2 !important;
+            grid-row: auto / span 2 !important;
+        }
         #{{ $uid }} .rj-bg-prev  { left: 10px; }
         #{{ $uid }} .rj-bg-next  { right: 10px; }
         #{{ $uid }} .rj-bg-close { top: 12px; right: 12px; }
@@ -300,12 +316,14 @@
         <div class="rj-bg-grid" style="gap: {{ $gap }};">
             @foreach($images as $i => $img)
                 @php
-                    [$cs, $rs] = $sizes[$i % count($sizes)];
+                    [$c, $cs, $r, $rs] = $slots[$i % 8];
+                    $r = $r + intdiv($i, 8) * 4;
                     [$r1, $r2] = $blobs[$i % count($blobs)];
                     $accent    = $accents[$i % count($accents)];
+                    $lead      = $i % 8 === 0 ? 'rj-bg-lead' : '';
                 @endphp
-                <figure class="rj-bg-item"
-                        style="grid-column: span {{ $cs }}; grid-row: span {{ $rs }}; --r1: {{ $r1 }}; --r2: {{ $r2 }}; --a: {{ $accent }}; --d: {{ number_format($i * 0.12, 2, '.', '') }}s;"
+                <figure class="rj-bg-item {{ $lead }}"
+                        style="grid-column: {{ $c }} / span {{ $cs }}; grid-row: {{ $r }} / span {{ $rs }}; --r1: {{ $r1 }}; --r2: {{ $r2 }}; --a: {{ $accent }}; --d: {{ number_format($i * 0.12, 2, '.', '') }}s;"
                         data-src="{{ $img }}"
                         tabindex="0"
                         role="button"
