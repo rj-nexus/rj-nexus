@@ -1,121 +1,140 @@
 @php
+    $slides = array_map(function ($s) {
+        $s['title_html'] = str_replace('rjsc-accent', 'sh-accent', (string) ($s['title_html'] ?? ''));
+        return $s;
+    }, $slides);
+    $final['title_html'] = str_replace('rjsc-accent', 'sh-accent', (string) ($final['title_html'] ?? ''));
+
     $count = count($slides);
     $sectionHeight = ($count + 1) * $o['step_vh'];
     $pad = fn ($n) => str_pad((string) $n, 2, '0', STR_PAD_LEFT);
 @endphp
 
 <style>
-    #{{ $uid }} { position: relative; z-index: 0; isolation: isolate; width: 100%; height: {{ $sectionHeight }}vh; height: {{ $sectionHeight }}svh; background: #020617; overflow-anchor: none; --rjsc-accent: {{ $o['accent'] }}; }
+    #{{ $uid }} { position: relative; z-index: 0; isolation: isolate; width: 100%; height: {{ $sectionHeight }}vh; height: {{ $sectionHeight }}svh; background: #020617; overflow-anchor: none; --sh-accent: {{ $o['accent'] }}; }
     #{{ $uid }} *, #{{ $uid }} *::before, #{{ $uid }} *::after { box-sizing: border-box; }
 
-    /* ---------- Pinned stage ---------- */
-    #{{ $uid }} .rjsc-stage { position: sticky; top: 0; width: 100%; height: 100vh; height: 100svh; overflow: hidden; }
+    #{{ $uid }} .sh-stage { position: sticky; top: 0; width: 100%; height: 100vh; height: 100svh; overflow: hidden; }
 
-    /* ---------- Slides ---------- */
-    #{{ $uid }} .rjsc-slide { position: absolute; inset: 0; overflow: hidden; will-change: clip-path; backface-visibility: hidden; }
-    #{{ $uid }} .rjsc-slide:not(:first-child) { visibility: hidden; }
-    #{{ $uid }} .rjsc-image { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: cover; display: block; transform-origin: 50% 50%; will-change: transform; }
-    #{{ $uid }} .rjsc-image.rjsc-blurred { filter: blur(22px); opacity: .6; }
-    #{{ $uid }} .rjsc-shade { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(to top, #020617 0%, rgba(2, 6, 23, .25) 50%, transparent 100%); }
-    #{{ $uid }} .rjsc-side { position: absolute; inset: 0; pointer-events: none; }
-    #{{ $uid }} .rjsc-slide[data-align="left"] .rjsc-side { background: linear-gradient(90deg, rgba(2, 6, 23, .82) 0%, rgba(2, 6, 23, .4) 42%, transparent 78%); }
-    #{{ $uid }} .rjsc-slide[data-align="right"] .rjsc-side { background: linear-gradient(270deg, rgba(2, 6, 23, .82) 0%, rgba(2, 6, 23, .4) 42%, transparent 78%); }
-    #{{ $uid }} .rjsc-slide[data-align="center"] .rjsc-side { background: radial-gradient(ellipse at center, rgba(2, 6, 23, .55) 0%, transparent 78%); }
-    #{{ $uid }} .rjsc-dim { position: absolute; inset: 0; background: #020617; opacity: 0; pointer-events: none; }
+    #{{ $uid }} .sh-slide { position: absolute; inset: 0; overflow: hidden; will-change: clip-path; backface-visibility: hidden; }
+    #{{ $uid }} .sh-slide:not(:first-child) { visibility: hidden; }
+    #{{ $uid }} .sh-image { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: cover; display: block; transform-origin: 50% 50%; will-change: transform; }
+    #{{ $uid }} .sh-image.sh-blurred { filter: blur(22px) saturate(1.15); opacity: .6; }
+    #{{ $uid }} .sh-tint { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(120% 90% at 85% 0%, color-mix(in srgb, var(--sh-accent) 34%, transparent) 0%, transparent 60%); mix-blend-mode: screen; }
+    #{{ $uid }} .sh-shade { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(to top, rgba(2, 6, 23, .92) 0%, rgba(2, 6, 23, .3) 55%, rgba(2, 6, 23, .05) 100%); }
+    #{{ $uid }} .sh-side { position: absolute; inset: 0; pointer-events: none; }
+    #{{ $uid }} .sh-slide[data-align="left"] .sh-side { background: linear-gradient(90deg, rgba(2, 6, 23, .85) 0%, rgba(2, 6, 23, .35) 45%, transparent 80%); }
+    #{{ $uid }} .sh-slide[data-align="right"] .sh-side { background: linear-gradient(270deg, rgba(2, 6, 23, .85) 0%, rgba(2, 6, 23, .35) 45%, transparent 80%); }
+    #{{ $uid }} .sh-slide[data-align="center"] .sh-side { background: radial-gradient(ellipse at center, rgba(2, 6, 23, .6) 0%, transparent 75%); }
+    #{{ $uid }} .sh-dim { position: absolute; inset: 0; background: #020617; opacity: 0; pointer-events: none; }
 
-    #{{ $uid }} .rjsc-final .rjsc-shade { background: radial-gradient(ellipse at center, rgba(15, 23, 42, .55) 0%, rgba(15, 23, 42, .92) 100%); }
-    #{{ $uid }} .rjsc-final .rjsc-side { display: none; }
+    #{{ $uid }} .sh-frame { position: absolute; inset: 24px; z-index: 2; border: 1px solid rgba(255, 255, 255, .16); border-radius: 28px; pointer-events: none; }
+    #{{ $uid }} .sh-final .sh-frame { border-color: color-mix(in srgb, var(--sh-accent) 40%, transparent); }
 
-    /* Ghost number */
-    #{{ $uid }} .rjsc-ghost { position: absolute; top: 10%; right: 4vw; font-size: clamp(8rem, 28vw, 26rem); font-weight: 900; line-height: .8; letter-spacing: -.04em; color: transparent; -webkit-text-stroke: 2px rgba(255, 255, 255, .2); pointer-events: none; user-select: none; will-change: transform, opacity; }
-    #{{ $uid }} .rjsc-slide[data-align="right"] .rjsc-ghost { right: auto; left: 4vw; }
+    #{{ $uid }} .sh-ghost { position: absolute; top: 8%; right: 3vw; z-index: 1; font-size: clamp(9rem, 30vw, 28rem); font-weight: 900; line-height: .8; letter-spacing: -.05em; color: transparent; -webkit-text-stroke: 1.5px rgba(255, 255, 255, .18); pointer-events: none; user-select: none; will-change: transform, opacity; }
+    #{{ $uid }} .sh-slide[data-align="right"] .sh-ghost { right: auto; left: 3vw; }
 
-    /* ---------- Content ---------- */
-    #{{ $uid }} .rjsc-content { position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 64px max(88px, 7vw) 96px max(24px, 7vw); will-change: transform, opacity; }
-    #{{ $uid }} .rjsc-slide[data-align="left"] .rjsc-content { align-items: flex-start; text-align: left; }
-    #{{ $uid }} .rjsc-slide[data-align="right"] .rjsc-content { align-items: flex-end; text-align: right; }
-    #{{ $uid }} .rjsc-card { display: flex; flex-direction: column; align-items: inherit; gap: 20px; width: 100%; max-width: 48rem; }
+    #{{ $uid }} .sh-content { position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; text-align: center; padding: 72px clamp(28px, 7vw, 96px) clamp(72px, 12vh, 120px); will-change: transform, opacity; }
+    #{{ $uid }} .sh-slide[data-align="left"] .sh-content { align-items: flex-start; text-align: left; }
+    #{{ $uid }} .sh-slide[data-align="right"] .sh-content { align-items: flex-end; text-align: right; }
+    #{{ $uid }} .sh-card { display: flex; flex-direction: column; align-items: inherit; gap: 22px; width: 100%; max-width: 44rem; padding: clamp(24px, 3vw, 44px); border-radius: 28px; background: rgba(2, 6, 23, .28); border: 1px solid rgba(255, 255, 255, .12); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 30px 60px -30px rgba(0, 0, 0, .6); }
 
-    #{{ $uid }} .rjsc-label { display: inline-flex; align-items: center; gap: 14px; margin: 0; font-size: .75rem; font-weight: 700; letter-spacing: .28em; text-transform: uppercase; color: var(--rjsc-accent); }
-    #{{ $uid }} .rjsc-label::before { content: ""; width: 36px; height: 2px; background: var(--rjsc-accent); }
-    #{{ $uid }} .rjsc-title { margin: 0; padding: 0; font-size: clamp(2.25rem, 6vw, 5.5rem); font-weight: 900; line-height: 1.04; letter-spacing: -.03em; color: #fff; text-shadow: 0 2px 30px rgba(0, 0, 0, .35); }
-    #{{ $uid }} .rjsc-final .rjsc-title { font-size: clamp(2.5rem, 7vw, 6rem); }
-    #{{ $uid }} .rjsc-accent { color: var(--rjsc-accent); }
-    #{{ $uid }} .rjsc-text { margin: 0; max-width: 36rem; font-size: clamp(1rem, 1.6vw, 1.3rem); line-height: 1.65; color: rgba(255, 255, 255, .85); text-shadow: 0 1px 14px rgba(0, 0, 0, .35); }
-    #{{ $uid }} .rjsc-btn { display: inline-flex; align-items: center; gap: 12px; margin-top: 8px; padding: 16px 32px; border-radius: 999px; background: #fff; color: #0f172a !important; font-size: .85rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; text-decoration: none !important; box-shadow: 0 18px 40px rgba(0, 0, 0, .35); transition: background-color .3s ease, color .3s ease, transform .3s ease; }
-    #{{ $uid }} .rjsc-btn:hover, #{{ $uid }} .rjsc-btn:focus-visible { background: var(--rjsc-accent); color: #fff !important; transform: translateY(-3px); }
-    #{{ $uid }} .rjsc-btn svg { width: 18px; height: 18px; transition: transform .3s ease; }
-    #{{ $uid }} .rjsc-btn:hover svg { transform: translateX(5px); }
+    #{{ $uid }} .sh-label { display: inline-flex; align-items: center; gap: 10px; align-self: inherit; padding: 7px 14px; border-radius: 999px; font-size: .7rem; font-weight: 700; letter-spacing: .24em; text-transform: uppercase; color: #fff; background: color-mix(in srgb, var(--sh-accent) 22%, transparent); border: 1px solid color-mix(in srgb, var(--sh-accent) 55%, transparent); }
+    #{{ $uid }} .sh-label::before { content: ""; width: 7px; height: 7px; border-radius: 999px; background: var(--sh-accent); box-shadow: 0 0 12px var(--sh-accent); }
 
-    #{{ $uid }} .rjsc-word { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .12em; margin-bottom: -.12em; }
-    #{{ $uid }} .rjsc-word > span { display: inline-block; will-change: transform; }
-    #{{ $uid }}.rjsc-ready [data-reveal] { opacity: 0; will-change: transform, opacity; }
+    #{{ $uid }} .sh-title { margin: 0; padding: 0; font-size: clamp(2.25rem, 5.6vw, 5rem); font-weight: 900; line-height: 1.02; letter-spacing: -.035em; color: #fff; text-shadow: 0 4px 30px rgba(0, 0, 0, .4); }
+    #{{ $uid }} .sh-final .sh-title { font-size: clamp(2.6rem, 8vw, 7rem); }
+    #{{ $uid }} .sh-accent { color: var(--sh-accent); text-shadow: 0 0 28px color-mix(in srgb, var(--sh-accent) 60%, transparent); }
+    #{{ $uid }} .sh-text { margin: 0; max-width: 34rem; font-size: clamp(1rem, 1.5vw, 1.2rem); line-height: 1.7; color: rgba(255, 255, 255, .82); }
 
-    /* ---------- HUD ---------- */
-    #{{ $uid }} .rjsc-hud { position: absolute; inset: 0; z-index: 50; pointer-events: none; }
-    #{{ $uid }} .rjsc-progress { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(255, 255, 255, .12); }
-    #{{ $uid }} .rjsc-progress > span { display: block; height: 100%; background: var(--rjsc-accent); transform-origin: 0 50%; transform: scaleX(0); }
-    #{{ $uid }} .rjsc-dots { position: absolute; right: 1.25rem; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 14px; pointer-events: auto; }
-    #{{ $uid }} .rjsc-dot { width: 10px; height: 10px; margin: 0; padding: 0; border-radius: 999px; border: 1.5px solid rgba(255, 255, 255, .7); background: transparent; cursor: pointer; transition: height .5s cubic-bezier(.4, 0, .2, 1), background .3s ease; }
-    #{{ $uid }} .rjsc-dot.rjsc-active { height: 28px; background: #fff; }
-    #{{ $uid }} .rjsc-counter { position: absolute; right: 1.5rem; bottom: 2.5rem; display: flex; align-items: baseline; gap: .5rem; color: #fff; transition: opacity .4s ease; }
-    #{{ $uid }} .rjsc-current { font-size: 2.5rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
-    #{{ $uid }} .rjsc-total { font-size: .875rem; font-weight: 600; color: rgba(255, 255, 255, .55); }
-    #{{ $uid }} .rjsc-hint { position: absolute; left: 50%; bottom: 28px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 10px; color: rgba(255, 255, 255, .8); font-size: .7rem; font-weight: 600; letter-spacing: .3em; text-transform: uppercase; }
-    #{{ $uid }} .rjsc-hint i { display: block; width: 1px; height: 38px; background: linear-gradient(to bottom, #fff, transparent); transform-origin: top; animation: rjsc-hint 1.8s ease-in-out infinite; }
-    @keyframes rjsc-hint { 0% { transform: scaleY(0); } 50% { transform: scaleY(1); } 100% { transform: scaleY(0); transform-origin: bottom; } }
+    #{{ $uid }} .sh-btn { position: relative; display: inline-flex; align-items: center; gap: 14px; margin-top: 6px; padding: 8px 8px 8px 28px; border-radius: 999px; background: #fff; color: #0f172a !important; font-size: .8rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; text-decoration: none !important; box-shadow: 0 18px 40px rgba(0, 0, 0, .35); transition: transform .4s cubic-bezier(.34, 1.4, .64, 1), box-shadow .4s ease; }
+    #{{ $uid }} .sh-btn::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, .6) 50%, transparent 70%); transform: translateX(-120%); transition: transform .8s ease; }
+    #{{ $uid }} .sh-btn span { position: relative; z-index: 1; }
+    #{{ $uid }} .sh-btn i { position: relative; z-index: 1; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 999px; background: var(--sh-accent); color: #fff; transition: transform .4s cubic-bezier(.34, 1.56, .64, 1); }
+    #{{ $uid }} .sh-btn i svg { width: 18px; height: 18px; }
+    #{{ $uid }} .sh-btn:hover, #{{ $uid }} .sh-btn:focus-visible { transform: translateY(-3px); box-shadow: 0 24px 50px -12px var(--sh-accent); }
+    #{{ $uid }} .sh-btn:hover::after { transform: translateX(120%); }
+    #{{ $uid }} .sh-btn:hover i { transform: translateX(4px) rotate(-12deg); }
+
+    #{{ $uid }} .sh-word { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .12em; margin-bottom: -.12em; }
+    #{{ $uid }} .sh-word > span { display: inline-block; will-change: transform; }
+    #{{ $uid }}.sh-ready [data-reveal] { opacity: 0; will-change: transform, opacity; }
+
+    #{{ $uid }} .sh-hud { position: absolute; inset: 0; z-index: 50; pointer-events: none; }
+    #{{ $uid }} .sh-progress { position: absolute; top: 0; bottom: 0; left: 0; width: 3px; background: rgba(255, 255, 255, .1); }
+    #{{ $uid }} .sh-progress > span { display: block; width: 100%; height: 100%; background: linear-gradient(to bottom, #fff, var(--sh-accent)); transform-origin: 50% 0; transform: scaleY(0); }
+    #{{ $uid }} .sh-counter { position: absolute; left: 24px; top: 24px; display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; color: #fff; background: rgba(2, 6, 23, .35); border: 1px solid rgba(255, 255, 255, .15); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); font-variant-numeric: tabular-nums; transition: opacity .4s ease; }
+    #{{ $uid }} .sh-current { font-size: .95rem; font-weight: 800; color: var(--sh-accent); }
+    #{{ $uid }} .sh-total { font-size: .8rem; font-weight: 600; color: rgba(255, 255, 255, .55); }
+    #{{ $uid }} .sh-dots { position: absolute; right: 1.25rem; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 12px; pointer-events: auto; }
+    #{{ $uid }} .sh-dot { position: relative; width: 8px; height: 8px; margin: 0; padding: 0; border: 0; border-radius: 999px; background: rgba(255, 255, 255, .35); cursor: pointer; transition: height .5s cubic-bezier(.4, 0, .2, 1), background .3s ease, box-shadow .3s ease; }
+    #{{ $uid }} .sh-dot.sh-active { height: 30px; background: var(--sh-accent); box-shadow: 0 0 16px var(--sh-accent); }
+    #{{ $uid }} .sh-hint { position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 10px; color: rgba(255, 255, 255, .8); font-size: .65rem; font-weight: 700; letter-spacing: .32em; text-transform: uppercase; }
+    #{{ $uid }} .sh-hint i { display: block; width: 1px; height: 36px; background: linear-gradient(to bottom, #fff, transparent); animation: {{ $uid }}-hint 1.8s ease-in-out infinite; }
+
+    @keyframes {{ $uid }}-hint {
+        0% { transform: scaleY(0); transform-origin: top; }
+        50% { transform: scaleY(1); transform-origin: top; }
+        51% { transform-origin: bottom; }
+        100% { transform: scaleY(0); transform-origin: bottom; }
+    }
 
     @media (min-width: 768px) {
-        #{{ $uid }} .rjsc-dots { right: 2.5rem; }
-        #{{ $uid }} .rjsc-counter { right: 2.5rem; }
+        #{{ $uid }} .sh-dots { right: 2.5rem; }
+        #{{ $uid }} .sh-counter { left: 40px; top: 40px; }
+        #{{ $uid }} .sh-frame { inset: 40px; }
     }
 
     @media (max-width: 640px) {
-        #{{ $uid }} .rjsc-content { padding: 48px 56px 88px 24px; }
-        #{{ $uid }} .rjsc-counter { display: none; }
+        #{{ $uid }} .sh-content { padding: 64px 18px 84px; justify-content: flex-end; }
+        #{{ $uid }} .sh-card { padding: 22px; border-radius: 22px; }
+        #{{ $uid }} .sh-frame { inset: 12px; border-radius: 20px; }
+        #{{ $uid }} .sh-dots { right: .6rem; gap: 9px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
-        #{{ $uid }} .rjsc-hint i { animation: none; }
+        #{{ $uid }} .sh-hint i { animation: none; }
     }
 </style>
 
 <section id="{{ $uid }}" aria-roledescription="carousel" aria-label="{{ __('Animated Scroll Hero') }}">
-    <div class="rjsc-stage">
+    <div class="sh-stage">
 
         @foreach ($slides as $i => $s)
             @php
-                $hasBtn = $s['btn_text'] !== '' && $s['btn_url'] !== '';
+                $hasBtn  = $s['btn_text'] !== '' && $s['btn_url'] !== '';
                 $hasText = $s['label'] !== '' || $s['title_html'] !== '' || $s['text'] !== '' || $hasBtn;
             @endphp
-            <article class="rjsc-slide" data-align="{{ $s['align'] }}" style="z-index: {{ $i + 1 }};">
-                <img class="rjsc-image" src="{{ $s['image'] }}" alt="{{ $s['title'] }}" decoding="async" @if($i === 0) fetchpriority="high" @endif>
-                <div class="rjsc-shade"></div>
+            <article class="sh-slide" data-align="{{ $s['align'] }}" style="z-index: {{ $i + 1 }};">
+                <img class="sh-image" src="{{ $s['image'] }}" alt="{{ $s['title'] }}" decoding="async" @if($i === 0) fetchpriority="high" @endif>
+                <div class="sh-tint"></div>
+                <div class="sh-shade"></div>
                 @if ($hasText)
-                    <div class="rjsc-side"></div>
+                    <div class="sh-side"></div>
                 @endif
-                <div class="rjsc-ghost" aria-hidden="true">{{ $pad($i + 1) }}</div>
+                <div class="sh-ghost" aria-hidden="true">{{ $pad($i + 1) }}</div>
+                <span class="sh-frame" aria-hidden="true"></span>
 
                 @if ($hasText)
-                    <div class="rjsc-content">
-                        <div class="rjsc-card">
+                    <div class="sh-content">
+                        <div class="sh-card">
                             @if ($s['label'] !== '')
-                                <div data-reveal="0" data-start=".2"><span class="rjsc-label">{{ $s['label'] }}</span></div>
+                                <div data-reveal="0" data-start=".2"><span class="sh-label">{{ $s['label'] }}</span></div>
                             @endif
 
                             @if ($s['title_html'] !== '')
-                                <h2 data-split class="rjsc-title">{!! $s['title_html'] !!}</h2>
+                                <h2 data-split class="sh-title">{!! $s['title_html'] !!}</h2>
                             @endif
 
                             @if ($s['text'] !== '')
-                                <div data-reveal="1" data-start=".6"><p class="rjsc-text">{!! nl2br(e($s['text'])) !!}</p></div>
+                                <div data-reveal="1" data-start=".6"><p class="sh-text">{!! nl2br(e($s['text'])) !!}</p></div>
                             @endif
 
                             @if ($hasBtn)
                                 <div data-reveal="2" data-start=".68">
-                                    <a href="{{ $s['btn_url'] }}" class="rjsc-btn">
+                                    <a href="{{ $s['btn_url'] }}" class="sh-btn">
                                         <span>{{ $s['btn_text'] }}</span>
-                                        <svg fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                                        <i><svg fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg></i>
                                     </a>
                                 </div>
                             @endif
@@ -123,29 +142,31 @@
                     </div>
                 @endif
 
-                <div class="rjsc-dim"></div>
+                <div class="sh-dim"></div>
             </article>
         @endforeach
 
-        <article class="rjsc-slide rjsc-final" data-align="center" style="z-index: {{ $count + 1 }};">
-            <img class="rjsc-image {{ $final['blurred'] ? 'rjsc-blurred' : '' }}" src="{{ $final['image'] }}" alt="{{ $final['title'] }}" decoding="async">
-            <div class="rjsc-shade"></div>
+        <article class="sh-slide sh-final" data-align="center" style="z-index: {{ $count + 1 }};">
+            <img class="sh-image {{ $final['blurred'] ? 'sh-blurred' : '' }}" src="{{ $final['image'] }}" alt="{{ $final['title'] }}" decoding="async">
+            <div class="sh-tint"></div>
+            <div class="sh-shade"></div>
+            <span class="sh-frame" aria-hidden="true"></span>
 
-            <div class="rjsc-content">
-                <div class="rjsc-card">
+            <div class="sh-content">
+                <div class="sh-card">
                     @if ($final['label'] !== '')
-                        <div data-reveal="0" data-start=".2"><span class="rjsc-label">{{ $final['label'] }}</span></div>
+                        <div data-reveal="0" data-start=".2"><span class="sh-label">{{ $final['label'] }}</span></div>
                     @endif
 
                     @if ($final['title_html'] !== '')
-                        <h2 data-split class="rjsc-title">{!! $final['title_html'] !!}</h2>
+                        <h2 data-split class="sh-title">{!! $final['title_html'] !!}</h2>
                     @endif
 
                     @if ($final['btn_text'] !== '' && $final['btn_url'] !== '')
                         <div data-reveal="2" data-start=".68">
-                            <a href="{{ $final['btn_url'] }}" class="rjsc-btn">
+                            <a href="{{ $final['btn_url'] }}" class="sh-btn">
                                 <span>{{ $final['btn_text'] }}</span>
-                                <svg fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                                <i><svg fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg></i>
                             </a>
                         </div>
                     @endif
@@ -153,27 +174,27 @@
             </div>
         </article>
 
-        <div class="rjsc-hud">
+        <div class="sh-hud">
             @if ($o['show_counter'])
-                <div class="rjsc-counter" aria-hidden="true">
-                    <span class="rjsc-current">01</span>
-                    <span class="rjsc-total">/ {{ $pad($count) }}</span>
+                <div class="sh-counter" aria-hidden="true">
+                    <span class="sh-current">01</span>
+                    <span class="sh-total">/ {{ $pad($count) }}</span>
                 </div>
             @endif
 
             @if ($o['show_dots'])
-                <div class="rjsc-dots">
+                <div class="sh-dots">
                     @for ($k = 0; $k < $count; $k++)
-                        <button type="button" class="rjsc-dot" aria-label="{{ __('Go to slide') }} {{ $k + 1 }}"></button>
+                        <button type="button" class="sh-dot" aria-label="{{ __('Go to slide') }} {{ $k + 1 }}"></button>
                     @endfor
                 </div>
             @endif
 
             @if ($o['show_hint'])
-                <div class="rjsc-hint" aria-hidden="true"><span>{{ __('Scroll') }}</span><i></i></div>
+                <div class="sh-hint" aria-hidden="true"><span>{{ __('Scroll') }}</span><i></i></div>
             @endif
 
-            <div class="rjsc-progress"><span></span></div>
+            <div class="sh-progress"><span></span></div>
         </div>
     </div>
 </section>
@@ -185,8 +206,8 @@
         if (!root || root.dataset.ready) { return; }
         root.dataset.ready = '1';
 
-        var stage = root.querySelector('.rjsc-stage');
-        var slideEls = Array.prototype.slice.call(root.querySelectorAll('.rjsc-slide'));
+        var stage = root.querySelector('.sh-stage');
+        var slideEls = Array.prototype.slice.call(root.querySelectorAll('.sh-slide'));
         var S = slideEls.length;
         if (S < 2) { return; }
 
@@ -199,7 +220,6 @@
         function easeOutExpo(t) { return t === 1 ? 1 : 1 - Math.pow(2, -10 * t); }
         function pad(n) { return n < 10 ? '0' + n : String(n); }
 
-        // ---------- Split titles into words (keeps highlighted words) ----------
         root.querySelectorAll('[data-split]').forEach(function (el) {
             var label = el.textContent.trim();
             var tokens = [];
@@ -213,7 +233,7 @@
             el.textContent = '';
             tokens.forEach(function (t, idx) {
                 var outer = document.createElement('span');
-                outer.className = 'rjsc-word';
+                outer.className = 'sh-word';
                 outer.setAttribute('aria-hidden', 'true');
                 var inner = document.createElement('span');
                 inner.textContent = t.w;
@@ -224,29 +244,29 @@
             });
         });
 
-        root.classList.add('rjsc-ready');
+        root.classList.add('sh-ready');
 
         var items = slideEls.map(function (el, i) {
-            var image = el.querySelector('.rjsc-image');
+            var image = el.querySelector('.sh-image');
             return {
                 el: el,
                 i: i,
                 mode: revealMode === 'mixed' ? (i % 2 === 0 ? 'inset' : 'circle') : revealMode,
                 image: image,
-                baseScale: image && image.classList.contains('rjsc-blurred') ? 1.15 : 1,
-                dim: el.querySelector('.rjsc-dim'),
-                ghost: el.querySelector('.rjsc-ghost'),
-                content: el.querySelector('.rjsc-content'),
-                words: Array.prototype.slice.call(el.querySelectorAll('.rjsc-word > span')),
+                baseScale: image && image.classList.contains('sh-blurred') ? 1.15 : 1,
+                dim: el.querySelector('.sh-dim'),
+                ghost: el.querySelector('.sh-ghost'),
+                content: el.querySelector('.sh-content'),
+                words: Array.prototype.slice.call(el.querySelectorAll('.sh-word > span')),
                 reveals: Array.prototype.slice.call(el.querySelectorAll('[data-reveal]'))
             };
         });
 
-        var bar = root.querySelector('.rjsc-progress > span');
-        var dots = Array.prototype.slice.call(root.querySelectorAll('.rjsc-dot'));
-        var counter = root.querySelector('.rjsc-counter');
-        var currentLabel = root.querySelector('.rjsc-current');
-        var hint = root.querySelector('.rjsc-hint');
+        var bar = root.querySelector('.sh-progress > span');
+        var dots = Array.prototype.slice.call(root.querySelectorAll('.sh-dot'));
+        var counter = root.querySelector('.sh-counter');
+        var currentLabel = root.querySelector('.sh-current');
+        var hint = root.querySelector('.sh-hint');
 
         var target = 0;
         var current = 0;
@@ -254,9 +274,6 @@
         var introStart = null;
         var rafId = null;
 
-        // ---------- Pinning ----------
-        // 1) Ancestors with overflow:hidden break position:sticky -> turn them into overflow:clip right away.
-        // 2) If a real scroll container remains, fall back to position:fixed (no JS transform = no jitter).
         var pinMode = 'sticky';
         var fixedState = '';
         var badFrames = 0;
@@ -315,7 +332,6 @@
             if (pinMode === 'fixed') {
                 applyFixed(rect, total);
             } else if (rect.top < -8 && rect.top > -total + 8) {
-                // Safety net: sticky is expected to hold the stage at top:0
                 if (Math.abs(stage.getBoundingClientRect().top) > 2) {
                     badFrames++;
                     if (badFrames > 3) { useFixed(); applyFixed(rect, total); }
@@ -330,7 +346,6 @@
             target = base + easeInOut(clamp((frac - 0.1) / 0.8));
         }
 
-        // ---------- Render (transform / opacity / clip-path only) ----------
         function render(pos) {
             var intro = easeOutExpo(introT);
 
@@ -407,8 +422,8 @@
             });
 
             var idx = clamp(Math.round(pos), 0, S - 1);
-            if (bar) { bar.style.transform = 'scaleX(' + (pos / (S - 1)).toFixed(4) + ')'; }
-            dots.forEach(function (dot, k) { dot.classList.toggle('rjsc-active', k === idx); });
+            if (bar) { bar.style.transform = 'scaleY(' + (pos / (S - 1)).toFixed(4) + ')'; }
+            dots.forEach(function (dot, k) { dot.classList.toggle('sh-active', k === idx); });
             if (counter) {
                 var onSlides = idx < S - 1;
                 counter.style.opacity = onSlides ? '1' : '0';
@@ -451,7 +466,6 @@
             });
         });
 
-        // capture = true also catches scrolling inside inner scroll containers
         window.addEventListener('scroll', onScroll, { passive: true, capture: true });
         window.addEventListener('resize', onScroll);
 
