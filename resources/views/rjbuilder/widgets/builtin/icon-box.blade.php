@@ -33,6 +33,10 @@
     $radius = $radiusMap[$settings['border_radius'] ?? 'rounded-2xl'] ?? '20px';
     $iconRadius = $iconStyle === 'circle' ? '999px' : ($iconStyle === 'square' ? '18px' : '0px');
 
+    $maxWidthRaw = (int) ($settings['max_width'] ?? 420);
+    $maxWidth = ($maxWidthRaw >= 240 && $maxWidthRaw <= 1600) ? $maxWidthRaw : 420;
+    $maxWidthCss = $maxWidthRaw >= 1600 ? 'none' : $maxWidth . 'px';
+
     if ($linkUrl !== '' && preg_match('/^\s*(javascript|data|vbscript):/i', $linkUrl)) {
         $linkUrl = '';
     }
@@ -75,6 +79,9 @@
         position: relative;
         display: flow-root;
         width: 100%;
+        max-width: {{ $maxWidthCss }};
+        margin-left: auto;
+        margin-right: auto;
         height: auto;
         max-height: none;
         min-height: -webkit-min-content;

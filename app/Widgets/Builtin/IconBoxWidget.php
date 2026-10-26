@@ -150,6 +150,20 @@ class IconBoxWidget extends BaseWidget
                     'rounded-3xl' => __('Large'),
                 ],
             ],
+                        [
+                'name' => 'max_width',
+                'type' => 'select',
+                'label' => __('Card Max Width'),
+                'default' => '420',
+                'tab' => 'style',
+                'options' => [
+                    '320' => __('Narrow (320px)'),
+                    '420' => __('Medium (420px)'),
+                    '560' => __('Wide (560px)'),
+                    '720' => __('Extra Wide (720px)'),
+                    '1600' => __('Full Width'),
+                ],
+            ],
         ];
     }
 
