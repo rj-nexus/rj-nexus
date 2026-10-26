@@ -6,30 +6,28 @@
     $style = $settings['style'] ?? 'brand';
     $rawLinks = $settings['links'] ?? '';
 
-    $alignClass = match($align) {
-        'left' => 'justify-start',
-        'right' => 'justify-end',
-        default => 'justify-center',
+    $justify = match($align) {
+        'left' => 'flex-start',
+        'right' => 'flex-end',
+        default => 'center',
     };
 
-    $layoutClass = $layout === 'grid' ? 'grid grid-cols-4 sm:grid-cols-6 gap-4' : 'flex flex-wrap items-center gap-3 sm:gap-4';
-
-    $sizeClass = match($size) {
-        'sm' => 'w-9 h-9',
-        'lg' => 'w-14 h-14',
-        default => 'w-11 h-11',
+    $box = match($size) {
+        'sm' => '36px',
+        'lg' => '56px',
+        default => '44px',
     };
 
-    $iconSize = match($size) {
-        'sm' => 'w-4 h-4',
-        'lg' => 'w-7 h-7',
-        default => 'w-5 h-5',
+    $icon = match($size) {
+        'sm' => '16px',
+        'lg' => '28px',
+        default => '20px',
     };
 
-    $shapeClass = match($shape) {
-        'square' => 'rounded-xl',
-        'none' => 'rounded-none bg-transparent',
-        default => 'rounded-full',
+    $radius = match($shape) {
+        'square' => '12px',
+        'none' => '0',
+        default => '9999px',
     };
 
     $customIcons = [
@@ -71,8 +69,11 @@
 
     $links = [];
     if (!empty($rawLinks)) {
-        $lines = explode("\n", $rawLinks);
-        foreach ($lines as $line) {
+        foreach (explode("\n", $rawLinks) as $line) {
+            $line = trim($line);
+            if ($line === '') {
+                continue;
+            }
             $parts = explode('|', $line);
             if (count($parts) === 2) {
                 $network = strtolower(trim($parts[0]));
@@ -90,12 +91,51 @@
 @endphp
 
 <style>
+    #{{ $uid }} {
+        width: 100%;
+        display: flex;
+        justify-content: {{ $justify }};
+    }
+    #{{ $uid }} .rj-row {
+        @if($layout === 'grid')
+            display: grid;
+            grid-template-columns: repeat(auto-fill, {{ $box }});
+        @else
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+        @endif
+        justify-content: {{ $justify }};
+        gap: 12px;
+        width: 100%;
+    }
     #{{ $uid }} .rj-social-item {
-        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        width: {{ $box }};
+        height: {{ $box }};
+        border-radius: {{ $radius }};
+        text-decoration: none;
+        transition: transform .3s cubic-bezier(.34,1.56,.64,1), background-color .3s ease, border-color .3s ease, box-shadow .3s ease, filter .3s ease;
     }
     #{{ $uid }} .rj-social-item:hover {
         transform: translateY(-5px) scale(1.05);
     }
+    #{{ $uid }} .rj-si,
+    #{{ $uid }} .rj-social-item svg,
+    #{{ $uid }} .rj-social-item img {
+        display: block;
+        flex-shrink: 0;
+        width: {{ $icon }};
+        height: {{ $icon }};
+        max-width: {{ $icon }};
+        max-height: {{ $icon }};
+        object-fit: contain;
+    }
+
     @if($style === 'brand')
         #{{ $uid }} .rj-social-item {
             background-color: #f1f5f9;
@@ -110,7 +150,7 @@
         }
         #{{ $uid }} .rj-social-item img {
             filter: grayscale(100%) opacity(60%);
-            transition: all 0.3s ease;
+            transition: filter .3s ease;
         }
         #{{ $uid }} .rj-social-item:hover img {
             filter: grayscale(0%) opacity(100%);
@@ -140,20 +180,34 @@
             box-shadow: 0 12px 25px -5px var(--brand);
         }
     @endif
+
+    @if($shape === 'none')
+        #{{ $uid }} .rj-social-item,
+        #{{ $uid }} .rj-social-item:hover {
+            background-color: transparent;
+            border-color: transparent;
+            box-shadow: none;
+        }
+    @endif
+
+    @media (prefers-reduced-motion: reduce) {
+        #{{ $uid }} .rj-social-item { transition: none; }
+        #{{ $uid }} .rj-social-item:hover { transform: none; }
+    }
 </style>
 
-<div id="{{ $uid }}" class="w-full flex {{ $alignClass }}">
-    <div class="{{ $layoutClass }}">
+<div id="{{ $uid }}">
+    <div class="rj-row">
         @foreach($links as $link)
             <a href="{{ $link['url'] }}" target="_blank" rel="noopener noreferrer"
-               class="rj-social-item {{ $sizeClass }} {{ $shapeClass }} flex items-center justify-center"
+               class="rj-social-item"
                style="--brand: {{ $link['color'] }};"
                title="{{ ucfirst($link['network']) }}">
 
                 @if(isset($customIcons[$link['network']]))
-                    <img src="{{ $customIcons[$link['network']] }}" class="{{ $iconSize }} object-contain" alt="{{ $link['network'] }}">
+                    <img src="{{ $customIcons[$link['network']] }}" class="rj-si" alt="{{ $link['network'] }}">
                 @else
-                    {!! rj_icon($stdIcons[$link['network']], $iconSize) !!}
+                    {!! rj_icon($stdIcons[$link['network']], 'rj-si') !!}
                 @endif
 
             </a>
