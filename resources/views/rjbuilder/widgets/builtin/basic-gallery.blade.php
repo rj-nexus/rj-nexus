@@ -15,23 +15,103 @@
         }
     }
     $images = array_values(array_filter($images));
+    $n = count($images);
 
     $accents = ['#6366f1', '#ec4899', '#14b8a6', '#f59e0b', '#8b5cf6', '#0ea5e9'];
 
-    $grows = [
-        [1.5, 1, 1],
-        [1, 1.5, 1],
-        [1, 1, 1.5],
-        [1.2, 1.6, 1],
-    ];
+    $S = 100;
+    $R = (int) ceil($n / 3);
 
-    $rows = array_chunk($images, 3, true);
+    $V = [];
+    for ($r = 0; $r <= $R; $r++) {
+        for ($c = 0; $c <= 3; $c++) {
+            $jx = ((($r * 7 + $c * 13) % 5) - 2) * 6;
+            $jy = ((($r * 11 + $c * 5) % 5) - 2) * 6;
+            $V[$r][$c] = [
+                $c * $S + (($c == 0 || $c == 3) ? 0 : $jx),
+                $r * $S + (($r == 0 || $r == $R) ? 0 : $jy),
+            ];
+        }
+    }
+
+    $hb = [];
+    $vb = [];
+    for ($r = 0; $r <= $R; $r++) {
+        for ($c = 0; $c < 3; $c++) {
+            if ($r == 0 || $r == $R) {
+                $hb[$r][$c] = [0, 0];
+            } else {
+                $k  = ($r * 5 + $c * 3) % 4;
+                $s  = (($r + $c) % 2) ? 1 : -1;
+                $b1 = $s * (20 + $k * 4);
+                $hb[$r][$c] = [$b1, $b1 * (($k % 3 == 0) ? -0.6 : 0.9)];
+            }
+        }
+    }
+    for ($r = 0; $r < $R; $r++) {
+        for ($c = 0; $c <= 3; $c++) {
+            if ($c == 0 || $c == 3) {
+                $vb[$r][$c] = [0, 0];
+            } else {
+                $k  = ($r * 3 + $c * 7 + 1) % 4;
+                $s  = (($r + $c) % 2) ? -1 : 1;
+                $b1 = $s * (20 + $k * 4);
+                $vb[$r][$c] = [$b1, $b1 * (($k % 2 == 0) ? -0.6 : 0.9)];
+            }
+        }
+    }
+
+    $f = function ($p) { return sprintf('%.2F %.2F', $p[0], $p[1]); };
+
+    $seg = function ($P, $Q, $b, $rev) use ($f) {
+        $dx = $Q[0] - $P[0];
+        $dy = $Q[1] - $P[1];
+        $len = sqrt($dx * $dx + $dy * $dy) ?: 1;
+        $nx = -$dy / $len;
+        $ny = $dx / $len;
+        $c1 = [$P[0] + $dx * .33 + $nx * $b[0], $P[1] + $dy * .33 + $ny * $b[0]];
+        $c2 = [$P[0] + $dx * .67 + $nx * $b[1], $P[1] + $dy * .67 + $ny * $b[1]];
+        return $rev
+            ? 'C ' . $f($c2) . ', ' . $f($c1) . ', ' . $f($P) . ' '
+            : 'C ' . $f($c1) . ', ' . $f($c2) . ', ' . $f($Q) . ' ';
+    };
+
+    $cells = [];
+    $idx = 0;
+    for ($r = 0; $r < $R; $r++) {
+        $k = min(3, $n - $r * 3);
+        $groups = $k == 3 ? [[0, 1], [1, 2], [2, 3]] : ($k == 2 ? [[0, 2], [2, 3]] : [[0, 3]]);
+        foreach ($groups as $g) {
+            [$a, $b] = $g;
+            $d = 'M ' . $f($V[$r][$a]) . ' ';
+            for ($c = $a; $c < $b; $c++) {
+                $d .= $seg($V[$r][$c], $V[$r][$c + 1], $hb[$r][$c], false);
+            }
+            $d .= $seg($V[$r][$b], $V[$r + 1][$b], $vb[$r][$b], false);
+            for ($c = $b - 1; $c >= $a; $c--) {
+                $d .= $seg($V[$r + 1][$c], $V[$r + 1][$c + 1], $hb[$r + 1][$c], true);
+            }
+            $d .= $seg($V[$r][$a], $V[$r + 1][$a], $vb[$r][$a], true);
+            $d .= 'Z';
+
+            $cells[] = [
+                'd' => $d,
+                'x' => $a * $S - 40,
+                'y' => $r * $S - 40,
+                'w' => ($b - $a) * $S + 80,
+                'h' => $S + 80,
+                'img' => $images[$idx],
+            ];
+            $idx++;
+        }
+    }
+    $VH = $R * $S;
 @endphp
 
 @once
 <style>
     @keyframes rjBgRise {
-        from { opacity: 0; transform: translateY(40px) scale(.96); }
+        from { opacity: 0; transform: scale(.85); }
         to   { opacity: 1; transform: none; }
     }
     @keyframes rjBgFade {
@@ -78,88 +158,48 @@
         #{{ $uid }} .rj-bg-title { font-size: 44px; }
     }
 
-    #{{ $uid }} .rj-bg-mosaic {
+    #{{ $uid }} .rj-bg-wrap {
         width: min(100%, 1100px);
         margin: 0 auto;
-        border-radius: 28px;
+        border-radius: 32px;
         overflow: hidden;
+        background: #e2e8f0;
         box-shadow: 0 30px 60px -25px rgba(15,23,42,.5);
     }
-
-    #{{ $uid }} .rj-bg-row {
-        display: flex;
+    #{{ $uid }} .rj-bg-svg {
+        display: block;
         width: 100%;
-        height: var(--h);
+        height: auto;
     }
 
     #{{ $uid }} .rj-bg-item {
-        position: relative;
-        flex: var(--g) 1 0;
-        min-width: 0;
-        margin: 0;
-        overflow: hidden;
         cursor: pointer;
         outline: none;
-        background: #e2e8f0;
-        transition: flex-grow .6s cubic-bezier(.2,.8,.2,1);
-        animation: rjBgRise .8s cubic-bezier(.2,.8,.2,1) var(--d, 0s) backwards;
+        transform-box: fill-box;
+        transform-origin: center;
+        transition: transform .6s cubic-bezier(.34,1.4,.64,1), filter .4s ease;
+        animation: rjBgRise .9s cubic-bezier(.34,1.3,.64,1) var(--d, 0s) backwards;
     }
-
-    #{{ $uid }} .rj-bg-item img {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-        transition: transform .9s cubic-bezier(.2,.8,.2,1);
+    #{{ $uid }} .rj-bg-item image {
+        transition: opacity .4s ease;
     }
-
-    #{{ $uid }} .rj-bg-shade {
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(to top, var(--a), rgba(15,23,42,0) 65%);
-        opacity: 0;
-        mix-blend-mode: multiply;
-        transition: opacity .5s ease;
+    #{{ $uid }} .rj-bg-edge {
+        fill: none;
+        stroke: rgba(255,255,255,.85);
+        stroke-width: 1;
+        stroke-linejoin: round;
+        transition: stroke .4s ease, stroke-width .4s ease;
+        pointer-events: none;
     }
-
-    #{{ $uid }} .rj-bg-zoom {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        width: 52px;
-        height: 52px;
-        margin: -26px 0 0 -26px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 999px;
-        color: #fff;
-        background: rgba(255,255,255,.22);
-        backdrop-filter: blur(6px);
-        border: 1px solid rgba(255,255,255,.45);
-        opacity: 0;
-        transform: scale(.4) rotate(-90deg);
-        transition: opacity .4s ease, transform .6s cubic-bezier(.34,1.56,.64,1);
-    }
-
     #{{ $uid }} .rj-bg-item:hover,
     #{{ $uid }} .rj-bg-item:focus-visible {
-        flex-grow: calc(var(--g) + 1.2);
+        transform: scale(1.05);
+        filter: drop-shadow(0 14px 16px rgba(15,23,42,.45));
     }
-    #{{ $uid }} .rj-bg-item:hover img,
-    #{{ $uid }} .rj-bg-item:focus-visible img {
-        transform: scale(1.1);
-    }
-    #{{ $uid }} .rj-bg-item:hover .rj-bg-shade,
-    #{{ $uid }} .rj-bg-item:focus-visible .rj-bg-shade {
-        opacity: .85;
-    }
-    #{{ $uid }} .rj-bg-item:hover .rj-bg-zoom,
-    #{{ $uid }} .rj-bg-item:focus-visible .rj-bg-zoom {
-        opacity: 1;
-        transform: scale(1) rotate(0deg);
+    #{{ $uid }} .rj-bg-item:hover .rj-bg-edge,
+    #{{ $uid }} .rj-bg-item:focus-visible .rj-bg-edge {
+        stroke: var(--a);
+        stroke-width: 2.2;
     }
 
     #{{ $uid }} .rj-bg-empty {
@@ -232,9 +272,7 @@
 
     @media (max-width: 640px) {
         #{{ $uid }} { padding: 28px 10px; }
-        #{{ $uid }} .rj-bg-mosaic { border-radius: 18px; }
-        #{{ $uid }} .rj-bg-row { height: calc(var(--h) * .45); }
-        #{{ $uid }} .rj-bg-zoom { display: none; }
+        #{{ $uid }} .rj-bg-wrap { border-radius: 20px; }
         #{{ $uid }} .rj-bg-prev  { left: 10px; }
         #{{ $uid }} .rj-bg-next  { right: 10px; }
         #{{ $uid }} .rj-bg-close { top: 12px; right: 12px; }
@@ -265,35 +303,33 @@
     @endif
 
     @if(!empty($images))
-        <div class="rj-bg-mosaic">
-            @foreach($rows as $ri => $row)
-                @php
-                    $heights = [320, 380, 340, 400];
-                    $h = $heights[$ri % 4];
-                    $pattern = $grows[$ri % count($grows)];
-                @endphp
-                <div class="rj-bg-row" style="--h: {{ $h }}px;">
-                    @foreach($row as $i => $img)
-                        @php
-                            $pos    = $i % 3;
-                            $g      = $pattern[$pos];
-                            $accent = $accents[$i % count($accents)];
-                        @endphp
-                        <figure class="rj-bg-item"
-                                style="--g: {{ $g }}; --a: {{ $accent }}; --d: {{ number_format($i * 0.08, 2, '.', '') }}s;"
-                                data-src="{{ $img }}"
-                                tabindex="0"
-                                role="button"
-                                aria-label="{{ __('Open image') }} {{ $i + 1 }}">
-                            <img src="{{ $img }}" alt="" loading="lazy">
-                            <span class="rj-bg-shade"></span>
-                            <span class="rj-bg-zoom">
-                                <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
-                            </span>
-                        </figure>
+        <div class="rj-bg-wrap">
+            <svg class="rj-bg-svg" viewBox="0 0 300 {{ $VH }}" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    @foreach($cells as $i => $cell)
+                        <clipPath id="{{ $uid }}-c{{ $i }}">
+                            <path d="{{ $cell['d'] }}"/>
+                        </clipPath>
                     @endforeach
-                </div>
-            @endforeach
+                </defs>
+                @foreach($cells as $i => $cell)
+                    <g class="rj-bg-item"
+                       style="--a: {{ $accents[$i % count($accents)] }}; --d: {{ number_format($i * 0.1, 2, '.', '') }}s;"
+                       data-src="{{ $cell['img'] }}"
+                       data-index="{{ $i }}"
+                       tabindex="0"
+                       role="button"
+                       aria-label="{{ __('Open image') }} {{ $i + 1 }}">
+                        <g clip-path="url(#{{ $uid }}-c{{ $i }})">
+                            <image href="{{ $cell['img'] }}"
+                                   x="{{ $cell['x'] }}" y="{{ $cell['y'] }}"
+                                   width="{{ $cell['w'] }}" height="{{ $cell['h'] }}"
+                                   preserveAspectRatio="xMidYMid slice"/>
+                        </g>
+                        <path class="rj-bg-edge" d="{{ $cell['d'] }}"/>
+                    </g>
+                @endforeach
+            </svg>
         </div>
     @else
         <div class="rj-bg-empty">{{ __('Please select at least one image for the gallery.') }}</div>
@@ -350,11 +386,22 @@
     }
 
     items.forEach(function (el, i) {
+        el.addEventListener('pointerenter', function () {
+            if (el.parentNode && el.parentNode.lastElementChild !== el) {
+                el.parentNode.appendChild(el);
+            }
+        });
         el.addEventListener('click', function () { open(i); });
         el.addEventListener('keydown', function (e) {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
                 open(i);
+            }
+        });
+        el.addEventListener('focus', function () {
+            if (el.parentNode && el.parentNode.lastElementChild !== el) {
+                el.parentNode.appendChild(el);
+                el.focus({ preventScroll: true });
             }
         });
     });
