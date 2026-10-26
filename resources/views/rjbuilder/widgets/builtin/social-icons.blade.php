@@ -125,8 +125,7 @@
         transform: translateY(-5px) scale(1.05);
     }
     #{{ $uid }} .rj-si,
-    #{{ $uid }} .rj-social-item svg,
-    #{{ $uid }} .rj-social-item img {
+    #{{ $uid }} .rj-social-item svg {
         display: block;
         flex-shrink: 0;
         width: {{ $icon }};
@@ -134,6 +133,15 @@
         max-width: {{ $icon }};
         max-height: {{ $icon }};
         object-fit: contain;
+    }
+    #{{ $uid }} .rj-mask {
+        display: block;
+        flex-shrink: 0;
+        width: {{ $icon }};
+        height: {{ $icon }};
+        background-color: currentColor;
+        -webkit-mask: var(--mask) no-repeat center / contain;
+        mask: var(--mask) no-repeat center / contain;
     }
 
     @if($style === 'brand')
@@ -148,13 +156,6 @@
             border-color: var(--brand);
             box-shadow: 0 10px 20px -5px var(--brand);
         }
-        #{{ $uid }} .rj-social-item img {
-            filter: grayscale(100%) opacity(60%);
-            transition: filter .3s ease;
-        }
-        #{{ $uid }} .rj-social-item:hover img {
-            filter: grayscale(0%) opacity(100%);
-        }
     @elseif($style === 'monochrome')
         #{{ $uid }} .rj-social-item {
             background-color: #0f172a;
@@ -164,9 +165,6 @@
         #{{ $uid }} .rj-social-item:hover {
             background-color: #334155;
             border-color: #334155;
-        }
-        #{{ $uid }} .rj-social-item img {
-            filter: brightness(0) invert(1);
         }
     @else
         #{{ $uid }} .rj-social-item {
@@ -205,7 +203,10 @@
                title="{{ ucfirst($link['network']) }}">
 
                 @if(isset($customIcons[$link['network']]))
-                    <img src="{{ $customIcons[$link['network']] }}" class="rj-si" alt="{{ $link['network'] }}">
+                    <span class="rj-si rj-mask"
+                          style="--mask: url('{{ $customIcons[$link['network']] }}');"
+                          role="img"
+                          aria-label="{{ $link['network'] }}"></span>
                 @else
                     {!! rj_icon($stdIcons[$link['network']], 'rj-si') !!}
                 @endif
