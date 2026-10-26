@@ -9,26 +9,24 @@
     $description = $settings['description'] ?? '';
     $linkUrl = trim($settings['link_url'] ?? '');
     $linkTarget = ($settings['link_target'] ?? '_self') === '_blank' ? '_blank' : '_self';
-    $style = in_array($settings['style'] ?? 'card', ['card', 'overlay', 'plain'], true) ? ($settings['style'] ?? 'card') : 'plain';
-    $ratioSetting = $settings['image_ratio'] ?? 'aspect-[4/3]';
+    $styleRaw = $settings['style'] ?? 'card';
+    $style = $styleRaw === 'minimal' ? 'plain' : (in_array($styleRaw, ['card', 'overlay', 'plain'], true) ? $styleRaw : 'card');
     $align = ($settings['align'] ?? 'left') === 'center' ? 'center' : 'left';
     $hover = $settings['hover_effect'] ?? true;
     $radius = $settings['border_radius'] ?? 'rounded-2xl';
 
+    $imgHeight = (int) ($settings['image_height'] ?? 280);
+    if ($imgHeight < 120 || $imgHeight > 900) {
+        $imgHeight = 280;
+    }
+    $maxWidth = (int) ($settings['max_width'] ?? 480);
+    if ($maxWidth < 200 || $maxWidth > 1400) {
+        $maxWidth = 480;
+    }
+
     $accent = ltrim($settings['accent'] ?? '#6366f1', '#');
     if (!preg_match('/^[0-9a-fA-F]{6}$/', $accent)) {
         $accent = '6366f1';
-    }
-
-    $ratioCss = '4 / 3';
-    if (preg_match('/aspect-\[(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)\]/', $ratioSetting, $m)) {
-        $ratioCss = $m[1] . ' / ' . $m[2];
-    } elseif (strpos($ratioSetting, 'aspect-square') !== false) {
-        $ratioCss = '1 / 1';
-    } elseif (strpos($ratioSetting, 'aspect-video') !== false) {
-        $ratioCss = '16 / 9';
-    } elseif (preg_match('/^(\d+(?:\.\d+)?)\s*[\/:]\s*(\d+(?:\.\d+)?)$/', trim($ratioSetting), $m)) {
-        $ratioCss = $m[1] . ' / ' . $m[2];
     }
 
     if ($linkUrl !== '' && preg_match('/^\s*(javascript|data|vbscript):/i', $linkUrl)) {
@@ -40,8 +38,8 @@
 
     $mediaClass = $style === 'plain' ? $radius : '';
     $rootClass = 'rj-ic rj-ic--' . $style . ' rj-ic--' . $align . ($hover ? ' rj-ic--hover' : '') . ($style === 'plain' ? '' : ' ' . $radius);
-    $rootStyle = $style === 'overlay' ? 'aspect-ratio: ' . $ratioCss . ';' : '';
-    $mediaStyle = $style === 'overlay' ? '' : 'aspect-ratio: ' . $ratioCss . ';';
+    $rootStyle = 'max-width: ' . $maxWidth . 'px;' . ($style === 'overlay' ? ' height: ' . ($imgHeight + 100) . 'px;' : '');
+    $mediaStyle = $style === 'overlay' ? '' : 'height: ' . $imgHeight . 'px;';
 @endphp
 
 @once
@@ -59,6 +57,8 @@
         position: relative;
         display: block;
         width: 100%;
+        margin-left: auto;
+        margin-right: auto;
         color: inherit;
         text-decoration: none;
         outline: none;
@@ -85,7 +85,6 @@
         position: relative;
         display: block;
         width: 100%;
-        min-height: 120px;
         overflow: hidden;
         background: #e2e8f0;
     }
@@ -93,7 +92,6 @@
         position: absolute;
         inset: 0;
         height: 100%;
-        min-height: 0;
     }
 
     #{{ $uid }} .rj-ic-media img {
@@ -102,6 +100,7 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
+        object-position: center;
         display: block;
         transition: transform .9s cubic-bezier(.2,.8,.2,1), filter .5s ease;
     }
@@ -273,7 +272,7 @@
     }
 </style>
 
-<{{ $tag }} id="{{ $uid }}" class="{{ trim($rootClass) }}" @if($rootStyle) style="{{ $rootStyle }}" @endif
+<{{ $tag }} id="{{ $uid }}" class="{{ trim($rootClass) }}" style="{{ $rootStyle }}"
     @if($isLink)
         href="{{ $linkUrl }}"
         target="{{ $linkTarget }}"
