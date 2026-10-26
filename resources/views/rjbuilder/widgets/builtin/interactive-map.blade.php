@@ -17,6 +17,9 @@
     #{{ $uid }} .leaflet-container { font-family: inherit; background: var(--mapbg); outline: 0; }
     #{{ $uid }} .leaflet-container:focus-visible { outline: 2px solid var(--acc); outline-offset: -2px; }
 
+    /* MapLibre's own attribution/controls are replaced by Leaflet's */
+    #{{ $uid }} .maplibregl-ctrl-attrib, #{{ $uid }} .maplibregl-ctrl-bottom-right, #{{ $uid }} .maplibregl-ctrl-bottom-left { display: none !important; }
+
     #{{ $uid }} .leaflet-control-attribution { margin: 0; padding: 3px 9px; border-radius: 10px 0 0 0; background: var(--glass) !important; color: var(--muted) !important; font-size: 10px; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
     #{{ $uid }} .leaflet-control-attribution a { color: inherit !important; }
 
@@ -264,15 +267,28 @@
 
     var FALLBACK_ICON = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a7 7 0 00-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 00-7-7zm0 9.5A2.5 2.5 0 119.5 9 2.5 2.5 0 0112 11.5z"/></svg>';
 
-    var TILES = {
-        light: { url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', attr: '&copy; OpenStreetMap contributors &copy; CARTO', sub: 'abcd', max: 19, theme: 'light' },
-        dark: { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', attr: '&copy; OpenStreetMap contributors &copy; CARTO', sub: 'abcd', max: 19, theme: 'dark' },
-        voyager: { url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', attr: '&copy; OpenStreetMap contributors &copy; CARTO', sub: 'abcd', max: 19, theme: 'light' },
-        streets: { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', attr: '&copy; OpenStreetMap contributors', sub: 'abc', max: 19, theme: 'light' },
-        satellite: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attr: 'Tiles &copy; Esri', sub: 'abc', max: 19, native: 18, theme: 'dark' }
+    // ---------- Keyless basemaps ----------
+    // Vector styles: OpenFreeMap (no API key, no request limit) rendered by MapLibre GL.
+    // Raster fallbacks are used when WebGL / MapLibre is unavailable.
+    var OFM = 'https://tiles.openfreemap.org/styles/';
+    var OFM_ATTR = '<a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> &copy; <a href="https://www.openmaptiles.org/" target="_blank" rel="noopener">OpenMapTiles</a> Data from <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>';
+
+    var STYLES = {
+        light: { vec: OFM + 'positron', raster: 'grayLight', theme: 'light' },
+        dark: { vec: OFM + 'dark', raster: 'grayDark', theme: 'dark' },
+        voyager: { vec: OFM + 'liberty', raster: 'osm', theme: 'light' },
+        streets: { vec: OFM + 'bright', raster: 'osm', theme: 'light' },
+        satellite: { vec: '', raster: 'satellite', theme: 'dark' }
     };
 
-    // ---------- Leaflet loader (shared by every map on the page) ----------
+    var RASTERS = {
+        osm: { url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', attr: '&copy; OpenStreetMap contributors', max: 19 },
+        grayLight: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', attr: 'Tiles &copy; Esri', max: 19, native: 16 },
+        grayDark: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', attr: 'Tiles &copy; Esri', max: 19, native: 16 },
+        satellite: { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attr: 'Tiles &copy; Esri', max: 19, native: 18 }
+    };
+
+    // ---------- Script loaders (shared by every map on the page) ----------
     function loadLeaflet() {
         if (window.L && window.L.map) { return Promise.resolve(window.L); }
         if (window.__rjLeafletP) { return window.__rjLeafletP; }
@@ -285,7 +301,7 @@
                 l.setAttribute('data-rj-leaflet', '1');
                 if (integrity) { l.integrity = integrity; l.crossOrigin = ''; }
                 l.onload = function () { onDone(true); };
-                l.onerror = function () { l.parentNode && l.parentNode.removeChild(l); onDone(false); };
+                l.onerror = function () { if (l.parentNode) { l.parentNode.removeChild(l); } onDone(false); };
                 document.head.appendChild(l);
             }
 
@@ -326,13 +342,68 @@
                 s.onload = function () {
                     if (window.L && window.L.map) { waitCss(function () { resolve(window.L); }); } else { next(); }
                 };
-                s.onerror = function () { s.parentNode && s.parentNode.removeChild(s); next(); };
+                s.onerror = function () { if (s.parentNode) { s.parentNode.removeChild(s); } next(); };
                 document.head.appendChild(s);
             })();
         });
 
         window.__rjLeafletP.catch(function () { window.__rjLeafletP = null; });
         return window.__rjLeafletP;
+    }
+
+    function loadAny(urls, check) {
+        return new Promise(function (resolve, reject) {
+            var i = 0;
+            (function next() {
+                if (check()) { resolve(); return; }
+                if (i >= urls.length) { reject(new Error('load')); return; }
+                var s = document.createElement('script');
+                s.src = urls[i++];
+                s.async = true;
+                s.onload = function () { if (check()) { resolve(); } else { next(); } };
+                s.onerror = function () { if (s.parentNode) { s.parentNode.removeChild(s); } next(); };
+                document.head.appendChild(s);
+            })();
+        });
+    }
+
+    function hasWebGL() {
+        try {
+            var c = document.createElement('canvas');
+            return !!(window.WebGLRenderingContext && (c.getContext('webgl') || c.getContext('experimental-webgl')));
+        } catch (e) { return false; }
+    }
+
+    function loadVector() {
+        if (window.L && window.L.maplibreGL) { return Promise.resolve(); }
+        if (window.__rjMapLibreP) { return window.__rjMapLibreP; }
+
+        window.__rjMapLibreP = new Promise(function (resolve, reject) {
+            if (!hasWebGL()) { reject(new Error('webgl')); return; }
+
+            if (!document.querySelector('link[data-rj-maplibre]')) {
+                var l = document.createElement('link');
+                l.rel = 'stylesheet';
+                l.href = 'https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css';
+                l.setAttribute('data-rj-maplibre', '1');
+                document.head.appendChild(l);
+            }
+
+            loadAny([
+                'https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js',
+                'https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.js'
+            ], function () { return !!window.maplibregl; })
+                .then(function () {
+                    return loadAny([
+                        'https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.1.4/leaflet-maplibre-gl.js',
+                        'https://cdn.jsdelivr.net/npm/@maplibre/maplibre-gl-leaflet@0.1.4/leaflet-maplibre-gl.js'
+                    ], function () { return !!(window.L && window.L.maplibreGL); });
+                })
+                .then(resolve, reject);
+        });
+
+        window.__rjMapLibreP.catch(function () { window.__rjMapLibreP = null; });
+        return window.__rjMapLibreP;
     }
 
     function pad2(v) { return v < 10 ? '0' + v : String(v); }
@@ -358,7 +429,9 @@
             attributionControl: false,
             scrollWheelZoom: false,
             dragging: !touchDevice,
-            worldCopyJump: true
+            worldCopyJump: true,
+            minZoom: 2,
+            maxZoom: 19
         });
 
         map.setView(bounds.getCenter(), Math.max(2, cfg.zoom - (flyIn ? 5 : 0)), { animate: false });
@@ -370,6 +443,14 @@
         var layer = null;
         var introDone = false;
         var hintTimer = 0;
+        var styleToken = 0;
+        var readyDone = false;
+
+        function ready() {
+            if (readyDone) { return; }
+            readyDone = true;
+            root.classList.add('rjm-ready');
+        }
 
         // ---------- Helpers ----------
         function showHint(text) {
@@ -381,7 +462,7 @@
         }
 
         function pads() {
-            var desktop = window.innerWidth > 640 && cfg.showCard && card && !root.classList.contains('rjm-fs-m');
+            var desktop = window.innerWidth > 640 && cfg.showCard && card;
             var cw = desktop ? Math.min(340, stage.clientWidth - 32) + 32 : 0;
             return {
                 tl: [(cfg.cardPos === 'left' ? cw : 0) + 40, 70],
@@ -406,27 +487,61 @@
         // ---------- Tiles ----------
         var switchBtns = Array.prototype.slice.call(root.querySelectorAll('.rjm-sw'));
 
-        function setStyle(name) {
-            var t = TILES[name] || TILES.light;
-            if (layer) { map.removeLayer(layer); }
+        function swap(next) {
+            var old = layer;
+            layer = next;
+            next.addTo(map);
+            if (old) { map.removeLayer(old); }
+        }
 
-            var opts = { attribution: t.attr, subdomains: t.sub, maxZoom: t.max };
-            if (t.native) { opts.maxNativeZoom = t.native; }
-            layer = L.tileLayer(t.url, opts).addTo(map);
+        function rasterLayer(key) {
+            var r = RASTERS[key] || RASTERS.osm;
+            var opts = { attribution: r.attr, maxZoom: r.max };
+            if (r.native) { opts.maxNativeZoom = r.native; }
+            return L.tileLayer(r.url, opts);
+        }
 
-            root.setAttribute('data-theme', t.theme);
+        function setStyle(name, first) {
+            var def = STYLES[name] || STYLES.light;
+            var token = ++styleToken;
+
+            root.setAttribute('data-theme', def.theme);
             root.setAttribute('data-style', name);
             switchBtns.forEach(function (b) {
                 var on = b.getAttribute('data-style') === name;
                 b.classList.toggle('rjm-on', on);
                 b.setAttribute('aria-pressed', on ? 'true' : 'false');
             });
+
+            function useRaster() {
+                if (token !== styleToken) { return; }
+                var l = rasterLayer(def.raster);
+                swap(l);
+                if (first) { l.once('load', ready); }
+            }
+
+            if (!def.vec) { useRaster(); return; }
+
+            loadVector().then(function () {
+                if (token !== styleToken) { return; }
+
+                var l = L.maplibreGL({ style: def.vec, attribution: OFM_ATTR });
+                swap(l);
+
+                if (first) {
+                    try {
+                        var getter = l.getMaplibreMap || l.getMapboxMap;
+                        var gl = getter ? getter.call(l) : null;
+                        if (gl && gl.once) { gl.once('idle', ready); }
+                    } catch (e) {}
+                }
+            }).catch(useRaster);
         }
 
-        setStyle(cfg.style);
+        setStyle(cfg.style, true);
 
         switchBtns.forEach(function (b) {
-            b.addEventListener('click', function () { setStyle(b.getAttribute('data-style')); });
+            b.addEventListener('click', function () { setStyle(b.getAttribute('data-style'), false); });
         });
 
         // ---------- Markers ----------
@@ -660,10 +775,7 @@
         }
 
         // ---------- Ready + intro ----------
-        function ready() { root.classList.add('rjm-ready'); }
-
-        layer.once('load', ready);
-        setTimeout(ready, 3200);
+        setTimeout(ready, 3500);
 
         function runIntro() {
             if (introDone) { return; }
