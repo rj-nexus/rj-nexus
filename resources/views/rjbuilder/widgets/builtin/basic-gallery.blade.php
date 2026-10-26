@@ -32,10 +32,10 @@
         [3, 1, 1, 1],
         [4, 1, 1, 2],
         [3, 1, 2, 1],
-        [1, 2, 3, 1],
-        [1, 2, 4, 1],
-        [3, 2, 3, 1],
-        [3, 2, 4, 1],
+        [1, 1, 3, 1],
+        [2, 2, 3, 2],
+        [4, 1, 3, 2],
+        [1, 1, 4, 1],
     ];
 @endphp
 
@@ -100,7 +100,7 @@
     #{{ $uid }} .rj-bg-grid {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
-        grid-auto-rows: clamp(130px, 14vw, 200px);
+        grid-auto-rows: calc((min(1100px, 100vw - 32px) - 3 * var(--gap)) / 4);
         max-width: 1100px;
         margin: 0 auto;
     }
@@ -273,15 +273,16 @@
     @media (max-width: 640px) {
         #{{ $uid }} .rj-bg-grid {
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            grid-auto-rows: clamp(120px, 38vw, 170px);
+            grid-auto-rows: calc((100vw - 32px - var(--gap)) / 2);
+            grid-auto-flow: row dense;
         }
         #{{ $uid }} .rj-bg-item {
-            grid-column: auto / span 1 !important;
-            grid-row: auto / span 1 !important;
+            grid-column: span 1 !important;
+            grid-row: span 1 !important;
         }
         #{{ $uid }} .rj-bg-item.rj-bg-lead {
-            grid-column: auto / span 2 !important;
-            grid-row: auto / span 2 !important;
+            grid-column: span 2 !important;
+            grid-row: span 2 !important;
         }
         #{{ $uid }} .rj-bg-prev  { left: 10px; }
         #{{ $uid }} .rj-bg-next  { right: 10px; }
@@ -313,7 +314,7 @@
     @endif
 
     @if(!empty($images))
-        <div class="rj-bg-grid" style="gap: {{ $gap }};">
+        <div class="rj-bg-grid" style="gap: {{ $gap }}; --gap: {{ $gap }};">
             @foreach($images as $i => $img)
                 @php
                     [$c, $cs, $r, $rs] = $slots[$i % 8];
