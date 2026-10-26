@@ -67,6 +67,7 @@
 <style>
     #{{ $uid }} {
         position: relative;
+        container-type: inline-size;
         width: 100%;
         padding: 40px 16px;
         overflow: hidden;
@@ -100,17 +101,18 @@
     #{{ $uid }} .rj-bg-grid {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
-        grid-auto-rows: calc((min(1100px, 100vw - 32px) - 3 * var(--gap)) / 4);
+        grid-auto-rows: calc((min(100cqw, 1100px) - 3 * var(--gap)) / 4);
+        width: min(100cqw, 1100px);
         max-width: 1100px;
         margin: 0 auto;
     }
 
     #{{ $uid }} .rj-bg-item {
         position: relative;
-        cursor: pointer;
-        outline: none;
         min-width: 0;
         min-height: 0;
+        cursor: pointer;
+        outline: none;
         animation: rjBgRise 1s cubic-bezier(.34,1.3,.64,1) var(--d, 0s) both;
     }
     #{{ $uid }} .rj-bg-item:focus-visible .rj-bg-shape {
@@ -273,7 +275,7 @@
     @media (max-width: 640px) {
         #{{ $uid }} .rj-bg-grid {
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            grid-auto-rows: calc((100vw - 32px - var(--gap)) / 2);
+            grid-auto-rows: calc((100cqw - var(--gap)) / 2);
             grid-auto-flow: row dense;
         }
         #{{ $uid }} .rj-bg-item {
