@@ -25,20 +25,13 @@
     #{{ $uid }} .rjl-img {
         display: block;
         width: 100%;
-        height: 100%;
+        height: auto;
         max-width: 100%;
         max-height: var(--mh);
         margin: 0;
         object-fit: contain;
         object-position: {{ $o['objpos'] }} center;
     }
-
-    /* Builder Canvas daxilində ağ loqolar görünsün deyə yüngül fon */
-    .rj-canvas #{{ $uid }} .rjl-img {
-        background: rgba(0, 0, 0, 0.06);
-        border-radius: 4px;
-    }
-
     #{{ $uid }}[data-filter="white"] .rjl-img { filter: brightness(0) invert(1); }
     #{{ $uid }}[data-filter="black"] .rjl-img { filter: brightness(0); }
 
@@ -77,6 +70,7 @@
                  src="{{ $o['src'] }}"
                  alt="{{ $o['alt'] }}"
                  decoding="async"
+                 loading="lazy"
                  onerror="this.style.display='none';var p=this.nextElementSibling;if(p){p.removeAttribute('hidden');}">
             <span class="rjl-ph rjl-err" hidden title="{{ $o['src'] }}">{{ __('Image not found') }}</span>
         @else
