@@ -28,7 +28,7 @@ class CurrencyRatesWidget extends BaseWidget
 
     public function description(): string
     {
-        return __('Live exchange rates (AZN, USD, EUR and more) fetched from a free API and displayed in a beautiful table.');
+        return __('Live exchange rates for 160+ currencies with search, filters, starred currencies and a built-in converter.');
     }
 
     public function schema(): array
@@ -55,10 +55,11 @@ class CurrencyRatesWidget extends BaseWidget
                 'default' => 'exchangerate_host',
                 'tab'     => 'content',
                 'options' => [
-                    'exchangerate_host' => __('Exchangerate.host (free, no key)'),
+                    // key kept for backward compatibility with already saved pages
+                    'exchangerate_host' => __('Open ER-API (free, no key)'),
                     'allratestoday'     => __('AllRatesToday – AMB official (needs key)'),
                 ],
-                'help'    => __('Exchangerate.host works without an API key. AllRatesToday requires a free API key from allratestoday.com.'),
+                'help'    => __('If the selected source is unreachable, free backup sources are used automatically.'),
             ],
             [
                 'name'    => 'api_key',
@@ -66,7 +67,7 @@ class CurrencyRatesWidget extends BaseWidget
                 'label'   => __('API Key (AllRatesToday only)'),
                 'default' => '',
                 'tab'     => 'content',
-                'help'    => __('Paste your free API key from allratestoday.com/register'),
+                'help'    => __('Paste your free API key from allratestoday.com/register. Note: the key is visible in the page source.'),
             ],
             [
                 'name'    => 'base',
@@ -78,9 +79,48 @@ class CurrencyRatesWidget extends BaseWidget
                     'AZN' => 'AZN',
                     'USD' => 'USD',
                     'EUR' => 'EUR',
+                    'GBP' => 'GBP',
                     'TRY' => 'TRY',
                     'RUB' => 'RUB',
-                    'GBP' => 'GBP',
+                    'GEL' => 'GEL',
+                    'KZT' => 'KZT',
+                    'UAH' => 'UAH',
+                    'AED' => 'AED',
+                    'CNY' => 'CNY',
+                    'JPY' => 'JPY',
+                ],
+            ],
+            [
+                'name'    => 'mode',
+                'type'    => 'select',
+                'label'   => __('Currencies Shown'),
+                'default' => 'auto',
+                'tab'     => 'content',
+                'options' => [
+                    'auto'   => __('All available (your list first)'),
+                    'custom' => __('Only my list below'),
+                ],
+                'help'    => __('A currency from your list that the source does not provide is shown with an error message.'),
+            ],
+            [
+                'name'    => 'show_extra',
+                'type'    => 'toggle',
+                'label'   => __('Include extra currencies (metals, crypto, etc.)'),
+                'default' => false,
+                'tab'     => 'content',
+            ],
+            [
+                'name'    => 'initial_count',
+                'type'    => 'select',
+                'label'   => __('Shown Before "Show all"'),
+                'default' => '24',
+                'tab'     => 'content',
+                'options' => [
+                    '12'  => '12',
+                    '24'  => '24',
+                    '48'  => '48',
+                    '96'  => '96',
+                    '0'   => __('Show everything'),
                 ],
             ],
             [
@@ -90,43 +130,58 @@ class CurrencyRatesWidget extends BaseWidget
                 'default' => '3600',
                 'tab'     => 'content',
                 'options' => [
-                    '0'    => __('Never (page load only)'),
-                    '300'  => __('Every 5 minutes'),
-                    '3600' => __('Every hour'),
-                    '21600'=> __('Every 6 hours'),
+                    '0'     => __('Never (page load only)'),
+                    '300'   => __('Every 5 minutes'),
+                    '3600'  => __('Every hour'),
+                    '21600' => __('Every 6 hours'),
                 ],
+            ],
+            [
+                'name'    => 'show_search',
+                'type'    => 'toggle',
+                'label'   => __('Show Search & Filters'),
+                'default' => true,
+                'tab'     => 'content',
+            ],
+            [
+                'name'    => 'show_converter',
+                'type'    => 'toggle',
+                'label'   => __('Show Converter'),
+                'default' => true,
+                'tab'     => 'content',
             ],
             [
                 'name'    => 'layout',
                 'type'    => 'select',
-                'label'   => __('Layout'),
-                'default' => 'table',
+                'label'   => __('Default Layout'),
+                'default' => 'grid',
                 'tab'     => 'style',
                 'options' => [
-                    'table'  => __('Table'),
-                    'cards'  => __('Cards'),
-                    'compact'=> __('Compact List'),
+                    'grid'    => __('Grid'),
+                    'list'    => __('List'),
+                    'compact' => __('Compact List'),
                 ],
+                'help'    => __('Visitors can switch the layout themselves.'),
             ],
             [
                 'name'    => 'accent',
                 'type'    => 'color',
                 'label'   => __('Accent Color'),
-                'default' => '#8b5cf6',
+                'default' => '#1f4fff',
                 'tab'     => 'style',
             ],
             [
                 'name'    => 'text_color',
                 'type'    => 'color',
                 'label'   => __('Text Color'),
-                'default' => '#0f172a',
+                'default' => '#0e1a2b',
                 'tab'     => 'style',
             ],
             [
                 'name'    => 'bg_color',
                 'type'    => 'color',
-                'label'   => __('Card Background'),
-                'default' => '#ffffff',
+                'label'   => __('Background Color'),
+                'default' => '#eef1f7',
                 'tab'     => 'style',
             ],
             [
@@ -146,7 +201,7 @@ class CurrencyRatesWidget extends BaseWidget
             [
                 'name'    => 'radius',
                 'type'    => 'select',
-                'label'   => __('Card Radius'),
+                'label'   => __('Corner Radius'),
                 'default' => 'lg',
                 'tab'     => 'style',
                 'options' => [
@@ -169,11 +224,12 @@ class CurrencyRatesWidget extends BaseWidget
             [
                 'name'   => 'currencies',
                 'type'   => 'repeater',
-                'label'  => __('Currencies to Display'),
+                'label'  => __('Priority Currencies'),
                 'tab'    => 'content',
+                'help'   => __('Shown first. Name and flag are optional – they are filled in automatically.'),
                 'fields' => [
                     ['name' => 'code', 'type' => 'text', 'label' => __('Currency Code (e.g. USD)')],
-                    ['name' => 'name', 'type' => 'text', 'label' => __('Display Name')],
+                    ['name' => 'name', 'type' => 'text', 'label' => __('Display Name (optional)')],
                     ['name' => 'flag', 'type' => 'text', 'label' => __('Flag Emoji (optional)')],
                 ],
             ],
