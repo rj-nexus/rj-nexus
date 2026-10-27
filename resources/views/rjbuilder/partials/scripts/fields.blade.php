@@ -7,6 +7,14 @@ function builderFields() {
         iconsLoading: false,
         iconList: [],
 
+        repeaterEdit: {
+            open: false,
+            field: null,
+            index: null,
+            item: null,
+            inputEl: null
+        },
+
         openIconPicker(fieldName) {
             this.iconTargetField = fieldName;
             this.iconSearch = '';
@@ -104,6 +112,68 @@ function builderFields() {
         dimEmpty(field) {
             const v = this.dimGet(field);
             return v.top === '' && v.right === '' && v.bottom === '' && v.left === '';
+        },
+
+        addRepeaterItem(field) {
+            const cur = [...(this.currentSettings[field.name] || [])];
+            const empty = {};
+            (field.fields || []).forEach(f => { empty[f.name] = ''; });
+            cur.push(empty);
+            this.updateSetting(field.name, cur);
+            this.repeaterEdit = {
+                open: true,
+                field: field,
+                index: cur.length - 1,
+                item: Object.assign({}, empty),
+                inputEl: null
+            };
+        },
+
+        openRepeaterItem(field, idx) {
+            const cur = this.currentSettings[field.name] || [];
+            if (!cur[idx]) return;
+            this.repeaterEdit = {
+                open: true,
+                field: field,
+                index: idx,
+                item: Object.assign({}, cur[idx]),
+                inputEl: null
+            };
+        },
+
+        removeRepeaterItem(field, idx) {
+            const cur = [...(this.currentSettings[field.name] || [])];
+            cur.splice(idx, 1);
+            this.updateSetting(field.name, cur);
+            if (this.repeaterEdit.open && this.repeaterEdit.field && this.repeaterEdit.field.name === field.name && this.repeaterEdit.index === idx) {
+                this.repeaterEdit.open = false;
+            }
+        },
+
+        setRepeaterField(name, value) {
+            if (!this.repeaterEdit.open || !this.repeaterEdit.field) return;
+            const fieldName = this.repeaterEdit.field.name;
+            const cur = [...(this.currentSettings[fieldName] || [])];
+            if (!cur[this.repeaterEdit.index]) return;
+            cur[this.repeaterEdit.index] = Object.assign({}, cur[this.repeaterEdit.index], { [name]: value });
+            this.repeaterEdit.item = cur[this.repeaterEdit.index];
+            this.updateSetting(fieldName, cur);
+        },
+
+        pickRepeaterMedia(subName) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.dataset.repeaterSub = subName;
+            this.repeaterEdit.inputEl = input;
+            window.dispatchEvent(new CustomEvent('open-media-picker', { detail: { value: input } }));
+        },
+
+        onRepeaterMedia(e) {
+            if (!this.repeaterEdit.open || !this.repeaterEdit.inputEl) return;
+            if (e.detail.target !== this.repeaterEdit.inputEl) return;
+            const subName = this.repeaterEdit.inputEl.dataset.repeaterSub;
+            this.setRepeaterField(subName, e.detail.url);
+            this.repeaterEdit.inputEl = null;
         }
     };
 }

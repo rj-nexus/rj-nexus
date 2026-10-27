@@ -435,6 +435,7 @@
                             @include('rjbuilder.partials.fields.label')
 
                             @include('rjbuilder.partials.fields.text')
+                            @include('rjbuilder.partials.fields.repeater')
 
                             <template x-if="field.type === 'number'">
                                 <input type="number" class="rj-in" :value="fieldValue(field)" :min="field.min" :max="field.max" :step="field.step || 1" @input="updateSetting(field.name, $event.target.value)">
