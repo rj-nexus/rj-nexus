@@ -62,8 +62,19 @@
                         </template>
 
                         <template x-if="sub.type === 'text'">
-                            <input type="text" class="rj-in" :value="repeaterEdit.item ? (repeaterEdit.item[sub.name] || '') : ''"
-                                   @input="setRepeaterField(sub.name, $event.target.value)">
+                            <div>
+                                <input type="text" class="rj-in" :value="repeaterEdit.item ? (repeaterEdit.item[sub.name] || '') : ''"
+                                       @input="setRepeaterField(sub.name, $event.target.value)"
+                                       :list="sub.source ? 'rj-dl-' + field.name + '-' + sub.name : null">
+
+                                <template x-if="sub.source">
+                                    <datalist :id="'rj-dl-' + field.name + '-' + sub.name">
+                                        <template x-for="opt in (currentSettings[sub.source] || '').split(',').map(s => s.trim()).filter(Boolean)" :key="opt">
+                                            <option :value="opt"></option>
+                                        </template>
+                                    </datalist>
+                                </template>
+                            </div>
                         </template>
 
                         <template x-if="sub.type === 'textarea'">
@@ -77,21 +88,6 @@
                                     <option :value="val" :selected="repeaterEdit.item && String(repeaterEdit.item[sub.name]) === String(val)" x-text="lbl"></option>
                                 </template>
                             </select>
-                        </template>
-
-                        <!-- YENİ ƏLAVƏ: Datalist tipi -->
-                        <template x-if="sub.type === 'datalist'">
-                            <div>
-                                <input type="text" class="rj-in" :list="'rj-datalist-' + field.name + '-' + si"
-                                       :value="repeaterEdit.item ? (repeaterEdit.item[sub.name] || '') : ''"
-                                       @input="setRepeaterField(sub.name, $event.target.value)"
-                                       placeholder="{{ __('Select or type new...') }}">
-                                <datalist :id="'rj-datalist-' + field.name + '-' + si">
-                                    <template x-for="opt in (currentSettings[sub.source] || '').split(',').map(s => s.trim()).filter(Boolean)" :key="opt">
-                                        <option :value="opt"></option>
-                                    </template>
-                                </datalist>
-                            </div>
                         </template>
                     </div>
                 </template>
