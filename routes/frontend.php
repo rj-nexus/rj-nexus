@@ -6,6 +6,7 @@ use App\Http\Controllers\Frontend\KycController;
 use App\Http\Controllers\Frontend\PageController;
 use App\Http\Controllers\Frontend\PostController;
 use App\Http\Controllers\Frontend\AccountController;
+use App\Http\Controllers\Frontend\WidgetAuthController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/theme-assets/{slug}/{path}', function (string $slug, string $path) {
@@ -40,6 +41,9 @@ Route::get('/plugin-assets/{slug}/{path}', function (string $slug, string $path)
     ]);
 })->where('path', '.*')->name('plugin.asset');
 
+Route::post('/rj-widget/login', [WidgetAuthController::class, 'login'])->name('rj.widget.login');
+Route::post('/rj-widget/logout', [WidgetAuthController::class, 'logout'])->name('rj.widget.logout');
+
 Route::get('/', [FrontendController::class, 'home'])->name('home');
 
 Route::get('/rj-preview/{template}', [FrontendController::class, 'preview'])
@@ -67,5 +71,5 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::get('/{slug}', [PageController::class, 'show'])
-    ->where('slug', '^(?!admin|login|register|logout|password|email|verification|api|rj-preview|rj-form|rj-fonts|theme-assets|plugin-assets|blog|account|kyc|profile|storage|up|sanctum|livewire|shop|cart|checkout|product).*$')
+    ->where('slug', '^(?!admin|login|register|logout|password|email|verification|api|rj-preview|rj-form|rj-fonts|rj-widget|theme-assets|plugin-assets|blog|account|kyc|profile|storage|up|sanctum|livewire|shop|cart|checkout|product).*$')
     ->name('frontend.page');
