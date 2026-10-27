@@ -70,12 +70,13 @@ class NewsletterSubscriber extends Model
         }
 
         return static::create([
-            'email'      => $email,
-            'name'       => $name,
-            'status'     => 'active',
-            'source'     => $source,
-            'ip_address' => request()->ip(),
-            'user_agent' => substr((string) request()->userAgent(), 0, 255),
+            'email'        => $email,
+            'name'         => $name,
+            'status'       => 'active',
+            'source'       => $source,
+            'ip_address'   => request()->ip(),
+            'user_agent'   => substr((string) request()->userAgent(), 0, 255),
+            'confirmed_at' => now(),
         ]);
     }
 
