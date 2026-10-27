@@ -457,7 +457,6 @@ function builderRender() {
                 const w = settings.width || 140;
                 const h = settings.max_height || 80;
                 const align = settings.align || 'left';
-                const filter = settings.color_filter || 'none';
 
                 if (!url) {
                     if (this.preview) return '';
@@ -472,8 +471,6 @@ function builderRender() {
                 const jcMap = { left: 'flex-start', center: 'center', right: 'flex-end' };
 
                 let imgStyle = `display:block; max-width:100%; width:${w}px; max-height:${h}px; object-fit:contain;`;
-                if (filter === 'white') imgStyle += ' filter: brightness(0) invert(1);';
-                if (filter === 'black') imgStyle += ' filter: brightness(0);';
 
                 let imgHtml = `<img src="${esc(url)}" alt="${esc(alt)}" style="${imgStyle}">`;
                 if (link) {
