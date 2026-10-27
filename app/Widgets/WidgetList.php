@@ -15,6 +15,7 @@ use App\Widgets\Builtin\CallToActionWidget;
 use App\Widgets\Builtin\CodeHighlightWidget;
 use App\Widgets\Builtin\ContactInfoWidget;
 use App\Widgets\Builtin\ContainerWidget;
+use App\Widgets\Builtin\CookieNoticeWidget;
 use App\Widgets\Builtin\CounterWidget;
 use App\Widgets\Builtin\CountdownWidget;
 use App\Widgets\Builtin\CurrencyRatesWidget;
@@ -62,7 +63,6 @@ use App\Widgets\Builtin\VideoHeroWidget;
 use App\Widgets\Builtin\VideoMaskTextWidget;
 use App\Widgets\Builtin\VideoWidget;
 use App\Widgets\Builtin\WheelOfFortuneWidget;
-use App\Widgets\Builtin\CookieNoticeWidget;
 
 class WidgetList
 {
