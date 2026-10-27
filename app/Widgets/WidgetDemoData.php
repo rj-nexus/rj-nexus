@@ -6,7 +6,7 @@ class WidgetDemoData
 {
     public static function get(string $widgetId): array
     {
-        $placeholder = 'https://raw.githubusercontent.com/mr-ruhid/rare-logos-vault/main/logo/social-media/piokio/piokio_logo.svg';
+        $placeholder = 'https://raw.githubusercontent.com/mr-ruhid/rare-logos-vault/main/placeholder/fallback-image/rj-nexus-no-image.webp';
 
         $data = [
             'portfolio' => [
