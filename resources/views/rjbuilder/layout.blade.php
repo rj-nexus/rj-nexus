@@ -24,7 +24,7 @@
 
     <script>
     (function() {
-        var placeholderUrl = 'https://raw.githubusercontent.com/mr-ruhid/rare-logos-vault/main/logo/social-media/piokio/piokio_logo.svg';
+        var placeholderUrl = 'https://raw.githubusercontent.com/mr-ruhid/rare-logos-vault/main/placeholder/fallback-image/rj-nexus-no-image.webp';
 
         function applyPlaceholder(img) {
             if (img.dataset.placeholderApplied) return;
