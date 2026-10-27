@@ -12,7 +12,9 @@ function builderFields() {
             field: null,
             index: null,
             item: null,
-            inputEl: null
+            inputEl: null,
+            dropdown: null,
+            creatingNewCat: null
         },
 
         openIconPicker(fieldName) {
@@ -125,7 +127,9 @@ function builderFields() {
                 field: field,
                 index: cur.length - 1,
                 item: Object.assign({}, empty),
-                inputEl: null
+                inputEl: null,
+                dropdown: null,
+                creatingNewCat: null
             };
         },
 
@@ -137,7 +141,9 @@ function builderFields() {
                 field: field,
                 index: idx,
                 item: Object.assign({}, cur[idx]),
-                inputEl: null
+                inputEl: null,
+                dropdown: null,
+                creatingNewCat: null
             };
         },
 
@@ -158,6 +164,32 @@ function builderFields() {
             cur[this.repeaterEdit.index] = Object.assign({}, cur[this.repeaterEdit.index], { [name]: value });
             this.repeaterEdit.item = cur[this.repeaterEdit.index];
             this.updateSetting(fieldName, cur);
+        },
+
+        saveNewCategory(sub) {
+            if (!this.repeaterEdit.open || !this.repeaterEdit.field) return;
+            const val = (this.repeaterEdit.item[sub.name] || '').trim();
+
+            if (!val) {
+                this.repeaterEdit.creatingNewCat = null;
+                return;
+            }
+
+            this.setRepeaterField(sub.name, val);
+
+            if (sub.source) {
+                let currentList = (this.currentSettings[sub.source] || '')
+                    .split(',')
+                    .map(s => s.trim())
+                    .filter(Boolean);
+
+                if (!currentList.includes(val)) {
+                    currentList.push(val);
+                    this.updateSetting(sub.source, currentList.join(', '));
+                }
+            }
+
+            this.repeaterEdit.creatingNewCat = null;
         },
 
         pickRepeaterMedia(subName) {
