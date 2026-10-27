@@ -149,19 +149,90 @@
         text-align: center;
     }
 
-    #{{ $uid }} .rj-nl-icon {
-        width: 52px;
-        height: 52px;
-        border-radius: 14px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 0 16px;
-        background: {{ $isDark ? 'rgba(255,255,255,.18)' : 'color-mix(in srgb, var(--nl-a) 12%, transparent)' }};
-        color: {{ $isDark ? '#fff' : 'var(--nl-a)' }};
-        backdrop-filter: blur(6px);
+    #{{ $uid }} .rj-nl-env {
+        --env: {{ $isDark ? '#ffffff' : 'var(--nl-a)' }};
+        --env-in: {{ $isDark ? 'rgba(255,255,255,.5)' : 'color-mix(in srgb, var(--nl-a) 50%, #fff)' }};
+        position: relative;
+        width: 76px;
+        height: 56px;
+        margin: {{ $align === 'left' ? '0 0 26px' : '0 auto 26px' }};
+        perspective: 420px;
+        color: var(--env);
     }
-    #{{ $uid }} .rj-nl-icon svg { width: 26px; height: 26px; }
+    #{{ $uid }} .rj-nl-env > * { position: absolute; }
+    #{{ $uid }} .rj-nl-env-back {
+        inset: 0;
+        border-radius: 8px;
+        background: var(--env-in);
+    }
+    #{{ $uid }} .rj-nl-env-letter {
+        z-index: 1;
+        left: 10%;
+        right: 10%;
+        top: 8%;
+        height: 80%;
+        display: grid;
+        align-content: start;
+        gap: 5px;
+        padding: 8px 7px;
+        border-radius: 4px;
+        background: #fff;
+        box-shadow: 0 4px 10px -4px rgba(15, 23, 42, .35);
+        transition: transform .5s cubic-bezier(.34, 1.56, .64, 1), opacity .3s;
+    }
+    #{{ $uid }} .rj-nl-env-letter i {
+        display: block;
+        height: 3px;
+        border-radius: 2px;
+        background: var(--nl-a);
+        opacity: .5;
+    }
+    #{{ $uid }} .rj-nl-env-letter i:nth-child(2) { width: 70%; }
+    #{{ $uid }} .rj-nl-env-letter i:nth-child(3) { width: 45%; }
+    #{{ $uid }} .rj-nl-env-front {
+        z-index: 2;
+        inset: 0;
+        border-radius: 8px;
+        background: var(--env);
+        clip-path: polygon(0 0, 50% 55%, 100% 0, 100% 100%, 0 100%);
+    }
+    #{{ $uid }} .rj-nl-env-flap {
+        z-index: 3;
+        left: 0;
+        right: 0;
+        top: 0;
+        height: 55%;
+        background: color-mix(in srgb, var(--env) 82%, #000);
+        clip-path: polygon(0 0, 100% 0, 50% 100%);
+        transform-origin: 50% 0;
+        transition: transform .45s ease;
+    }
+    #{{ $uid }} .rj-nl-env-plane {
+        z-index: 4;
+        left: 26px;
+        top: 14px;
+        width: 26px;
+        height: 26px;
+        opacity: 0;
+        rotate: 45deg;
+    }
+
+    #{{ $uid }} .rj-nl-env[data-state="open"] .rj-nl-env-flap,
+    #{{ $uid }} .rj-nl-env[data-state="valid"] .rj-nl-env-flap { transform: rotateX(180deg); z-index: 0; }
+    #{{ $uid }} .rj-nl-env[data-state="open"] .rj-nl-env-letter { transform: translateY(-14px); }
+    #{{ $uid }} .rj-nl-env[data-state="valid"] .rj-nl-env-letter { transform: translateY(-26px) rotate(-3deg); }
+    #{{ $uid }} .rj-nl-env[data-state="sending"] { animation: rjNlBob .6s ease-in-out infinite; }
+    #{{ $uid }} .rj-nl-env[data-state="error"] { animation: rjNlShake .5s; }
+    #{{ $uid }} .rj-nl-env[data-state="sent"] .rj-nl-env-letter { opacity: 0; transform: translateY(0); }
+    #{{ $uid }} .rj-nl-env[data-state="sent"] .rj-nl-env-plane { animation: rjNlFly 1.1s cubic-bezier(.5, 0, .9, .6) forwards; }
+
+    @keyframes rjNlBob { 50% { transform: translateY(-5px) scale(1.04); } }
+    @keyframes rjNlShake { 20%, 60% { transform: translateX(-5px) rotate(-4deg); } 40%, 80% { transform: translateX(5px) rotate(4deg); } }
+    @keyframes rjNlFly {
+        0%   { opacity: 0; transform: translate(0, 0) scale(.6); }
+        15%  { opacity: 1; }
+        100% { opacity: 0; transform: translate(190px, -150px) scale(1.2); }
+    }
 
     #{{ $uid }} .rj-nl-title {
         font-size: clamp(22px, 2.8vw, 32px);
@@ -428,11 +499,12 @@
         <div class="rj-nl-inner">
             <div data-form-area>
                 @if($showIcon)
-                    <div class="rj-nl-icon">
-                        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                            <rect x="3" y="5" width="18" height="14" rx="2"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 7l9 6 9-6"/>
-                        </svg>
+                    <div class="rj-nl-env" data-env data-state="idle" aria-hidden="true">
+                        <div class="rj-nl-env-back"></div>
+                        <div class="rj-nl-env-letter"><i></i><i></i><i></i></div>
+                        <div class="rj-nl-env-front"></div>
+                        <div class="rj-nl-env-flap"></div>
+                        <svg class="rj-nl-env-plane" viewBox="0 0 24 24" fill="currentColor"><path d="M2.5 11.2 21 3.5c.8-.3 1.5.4 1.2 1.2l-7.7 18.5c-.4.9-1.6.9-2 0l-2.4-6.2a1 1 0 0 0-.6-.6l-6.2-2.4c-.9-.4-.9-1.6 0-2Z"/></svg>
                     </div>
                 @endif
 
@@ -500,19 +572,35 @@
     var root = document.getElementById(@js($uid));
     if (!root) return;
 
-    var formEl       = root.querySelector('[data-form]');
-    var emailEl      = root.querySelector('[data-email]');
-    var nameEl       = root.querySelector('[data-name]');
-    var privacyEl    = root.querySelector('[data-privacy]');
-    var submitBtn    = root.querySelector('[data-submit]');
-    var btnText      = root.querySelector('[data-btn-text]');
-    var spinner      = root.querySelector('[data-spinner]');
-    var msgEl        = root.querySelector('[data-msg]');
-    var formArea     = root.querySelector('[data-form-area]');
-    var successEl    = root.querySelector('[data-success]');
+    var formEl    = root.querySelector('[data-form]');
+    var emailEl   = root.querySelector('[data-email]');
+    var nameEl    = root.querySelector('[data-name]');
+    var privacyEl = root.querySelector('[data-privacy]');
+    var submitBtn = root.querySelector('[data-submit]');
+    var btnText   = root.querySelector('[data-btn-text]');
+    var spinner   = root.querySelector('[data-spinner]');
+    var msgEl     = root.querySelector('[data-msg]');
+    var formArea  = root.querySelector('[data-form-area]');
+    var successEl = root.querySelector('[data-success]');
+    var envEl     = root.querySelector('[data-env]');
 
     var privacyRequired = {{ $privacyRequired ? 'true' : 'false' }};
-    var originalBtnText = btnText ? btnText.textContent : '';
+    var emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    function env(s) {
+        if (envEl) envEl.dataset.state = s;
+    }
+
+    function envRest() {
+        var a = document.activeElement;
+        if (emailRe.test(emailEl ? emailEl.value.trim() : '')) return env('valid');
+        env(a === emailEl || a === nameEl ? 'open' : 'idle');
+    }
+
+    function envError() {
+        env('error');
+        setTimeout(envRest, 900);
+    }
 
     function showMsg(type, text) {
         if (!msgEl) return;
@@ -531,6 +619,13 @@
         if (spinner) spinner.style.display = on ? 'inline-block' : 'none';
     }
 
+    [emailEl, nameEl].forEach(function (el) {
+        if (!el) return;
+        el.addEventListener('focus', envRest);
+        el.addEventListener('blur', function () { setTimeout(envRest, 0); });
+        el.addEventListener('input', envRest);
+    });
+
     if (formEl) {
         formEl.addEventListener('submit', async function (e) {
             e.preventDefault();
@@ -539,17 +634,20 @@
             var email = emailEl ? emailEl.value.trim() : '';
             var name  = nameEl ? nameEl.value.trim() : '';
 
-            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            if (!email || !emailRe.test(email)) {
                 showMsg('error', @js(__('Please enter a valid email address.')));
+                envError();
                 return;
             }
 
             if (privacyRequired && privacyEl && !privacyEl.checked) {
                 showMsg('error', @js(__('Please accept the privacy policy to continue.')));
+                envError();
                 return;
             }
 
             setLoading(true);
+            env('sending');
 
             try {
                 var res = await fetch(@js(route('rj.widget.newsletter', absolute: false)), {
@@ -566,26 +664,29 @@
                 var data = await res.json();
 
                 if (res.ok && data.ok) {
-                    if (formArea) formArea.style.display = 'none';
-                    if (successEl) {
-                        successEl.classList.add('is-on');
-                        var descEl = successEl.querySelector('.rj-nl-success-desc');
-                        if (!descEl) {
-                            var p = document.createElement('p');
-                            p.className = 'rj-nl-success-desc';
-                            p.textContent = data.message || @js($successMessage);
-                            successEl.appendChild(p);
-                        } else {
+                    env('sent');
+                    setTimeout(function () {
+                        if (formArea) formArea.style.display = 'none';
+                        if (successEl) {
+                            successEl.classList.add('is-on');
+                            var descEl = successEl.querySelector('.rj-nl-success-desc');
+                            if (!descEl) {
+                                descEl = document.createElement('p');
+                                descEl.className = 'rj-nl-success-desc';
+                                successEl.appendChild(descEl);
+                            }
                             descEl.textContent = data.message || @js($successMessage);
                         }
-                    }
+                    }, envEl ? 1000 : 0);
                 } else {
                     showMsg('error', data.message || @js(__('Subscription failed. Please try again.')));
                     setLoading(false);
+                    envError();
                 }
             } catch (err) {
                 showMsg('error', @js(__('Network error. Please try again.')));
                 setLoading(false);
+                envError();
             }
         });
     }
