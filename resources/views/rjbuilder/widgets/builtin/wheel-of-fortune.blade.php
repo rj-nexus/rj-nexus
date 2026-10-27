@@ -286,9 +286,11 @@
         to   { opacity: 1; transform: none; }
     }
     #{{ $uid }} .rj-wf-modal-icon {
-        font-size: 56px;
-        line-height: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         margin-bottom: 14px;
+        color: #fbbf24;
         animation: rjWfBounce 1.2s ease-in-out infinite;
     }
     @keyframes rjWfBounce {
@@ -414,7 +416,9 @@
             <div class="rj-wf-modal" data-modal-box role="dialog" aria-modal="true">
                 <div class="rj-wf-modal-back" data-modal-close></div>
                 <div class="rj-wf-modal-box">
-                    <div class="rj-wf-modal-icon">🏆</div>
+                    <div class="rj-wf-modal-icon">
+                        <svg width="56" height="56" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 21h8m-4-4v4m-5-4h10a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2zm3-6a2 2 0 11-4 0 2 2 0 014 0zm8 0a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                    </div>
                     <p class="rj-wf-modal-label">{{ $claimedLabel }}</p>
                     <h3 class="rj-wf-modal-prize" data-prize>—</h3>
                     <p class="rj-wf-modal-desc" data-desc></p>
