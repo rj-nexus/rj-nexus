@@ -40,11 +40,15 @@
 
         function checkImages(container) {
             container.querySelectorAll('img').forEach(function(img) {
+                // BUILDER CANVASINDAKI ŞƏKİLLƏRƏ TOXUNMA!
+                if (img.closest('#rj-canvas') || img.closest('.rj-canvas')) return;
+
                 if (!img.src || img.src.includes('undefined') || img.src === window.location.href || img.src === '') {
                     applyPlaceholder(img);
                 }
 
                 img.addEventListener('error', function() {
+                    if (this.closest('#rj-canvas') || this.closest('.rj-canvas')) return;
                     applyPlaceholder(this);
                 });
             });
@@ -59,9 +63,15 @@
                 if (mutation.addedNodes) {
                     mutation.addedNodes.forEach(function(node) {
                         if (node.nodeType === 1) {
+                            // Əgər əlavə olunan element Builder Canvas-dırsa, onu və içindəkini qorumuş oluruq
+                            if (node.closest && (node.closest('#rj-canvas') || node.closest('.rj-canvas'))) return;
+
                             if (node.tagName === 'IMG') {
                                 if (!node.src || node.src === '') applyPlaceholder(node);
-                                node.addEventListener('error', function() { applyPlaceholder(this); });
+                                node.addEventListener('error', function() {
+                                    if (this.closest('#rj-canvas') || this.closest('.rj-canvas')) return;
+                                    applyPlaceholder(this);
+                                });
                             } else {
                                 checkImages(node);
                             }
