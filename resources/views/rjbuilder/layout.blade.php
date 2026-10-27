@@ -40,7 +40,7 @@
 
         function checkImages(container) {
             container.querySelectorAll('img').forEach(function(img) {
-                // BUILDER CANVASINDAKI ŞƏKİLLƏRƏ TOXUNMA!
+                // Builder Canvas daxilindəki şəkillərə TOXUNMA!
                 if (img.closest('#rj-canvas') || img.closest('.rj-canvas')) return;
 
                 if (!img.src || img.src.includes('undefined') || img.src === window.location.href || img.src === '') {
@@ -63,7 +63,7 @@
                 if (mutation.addedNodes) {
                     mutation.addedNodes.forEach(function(node) {
                         if (node.nodeType === 1) {
-                            // Əgər əlavə olunan element Builder Canvas-dırsa, onu və içindəkini qorumuş oluruq
+                            // Əgər əlavə olunan element Builder Canvas-dırsa, onu qorumuş oluruq
                             if (node.closest && (node.closest('#rj-canvas') || node.closest('.rj-canvas'))) return;
 
                             if (node.tagName === 'IMG') {
