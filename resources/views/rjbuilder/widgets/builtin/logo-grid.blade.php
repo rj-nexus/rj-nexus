@@ -1,7 +1,6 @@
 @php
     $title      = $settings['title'] ?? '';
     $subtitle   = $settings['subtitle'] ?? '';
-    $layout     = $settings['layout'] ?? 'grid';
     $logoH      = max(20, min(160, (int) ($settings['logo_height'] ?? 60)));
     $grayscale  = !empty($settings['grayscale'] ?? true);
     $hoverRaw   = $settings['hover_effect'] ?? 'color';
@@ -61,11 +60,6 @@
     if ($count > 0) {
         $rep = max(1, (int) ceil(14 / $count));
         $lanes[] = $logos;
-        if ($layout !== 'marquee') {
-            $shift = $count > 1 ? intdiv($count, 2) : 0;
-            $second = array_merge(array_slice($logos, $shift), array_slice($logos, 0, $shift));
-            $lanes[] = array_reverse($second);
-        }
     }
     $duration = $speed * $rep;
 
@@ -189,7 +183,6 @@
         -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 9%, #000 91%, transparent 100%);
         mask-image: linear-gradient(90deg, transparent 0%, #000 9%, #000 91%, transparent 100%);
     }
-    #{{ $uid }} .rj-lm-lane + .rj-lm-lane { animation-delay: .3s; }
 
     #{{ $uid }} .rj-lm-track {
         display: flex;
@@ -199,10 +192,6 @@
         animation-play-state: paused;
     }
     #{{ $uid }}.is-run .rj-lm-track { animation-play-state: running; }
-    #{{ $uid }} .rj-lm-lane[data-dir="-1"] .rj-lm-track {
-        animation-direction: reverse;
-        animation-duration: {{ round($duration * 1.25) }}s;
-    }
     #{{ $uid }} .rj-lm-group {
         display: flex;
         flex: 0 0 auto;
@@ -352,8 +341,8 @@
 
     @if($count > 0)
         <div class="rj-lm-lanes">
-            @foreach($lanes as $li => $laneLogos)
-                <div class="rj-lm-lane" data-dir="{{ $li % 2 === 0 ? 1 : -1 }}">
+            @foreach($lanes as $laneLogos)
+                <div class="rj-lm-lane" data-dir="1">
                     <div class="rj-lm-track">
                         @for($g = 0; $g < 2; $g++)
                             <div class="rj-lm-group" @if($g === 1) aria-hidden="true" @endif>
