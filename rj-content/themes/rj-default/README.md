@@ -1,5 +1,7 @@
 <div align="center">
 
+# Version 1.0.3
+
 # 🎨 RJ Default
 
 **The official default theme for [RJ CMS](https://github.com/mr-ruhid/rj-cms-ai)**
