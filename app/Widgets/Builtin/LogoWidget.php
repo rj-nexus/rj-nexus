@@ -152,8 +152,8 @@ class LogoWidget extends BaseWidget
     }
 
     /**
-     * Normalizes whatever the media field stored (string, array, object) into a URL the
-     * current page can actually load.
+     * Normalizes whatever the media field stored (string, array, object) into an absolute URL that
+     * loads from any document context: the frontend, the builder canvas (iframe / srcdoc / blob) and previews.
      */
     private function imageUrl(mixed $value): string
     {
@@ -185,12 +185,14 @@ class LogoWidget extends BaseWidget
         }
 
         if (str_starts_with($value, '//')) {
-            $value = 'https:' . $value;
+            $value = request()->getScheme() . ':' . $value;
         }
 
         if (preg_match('#^data:image/(png|jpe?g|gif|webp|avif|svg\+xml)[;,]#i', $value)) {
             return $value;
         }
+
+        $origin = rtrim(request()->getSchemeAndHttpHost(), '/');
 
         if (preg_match('/^[a-z][a-z0-9+.\-]*:/i', $value)) {
             if (!preg_match('/^https?:/i', $value)) {
@@ -205,19 +207,19 @@ class LogoWidget extends BaseWidget
             $local = in_array($host, ['localhost', '127.0.0.1', '::1', '[::1]'], true)
                 || ($appHost !== '' && $host === $appHost);
 
-            // Same site saved under another host (e.g. http://localhost vs 127.0.0.1:8000): use a root-relative path
+            // Same site saved under another host (http://localhost vs 127.0.0.1:8000): re-point it to the current origin
             if ($host !== '' && $host !== $reqHost && $local) {
-                return ($parts['path'] ?? '/') . (isset($parts['query']) ? '?' . $parts['query'] : '');
+                return $origin . ($parts['path'] ?? '/') . (isset($parts['query']) ? '?' . $parts['query'] : '');
             }
 
             return $value;
         }
 
         if (str_starts_with($value, '/')) {
-            return $value;
+            return $origin . $value;
         }
 
-        return url('/' . ltrim($value, '/'));
+        return $origin . '/' . ltrim($value, '/');
     }
 
     private function safeUrl(string $url): string
