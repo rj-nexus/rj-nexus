@@ -58,7 +58,7 @@
         'Editor', 'Show hover outlines', 'Auto-save every 30 seconds', 'Canvas zoom', 'Keyboard shortcuts', 'Template',
         'Select a layout', 'Choose a structure to start building.', 'or start from scratch', 'Start Blank', 'Add New Section',
         'Choose a layout for the new section.', 'Cancel', 'Back to editor', 'Replay animations', 'Full width',
-        'Editing in', 'fields marked 🌐 are translated; others are shared.', 'Edit content in',
+        'Editing in', 'fields marked with this icon are translated; others are shared.', 'Edit content in',
         'Select Image', 'Change Image', 'Copied', 'Pasted', 'Nothing to paste', 'Auto-saved', 'Save failed', 'Network error — not saved',
         'Session expired — reload the page and try again', 'Added', 'Moved', 'Deleted', 'Duplicated', 'Edited', 'Initial state',
         'Hidden on', 'Image', 'Unknown widget', 'Drop here', 'Save (Ctrl+S)', 'Close panel', 'Open panel', 'Logo',
@@ -396,7 +396,14 @@
                     <div x-show="editTab === 'content' && templateType === 'page' && locales.length > 1" class="rj-hint" style="text-align:left; border-style:solid; background:rgba(139,92,246,.1); border-color:rgba(139,92,246,.35); color:#c4b5fd;">
                         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:inline-block; vertical-align:-2px;"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/></svg>
                         <span x-text="t('Editing in')"></span>: <strong x-text="activeLocale.toUpperCase()"></strong>
-                        <span x-show="activeLocale !== baseLocale" style="opacity:.8;">— <span x-text="t('fields marked 🌐 are translated; others are shared.')"></span></span>
+                        <span x-show="activeLocale !== baseLocale" style="opacity:.8; display:inline-flex; align-items:center; gap:5px; flex-wrap:wrap;">—
+                            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="display:inline-block; vertical-align:-2px; flex-shrink:0;">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M2 12h20"/>
+                                <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
+                            </svg>
+                            <span x-text="t('fields marked with this icon are translated; others are shared.')"></span>
+                        </span>
                     </div>
 
                     <div x-show="editTab === 'content'" style="margin-bottom:18px;">
@@ -433,7 +440,9 @@
                             </template>
 
                             @include('rjbuilder.partials.fields.label')
+
                             @include('rjbuilder.partials.fields.text')
+
                             @include('rjbuilder.partials.fields.repeater')
 
                             <template x-if="field.type === 'number'">
@@ -554,16 +563,16 @@
                             @include('rjbuilder.partials.fields.dimensions')
 
                             <p class="rj-help" x-show="field.help || field.help_link" style="display:flex; flex-wrap:wrap; align-items:center; gap:4px;">
-    <span x-show="field.help" x-text="field.help"></span>
-    <template x-if="field.help_link">
-        <a :href="field.help_link"
-           target="_blank"
-           rel="noopener noreferrer"
-           style="color:#a78bfa; text-decoration:underline; font-weight:600; margin-inline-start:2px;"
-           @click.stop
-           x-text="field.help_link_text || t('Learn more →')"></a>
-    </template>
-</p>
+                                <span x-show="field.help" x-text="field.help"></span>
+                                <template x-if="field.help_link">
+                                    <a :href="field.help_link"
+                                       target="_blank"
+                                       rel="noopener noreferrer"
+                                       style="color:#a78bfa; text-decoration:underline; font-weight:600; margin-inline-start:2px;"
+                                       @click.stop
+                                       x-text="field.help_link_text || t('Learn more →')"></a>
+                                </template>
+                            </p>
                         </div>
                     </template>
 
