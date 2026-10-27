@@ -21,10 +21,7 @@
     $overlayColor  = $hexOk($settings['overlay_color'] ?? '', '#8b5cf6');
     $subtitleColor = $hexOk($settings['subtitle_color'] ?? '', '#64748b');
 
-    /*
-     * Resolve the video source.
-     * type: 'video' (direct file), 'iframe' (YouTube / Vimeo / other embed), or '' (none)
-     */
+    // Resolve video source: 'video' (direct file), 'iframe' (YouTube / Vimeo / embed) or '' (none)
     $mediaType = '';
     $mediaSrc  = '';
     $mediaMime = '';
@@ -60,17 +57,15 @@
         } elseif ($host === 'vimeo.com' || $host === 'player.vimeo.com') {
             if (preg_match('#/(\d+)#', $path, $m)) {
                 $mediaType = 'iframe';
-                $mediaSrc  = 'https://player.vimeo.com/video/' . $m[1]
-                    . '?background=1&autoplay=1&loop=1&muted=1';
+                $mediaSrc  = 'https://player.vimeo.com/video/' . $m[1] . '?background=1&autoplay=1&loop=1&muted=1';
             }
         } else {
-            // Any other embeddable page (e.g. Dailymotion, Wistia, Bunny embed)
             $mediaType = 'iframe';
             $mediaSrc  = $rawUrl;
         }
     }
 
-    // Text as an SVG mask (data URI, no font loading needed)
+    // Text as SVG mask (data URI)
     $x      = match ($align) { 'left' => 40, 'right' => 1160, default => 600 };
     $anchor = match ($align) { 'left' => 'start', 'right' => 'end', default => 'middle' };
     $safe   = htmlspecialchars($text, ENT_XML1 | ENT_QUOTES, 'UTF-8');
@@ -101,16 +96,23 @@
         max-width: 1200px;
         aspect-ratio: 1200 / 240;
         margin: 0 auto;
+        /* Soft shadow around the letters so they stay readable on light backgrounds */
+        filter: drop-shadow(0 6px 14px rgba(15, 23, 42, .22));
     }
 
-    /* Everything inside this layer is visible only through the text shape */
     #{{ $uid }} .vmt-mask {
         position: absolute;
         inset: 0;
         overflow: hidden;
         pointer-events: none;
-        -webkit-mask: var(--vmt-mask) center / 100% 100% no-repeat;
-        mask: var(--vmt-mask) center / 100% 100% no-repeat;
+        -webkit-mask-image: var(--vmt-mask);
+        mask-image: var(--vmt-mask);
+        -webkit-mask-size: 100% 100%;
+        mask-size: 100% 100%;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
     }
 
     #{{ $uid }} .vmt-base {
@@ -124,26 +126,28 @@
         inset: 0;
         overflow: hidden;
     }
-    #{{ $uid }} .vmt-video,
+    #{{ $uid }} .vmt-video {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        pointer-events: none;
+        /* Brighter, punchier video so the letters stand out */
+        filter: contrast(1.15) saturate(1.2) brightness(1.08);
+    }
     #{{ $uid }} .vmt-iframe {
         position: absolute;
-        left: 0;
+        left: 50%;
         top: 50%;
         width: 100%;
         height: 100%;
-        border: 0;
-        display: block;
-        pointer-events: none;
-    }
-    #{{ $uid }} .vmt-video {
-        top: 0;
-        object-fit: cover;
-    }
-    #{{ $uid }} .vmt-iframe {
-        height: auto;
-        aspect-ratio: 16 / 9;
+        min-width: 177.78%;
         min-height: 100%;
-        transform: translateY(-50%);
+        transform: translate(-50%, -50%);
+        border: 0;
+        pointer-events: none;
     }
 
     #{{ $uid }} .vmt-tint {
@@ -188,6 +192,21 @@
         color: {{ $subtitleColor }};
     }
 
+    @supports not ((-webkit-mask-image: none) or (mask-image: none)) {
+        #{{ $uid }} .vmt-mask { display: none; }
+        #{{ $uid }} .vmt-stage::after {
+            content: "{{ $text }}";
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 96px;
+            font-weight: 900;
+            color: var(--vmt-fallback);
+        }
+    }
+
     @media (prefers-reduced-motion: reduce) {
         #{{ $uid }} .vmt-hover { transition: none; }
     }
@@ -203,10 +222,10 @@
             @if($mediaType === 'video')
                 <div class="vmt-media">
                     <video class="vmt-video"
-                           autoplay
                            muted
                            loop
                            playsinline
+                           autoplay
                            preload="auto"
                            @if($poster !== '') poster="{{ $poster }}" @endif>
                         <source src="{{ $mediaSrc }}" type="{{ $mediaMime }}">
@@ -238,3 +257,45 @@
         <p class="vmt-subtitle">{{ $subtitle }}</p>
     @endif
 </div>
+
+@if($mediaType === 'video')
+<script>
+(function () {
+    var root = document.getElementById(@js($uid));
+    if (!root) return;
+    var video = root.querySelector('video');
+    if (!video) return;
+
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) { video.pause(); return; }
+
+    function play() {
+        var p = video.play();
+        if (p && p.catch) p.catch(function () {});
+    }
+
+    // Always start from the first frame when the video becomes ready
+    function restart() {
+        try { video.currentTime = 0; } catch (e) {}
+        play();
+    }
+
+    if (video.readyState >= 2) restart();
+    else video.addEventListener('loadeddata', restart, { once: true });
+
+    // Play only while visible, pause when scrolled away
+    if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) {
+                if (e.isIntersecting) play();
+                else video.pause();
+            });
+        }, { threshold: 0.1 });
+        io.observe(root);
+    }
+
+    // Keep the loop clean: if the browser ends the video early, rewind and replay
+    video.addEventListener('ended', restart);
+})();
+</script>
+@endif
