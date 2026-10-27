@@ -35,7 +35,7 @@
 @endphp
 
 @once
-<script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
 @endonce
 
 <style>
@@ -47,6 +47,7 @@
         padding: {{ $paddingY }}px 16px;
     }
     #{{ $uid }} *, #{{ $uid }} *::before, #{{ $uid }} *::after { box-sizing: border-box; }
+    #{{ $uid }} [hidden] { display: none !important; }
 
     #{{ $uid }} .o3-inner { max-width: 1120px; margin: 0 auto; }
 
@@ -84,6 +85,7 @@
         isolation: isolate;
     }
 
+    /* Model is visible by default. The fade-in is only an animation, so it can never leave the model hidden. */
     #{{ $uid }} model-viewer {
         position: relative;
         z-index: 1;
@@ -96,13 +98,13 @@
         --progress-bar-color: var(--o3-accent);
         --progress-bar-height: 3px;
         --progress-mask: transparent;
-        opacity: 0;
-        transform: scale(.97);
-        transition: opacity .8s ease, transform .9s cubic-bezier(.2,.8,.2,1);
     }
     #{{ $uid }} model-viewer.is-ready {
-        opacity: 1;
-        transform: none;
+        animation: o3In .8s cubic-bezier(.2,.8,.2,1) both;
+    }
+    @keyframes o3In {
+        from { opacity: 0; transform: scale(.97); }
+        to   { opacity: 1; transform: none; }
     }
 
     #{{ $uid }} .o3-glow {
@@ -172,7 +174,8 @@
     #{{ $uid }} .o3-ar:hover { background: rgba(15, 23, 42, .9); transform: translateY(-1px); }
     #{{ $uid }} .o3-ar svg { width: 14px; height: 14px; }
 
-    #{{ $uid }} .o3-status {
+    /* Loading overlay: sits above the model only while loading */
+    #{{ $uid }} .o3-loading {
         position: absolute;
         inset: 0;
         z-index: 2;
@@ -187,7 +190,7 @@
         pointer-events: none;
         transition: opacity .5s ease;
     }
-    #{{ $uid }} .o3-status.is-hidden { opacity: 0; }
+    #{{ $uid }} .o3-loading.is-done { opacity: 0; }
     #{{ $uid }} .o3-spinner {
         width: 34px;
         height: 34px;
@@ -198,7 +201,23 @@
     }
     @keyframes o3Spin { to { transform: rotate(360deg); } }
 
-    #{{ $uid }} .o3-error {
+    /* Error overlay: only shown when the model really fails */
+    #{{ $uid }} .o3-error-box {
+        position: absolute;
+        inset: 0;
+        z-index: 5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        text-align: center;
+        color: #64748b;
+        background: #f8fafc;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    #{{ $uid }} .o3-empty {
         max-width: 480px;
         margin: 0 auto;
         padding: 40px 24px;
@@ -217,7 +236,6 @@
             animation: none !important;
             transition: none !important;
         }
-        #{{ $uid }} model-viewer { opacity: 1; transform: none; }
     }
 </style>
 
@@ -235,7 +253,7 @@
         @endif
 
         @if($hasModel)
-            <div class="o3-viewer" data-state="loading">
+            <div class="o3-viewer">
                 @if($background !== 'transparent')
                     <span class="o3-glow" aria-hidden="true"></span>
                 @endif
@@ -247,16 +265,12 @@
                     alt="{{ $title !== '' ? $title : __('3D model') }}"
                     camera-controls
                     camera-orbit="{{ $cameraOrbit }}"
-                    environment-image="neutral"
-                    exposure="1"
                     shadow-intensity="1"
-                    shadow-softness="0.8"
                     interaction-prompt="none"
                     touch-action="pan-y"
                     @if($autoRotate) auto-rotate rotation-per-second="20deg" @endif
                     @if(!$enableZoom) disable-zoom @endif
-                    @if(!$enablePan) disable-pan @endif
-                    loading="lazy">
+                    @if(!$enablePan) disable-pan @endif>
                     @if($hasUsdz)
                         <button class="o3-ar" slot="ar-button" type="button">
                             <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2l9 5v10l-9 5-9-5V7l9-5zM12 12l9-5M12 12l-9-5M12 12v10"/></svg>
@@ -265,12 +279,12 @@
                     @endif
                 </model-viewer>
 
-                <div class="o3-status" aria-live="polite">
+                <div class="o3-loading" aria-live="polite">
                     <span class="o3-spinner"></span>
                     <span>{{ __('Loading 3D model…') }}</span>
                 </div>
 
-                <div class="o3-error o3-status" hidden style="background:#f8fafc;border:1px dashed #cbd5e1;">
+                <div class="o3-error-box" hidden>
                     {{ __('The 3D model could not be loaded.') }}
                 </div>
 
@@ -280,7 +294,7 @@
                 </div>
             </div>
         @else
-            <div class="o3-error">{{ __('Please provide a .glb or .gltf model URL.') }}</div>
+            <div class="o3-empty">{{ __('Please provide a .glb or .gltf model URL.') }}</div>
         @endif
     </div>
 </div>
@@ -290,25 +304,41 @@
 (function () {
     var root = document.getElementById(@js($uid));
     if (!root) return;
+
     var viewer = root.querySelector('model-viewer');
     var box = root.querySelector('.o3-viewer');
-    var status = root.querySelector('.o3-status');
-    var errorBox = root.querySelector('.o3-error');
+    var loading = root.querySelector('.o3-loading');
+    var errorBox = root.querySelector('.o3-error-box');
     if (!viewer || !box) return;
 
-    viewer.addEventListener('load', function () {
+    function ready() {
         viewer.classList.add('is-ready');
-        if (status) status.classList.add('is-hidden');
+        if (loading) loading.classList.add('is-done');
+        if (errorBox) errorBox.hidden = true;
         box.setAttribute('data-state', 'ready');
-    });
+    }
 
-    viewer.addEventListener('error', function () {
+    function failed() {
+        // Only show the error if the model never became visible
+        if (viewer.loaded) return;
         box.setAttribute('data-state', 'error');
-        if (status) status.hidden = true;
+        if (loading) loading.hidden = true;
         if (errorBox) errorBox.hidden = false;
-    });
+    }
 
-    // Hide the hint permanently after the first real interaction
+    viewer.addEventListener('load', ready);
+    viewer.addEventListener('error', failed);
+
+    // If the model was already loaded before this script ran, the load event was missed
+    if (viewer.loaded) ready();
+
+    // Safety net: stop the spinner after a while even if no event fires
+    setTimeout(function () {
+        if (!viewer.loaded && loading && !loading.hidden) {
+            loading.classList.add('is-done');
+        }
+    }, 15000);
+
     viewer.addEventListener('camera-change', function (e) {
         if (e.detail && e.detail.source === 'user-interaction') {
             box.classList.add('is-touched');
