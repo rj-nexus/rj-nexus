@@ -449,15 +449,15 @@ function builderRender() {
             }
 
             if (block.type === 'logo') {
-                const urlRaw = settings.url || '';
+                const urlRaw = settings.image || '';
                 const url = this.isDynamicValue(urlRaw) ? '' : urlRaw;
                 const alt = this.getBlockField(block, 'alt') || '';
-                const link = settings.link || '/';
-                const target = settings.target || '_self';
-                const w = settings.width || 'auto';
-                const cw = settings.custom_width || '';
-                const h = settings.height || 'auto';
+                const link = settings.url || '/';
+                const target = settings.new_tab ? '_blank' : '_self';
+                const w = settings.width || 140;
+                const h = settings.max_height || 80;
                 const align = settings.align || 'left';
+                const filter = settings.color_filter || 'none';
 
                 if (!url) {
                     if (this.preview) return '';
@@ -469,20 +469,11 @@ function builderRender() {
                             </div>`;
                 }
 
-                const jcMap = { left: 'flex-start', center: 'center', right: 'flex-end', stretch: 'stretch' };
-                const widthMap = { auto: 'auto', xs: '80px', sm: '120px', md: '160px', lg: '200px', xl: '280px' };
-                const heightMap = { auto: 'auto', xs: '32px', sm: '48px', md: '64px', lg: '80px', xl: '120px' };
+                const jcMap = { left: 'flex-start', center: 'center', right: 'flex-end' };
 
-                let widthValue;
-                if (w === 'full') widthValue = '100%';
-                else if (w === 'custom' && cw !== '') widthValue = this.cssv(cw);
-                else widthValue = widthMap[w] || 'auto';
-
-                const heightValue = heightMap[h] || 'auto';
-
-                let imgStyle = `display:block; max-width:100%; width:${widthValue}; height:${heightValue};`;
-                if (h !== 'auto') imgStyle += ' object-fit:contain;';
-                else if (w === 'full') imgStyle += ' object-fit:contain;';
+                let imgStyle = `display:block; max-width:100%; width:${w}px; max-height:${h}px; object-fit:contain;`;
+                if (filter === 'white') imgStyle += ' filter: brightness(0) invert(1);';
+                if (filter === 'black') imgStyle += ' filter: brightness(0);';
 
                 let imgHtml = `<img src="${esc(url)}" alt="${esc(alt)}" style="${imgStyle}">`;
                 if (link) {
