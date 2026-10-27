@@ -42,6 +42,7 @@ use App\Widgets\Builtin\LogoWidget;
 use App\Widgets\Builtin\LottieWidget;
 use App\Widgets\Builtin\MenuWidget;
 use App\Widgets\Builtin\MultiChatWidget;
+use App\Widgets\Builtin\MusicPlayerWidget;
 use App\Widgets\Builtin\NewsletterSignupWidget;
 use App\Widgets\Builtin\Object3DWidget;
 use App\Widgets\Builtin\PortfolioWidget;
@@ -130,6 +131,7 @@ class WidgetList
             new CookieNoticeWidget(),
             new NewsletterSignupWidget(),
             new ContactInfoWidget(),
+            new MusicPlayerWidget(),
         ];
     }
 }
