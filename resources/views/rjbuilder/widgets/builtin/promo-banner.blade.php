@@ -52,6 +52,7 @@
 
     $isRibbon = $layout === 'ribbon';
     $isSplit  = $layout === 'split';
+    $palette  = [$accent, $accent2, '#ffffff', '#fde047'];
 
     $countdownTs = 0;
     if ($countdownEnd !== '') {
@@ -672,7 +673,7 @@
     var reduce  = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var fine    = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     var live    = animate && !reduce;
-    var palette = @json([$accent, $accent2, '#ffffff', '#fde047']);
+    var palette = @json($palette);
 
     root.classList.add('rj-pb-js');
 
