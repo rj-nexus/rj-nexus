@@ -1,6 +1,13 @@
 <script>
 function builderActions() {
     return {
+        applyDemoData(block) {
+            if (!block || !window.RJ_DEMO_DATA || !window.RJ_DEMO_DATA[block.type]) return block;
+            if (!block.settings) block.settings = {};
+            block.settings = Object.assign({}, block.settings, window.RJ_DEMO_DATA[block.type]);
+            return block;
+        },
+
         addLayout(preset) {
             const presets = {
                 '1col': { cols: 1 },
@@ -119,7 +126,8 @@ function builderActions() {
 
                 if (block && block.type === 'container') {
                     if (!block.children) block.children = [];
-                    const newBlock = this.createBlock(widgetId);
+                    let newBlock = this.createBlock(widgetId);
+                    newBlock = this.applyDemoData(newBlock);
 
                     const emptyIndex = block.children.findIndex(c => !c);
                     if (emptyIndex === -1) block.children.push(newBlock);
@@ -130,7 +138,8 @@ function builderActions() {
                 }
 
                 if (block && found) {
-                    const newBlock = this.createBlock(widgetId);
+                    let newBlock = this.createBlock(widgetId);
+                    newBlock = this.applyDemoData(newBlock);
                     found.list.splice(found.index + 1, 0, newBlock);
                     this.afterInsert(newBlock);
                     return;
@@ -149,7 +158,8 @@ function builderActions() {
 
         insertAt(widgetId, list, index) {
             this.touchRecent(widgetId);
-            const block = this.createBlock(widgetId);
+            let block = this.createBlock(widgetId);
+            block = this.applyDemoData(block);
             list.splice(index, 0, block);
             this.afterInsert(block);
         },
@@ -220,6 +230,7 @@ function builderActions() {
             if (d.type === 'new') {
                 this.touchRecent(d.widgetId);
                 block = this.createBlock(d.widgetId);
+                block = this.applyDemoData(block);
             } else {
                 const found = this.findBlockAndParent(d.id);
                 if (!found) return;
