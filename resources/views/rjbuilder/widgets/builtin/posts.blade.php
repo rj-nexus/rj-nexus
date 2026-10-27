@@ -21,20 +21,13 @@
         '--rj-posts-meta-color:' . ($settings['meta_color'] ?? '#9ca3af'),
     ];
 
-    $padding = $this->dimensionCss($settings, 'padding_dim');
+    // Artıq $this istifadə etmirik, çünki bu dəyərlər Widget-dən gəlir
     if ($padding !== '') $wrapperStyles[] = 'padding:' . $padding;
-
-    $margin = $this->dimensionCss($settings, 'margin_dim');
     if ($margin !== '') $wrapperStyles[] = 'margin:' . $margin;
-
-    $bg = $this->backgroundCss($settings);
     if ($bg !== '') $wrapperStyles[] = rtrim($bg, ';');
 
     $wrapperClasses = 'rj-posts rj-posts-' . $layout . ' rj-posts-cols-' . $columns . ' rj-posts-card-' . ($settings['card_style'] ?? 'default');
     if (!empty($settings['hover_lift'])) $wrapperClasses .= ' rj-posts-hover-lift';
-
-    $id = $this->cssId($settings);
-    $class = $this->cssClass($settings);
     if ($class !== '') $wrapperClasses .= ' ' . $class;
 
     $showImage = !empty($settings['show_image']);
