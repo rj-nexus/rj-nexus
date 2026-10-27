@@ -133,6 +133,8 @@ class SocialFeedWidget extends BaseWidget
         ];
     }
 
+
+
     public function render(array $settings): string
     {
         $uid      = 'sf_' . substr(md5(uniqid('', true)), 0, 8);
@@ -151,6 +153,8 @@ class SocialFeedWidget extends BaseWidget
         if (!$items) {
             $items = $this->manualItems($settings['items'] ?? []);
         }
+
+        Log::info('social-feed render', ['enable_rss' => $settings['enable_rss'] ?? null, 'rss_url' => $settings['rss_url'] ?? null, 'layout' => $settings['layout'] ?? null]);
 
         return view('rjbuilder.widgets.builtin.social-feed', compact('settings', 'uid', 'items', 'rssError'))->render();
     }
