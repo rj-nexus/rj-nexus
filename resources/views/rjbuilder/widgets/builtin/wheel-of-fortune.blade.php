@@ -1,592 +1,354 @@
 @php
-    $title           = $settings['title'] ?? __('Try your luck!');
-    $subtitle        = $settings['subtitle'] ?? '';
-    $spinLabel       = $settings['spin_label'] ?? __('SPIN');
-    $duration        = (int) ($settings['duration'] ?? 5000);
-    $size            = $settings['size'] ?? 'lg';
-    $pointerColor    = $settings['pointer_color'] ?? '#0f172a';
-    $rimColor        = $settings['rim_color'] ?? '#0f172a';
-    $hubColor        = $settings['hub_color'] ?? '#8b5cf6';
-    $hubTextColor    = $settings['hub_text_color'] ?? '#ffffff';
-    $showConfetti    = $settings['show_confetti'] ?? true;
-    $showResultModal = $settings['show_result_modal'] ?? true;
-    $oneTime         = $settings['one_time'] ?? false;
-    $oneTimeMsg      = $settings['one_time_message'] ?? __('You have already spun the wheel!');
-    $claimedLabel    = $settings['claimed_label'] ?? __('You won:');
-    $paddingY        = (int) ($settings['padding_y'] ?? 60);
+    $hex = function ($v, $d) {
+        $v = trim((string) $v);
+        return preg_match('/^#([0-9a-f]{3}|[0-9a-f]{6})$/i', $v) ? $v : $d;
+    };
 
-    $sizeMap = ['sm' => 280, 'md' => 360, 'lg' => 440, 'xl' => 520];
-    $sizePx  = $sizeMap[$size] ?? 440;
+    $title       = trim((string) ($settings['title'] ?? __('Try your luck!')));
+    $subtitle    = trim((string) ($settings['subtitle'] ?? ''));
+    $spinLabel   = trim((string) ($settings['spin_label'] ?? __('SPIN'))) ?: __('SPIN');
+    $duration    = max(2000, min(15000, (int) ($settings['duration'] ?? 5000)));
+    $sizePx      = ['sm' => 280, 'md' => 360, 'lg' => 440, 'xl' => 520][$settings['size'] ?? 'lg'] ?? 440;
+    $pointer     = $hex($settings['pointer_color'] ?? '', '#0f172a');
+    $rim         = $hex($settings['rim_color'] ?? '', '#0f172a');
+    $hub         = $hex($settings['hub_color'] ?? '', '#8b5cf6');
+    $hubText     = $hex($settings['hub_text_color'] ?? '', '#ffffff');
+    $confettiOn  = !empty($settings['show_confetti'] ?? true);
+    $modalOn     = !empty($settings['show_result_modal'] ?? true);
+    $oneTime     = !empty($settings['one_time'] ?? false);
+    $oneTimeMsg  = (string) ($settings['one_time_message'] ?? __('You have already spun the wheel!'));
+    $claimed     = (string) ($settings['claimed_label'] ?? __('You won:'));
+    $paddingY    = max(0, min(240, (int) ($settings['padding_y'] ?? 60)));
 
-    $palette = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#84cc16', '#d946ef', '#f43f5e'];
-
+    $palette  = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#06b6d4', '#84cc16', '#d946ef', '#f43f5e'];
     $segments = [];
-    if (!empty($settings['segments']) && is_array($settings['segments'])) {
-        foreach ($settings['segments'] as $i => $row) {
-            if (!is_array($row)) continue;
-            $label = trim((string) ($row['label'] ?? ''));
-            if ($label === '') continue;
-            $weight = (isset($row['weight']) && is_numeric($row['weight']) && (float) $row['weight'] > 0)
-                ? (float) $row['weight']
-                : 1.0;
-            $color = trim((string) ($row['color'] ?? ''));
-            if ($color === '' || !preg_match('/^#?[0-9a-fA-F]{3,8}$/', $color)) {
-                $color = $palette[$i % count($palette)];
-            } elseif ($color[0] !== '#') {
-                $color = '#' . $color;
-            }
-            $segments[] = [
-                'label'       => $label,
-                'color'       => $color,
-                'weight'      => $weight,
-                'description' => trim((string) ($row['description'] ?? '')),
-            ];
-        }
-    }
-
-    $hasSegments = count($segments) >= 2;
-    $n = count($segments);
-    $segAngle = $n > 0 ? 360 / $n : 0;
-
-    $cx = 200.0;
-    $cy = 200.0;
-    $rSeg = 185.0;
-
-    $paths = [];
-    $labels = [];
-    if ($hasSegments) {
-        $labelMaxChars = $n > 12 ? 8 : ($n > 8 ? 10 : ($n > 6 ? 12 : 16));
-        $fontSize      = min(20.0, max(9.0, $segAngle * 0.38));
-
-        foreach ($segments as $i => $seg) {
-            $startAngle = $i * $segAngle;
-            $endAngle   = ($i + 1) * $segAngle;
-            $midAngle   = ($i + 0.5) * $segAngle;
-
-            $startRad = deg2rad($startAngle);
-            $endRad   = deg2rad($endAngle);
-            $midRad   = deg2rad($midAngle);
-
-            $x1 = $cx + $rSeg * sin($startRad);
-            $y1 = $cy - $rSeg * cos($startRad);
-            $x2 = $cx + $rSeg * sin($endRad);
-            $y2 = $cy - $rSeg * cos($endRad);
-
-            $largeArc = $segAngle > 180 ? 1 : 0;
-            $pathD = sprintf(
-                'M %.2F %.2F L %.2F %.2F A %.2F %.2F 0 %d 1 %.2F %.2F Z',
-                $cx, $cy, $x1, $y1, $rSeg, $rSeg, $largeArc, $x2, $y2
-            );
-
-            $textR = $rSeg * 0.66;
-            $tx = $cx + $textR * sin($midRad);
-            $ty = $cy - $textR * cos($midRad);
-
-            $textRotation = $midAngle;
-            if ($midAngle > 90 && $midAngle < 270) {
-                $textRotation += 180;
-            }
-
-            $labelDisplay = mb_strlen($seg['label']) > $labelMaxChars
-                ? mb_substr($seg['label'], 0, $labelMaxChars - 1) . '…'
-                : $seg['label'];
-
-            $paths[] = [
-                'd'     => $pathD,
-                'color' => $seg['color'],
-                'index' => $i,
-            ];
-            $labels[] = [
-                'x'        => $tx,
-                'y'        => $ty,
-                'rotation' => $textRotation,
-                'text'     => $labelDisplay,
-                'size'     => $fontSize,
-            ];
-        }
-    }
-
-    $segmentsJson = array_map(function ($s, $i) use ($segAngle) {
-        return [
-            'label'       => $s['label'],
-            'color'       => $s['color'],
-            'weight'      => $s['weight'],
-            'description' => $s['description'],
-            'midAngle'    => ($i + 0.5) * $segAngle,
+    foreach ((array) ($settings['segments'] ?? []) as $i => $row) {
+        if (!is_array($row) || trim((string) ($row['label'] ?? '')) === '') continue;
+        $c = '#' . ltrim(trim((string) ($row['color'] ?? '')), '#');
+        $segments[] = [
+            'label'       => trim((string) $row['label']),
+            'color'       => $hex($c, $palette[count($segments) % count($palette)]),
+            'weight'      => (isset($row['weight']) && is_numeric($row['weight']) && (float) $row['weight'] > 0) ? (float) $row['weight'] : 1.0,
+            'description' => trim((string) ($row['description'] ?? '')),
         ];
-    }, $segments, array_keys($segments));
+    }
+
+    $n    = count($segments);
+    $ok   = $n >= 2;
+    $A    = $ok ? 360 / $n : 0;
+    $pt   = fn ($r, $deg) => [200 + $r * sin(deg2rad($deg)), 200 - $r * cos(deg2rad($deg))];
+    $geo  = [];
+    $segJson = [];
+
+    foreach ($segments as $i => $seg) {
+        [$x1, $y1] = $pt(185, $i * $A);
+        [$x2, $y2] = $pt(185, ($i + 1) * $A);
+        $mid  = ($i + .5) * $A;
+        $left = $mid > 180;
+        $fs   = min(19, max(9, $A * .4));
+        $max  = max(4, (int) floor(135 / ($fs * .6)));
+        $geo[] = [
+            'd'      => sprintf('M200 200L%.2F %.2F A185 185 0 %d 1 %.2F %.2F Z', $x1, $y1, $A > 180 ? 1 : 0, $x2, $y2),
+            'peg'    => $pt(179, $i * $A),
+            'x'      => $left ? 24 : 376,
+            'anchor' => $left ? 'start' : 'end',
+            'rot'    => round($left ? $mid - 270 : $mid - 90, 2),
+            'fs'     => round($fs, 1),
+            'text'   => mb_strlen($seg['label']) > $max ? mb_substr($seg['label'], 0, $max - 1) . '…' : $seg['label'],
+        ];
+        $segJson[] = [
+            'label'       => $seg['label'],
+            'color'       => $seg['color'],
+            'weight'      => $seg['weight'],
+            'description' => $seg['description'],
+            'mid'         => $mid,
+        ];
+    }
 @endphp
 
 <style>
-    #{{ $uid }} {
-        width: 100%;
-        padding: {{ $paddingY }}px 16px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-    #{{ $uid }} .rj-wf-head {
-        text-align: center;
-        margin-bottom: 32px;
-        max-width: 640px;
-    }
-    #{{ $uid }} .rj-wf-sub {
-        font-size: 12px;
-        font-weight: 700;
-        letter-spacing: .18em;
-        text-transform: uppercase;
-        color: {{ $hubColor }};
-        margin: 0 0 10px;
-    }
-    #{{ $uid }} .rj-wf-title {
-        font-size: 30px;
-        font-weight: 800;
-        letter-spacing: -.02em;
-        color: #0f172a;
-        margin: 0;
-    }
-    @media (min-width: 768px) {
-        #{{ $uid }} .rj-wf-title { font-size: 40px; }
-    }
+    #{{ $uid }} { --h: {{ $hub }}; width: 100%; padding: {{ $paddingY }}px 16px; display: flex; flex-direction: column; align-items: center; }
+    #{{ $uid }} *, #{{ $uid }} *::before, #{{ $uid }} *::after { box-sizing: border-box; }
 
-    #{{ $uid }} .rj-wf-stage {
-        position: relative;
-        width: min(100%, {{ $sizePx }}px);
-        aspect-ratio: 1 / 1;
-        user-select: none;
-    }
-    #{{ $uid }} .rj-wf-svg {
-        width: 100%;
-        height: 100%;
-        display: block;
-        overflow: visible;
-    }
-    #{{ $uid }} .rj-wf-rotate {
-        transform-origin: 200px 200px;
-        transform-box: view-box;
-        will-change: transform;
-    }
-    #{{ $uid }} .rj-wf-seg-text {
-        fill: #fff;
-        font-weight: 800;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        letter-spacing: .02em;
-        paint-order: stroke fill;
-        stroke: rgba(0,0,0,.18);
-        stroke-width: 1.5px;
-        pointer-events: none;
-        user-select: none;
-    }
-    #{{ $uid }} .rj-wf-rim {
-        pointer-events: none;
-    }
-    #{{ $uid }} .rj-wf-pointer {
-        pointer-events: none;
-        filter: drop-shadow(0 3px 6px rgba(0,0,0,.3));
-    }
+    #{{ $uid }} .wf-head { max-width: 640px; margin-bottom: 36px; text-align: center; }
+    #{{ $uid }} .wf-sub { margin: 0 0 10px; font-size: 13px; font-weight: 700; color: var(--h); }
+    #{{ $uid }} .wf-title { margin: 0; font-size: clamp(30px, 5vw, 44px); font-weight: 800; letter-spacing: -.03em; color: #0f172a; }
 
-    #{{ $uid }} .rj-wf-hub {
+    #{{ $uid }} .wf-stage { position: relative; width: min(100%, {{ $sizePx }}px); aspect-ratio: 1; user-select: none; filter: drop-shadow(0 30px 36px rgba(15, 23, 42, .28)); }
+    #{{ $uid }} .wf-svg { display: block; width: 100%; height: 100%; overflow: visible; }
+    #{{ $uid }} .wf-seg { transition: opacity .5s ease; }
+    #{{ $uid }}.has-win .wf-seg:not(.is-win) { opacity: .35; }
+    #{{ $uid }} .wf-seg.is-win { stroke: #fff; stroke-width: 3; stroke-linejoin: round; filter: brightness(1.12); }
+    #{{ $uid }} .wf-t { fill: #fff; font-family: -apple-system, 'Segoe UI', sans-serif; font-weight: 800; paint-order: stroke fill; stroke: rgba(0, 0, 0, .28); stroke-width: 2px; pointer-events: none; }
+    #{{ $uid }} .wf-peg { fill: #fff; stroke: rgba(0, 0, 0, .35); stroke-width: 1; }
+    #{{ $uid }} .wf-pointer { transform-box: view-box; transform-origin: 200px 6px; filter: drop-shadow(0 4px 5px rgba(0, 0, 0, .4)); }
+    #{{ $uid }} .wf-bulb { fill: #fde68a; opacity: .35; animation: wfChase 1.2s linear infinite; animation-delay: calc(var(--i) * -50ms); }
+    #{{ $uid }}.is-spinning .wf-bulb { animation-duration: .45s; animation-delay: calc(var(--i) * -18.75ms); }
+    #{{ $uid }}.is-celebrate .wf-bulb { animation: wfBlink .35s steps(1) infinite; }
+    @keyframes wfChase { 0% { opacity: 1; filter: drop-shadow(0 0 5px #fbbf24); } 14%, 100% { opacity: .3; } }
+    @keyframes wfBlink { 0% { opacity: 1; filter: drop-shadow(0 0 6px #fbbf24); } 50% { opacity: .3; } }
+
+    #{{ $uid }} .wf-hub {
         position: absolute;
         top: 50%;
         left: 50%;
+        width: 24%;
+        height: 24%;
         transform: translate(-50%, -50%);
-        width: 22%;
-        height: 22%;
-        border-radius: 50%;
         border: 4px solid #fff;
-        background: {{ $hubColor }};
-        color: {{ $hubTextColor }};
-        font-size: clamp(10px, 1.7vw, 16px);
-        font-weight: 900;
-        letter-spacing: .08em;
-        cursor: pointer;
-        z-index: 10;
-        box-shadow: 0 8px 24px rgba(0,0,0,.35), 0 0 0 0 {{ $hubColor }};
-        transition: transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0;
-        font-family: inherit;
-    }
-    #{{ $uid }} .rj-wf-hub:hover:not(:disabled) {
-        transform: translate(-50%, -50%) scale(1.08);
-        box-shadow: 0 12px 32px rgba(0,0,0,.4), 0 0 0 6px {{ $hubColor }}22;
-    }
-    #{{ $uid }} .rj-wf-hub:active:not(:disabled) {
-        transform: translate(-50%, -50%) scale(.96);
-    }
-    #{{ $uid }} .rj-wf-hub:disabled {
-        cursor: wait;
-        opacity: .85;
-    }
-    #{{ $uid }} .rj-wf-hub::after {
-        content: '';
-        position: absolute;
-        inset: -6px;
         border-radius: 50%;
-        border: 2px solid {{ $hubColor }};
-        opacity: 0;
-        transition: opacity .3s ease;
-        animation: rjWfHubPulse 2.5s ease-in-out infinite;
-    }
-    #{{ $uid }} .rj-wf-hub:not(:disabled)::after {
-        opacity: .5;
-    }
-    @keyframes rjWfHubPulse {
-        0%, 100% { transform: scale(1); opacity: .5; }
-        50%      { transform: scale(1.15); opacity: .1; }
-    }
-
-    #{{ $uid }} .rj-wf-empty {
-        max-width: 480px;
-        padding: 40px 24px;
-        text-align: center;
-        color: #64748b;
-        background: #f8fafc;
-        border: 1px dashed #cbd5e1;
-        border-radius: 16px;
-        font-size: 14px;
-    }
-
-    /* ---------- MODAL ---------- */
-    #{{ $uid }} .rj-wf-modal {
-        position: fixed;
-        inset: 0;
-        z-index: 99990;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        padding: 24px;
-    }
-    #{{ $uid }} .rj-wf-modal.is-open {
-        display: flex;
-    }
-    #{{ $uid }} .rj-wf-modal-back {
-        position: absolute;
-        inset: 0;
-        background: rgba(2,6,23,.72);
-        backdrop-filter: blur(6px);
-        animation: rjWfFade .25s ease both;
-    }
-    #{{ $uid }} .rj-wf-modal-box {
-        position: relative;
-        background: #fff;
-        border-radius: 24px;
-        padding: 40px 32px 28px;
-        text-align: center;
-        max-width: 400px;
-        width: 100%;
-        box-shadow: 0 40px 80px -20px rgba(0,0,0,.6);
-        animation: rjWfPop .4s cubic-bezier(.34,1.56,.64,1) both;
-    }
-    @keyframes rjWfFade { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes rjWfPop {
-        from { opacity: 0; transform: scale(.85) translateY(20px); }
-        to   { opacity: 1; transform: none; }
-    }
-    #{{ $uid }} .rj-wf-modal-icon {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-bottom: 14px;
-        color: #fbbf24;
-        animation: rjWfBounce 1.2s ease-in-out infinite;
-    }
-    @keyframes rjWfBounce {
-        0%, 100% { transform: translateY(0); }
-        50%      { transform: translateY(-8px); }
-    }
-    #{{ $uid }} .rj-wf-modal-label {
-        font-size: 12px;
-        font-weight: 800;
-        letter-spacing: .14em;
-        text-transform: uppercase;
-        color: {{ $hubColor }};
-        margin: 0 0 8px;
-    }
-    #{{ $uid }} .rj-wf-modal-prize {
-        font-size: 26px;
-        font-weight: 800;
-        color: #0f172a;
-        letter-spacing: -.01em;
-        margin: 0 0 10px;
-        line-height: 1.2;
-    }
-    #{{ $uid }} .rj-wf-modal-desc {
-        font-size: 14px;
-        color: #64748b;
-        line-height: 1.6;
-        margin: 0 0 24px;
-    }
-    #{{ $uid }} .rj-wf-modal-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 12px 32px;
-        border-radius: 12px;
-        background: {{ $hubColor }};
-        color: #fff;
-        border: 0;
-        font-size: 14px;
-        font-weight: 700;
-        cursor: pointer;
-        transition: transform .15s ease, opacity .2s ease;
+        background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--h) 70%, #fff), var(--h) 65%);
+        color: {{ $hubText }};
         font-family: inherit;
+        font-size: clamp(11px, 2.2vw, 18px);
+        font-weight: 900;
+        letter-spacing: .06em;
+        cursor: pointer;
+        box-shadow: 0 10px 26px rgba(0, 0, 0, .4);
+        transition: transform .25s cubic-bezier(.34, 1.56, .64, 1);
     }
-    #{{ $uid }} .rj-wf-modal-btn:hover { opacity: .92; }
-    #{{ $uid }} .rj-wf-modal-btn:active { transform: scale(.97); }
+    #{{ $uid }} .wf-hub:hover:not(:disabled) { transform: translate(-50%, -50%) scale(1.08); }
+    #{{ $uid }} .wf-hub:active:not(:disabled) { transform: translate(-50%, -50%) scale(.95); }
+    #{{ $uid }} .wf-hub:disabled { cursor: wait; opacity: .85; }
+    #{{ $uid }} .wf-hub:focus-visible { outline: 3px solid #0f172a; outline-offset: 4px; }
+    #{{ $uid }} .wf-hub::after { content: ""; position: absolute; inset: -8px; border-radius: 50%; border: 2px solid var(--h); opacity: 0; }
+    #{{ $uid }} .wf-hub:not(:disabled)::after { animation: wfPing 2.2s ease-out infinite; }
+    @keyframes wfPing { 0% { transform: scale(.92); opacity: .7; } 100% { transform: scale(1.35); opacity: 0; } }
 
-    /* ---------- CONFETTI ---------- */
-    #{{ $uid }} .rj-wf-confetti {
-        position: fixed;
-        inset: 0;
-        pointer-events: none;
-        z-index: 99995;
-        overflow: hidden;
-    }
-    #{{ $uid }} .rj-wf-confetti-piece {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 9px;
-        height: 14px;
-        opacity: 1;
-        will-change: transform, opacity;
-        animation: rjWfConfetti 2.4s cubic-bezier(.2,.7,.4,1) forwards;
-    }
-    @keyframes rjWfConfetti {
-        0% {
-            transform: translate(-50%, -50%) rotate(0deg) scale(1);
-            opacity: 1;
-        }
-        100% {
-            transform: translate(calc(-50% + var(--tx, 0px)), calc(-50% + var(--ty, 400px))) rotate(var(--rot, 720deg)) scale(.4);
-            opacity: 0;
-        }
-    }
+    #{{ $uid }} .wf-empty { max-width: 480px; padding: 40px 24px; text-align: center; color: #64748b; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 16px; font-size: 14px; }
+
+    #{{ $uid }} .wf-modal { position: fixed; inset: 0; z-index: 99990; display: none; align-items: center; justify-content: center; padding: 24px; background: rgba(2, 6, 23, .72); }
+    #{{ $uid }} .wf-modal.is-open { display: flex; animation: wfFade .25s ease both; }
+    #{{ $uid }} .wf-box { width: 100%; max-width: 400px; padding: 40px 32px 28px; text-align: center; background: #fff; border-radius: 24px; box-shadow: 0 40px 80px -20px rgba(0, 0, 0, .6); animation: wfPop .45s cubic-bezier(.34, 1.56, .64, 1) both; }
+    @keyframes wfFade { from { opacity: 0; } }
+    @keyframes wfPop { from { opacity: 0; transform: scale(.85) translateY(20px); } }
+    #{{ $uid }} .wf-emoji { margin-bottom: 10px; font-size: 52px; line-height: 1; }
+    #{{ $uid }} .wf-label { margin: 0 0 8px; font-size: 13px; font-weight: 700; color: var(--h); }
+    #{{ $uid }} .wf-prize { margin: 0 0 10px; font-size: 28px; font-weight: 800; line-height: 1.2; color: #0f172a; }
+    #{{ $uid }} .wf-desc { margin: 0 0 24px; font-size: 14px; line-height: 1.6; color: #64748b; }
+    #{{ $uid }} .wf-close { padding: 12px 32px; border: 0; border-radius: 12px; background: var(--h); color: #fff; font-family: inherit;
+        font-size: 14px;
+        font-weight: 700; cursor: pointer; }
+    #{{ $uid }} .wf-close:focus-visible { outline: 3px solid #0f172a; outline-offset: 3px; }
 
     @media (prefers-reduced-motion: reduce) {
-        #{{ $uid }} *,
-        #{{ $uid }} *::before,
-        #{{ $uid }} *::after {
-            animation: none !important;
-            transition-duration: .01ms !important;
-        }
+        #{{ $uid }} *, #{{ $uid }} *::before, #{{ $uid }} *::after { animation: none !important; transition: none !important; }
+        #{{ $uid }} .wf-bulb { opacity: .9; }
     }
 </style>
 
-<div id="{{ $uid }}" data-duration="{{ $duration }}" data-one-time="{{ $oneTime ? '1' : '0' }}" data-confetti="{{ $showConfetti ? '1' : '0' }}" data-modal="{{ $showResultModal ? '1' : '0' }}" data-hub-color="{{ $hubColor }}">
-    @if($hasSegments)
-        @if($title || $subtitle)
-            <header class="rj-wf-head">
-                @if($subtitle)
-                    <p class="rj-wf-sub">{{ $subtitle }}</p>
-                @endif
-                @if($title)
-                    <h2 class="rj-wf-title">{{ $title }}</h2>
-                @endif
+<div id="{{ $uid }}">
+    @if($ok)
+        @if($title !== '' || $subtitle !== '')
+            <header class="wf-head">
+                @if($subtitle !== '') <p class="wf-sub">{{ $subtitle }}</p> @endif
+                @if($title !== '') <h2 class="wf-title">{{ $title }}</h2> @endif
             </header>
         @endif
 
-        <div class="rj-wf-stage">
-            <svg class="rj-wf-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-                <g class="rj-wf-rotate" data-rotate>
-                    @foreach($paths as $p)
-                        <path d="{{ $p['d'] }}" fill="{{ $p['color'] }}" />
+        <div class="wf-stage">
+            <svg class="wf-svg" viewBox="0 0 400 400" role="img" aria-label="{{ $title }}">
+                <defs>
+                    <radialGradient id="{{ $uid }}-gl" cx=".35" cy=".3" r=".85">
+                        <stop offset="0" stop-color="#fff" stop-opacity=".35"/>
+                        <stop offset=".55" stop-color="#fff" stop-opacity="0"/>
+                        <stop offset="1" stop-color="#000" stop-opacity=".28"/>
+                    </radialGradient>
+                </defs>
+                <circle cx="200" cy="200" r="193" fill="none" stroke="{{ $rim }}" stroke-width="16"/>
+                <g data-wheel>
+                    @foreach($geo as $i => $g)
+                        <path class="wf-seg" d="{{ $g['d'] }}" fill="{{ $segments[$i]['color'] }}"/>
                     @endforeach
-                    @foreach($labels as $lbl)
-                        <text class="rj-wf-seg-text"
-                              x="{{ number_format($lbl['x'], 2, '.', '') }}"
-                              y="{{ number_format($lbl['y'], 2, '.', '') }}"
-                              text-anchor="middle"
-                              dominant-baseline="middle"
-                              font-size="{{ number_format($lbl['size'], 1, '.', '') }}"
-                              transform="rotate({{ number_format($lbl['rotation'], 2, '.', '') }} {{ number_format($lbl['x'], 2, '.', '') }} {{ number_format($lbl['y'], 2, '.', '') }})">{{ $lbl['text'] }}</text>
+                    @foreach($geo as $g)
+                        <text class="wf-t" x="{{ $g['x'] }}" y="200" text-anchor="{{ $g['anchor'] }}" dominant-baseline="middle" font-size="{{ $g['fs'] }}" transform="rotate({{ $g['rot'] }} 200 200)">{{ $g['text'] }}</text>
+                    @endforeach
+                    @foreach($geo as $g)
+                        <circle class="wf-peg" cx="{{ number_format($g['peg'][0], 2, '.', '') }}" cy="{{ number_format($g['peg'][1], 2, '.', '') }}" r="4"/>
                     @endforeach
                 </g>
-                <circle class="rj-wf-rim" cx="200" cy="200" r="190" fill="none" stroke="{{ $rimColor }}" stroke-width="10" />
-                <polygon class="rj-wf-pointer" points="182,5 218,5 200,42" fill="{{ $pointerColor }}" />
+                <circle cx="200" cy="200" r="185" fill="url(#{{ $uid }}-gl)" pointer-events="none"/>
+                @for($b = 0; $b < 24; $b++)
+                    @php [$bx, $by] = $pt(193, $b * 15); @endphp
+                    <circle class="wf-bulb" style="--i:{{ $b }}" cx="{{ number_format($bx, 2, '.', '') }}" cy="{{ number_format($by, 2, '.', '') }}" r="3.6"/>
+                @endfor
+                <g class="wf-pointer" data-pointer>
+                    <path d="M187 -8H213L200 40Z" fill="{{ $pointer }}" stroke="#fff" stroke-width="2.5" stroke-linejoin="round"/>
+                </g>
             </svg>
-
-            <button type="button" class="rj-wf-hub" data-spin aria-label="{{ $spinLabel }}">{{ $spinLabel }}</button>
+            <button type="button" class="wf-hub" data-spin aria-label="{{ $spinLabel }}">{{ $spinLabel }}</button>
         </div>
 
-        @if($showResultModal)
-            <div class="rj-wf-modal" data-modal-box role="dialog" aria-modal="true">
-                <div class="rj-wf-modal-back" data-modal-close></div>
-                <div class="rj-wf-modal-box">
-                    <div class="rj-wf-modal-icon">
-                        <svg width="56" height="56" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 21h8m-4-4v4m-5-4h10a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2zm3-6a2 2 0 11-4 0 2 2 0 014 0zm8 0a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                    </div>
-                    <p class="rj-wf-modal-label">{{ $claimedLabel }}</p>
-                    <h3 class="rj-wf-modal-prize" data-prize>—</h3>
-                    <p class="rj-wf-modal-desc" data-desc></p>
-                    <button type="button" class="rj-wf-modal-btn" data-modal-close>{{ __('Got it!') }}</button>
+        @if($modalOn)
+            <div class="wf-modal" data-modal role="dialog" aria-modal="true">
+                <div class="wf-box">
+                    <div class="wf-emoji" aria-hidden="true">🎉</div>
+                    <p class="wf-label" data-label>{{ $claimed }}</p>
+                    <h3 class="wf-prize" data-prize></h3>
+                    <p class="wf-desc" data-desc></p>
+                    <button type="button" class="wf-close" data-close>{{ __('Got it!') }}</button>
                 </div>
             </div>
         @endif
-
-        <div class="rj-wf-confetti" data-confetti-box></div>
 
         <script>
         (function () {
             var root = document.getElementById(@js($uid));
             if (!root) return;
 
-            var segments     = @json($segmentsJson);
-            var duration     = parseInt(root.getAttribute('data-duration'), 10) || 5000;
-            var oneTime      = root.getAttribute('data-one-time') === '1';
-            var confettiOn   = root.getAttribute('data-confetti') === '1';
-            var modalOn      = root.getAttribute('data-modal') === '1';
+            var segs    = @json($segJson);
+            var dur     = @json($duration);
+            var oneTime = @json($oneTime);
+            var confOn  = @json($confettiOn);
+            var claimed = @js($claimed);
+            var onceMsg = @js($oneTimeMsg);
+            var n       = segs.length;
+            var A       = 360 / n;
+            var reduce  = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-            var wheelEl      = root.querySelector('[data-rotate]');
-            var spinBtn      = root.querySelector('[data-spin]');
-            var modalBox     = root.querySelector('[data-modal-box]');
-            var prizeEl      = root.querySelector('[data-prize]');
-            var descEl       = root.querySelector('[data-desc]');
-            var confettiBox  = root.querySelector('[data-confetti-box]');
+            var wheel = root.querySelector('[data-wheel]');
+            var ptr   = root.querySelector('[data-pointer]');
+            var btn   = root.querySelector('[data-spin]');
+            var modal = root.querySelector('[data-modal]');
+            var paths = [].slice.call(root.querySelectorAll('.wf-seg'));
 
-            var oneTimeMsg   = @js($oneTimeMsg);
-            var spinning     = false;
-            var currentRotation = 0;
+            var rot = 0, spinning = false, idle = !reduce, visible = true;
 
-            var lsKey = (function () {
-                var sig = segments.map(function (s) { return s.label + s.color; }).join('|');
+            var key = 'rj_wf_' + (function (s) {
                 var h = 0;
-                for (var i = 0; i < sig.length; i++) {
-                    h = ((h << 5) - h) + sig.charCodeAt(i);
-                    h |= 0;
-                }
-                return 'rj_wf_' + Math.abs(h);
-            })();
+                for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+                return Math.abs(h);
+            })(segs.map(function (s) { return s.label + s.color; }).join('|'));
 
-            function alreadyPlayed() {
-                if (!oneTime) return null;
-                try {
-                    var raw = localStorage.getItem(lsKey);
-                    if (!raw) return null;
-                    return JSON.parse(raw);
-                } catch (e) { return null; }
+            function played() {
+                try { return oneTime && !!localStorage.getItem(key); } catch (e) { return false; }
+            }
+            function markPlayed() {
+                try { if (oneTime) localStorage.setItem(key, String(Date.now())); } catch (e) {}
             }
 
-            function markPlayed(idx) {
-                if (!oneTime) return;
-                try {
-                    localStorage.setItem(lsKey, JSON.stringify({ idx: idx, ts: Date.now() }));
-                } catch (e) {}
+            function draw() { wheel.setAttribute('transform', 'rotate(' + rot.toFixed(2) + ' 200 200)'); }
+            function slot(r) { return Math.floor((((-r % 360) + 360) % 360) / A); }
+
+            function flick() {
+                if (ptr.animate) ptr.animate([{ transform: 'rotate(-26deg)' }, { transform: 'rotate(0deg)' }], { duration: 130, easing: 'ease-out' });
             }
 
-            function weightedPick() {
-                var total = 0;
-                segments.forEach(function (s) { total += s.weight; });
-                if (total <= 0) return Math.floor(Math.random() * segments.length);
-                var pick = Math.random() * total;
-                for (var i = 0; i < segments.length; i++) {
-                    pick -= segments[i].weight;
-                    if (pick <= 0) return i;
-                }
-                return segments.length - 1;
+            function pick() {
+                var total = 0, i;
+                segs.forEach(function (s) { total += s.weight; });
+                var r = Math.random() * total;
+                for (i = 0; i < n; i++) { r -= segs[i].weight; if (r <= 0) return i; }
+                return n - 1;
             }
 
-            function showModal(seg) {
-                if (!modalOn) return;
-                prizeEl.textContent = seg.label;
-                if (seg.description) {
-                    descEl.textContent = seg.description;
-                    descEl.style.display = 'block';
-                } else {
-                    descEl.style.display = 'none';
-                }
-                modalBox.classList.add('is-open');
+            function openModal(text, desc, label) {
+                if (!modal) { alert(text); return; }
+                modal.querySelector('[data-label]').textContent = label;
+                modal.querySelector('[data-prize]').textContent = text;
+                var d = modal.querySelector('[data-desc]');
+                d.textContent = desc || '';
+                d.style.display = desc ? 'block' : 'none';
+                modal.classList.add('is-open');
+                modal.querySelector('[data-close]').focus();
             }
-
-            function showMessage(text) {
-                if (!modalOn) { alert(text); return; }
-                prizeEl.textContent = text;
-                descEl.style.display = 'none';
-                modalBox.classList.add('is-open');
-            }
-
             function closeModal() {
-                if (modalBox) modalBox.classList.remove('is-open');
+                if (!modal || !modal.classList.contains('is-open')) return;
+                modal.classList.remove('is-open');
+                btn.focus();
+            }
+            if (modal) {
+                modal.addEventListener('click', function (e) { if (e.target === modal) closeModal(); });
+                modal.querySelector('[data-close]').addEventListener('click', closeModal);
+                document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
             }
 
-            if (modalBox) {
-                root.querySelectorAll('[data-modal-close]').forEach(function (el) {
-                    el.addEventListener('click', closeModal);
-                });
-                document.addEventListener('keydown', function (e) {
-                    if (e.key === 'Escape') closeModal();
-                });
-            }
-
-            function launchConfetti() {
-                if (!confettiOn || !confettiBox) return;
-                confettiBox.innerHTML = '';
-                var colors = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#fbbf24'];
-                for (var i = 0; i < 70; i++) {
-                    var piece = document.createElement('div');
-                    piece.className = 'rj-wf-confetti-piece';
-                    piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                    piece.style.animationDelay = (Math.random() * 0.35) + 's';
-                    var angle = Math.random() * Math.PI * 2;
-                    var dist = 250 + Math.random() * 500;
-                    var tx = Math.cos(angle) * dist;
-                    var ty = Math.sin(angle) * dist + 300;
-                    piece.style.setProperty('--tx', tx.toFixed(1) + 'px');
-                    piece.style.setProperty('--ty', ty.toFixed(1) + 'px');
-                    piece.style.setProperty('--rot', ((Math.random() - 0.5) * 1440).toFixed(0) + 'deg');
-                    confettiBox.appendChild(piece);
+            function confetti() {
+                if (!confOn || reduce) return;
+                var cv = document.createElement('canvas'), w = innerWidth, h = innerHeight;
+                cv.width = w;
+                cv.height = h;
+                cv.style.cssText = 'position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:99995';
+                document.body.appendChild(cv);
+                var c = cv.getContext('2d'), r = btn.getBoundingClientRect(), bits = [], f = 0;
+                var cols = segs.map(function (s) { return s.color; }).concat(['#ffffff', '#fde047']);
+                for (var i = 0; i < 160; i++) {
+                    var a = -Math.PI / 2 + (Math.random() - .5) * 2.2, v = 8 + Math.random() * 14;
+                    bits.push({ x: r.left + r.width / 2, y: r.top + r.height / 2, vx: Math.cos(a) * v, vy: Math.sin(a) * v, r: Math.random() * 6, vr: (Math.random() - .5) * .5, round: i % 4 === 0, col: cols[i % cols.length] });
                 }
-                setTimeout(function () {
-                    if (confettiBox) confettiBox.innerHTML = '';
-                }, 2800);
+                (function frame() {
+                    c.clearRect(0, 0, w, h);
+                    bits.forEach(function (b) {
+                        b.vy += .3; b.vx *= .99; b.x += b.vx; b.y += b.vy; b.r += b.vr;
+                        c.save();
+                        c.globalAlpha = Math.max(0, 1 - Math.max(0, f - 100) / 60);
+                        c.translate(b.x, b.y);
+                        c.rotate(b.r);
+                        c.fillStyle = b.col;
+                        if (b.round) { c.beginPath(); c.arc(0, 0, 3.5, 0, 6.3); c.fill(); } else { c.fillRect(-4.5, -2.5, 9, 5); }
+                        c.restore();
+                    });
+                    if (++f < 160) requestAnimationFrame(frame); else cv.remove();
+                })();
+            }
+
+            function finish(w) {
+                markPlayed();
+                spinning = false;
+                btn.disabled = false;
+                root.classList.remove('is-spinning');
+                root.classList.add('has-win', 'is-celebrate');
+                paths[w].classList.add('is-win');
+                confetti();
+                setTimeout(function () { root.classList.remove('is-celebrate'); }, 2600);
+                setTimeout(function () { openModal(segs[w].label, segs[w].description, claimed); }, reduce ? 0 : 900);
             }
 
             function spin() {
                 if (spinning) return;
-
-                var prev = alreadyPlayed();
-                if (prev) {
-                    showMessage(oneTimeMsg);
-                    return;
-                }
+                if (played()) { openModal(onceMsg, '', ''); return; }
 
                 spinning = true;
-                spinBtn.disabled = true;
+                idle = false;
+                btn.disabled = true;
+                root.classList.remove('has-win');
+                root.classList.add('is-spinning');
+                paths.forEach(function (p) { p.classList.remove('is-win'); });
 
-                var winner = weightedPick();
-                var seg = segments[winner];
-                var segAngle = 360 / segments.length;
-                var jitter = (Math.random() - 0.5) * segAngle * 0.7;
-                var desiredR = -seg.midAngle + jitter;
+                var w      = pick();
+                var jitter = (Math.random() - .5) * A * .7;
+                var cur    = ((rot % 360) + 360) % 360;
+                var tgt    = (((-segs[w].mid + jitter) % 360) + 360) % 360;
+                var from   = rot;
+                var to     = rot + (5 + Math.floor(Math.random() * 3)) * 360 + ((tgt - cur + 360) % 360);
 
-                var currentMod = ((currentRotation % 360) + 360) % 360;
-                var targetMod  = ((desiredR % 360) + 360) % 360;
-                var delta      = ((targetMod - currentMod) + 360) % 360;
+                if (reduce) { rot = to; draw(); finish(w); return; }
 
-                var fullSpins = 5 + Math.floor(Math.random() * 3);
-                var finalRotation = currentRotation + fullSpins * 360 + delta;
-
-                wheelEl.style.transition = 'transform ' + duration + 'ms cubic-bezier(.17,.67,.17,1)';
-                wheelEl.style.transform = 'rotate(' + finalRotation + 'deg)';
-                currentRotation = finalRotation;
-
-                markPlayed(winner);
-
-                setTimeout(function () {
-                    spinning = false;
-                    spinBtn.disabled = false;
-                    if (confettiOn) launchConfetti();
-                    showModal(seg);
-                }, duration + 120);
+                var t0 = performance.now(), last = slot(rot);
+                (function frame(now) {
+                    var p = Math.min(1, (now - t0) / dur);
+                    rot = from + (to - from) * (1 - Math.pow(1 - p, 4));
+                    draw();
+                    var s = slot(rot);
+                    if (s !== last) { last = s; flick(); }
+                    if (p < 1) requestAnimationFrame(frame); else finish(w);
+                })(t0);
             }
 
-            spinBtn.addEventListener('click', spin);
+            (function drift() {
+                if (!idle) return;
+                if (visible) { rot += .1; draw(); }
+                requestAnimationFrame(drift);
+            })();
+
+            if ('IntersectionObserver' in window) {
+                new IntersectionObserver(function (e) { visible = e[0].isIntersecting; }).observe(root);
+            }
+
+            btn.addEventListener('click', spin);
         })();
         </script>
     @else
-        <div class="rj-wf-empty">{{ __('Please add at least two wheel segments to spin.') }}</div>
+        <div class="wf-empty">{{ __('Please add at least two wheel segments to spin.') }}</div>
     @endif
 </div>
