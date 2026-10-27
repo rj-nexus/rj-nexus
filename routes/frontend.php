@@ -6,6 +6,8 @@ use App\Http\Controllers\Frontend\KycController;
 use App\Http\Controllers\Frontend\PageController;
 use App\Http\Controllers\Frontend\PostController;
 use App\Http\Controllers\Frontend\AccountController;
+use App\Http\Controllers\Frontend\LocaleController;
+use App\Http\Controllers\Frontend\NewsletterController;
 use App\Http\Controllers\Frontend\WidgetAuthController;
 use Illuminate\Support\Facades\Route;
 
@@ -42,8 +44,9 @@ Route::get('/plugin-assets/{slug}/{path}', function (string $slug, string $path)
 })->where('path', '.*')->name('plugin.asset');
 
 Route::post('/rj-widget/login', [WidgetAuthController::class, 'login'])->name('rj.widget.login');
-Route::get('/rj-widget/locale/{locale}', [\App\Http\Controllers\Frontend\LocaleController::class, 'switch'])->name('rj.widget.locale');
 Route::post('/rj-widget/logout', [WidgetAuthController::class, 'logout'])->name('rj.widget.logout');
+Route::get('/rj-widget/locale/{locale}', [LocaleController::class, 'switch'])->name('rj.widget.locale');
+Route::post('/rj-widget/newsletter', [NewsletterController::class, 'subscribe'])->name('rj.widget.newsletter');
 
 Route::get('/', [FrontendController::class, 'home'])->name('home');
 
