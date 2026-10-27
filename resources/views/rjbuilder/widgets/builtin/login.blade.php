@@ -237,12 +237,26 @@
     }
 </style>
 
+<!-- 1. XARİCİ YOXLAMA (Əgər bunu görürsənsə, Laravel faylı düzgün yükləyir) -->
+<div style="background: #ef4444; color: white; text-align: center; padding: 10px; margin: 10px auto; max-width: 420px; border-radius: 8px; font-weight: bold; z-index: 9999; position: relative;">
+    🔴 DEBUG: Xarici qutu işləyir. (Laravel faylı yüklənir)
+</div>
+
 <div id="{{ $uid }}" x-data="rjLogin_{{ $uid }}()">
+
+    <!-- 2. DAXİLİ YOXLAMA (Əgər bunu görürsənsə, Alpine.js işə düşüb) -->
+    <div style="background: #22c55e; color: white; text-align: center; padding: 10px; margin: 10px auto; max-width: 420px; border-radius: 8px; font-weight: bold;"
+         x-text="'🟢 DEBUG: Alpine işləyir. User: ' + (user ? user.name : 'Yoxdur')">
+    </div>
+
     <div class="rj-lg-card">
+
+        <!-- 3. FORMA YOXLAMASI -->
         <template x-if="!user">
             <form @submit.prevent="submit($event)" novalidate>
-                <h2 class="rj-lg-title" x-text="title"></h2>
-                <p class="rj-lg-sub" x-text="subtitle"></p>
+                <!-- Əgər formun içi boş görünürsə, deməli bura gəlib çatır, amma başqa problem var -->
+                <h2 class="rj-lg-title" x-text="title || 'Başlıq yoxdur'"></h2>
+                <p class="rj-lg-sub" x-text="subtitle || 'Alt başlıq yoxdur'"></p>
 
                 <div x-show="error" x-cloak class="rj-lg-err" x-text="error"></div>
 
@@ -284,16 +298,18 @@
             </form>
         </template>
 
+        <!-- 4. PROFİL YOXLAMASI -->
         <template x-if="user">
             <div class="rj-lg-user">
-                <h2 class="rj-lg-title" x-text="loggedTitle"></h2>
-                <div class="rj-lg-avatar" x-text="user.initials || ''"></div>
-                <p class="rj-lg-uname" x-text="user.name || ''"></p>
-                <p class="rj-lg-email" x-text="user.email || ''"></p>
+                <div style="background: blue; color: white; padding: 5px; margin-bottom: 10px; border-radius: 4px;">Profil Kartı Görünür</div>
+                <h2 class="rj-lg-title" x-text="loggedTitle || 'Xoş gəldiniz'"></h2>
+                <div class="rj-lg-avatar" x-text="user ? user.initials : ''"></div>
+                <p class="rj-lg-uname" x-text="user ? user.name : ''"></p>
+                <p class="rj-lg-email" x-text="user ? user.email : ''"></p>
 
                 <div class="rj-lg-actions">
                     @if($showAdminBtn)
-                        <template x-if="user.admin && user.adminUrl">
+                        <template x-if="user && user.admin && user.adminUrl">
                             <a :href="user.adminUrl" class="rj-lg-btn primary">
                                 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>
                                 <span>{{ __('Go to Admin') }}</span>
@@ -301,7 +317,7 @@
                         </template>
                     @endif
 
-                    <a :href="user.account || '#'" class="rj-lg-btn">
+                    <a :href="user ? user.account : '#'" class="rj-lg-btn">
                         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path stroke-linecap="round" stroke-linejoin="round" d="M4 21v-1a8 8 0 0116 0v1"/></svg>
                         <span>{{ __('My Account') }}</span>
                     </a>
@@ -319,7 +335,6 @@
 <script>
 window['rjLogin_{{ $uid }}'] = function () {
     return {
-        // Bütün Blade məlumatları birbaşa buraya ötürülür
         user: @js($initialUser),
         title: @js($title),
         subtitle: @js($subtitle),
