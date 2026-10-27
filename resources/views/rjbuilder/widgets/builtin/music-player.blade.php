@@ -7,7 +7,7 @@
         $c = ltrim($c, '#');
         if (strlen($c) === 3) { $c = $c[0].$c[0].$c[1].$c[1].$c[2].$c[2]; }
         $rgb = array_map('hexdec', str_split($c, 2));
-        return (0.299 * $rgb[0] + 0.587 * $rgb[1] + 0.114 * $rgb[2]) > 150 ? '#1d1330' : '#ffffff';
+        return (0.299 * $rgb[0] + 0.587 * $rgb[1] + 0.114 * $rgb[2]) > 150 ? '#0f172a' : '#ffffff';
     };
     $bool = fn ($v, $d = false) => $v === null ? $d : filter_var($v, FILTER_VALIDATE_BOOLEAN);
 
@@ -15,20 +15,21 @@
     $source       = in_array(($settings['source'] ?? 'audius'), ['audius', 'jamendo', 'deezer', 'itunes', 'local', 'custom'], true) ? $settings['source'] : 'audius';
     $visualizer   = in_array(($settings['visualizer'] ?? 'all'), ['all', 'bars', 'circular', 'wave', 'none'], true) ? ($settings['visualizer'] ?? 'all') : 'all';
     $accent       = $hex($settings['accent'] ?? null, '#8b5cf6');
-    $accent2      = $hex($settings['accent2'] ?? null, '#ec4899');
+    $accent2      = $hex($settings['accent2'] ?? null, '#fb923c');
     $theme        = ($settings['theme'] ?? 'paper') === 'night' ? 'night' : 'paper';
     $height       = max(320, (int) ($settings['height'] ?? 400));
     $showPlaylist = $bool($settings['show_playlist'] ?? null, true);
     $autoplay     = $bool($settings['autoplay'] ?? null, false);
     $shuffle      = $bool($settings['shuffle'] ?? null, false);
-    $paddingY     = (int) ($settings['padding_y'] ?? 60);
+    $shadow       = $bool($settings['shadow'] ?? null, true);
+    $paddingY     = (int) ($settings['padding_y'] ?? 40);
 
-    $radiusMap = ['none' => '0px', 'md' => '14px', 'xl' => '24px', '2xl' => '34px'];
-    $radiusCss = $radiusMap[$settings['radius'] ?? 'xl'] ?? '24px';
+    $radiusMap = ['none' => '0px', 'md' => '12px', 'xl' => '20px', '2xl' => '28px'];
+    $radiusCss = $radiusMap[$settings['radius'] ?? 'xl'] ?? '20px';
 
     $vars = $theme === 'night'
-        ? ['paper' => '#1a1330', 'paper2' => '#2a2048', 'ink' => '#f4eeff', 'shadow' => '#000000']
-        : ['paper' => '#fbf7ff', 'paper2' => '#efe7fb', 'ink' => '#1d1330', 'shadow' => '#1d1330'];
+        ? ['bg' => '#0f172a', 'bg2' => '#1e293b', 'ink' => '#f1f5f9', 'muted' => '#94a3b8', 'line' => '#334155', 'glow' => 'rgba(255, 255, 255, .08)']
+        : ['bg' => '#ffffff', 'bg2' => '#f8fafc', 'ink' => '#0f172a', 'muted' => '#64748b', 'line' => '#e2e8f0', 'glow' => 'rgba(255, 255, 255, .75)'];
 
     $localFiles = [];
     if (!empty($settings['local_files']) && is_array($settings['local_files'])) {
@@ -84,470 +85,235 @@
 
 <style>
     #{{ $uid }} {
-        --a: {{ $accent }};
-        --b: {{ $accent2 }};
+        --accent: {{ $accent }};
+        --accent2: {{ $accent2 }};
         --a-ink: {{ $inkFor($accent) }};
-        --b-ink: {{ $inkFor($accent2) }};
-        --paper: {{ $vars['paper'] }};
-        --paper2: {{ $vars['paper2'] }};
+        --r: {{ $radiusCss }};
+        --bg: {{ $vars['bg'] }};
+        --bg2: {{ $vars['bg2'] }};
         --ink: {{ $vars['ink'] }};
-        --shadow: {{ $vars['shadow'] }};
-        --dark: #1d1330;
+        --muted: {{ $vars['muted'] }};
+        --line: {{ $vars['line'] }};
+        --glow: {{ $vars['glow'] }};
         width: 100%;
         padding: {{ $paddingY }}px 16px;
         color: var(--ink);
-        font-family: ui-rounded, "SF Pro Rounded", "Nunito", "Segoe UI", system-ui, sans-serif;
-    }
-    #{{ $uid }} *, #{{ $uid }} *::before, #{{ $uid }} *::after { box-sizing: border-box; }
-    #{{ $uid }} [hidden] { display: none !important; }
+        font-family: inherit;
 
-    #{{ $uid }} .rj-mp {
-        max-width: 1100px;
-        margin: 0 auto;
-        display: grid;
-        grid-template-columns: minmax(300px, 5fr) 6fr;
-        min-height: {{ $height }}px;
-        background: var(--paper);
-        border: 4px solid var(--ink);
-        border-radius: {{ $radiusCss }};
-        box-shadow: 10px 10px 0 var(--shadow);
-        overflow: hidden;
+        *, *::before, *::after { box-sizing: border-box; }
+        [hidden] { display: none !important; }
+
+        .mp-card { display: grid; grid-template-columns: minmax(300px, 5fr) 6fr; max-width: 1040px; min-height: {{ $height }}px; margin: 0 auto; overflow: hidden; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); box-shadow: {{ $shadow ? '0 40px 80px -36px rgba(15, 23, 42, .35)' : 'none' }}; }
+
+        /* ---------- Stage: orbs, equalizer canvas and the 4 characters ---------- */
+        .mp-stage { position: relative; container-type: inline-size; overflow: hidden; border-right: 1px solid var(--line); background: radial-gradient(circle at 18% 12%, var(--glow), transparent 42%), linear-gradient(160deg, color-mix(in srgb, var(--accent) 12%, var(--bg)), color-mix(in srgb, var(--accent) 34%, var(--bg))); }
+        .mp-orb { position: absolute; border-radius: 50%; background: color-mix(in srgb, var(--accent) 20%, transparent); animation: rj-mp-drift 12s ease-in-out infinite alternate;
+            &:nth-of-type(1) { top: -8cqw; right: -10cqw; width: 44cqw; height: 44cqw; }
+            &:nth-of-type(2) { bottom: 22cqw; left: -12cqw; width: 30cqw; height: 30cqw; animation-delay: -5s; }
+        }
+        .mp-canvas { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; pointer-events: none; }
+
+        .mp-tag { position: absolute; top: clamp(16px, 6cqw, 40px); left: clamp(16px, 6cqw, 32px); z-index: 6; display: inline-flex; align-items: center; gap: 8px; max-width: 80%; padding: 9px 16px; border-radius: 999px; background: var(--bg); color: var(--ink); font-size: 13.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-shadow: 0 14px 28px -14px rgba(15, 23, 42, .4);
+            &::before { content: ""; flex-shrink: 0; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); opacity: .45; }
+        }
+        &.is-playing .mp-tag::before { background: var(--accent); opacity: 1; animation: rj-mp-blink 1s steps(2) infinite; }
+
+        .mp-zz { position: absolute; z-index: 6; left: 54cqw; bottom: 50cqw; pointer-events: none;
+            i { position: absolute; left: 0; bottom: 0; font-style: normal; font-size: 5cqw; font-weight: 900; color: var(--accent); opacity: 0; }
+            i:nth-child(2) { left: 4cqw; }
+            i:nth-child(3) { left: 8cqw; }
+        }
+        &.is-paused .mp-zz i { animation: rj-mp-z 3s ease-in-out infinite; }
+        &.is-paused .mp-zz i:nth-child(2) { animation-delay: 1s; }
+        &.is-paused .mp-zz i:nth-child(3) { animation-delay: 2s; }
+
+        .mp-cast { position: absolute; inset: auto 0 0; z-index: 3; height: 66cqw; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+
+        .c { position: absolute; bottom: 0; transform-origin: 50% 100%; transform: skewX(calc(var(--lx, 0) * -1.8deg)); translate: 0 calc(var(--hop, 0) * 1cqw); scale: 1 var(--sq, 1); rotate: calc(var(--rot, 0) * 1deg);
+            .eyes { position: absolute; top: var(--et); left: 50%; display: flex; gap: var(--eg); translate: -50% 0; }
+            .eye { display: block; transition: transform .3s; animation: rj-mp-blink-eye 5.5s infinite var(--d); }
+            .eye.w { display: grid; place-items: center; width: var(--es, 6cqw); height: var(--es, 6cqw); border-radius: 50%; background: #fff;
+                i { width: 46%; height: 46%; border-radius: 50%; background: #0f172a; translate: calc(var(--lx, 0) * 1.1cqw) calc(var(--ly, 0) * 1.1cqw); }
+            }
+            .eye.d { width: 2.6cqw; height: 3.6cqw; border-radius: 50%; background: #0f172a; translate: calc(var(--lx, 0) * 1.4cqw) calc(var(--ly, 0) * 1cqw); }
+            .m { position: absolute; top: var(--mt); left: 50%; width: var(--mw, 6cqw); height: calc(var(--mh, 0) * 1cqw); translate: -50% 0; border: .55cqw solid var(--mc, #0f172a); border-top: 0; border-radius: 0 0 6cqw 6cqw; }
+        }
+        .c-p { z-index: 1; left: 17cqw; width: 31cqw; height: 62cqw; border-radius: 3.5cqw 3.5cqw 0 0; background: var(--accent); --et: 9cqw; --eg: 4.5cqw; --es: 6.5cqw; --mt: 21cqw; --mw: 7cqw; --mc: rgba(255, 255, 255, .85); }
+        .c-b { z-index: 2; left: 46cqw; width: 21cqw; height: 46cqw; border-radius: 3cqw 3cqw 0 0; background: #1f2937; --et: 8cqw; --eg: 3.5cqw; --es: 5.5cqw; --mt: 17cqw; --mw: 5cqw; --mc: rgba(255, 255, 255, .85); }
+        .c-o { z-index: 3; left: 3cqw; width: 41cqw; height: 31cqw; border-radius: 20.5cqw 20.5cqw 0 0; background: #fb923c; --et: 13cqw; --eg: 9cqw; --mt: 20cqw; --mw: 7cqw; }
+        .c-y { z-index: 4; left: 62cqw; width: 25cqw; height: 37cqw; border-radius: 12.5cqw 12.5cqw 0 0; background: #facc15; --et: 10cqw; --eg: 5.5cqw; --mt: 19cqw; --mw: 6cqw; }
+
+        &.is-paused .eye { transform: scaleY(.08); }
+
+        /* ---------- Panel ---------- */
+        .mp-panel { display: flex; flex-direction: column; justify-content: center; gap: 18px; min-width: 0; padding: clamp(24px, 4vw, 44px); }
+
+        .mp-now { display: flex; align-items: center; gap: 16px; min-width: 0; }
+        .mp-cover { flex-shrink: 0; width: 84px; height: 84px; overflow: hidden; border: 1px solid var(--line); border-radius: 16px; background: var(--bg2); box-shadow: 0 14px 28px -16px rgba(15, 23, 42, .45);
+            img { display: block; width: 100%; height: 100%; object-fit: cover; }
+        }
+        .mp-meta { min-width: 0; }
+        .mp-now-title { display: -webkit-box; margin: 0 0 6px; overflow: hidden; overflow-wrap: anywhere; -webkit-box-orient: vertical; -webkit-line-clamp: 2; font-size: clamp(22px, 3vw, 30px); font-weight: 800; line-height: 1.15; letter-spacing: -.02em; }
+        .mp-now-artist { margin: 0; overflow: hidden; color: var(--muted); font-size: 14px; white-space: nowrap; text-overflow: ellipsis; }
+        .mp-status { margin: -6px 0 0; color: var(--muted); font-size: 13px;
+            &:empty { display: none; }
+        }
+
+        .mp-seek { display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+        input[type="range"] { -webkit-appearance: none; appearance: none; flex: 1; min-width: 0; height: 22px; margin: 0; background: transparent; cursor: pointer;
+            &:disabled { cursor: default; opacity: .5; }
+            &::-webkit-slider-runnable-track { height: 6px; border-radius: 999px; background: linear-gradient(to right, var(--accent) var(--p, 0%), var(--line) var(--p, 0%)); }
+            &::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; margin-top: -5px; border: 3px solid var(--accent); border-radius: 50%; background: var(--bg); box-shadow: 0 4px 10px -3px color-mix(in srgb, var(--accent) 60%, transparent); }
+            &::-moz-range-track { height: 6px; border-radius: 999px; background: var(--line); }
+            &::-moz-range-progress { height: 6px; border-radius: 999px; background: var(--accent); }
+            &::-moz-range-thumb { width: 10px; height: 10px; border: 3px solid var(--accent); border-radius: 50%; background: var(--bg); }
+            &:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 35%, transparent); outline-offset: 2px; border-radius: 999px; }
+        }
+
+        .mp-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .mp-btn { position: relative; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 1.5px solid var(--line); border-radius: 12px; background: var(--bg); color: var(--muted); cursor: pointer; transition: .2s;
+            svg { width: 22px; height: 22px; fill: currentColor; }
+            &:hover { border-color: var(--accent); color: var(--accent); }
+            &:active { transform: scale(.95); }
+            &:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 35%, transparent); outline-offset: 2px; }
+            &[aria-pressed="true"], &[data-state="all"], &[data-state="one"] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, var(--bg)); color: var(--accent); }
+            &[data-state="one"]::after { content: "1"; position: absolute; right: 5px; bottom: 3px; font-size: 10px; font-weight: 800; }
+        }
+        .mp-play { position: relative; overflow: hidden; width: 60px; height: 60px; border: 0; border-radius: 16px; background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 70%, #0f172a)); color: var(--a-ink); box-shadow: 0 16px 28px -14px var(--accent);
+            svg { width: 28px; height: 28px; }
+            &:hover { color: var(--a-ink); filter: brightness(1.07); }
+            &::after { content: ""; position: absolute; top: 0; bottom: 0; left: -60%; width: 40%; background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .4), transparent); transform: skewX(-20deg); animation: rj-mp-shine 3.6s ease-in-out infinite; }
+            .ic-pause { display: none; }
+        }
+        &.is-playing .mp-play .ic-play { display: none; }
+        &.is-playing .mp-play .ic-pause { display: block; }
+
+        .mp-vol { display: flex; align-items: center; gap: 8px; width: 150px; margin-left: auto;
+            .mp-btn { flex-shrink: 0; width: 38px; height: 38px; border-color: transparent; }
+            .mp-btn svg { width: 20px; height: 20px; }
+            .ic-mute { display: none; }
+        }
+        &.is-muted .mp-vol .ic-vol { display: none; }
+        &.is-muted .mp-vol .ic-mute { display: block; }
+
+        .mp-list { flex: 1; min-height: 120px; max-height: 240px; margin: 0; padding: 0; overflow-y: auto; border: 1px solid var(--line); border-radius: 16px; background: var(--bg); list-style: none; scrollbar-width: thin;
+            li + li .mp-row { border-top: 1px solid var(--line); }
+        }
+        .mp-row { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 16px; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; transition: background .2s;
+            &:hover { background: var(--bg2); }
+            &:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 35%, transparent); outline-offset: -3px; }
+            &.is-active { background: color-mix(in srgb, var(--accent) 10%, var(--bg)); color: var(--accent); }
+            &.is-active .mp-num { display: none; }
+            &.is-active .mp-eq { display: flex; }
+        }
+        .mp-num { width: 24px; flex-shrink: 0; color: var(--muted); font-size: 13px; font-weight: 700; text-align: center; font-variant-numeric: tabular-nums; }
+        .mp-eq { display: none; align-items: flex-end; justify-content: center; gap: 2px; width: 24px; height: 16px; flex-shrink: 0;
+            i { display: block; width: 4px; height: 100%; border-radius: 2px; background: currentColor; transform: scaleY(.35); transform-origin: bottom; }
+        }
+        &.is-playing .mp-row.is-active .mp-eq i { animation: rj-mp-eq .7s ease-in-out infinite alternate; }
+        &.is-playing .mp-row.is-active .mp-eq i:nth-child(2) { animation-delay: .2s; }
+        &.is-playing .mp-row.is-active .mp-eq i:nth-child(3) { animation-delay: .4s; }
+        .mp-rowinfo { display: flex; flex: 1; flex-direction: column; min-width: 0;
+            strong { overflow: hidden; font-size: 14px; font-weight: 700; white-space: nowrap; text-overflow: ellipsis; }
+            small { overflow: hidden; color: var(--muted); font-size: 12px; white-space: nowrap; text-overflow: ellipsis; }
+        }
+        .mp-dur { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+        .mp-empty { padding: 22px 16px; color: var(--muted); font-size: 14px; }
+
+        @media (max-width: 820px) {
+            .mp-card { grid-template-columns: 1fr; min-height: 0; }
+            .mp-stage { aspect-ratio: 4 / 3; border-right: 0; border-bottom: 1px solid var(--line); }
+            .mp-cast { scale: .78; transform-origin: 50% 100%; }
+            .mp-zz { bottom: 44cqw; }
+            .mp-vol { width: 100%; margin-left: 0; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation: none !important; transition: none !important; }
+        }
     }
 
-    /* ---------- Stage (mascot + reactive wave) ---------- */
-    #{{ $uid }} .rj-mp-stage {
-        position: relative;
-        display: grid;
-        place-items: end center;
-        padding: 64px 16px 14px;
-        overflow: hidden;
-        border-right: 4px solid var(--ink);
-        background-color: var(--paper2);
-        background-image: radial-gradient(color-mix(in srgb, var(--ink) 18%, transparent) 1.6px, transparent 2px);
-        background-size: 22px 22px;
-    }
-    #{{ $uid }} .rj-mp-canvas {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-    }
-    #{{ $uid }} .rj-mp-mascot {
-        position: relative;
-        z-index: 1;
-        display: block;
-        width: min(100%, 340px);
-        height: auto;
-        overflow: visible;
-        cursor: pointer;
-        touch-action: manipulation;
-        -webkit-tap-highlight-color: transparent;
-    }
-    #{{ $uid }} .rj-mp-tag {
-        position: absolute;
-        z-index: 2;
-        top: 18px;
-        left: 18px;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 7px 15px;
-        font-size: 14px;
-        font-weight: 800;
-        color: var(--b-ink);
-        background: var(--b);
-        border: 3px solid var(--ink);
-        border-radius: 999px;
-        box-shadow: 3px 3px 0 var(--shadow);
-        transform: rotate(-4deg);
-    }
-    #{{ $uid }} .rj-mp-tag::before {
-        content: '';
-        width: 9px;
-        height: 9px;
-        border-radius: 50%;
-        background: currentColor;
-        opacity: .35;
-    }
-    #{{ $uid }}.is-playing .rj-mp-tag::before { opacity: 1; animation: rjMpBlink 1s steps(2) infinite; }
-
-    #{{ $uid }} .rj-mp-zz text {
-        font-weight: 900;
-        font-size: 26px;
-        fill: var(--ink);
-        opacity: 0;
-    }
-    #{{ $uid }}.is-paused .rj-mp-zz text { animation: rjMpZ 3s ease-in-out infinite; }
-    #{{ $uid }}.is-paused .rj-mp-zz text:nth-child(2) { animation-delay: 1s; }
-    #{{ $uid }}.is-paused .rj-mp-zz text:nth-child(3) { animation-delay: 2s; }
-
-    /* ---------- Panel ---------- */
-    #{{ $uid }} .rj-mp-panel {
-        display: flex;
-        flex-direction: column;
-        gap: 18px;
-        min-width: 0;
-        padding: 28px 30px;
-    }
-    #{{ $uid }} .rj-mp-now {
-        display: flex;
-        align-items: center;
-        gap: 18px;
-        min-width: 0;
-    }
-    #{{ $uid }} .rj-mp-cover {
-        flex-shrink: 0;
-        width: 88px;
-        height: 88px;
-        overflow: hidden;
-        border: 3px solid var(--ink);
-        border-radius: 18px;
-        box-shadow: 4px 4px 0 var(--shadow);
-        transform: rotate(-3deg);
-        background: var(--paper2);
-    }
-    #{{ $uid }} .rj-mp-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    #{{ $uid }} .rj-mp-meta { min-width: 0; }
-    #{{ $uid }} .rj-mp-now-title {
-        margin: 0 0 6px;
-        font-size: clamp(24px, 3.4vw, 36px);
-        font-weight: 900;
-        line-height: 1.05;
-        letter-spacing: -.03em;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        overflow-wrap: anywhere;
-    }
-    #{{ $uid }} .rj-mp-now-artist {
-        margin: 0;
-        font-size: 15px;
-        font-weight: 700;
-        opacity: .65;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    #{{ $uid }} .rj-mp-status {
-        margin: -6px 0 0;
-        font-size: 13px;
-        font-weight: 700;
-        opacity: .7;
-    }
-    #{{ $uid }} .rj-mp-status:empty { display: none; }
-
-    /* seek + volume sliders */
-    #{{ $uid }} .rj-mp-seek {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        font-size: 12px;
-        font-weight: 800;
-        font-variant-numeric: tabular-nums;
-    }
-    #{{ $uid }} input[type="range"] {
-        -webkit-appearance: none;
-        appearance: none;
-        flex: 1;
-        min-width: 0;
-        height: 24px;
-        margin: 0;
-        background: transparent;
-        cursor: pointer;
-    }
-    #{{ $uid }} input[type="range"]:disabled { cursor: default; opacity: .5; }
-    #{{ $uid }} input[type="range"]::-webkit-slider-runnable-track {
-        height: 14px;
-        border: 3px solid var(--ink);
-        border-radius: 999px;
-        background: linear-gradient(to right, var(--a) var(--p, 0%), var(--paper2) var(--p, 0%));
-    }
-    #{{ $uid }} input[type="range"]::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        width: 22px;
-        height: 22px;
-        margin-top: -6px;
-        border: 3px solid var(--ink);
-        border-radius: 50%;
-        background: var(--b);
-    }
-    #{{ $uid }} input[type="range"]::-moz-range-track {
-        height: 14px;
-        border: 3px solid var(--ink);
-        border-radius: 999px;
-        background: var(--paper2);
-    }
-    #{{ $uid }} input[type="range"]::-moz-range-progress {
-        height: 8px;
-        border-radius: 999px;
-        background: var(--a);
-    }
-    #{{ $uid }} input[type="range"]::-moz-range-thumb {
-        width: 16px;
-        height: 16px;
-        border: 3px solid var(--ink);
-        border-radius: 50%;
-        background: var(--b);
-    }
-    #{{ $uid }} input[type="range"]:focus-visible { outline: 3px solid var(--b); outline-offset: 3px; border-radius: 999px; }
-
-    /* buttons */
-    #{{ $uid }} .rj-mp-controls {
-        display: flex;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 12px;
-    }
-    #{{ $uid }} .rj-mp-btn {
-        position: relative;
-        display: grid;
-        place-items: center;
-        width: 48px;
-        height: 48px;
-        padding: 0;
-        color: var(--ink);
-        background: var(--paper);
-        border: 3px solid var(--ink);
-        border-radius: 16px;
-        box-shadow: 3px 3px 0 var(--shadow);
-        cursor: pointer;
-        transition: transform .1s ease, box-shadow .1s ease, background .15s ease;
-    }
-    #{{ $uid }} .rj-mp-btn:hover { background: var(--paper2); }
-    #{{ $uid }} .rj-mp-btn:active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--shadow); }
-    #{{ $uid }} .rj-mp-btn:focus-visible { outline: 3px solid var(--b); outline-offset: 3px; }
-    #{{ $uid }} .rj-mp-btn svg { width: 24px; height: 24px; fill: currentColor; }
-    #{{ $uid }} .rj-mp-btn[aria-pressed="true"],
-    #{{ $uid }} .rj-mp-btn[data-state="all"],
-    #{{ $uid }} .rj-mp-btn[data-state="one"] { color: var(--b-ink); background: var(--b); }
-    #{{ $uid }} .rj-mp-btn[data-state="one"]::after {
-        content: '1';
-        position: absolute;
-        right: 5px;
-        bottom: 3px;
-        font-size: 11px;
-        font-weight: 900;
-    }
-    #{{ $uid }} .rj-mp-play {
-        width: 68px;
-        height: 68px;
-        border-radius: 22px;
-        color: var(--a-ink);
-        background: var(--a);
-    }
-    #{{ $uid }} .rj-mp-play:hover { background: var(--a); filter: brightness(1.08); }
-    #{{ $uid }} .rj-mp-play svg { width: 32px; height: 32px; }
-    #{{ $uid }} .rj-mp-play .ic-pause, #{{ $uid }}.is-playing .rj-mp-play .ic-play { display: none; }
-    #{{ $uid }}.is-playing .rj-mp-play .ic-pause { display: block; }
-
-    #{{ $uid }} .rj-mp-vol {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-left: auto;
-        width: 150px;
-    }
-    #{{ $uid }} .rj-mp-vol .rj-mp-btn { width: 40px; height: 40px; flex-shrink: 0; border-radius: 13px; }
-    #{{ $uid }} .rj-mp-vol .rj-mp-btn svg { width: 20px; height: 20px; }
-    #{{ $uid }} .rj-mp-vol .ic-mute, #{{ $uid }}.is-muted .rj-mp-vol .ic-vol { display: none; }
-    #{{ $uid }}.is-muted .rj-mp-vol .ic-mute { display: block; }
-
-    /* playlist */
-    #{{ $uid }} .rj-mp-list {
-        flex: 1;
-        min-height: 120px;
-        max-height: 240px;
-        margin: 0;
-        padding: 0;
-        overflow-y: auto;
-        list-style: none;
-        background: var(--paper);
-        border: 3px solid var(--ink);
-        border-radius: 18px;
-        scrollbar-width: thin;
-    }
-    #{{ $uid }} .rj-mp-list li + li .rj-mp-row { border-top: 2px dashed color-mix(in srgb, var(--ink) 22%, transparent); }
-    #{{ $uid }} .rj-mp-row {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        width: 100%;
-        padding: 10px 16px;
-        color: inherit;
-        font: inherit;
-        text-align: left;
-        background: transparent;
-        border: 0;
-        cursor: pointer;
-    }
-    #{{ $uid }} .rj-mp-row:hover { background: var(--paper2); }
-    #{{ $uid }} .rj-mp-row:focus-visible { outline: 3px solid var(--b); outline-offset: -3px; }
-    #{{ $uid }} .rj-mp-row.is-active { color: var(--b-ink); background: var(--b); }
-    #{{ $uid }} .rj-mp-num { width: 24px; flex-shrink: 0; font-size: 13px; font-weight: 800; opacity: .5; text-align: center; font-variant-numeric: tabular-nums; }
-    #{{ $uid }} .rj-mp-eq { display: none; width: 24px; height: 16px; flex-shrink: 0; align-items: flex-end; justify-content: center; gap: 2px; }
-    #{{ $uid }} .rj-mp-eq i { display: block; width: 4px; height: 100%; background: currentColor; border-radius: 2px; transform: scaleY(.35); transform-origin: bottom; }
-    #{{ $uid }}.is-playing .rj-mp-row.is-active .rj-mp-eq i { animation: rjMpEq .7s ease-in-out infinite alternate; }
-    #{{ $uid }}.is-playing .rj-mp-row.is-active .rj-mp-eq i:nth-child(2) { animation-delay: .2s; }
-    #{{ $uid }}.is-playing .rj-mp-row.is-active .rj-mp-eq i:nth-child(3) { animation-delay: .4s; }
-    #{{ $uid }} .rj-mp-row.is-active .rj-mp-num { display: none; }
-    #{{ $uid }} .rj-mp-row.is-active .rj-mp-eq { display: flex; }
-    #{{ $uid }} .rj-mp-rowinfo { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-    #{{ $uid }} .rj-mp-rowinfo strong { font-size: 14px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    #{{ $uid }} .rj-mp-rowinfo small { font-size: 12px; font-weight: 600; opacity: .65; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    #{{ $uid }} .rj-mp-dur { font-size: 12px; font-weight: 700; opacity: .55; font-variant-numeric: tabular-nums; }
-    #{{ $uid }} .rj-mp-empty { padding: 22px 16px; font-size: 14px; font-weight: 700; opacity: .7; }
-
-    @keyframes rjMpEq { to { transform: scaleY(1); } }
-    @keyframes rjMpBlink { 50% { opacity: .25; } }
-    @keyframes rjMpZ {
-        0%   { opacity: 0; transform: translate(0, 12px); }
+    @keyframes rj-mp-eq { to { transform: scaleY(1); } }
+    @keyframes rj-mp-blink { 50% { opacity: .25; } }
+    @keyframes rj-mp-blink-eye { 0%, 93%, 100% { scale: 1 1; } 96% { scale: 1 .1; } }
+    @keyframes rj-mp-drift { to { translate: 4cqw 3cqw; } }
+    @keyframes rj-mp-shine { 0%, 55% { left: -60%; } 100% { left: 130%; } }
+    @keyframes rj-mp-z {
+        0%   { opacity: 0; translate: 0 6px; }
         25%  { opacity: 1; }
-        80%  { opacity: 0; transform: translate(10px, -18px); }
+        80%  { opacity: 0; translate: 8px -18px; }
         100% { opacity: 0; }
-    }
-
-    @media (max-width: 820px) {
-        #{{ $uid }} .rj-mp { grid-template-columns: 1fr; }
-        #{{ $uid }} .rj-mp-stage { border-right: 0; border-bottom: 4px solid var(--ink); padding-top: 60px; }
-        #{{ $uid }} .rj-mp-mascot { width: min(100%, 280px); }
-        #{{ $uid }} .rj-mp-panel { padding: 22px 20px; }
-        #{{ $uid }} .rj-mp-vol { width: 100%; margin-left: 0; }
-    }
-    @media (prefers-reduced-motion: reduce) {
-        #{{ $uid }} *, #{{ $uid }} *::before { animation: none !important; transition: none !important; }
     }
 </style>
 
 <div id="{{ $uid }}" class="is-paused">
-    <div class="rj-mp">
+    <div class="mp-card">
 
-        <div class="rj-mp-stage" data-stage>
-            <canvas class="rj-mp-canvas" data-canvas aria-hidden="true"></canvas>
+        <div class="mp-stage" aria-hidden="false">
+            <span class="mp-orb"></span><span class="mp-orb"></span>
+            <canvas class="mp-canvas" data-canvas aria-hidden="true"></canvas>
             @if($title !== '')
-                <span class="rj-mp-tag">{{ $title }}</span>
+                <span class="mp-tag">{{ $title }}</span>
             @endif
+            <div class="mp-zz" aria-hidden="true"><i>z</i><i>z</i><i>z</i></div>
 
-            <svg class="rj-mp-mascot" viewBox="0 -20 320 360" aria-hidden="true" data-svg>
-                <defs>
-                    <clipPath id="{{ $uid }}-eye-l"><ellipse cx="122" cy="140" rx="26" ry="30"/></clipPath>
-                    <clipPath id="{{ $uid }}-eye-r"><ellipse cx="198" cy="140" rx="26" ry="30"/></clipPath>
-                    <clipPath id="{{ $uid }}-mouth"><path data-mouth-clip d="M138 188L182 188Q160 202 138 188Z"/></clipPath>
-                </defs>
-
-                <ellipse data-shadow cx="160" cy="320" rx="92" ry="11" fill="var(--ink)" opacity=".18"/>
-
-                <g data-foot-l><ellipse cx="116" cy="302" rx="30" ry="15" fill="var(--b)" stroke="var(--ink)" stroke-width="5"/></g>
-                <g data-foot-r><ellipse cx="204" cy="302" rx="30" ry="15" fill="var(--b)" stroke="var(--ink)" stroke-width="5"/></g>
-
-                <g data-body>
-                    <g data-arm-l>
-                        <path d="M66 205Q28 214 24 254" fill="none" stroke="var(--ink)" stroke-width="20" stroke-linecap="round"/>
-                        <path d="M66 205Q28 214 24 254" fill="none" stroke="var(--a)" stroke-width="10" stroke-linecap="round"/>
-                        <circle cx="24" cy="256" r="13" fill="#fff" stroke="var(--ink)" stroke-width="5"/>
-                    </g>
-                    <g data-arm-r>
-                        <path d="M254 205Q292 214 296 254" fill="none" stroke="var(--ink)" stroke-width="20" stroke-linecap="round"/>
-                        <path d="M254 205Q292 214 296 254" fill="none" stroke="var(--a)" stroke-width="10" stroke-linecap="round"/>
-                        <circle cx="296" cy="256" r="13" fill="#fff" stroke="var(--ink)" stroke-width="5"/>
-                    </g>
-
-                    <g data-ant>
-                        <path d="M160 46Q156 20 171 2" fill="none" stroke="var(--ink)" stroke-width="6" stroke-linecap="round"/>
-                        <circle cx="172" cy="-3" r="11" fill="var(--b)" stroke="var(--ink)" stroke-width="5"/>
-                    </g>
-
-                    <rect x="62" y="56" width="196" height="248" rx="92" fill="var(--a)" stroke="var(--ink)" stroke-width="5"/>
-                    <path d="M84 120Q80 160 90 198" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="8" stroke-linecap="round"/>
-
-                    <g data-woofer>
-                        <circle cx="160" cy="252" r="34" fill="var(--dark)"/>
-                        <circle cx="160" cy="252" r="25" fill="var(--b)" stroke="var(--dark)" stroke-width="3"/>
-                        <g data-cone>
-                            <circle cx="160" cy="252" r="12" fill="var(--dark)"/>
-                            <circle cx="160" cy="252" r="5" fill="#fff"/>
-                        </g>
-                    </g>
-
-                    <g clip-path="url(#{{ $uid }}-eye-l)">
-                        <ellipse cx="122" cy="140" rx="26" ry="30" fill="#fff"/>
-                        <g data-pupil-l><circle cx="122" cy="142" r="11" fill="var(--dark)"/><circle cx="118" cy="137" r="3.5" fill="#fff"/></g>
-                        <rect data-lid-l x="94" y="106" width="56" height="0" fill="var(--a)"/>
-                        <line data-line-l x1="94" x2="150" y1="106" y2="106" stroke="var(--dark)" stroke-width="5" opacity="0"/>
-                    </g>
-                    <ellipse cx="122" cy="140" rx="26" ry="30" fill="none" stroke="var(--ink)" stroke-width="5"/>
-
-                    <g clip-path="url(#{{ $uid }}-eye-r)">
-                        <ellipse cx="198" cy="140" rx="26" ry="30" fill="#fff"/>
-                        <g data-pupil-r><circle cx="198" cy="142" r="11" fill="var(--dark)"/><circle cx="194" cy="137" r="3.5" fill="#fff"/></g>
-                        <rect data-lid-r x="170" y="106" width="56" height="0" fill="var(--a)"/>
-                        <line data-line-r x1="170" x2="226" y1="106" y2="106" stroke="var(--dark)" stroke-width="5" opacity="0"/>
-                    </g>
-                    <ellipse cx="198" cy="140" rx="26" ry="30" fill="none" stroke="var(--ink)" stroke-width="5"/>
-
-                    <ellipse cx="90" cy="184" rx="13" ry="8" fill="var(--b)" opacity=".6"/>
-                    <ellipse cx="230" cy="184" rx="13" ry="8" fill="var(--b)" opacity=".6"/>
-
-                    <g data-brows stroke="var(--dark)" stroke-width="6" stroke-linecap="round" fill="none">
-                        <path d="M100 98L144 94"/>
-                        <path d="M176 94L220 98"/>
-                    </g>
-
-                    <path data-mouth d="M138 188L182 188Q160 202 138 188Z" fill="var(--dark)" stroke="var(--dark)" stroke-width="4" stroke-linejoin="round"/>
-                    <ellipse data-tongue clip-path="url(#{{ $uid }}-mouth)" cx="160" cy="196" rx="12" ry="0" fill="#ff7a9c"/>
-
-                    <path d="M64 142C60 8 260 8 256 142" fill="none" stroke="var(--ink)" stroke-width="14" stroke-linecap="round"/>
-                    <path d="M64 142C60 8 260 8 256 142" fill="none" stroke="var(--b)" stroke-width="6" stroke-linecap="round"/>
-                    <rect x="44" y="118" width="34" height="68" rx="15" fill="var(--b)" stroke="var(--ink)" stroke-width="5"/>
-                    <rect x="242" y="118" width="34" height="68" rx="15" fill="var(--b)" stroke="var(--ink)" stroke-width="5"/>
-                </g>
-
-                <g class="rj-mp-zz">
-                    <text x="238" y="44">z</text>
-                    <text x="258" y="22">z</text>
-                    <text x="276" y="2">z</text>
-                </g>
-            </svg>
+            <div class="mp-cast" data-cast aria-hidden="true">
+                <div class="c c-p" style="--d:0s">
+                    <div class="eyes"><span class="eye w"><i></i></span><span class="eye w"><i></i></span></div>
+                    <span class="m"></span>
+                </div>
+                <div class="c c-b" style="--d:.4s">
+                    <div class="eyes"><span class="eye w"><i></i></span><span class="eye w"><i></i></span></div>
+                    <span class="m"></span>
+                </div>
+                <div class="c c-o" style="--d:.8s">
+                    <div class="eyes"><span class="eye d"></span><span class="eye d"></span></div>
+                    <span class="m"></span>
+                </div>
+                <div class="c c-y" style="--d:1.2s">
+                    <div class="eyes"><span class="eye d"></span><span class="eye d"></span></div>
+                    <span class="m"></span>
+                </div>
+            </div>
         </div>
 
-        <div class="rj-mp-panel">
-            <div class="rj-mp-now">
-                <div class="rj-mp-cover" data-cover hidden><img alt="" data-cover-img></div>
-                <div class="rj-mp-meta">
-                    <h3 class="rj-mp-now-title" data-now-title>{{ __('Pick a track to start') }}</h3>
-                    <p class="rj-mp-now-artist" data-now-artist></p>
+        <div class="mp-panel">
+            <div class="mp-now">
+                <div class="mp-cover" data-cover hidden><img alt="" data-cover-img></div>
+                <div class="mp-meta">
+                    <h3 class="mp-now-title" data-now-title>{{ __('Pick a track to start') }}</h3>
+                    <p class="mp-now-artist" data-now-artist></p>
                 </div>
             </div>
 
-            <p class="rj-mp-status" data-status role="status" aria-live="polite"></p>
+            <p class="mp-status" data-status role="status" aria-live="polite"></p>
 
-            <div class="rj-mp-seek">
+            <div class="mp-seek">
                 <span data-time-cur>0:00</span>
                 <input type="range" min="0" max="1000" step="1" value="0" data-seek aria-label="{{ __('Seek') }}">
                 <span data-time-total>0:00</span>
             </div>
 
-            <div class="rj-mp-controls">
-                <button type="button" class="rj-mp-btn" data-shuffle aria-pressed="false" aria-label="{{ __('Shuffle') }}">
+            <div class="mp-controls">
+                <button type="button" class="mp-btn" data-shuffle aria-pressed="false" aria-label="{{ __('Shuffle') }}">
                     <svg viewBox="0 0 24 24"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg>
                 </button>
-                <button type="button" class="rj-mp-btn" data-prev aria-label="{{ __('Previous track') }}">
+                <button type="button" class="mp-btn" data-prev aria-label="{{ __('Previous track') }}">
                     <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
                 </button>
-                <button type="button" class="rj-mp-btn rj-mp-play" data-play aria-label="{{ __('Play') }}">
+                <button type="button" class="mp-btn mp-play" data-play aria-label="{{ __('Play') }}">
                     <svg class="ic-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                     <svg class="ic-pause" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
                 </button>
-                <button type="button" class="rj-mp-btn" data-next aria-label="{{ __('Next track') }}">
+                <button type="button" class="mp-btn" data-next aria-label="{{ __('Next track') }}">
                     <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
                 </button>
-                <button type="button" class="rj-mp-btn" data-repeat data-state="off" aria-label="{{ __('Repeat: off') }}">
+                <button type="button" class="mp-btn" data-repeat data-state="off" aria-label="{{ __('Repeat: off') }}">
                     <svg viewBox="0 0 24 24"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>
                 </button>
 
-                <div class="rj-mp-vol">
-                    <button type="button" class="rj-mp-btn" data-mute aria-label="{{ __('Mute') }}">
+                <div class="mp-vol">
+                    <button type="button" class="mp-btn" data-mute aria-label="{{ __('Mute') }}">
                         <svg class="ic-vol" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
                         <svg class="ic-mute" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51A8.8 8.8 0 0021 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06a8.99 8.99 0 003.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
                     </button>
@@ -556,7 +322,7 @@
             </div>
 
             @if($showPlaylist)
-                <ol class="rj-mp-list" data-list aria-label="{{ __('Playlist') }}"></ol>
+                <ol class="mp-list" data-list aria-label="{{ __('Playlist') }}"></ol>
             @endif
         </div>
 
@@ -576,15 +342,7 @@
     /* ------------------------------------------------------------------ */
     /*  Elements                                                           */
     /* ------------------------------------------------------------------ */
-    var svg = q('[data-svg]'), canvas = q('[data-canvas]');
-    var E = {
-        body: q('[data-body]'), armL: q('[data-arm-l]'), armR: q('[data-arm-r]'), ant: q('[data-ant]'),
-        footL: q('[data-foot-l]'), footR: q('[data-foot-r]'), shadow: q('[data-shadow]'),
-        woofer: q('[data-woofer]'), cone: q('[data-cone]'),
-        pupL: q('[data-pupil-l]'), pupR: q('[data-pupil-r]'),
-        lidL: q('[data-lid-l]'), lidR: q('[data-lid-r]'), lineL: q('[data-line-l]'), lineR: q('[data-line-r]'),
-        mouth: q('[data-mouth]'), mouthClip: q('[data-mouth-clip]'), tongue: q('[data-tongue]'), brows: q('[data-brows]')
-    };
+    var canvas = q('[data-canvas]'), castEl = q('[data-cast]');
     var titleEl = q('[data-now-title]'), artistEl = q('[data-now-artist]'), statusEl = q('[data-status]');
     var coverEl = q('[data-cover]'), coverImg = q('[data-cover-img]');
     var seekEl = q('[data-seek]'), curEl = q('[data-time-cur]'), totEl = q('[data-time-total]');
@@ -596,7 +354,6 @@
     var mo = reduce ? 0.3 : 1;
     var mode = cfg.visualizer;
     var dpr = Math.min(2, window.devicePixelRatio || 1);
-    var inkColor = (getComputedStyle(root).getPropertyValue('--ink') || '#1d1330').trim();
 
     /* ------------------------------------------------------------------ */
     /*  State                                                              */
@@ -799,22 +556,22 @@
         if (!listEl) return;
         listEl.textContent = '';
         if (loading && !tracks.length) {
-            var li = document.createElement('li'); li.className = 'rj-mp-empty'; li.textContent = T.loading; listEl.appendChild(li); return;
+            var li = document.createElement('li'); li.className = 'mp-empty'; li.textContent = T.loading; listEl.appendChild(li); return;
         }
         if (!tracks.length) {
-            var li2 = document.createElement('li'); li2.className = 'rj-mp-empty'; li2.textContent = T.empty; listEl.appendChild(li2); return;
+            var li2 = document.createElement('li'); li2.className = 'mp-empty'; li2.textContent = T.empty; listEl.appendChild(li2); return;
         }
         tracks.forEach(function (t, i) {
             var li = document.createElement('li'), b = document.createElement('button');
-            b.type = 'button'; b.className = 'rj-mp-row';
-            var num = document.createElement('span'); num.className = 'rj-mp-num'; num.textContent = String(i + 1);
-            var eq = document.createElement('span'); eq.className = 'rj-mp-eq'; eq.setAttribute('aria-hidden', 'true'); eq.innerHTML = '<i></i><i></i><i></i>';
-            var info = document.createElement('span'); info.className = 'rj-mp-rowinfo';
+            b.type = 'button'; b.className = 'mp-row';
+            var num = document.createElement('span'); num.className = 'mp-num'; num.textContent = String(i + 1);
+            var eq = document.createElement('span'); eq.className = 'mp-eq'; eq.setAttribute('aria-hidden', 'true'); eq.innerHTML = '<i></i><i></i><i></i>';
+            var info = document.createElement('span'); info.className = 'mp-rowinfo';
             var s1 = document.createElement('strong'); s1.textContent = t.title || '';
             var s2 = document.createElement('small'); s2.textContent = t.artist || '';
             info.appendChild(s1); info.appendChild(s2);
             b.appendChild(num); b.appendChild(eq); b.appendChild(info);
-            if (t.duration) { var d = document.createElement('span'); d.className = 'rj-mp-dur'; d.textContent = fmt(t.duration); b.appendChild(d); }
+            if (t.duration) { var d = document.createElement('span'); d.className = 'mp-dur'; d.textContent = fmt(t.duration); b.appendChild(d); }
             b.addEventListener('click', function () { wantPlay = true; loadTrack(i, true); });
             li.appendChild(b); listEl.appendChild(li);
         });
@@ -822,7 +579,7 @@
     }
     function markActive() {
         if (!listEl) return;
-        var rows = listEl.querySelectorAll('.rj-mp-row');
+        var rows = listEl.querySelectorAll('.mp-row');
         for (var i = 0; i < rows.length; i++) rows[i].classList.toggle('is-active', i === cur);
         var row = rows[cur];
         if (row) {
@@ -886,7 +643,7 @@
 
     function onError(a) {
         if (a._cors) {
-            // Server has no CORS headers: play it natively without the analyser (mascot keeps dancing in simulated mode)
+            // Server has no CORS headers: play it natively without the analyser (characters keep dancing in simulated mode)
             var na = makeAudio(a._url, false);
             try { a.pause(); a.removeAttribute('src'); a.load(); } catch (e) {}
             audio = na;
@@ -1084,111 +841,81 @@
     }
 
     /* ------------------------------------------------------------------ */
-    /*  Mascot                                                             */
+    /*  The 4 characters: hop on the beat, eyes follow the pointer,        */
+    /*  mouths open with the bass, they fall asleep when paused            */
     /* ------------------------------------------------------------------ */
-    var M = { hop: 0, hv: 0, land: 0, sway: 0, dir: 1, aL: 0, aR: 0, ant: 0, antV: 0, mouth: 0, boop: 0, lid: 32, bp: -1, blinkT: 2.5, brow: 0, lean: 0,
-              p: [{ x: 0, y: 0 }, { x: 0, y: 0 }], wander: { x: 0, y: 0, t: 0 } };
-    var EYES = [[122, 142], [198, 142]];
+    var SIZE = [0.7, 0.55, 1, 0.9];
+    var CH = Array.prototype.map.call(root.querySelectorAll('.c'), function (el, i) {
+        return { el: el, size: SIZE[i] || 0.8, hop: 0, hv: 0, land: 0, sway: 0, lx: 0, ly: 0, mouth: 0 };
+    });
+    var beatN = 0, boop = 0;
     var mouse = { x: 0, y: 0, t: 0, on: false };
+    var wander = { x: 0, y: 0, t: 0 };
 
     function onBeat(strength) {
-        M.hv = -(170 + 260 * strength) * mo;
-        M.dir = -M.dir;
-        if (M.dir > 0) M.aL = 1; else M.aR = 1;
-        M.sway = M.dir * (3 + 7 * strength) * mo;
-        M.antV += -M.dir * 90;
-        M.brow = 1;
+        beatN++;
+        CH.forEach(function (c, i) {
+            if ((i + beatN) % 2 === 0 || strength > 0.7) {
+                c.hv = -(38 + 48 * strength * c.size) * mo;
+                c.sway = (i % 2 ? 1 : -1) * (1 + 3 * strength) * mo;
+            }
+        });
     }
 
     function onPointer(e) { mouse.x = e.clientX; mouse.y = e.clientY; mouse.t = performance.now() / 1000; mouse.on = true; }
     window.addEventListener('pointermove', onPointer, { passive: true });
-    svg.addEventListener('click', function () { M.boop = 1; M.hv = -420 * mo; });
+    castEl.addEventListener('click', function () {
+        boop = 1;
+        CH.forEach(function (c) { c.hv = -(60 + 20 * c.size) * mo; });
+    });
 
-    function mascot(dt, t, r) {
-        var s = r.width / 320, now = performance.now() / 1000;
+    function cast(dt, t) {
+        var now = performance.now() / 1000;
         var active = mouse.on && (now - mouse.t) < 4;
 
-        // Eyes follow the pointer, or wander when it is idle
-        if (!active && now > M.wander.t) { M.wander.t = now + 1.4 + Math.random() * 2; M.wander.x = Math.random() * 2 - 1; M.wander.y = Math.random() * 0.9 - 0.3; }
-        for (var i = 0; i < 2; i++) {
-            var tx, ty;
+        if (!active && now > wander.t) { wander.t = now + 1.4 + Math.random() * 2; wander.x = Math.random() * 2 - 1; wander.y = Math.random() * 0.9 - 0.3; }
+
+        // read first, write after (avoids layout thrash)
+        var rects = CH.map(function (c) { return c.el.getBoundingClientRect(); });
+
+        boop *= Math.exp(-dt * 4);
+
+        CH.forEach(function (c, i) {
+            var r = rects[i], tx, ty;
             if (active) {
-                var ex = r.left + EYES[i][0] * s, ey = r.top + (EYES[i][1] + 20) * s;
-                var dx = mouse.x - ex, dy = mouse.y - ey, d = Math.sqrt(dx * dx + dy * dy) || 1;
-                var amt = Math.min(1, d / (170 * Math.max(0.7, s)));
-                tx = dx / d * amt * 12; ty = dy / d * amt * 15;
-            } else { tx = M.wander.x * 9; ty = M.wander.y * 11; }
-            M.p[i].x += (tx - M.p[i].x) * ease(dt, 16);
-            M.p[i].y += (ty - M.p[i].y) * ease(dt, 16);
-        }
-        var leanT = active ? clamp((mouse.x - (r.left + r.width / 2)) / (r.width * 1.4), -1, 1) * 5 : 0;
-        M.lean += (leanT - M.lean) * ease(dt, 6);
+                var dx = mouse.x - (r.left + r.width / 2), dy = mouse.y - (r.top + r.height * 0.2);
+                var d = Math.sqrt(dx * dx + dy * dy) || 1, k = Math.min(1, d / 160);
+                tx = dx / d * k; ty = dy / d * k;
+            } else { tx = wander.x * 0.8; ty = wander.y * 0.7; }
+            c.lx += (tx - c.lx) * ease(dt, 12);
+            c.ly += (ty - c.ly) * ease(dt, 12);
 
-        // Hop physics
-        M.hv += 2200 * dt;
-        M.hop += M.hv * dt;
-        if (M.hop > 0) { if (M.hv > 120) M.land = Math.min(1, M.hv / 500); M.hop = 0; M.hv = 0; }
-        M.land *= Math.exp(-dt * 12);
-        M.boop *= Math.exp(-dt * 4);
-        M.brow *= Math.exp(-dt * 7);
-        M.aL *= Math.exp(-dt * 5);
-        M.aR *= Math.exp(-dt * 5);
-        M.sway *= Math.exp(-dt * 3);
-        M.antV += ((-M.sway * 2.2 - M.ant) * 160 - M.antV * 9) * dt;
-        M.ant += M.antV * dt;
+            // hop physics (units: cqw)
+            c.hv += 400 * dt;
+            c.hop += c.hv * dt;
+            if (c.hop > 0) { if (c.hv > 25) c.land = Math.min(1, c.hv / 80); c.hop = 0; c.hv = 0; }
+            c.land *= Math.exp(-dt * 12);
+            c.sway *= Math.exp(-dt * 3);
 
-        // Body
-        var breathe = Math.sin(t * 2.2) * 0.012;
-        var sy = 1 + breathe - 0.075 * bassS * mo - 0.1 * M.land * mo + (M.hop < -2 ? Math.min(0.05, -M.hop / 400) : 0);
-        var sx = 1 - (sy - 1) * 0.8;
-        var rot = M.sway + M.lean + Math.sin(t * 2.6) * midS * 2 * mo;
-        E.body.setAttribute('transform', 'translate(0 ' + M.hop.toFixed(2) + ') translate(160 304) rotate(' + rot.toFixed(2) + ') scale(' + sx.toFixed(3) + ' ' + sy.toFixed(3) + ') translate(-160 -304)');
+            var sq = 1 + Math.sin(t * 2.2 + i) * 0.012 - 0.035 * bassS * mo - 0.07 * c.land * mo + (c.hop < -0.5 ? Math.min(0.04, -c.hop / 100) : 0);
+            var rot = c.sway + Math.sin(t * 2.6 + i) * midS * 1.5 * mo;
 
-        // Limbs
-        var wob = Math.sin(t * 7) * midS * 10 * mo;
-        E.armL.setAttribute('transform', 'rotate(' + (12 + M.aL * 70 * mo + wob).toFixed(1) + ' 66 205)');
-        E.armR.setAttribute('transform', 'rotate(' + (-(12 + M.aR * 70 * mo) - wob).toFixed(1) + ' 254 205)');
-        E.ant.setAttribute('transform', 'rotate(' + M.ant.toFixed(1) + ' 160 46)');
-        E.footL.setAttribute('transform', 'translate(0 ' + (-M.aL * 10 * mo).toFixed(1) + ')');
-        E.footR.setAttribute('transform', 'translate(0 ' + (-M.aR * 10 * mo).toFixed(1) + ')');
-        var sh = 1 + M.hop / 300;
-        E.shadow.setAttribute('transform', 'translate(160 320) scale(' + sh.toFixed(3) + ' 1) translate(-160 -320)');
-        E.shadow.setAttribute('opacity', (0.18 + M.hop / 500).toFixed(3));
+            var open = playing ? clamp(bassS * 1.0 + midS * 0.6 + boop, 0, 1) : boop;
+            c.mouth += (open - c.mouth) * ease(dt, 18);
+            var mh = (playing ? 2 : 0) + c.mouth * 4;
 
-        // Speaker belly
-        E.woofer.setAttribute('transform', 'translate(160 252) scale(' + (1 + bassS * 0.2).toFixed(3) + ') translate(-160 -252)');
-        E.cone.setAttribute('transform', 'translate(160 252) scale(' + (1 - bassS * 0.25).toFixed(3) + ') translate(-160 -252)');
-
-        // Face
-        var ps = 1 + bassS * 0.18 + M.boop * 0.3;
-        E.pupL.setAttribute('transform', 'translate(' + M.p[0].x.toFixed(2) + ' ' + M.p[0].y.toFixed(2) + ') translate(122 142) scale(' + ps.toFixed(3) + ') translate(-122 -142)');
-        E.pupR.setAttribute('transform', 'translate(' + M.p[1].x.toFixed(2) + ' ' + M.p[1].y.toFixed(2) + ') translate(198 142) scale(' + ps.toFixed(3) + ') translate(-198 -142)');
-
-        M.blinkT -= dt;
-        if (M.blinkT < 0 && M.bp < 0) { M.bp = 0; M.blinkT = 2 + Math.random() * 4; }
-        if (M.bp >= 0) { M.bp += dt / 0.16; if (M.bp >= 1) M.bp = -1; }
-        M.lid += ((playing ? 0 : 32) - M.lid) * ease(dt, 6);
-        var lid = Math.max(M.lid, M.bp >= 0 ? 62 * Math.sin(Math.PI * M.bp) : 0);
-        var ly = (106 + lid).toFixed(1);
-        E.lidL.setAttribute('height', lid.toFixed(1)); E.lidR.setAttribute('height', lid.toFixed(1));
-        E.lineL.setAttribute('y1', ly); E.lineL.setAttribute('y2', ly); E.lineR.setAttribute('y1', ly); E.lineR.setAttribute('y2', ly);
-        var lo = lid > 1 ? 1 : 0;
-        E.lineL.setAttribute('opacity', lo); E.lineR.setAttribute('opacity', lo);
-
-        E.brows.setAttribute('transform', 'translate(0 ' + (-M.brow * 7 * mo + (playing ? 0 : 3)).toFixed(1) + ')');
-
-        var open = playing ? clamp(bassS * 1.0 + midS * 0.6 + M.boop, 0, 1) : M.boop;
-        M.mouth += (open - M.mouth) * ease(dt, 20);
-        var w = 22 + M.mouth * 5, depth = 7 + M.mouth * 36;
-        var md = 'M' + (160 - w).toFixed(1) + ' 188L' + (160 + w).toFixed(1) + ' 188Q160 ' + (188 + depth * 2).toFixed(1) + ' ' + (160 - w).toFixed(1) + ' 188Z';
-        E.mouth.setAttribute('d', md);
-        E.mouthClip.setAttribute('d', md);
-        E.tongue.setAttribute('cy', (188 + depth * 0.85).toFixed(1));
-        E.tongue.setAttribute('ry', clamp((depth - 12) * 0.28, 0, 9).toFixed(1));
+            var st = c.el.style;
+            st.setProperty('--lx', c.lx.toFixed(3));
+            st.setProperty('--ly', c.ly.toFixed(3));
+            st.setProperty('--hop', c.hop.toFixed(2));
+            st.setProperty('--sq', sq.toFixed(3));
+            st.setProperty('--rot', rot.toFixed(2));
+            st.setProperty('--mh', mh.toFixed(2));
+        });
     }
 
     /* ------------------------------------------------------------------ */
-    /*  Stage canvas: sunburst rays, ring, liquid wave                     */
+    /*  Stage canvas: soft equalizer bars, ring, layered waves             */
     /* ------------------------------------------------------------------ */
     var c2 = (mode !== 'none' && canvas.getContext) ? canvas.getContext('2d') : null;
     function resize() {
@@ -1197,48 +924,48 @@
         canvas.height = Math.max(1, Math.round(canvas.clientHeight * dpr));
     }
 
-    function angleFor(j) { return Math.PI / 2 + (j / (2 * N)) * Math.PI * 2; }
-    function levelFor(j) { return lv[j < N ? j : 2 * N - 1 - j]; }
-
-    function drawRays(cx, cy, s) {
-        c2.lineCap = 'round';
-        c2.lineWidth = 6 * s;
-        c2.strokeStyle = cfg.accent2;
-        var r0 = 132 * s;
-        c2.beginPath();
-        for (var j = 0; j < 2 * N; j++) {
-            var a = angleFor(j), v = levelFor(j) * (j % 2 ? 0.6 : 1);
-            var len = (5 + v * 95) * s;
-            c2.moveTo(cx + Math.cos(a) * r0, cy + Math.sin(a) * r0);
-            c2.lineTo(cx + Math.cos(a) * (r0 + len), cy + Math.sin(a) * (r0 + len));
-        }
-        c2.stroke();
+    function levelAt(u) {
+        var d = Math.abs(u - 0.5) * 2;
+        return lv[clamp(Math.floor((1 - d) * (N - 1)), 0, N - 1)];
     }
 
-    function drawRing(cx, cy, s) {
-        var pts = [], j;
-        for (j = 0; j < 2 * N; j++) {
-            var a = angleFor(j), r = (132 + levelFor(j) * 80) * s;
+    function drawBars(W, H) {
+        var n = 36, gap = W * 0.012, margin = W * 0.06, bw = (W - 2 * margin - gap * (n - 1)) / n;
+        c2.fillStyle = cfg.accent;
+        for (var k = 0; k < n; k++) {
+            var l = levelAt((k + 0.5) / n), h = (0.04 + l * 0.62) * H, x = margin + k * (bw + gap);
+            c2.globalAlpha = 0.18 + l * 0.3;
+            c2.beginPath();
+            if (c2.roundRect) c2.roundRect(x, H - h, bw, h, bw / 2); else c2.rect(x, H - h, bw, h);
+            c2.fill();
+        }
+        c2.globalAlpha = 1;
+    }
+
+    function drawRing(W, H) {
+        var cx = W / 2, cy = H * 0.5, R = Math.min(W, H) * 0.3, n = 2 * N, pts = [], j;
+        for (j = 0; j < n; j++) {
+            var a = Math.PI / 2 + (j / n) * Math.PI * 2, l = lv[j < N ? j : n - 1 - j], r = R + l * R * 0.45;
             pts.push([cx + Math.cos(a) * r, cy + Math.sin(a) * r]);
         }
         c2.beginPath();
-        var n = pts.length, m0 = [(pts[n - 1][0] + pts[0][0]) / 2, (pts[n - 1][1] + pts[0][1]) / 2];
-        c2.moveTo(m0[0], m0[1]);
+        c2.moveTo((pts[n - 1][0] + pts[0][0]) / 2, (pts[n - 1][1] + pts[0][1]) / 2);
         for (j = 0; j < n; j++) {
             var p = pts[j], nx = pts[(j + 1) % n];
             c2.quadraticCurveTo(p[0], p[1], (p[0] + nx[0]) / 2, (p[1] + nx[1]) / 2);
         }
         c2.closePath();
-        c2.globalAlpha = 0.3; c2.fillStyle = cfg.accent2; c2.fill();
-        c2.globalAlpha = 1; c2.lineWidth = 4 * dpr; c2.strokeStyle = inkColor; c2.stroke();
+        c2.globalAlpha = 0.18; c2.fillStyle = cfg.accent; c2.fill();
+        c2.globalAlpha = 0.7; c2.lineWidth = 3 * dpr; c2.strokeStyle = cfg.accent2; c2.stroke();
+        c2.globalAlpha = 1;
     }
 
     function drawWave(W, H, t) {
         var layers = [
-            { c: cfg.accent,  a: 0.35, amp: 10, f: 0.012, sp: 1.1,  off: 0,   dy: 14, stroke: false },
-            { c: cfg.accent2, a: 0.6,  amp: 14, f: 0.017, sp: -1.6, off: 1.7, dy: 0,  stroke: true }
+            { c: cfg.accent,  a: 0.22, amp: 10, f: 0.012, sp: 1.1,  off: 0,   dy: 14, stroke: false },
+            { c: cfg.accent2, a: 0.3,  amp: 14, f: 0.017, sp: -1.6, off: 1.7, dy: 0,  stroke: true }
         ];
-        var base = H * 0.8 - energy * H * 0.05;
+        var base = H * 0.78 - energy * H * 0.05;
         layers.forEach(function (L) {
             c2.beginPath();
             c2.moveTo(0, H);
@@ -1253,20 +980,18 @@
             c2.lineTo(W, H);
             c2.closePath();
             c2.globalAlpha = L.a; c2.fillStyle = L.c; c2.fill();
+            if (L.stroke) { c2.globalAlpha = 0.8; c2.lineWidth = 2 * dpr; c2.strokeStyle = L.c; c2.stroke(); }
             c2.globalAlpha = 1;
-            if (L.stroke) { c2.lineWidth = 3 * dpr; c2.strokeStyle = inkColor; c2.stroke(); }
         });
     }
 
-    function stageDraw(t, r) {
+    function stageDraw(t) {
         if (!c2) return;
-        var cr = canvas.getBoundingClientRect(), W = canvas.width, H = canvas.height;
+        var W = canvas.width, H = canvas.height;
         c2.clearRect(0, 0, W, H);
-        var sc = r.width / 320, s = sc * dpr;
-        var cx = (r.left - cr.left + r.width / 2) * dpr, cy = (r.top - cr.top + 200 * sc) * dpr;
         if (mode === 'wave' || mode === 'all') drawWave(W, H, t);
-        if (mode === 'bars' || mode === 'all') drawRays(cx, cy, s);
-        if (mode === 'circular') drawRing(cx, cy, s);
+        if (mode === 'bars' || mode === 'all') drawBars(W, H);
+        if (mode === 'circular') drawRing(W, H);
     }
 
     /* ------------------------------------------------------------------ */
@@ -1280,9 +1005,8 @@
         if (!visible) return;
         var t = now / 1000;
         sample(dt, t);
-        var r = svg.getBoundingClientRect();
-        mascot(dt, t, r);
-        stageDraw(t, r);
+        cast(dt, t);
+        stageDraw(t);
     }
 
     var io = null, ro = null;
