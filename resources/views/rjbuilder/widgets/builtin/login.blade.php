@@ -237,26 +237,89 @@
     }
 </style>
 
-<!-- 1. XARİCİ YOXLAMA (Əgər bunu görürsənsə, Laravel faylı düzgün yükləyir) -->
-<div style="background: #ef4444; color: white; text-align: center; padding: 10px; margin: 10px auto; max-width: 420px; border-radius: 8px; font-weight: bold; z-index: 9999; position: relative;">
-    🔴 DEBUG: Xarici qutu işləyir. (Laravel faylı yüklənir)
-</div>
-
-<div id="{{ $uid }}" x-data="rjLogin_{{ $uid }}()">
-
-    <!-- 2. DAXİLİ YOXLAMA (Əgər bunu görürsənsə, Alpine.js işə düşüb) -->
-    <div style="background: #22c55e; color: white; text-align: center; padding: 10px; margin: 10px auto; max-width: 420px; border-radius: 8px; font-weight: bold;"
-         x-text="'🟢 DEBUG: Alpine işləyir. User: ' + (user ? user.name : 'Yoxdur')">
-    </div>
-
+<!-- Hər şey birbaşa x-data daxilindədir -->
+<div id="{{ $uid }}" x-data="{
+    user: @js($initialUser),
+    title: @js($title),
+    subtitle: @js($subtitle),
+    loggedTitle: @js($loggedTitle),
+    email: '',
+    password: '',
+    remember: false,
+    loading: false,
+    error: '',
+    texts: {
+        signingIn: @js(__('Signing in...')),
+        signIn: @js(__('Sign In')),
+        fillFields: @js(__('Please fill in all fields.')),
+        loginFailed: @js(__('Login failed.')),
+        networkError: @js(__('Network error. Please try again.'))
+    },
+    async submit(e) {
+        this.error = '';
+        if (!this.email || !this.password) {
+            this.error = this.texts.fillFields;
+            return;
+        }
+        this.loading = true;
+        try {
+            var res = await fetch(@js(route('rj.widget.login', absolute: false)), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': @js(csrf_token())
+                },
+                body: JSON.stringify({
+                    email: this.email,
+                    password: this.password,
+                    remember: this.remember ? 1 : 0
+                })
+            });
+            var data = await res.json();
+            if (res.ok && data.ok) {
+                this.user = data.user;
+                this.password = '';
+            } else {
+                this.error = data.message || this.texts.loginFailed;
+            }
+        } catch (err) {
+            this.error = this.texts.networkError;
+        } finally {
+            this.loading = false;
+        }
+    },
+    async logout() {
+        this.loading = true;
+        try {
+            await fetch(@js(route('rj.widget.logout', absolute: false)), {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': @js(csrf_token())
+                }
+            });
+            this.user = null;
+            this.email = '';
+            this.password = '';
+            this.remember = false;
+            this.error = '';
+        } catch (err) {
+            this.error = this.texts.networkError;
+        } finally {
+            this.loading = false;
+        }
+    }
+}">
     <div class="rj-lg-card">
 
-        <!-- 3. FORMA YOXLAMASI -->
-        <template x-if="!user">
+        <!-- x-if yerinə x-show istifadə edirik, bu daha stabil işləyir -->
+        <div x-show="!user">
             <form @submit.prevent="submit($event)" novalidate>
-                <!-- Əgər formun içi boş görünürsə, deməli bura gəlib çatır, amma başqa problem var -->
-                <h2 class="rj-lg-title" x-text="title || 'Başlıq yoxdur'"></h2>
-                <p class="rj-lg-sub" x-text="subtitle || 'Alt başlıq yoxdur'"></p>
+                <h2 class="rj-lg-title" x-text="title"></h2>
+                <p class="rj-lg-sub" x-text="subtitle"></p>
 
                 <div x-show="error" x-cloak class="rj-lg-err" x-text="error"></div>
 
@@ -296,25 +359,23 @@
                     </p>
                 @endif
             </form>
-        </template>
+        </div>
 
-        <!-- 4. PROFİL YOXLAMASI -->
-        <template x-if="user">
+        <div x-show="user" style="display: none;">
             <div class="rj-lg-user">
-                <div style="background: blue; color: white; padding: 5px; margin-bottom: 10px; border-radius: 4px;">Profil Kartı Görünür</div>
-                <h2 class="rj-lg-title" x-text="loggedTitle || 'Xoş gəldiniz'"></h2>
+                <h2 class="rj-lg-title" x-text="loggedTitle"></h2>
                 <div class="rj-lg-avatar" x-text="user ? user.initials : ''"></div>
                 <p class="rj-lg-uname" x-text="user ? user.name : ''"></p>
                 <p class="rj-lg-email" x-text="user ? user.email : ''"></p>
 
                 <div class="rj-lg-actions">
                     @if($showAdminBtn)
-                        <template x-if="user && user.admin && user.adminUrl">
-                            <a :href="user.adminUrl" class="rj-lg-btn primary">
+                        <div x-show="user && user.admin && user.adminUrl">
+                            <a :href="user ? user.adminUrl : '#'" class="rj-lg-btn primary">
                                 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>
                                 <span>{{ __('Go to Admin') }}</span>
                             </a>
-                        </template>
+                        </div>
                     @endif
 
                     <a :href="user ? user.account : '#'" class="rj-lg-btn">
@@ -328,91 +389,6 @@
                     </button>
                 </div>
             </div>
-        </template>
+        </div>
     </div>
 </div>
-
-<script>
-window['rjLogin_{{ $uid }}'] = function () {
-    return {
-        user: @js($initialUser),
-        title: @js($title),
-        subtitle: @js($subtitle),
-        loggedTitle: @js($loggedTitle),
-
-        email: '',
-        password: '',
-        remember: false,
-        loading: false,
-        error: '',
-
-        texts: {
-            signingIn: @js(__('Signing in...')),
-            signIn: @js(__('Sign In')),
-            fillFields: @js(__('Please fill in all fields.')),
-            loginFailed: @js(__('Login failed.')),
-            networkError: @js(__('Network error. Please try again.'))
-        },
-
-        async submit(e) {
-            this.error = '';
-            if (!this.email || !this.password) {
-                this.error = this.texts.fillFields;
-                return;
-            }
-            this.loading = true;
-            try {
-                var res = await fetch(@js(route('rj.widget.login', absolute: false)), {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRF-TOKEN': @js(csrf_token())
-                    },
-                    body: JSON.stringify({
-                        email: this.email,
-                        password: this.password,
-                        remember: this.remember ? 1 : 0
-                    })
-                });
-                var data = await res.json();
-
-                if (res.ok && data.ok) {
-                    this.user = data.user;
-                    this.password = '';
-                } else {
-                    this.error = data.message || this.texts.loginFailed;
-                }
-            } catch (err) {
-                this.error = this.texts.networkError;
-            } finally {
-                this.loading = false;
-            }
-        },
-
-        async logout() {
-            this.loading = true;
-            try {
-                await fetch(@js(route('rj.widget.logout', absolute: false)), {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRF-TOKEN': @js(csrf_token())
-                    }
-                });
-                this.user = null;
-                this.email = '';
-                this.password = '';
-                this.remember = false;
-                this.error = '';
-            } catch (err) {
-                this.error = this.texts.networkError;
-            } finally {
-                this.loading = false;
-            }
-        }
-    };
-};
-</script>
