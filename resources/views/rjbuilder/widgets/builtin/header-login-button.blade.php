@@ -4,25 +4,23 @@
     $registerUrl      = $settings['register_url'] ?? '/register';
     $loginMode        = $settings['login_mode'] ?? 'modal';
     $showAvatar       = $settings['show_avatar'] ?? true;
-    $showName         = $settings['show_name'] ?? true;
-    $showAdminLink    = $settings['show_admin_link'] ?? true;
-    $showAccountLink  = $settings['show_account_link'] ?? true;
-    $showSettingsLink = $settings['show_settings_link'] ?? false;
+    $showName         = $settings['show_name'] ?? false;
+    $pulse            = $settings['pulse'] ?? true;
     $btnStyle         = $settings['btn_style'] ?? 'gradient';
     $size             = $settings['size'] ?? 'md';
     $accent           = $settings['accent'] ?? '#8b5cf6';
     $accent2          = $settings['accent2'] ?? '#ec4899';
-    $radius           = $settings['radius'] ?? 'md';
+    $radius           = $settings['radius'] ?? 'full';
     $showIcon         = $settings['show_icon'] ?? true;
     $showDivider      = $settings['show_divider'] ?? false;
 
     $radiusMap = ['none' => '0px', 'sm' => '6px', 'md' => '10px', 'lg' => '14px', 'full' => '9999px'];
-    $radiusCss = $radiusMap[$radius] ?? '10px';
+    $radiusCss = $radiusMap[$radius] ?? '9999px';
 
     $sizeMap = [
-        'sm' => ['pad' => '6px 14px', 'fs' => '12.5px', 'icon' => 14, 'avatar' => 26],
-        'md' => ['pad' => '9px 18px', 'fs' => '13.5px', 'icon' => 16, 'avatar' => 32],
-        'lg' => ['pad' => '12px 24px', 'fs' => '14.5px', 'icon' => 18, 'avatar' => 38],
+        'sm' => ['pad' => '6px 14px', 'fs' => '12.5px', 'icon' => 14, 'avatar' => 32],
+        'md' => ['pad' => '9px 18px', 'fs' => '13.5px', 'icon' => 16, 'avatar' => 42],
+        'lg' => ['pad' => '12px 24px', 'fs' => '14.5px', 'icon' => 18, 'avatar' => 52],
     ];
     $sz = $sizeMap[$size] ?? $sizeMap['md'];
 
@@ -35,16 +33,10 @@
             ? mb_strtoupper(mb_substr($parts[0], 0, 1) . mb_substr($parts[count($parts) - 1], 0, 1))
             : mb_strtoupper(mb_substr($parts[0] ?? '?', 0, 1));
 
-        $isAdmin = method_exists($authUser, 'isAdmin') ? $authUser->isAdmin() : false;
-
         $initialUser = [
             'name'     => $authUser->name,
-            'email'    => $authUser->email,
             'initials' => $initials,
-            'admin'    => $isAdmin,
-            'adminUrl' => $isAdmin ? route('admin.dashboard', absolute: false) : null,
             'account'  => route('frontend.account.index', absolute: false),
-            'settings' => route('frontend.account.settings', absolute: false),
         ];
     }
 @endphp
@@ -53,13 +45,13 @@
     #{{ $uid }} {
         --hlb-accent: {{ $accent }};
         --hlb-accent2: {{ $accent2 }};
-        position: relative;
         display: inline-flex;
         align-items: center;
         gap: 8px;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
+    /* ---------- LOGIN / REGISTER BUTTONS ---------- */
     #{{ $uid }} .rj-hlb-btn {
         display: inline-flex;
         align-items: center;
@@ -88,50 +80,29 @@
         color: #fff;
         box-shadow: 0 6px 16px -8px color-mix(in srgb, var(--hlb-accent) 65%, transparent);
     }
-    #{{ $uid }}[data-style="gradient"] .rj-hlb-btn.login:hover {
-        box-shadow: 0 10px 20px -8px color-mix(in srgb, var(--hlb-accent) 70%, transparent);
-    }
-
     #{{ $uid }}[data-style="solid"] .rj-hlb-btn.login {
         background: var(--hlb-accent);
         color: #fff;
     }
-    #{{ $uid }}[data-style="solid"] .rj-hlb-btn.login:hover { opacity: .9; }
-
     #{{ $uid }}[data-style="outline"] .rj-hlb-btn.login {
         background: transparent;
         color: var(--hlb-accent);
         border-color: var(--hlb-accent);
     }
-    #{{ $uid }}[data-style="outline"] .rj-hlb-btn.login:hover {
-        background: color-mix(in srgb, var(--hlb-accent) 8%, transparent);
-    }
-
     #{{ $uid }}[data-style="ghost"] .rj-hlb-btn.login {
         background: transparent;
         color: inherit;
         border-color: transparent;
     }
-    #{{ $uid }}[data-style="ghost"] .rj-hlb-btn.login:hover {
-        background: rgba(0,0,0,.04);
-    }
-
     #{{ $uid }}[data-style="dark"] .rj-hlb-btn.login {
         background: #0f172a;
         color: #fff;
-    }
-    #{{ $uid }}[data-style="dark"] .rj-hlb-btn.login:hover {
-        background: #1e293b;
     }
 
     #{{ $uid }} .rj-hlb-btn.register {
         background: transparent;
         color: var(--hlb-accent);
         border-color: color-mix(in srgb, var(--hlb-accent) 35%, transparent);
-    }
-    #{{ $uid }} .rj-hlb-btn.register:hover {
-        background: color-mix(in srgb, var(--hlb-accent) 8%, transparent);
-        border-color: var(--hlb-accent);
     }
 
     #{{ $uid }} .rj-hlb-divider {
@@ -141,25 +112,18 @@
         margin: 0 4px;
     }
 
-    #{{ $uid }} .rj-hlb-user {
+    /* ---------- LOGGED IN AVATAR ---------- */
+    #{{ $uid }} .rj-hlb-user-link {
         display: inline-flex;
         align-items: center;
-        gap: 8px;
-        padding: 4px 10px 4px 4px;
-        border-radius: {{ $radiusCss }};
-        border: 1.5px solid transparent;
-        background: transparent;
+        gap: 10px;
+        text-decoration: none;
         color: inherit;
         cursor: pointer;
-        transition: background .2s ease, border-color .2s ease;
-        font-family: inherit;
+        transition: transform .25s cubic-bezier(.34,1.56,.64,1);
     }
-    #{{ $uid }} .rj-hlb-user:hover {
-        background: rgba(15,23,42,.04);
-        border-color: rgba(15,23,42,.08);
-    }
-    #{{ $uid }} .rj-hlb-user.is-open {
-        background: rgba(15,23,42,.06);
+    #{{ $uid }} .rj-hlb-user-link:hover {
+        transform: scale(1.05);
     }
 
     #{{ $uid }} .rj-hlb-avatar {
@@ -175,121 +139,36 @@
         justify-content: center;
         flex-shrink: 0;
         letter-spacing: .02em;
-        box-shadow: 0 4px 10px -4px color-mix(in srgb, var(--hlb-accent) 55%, transparent);
+        box-shadow: 0 4px 12px -4px color-mix(in srgb, var(--hlb-accent) 55%, transparent);
+        position: relative;
+        z-index: 2;
     }
+
+    @if($pulse)
+    #{{ $uid }} .rj-hlb-avatar::before {
+        content: '';
+        position: absolute;
+        inset: -3px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--hlb-accent), var(--hlb-accent2));
+        z-index: -1;
+        opacity: .6;
+        animation: rjHlbPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes rjHlbPulse {
+        0%, 100% { transform: scale(1); opacity: 0.6; }
+        50% { transform: scale(1.15); opacity: 0.1; }
+    }
+    @endif
+
     #{{ $uid }} .rj-hlb-uname {
         font-size: {{ $sz['fs'] }};
         font-weight: 700;
         color: inherit;
-        max-width: 120px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-    #{{ $uid }} .rj-hlb-caret {
-        width: 12px;
-        height: 12px;
-        color: inherit;
-        opacity: .5;
-        transition: transform .25s ease;
-    }
-    #{{ $uid }} .rj-hlb-user.is-open .rj-hlb-caret {
-        transform: rotate(180deg);
-    }
-
-    #{{ $uid }} .rj-hlb-menu {
-        position: absolute;
-        top: calc(100% + 10px);
-        right: 0;
-        min-width: 240px;
-        background: #fff;
-        border: 1px solid rgba(15,23,42,.08);
-        border-radius: 14px;
-        box-shadow: 0 20px 40px -16px rgba(15,23,42,.35);
-        padding: 8px;
-        opacity: 0;
-        transform: translateY(-8px) scale(.96);
-        pointer-events: none;
-        transition: opacity .22s ease, transform .25s cubic-bezier(.34,1.56,.64,1);
-        z-index: 9999;
-    }
-    #{{ $uid }} .rj-hlb-menu.is-open {
-        opacity: 1;
-        transform: none;
-        pointer-events: auto;
-    }
-    html[dir="rtl"] #{{ $uid }} .rj-hlb-menu {
-        right: auto;
-        left: 0;
-    }
-
-    #{{ $uid }} .rj-hlb-menu-head {
-        padding: 10px 12px;
-        border-bottom: 1px solid #f1f5f9;
-        margin-bottom: 6px;
-    }
-    #{{ $uid }} .rj-hlb-menu-name {
-        font-size: 13px;
-        font-weight: 800;
-        color: #0f172a;
-        margin: 0 0 2px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-    #{{ $uid }} .rj-hlb-menu-email {
-        font-size: 11.5px;
-        color: #64748b;
-        margin: 0;
-        overflow: hidden;
-        text-overflow: ellipsis;
         white-space: nowrap;
     }
 
-    #{{ $uid }} .rj-hlb-menu-item {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 9px 12px;
-        border-radius: 8px;
-        color: #334155;
-        font-size: 13px;
-        font-weight: 600;
-        text-decoration: none;
-        cursor: pointer;
-        transition: background .15s ease, color .15s ease;
-        border: 0;
-        background: transparent;
-        width: 100%;
-        text-align: left;
-        font-family: inherit;
-    }
-    #{{ $uid }} .rj-hlb-menu-item:hover {
-        background: #f8fafc;
-        color: var(--hlb-accent);
-    }
-    #{{ $uid }} .rj-hlb-menu-item svg {
-        width: 16px;
-        height: 16px;
-        flex-shrink: 0;
-        opacity: .7;
-    }
-    #{{ $uid }} .rj-hlb-menu-item:hover svg {
-        opacity: 1;
-    }
-    #{{ $uid }} .rj-hlb-menu-item.danger {
-        color: #dc2626;
-    }
-    #{{ $uid }} .rj-hlb-menu-item.danger:hover {
-        background: #fef2f2;
-        color: #b91c1c;
-    }
-    #{{ $uid }} .rj-hlb-menu-sep {
-        height: 1px;
-        background: #f1f5f9;
-        margin: 6px 4px;
-    }
-
+    /* ---------- LOGIN MODAL ---------- */
     #{{ $uid }} .rj-hlb-modal {
         position: fixed;
         inset: 0;
@@ -457,15 +336,6 @@
         text-decoration: none;
     }
     #{{ $uid }} .rj-hlb-modal-foot a:hover { text-decoration: underline; }
-
-    @media (prefers-reduced-motion: reduce) {
-        #{{ $uid }} *,
-        #{{ $uid }} *::before,
-        #{{ $uid }} *::after {
-            animation: none !important;
-            transition-duration: .01ms !important;
-        }
-    }
 </style>
 
 <div id="{{ $uid }}" data-style="{{ $btnStyle }}" data-mode="{{ $loginMode }}" data-initial-user='@json($initialUser)'>
@@ -491,62 +361,14 @@
     </div>
 
     <div data-logged-in @if(!$initialUser) style="display:none;" @endif>
-        <button type="button" class="rj-hlb-user" data-user-btn>
+        <a href="{{ $initialUser['account'] ?? '#' }}" class="rj-hlb-user-link" data-user-link title="{{ $initialUser['name'] ?? '' }}">
             @if($showAvatar)
                 <span class="rj-hlb-avatar" data-user-avatar>{{ $initialUser['initials'] ?? '' }}</span>
             @endif
             @if($showName)
                 <span class="rj-hlb-uname" data-user-name>{{ $initialUser['name'] ?? '' }}</span>
             @endif
-            <svg class="rj-hlb-caret" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-            </svg>
-        </button>
-
-        <div class="rj-hlb-menu" data-user-menu>
-            <div class="rj-hlb-menu-head">
-                <p class="rj-hlb-menu-name" data-menu-name>{{ $initialUser['name'] ?? '' }}</p>
-                <p class="rj-hlb-menu-email" data-menu-email>{{ $initialUser['email'] ?? '' }}</p>
-            </div>
-
-            @if($showAdminLink)
-                <a href="#" class="rj-hlb-menu-item" data-admin-link style="display:none;">
-                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v10h14V10"/>
-                    </svg>
-                    <span>{{ __('Admin Panel') }}</span>
-                </a>
-            @endif
-
-            @if($showAccountLink)
-                <a href="#" class="rj-hlb-menu-item" data-account-link>
-                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <circle cx="12" cy="8" r="4"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 21v-1a8 8 0 0116 0v1"/>
-                    </svg>
-                    <span>{{ __('My Account') }}</span>
-                </a>
-            @endif
-
-            @if($showSettingsLink)
-                <a href="#" class="rj-hlb-menu-item" data-settings-link>
-                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="3"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 008 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
-                    </svg>
-                    <span>{{ __('Settings') }}</span>
-                </a>
-            @endif
-
-            <div class="rj-hlb-menu-sep"></div>
-
-            <button type="button" class="rj-hlb-menu-item danger" data-logout-btn>
-                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                </svg>
-                <span>{{ __('Sign out') }}</span>
-            </button>
-        </div>
+        </a>
     </div>
 
     @if($loginMode === 'modal')
@@ -611,9 +433,7 @@
     var loggedOutEl = root.querySelector('[data-logged-out]');
     var loggedInEl  = root.querySelector('[data-logged-in]');
     var loginBtn    = root.querySelector('[data-login-btn]');
-    var userBtn     = root.querySelector('[data-user-btn]');
-    var userMenu    = root.querySelector('[data-user-menu]');
-    var logoutBtn   = root.querySelector('[data-logout-btn]');
+    var userLink    = root.querySelector('[data-user-link]');
     var modal       = root.querySelector('[data-login-modal]');
     var loginForm   = root.querySelector('[data-login-form]');
     var errorEl     = root.querySelector('[data-login-error]');
@@ -621,13 +441,8 @@
     var spinner     = root.querySelector('[data-login-spinner]');
     var btnText     = root.querySelector('[data-login-btn-text]');
 
-    var adminLink   = root.querySelector('[data-admin-link]');
-    var accountLink = root.querySelector('[data-account-link]');
-    var settingsLink= root.querySelector('[data-settings-link]');
     var userAvatar  = root.querySelector('[data-user-avatar]');
     var userName    = root.querySelector('[data-user-name]');
-    var menuName    = root.querySelector('[data-menu-name]');
-    var menuEmail   = root.querySelector('[data-menu-email]');
 
     function setUser(user) {
         if (user) {
@@ -636,59 +451,15 @@
 
             if (userAvatar) userAvatar.textContent = user.initials || '?';
             if (userName)   userName.textContent   = user.name || '';
-            if (menuName)   menuName.textContent   = user.name || '';
-            if (menuEmail)  menuEmail.textContent  = user.email || '';
-
-            if (adminLink) {
-                if (user.admin && user.adminUrl) {
-                    adminLink.href = user.adminUrl;
-                    adminLink.style.display = '';
-                } else {
-                    adminLink.style.display = 'none';
-                }
+            if (userLink) {
+                userLink.href = user.account || '/account';
+                userLink.title = user.name || '';
             }
-            if (accountLink && user.account) accountLink.href = user.account;
-            if (settingsLink && user.settings) settingsLink.href = user.settings;
         } else {
             if (loggedOutEl) loggedOutEl.style.display = '';
             if (loggedInEl)  loggedInEl.style.display = 'none';
-            closeMenu();
         }
     }
-
-    function openMenu() {
-        if (!userMenu) return;
-        userMenu.classList.add('is-open');
-        if (userBtn) userBtn.classList.add('is-open');
-    }
-    function closeMenu() {
-        if (!userMenu) return;
-        userMenu.classList.remove('is-open');
-        if (userBtn) userBtn.classList.remove('is-open');
-    }
-    function toggleMenu() {
-        if (!userMenu) return;
-        if (userMenu.classList.contains('is-open')) closeMenu();
-        else openMenu();
-    }
-
-    if (userBtn) {
-        userBtn.addEventListener('click', function (e) {
-            e.stopPropagation();
-            toggleMenu();
-        });
-    }
-
-    document.addEventListener('click', function (e) {
-        if (userMenu && !root.contains(e.target)) closeMenu();
-    });
-
-    document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') {
-            closeMenu();
-            if (modal) modal.classList.remove('is-open');
-        }
-    });
 
     function openLoginModal() {
         if (!modal) return;
@@ -718,6 +489,12 @@
             el.addEventListener('click', closeLoginModal);
         });
     }
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && modal && modal.classList.contains('is-open')) {
+            closeLoginModal();
+        }
+    });
 
     function setLoading(on) {
         if (submitBtn) submitBtn.disabled = on;
@@ -768,7 +545,7 @@
                     setUser(data.user);
                     closeLoginModal();
                     if (loginForm) loginForm.reset();
-                    // Uğurlu girişdən sonra profil səhifəsinə yönləndir
+
                     if (data.user && data.user.account) {
                         window.location.href = data.user.account;
                     }
@@ -779,28 +556,6 @@
                 showError(@js(__('Network error. Please try again.')));
             } finally {
                 setLoading(false);
-            }
-        });
-    }
-
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', async function () {
-            logoutBtn.disabled = true;
-            try {
-                await fetch(@js(route('rj.widget.logout', absolute: false)), {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRF-TOKEN': @js(csrf_token())
-                    }
-                });
-                setUser(null);
-                closeMenu();
-            } catch (err) {
-                /* silent */
-            } finally {
-                logoutBtn.disabled = false;
             }
         });
     }
