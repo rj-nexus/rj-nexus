@@ -1,1 +1,1 @@
-RJ Builder v1.2.24
+RJ Builder v1.2.25
