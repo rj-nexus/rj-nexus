@@ -28,7 +28,7 @@ class HeaderLoginButtonWidget extends BaseWidget
 
     public function description(): string
     {
-        return __('A compact header login button that turns into a user dropdown when logged in.');
+        return __('A compact login button that turns into a circular profile avatar.');
     }
 
     public function contexts(): array
@@ -75,7 +75,7 @@ class HeaderLoginButtonWidget extends BaseWidget
             [
                 'name'    => 'show_avatar',
                 'type'    => 'toggle',
-                'label'   => __('Show Avatar when Logged In'),
+                'label'   => __('Show Avatar Initials'),
                 'default' => true,
                 'tab'     => 'style',
             ],
@@ -83,29 +83,17 @@ class HeaderLoginButtonWidget extends BaseWidget
                 'name'    => 'show_name',
                 'type'    => 'toggle',
                 'label'   => __('Show User Name'),
+                'default' => false,
+                'tab'     => 'style',
+                'help'    => __('Show the name next to the avatar circle.'),
+            ],
+            [
+                'name'    => 'pulse',
+                'type'    => 'toggle',
+                'label'   => __('Pulse Animation'),
                 'default' => true,
                 'tab'     => 'style',
-            ],
-            [
-                'name'    => 'show_admin_link',
-                'type'    => 'toggle',
-                'label'   => __('Show "Admin Panel" in Dropdown'),
-                'default' => true,
-                'tab'     => 'content',
-            ],
-            [
-                'name'    => 'show_account_link',
-                'type'    => 'toggle',
-                'label'   => __('Show "My Account" in Dropdown'),
-                'default' => true,
-                'tab'     => 'content',
-            ],
-            [
-                'name'    => 'show_settings_link',
-                'type'    => 'toggle',
-                'label'   => __('Show "Settings" in Dropdown'),
-                'default' => false,
-                'tab'     => 'content',
+                'help'    => __('A subtle glowing ring animation around the avatar.'),
             ],
             [
                 'name'    => 'btn_style',
@@ -151,7 +139,7 @@ class HeaderLoginButtonWidget extends BaseWidget
                 'name'    => 'radius',
                 'type'    => 'select',
                 'label'   => __('Radius'),
-                'default' => 'md',
+                'default' => 'full',
                 'tab'     => 'style',
                 'options' => [
                     'none' => __('None'),
