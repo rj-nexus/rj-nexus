@@ -40,7 +40,7 @@ class LogoWidget extends BaseWidget
                 'label'   => __('Logo Image'),
                 'default' => '',
                 'tab'     => 'content',
-                'help'    => __('Leave empty to use the site default logo.'),
+                'help'    => __('Leave empty to use the site default logo or name.'),
             ],
             [
                 'name'    => 'url',
