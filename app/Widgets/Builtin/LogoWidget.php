@@ -23,7 +23,7 @@ class LogoWidget extends BaseWidget
 
     public function category(): string
     {
-        return 'basic';
+        return 'header';
     }
 
     public function description(): string
@@ -40,6 +40,7 @@ class LogoWidget extends BaseWidget
                 'label'   => __('Logo Image'),
                 'default' => '',
                 'tab'     => 'content',
+                'help'    => __('Leave empty to use the site default logo.'),
             ],
             [
                 'name'    => 'url',
