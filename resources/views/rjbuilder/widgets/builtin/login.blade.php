@@ -116,6 +116,7 @@
         text-decoration: none;
     }
     #{{ $uid }} .rj-lg-link:hover { text-decoration: underline; }
+
     #{{ $uid }} .rj-lg-submit {
         width: 100%;
         padding: 12px;
@@ -237,64 +238,12 @@
     }
 </style>
 
-<div id="{{ $uid }}" x-data="{
-    user: @js($initialUser),
-    title: @js($title),
-    subtitle: @js($subtitle),
-    loggedTitle: @js($loggedTitle),
-    email: '',
-    password: '',
-    remember: false,
-    loading: false,
-    error: '',
-    texts: {
-        signingIn: @js(__('Signing in...')),
-        signIn: @js(__('Sign In')),
-        fillFields: @js(__('Please fill in all fields.')),
-        loginFailed: @js(__('Login failed.')),
-        networkError: @js(__('Network error. Please try again.'))
-    }
-}">
+<div id="{{ $uid }}" x-data="rjLogin_{{$uid}}()">
     <div class="rj-lg-card">
 
-        <!-- x-if istifadə edirik ki, tamamilə dəyişsin -->
-        <template x-if="!user">
-            <form @submit.prevent="
-                error = '';
-                if (!email || !password) { error = texts.fillFields; return; }
-                loading = true;
-                fetch(@js(route('rj.widget.login', absolute: false)), {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRF-TOKEN': @js(csrf_token())
-                    },
-                    body: JSON.stringify({ email: email, password: password, remember: remember ? 1 : 0 })
-                })
-                .then(res => {
-                    if (!res.ok && res.status !== 422 && res.status !== 429) {
-                        throw new Error('HTTP ' + res.status);
-                    }
-                    return res.json();
-                })
-                .then(data => {
-                    if (data.ok && data.user) {
-                        user = data.user;
-                        password = '';
-                    } else {
-                        error = data.message || texts.loginFailed;
-                    }
-                })
-                .catch(err => {
-                    console.error('Login Error:', err);
-                    error = texts.networkError;
-                })
-                .finally(() => {
-                    loading = false;
-                });
-            " novalidate>
+        <!-- x-show istifadə edirik ki, state dəyişəndə dərhal reaksiya versin -->
+        <div x-show="!user" x-transition.opacity>
+            <form @submit.prevent="submit" novalidate>
                 <h2 class="rj-lg-title" x-text="title"></h2>
                 <p class="rj-lg-sub" x-text="subtitle"></p>
 
@@ -336,52 +285,128 @@
                     </p>
                 @endif
             </form>
-        </template>
+        </div>
 
-        <template x-if="user">
+        <div x-show="user" style="display: none;" x-transition.opacity>
             <div class="rj-lg-user">
                 <h2 class="rj-lg-title" x-text="loggedTitle"></h2>
-                <div class="rj-lg-avatar" x-text="user.initials || ''"></div>
-                <p class="rj-lg-uname" x-text="user.name || ''"></p>
-                <p class="rj-lg-email" x-text="user.email || ''"></p>
+                <div class="rj-lg-avatar" x-text="user ? user.initials : ''"></div>
+                <p class="rj-lg-uname" x-text="user ? user.name : ''"></p>
+                <p class="rj-lg-email" x-text="user ? user.email : ''"></p>
 
                 <div class="rj-lg-actions">
                     @if($showAdminBtn)
-                        <template x-if="user.admin && user.adminUrl">
-                            <a :href="user.adminUrl" class="rj-lg-btn primary">
+                        <div x-show="user && user.admin && user.adminUrl">
+                            <a :href="user ? user.adminUrl : '#'" class="rj-lg-btn primary">
                                 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>
                                 <span>{{ __('Go to Admin') }}</span>
                             </a>
-                        </template>
+                        </div>
                     @endif
 
-                    <a :href="user.account || '#'" class="rj-lg-btn">
+                    <a :href="user ? user.account : '#'" class="rj-lg-btn">
                         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path stroke-linecap="round" stroke-linejoin="round" d="M4 21v-1a8 8 0 0116 0v1"/></svg>
                         <span>{{ __('My Account') }}</span>
                     </a>
 
-                    <button type="button" class="rj-lg-btn ghost" @click="
-                        loading = true;
-                        fetch(@js(route('rj.widget.logout', absolute: false)), {
-                            method: 'POST',
-                            headers: {
-                                'Accept': 'application/json',
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'X-CSRF-TOKEN': @js(csrf_token())
-                            }
-                        }).finally(() => {
-                            user = null;
-                            email = '';
-                            password = '';
-                            remember = false;
-                            loading = false;
-                        });
-                    " :disabled="loading">
+                    <button type="button" class="rj-lg-btn ghost" @click="logout" :disabled="loading">
                         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                         <span>{{ __('Sign out') }}</span>
                     </button>
                 </div>
             </div>
-        </template>
+        </div>
     </div>
 </div>
+
+<script>
+window['rjLogin_{{$uid}}'] = function() {
+    return {
+        user: @js($initialUser),
+        title: @js($title),
+        subtitle: @js($subtitle),
+        loggedTitle: @js($loggedTitle),
+        email: '',
+        password: '',
+        remember: false,
+        loading: false,
+        error: '',
+        texts: {
+            signingIn: @js(__('Signing in...')),
+            signIn: @js(__('Sign In')),
+            fillFields: @js(__('Please fill in all fields.')),
+            loginFailed: @js(__('Login failed.'))
+        },
+
+        async submit() {
+            this.error = '';
+            if (!this.email || !this.password) {
+                this.error = this.texts.fillFields;
+                return;
+            }
+            this.loading = true;
+
+            try {
+                const res = await fetch(@js(route('rj.widget.login', absolute: false)), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': @js(csrf_token())
+                    },
+                    body: JSON.stringify({
+                        email: this.email,
+                        password: this.password,
+                        remember: this.remember ? 1 : 0
+                    })
+                });
+
+                let data;
+                try {
+                    data = await res.json();
+                } catch (e) {
+                    throw new Error('Server xətası (JSON gözlənilirdi, HTML gəldi). Status: ' + res.status);
+                }
+
+                if (res.ok && data.ok) {
+                    this.user = data.user;
+                    this.password = '';
+                } else {
+                    this.error = data.message || this.texts.loginFailed;
+                }
+            } catch (err) {
+                // Hər hansı xəta olsa (419, 500, Network) ekranda göstər
+                console.error(err);
+                this.error = 'Xəta: ' + err.message;
+            } finally {
+                // Nə olursa olsun, düyməni mütləq dayandır!
+                this.loading = false;
+            }
+        },
+
+        async logout() {
+            this.loading = true;
+            try {
+                await fetch(@js(route('rj.widget.logout', absolute: false)), {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': @js(csrf_token())
+                    }
+                });
+                this.user = null;
+                this.email = '';
+                this.password = '';
+                this.remember = false;
+                this.error = '';
+            } catch (err) {
+                console.error(err);
+            } finally {
+                this.loading = false;
+            }
+        }
+    };
+};
+</script>
