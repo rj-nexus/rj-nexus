@@ -510,21 +510,19 @@
         if (source === 'audius') {
             try {
                 let url = '';
-                // Əgər ID kimi görünürsə (məsələn D7KyD), birbaşa istifadə et
+                // Rəsmi Audius API ünvanı istifadə olunur (api.audius.co)
                 if (audiusPl && !audiusPl.includes(' ')) {
-                    url = `https://discoveryprovider.audius.co/v1/playlists/${audiusPl}/tracks?app_name=RJ_CMS`;
+                    url = `https://api.audius.co/v1/playlists/${audiusPl}/tracks?app_name=RJ_CMS`;
                 } else if (audiusPl) {
-                    // Əgər ad kimi görünürsə, axtarış et və ilk nəticəni götür
-                    let searchUrl = `https://discoveryprovider.audius.co/v1/playlists/search?query=${encodeURIComponent(audiusPl)}&app_name=RJ_CMS`;
+                    let searchUrl = `https://api.audius.co/v1/playlists/search?query=${encodeURIComponent(audiusPl)}&app_name=RJ_CMS`;
                     let searchRes = await fetch(searchUrl);
                     let searchData = await searchRes.json();
                     if (searchData.data && searchData.data.length > 0) {
                         let firstPl = searchData.data[0];
-                        url = `https://discoveryprovider.audius.co/v1/playlists/${firstPl.id}/tracks?app_name=RJ_CMS`;
+                        url = `https://api.audius.co/v1/playlists/${firstPl.id}/tracks?app_name=RJ_CMS`;
                     }
                 } else {
-                    // Heç bir ID və ya ad yoxdursa, trend musiqiləri yüklə
-                    url = 'https://discoveryprovider.audius.co/v1/tracks/trending?app_name=RJ_CMS&limit=20';
+                    url = 'https://api.audius.co/v1/tracks/trending?app_name=RJ_CMS&limit=20';
                 }
 
                 if (url) {
@@ -533,7 +531,7 @@
                     let items = data.data || [];
 
                     items.forEach(function(t) {
-                        let streamUrl = `https://discoveryprovider.audius.co/v1/tracks/${t.id}/stream?app_name=RJ_CMS`;
+                        let streamUrl = `https://api.audius.co/v1/tracks/${t.id}/stream?app_name=RJ_CMS`;
                         tracks.push({
                             title: t.title,
                             artist: t.user ? t.user.name : 'Audius Artist',
@@ -564,36 +562,37 @@
         else if (source === 'deezer') {
             try {
                 let dUrl = '';
-                // Əgər rəqəmdirsə, birbaşa ID kimi istifadə et
+                // Daha etibarlı olan codetabs proxy-si istifadə olunur
+                let proxy = 'https://api.codetabs.com/v1/proxy?quest=';
+
                 if (deezerPl && /^\d+$/.test(deezerPl)) {
                     dUrl = `https://api.deezer.com/playlist/${deezerPl}/tracks`;
                 } else if (deezerPl) {
-                    // Əgər ad kimi görünürsə, axtarış et və ilk nəticəni götür
                     let searchUrl = `https://api.deezer.com/search/playlist?q=${encodeURIComponent(deezerPl)}`;
-                    let searchRes = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(searchUrl));
+                    let searchRes = await fetch(proxy + encodeURIComponent(searchUrl));
                     let searchData = await searchRes.json();
                     if (searchData.data && searchData.data.length > 0) {
                         let firstPl = searchData.data[0];
                         dUrl = `https://api.deezer.com/playlist/${firstPl.id}/tracks`;
                     }
                 } else {
-                    // Heç bir ID və ya ad yoxdursa, chart-ları yüklə
                     dUrl = 'https://api.deezer.com/chart/0/tracks';
                 }
 
                 if (dUrl) {
-                    let proxy = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(dUrl);
-                    let res = await fetch(proxy);
+                    let res = await fetch(proxy + encodeURIComponent(dUrl));
                     let data = await res.json();
                     let items = data.data || [];
 
                     items.forEach(function(t) {
-                        tracks.push({
-                            title: t.title,
-                            artist: t.artist.name,
-                            url: t.preview,
-                            cover: t.album ? t.album.cover : null
-                        });
+                        if(t.preview) {
+                            tracks.push({
+                                title: t.title,
+                                artist: t.artist.name,
+                                url: t.preview,
+                                cover: t.album ? t.album.cover : null
+                            });
+                        }
                     });
                 }
             } catch(e) { console.error('Deezer error:', e); }
@@ -646,7 +645,7 @@
         var coverEl = root.querySelector('[data-cover]');
         if (coverEl) {
             if (t.cover) {
-                coverEl.innerHTML = `<img src="${t.cover}" alt="${escapeHtml(t.title)}">`;
+                coverEl.innerHTML = `<img src="${t.cover}" alt="${escapeHtml(t.title)}" crossorigin="anonymous">`;
             } else {
                 coverEl.innerHTML = `<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>`;
             }
