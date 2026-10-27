@@ -324,7 +324,14 @@ class PostsWidget extends BaseWidget
 
         $uid = 'rjp_' . substr(md5(uniqid('', true)), 0, 8);
 
-        return view('rjbuilder.widgets.builtin.posts', compact('posts', 'settings', 'uid'))->render();
+        // Hesablamaları Blade-ə ötürmək üçün burda edirik
+        $padding = $this->dimensionCss($settings, 'padding_dim');
+        $margin = $this->dimensionCss($settings, 'margin_dim');
+        $bg = $this->backgroundCss($settings);
+        $id = $this->cssId($settings);
+        $class = $this->cssClass($settings);
+
+        return view('rjbuilder.widgets.builtin.posts', compact('posts', 'settings', 'uid', 'padding', 'margin', 'bg', 'id', 'class'))->render();
     }
 
     protected function buildQuery(array $settings)
