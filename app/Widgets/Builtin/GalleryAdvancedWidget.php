@@ -63,6 +63,14 @@ class GalleryAdvancedWidget extends BaseWidget
                 'tab'     => 'content',
             ],
             [
+                'name'    => 'categories',
+                'type'    => 'text',
+                'label'   => __('Global Categories (comma separated)'),
+                'default' => 'Nature, Urban, Architecture, People',
+                'tab'     => 'content',
+                'help'    => __('These will appear in the dropdown when adding gallery items. You can still type new ones per item.'),
+            ],
+            [
                 'name'    => 'layout',
                 'type'    => 'select',
                 'label'   => __('Layout'),
@@ -105,7 +113,7 @@ class GalleryAdvancedWidget extends BaseWidget
                 'fields' => [
                     ['name' => 'image',    'type' => 'media', 'label' => __('Image')],
                     ['name' => 'title',    'type' => 'text',  'label' => __('Title')],
-                    ['name' => 'category', 'type' => 'text',  'label' => __('Category')],
+                    ['name' => 'category', 'type' => 'text',  'label' => __('Category'), 'source' => 'categories'],
                 ],
             ],
         ];
