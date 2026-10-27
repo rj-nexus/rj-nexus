@@ -116,6 +116,7 @@
         text-decoration: none;
     }
     #{{ $uid }} .rj-lg-link:hover { text-decoration: underline; }
+
     #{{ $uid }} .rj-lg-submit {
         width: 100%;
         padding: 12px;
@@ -357,6 +358,8 @@ window['rjLogin_{{ $uid }}'] = function () {
                 if (res.ok && data.ok) {
                     this.user = data.user;
                     this.password = '';
+                    // Uğurlu girişdən sonra profil səhifəsinə yönləndirmək istəsən, aşağıdakı sətri aça bilərsən:
+                    // window.location.href = data.user.account;
                 } else {
                     this.error = data.message || @js(__('Login failed.'));
                 }
