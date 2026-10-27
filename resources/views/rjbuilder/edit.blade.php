@@ -553,7 +553,17 @@
 
                             @include('rjbuilder.partials.fields.dimensions')
 
-                            <p class="rj-help" x-show="field.help" x-text="field.help"></p>
+                            <p class="rj-help" x-show="field.help || field.help_link" style="display:flex; flex-wrap:wrap; align-items:center; gap:4px;">
+    <span x-show="field.help" x-text="field.help"></span>
+    <template x-if="field.help_link">
+        <a :href="field.help_link"
+           target="_blank"
+           rel="noopener noreferrer"
+           style="color:#a78bfa; text-decoration:underline; font-weight:600; margin-inline-start:2px;"
+           @click.stop
+           x-text="field.help_link_text || t('Learn more →')"></a>
+    </template>
+</p>
                         </div>
                     </template>
 
