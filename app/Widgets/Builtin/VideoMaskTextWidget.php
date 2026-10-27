@@ -52,7 +52,7 @@ class VideoMaskTextWidget extends BaseWidget
                 'name'    => 'video_url',
                 'type'    => 'text',
                 'label'   => __('Video URL (mp4 / webm)'),
-                'default' => 'https://cdn.pixabay.com/video/2023/03/31/156932-814104173_large.mp4',
+                'default' => 'https://vimeo.com/63806344?fl=pl&fe=sh',
                 'tab'     => 'content',
                 'help'    => __('Direct link to a video file. Use a short, muted, looping video for best results.'),
             ],
