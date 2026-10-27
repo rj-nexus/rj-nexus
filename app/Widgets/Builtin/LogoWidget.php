@@ -96,19 +96,6 @@ class LogoWidget extends BaseWidget
                 ],
             ],
             [
-                'name'    => 'color_filter',
-                'type'    => 'select',
-                'label'   => __('Logo Color'),
-                'default' => 'none',
-                'tab'     => 'style',
-                'help'    => __('Use "Force white" for light logos on dark headers (or the opposite).'),
-                'options' => [
-                    'none'  => __('Original'),
-                    'white' => __('Force white'),
-                    'black' => __('Force black'),
-                ],
-            ],
-            [
                 'name'    => 'hover_opacity',
                 'type'    => 'toggle',
                 'label'   => __('Fade on Hover'),
@@ -139,7 +126,6 @@ class LogoWidget extends BaseWidget
             'max_h'    => max(20, min(240, (int) ($settings['max_height'] ?? 80))),
             'justify'  => ['left' => 'flex-start', 'center' => 'center', 'right' => 'flex-end'][$align],
             'objpos'   => $align,
-            'filter'   => $this->pick($settings['color_filter'] ?? 'none', ['none', 'white', 'black'], 'none'),
             'hover'    => $this->flag($settings['hover_opacity'] ?? null, true),
         ];
 
