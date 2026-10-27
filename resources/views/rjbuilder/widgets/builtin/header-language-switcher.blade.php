@@ -34,15 +34,17 @@
         'nl' => '🇳🇱', 'pl' => '🇵🇱', 'sv' => '🇸🇪', 'uk' => '🇺🇦',
     ];
 
-    $getFlag = function (string $code) use ($flags): string {
-        if (function_exists('rj_lang_flag_url')) {
-            $url = rj_lang_flag_url($code);
-            if ($url) {
-                return '<img src="' . e($url) . '" alt="" style="width:100%;height:100%;object-fit:contain;border-radius:2px;">';
-            }
+    $globeIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%;display:block;"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>';
+
+$getFlag = function (string $code) use ($flags, $globeIcon): string {
+    if (function_exists('rj_lang_flag_url')) {
+        $url = rj_lang_flag_url($code);
+        if ($url) {
+            return '<img src="' . e($url) . '" alt="" style="width:100%;height:100%;object-fit:contain;border-radius:2px;">';
         }
-        return $flags[$code] ?? '🌐';
-    };
+    }
+    return $flags[$code] ?? $globeIcon;
+};
 
     $getName = function (string $code) use ($showFullName): string {
         $upper = strtoupper($code);
