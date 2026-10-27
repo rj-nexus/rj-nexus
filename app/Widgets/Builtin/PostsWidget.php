@@ -55,6 +55,7 @@ class PostsWidget extends BaseWidget
                     'list' => __('List'),
                     'masonry' => __('Masonry'),
                     'carousel' => __('Carousel'),
+                    'compact' => __('Compact (sidebar)'),
                 ],
             ],
             [
@@ -329,6 +330,11 @@ class PostsWidget extends BaseWidget
         }
 
         $layout = $settings['layout'] ?? 'grid';
+
+        if ($layout === 'compact') {
+            return $this->renderCompact($posts, $settings);
+        }
+
         $columns = (int) ($settings['columns'] ?? 3);
 
         $gapMap = ['none' => '0', 'sm' => '12px', 'md' => '20px', 'lg' => '32px', 'xl' => '48px'];
@@ -395,6 +401,104 @@ class PostsWidget extends BaseWidget
             . '</div>';
 
         return $this->applyAnimation($html, $settings);
+    }
+
+    protected function renderCompact($posts, array $settings): string
+    {
+        $uid = 'rjc_' . substr(md5(uniqid('', true)), 0, 8);
+
+        $showImage = !empty($settings['show_image']);
+        $showDate = !empty($settings['show_date']);
+        $showAuthor = !empty($settings['show_author']);
+        $showCategories = !empty($settings['show_categories']);
+        $showExcerpt = !empty($settings['show_excerpt']);
+
+        $titleColor = $settings['title_color'] ?? '#111827';
+        $textColor = $settings['text_color'] ?? '#6b7280';
+        $metaColor = $settings['meta_color'] ?? '#9ca3af';
+        $cardRadiusMap = ['none' => '0px', 'sm' => '4px', 'md' => '8px', 'lg' => '16px'];
+        $thumbRadius = $cardRadiusMap[$settings['card_radius'] ?? 'md'] ?? '8px';
+
+        $gapMap = ['none' => '4px', 'sm' => '10px', 'md' => '16px', 'lg' => '24px', 'xl' => '32px'];
+        $itemGap = $gapMap[$settings['gap'] ?? 'md'] ?? '16px';
+
+        $hoverLift = !empty($settings['hover_lift']);
+
+        $padding = $this->dimensionCss($settings, 'padding_dim');
+        $margin = $this->dimensionCss($settings, 'margin_dim');
+
+        $wrapperStyle = '';
+        if ($padding !== '') $wrapperStyle .= 'padding:' . $padding . ';';
+        if ($margin !== '') $wrapperStyle .= 'margin:' . $margin . ';';
+
+        $html = '<style>'
+            . '#' . $uid . '{display:flex;flex-direction:column;gap:' . $itemGap . ';' . $wrapperStyle . '}'
+            . '#' . $uid . ' .rj-cmp-item{display:flex;gap:14px;align-items:flex-start;text-decoration:none;color:inherit;' . ($hoverLift ? 'transition:transform .25s cubic-bezier(.2,.8,.2,1);' : '') . '}'
+            . ($hoverLift ? '#' . $uid . ' .rj-cmp-item:hover{transform:translateX(4px);}' : '')
+            . '#' . $uid . ' .rj-cmp-thumb{width:72px;height:72px;flex-shrink:0;border-radius:' . $thumbRadius . ';overflow:hidden;background:#f1f5f9;}'
+            . '#' . $uid . ' .rj-cmp-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s cubic-bezier(.2,.8,.2,1);}'
+            . '#' . $uid . ' .rj-cmp-item:hover .rj-cmp-thumb img{transform:scale(1.08);}'
+            . '#' . $uid . ' .rj-cmp-body{flex:1;min-width:0;padding-top:2px;}'
+            . '#' . $uid . ' .rj-cmp-cats{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px;}'
+            . '#' . $uid . ' .rj-cmp-cat{font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#8b5cf6;}'
+            . '#' . $uid . ' .rj-cmp-title{font-size:13.5px;font-weight:700;color:' . $titleColor . ';margin:0 0 4px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;letter-spacing:-.005em;}'
+            . '#' . $uid . ' .rj-cmp-item:hover .rj-cmp-title{color:#8b5cf6;}'
+            . '#' . $uid . ' .rj-cmp-excerpt{font-size:11.5px;color:' . $textColor . ';margin:3px 0 4px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;}'
+            . '#' . $uid . ' .rj-cmp-meta{font-size:10.5px;color:' . $metaColor . ';font-weight:500;display:flex;align-items:center;gap:5px;}'
+            . '#' . $uid . ' .rj-cmp-sep{opacity:.5;}'
+            . '@media (prefers-reduced-motion: reduce){#' . $uid . ',#' . $uid . ' *{animation:none!important;transition:none!important;}}'
+            . '</style>';
+
+        $html .= '<div id="' . $uid . '">';
+
+        foreach ($posts as $post) {
+            $url = url('/blog/' . $post->slug);
+
+            $html .= '<a href="' . e($url) . '" class="rj-cmp-item">';
+
+            if ($showImage && $post->featured_image) {
+                $html .= '<div class="rj-cmp-thumb">';
+                $html .= '<img src="' . e($post->featured_image) . '" alt="' . e($post->title) . '" loading="lazy">';
+                $html .= '</div>';
+            }
+
+            $html .= '<div class="rj-cmp-body">';
+
+            if ($showCategories && $post->categories->isNotEmpty()) {
+                $html .= '<div class="rj-cmp-cats">';
+                foreach ($post->categories->take(1) as $cat) {
+                    $html .= '<span class="rj-cmp-cat">' . e($cat->name) . '</span>';
+                }
+                $html .= '</div>';
+            }
+
+            $html .= '<h4 class="rj-cmp-title">' . e($post->title) . '</h4>';
+
+            if ($showExcerpt) {
+                $length = max(5, (int) ($settings['excerpt_length'] ?? 20));
+                $excerpt = \Illuminate\Support\Str::words(strip_tags((string) $post->excerpt), $length, '…');
+                if ($excerpt !== '') {
+                    $html .= '<p class="rj-cmp-excerpt">' . e($excerpt) . '</p>';
+                }
+            }
+
+            $meta = [];
+            if ($showDate && $post->published_at) {
+                $meta[] = '<span>' . e($post->published_at->format('M j, Y')) . '</span>';
+            }
+            if ($showAuthor && $post->author) {
+                $meta[] = '<span>' . e($post->author->name) . '</span>';
+            }
+            if (!empty($meta)) {
+                $html .= '<div class="rj-cmp-meta">' . implode('<span class="rj-cmp-sep">·</span>', $meta) . '</div>';
+            }
+
+            $html .= '</div></a>';
+        }
+
+        $html .= '</div>';
+
+        return $html;
     }
 
     protected function buildQuery(array $settings)
