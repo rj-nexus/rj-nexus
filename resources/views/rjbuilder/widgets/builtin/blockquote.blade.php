@@ -29,71 +29,69 @@
     @property --bq-angle { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
 
     @keyframes bqWord-{{ $uid }} {
-        from { opacity: 0; transform: translateY(18px) scale(.96); filter: blur(10px); }
+        from { opacity: 0; transform: translateY(22px) rotateX(-40deg); filter: blur(8px); }
         to   { opacity: 1; transform: none; filter: blur(0); }
     }
     @keyframes bqUp-{{ $uid }} {
-        from { opacity: 0; transform: translateY(16px); }
+        from { opacity: 0; transform: translateY(18px); }
         to   { opacity: 1; transform: none; }
     }
-    @keyframes bqBar-{{ $uid }} {
+    @keyframes bqDraw-{{ $uid }} {
         from { transform: scaleY(0); }
         to   { transform: scaleY(1); }
     }
-    @keyframes bqDot-{{ $uid }} {
+    @keyframes bqDrawX-{{ $uid }} {
+        from { transform: scaleX(0); }
+        to   { transform: scaleX(1); }
+    }
+    @keyframes bqTravel-{{ $uid }} {
         0%   { top: 0; opacity: 0; }
-        10%  { opacity: 1; }
-        90%  { opacity: 1; }
+        12%  { opacity: 1; }
+        88%  { opacity: 1; }
         100% { top: 100%; opacity: 0; }
     }
     @keyframes bqSpin-{{ $uid }} { to { --bq-angle: 360deg; } }
     @keyframes bqRotate-{{ $uid }} { to { transform: rotate(360deg); } }
-    @keyframes bqFlow-{{ $uid }} {
-        0%   { background-position: 0% 50%; }
-        50%  { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-    }
-    @keyframes bqFloat-{{ $uid }} {
-        0%, 100% { transform: translateY(0) rotate(0deg); }
-        50%      { transform: translateY(-12px) rotate(4deg); }
-    }
     @keyframes bqBlobA-{{ $uid }} {
         0%, 100% { transform: translate(0, 0) scale(1); }
-        50%      { transform: translate(50px, 30px) scale(1.2); }
+        50%      { transform: translate(70px, 40px) scale(1.25); }
     }
     @keyframes bqBlobB-{{ $uid }} {
         0%, 100% { transform: translate(0, 0) scale(1); }
-        50%      { transform: translate(-60px, -20px) scale(1.15); }
+        50%      { transform: translate(-80px, -30px) scale(1.18); }
     }
-    @keyframes bqShine-{{ $uid }} {
-        0%   { transform: translateX(-160%) skewX(-18deg); }
-        60%, 100% { transform: translateX(260%) skewX(-18deg); }
+    @keyframes bqRise-{{ $uid }} {
+        from { background-position: 0 0; }
+        to   { background-position: 0 -240px; }
     }
-    @keyframes bqMark-{{ $uid }} {
-        from { opacity: 0; transform: scale(.3) rotate(-25deg); }
-        to   { opacity: .95; transform: none; }
+    @keyframes bqDrop-{{ $uid }} {
+        0%   { opacity: 0; transform: translateY(-80px) scale(1.3) rotate(-8deg); }
+        60%  { opacity: .22; transform: translateY(8px) scale(.98) rotate(2deg); }
+        100% { opacity: .2; transform: none; }
     }
-    @keyframes bqLine-{{ $uid }} {
-        from { transform: scaleX(0); }
-        to   { transform: scaleX(1); }
+    @keyframes bqPop-{{ $uid }} {
+        0%   { opacity: 0; transform: scale(.2) rotate(-40deg); }
+        100% { opacity: 1; transform: none; }
+    }
+    @keyframes bqPulse-{{ $uid }} {
+        0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--bq-accent) 45%, transparent); }
+        100% { box-shadow: 0 0 0 16px transparent; }
     }
 
     #{{ $uid }} { --bq-accent: {{ $accent }}; --bq-accent2: {{ $accent2 }}; --bq-text: {{ $textColor }}; --bq-size: {{ $sizeCss }}; width: 100%; padding: {{ $paddingY }}px 16px; }
     #{{ $uid }} *, #{{ $uid }} *::before, #{{ $uid }} *::after { box-sizing: border-box; }
 
-    #{{ $uid }} .rj-bq-wrap { --rx: 0deg; --ry: 0deg; --mx: 50%; --my: 50%; position: relative; max-width: 820px; margin: 0 auto; text-align: {{ $align }}; isolation: isolate; transition: transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .5s ease; }
-    #{{ $uid }} .rj-bq-wrap > * { position: relative; z-index: 2; }
+    #{{ $uid }} .rj-bq-wrap { --rx: 0deg; --ry: 0deg; --mx: 50%; --my: 50%; position: relative; max-width: 840px; margin: 0 auto; text-align: {{ $align }}; isolation: isolate; transition: transform .4s cubic-bezier(.2,.8,.2,1), box-shadow .5s ease; }
+    #{{ $uid }} .rj-bq-quote, #{{ $uid }} .rj-bq-author { position: relative; z-index: 3; }
 
-    #{{ $uid }} .rj-bq-quote { margin: 0 0 24px; padding: 0; border: 0; background: transparent; font-size: var(--bq-size); font-weight: 600; line-height: 1.5; letter-spacing: -.012em; color: var(--bq-text); quotes: none; }
+    #{{ $uid }} .rj-bq-quote { margin: 0 0 28px; padding: 0; border: 0; background: transparent; font-size: var(--bq-size); font-weight: 600; line-height: 1.5; letter-spacing: -.012em; color: var(--bq-text); quotes: none; perspective: 700px; }
     #{{ $uid }} .rj-bq-quote::before, #{{ $uid }} .rj-bq-quote::after { content: none; }
-    #{{ $uid }} .rj-w { display: inline-block; }
+    #{{ $uid }} .rj-w { display: inline-block; transform-origin: 50% 100%; }
 
     #{{ $uid }} .rj-bq-author { display: inline-flex; align-items: center; gap: 14px; }
     #{{ $uid }} .rj-bq-ring { position: relative; flex: none; width: 56px; height: 56px; padding: 3px; border-radius: 50%; transition: transform .5s cubic-bezier(.34,1.56,.64,1); }
-    #{{ $uid }} .rj-bq-ring::before { content: ""; position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, var(--bq-accent), var(--bq-accent2), var(--bq-accent)); animation: bqRotate-{{ $uid }} 6s linear infinite; }
-    #{{ $uid }} .rj-bq-wrap:hover .rj-bq-ring { transform: scale(1.1) rotate(-6deg); }
-    #{{ $uid }} .rj-bq-ring::before { transition: filter .4s ease; }
-    #{{ $uid }} .rj-bq-wrap:hover .rj-bq-ring::before { filter: blur(1.5px) saturate(1.4); animation-duration: 2s; }
+    #{{ $uid }} .rj-bq-ring::before { content: ""; position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, var(--bq-accent), var(--bq-accent2), transparent 60%, var(--bq-accent)); animation: bqRotate-{{ $uid }} 5s linear infinite; }
+    #{{ $uid }} .rj-bq-wrap:hover .rj-bq-ring { transform: scale(1.1) rotate(-8deg); }
     #{{ $uid }} .rj-bq-avatar { position: relative; display: grid; place-items: center; width: 100%; height: 100%; overflow: hidden; border-radius: 50%; border: 3px solid #fff; background: linear-gradient(135deg, var(--bq-accent), var(--bq-accent2)); color: #fff; font-size: 18px; font-weight: 800; }
     #{{ $uid }} .rj-bq-avatar img { display: block; width: 100%; height: 100%; max-width: none; object-fit: cover; }
     #{{ $uid }} .rj-bq-meta { display: flex; flex-direction: column; text-align: left; }
@@ -103,74 +101,95 @@
     #{{ $uid }} .rj-bq-wrap[data-align="right"] .rj-bq-author { flex-direction: row-reverse; }
     #{{ $uid }} .rj-bq-wrap[data-align="right"] .rj-bq-meta { text-align: right; }
 
-    #{{ $uid }} .rj-bq-mark { position: absolute; z-index: 1; font-family: Georgia, 'Times New Roman', serif; font-size: 130px; line-height: 1; font-weight: 900; color: var(--bq-accent); opacity: .13; pointer-events: none; user-select: none; animation: bqFloat-{{ $uid }} 7s ease-in-out infinite; }
-    #{{ $uid }} .rj-bq-mark.open { top: -34px; left: 6px; }
-    #{{ $uid }} .rj-bq-mark.close { right: 6px; bottom: -64px; animation-delay: -3.5s; }
+    #{{ $uid }} .rj-bq-rail, #{{ $uid }} .rj-bq-badge, #{{ $uid }} .rj-bq-glow, #{{ $uid }} .rj-bq-blob, #{{ $uid }} .rj-bq-dots, #{{ $uid }} .rj-bq-ln, #{{ $uid }} .rj-bq-mark { display: none; }
+    #{{ $uid }} .rj-bq-mark { font-family: Georgia, 'Times New Roman', serif; font-weight: 900; line-height: 1; pointer-events: none; user-select: none; }
 
-    #{{ $uid }} .rj-bq-bar, #{{ $uid }} .rj-bq-blob, #{{ $uid }} .rj-bq-shine, #{{ $uid }} .rj-bq-glow, #{{ $uid }} .rj-bq-line { display: none; }
+    #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"] { padding: 10px 0 10px 44px; }
+    #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"]::before { content: ""; position: absolute; z-index: 0; inset: -10px -20px -10px -20px; border-radius: 24px; background: linear-gradient(90deg, color-mix(in srgb, var(--bq-accent) 9%, transparent), transparent 70%); opacity: .8; transition: opacity .5s ease; pointer-events: none; }
+    #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"]:hover::before { opacity: 1; }
+    #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"] .rj-bq-rail { display: block; position: absolute; z-index: 2; left: 0; top: 0; bottom: 0; width: 4px; border-radius: 4px; background: color-mix(in srgb, var(--bq-accent) 16%, transparent); }
+    #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"] .rj-bq-rail::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(180deg, var(--bq-accent), var(--bq-accent2)); transform-origin: top; box-shadow: 0 0 24px -2px var(--bq-accent); }
+    #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"] .rj-bq-rail::after { content: ""; position: absolute; left: 50%; top: 0; width: 14px; height: 14px; margin: -7px 0 0 -7px; background: #fff; transform: rotate(45deg); border-radius: 3px; box-shadow: 0 0 0 3px var(--bq-accent), 0 0 20px 4px var(--bq-accent); animation: bqTravel-{{ $uid }} 3.6s ease-in-out infinite; }
+    #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"][data-align="right"] { padding: 10px 44px 10px 0; }
+    #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"][data-align="right"] .rj-bq-rail { left: auto; right: 0; }
+    #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"][data-align="center"] { padding: 10px 44px; }
+    #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"] .rj-bq-mark.open { display: block; position: relative; z-index: 3; font-size: 72px; height: 38px; margin-bottom: 6px; background: linear-gradient(135deg, var(--bq-accent), var(--bq-accent2)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; transform-origin: left bottom; }
+    #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"][data-align="center"] .rj-bq-mark.open { transform-origin: center bottom; }
+    #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"] .rj-bq-quote { transition: transform .5s cubic-bezier(.2,.8,.2,1); }
+    #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"]:hover .rj-bq-quote { transform: translateX(6px); }
 
-    #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"] { padding: 6px 0 6px 32px; }
-    #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"] .rj-bq-bar { display: block; position: absolute; z-index: 1; left: 0; top: 0; bottom: 0; width: 5px; border-radius: 5px; background: linear-gradient(180deg, var(--bq-accent), var(--bq-accent2)); transform-origin: top; box-shadow: 0 0 22px -2px var(--bq-accent); }
-    #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"] .rj-bq-bar::after { content: ""; position: absolute; left: 50%; top: 0; width: 13px; height: 13px; margin: -6px 0 0 -6.5px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 3px var(--bq-accent), 0 0 18px 4px var(--bq-accent); animation: bqDot-{{ $uid }} 3.4s ease-in-out infinite; }
-    #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"]:hover .rj-bq-bar { width: 8px; }
-    #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"] .rj-bq-bar { transition: width .4s ease; }
-    #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"] .rj-bq-mark.open { top: -44px; left: 22px; }
-    #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"][data-align="right"] { padding: 6px 32px 6px 0; }
-    #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"][data-align="right"] .rj-bq-bar { left: auto; right: 0; }
-    #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"][data-align="center"] { padding: 6px 32px; }
-
-    #{{ $uid }} .rj-bq-wrap[data-style="card"],
-    #{{ $uid }} .rj-bq-wrap[data-style="gradient"] { padding: clamp(28px, 4.5vw, 52px) clamp(24px, 4.5vw, 52px); border-radius: 26px; transform: perspective(1100px) rotateX(var(--rx)) rotateY(var(--ry)); }
-
-    #{{ $uid }} .rj-bq-wrap[data-style="card"] { background: #fff; box-shadow: 0 1px 2px rgba(15,23,42,.05), 0 30px 60px -30px rgba(15,23,42,.28); }
-    #{{ $uid }} .rj-bq-wrap[data-style="card"]::before { content: ""; position: absolute; inset: -2px; z-index: 0; border-radius: inherit; padding: 2px; background: conic-gradient(from var(--bq-angle), transparent 0 50%, var(--bq-accent) 72%, var(--bq-accent2) 88%, transparent 100%); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); mask-composite: exclude; animation: bqSpin-{{ $uid }} 5s linear infinite; }
-    #{{ $uid }} .rj-bq-wrap[data-style="card"] .rj-bq-glow { display: block; position: absolute; inset: 0; z-index: 1; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .4s ease; background: radial-gradient(420px circle at var(--mx) var(--my), color-mix(in srgb, var(--bq-accent) 14%, transparent), transparent 70%); }
+    #{{ $uid }} .rj-bq-wrap[data-style="card"] { margin-top: 30px; padding: clamp(40px, 5vw, 60px) clamp(26px, 4.5vw, 56px) clamp(30px, 4vw, 48px); border-radius: 30px; background: #fff; transform: perspective(1200px) rotateX(var(--rx)) rotateY(var(--ry)); box-shadow: 0 1px 2px rgba(15,23,42,.05), 0 34px 60px -30px rgba(15,23,42,.3); }
+    #{{ $uid }} .rj-bq-wrap[data-style="card"]::before, #{{ $uid }} .rj-bq-wrap[data-style="card"]::after { content: ""; position: absolute; z-index: -1; inset: 0; border-radius: inherit; transition: transform .7s cubic-bezier(.34,1.3,.64,1), opacity .5s ease; }
+    #{{ $uid }} .rj-bq-wrap[data-style="card"]::before { background: linear-gradient(135deg, var(--bq-accent), var(--bq-accent2)); transform: rotate(-2.5deg) translateY(6px); opacity: .85; }
+    #{{ $uid }} .rj-bq-wrap[data-style="card"]::after { background: color-mix(in srgb, var(--bq-accent2) 35%, #fff); transform: rotate(2.5deg) translateY(10px); opacity: .6; }
+    #{{ $uid }} .rj-bq-wrap[data-style="card"]:hover::before { transform: rotate(-6deg) translate(-14px, 8px); }
+    #{{ $uid }} .rj-bq-wrap[data-style="card"]:hover::after { transform: rotate(5deg) translate(14px, 12px); }
+    #{{ $uid }} .rj-bq-wrap[data-style="card"] .rj-bq-glow { display: block; position: absolute; z-index: 1; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .4s ease; background: radial-gradient(380px circle at var(--mx) var(--my), color-mix(in srgb, var(--bq-accent) 14%, transparent), transparent 70%); }
     #{{ $uid }} .rj-bq-wrap[data-style="card"]:hover .rj-bq-glow { opacity: 1; }
-    #{{ $uid }} .rj-bq-wrap[data-style="card"]:hover { box-shadow: 0 1px 2px rgba(15,23,42,.05), 0 40px 70px -30px color-mix(in srgb, var(--bq-accent) 55%, transparent); }
+    #{{ $uid }} .rj-bq-wrap[data-style="card"] .rj-bq-badge { display: grid; place-items: center; position: absolute; z-index: 4; top: -30px; left: 50%; width: 62px; height: 62px; margin-left: -31px; border-radius: 50%; background: linear-gradient(135deg, var(--bq-accent), var(--bq-accent2)); border: 4px solid #fff; color: #fff; font-family: Georgia, serif; font-size: 44px; font-weight: 900; line-height: 1; padding-top: 14px; box-shadow: 0 16px 30px -10px var(--bq-accent); animation: bqPulse-{{ $uid }} 2.2s ease-out infinite; }
+    #{{ $uid }} .rj-bq-wrap[data-style="card"][data-align="left"] .rj-bq-badge { left: 40px; margin-left: 0; }
+    #{{ $uid }} .rj-bq-wrap[data-style="card"][data-align="right"] .rj-bq-badge { left: auto; right: 40px; margin-left: 0; }
 
-    #{{ $uid }} .rj-bq-wrap[data-style="gradient"] { overflow: hidden; background: linear-gradient(120deg, var(--bq-accent), var(--bq-accent2), color-mix(in srgb, var(--bq-accent) 60%, #06b6d4), var(--bq-accent)); background-size: 300% 300%; animation: bqFlow-{{ $uid }} 12s ease-in-out infinite; box-shadow: 0 40px 70px -34px color-mix(in srgb, var(--bq-accent) 70%, transparent); }
-    #{{ $uid }} .rj-bq-wrap[data-style="gradient"] .rj-bq-quote,
-    #{{ $uid }} .rj-bq-wrap[data-style="gradient"] .rj-bq-name { color: #fff; text-shadow: 0 2px 20px rgba(0,0,0,.18); }
-    #{{ $uid }} .rj-bq-wrap[data-style="gradient"] .rj-bq-role { color: rgba(255,255,255,.8); }
-    #{{ $uid }} .rj-bq-wrap[data-style="gradient"] .rj-bq-mark { color: #fff; opacity: .2; }
-    #{{ $uid }} .rj-bq-wrap[data-style="gradient"] .rj-bq-ring::before { background: conic-gradient(from 0deg, #fff, rgba(255,255,255,.2), #fff); }
-    #{{ $uid }} .rj-bq-wrap[data-style="gradient"] .rj-bq-avatar { border-color: transparent; background: rgba(255,255,255,.22); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
-    #{{ $uid }} .rj-bq-wrap[data-style="gradient"] .rj-bq-blob { display: block; position: absolute; z-index: 0; width: 260px; height: 260px; border-radius: 50%; background: rgba(255,255,255,.28); filter: blur(60px); pointer-events: none; }
-    #{{ $uid }} .rj-bq-wrap[data-style="gradient"] .rj-bq-blob.a { top: -90px; left: -60px; animation: bqBlobA-{{ $uid }} 11s ease-in-out infinite; }
-    #{{ $uid }} .rj-bq-wrap[data-style="gradient"] .rj-bq-blob.b { right: -80px; bottom: -100px; background: rgba(255,255,255,.2); animation: bqBlobB-{{ $uid }} 14s ease-in-out infinite; }
-    #{{ $uid }} .rj-bq-wrap[data-style="gradient"] .rj-bq-shine { display: block; position: absolute; z-index: 1; top: 0; bottom: 0; left: 0; width: 38%; background: linear-gradient(100deg, transparent, rgba(255,255,255,.28), transparent); animation: bqShine-{{ $uid }} 5.5s ease-in-out infinite; pointer-events: none; }
+    #{{ $uid }} .rj-bq-wrap[data-style="gradient"] { padding: clamp(34px, 5vw, 60px) clamp(26px, 5vw, 60px); border-radius: 32px; overflow: hidden; background: #0a0d1f; border: 1px solid rgba(255,255,255,.12); transform: perspective(1200px) rotateX(var(--rx)) rotateY(var(--ry)); box-shadow: 0 40px 80px -36px color-mix(in srgb, var(--bq-accent) 65%, transparent); }
+    #{{ $uid }} .rj-bq-wrap[data-style="gradient"] .rj-bq-quote, #{{ $uid }} .rj-bq-wrap[data-style="gradient"] .rj-bq-name { color: #fff; }
+    #{{ $uid }} .rj-bq-wrap[data-style="gradient"] .rj-bq-role { color: rgba(255,255,255,.65); }
+    #{{ $uid }} .rj-bq-wrap[data-style="gradient"] .rj-bq-avatar { border-color: #0a0d1f; }
+    #{{ $uid }} .rj-bq-wrap[data-style="gradient"] .rj-bq-blob { display: block; position: absolute; z-index: 0; width: 340px; height: 340px; border-radius: 50%; filter: blur(70px); pointer-events: none; }
+    #{{ $uid }} .rj-bq-wrap[data-style="gradient"] .rj-bq-blob.a { top: -130px; left: -90px; background: var(--bq-accent); opacity: .55; animation: bqBlobA-{{ $uid }} 12s ease-in-out infinite; }
+    #{{ $uid }} .rj-bq-wrap[data-style="gradient"] .rj-bq-blob.b { right: -110px; bottom: -140px; background: var(--bq-accent2); opacity: .5; animation: bqBlobB-{{ $uid }} 15s ease-in-out infinite; }
+    #{{ $uid }} .rj-bq-wrap[data-style="gradient"] .rj-bq-dots { display: block; position: absolute; z-index: 1; inset: 0; pointer-events: none; opacity: .5; background-image: radial-gradient(circle, rgba(255,255,255,.55) 1px, transparent 1.6px), radial-gradient(circle, rgba(255,255,255,.35) 1px, transparent 1.6px); background-size: 120px 120px, 77px 77px; background-position: 0 0, 30px 40px; animation: bqRise-{{ $uid }} 14s linear infinite; -webkit-mask-image: linear-gradient(to bottom, transparent, #000 25%, #000 75%, transparent); mask-image: linear-gradient(to bottom, transparent, #000 25%, #000 75%, transparent); }
+    #{{ $uid }} .rj-bq-wrap[data-style="gradient"] .rj-bq-glow { display: block; position: absolute; z-index: 1; inset: 0; pointer-events: none; opacity: 0; transition: opacity .4s ease; background: radial-gradient(360px circle at var(--mx) var(--my), rgba(255,255,255,.12), transparent 70%); }
+    #{{ $uid }} .rj-bq-wrap[data-style="gradient"]:hover .rj-bq-glow { opacity: 1; }
+    #{{ $uid }} .rj-bq-wrap[data-style="gradient"] .rj-bq-mark.open { display: block; position: absolute; z-index: 2; top: 6px; right: 26px; font-size: 170px; color: #fff; opacity: .1; }
 
-    #{{ $uid }} .rj-bq-wrap[data-style="big-marks"] { padding: 20px 10px 14px; }
-    #{{ $uid }} .rj-bq-wrap[data-style="big-marks"] .rj-bq-mark.open { position: relative; top: auto; left: auto; display: inline-block; margin: 0 0 -34px; font-size: 118px; line-height: .9; opacity: .95; background: linear-gradient(135deg, var(--bq-accent), var(--bq-accent2)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; filter: drop-shadow(0 12px 18px color-mix(in srgb, var(--bq-accent) 35%, transparent)); transform-origin: 30% 70%; }
-    #{{ $uid }} .rj-bq-wrap[data-style="big-marks"] .rj-bq-mark.close { display: none; }
-    #{{ $uid }} .rj-bq-wrap[data-style="big-marks"] .rj-bq-line { display: block; width: 90px; height: 4px; margin: 4px 0 22px; border-radius: 4px; background: linear-gradient(90deg, var(--bq-accent), var(--bq-accent2)); transform-origin: left; }
-    #{{ $uid }} .rj-bq-wrap[data-style="big-marks"][data-align="center"] .rj-bq-line { margin-inline: auto; transform-origin: center; }
-    #{{ $uid }} .rj-bq-wrap[data-style="big-marks"][data-align="right"] .rj-bq-line { margin-left: auto; transform-origin: right; }
+    #{{ $uid }} .rj-bq-wrap[data-style="big-marks"] { padding: 54px 10px 10px; }
+    #{{ $uid }} .rj-bq-wrap[data-style="big-marks"] .rj-bq-quote { font-weight: 800; letter-spacing: -.025em; line-height: 1.32; }
+    #{{ $uid }} .rj-bq-wrap[data-style="big-marks"] .rj-bq-mark.open { display: block; position: absolute; z-index: 1; top: -30px; left: -6px; font-size: 300px; opacity: .2; background: linear-gradient(135deg, var(--bq-accent), var(--bq-accent2)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; filter: drop-shadow(0 20px 30px color-mix(in srgb, var(--bq-accent) 30%, transparent)); }
+    #{{ $uid }} .rj-bq-wrap[data-style="big-marks"] .rj-bq-mark.close { display: block; position: absolute; z-index: 1; right: -4px; bottom: -120px; font-size: 260px; color: transparent; -webkit-text-stroke: 2px var(--bq-accent); opacity: .35; transition: opacity .4s ease, transform .6s cubic-bezier(.2,.8,.2,1); }
+    #{{ $uid }} .rj-bq-wrap[data-style="big-marks"]:hover .rj-bq-mark.close { opacity: .7; transform: translate(-8px, -8px) rotate(-4deg); }
+    #{{ $uid }} .rj-bq-wrap[data-style="big-marks"][data-align="center"] .rj-bq-mark.open { left: 50%; margin-left: -80px; }
+    #{{ $uid }} .rj-bq-wrap[data-style="big-marks"][data-align="right"] .rj-bq-mark.open { left: auto; right: -6px; }
+    #{{ $uid }} .rj-bq-wrap[data-style="big-marks"][data-align="right"] .rj-bq-mark.close { right: auto; left: -4px; }
+    #{{ $uid }} .rj-bq-wrap[data-style="big-marks"] .rj-bq-ln.b { display: block; position: relative; z-index: 3; width: 110px; height: 5px; margin: 0 0 26px; border-radius: 5px; background: linear-gradient(90deg, var(--bq-accent), var(--bq-accent2)); transform-origin: left; transition: width .5s ease; }
+    #{{ $uid }} .rj-bq-wrap[data-style="big-marks"]:hover .rj-bq-ln.b { width: 180px; }
+    #{{ $uid }} .rj-bq-wrap[data-style="big-marks"][data-align="center"] .rj-bq-ln.b { margin-inline: auto; transform-origin: center; }
+    #{{ $uid }} .rj-bq-wrap[data-style="big-marks"][data-align="right"] .rj-bq-ln.b { margin-left: auto; transform-origin: right; }
 
-    #{{ $uid }} .rj-bq-wrap[data-style="minimal"] { padding: 10px 0; }
-    #{{ $uid }} .rj-bq-wrap[data-style="minimal"] .rj-bq-quote { font-weight: 500; font-style: italic; }
-    #{{ $uid }} .rj-bq-wrap[data-style="minimal"] .rj-bq-quote::before { content: '\201C'; display: inline-block; margin-right: 6px; font-family: Georgia, serif; font-style: normal; font-weight: 900; font-size: 1.5em; line-height: 0; vertical-align: -.25em; color: var(--bq-accent); }
-    #{{ $uid }} .rj-bq-wrap[data-style="minimal"] .rj-bq-quote::after { content: '\201D'; display: inline-block; margin-left: 4px; font-family: Georgia, serif; font-style: normal; font-weight: 900; font-size: 1.5em; line-height: 0; vertical-align: -.25em; color: var(--bq-accent); }
-    #{{ $uid }} .rj-bq-wrap[data-style="minimal"] .rj-bq-line { display: block; width: 56px; height: 2px; margin: 0 0 22px; background: var(--bq-accent); transform-origin: left; transition: width .5s ease; }
-    #{{ $uid }} .rj-bq-wrap[data-style="minimal"]:hover .rj-bq-line { width: 120px; }
-    #{{ $uid }} .rj-bq-wrap[data-style="minimal"][data-align="center"] .rj-bq-line { margin-inline: auto; transform-origin: center; }
-    #{{ $uid }} .rj-bq-wrap[data-style="minimal"][data-align="right"] .rj-bq-line { margin-left: auto; transform-origin: right; }
+    #{{ $uid }} .rj-bq-wrap[data-style="minimal"] { padding: 36px 0; }
+    #{{ $uid }} .rj-bq-wrap[data-style="minimal"] .rj-bq-quote { font-family: Georgia, 'Times New Roman', serif; font-weight: 400; font-style: italic; line-height: 1.55; letter-spacing: 0; }
+    #{{ $uid }} .rj-bq-wrap[data-style="minimal"] .rj-bq-ln { display: block; position: absolute; z-index: 1; left: 0; right: 0; height: 1px; background: color-mix(in srgb, var(--bq-text) 18%, transparent); transform-origin: left; transition: background .5s ease; }
+    #{{ $uid }} .rj-bq-wrap[data-style="minimal"] .rj-bq-ln.t { top: 0; }
+    #{{ $uid }} .rj-bq-wrap[data-style="minimal"] .rj-bq-ln.b { bottom: 0; transform-origin: right; }
+    #{{ $uid }} .rj-bq-wrap[data-style="minimal"] .rj-bq-ln::after { content: ""; position: absolute; top: -2px; left: 0; width: 56px; height: 5px; background: var(--bq-accent); transition: width .6s cubic-bezier(.2,.8,.2,1); }
+    #{{ $uid }} .rj-bq-wrap[data-style="minimal"] .rj-bq-ln.b::after { left: auto; right: 0; background: var(--bq-accent2); }
+    #{{ $uid }} .rj-bq-wrap[data-style="minimal"]:hover .rj-bq-ln::after { width: 45%; }
+    #{{ $uid }} .rj-bq-wrap[data-style="minimal"] .rj-bq-name { font-size: 12.5px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; }
+    #{{ $uid }} .rj-bq-wrap[data-style="minimal"] .rj-bq-role { font-size: 12px; letter-spacing: .04em; }
+    #{{ $uid }} .rj-bq-wrap[data-style="minimal"] .rj-bq-ring { width: 46px; height: 46px; padding: 2px; }
+    #{{ $uid }} .rj-bq-wrap[data-style="minimal"] .rj-bq-ring::before { background: conic-gradient(from 0deg, var(--bq-accent), transparent 70%, var(--bq-accent)); }
 
-    #{{ $uid }} .rj-bq-wrap.rj-bq-js:not(.is-visible) .rj-w { opacity: 0; }
+    #{{ $uid }} .rj-bq-wrap.rj-bq-js:not(.is-visible) .rj-w,
     #{{ $uid }} .rj-bq-wrap.rj-bq-js:not(.is-visible) .rj-bq-author,
     #{{ $uid }} .rj-bq-wrap.rj-bq-js:not(.is-visible) .rj-bq-mark,
-    #{{ $uid }} .rj-bq-wrap.rj-bq-js:not(.is-visible) .rj-bq-bar,
-    #{{ $uid }} .rj-bq-wrap.rj-bq-js:not(.is-visible) .rj-bq-line { opacity: 0; }
+    #{{ $uid }} .rj-bq-wrap.rj-bq-js:not(.is-visible) .rj-bq-badge,
+    #{{ $uid }} .rj-bq-wrap.rj-bq-js:not(.is-visible) .rj-bq-rail,
+    #{{ $uid }} .rj-bq-wrap.rj-bq-js:not(.is-visible) .rj-bq-ln { opacity: 0; }
 
-    #{{ $uid }} .rj-bq-wrap.is-visible .rj-w { animation: bqWord-{{ $uid }} .8s cubic-bezier(.2,.8,.2,1) backwards; animation-delay: calc(var(--w, 0) * 45ms + 250ms); }
-    #{{ $uid }} .rj-bq-wrap.is-visible .rj-bq-author { animation: bqUp-{{ $uid }} .8s cubic-bezier(.2,.8,.2,1) backwards; animation-delay: calc(var(--total, 0) * 45ms + 500ms); }
-    #{{ $uid }} .rj-bq-wrap.is-visible .rj-bq-bar { animation: bqBar-{{ $uid }} 1.1s cubic-bezier(.2,.8,.2,1) backwards; }
-    #{{ $uid }} .rj-bq-wrap.is-visible .rj-bq-line { animation: bqLine-{{ $uid }} .9s cubic-bezier(.2,.8,.2,1) .2s backwards; }
-    #{{ $uid }} .rj-bq-wrap[data-style="big-marks"].is-visible .rj-bq-mark.open { animation: bqMark-{{ $uid }} .9s cubic-bezier(.34,1.56,.64,1) backwards, bqFloat-{{ $uid }} 7s ease-in-out .9s infinite; }
+    #{{ $uid }} .rj-bq-wrap.is-visible .rj-w { animation: bqWord-{{ $uid }} .85s cubic-bezier(.2,.8,.2,1) backwards; animation-delay: calc(var(--w, 0) * 50ms + 300ms); }
+    #{{ $uid }} .rj-bq-wrap.is-visible .rj-bq-author { animation: bqUp-{{ $uid }} .8s cubic-bezier(.2,.8,.2,1) backwards; animation-delay: calc(var(--total, 0) * 50ms + 550ms); }
+    #{{ $uid }} .rj-bq-wrap.is-visible .rj-bq-rail::before { animation: bqDraw-{{ $uid }} 1.2s cubic-bezier(.2,.8,.2,1) backwards; }
+    #{{ $uid }} .rj-bq-wrap.is-visible .rj-bq-ln { animation: bqDrawX-{{ $uid }} 1.1s cubic-bezier(.2,.8,.2,1) .15s backwards; }
+    #{{ $uid }} .rj-bq-wrap.is-visible .rj-bq-badge { animation: bqPop-{{ $uid }} .8s cubic-bezier(.34,1.56,.64,1) .1s backwards, bqPulse-{{ $uid }} 2.2s ease-out .9s infinite; }
+    #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"].is-visible .rj-bq-mark.open { animation: bqPop-{{ $uid }} .8s cubic-bezier(.34,1.56,.64,1) .1s backwards; }
+    #{{ $uid }} .rj-bq-wrap[data-style="gradient"].is-visible .rj-bq-mark.open { animation: bqUp-{{ $uid }} 1.1s ease .2s backwards; }
+    #{{ $uid }} .rj-bq-wrap[data-style="big-marks"].is-visible .rj-bq-mark.open { animation: bqDrop-{{ $uid }} 1.1s cubic-bezier(.3,1.2,.5,1) backwards; }
+    #{{ $uid }} .rj-bq-wrap[data-style="big-marks"].is-visible .rj-bq-mark.close { animation: bqUp-{{ $uid }} 1s ease .6s backwards; }
 
     @media (max-width: 639px) {
-        #{{ $uid }} .rj-bq-mark { font-size: 90px; }
-        #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"] { padding-left: 24px; }
+        #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"] { padding-left: 28px; }
+        #{{ $uid }} .rj-bq-wrap[data-style="big-marks"] .rj-bq-mark.open { font-size: 200px; }
+        #{{ $uid }} .rj-bq-wrap[data-style="big-marks"] .rj-bq-mark.close { font-size: 160px; bottom: -80px; }
+        #{{ $uid }} .rj-bq-wrap[data-style="gradient"] .rj-bq-mark.open { font-size: 110px; }
         #{{ $uid }} .rj-bq-ring { width: 48px; height: 48px; }
     }
 
@@ -179,33 +198,43 @@
         #{{ $uid }} .rj-bq-wrap.rj-bq-js:not(.is-visible) .rj-w,
         #{{ $uid }} .rj-bq-wrap.rj-bq-js:not(.is-visible) .rj-bq-author,
         #{{ $uid }} .rj-bq-wrap.rj-bq-js:not(.is-visible) .rj-bq-mark,
-        #{{ $uid }} .rj-bq-wrap.rj-bq-js:not(.is-visible) .rj-bq-bar,
-        #{{ $uid }} .rj-bq-wrap.rj-bq-js:not(.is-visible) .rj-bq-line { opacity: 1; }
+        #{{ $uid }} .rj-bq-wrap.rj-bq-js:not(.is-visible) .rj-bq-badge,
+        #{{ $uid }} .rj-bq-wrap.rj-bq-js:not(.is-visible) .rj-bq-rail,
+        #{{ $uid }} .rj-bq-wrap.rj-bq-js:not(.is-visible) .rj-bq-ln { opacity: 1; }
     }
 </style>
 
 <div id="{{ $uid }}">
     <div class="rj-bq-wrap" data-style="{{ $style }}" data-align="{{ $align }}" data-animate="{{ $animate ? 1 : 0 }}">
 
-        <span class="rj-bq-bar" aria-hidden="true"></span>
+        <span class="rj-bq-rail" aria-hidden="true"></span>
         <span class="rj-bq-blob a" aria-hidden="true"></span>
         <span class="rj-bq-blob b" aria-hidden="true"></span>
+        <span class="rj-bq-dots" aria-hidden="true"></span>
         <span class="rj-bq-glow" aria-hidden="true"></span>
-        <span class="rj-bq-shine" aria-hidden="true"></span>
 
-        @if ($showMarks && $style !== 'minimal')
-            <span class="rj-bq-mark open" aria-hidden="true">&ldquo;</span>
-            @if ($style !== 'big-marks')
-                <span class="rj-bq-mark close" aria-hidden="true">&rdquo;</span>
-            @endif
+        @if ($style === 'minimal')
+            <span class="rj-bq-ln t" aria-hidden="true"></span>
+            <span class="rj-bq-ln b" aria-hidden="true"></span>
         @endif
 
-        @if ($style === 'big-marks' || $style === 'minimal')
-            <span class="rj-bq-line" aria-hidden="true"></span>
+        @if ($showMarks)
+            @if ($style === 'card')
+                <span class="rj-bq-badge" aria-hidden="true">&ldquo;</span>
+            @elseif ($style === 'big-marks')
+                <span class="rj-bq-mark open" aria-hidden="true">&ldquo;</span>
+                <span class="rj-bq-mark close" aria-hidden="true">&rdquo;</span>
+            @elseif ($style === 'accent-bar' || $style === 'gradient')
+                <span class="rj-bq-mark open" aria-hidden="true">&ldquo;</span>
+            @endif
         @endif
 
         @if ($quote !== '')
             <blockquote class="rj-bq-quote">@foreach ($lines as $line)@foreach (preg_split('/\s+/u', trim($line), -1, PREG_SPLIT_NO_EMPTY) ?: [] as $word)<span class="rj-w" style="--w: {{ min($n++, 80) }};">{{ $word }}</span> @endforeach @if (!$loop->last)<br>@endif @endforeach</blockquote>
+        @endif
+
+        @if ($style === 'big-marks')
+            <span class="rj-bq-ln b" aria-hidden="true"></span>
         @endif
 
         @if ($author !== '')
@@ -269,8 +298,8 @@
             var y = e.clientY - r.top;
             el.style.setProperty('--mx', x + 'px');
             el.style.setProperty('--my', y + 'px');
-            el.style.setProperty('--ry', ((x / r.width - 0.5) * 7).toFixed(2) + 'deg');
-            el.style.setProperty('--rx', ((0.5 - y / r.height) * 7).toFixed(2) + 'deg');
+            el.style.setProperty('--ry', ((x / r.width - 0.5) * 6).toFixed(2) + 'deg');
+            el.style.setProperty('--rx', ((0.5 - y / r.height) * 6).toFixed(2) + 'deg');
         });
         el.addEventListener('pointerleave', function () {
             el.style.setProperty('--rx', '0deg');
