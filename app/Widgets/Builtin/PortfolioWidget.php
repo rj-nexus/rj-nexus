@@ -56,6 +56,14 @@ class PortfolioWidget extends BaseWidget
                 'tab'     => 'content',
             ],
             [
+                'name'    => 'categories',
+                'type'    => 'text',
+                'label'   => __('Global Categories (comma separated)'),
+                'default' => 'Branding, Web, Print, Design',
+                'tab'     => 'content',
+                'help'    => __('These will appear in the dropdown when adding portfolio items. You can still type new ones per item.'),
+            ],
+            [
                 'name'    => 'columns',
                 'type'    => 'select',
                 'label'   => __('Columns'),
@@ -100,7 +108,7 @@ class PortfolioWidget extends BaseWidget
                 'fields' => [
                     ['name' => 'image',    'type' => 'media', 'label' => __('Image')],
                     ['name' => 'title',    'type' => 'text',  'label' => __('Title')],
-                    ['name' => 'category', 'type' => 'text',  'label' => __('Category')],
+                    ['name' => 'category', 'type' => 'datalist', 'label' => __('Category'), 'source' => 'categories'],
                     ['name' => 'link',     'type' => 'text',  'label' => __('Link URL')],
                 ],
             ],
