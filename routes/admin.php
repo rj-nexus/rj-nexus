@@ -42,6 +42,7 @@ use App\Http\Controllers\Admin\AiToolController;
 use App\Http\Controllers\Admin\AboutController;
 use App\Http\Controllers\Admin\TwoFactorController;
 use App\Http\Controllers\Admin\KycController;
+use App\Http\Controllers\Admin\NewsletterController;
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', fn() => redirect()->route('admin.dashboard'))->name('home');
@@ -70,6 +71,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/{verification}', [KycController::class, 'show'])->name('show');
         Route::post('/{verification}/approve', [KycController::class, 'approve'])->name('approve');
         Route::post('/{verification}/reject', [KycController::class, 'reject'])->name('reject');
+    });
+
+    Route::prefix('newsletter')->name('newsletter.')->group(function () {
+        Route::get('/', [NewsletterController::class, 'index'])->name('index');
+        Route::delete('/{subscriber}', [NewsletterController::class, 'destroy'])->name('destroy');
+        Route::post('/send', [NewsletterController::class, 'sendBulk'])->name('send');
     });
 
     Route::prefix('posts')->name('posts.')->group(function () {
