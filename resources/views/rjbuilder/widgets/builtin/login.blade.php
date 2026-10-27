@@ -237,13 +237,7 @@
     }
 </style>
 
-<!-- Diqqət: x-data üçün tək dırnaq (') istifadə olunub ki, JS-dəki dırnaqlar HTML-i sındırmasın -->
-<div id="{{ $uid }}" x-data='rjLogin_{{ $uid }}({
-    title: @js($title),
-    subtitle: @js($subtitle),
-    loggedTitle: @js($loggedTitle),
-    initialUser: @js($initialUser)
-})'>
+<div id="{{ $uid }}" x-data="rjLogin_{{ $uid }}()">
     <div class="rj-lg-card">
         <template x-if="!user">
             <form @submit.prevent="submit($event)" novalidate>
@@ -323,18 +317,19 @@
 </div>
 
 <script>
-window['rjLogin_{{ $uid }}'] = function (config) {
+window['rjLogin_{{ $uid }}'] = function () {
     return {
-        user: config.initialUser || null,
+        // Bütün Blade məlumatları birbaşa buraya ötürülür
+        user: @js($initialUser),
+        title: @js($title),
+        subtitle: @js($subtitle),
+        loggedTitle: @js($loggedTitle),
+
         email: '',
         password: '',
         remember: false,
         loading: false,
         error: '',
-
-        title: config.title,
-        subtitle: config.subtitle,
-        loggedTitle: config.loggedTitle,
 
         texts: {
             signingIn: @js(__('Signing in...')),
