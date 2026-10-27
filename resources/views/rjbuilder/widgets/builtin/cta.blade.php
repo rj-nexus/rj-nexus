@@ -4,26 +4,23 @@
     $allowedRadius  = ['md', 'xl', '2xl', '3xl'];
 
     $layout    = in_array($settings['layout'] ?? 'centered', $allowedLayouts, true) ? $settings['layout'] : 'centered';
-    $bgStyle   = in_array($settings['bg_style'] ?? 'gradient', $allowedBg, true) ? $settings['bg_style'] : 'gradient';
+    $bgStyle   = in_array($settings['bg_style'] ?? 'dark', $allowedBg, true) ? $settings['bg_style'] : 'dark';
     $radius    = in_array($settings['radius'] ?? 'xl', $allowedRadius, true) ? $settings['radius'] : 'xl';
     $paddingY  = max(0, min(240, (int) ($settings['padding_y'] ?? 80)));
-    $showAura  = !empty($settings['show_shapes'] ?? true);
     $animateOn = !empty($settings['animate'] ?? true);
+    $showAura  = !empty($settings['show_shapes'] ?? true);
 
     $badge     = trim((string) ($settings['badge'] ?? ''));
     $title     = trim((string) ($settings['title'] ?? ''));
     $highlight = trim((string) ($settings['highlight'] ?? ''));
     $desc      = trim((string) ($settings['desc'] ?? ''));
     $image     = trim((string) ($settings['image'] ?? ''));
-
     $btn1Label = trim((string) ($settings['btn1_label'] ?? ''));
     $btn2Label = trim((string) ($settings['btn2_label'] ?? ''));
+
     $safeUrl = function ($v) {
         $v = trim((string) $v);
-        if ($v === '' || preg_match('/^\s*(javascript|data|vbscript):/i', $v)) {
-            return '#';
-        }
-        return $v;
+        return ($v === '' || preg_match('/^\s*(javascript|data|vbscript):/i', $v)) ? '#' : $v;
     };
     $btn1Url = $safeUrl($settings['btn1_url'] ?? '#');
     $btn2Url = $safeUrl($settings['btn2_url'] ?? '#');
@@ -31,9 +28,7 @@
     $chips = [];
     foreach (preg_split('/\r\n|\r|\n/', (string) ($settings['chips'] ?? '')) as $c) {
         $c = trim($c);
-        if ($c !== '') {
-            $chips[] = $c;
-        }
+        if ($c !== '') $chips[] = $c;
     }
 
     $hexOk = function ($v, $d) {
@@ -45,232 +40,223 @@
     $titleColor = $hexOk($settings['title_color'] ?? '', '#0f172a');
     $textColor  = $hexOk($settings['text_color'] ?? '', '#475569');
 
-    $isDarkBg = in_array($bgStyle, ['gradient', 'dark'], true);
+    $isDarkBg   = in_array($bgStyle, ['gradient', 'dark'], true);
     $finalTitle = $isDarkBg ? '#ffffff' : $titleColor;
-    $finalText  = $isDarkBg ? 'rgba(255,255,255,.8)' : $textColor;
+    $finalText  = $isDarkBg ? 'rgba(255,255,255,.75)' : $textColor;
 
-    // Title with highlighted part (escaped first, so no HTML injection)
     $titleHtml = e($title);
     if ($highlight !== '' && $title !== '') {
         $titleHtml = str_replace(
             e($highlight),
-            '<span class="cx-hl">' . e($highlight) . '</span>',
+            '<mark class="cx-hl">' . e($highlight) . '</mark>',
             $titleHtml
         );
     }
 
-    $radiusCss = ['md' => '18px', 'xl' => '26px', '2xl' => '34px', '3xl' => '44px'][$radius];
+    $radiusCss = ['md' => '16px', 'xl' => '24px', '2xl' => '32px', '3xl' => '44px'][$radius];
+
+    $accentHex = ltrim($accent, '#');
+    $ar = hexdec(substr($accentHex, 0, 2));
+    $ag = hexdec(substr($accentHex, 2, 2));
+    $ab = hexdec(substr($accentHex, 4, 2));
+
+    $accent2Hex = ltrim($accent2, '#');
+    $br2 = hexdec(substr($accent2Hex, 0, 2));
+    $bg2 = hexdec(substr($accent2Hex, 2, 2));
+    $bb2 = hexdec(substr($accent2Hex, 4, 2));
 @endphp
 
 <style>
     #{{ $uid }} {
-        --cx-a: {{ $accent }};
-        --cx-b: {{ $accent2 }};
-        --cx-title: {{ $finalTitle }};
-        --cx-text: {{ $finalText }};
-        --cx-mx: 50%;
-        --cx-my: 50%;
+        --a: {{ $accent }};
+        --b: {{ $accent2 }};
+        --ar: {{ $ar }};
+        --ag: {{ $ag }};
+        --ab: {{ $ab }};
+        --br: {{ $br2 }};
+        --bg2: {{ $bg2 }};
+        --bb: {{ $bb2 }};
+        --ti: {{ $finalTitle }};
+        --tx: {{ $finalText }};
+        --rx: 50%;
+        --ry: 50%;
         box-sizing: border-box;
         width: 100%;
         padding: {{ $paddingY }}px 16px;
     }
     #{{ $uid }} *, #{{ $uid }} *::before, #{{ $uid }} *::after { box-sizing: border-box; }
 
-    /* ---------- Card shell ---------- */
-    #{{ $uid }} .cx-card {
+    #{{ $uid }} .cx-wrap {
         position: relative;
         max-width: 1120px;
         margin: 0 auto;
         border-radius: {{ $radiusCss }};
         overflow: hidden;
         isolation: isolate;
-        padding: {{ $layout === 'split' ? '60px 52px' : '72px 40px' }};
-        transition: transform .6s cubic-bezier(.2,.8,.2,1), box-shadow .6s ease;
-    }
-    #{{ $uid }} .cx-card:hover { transform: translateY(-4px); }
-    @media (max-width: 720px) {
-        #{{ $uid }} .cx-card { padding: 48px 24px; }
     }
 
-    #{{ $uid }}[data-bg="gradient"] .cx-card {
-        background: linear-gradient(125deg, var(--cx-a), var(--cx-b));
-        box-shadow: 0 40px 80px -36px color-mix(in srgb, var(--cx-a) 65%, transparent);
-    }
-    #{{ $uid }}[data-bg="dark"] .cx-card {
-        background: #0b1120;
-        box-shadow: 0 40px 80px -36px rgba(0,0,0,.7);
-    }
-    #{{ $uid }}[data-bg="solid"] .cx-card {
-        background: #ffffff;
-        border: 1px solid #e5e7eb;
-        box-shadow: 0 24px 50px -28px rgba(15,23,42,.25);
-    }
-    #{{ $uid }}[data-bg="glass"] .cx-card {
-        background: linear-gradient(125deg, color-mix(in srgb, var(--cx-a) 22%, #fff), color-mix(in srgb, var(--cx-b) 22%, #fff));
-        border: 1px solid rgba(255,255,255,.7);
-        -webkit-backdrop-filter: blur(14px);
-        backdrop-filter: blur(14px);
-        box-shadow: 0 30px 60px -30px rgba(15,23,42,.25);
-    }
-
-    /* ---------- Animated aurora background ---------- */
-    #{{ $uid }} .cx-aura {
-        position: absolute;
-        inset: -20%;
-        z-index: -2;
-        pointer-events: none;
-        display: none;
-    }
-    @if($showAura)
-    #{{ $uid }}[data-bg="gradient"] .cx-aura,
-    #{{ $uid }}[data-bg="dark"] .cx-aura,
-    #{{ $uid }}[data-bg="glass"] .cx-aura { display: block; }
-    @endif
-    #{{ $uid }} .cx-blob {
-        position: absolute;
-        width: 46%;
-        height: 60%;
-        border-radius: 50%;
-        filter: blur(60px);
-        opacity: .55;
-        animation: cxFloat 14s ease-in-out infinite alternate;
-    }
-    #{{ $uid }} .cx-blob.b1 { left: -6%; top: -10%; background: #fff; opacity: .28; }
-    #{{ $uid }} .cx-blob.b2 { right: -8%; bottom: -14%; background: var(--cx-b); opacity: .6; animation-delay: -5s; }
-    #{{ $uid }} .cx-blob.b3 { left: 36%; top: 30%; background: var(--cx-a); opacity: .45; animation-delay: -9s; width: 34%; height: 44%; }
-    #{{ $uid }}[data-bg="dark"] .cx-blob.b1 { background: var(--cx-a); opacity: .35; }
-    #{{ $uid }}[data-bg="dark"] .cx-blob.b2 { background: var(--cx-b); opacity: .3; }
-    #{{ $uid }}[data-bg="dark"] .cx-blob.b3 { opacity: .18; }
-    #{{ $uid }}[data-bg="glass"] .cx-blob.b1 { background: var(--cx-a); opacity: .25; }
-    #{{ $uid }}[data-bg="glass"] .cx-blob.b2 { background: var(--cx-b); opacity: .25; }
-    #{{ $uid }}[data-bg="glass"] .cx-blob.b3 { background: #fff; opacity: .4; }
-
-    /* Film grain for texture */
-    #{{ $uid }} .cx-grain {
+    #{{ $uid }} .cx-canvas {
         position: absolute;
         inset: 0;
-        z-index: -1;
+        z-index: 0;
         pointer-events: none;
-        opacity: .07;
+    }
+
+    #{{ $uid }} .cx-bg {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        pointer-events: none;
+    }
+
+    #{{ $uid }}[data-bg="dark"] .cx-bg    { background: #080c18; }
+    #{{ $uid }}[data-bg="gradient"] .cx-bg { background: linear-gradient(135deg, var(--a), var(--b)); }
+    #{{ $uid }}[data-bg="solid"] .cx-bg   { background: #ffffff; }
+    #{{ $uid }}[data-bg="glass"] .cx-bg   {
+        background: rgba(255,255,255,.12);
+        -webkit-backdrop-filter: blur(20px);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255,255,255,.22);
+    }
+
+    #{{ $uid }} .cx-noise {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        opacity: .055;
+        pointer-events: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23f)'/%3E%3C/svg%3E");
         mix-blend-mode: overlay;
-        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
     }
 
-    /* Cursor spotlight */
-    #{{ $uid }} .cx-spot {
+    #{{ $uid }} .cx-glow {
         position: absolute;
         inset: 0;
-        z-index: -1;
+        z-index: 3;
         pointer-events: none;
         opacity: 0;
-        transition: opacity .5s ease;
-        background: radial-gradient(420px circle at var(--cx-mx) var(--cx-my), rgba(255,255,255,.22), transparent 60%);
+        transition: opacity .6s ease;
+        background: radial-gradient(600px circle at var(--rx) var(--ry), rgba(var(--ar),var(--ag),var(--ab),.18), transparent 55%);
     }
-    #{{ $uid }} .cx-card:hover .cx-spot { opacity: 1; }
-    #{{ $uid }}[data-bg="solid"] .cx-spot {
-        background: radial-gradient(420px circle at var(--cx-mx) var(--cx-my), color-mix(in srgb, var(--cx-a) 10%, transparent), transparent 60%);
-    }
+    #{{ $uid }} .cx-wrap:hover .cx-glow { opacity: 1; }
 
-    /* Solid card: animated top line instead of aurora */
-    #{{ $uid }}[data-bg="solid"] .cx-card::before {
-        content: "";
+    #{{ $uid }}[data-bg="dark"] .cx-grid-lines {
         position: absolute;
-        left: 0;
-        right: 0;
-        top: 0;
-        height: 4px;
-        background: linear-gradient(90deg, var(--cx-a), var(--cx-b), var(--cx-a));
-        background-size: 200% 100%;
-        animation: cxFlow 4s linear infinite;
+        inset: 0;
+        z-index: 2;
+        pointer-events: none;
+        background-image:
+            linear-gradient(rgba(var(--ar),var(--ag),var(--ab),.06) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(var(--ar),var(--ag),var(--ab),.06) 1px, transparent 1px);
+        background-size: 44px 44px;
+        mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, #000 40%, transparent 100%);
     }
 
-    /* ---------- Layout ---------- */
-    #{{ $uid }} .cx-centered { text-align: center; max-width: 740px; margin: 0 auto; }
-    #{{ $uid }} .cx-split {
+    #{{ $uid }} .cx-body {
+        position: relative;
+        z-index: 10;
+        padding: {{ $layout === 'split' ? '64px 56px' : '80px 40px' }};
+    }
+    @media (max-width: 720px) {
+        #{{ $uid }} .cx-body { padding: 52px 24px; }
+    }
+
+    #{{ $uid }} .cx-inner-centered {
+        max-width: 760px;
+        margin: 0 auto;
+        text-align: center;
+    }
+    #{{ $uid }} .cx-inner-split {
         display: grid;
         grid-template-columns: 1.1fr 1fr;
-        gap: 48px;
+        gap: 52px;
         align-items: center;
     }
     @media (max-width: 860px) {
-        #{{ $uid }} .cx-split { grid-template-columns: 1fr; gap: 36px; text-align: center; }
-        #{{ $uid }} .cx-split .cx-actions,
-        #{{ $uid }} .cx-split .cx-chips { justify-content: center; }
+        #{{ $uid }} .cx-inner-split {
+            grid-template-columns: 1fr;
+            gap: 36px;
+            text-align: center;
+        }
+        #{{ $uid }} .cx-inner-split .cx-actions,
+        #{{ $uid }} .cx-inner-split .cx-chips { justify-content: center; }
     }
 
-    /* ---------- Reveal sequence ---------- */
-    #{{ $uid }} .cx-reveal > * {
-        opacity: 0;
-        transform: translateY(18px);
-    }
-    #{{ $uid }} .cx-reveal.is-visible > * {
-        animation: cxUp .8s cubic-bezier(.2,.8,.2,1) forwards;
-        animation-delay: calc(var(--d, 0) * .12s);
-    }
-
-    /* ---------- Badge ---------- */
+    /* Badge */
     #{{ $uid }} .cx-badge {
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        padding: 7px 14px 7px 9px;
-        margin-bottom: 20px;
+        padding: 6px 16px 6px 8px;
+        margin-bottom: 24px;
         border-radius: 999px;
-        font-size: 11px;
+        font-size: 10.5px;
         font-weight: 800;
-        letter-spacing: .12em;
+        letter-spacing: .14em;
         text-transform: uppercase;
-        background: rgba(255,255,255,.14);
-        color: var(--cx-title);
-        border: 1px solid rgba(255,255,255,.3);
+        border: 1px solid rgba(var(--ar),var(--ag),var(--ab),.45);
+        background: rgba(var(--ar),var(--ag),var(--ab),.12);
+        color: var(--a);
+        -webkit-backdrop-filter: blur(6px);
+        backdrop-filter: blur(6px);
     }
-    #{{ $uid }}[data-bg="solid"] .cx-badge {
-        background: color-mix(in srgb, var(--cx-a) 10%, transparent);
-        color: var(--cx-a);
-        border-color: color-mix(in srgb, var(--cx-a) 25%, transparent);
+    #{{ $uid }}[data-bg="gradient"] .cx-badge,
+    #{{ $uid }}[data-bg="dark"] .cx-badge {
+        border-color: rgba(255,255,255,.28);
+        background: rgba(255,255,255,.1);
+        color: #fff;
     }
-    #{{ $uid }} .cx-badge-dot {
+    #{{ $uid }} .cx-badge-ring {
         position: relative;
-        width: 8px;
-        height: 8px;
+        width: 10px;
+        height: 10px;
         border-radius: 50%;
-        background: #fff;
+        background: var(--a);
+        box-shadow: 0 0 0 0 rgba(var(--ar),var(--ag),var(--ab),.6);
+        animation: cxPulse 2s ease-out infinite;
     }
-    #{{ $uid }}[data-bg="solid"] .cx-badge-dot { background: var(--cx-a); }
-    #{{ $uid }} .cx-badge-dot::after {
-        content: "";
-        position: absolute;
-        inset: -4px;
-        border-radius: 50%;
-        border: 2px solid currentColor;
-        color: inherit;
-        opacity: 0;
-        animation: cxPing 2s ease-out infinite;
-    }
+    #{{ $uid }}[data-bg="gradient"] .cx-badge-ring,
+    #{{ $uid }}[data-bg="dark"] .cx-badge-ring { background: #fff; box-shadow: 0 0 0 0 rgba(255,255,255,.5); }
 
-    /* ---------- Title ---------- */
+    /* Title */
     #{{ $uid }} .cx-title {
-        margin: 0 0 16px;
-        font-size: clamp(26px, 3.6vw, 44px);
+        margin: 0 0 18px;
+        font-size: clamp(28px, 4vw, 52px);
         font-weight: 900;
-        line-height: 1.1;
-        letter-spacing: -.025em;
-        color: var(--cx-title);
+        line-height: 1.08;
+        letter-spacing: -.03em;
+        color: var(--ti);
     }
+    #{{ $uid }} .cx-char {
+        display: inline-block;
+        opacity: 0;
+        transform: translateY(40px) rotate(8deg);
+        transition: opacity .5s ease, transform .6s cubic-bezier(.34,1.56,.64,1);
+    }
+    #{{ $uid }} .cx-char.is-in {
+        opacity: 1;
+        transform: none;
+    }
+    #{{ $uid }} .cx-char-space { display: inline-block; width: .28em; }
+
+    /* Highlight */
     #{{ $uid }} .cx-hl {
         position: relative;
-        display: inline-block;
-        background: linear-gradient(90deg, #fff, rgba(255,255,255,.75), #fff);
-        background-size: 200% 100%;
+        display: inline;
+        background: none;
+        color: inherit;
+        font-style: normal;
+        white-space: nowrap;
+    }
+    #{{ $uid }} .cx-hl .cx-char {
+        background: linear-gradient(120deg, var(--a), var(--b));
         -webkit-background-clip: text;
         background-clip: text;
         -webkit-text-fill-color: transparent;
-        animation: cxShimmer 4s linear infinite;
     }
-    #{{ $uid }}[data-bg="solid"] .cx-hl,
-    #{{ $uid }}[data-bg="glass"] .cx-hl {
-        background: linear-gradient(90deg, var(--cx-a), var(--cx-b), var(--cx-a));
-        background-size: 200% 100%;
+    #{{ $uid }}[data-bg="gradient"] .cx-hl .cx-char,
+    #{{ $uid }}[data-bg="dark"] .cx-hl .cx-char {
+        background: linear-gradient(120deg, #fff, rgba(255,255,255,.7));
         -webkit-background-clip: text;
         background-clip: text;
         -webkit-text-fill-color: transparent;
@@ -280,37 +266,44 @@
         position: absolute;
         left: 0;
         right: 0;
-        bottom: .04em;
-        height: .14em;
+        bottom: -.1em;
+        height: 3px;
         border-radius: 4px;
-        background: currentColor;
-        opacity: .0;
-        transform-origin: left;
+        background: linear-gradient(90deg, var(--a), var(--b));
         transform: scaleX(0);
-        -webkit-text-fill-color: initial;
+        transform-origin: left;
+        transition: transform .9s .8s cubic-bezier(.2,.8,.2,1);
     }
-    #{{ $uid }} .cx-reveal.is-visible .cx-hl::after {
-        opacity: .35;
-        animation: cxUnderline 1s .6s cubic-bezier(.2,.8,.2,1) forwards;
-    }
+    #{{ $uid }}[data-bg="gradient"] .cx-hl::after,
+    #{{ $uid }}[data-bg="dark"] .cx-hl::after { background: rgba(255,255,255,.6); }
+    #{{ $uid }} .cx-title.is-in .cx-hl::after { transform: scaleX(1); }
 
+    /* Desc */
     #{{ $uid }} .cx-desc {
-        margin: 0 0 28px;
+        margin: 0 0 32px;
         max-width: 620px;
         font-size: 16px;
-        line-height: 1.7;
-        color: var(--cx-text);
+        line-height: 1.75;
+        color: var(--tx);
+        opacity: 0;
+        transform: translateY(16px);
+        transition: opacity .7s .35s ease, transform .7s .35s cubic-bezier(.2,.8,.2,1);
     }
-    #{{ $uid }} .cx-centered .cx-desc { margin-left: auto; margin-right: auto; }
+    #{{ $uid }} .cx-desc.is-in { opacity: 1; transform: none; }
+    #{{ $uid }} .cx-inner-centered .cx-desc { margin-left: auto; margin-right: auto; }
 
-    /* ---------- Buttons ---------- */
+    /* Actions */
     #{{ $uid }} .cx-actions {
         display: flex;
         flex-wrap: wrap;
-        gap: 12px;
-        margin-bottom: 26px;
+        gap: 14px;
+        margin-bottom: 28px;
+        opacity: 0;
+        transform: translateY(16px);
+        transition: opacity .7s .5s ease, transform .7s .5s cubic-bezier(.2,.8,.2,1);
     }
-    #{{ $uid }} .cx-centered .cx-actions { justify-content: center; }
+    #{{ $uid }} .cx-actions.is-in { opacity: 1; transform: none; }
+    #{{ $uid }} .cx-inner-centered .cx-actions { justify-content: center; }
 
     #{{ $uid }} .cx-btn {
         position: relative;
@@ -318,278 +311,421 @@
         display: inline-flex;
         align-items: center;
         gap: 10px;
-        padding: 14px 26px;
+        padding: 15px 28px;
         border-radius: 14px;
         font-size: 15px;
         font-weight: 800;
         text-decoration: none;
-        isolation: isolate;
-        transition: transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .3s ease, background .3s ease, color .3s ease;
+        letter-spacing: -.01em;
+        transition: transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .35s ease;
     }
-    #{{ $uid }} .cx-btn:active { transform: scale(.97); }
-    #{{ $uid }} .cx-btn svg {
-        width: 15px;
-        height: 15px;
-        transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+    #{{ $uid }} .cx-btn:active { transform: scale(.96) !important; }
+    #{{ $uid }} .cx-btn-icon {
+        display: inline-flex;
+        width: 16px;
+        height: 16px;
+        transition: transform .35s cubic-bezier(.34,1.56,.64,1);
     }
-    #{{ $uid }} .cx-btn:hover svg { transform: translateX(4px); }
+    #{{ $uid }} .cx-btn:hover .cx-btn-icon { transform: translateX(5px); }
 
-    #{{ $uid }} .cx-btn-primary {
-        background: #fff;
-        color: var(--cx-a);
-        box-shadow: 0 14px 30px -14px rgba(15,23,42,.45);
-    }
-    #{{ $uid }}[data-bg="solid"] .cx-btn-primary {
-        background: linear-gradient(120deg, var(--cx-a), var(--cx-b));
+    #{{ $uid }} .cx-btn-p {
+        background: linear-gradient(120deg, var(--a), var(--b));
         color: #fff;
-        box-shadow: 0 14px 30px -14px color-mix(in srgb, var(--cx-a) 70%, transparent);
+        box-shadow: 0 16px 36px -14px rgba(var(--ar),var(--ag),var(--ab),.7);
     }
-    #{{ $uid }} .cx-btn-primary::before {
+    #{{ $uid }}[data-bg="gradient"] .cx-btn-p,
+    #{{ $uid }}[data-bg="dark"] .cx-btn-p {
+        background: #fff;
+        color: var(--a);
+        box-shadow: 0 16px 36px -14px rgba(0,0,0,.35);
+    }
+    #{{ $uid }} .cx-btn-p::before {
         content: "";
         position: absolute;
-        top: 0;
-        bottom: 0;
-        left: -60%;
-        width: 40%;
-        z-index: -1;
-        background: linear-gradient(100deg, transparent, rgba(255,255,255,.55), transparent);
-        transform: skewX(-20deg);
-        animation: cxSweep 3.6s ease-in-out infinite;
+        inset: 0;
+        background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,.35) 50%, transparent 70%);
+        transform: translateX(-100%);
+        transition: transform .7s ease;
     }
-    #{{ $uid }} .cx-btn-primary:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 22px 40px -16px rgba(15,23,42,.55);
-    }
+    #{{ $uid }} .cx-btn-p:hover { transform: translateY(-4px); }
+    #{{ $uid }} .cx-btn-p:hover::before { transform: translateX(100%); }
+    #{{ $uid }} .cx-btn-p:hover { box-shadow: 0 24px 48px -16px rgba(var(--ar),var(--ag),var(--ab),.8); }
 
-    #{{ $uid }} .cx-btn-ghost {
-        background: rgba(255,255,255,.06);
-        color: var(--cx-title);
-        border: 1.5px solid color-mix(in srgb, var(--cx-title) 28%, transparent);
-        -webkit-backdrop-filter: blur(6px);
-        backdrop-filter: blur(6px);
+    #{{ $uid }} .cx-btn-s {
+        background: transparent;
+        color: var(--ti);
+        border: 1.5px solid rgba(var(--ar),var(--ag),var(--ab),.4);
     }
-    #{{ $uid }} .cx-btn-ghost:hover {
-        background: var(--cx-title);
+    #{{ $uid }}[data-bg="gradient"] .cx-btn-s,
+    #{{ $uid }}[data-bg="dark"] .cx-btn-s {
+        border-color: rgba(255,255,255,.35);
         color: #fff;
-        border-color: var(--cx-title);
-        transform: translateY(-3px);
     }
-    #{{ $uid }}[data-bg="gradient"] .cx-btn-ghost:hover,
-    #{{ $uid }}[data-bg="dark"] .cx-btn-ghost:hover { color: #0b1120; background: #fff; }
-    #{{ $uid }}[data-bg="gradient"] .cx-btn-ghost,
-    #{{ $uid }}[data-bg="dark"] .cx-btn-ghost { border-color: rgba(255,255,255,.4); }
+    #{{ $uid }} .cx-btn-s:hover {
+        background: rgba(var(--ar),var(--ag),var(--ab),.12);
+        border-color: var(--a);
+        transform: translateY(-4px);
+    }
+    #{{ $uid }}[data-bg="gradient"] .cx-btn-s:hover,
+    #{{ $uid }}[data-bg="dark"] .cx-btn-s:hover {
+        background: rgba(255,255,255,.14);
+        border-color: rgba(255,255,255,.7);
+    }
 
-    /* ---------- Chips ---------- */
+    /* Chips */
     #{{ $uid }} .cx-chips {
         display: flex;
         flex-wrap: wrap;
         gap: 8px;
+        opacity: 0;
+        transform: translateY(12px);
+        transition: opacity .6s .65s ease, transform .6s .65s ease;
     }
-    #{{ $uid }} .cx-centered .cx-chips { justify-content: center; }
+    #{{ $uid }} .cx-chips.is-in { opacity: 1; transform: none; }
+    #{{ $uid }} .cx-inner-centered .cx-chips { justify-content: center; }
     #{{ $uid }} .cx-chip {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
-        padding: 7px 13px;
+        gap: 7px;
+        padding: 8px 14px;
         border-radius: 999px;
         font-size: 12px;
         font-weight: 700;
-        color: var(--cx-title);
-        background: rgba(255,255,255,.12);
-        border: 1px solid rgba(255,255,255,.25);
-        -webkit-backdrop-filter: blur(6px);
-        backdrop-filter: blur(6px);
-        transition: transform .3s cubic-bezier(.34,1.56,.64,1), background .3s ease;
+        color: var(--ti);
+        background: rgba(var(--ar),var(--ag),var(--ab),.08);
+        border: 1px solid rgba(var(--ar),var(--ag),var(--ab),.2);
+        transition: transform .3s cubic-bezier(.34,1.56,.64,1), background .3s ease, box-shadow .3s ease;
     }
-    #{{ $uid }}[data-bg="solid"] .cx-chip {
-        background: color-mix(in srgb, var(--cx-a) 8%, transparent);
-        border-color: color-mix(in srgb, var(--cx-a) 18%, transparent);
+    #{{ $uid }}[data-bg="gradient"] .cx-chip,
+    #{{ $uid }}[data-bg="dark"] .cx-chip {
+        background: rgba(255,255,255,.08);
+        border-color: rgba(255,255,255,.2);
+        color: rgba(255,255,255,.9);
     }
-    #{{ $uid }} .cx-chip:hover { transform: translateY(-2px); background: rgba(255,255,255,.22); }
-    #{{ $uid }} .cx-chip svg { flex-shrink: 0; }
-    #{{ $uid }}[data-bg="solid"] .cx-chip svg { color: var(--cx-a); }
+    #{{ $uid }} .cx-chip:hover {
+        transform: translateY(-3px);
+        background: rgba(var(--ar),var(--ag),var(--ab),.18);
+        box-shadow: 0 8px 20px -8px rgba(var(--ar),var(--ag),var(--ab),.4);
+    }
+    #{{ $uid }}[data-bg="gradient"] .cx-chip:hover,
+    #{{ $uid }}[data-bg="dark"] .cx-chip:hover {
+        background: rgba(255,255,255,.18);
+        box-shadow: 0 8px 20px -8px rgba(0,0,0,.3);
+    }
+    #{{ $uid }} .cx-chip-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--a);
+        flex-shrink: 0;
+    }
+    #{{ $uid }}[data-bg="gradient"] .cx-chip-dot,
+    #{{ $uid }}[data-bg="dark"] .cx-chip-dot { background: #fff; }
 
-    /* ---------- Media ---------- */
-    #{{ $uid }} .cx-media {
+    /* Image */
+    #{{ $uid }} .cx-img-wrap {
         position: relative;
-        padding: 10px;
-        border-radius: 28px;
+        opacity: 0;
+        transform: translateX(24px);
+        transition: opacity .8s .25s ease, transform .9s .25s cubic-bezier(.2,.8,.2,1);
     }
-    #{{ $uid }} .cx-media::before {
-        content: "";
+    #{{ $uid }} .cx-img-wrap.is-in { opacity: 1; transform: none; }
+    #{{ $uid }} .cx-img-ring {
         position: absolute;
-        inset: -2px;
+        inset: -10px;
         border-radius: 30px;
-        background: conic-gradient(from 0deg, var(--cx-a), var(--cx-b), #fff, var(--cx-a));
+        background: conic-gradient(from 0deg, var(--a), var(--b), rgba(255,255,255,.2), var(--a));
         animation: cxSpin 8s linear infinite;
         z-index: -1;
-        opacity: .9;
     }
-    #{{ $uid }} .cx-media-inner {
-        position: relative;
+    #{{ $uid }} .cx-img-inner {
         border-radius: 22px;
         overflow: hidden;
         aspect-ratio: 4 / 3;
-        background: #0b1120;
-        animation: cxBob 6s ease-in-out infinite;
+        background: #111827;
     }
-    #{{ $uid }} .cx-media img {
+    #{{ $uid }} .cx-img-inner img {
         width: 100%;
         height: 100%;
         object-fit: cover;
         display: block;
-        transition: transform 1.2s cubic-bezier(.2,.8,.2,1);
+        transition: transform 1.4s cubic-bezier(.2,.8,.2,1);
     }
-    #{{ $uid }} .cx-card:hover .cx-media img { transform: scale(1.06); }
+    #{{ $uid }} .cx-wrap:hover .cx-img-inner img { transform: scale(1.07); }
+    #{{ $uid }} .cx-img-float {
+        position: absolute;
+        top: -18px;
+        right: -18px;
+        width: 58px;
+        height: 58px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, var(--a), var(--b));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 14px 28px -10px rgba(var(--ar),var(--ag),var(--ab),.6);
+        animation: cxBob 4s ease-in-out infinite;
+        z-index: 2;
+    }
+    #{{ $uid }} .cx-img-float svg { width: 26px; height: 26px; color: #fff; }
 
-    /* ---------- Keyframes ---------- */
-    @keyframes cxUp {
-        from { opacity: 0; transform: translateY(18px); }
-        to   { opacity: 1; transform: none; }
+    /* Keyframes */
+    @keyframes cxPulse {
+        0%   { box-shadow: 0 0 0 0 rgba(var(--ar),var(--ag),var(--ab),.6); }
+        70%  { box-shadow: 0 0 0 8px rgba(var(--ar),var(--ag),var(--ab),0); }
+        100% { box-shadow: 0 0 0 0 rgba(var(--ar),var(--ag),var(--ab),0); }
     }
-    @keyframes cxFloat {
-        0%   { transform: translate(0, 0) scale(1); }
-        100% { transform: translate(50px, -40px) scale(1.18); }
-    }
-    @keyframes cxFlow {
-        0%   { background-position: 0% 50%; }
-        100% { background-position: 200% 50%; }
-    }
-    @keyframes cxShimmer {
-        0%   { background-position: 0% 50%; }
-        100% { background-position: 200% 50%; }
-    }
-    @keyframes cxUnderline {
-        to { transform: scaleX(1); }
-    }
-    @keyframes cxSweep {
-        0%, 60% { left: -60%; }
-        100%    { left: 140%; }
-    }
-    @keyframes cxPing {
-        0%   { transform: scale(.6); opacity: .9; }
-        100% { transform: scale(2.2); opacity: 0; }
-    }
-    @keyframes cxSpin {
-        to { transform: rotate(360deg); }
-    }
+    @keyframes cxSpin { to { transform: rotate(360deg); } }
     @keyframes cxBob {
-        0%, 100% { transform: translateY(0); }
-        50%      { transform: translateY(-8px); }
+        0%, 100% { transform: translateY(0) rotate(0); }
+        50%      { transform: translateY(-8px) rotate(6deg); }
     }
 
     @media (prefers-reduced-motion: reduce) {
+        #{{ $uid }} .cx-char { opacity: 1 !important; transform: none !important; transition: none !important; }
+        #{{ $uid }} .cx-desc,
+        #{{ $uid }} .cx-actions,
+        #{{ $uid }} .cx-chips,
+        #{{ $uid }} .cx-img-wrap { opacity: 1 !important; transform: none !important; transition: none !important; }
+        #{{ $uid }} .cx-title.is-in .cx-hl::after { transform: scaleX(1); }
         #{{ $uid }} *,
         #{{ $uid }} *::before,
-        #{{ $uid }} *::after {
-            animation: none !important;
-            transition: none !important;
-        }
-        #{{ $uid }} .cx-reveal > * { opacity: 1; transform: none; }
-        #{{ $uid }} .cx-hl::after { transform: scaleX(1); opacity: .35; }
+        #{{ $uid }} *::after { animation: none !important; }
     }
 </style>
 
 <div id="{{ $uid }}" data-bg="{{ $bgStyle }}">
-    <div class="cx-card">
-        @if($bgStyle !== 'solid')
-            <div class="cx-aura" aria-hidden="true">
-                <span class="cx-blob b1"></span>
-                <span class="cx-blob b2"></span>
-                <span class="cx-blob b3"></span>
-            </div>
+    <div class="cx-wrap">
+        <canvas class="cx-canvas" aria-hidden="true"></canvas>
+        <div class="cx-bg" aria-hidden="true"></div>
+        @if($bgStyle === 'dark')
+            <div class="cx-grid-lines" aria-hidden="true"></div>
         @endif
-        <span class="cx-grain" aria-hidden="true"></span>
-        <span class="cx-spot" aria-hidden="true"></span>
+        <div class="cx-noise" aria-hidden="true"></div>
+        <div class="cx-glow" aria-hidden="true"></div>
 
-        <div class="{{ $animateOn ? 'cx-reveal' : '' }} {{ $layout === 'split' ? 'cx-split' : 'cx-centered' }}" data-reveal>
-
-            <div class="{{ $layout === 'split' ? '' : 'cx-body' }}">
-                @if($badge !== '')
-                    <span class="cx-badge" style="--d: 0;">
-                        <span class="cx-badge-dot"></span>
-                        <span>{{ $badge }}</span>
-                    </span>
-                @endif
-
-                @if($title !== '')
-                    <h2 class="cx-title" style="--d: 1;">{!! $titleHtml !!}</h2>
-                @endif
-
-                @if($desc !== '')
-                    <p class="cx-desc" style="--d: 2;">{{ $desc }}</p>
-                @endif
-
-                @if($btn1Label !== '' || $btn2Label !== '')
-                    <div class="cx-actions" style="--d: 3;">
-                        @if($btn1Label !== '')
-                            <a href="{{ $btn1Url }}" class="cx-btn cx-btn-primary">
-                                <span>{{ $btn1Label }}</span>
-                                <svg fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-                            </a>
-                        @endif
-                        @if($btn2Label !== '')
-                            <a href="{{ $btn2Url }}" class="cx-btn cx-btn-ghost">
-                                <span>{{ $btn2Label }}</span>
-                            </a>
-                        @endif
-                    </div>
-                @endif
-
-                @if(!empty($chips))
-                    <div class="cx-chips" style="--d: 4;">
-                        @foreach($chips as $chip)
-                            <span class="cx-chip" style="--d: {{ 4 + $loop->index * 0.3 }};">
-                                <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                                <span>{{ $chip }}</span>
+        <div class="cx-body">
+            <div class="cx-inner-{{ $layout === 'split' ? 'split' : 'centered' }}">
+                <div class="cx-content-col">
+                    @if($badge !== '')
+                        <div>
+                            <span class="cx-badge">
+                                <span class="cx-badge-ring"></span>
+                                <span>{{ $badge }}</span>
                             </span>
-                        @endforeach
+                        </div>
+                    @endif
+
+                    @if($title !== '')
+                        <h2 class="cx-title" data-title>{!! $titleHtml !!}</h2>
+                    @endif
+
+                    @if($desc !== '')
+                        <p class="cx-desc" data-desc>{{ $desc }}</p>
+                    @endif
+
+                    @if($btn1Label !== '' || $btn2Label !== '')
+                        <div class="cx-actions" data-actions>
+                            @if($btn1Label !== '')
+                                <a href="{{ $btn1Url }}" class="cx-btn cx-btn-p">
+                                    <span>{{ $btn1Label }}</span>
+                                    <span class="cx-btn-icon">
+                                        <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                                    </span>
+                                </a>
+                            @endif
+                            @if($btn2Label !== '')
+                                <a href="{{ $btn2Url }}" class="cx-btn cx-btn-s">
+                                    <span>{{ $btn2Label }}</span>
+                                </a>
+                            @endif
+                        </div>
+                    @endif
+
+                    @if(!empty($chips))
+                        <div class="cx-chips" data-chips>
+                            @foreach($chips as $chip)
+                                <span class="cx-chip">
+                                    <span class="cx-chip-dot"></span>
+                                    <span>{{ $chip }}</span>
+                                </span>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+
+                @if($layout === 'split' && $image !== '')
+                    <div class="cx-img-wrap" data-img>
+                        <span class="cx-img-ring"></span>
+                        <div class="cx-img-inner">
+                            <img src="{{ $image }}" alt="{{ $title }}" loading="lazy">
+                        </div>
+                        <span class="cx-img-float" aria-hidden="true">
+                            <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        </span>
                     </div>
                 @endif
             </div>
-
-            @if($layout === 'split' && $image !== '')
-                <div class="cx-media" style="--d: 2;">
-                    <div class="cx-media-inner">
-                        <img src="{{ $image }}" alt="{{ $title }}" loading="lazy">
-                    </div>
-                </div>
-            @endif
         </div>
     </div>
 </div>
 
 <script>
 (function () {
-    var root = document.getElementById(@js($uid));
+    var root   = document.getElementById(@js($uid));
     if (!root) return;
-    var card = root.querySelector('.cx-card');
-    var reveal = root.querySelector('[data-reveal]');
 
-    // Reveal the content when it scrolls into view
-    if (reveal && reveal.classList.contains('cx-reveal')) {
-        if (!('IntersectionObserver' in window)) {
-            reveal.classList.add('is-visible');
-        } else {
-            var io = new IntersectionObserver(function (entries) {
-                entries.forEach(function (entry) {
-                    if (entry.isIntersecting) {
-                        reveal.classList.add('is-visible');
-                        io.disconnect();
+    var wrap    = root.querySelector('.cx-wrap');
+    var canvas  = root.querySelector('.cx-canvas');
+    var glow    = root.querySelector('.cx-glow');
+    var titleEl = root.querySelector('[data-title]');
+    var descEl  = root.querySelector('[data-desc]');
+    var actEl   = root.querySelector('[data-actions]');
+    var chipsEl = root.querySelector('[data-chips]');
+    var imgEl   = root.querySelector('[data-img]');
+
+    var reduce  = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var isMouse = window.matchMedia('(hover: hover)').matches;
+
+    /* ------- Letter-by-letter title split ------- */
+    if (titleEl) {
+        titleEl.querySelectorAll('.cx-hl, .cx-title').forEach(function () {});
+        var wrapNode = function (node) {
+            if (node.nodeType === 3) {
+                var frag = document.createDocumentFragment();
+                var chars = node.textContent.split('');
+                chars.forEach(function (ch) {
+                    if (ch === ' ') {
+                        var s = document.createElement('span');
+                        s.className = 'cx-char-space';
+                        frag.appendChild(s);
+                    } else {
+                        var s = document.createElement('span');
+                        s.className = 'cx-char';
+                        s.textContent = ch;
+                        frag.appendChild(s);
                     }
                 });
-            }, { threshold: 0.15 });
-            io.observe(reveal);
-        }
+                node.parentNode.replaceChild(frag, node);
+            } else if (node.nodeType === 1) {
+                [].slice.call(node.childNodes).forEach(wrapNode);
+            }
+        };
+        wrapNode(titleEl);
     }
 
-    // Cursor spotlight (mouse only)
-    if (card && window.matchMedia && window.matchMedia('(hover: hover)').matches
-        && !(window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
-        card.addEventListener('pointermove', function (e) {
-            var r = card.getBoundingClientRect();
-            root.style.setProperty('--cx-mx', (e.clientX - r.left) + 'px');
-            root.style.setProperty('--cx-my', (e.clientY - r.top) + 'px');
+    /* ------- Intersection reveal ------- */
+    var revealed = false;
+    function reveal() {
+        if (revealed) return;
+        revealed = true;
+
+        if (titleEl) {
+            titleEl.classList.add('is-in');
+            var chars = [].slice.call(titleEl.querySelectorAll('.cx-char'));
+            chars.forEach(function (ch, i) {
+                if (reduce) {
+                    ch.classList.add('is-in');
+                } else {
+                    setTimeout(function () { ch.classList.add('is-in'); }, i * 38);
+                }
+            });
+        }
+        var delay = titleEl ? Math.min(titleEl.querySelectorAll('.cx-char').length * 38 + 80, 700) : 0;
+        if (reduce) delay = 0;
+
+        setTimeout(function () {
+            if (descEl)  descEl.classList.add('is-in');
+        }, reduce ? 0 : delay);
+        setTimeout(function () {
+            if (actEl)   actEl.classList.add('is-in');
+        }, reduce ? 0 : delay + 120);
+        setTimeout(function () {
+            if (chipsEl) chipsEl.classList.add('is-in');
+        }, reduce ? 0 : delay + 240);
+        setTimeout(function () {
+            if (imgEl)   imgEl.classList.add('is-in');
+        }, reduce ? 0 : 120);
+    }
+
+    if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (entries) {
+            if (entries[0].isIntersecting) { reveal(); io.disconnect(); }
+        }, { threshold: 0.12 });
+        io.observe(wrap);
+    } else {
+        reveal();
+    }
+
+    /* ------- Particle canvas ------- */
+    if (canvas && !reduce) {
+        var ctx  = canvas.getContext('2d');
+        var dots = [];
+        var W, H, RAF;
+        var bg = @json($bgStyle);
+
+        var colors = bg === 'dark' || bg === 'gradient'
+            ? ['rgba({{ $ar }},{{ $ag }},{{ $ab }},.55)', 'rgba({{ $br2 }},{{ $bg2 }},{{ $bb2 }},.45)', 'rgba(255,255,255,.25)']
+            : ['rgba({{ $ar }},{{ $ag }},{{ $ab }},.35)', 'rgba({{ $br2 }},{{ $bg2 }},{{ $bb2 }},.3)'];
+
+        function resize() {
+            W = canvas.width  = wrap.offsetWidth;
+            H = canvas.height = wrap.offsetHeight;
+            if (!dots.length) init();
+        }
+
+        function init() {
+            dots = [];
+            var n = Math.floor((W * H) / 10000);
+            n = Math.max(14, Math.min(n, 60));
+            for (var i = 0; i < n; i++) {
+                dots.push({
+                    x: Math.random() * W,
+                    y: Math.random() * H,
+                    r: Math.random() * 1.6 + .4,
+                    vx: (Math.random() - .5) * .35,
+                    vy: (Math.random() - .5) * .35,
+                    c: colors[Math.floor(Math.random() * colors.length)],
+                    o: Math.random() * .6 + .2,
+                    phase: Math.random() * Math.PI * 2,
+                    speed: Math.random() * .02 + .008
+                });
+            }
+        }
+
+        function draw(ts) {
+            ctx.clearRect(0, 0, W, H);
+            dots.forEach(function (d) {
+                d.x += d.vx;
+                d.y += d.vy;
+                if (d.x < -4) d.x = W + 4;
+                if (d.x > W + 4) d.x = -4;
+                if (d.y < -4) d.y = H + 4;
+                if (d.y > H + 4) d.y = -4;
+                var pulse = Math.sin(ts * d.speed + d.phase) * .3 + .7;
+                ctx.beginPath();
+                ctx.arc(d.x, d.y, d.r * pulse, 0, Math.PI * 2);
+                ctx.fillStyle = d.c;
+                ctx.globalAlpha = d.o * pulse;
+                ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+            RAF = requestAnimationFrame(draw);
+        }
+
+        resize();
+        RAF = requestAnimationFrame(draw);
+
+        var ro = new ResizeObserver(function () { cancelAnimationFrame(RAF); resize(); RAF = requestAnimationFrame(draw); });
+        ro.observe(wrap);
+    }
+
+    /* ------- Cursor glow + spotlight ------- */
+    if (isMouse && wrap && !reduce) {
+        wrap.addEventListener('pointermove', function (e) {
+            var r = wrap.getBoundingClientRect();
+            root.style.setProperty('--rx', (e.clientX - r.left) + 'px');
+            root.style.setProperty('--ry', (e.clientY - r.top) + 'px');
         });
     }
 })();
