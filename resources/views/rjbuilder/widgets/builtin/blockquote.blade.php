@@ -26,221 +26,191 @@
 @endphp
 
 <style>
-    @property --bq-angle { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+    @property --rq-ang { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
 
-    @keyframes bqWord-{{ $uid }} {
-        from { opacity: 0; transform: translateY(22px) rotateX(-40deg); filter: blur(8px); }
-        to   { opacity: 1; transform: none; filter: blur(0); }
-    }
-    @keyframes bqUp-{{ $uid }} {
-        from { opacity: 0; transform: translateY(18px); }
-        to   { opacity: 1; transform: none; }
-    }
-    @keyframes bqDraw-{{ $uid }} {
-        from { transform: scaleY(0); }
-        to   { transform: scaleY(1); }
-    }
-    @keyframes bqDrawX-{{ $uid }} {
-        from { transform: scaleX(0); }
-        to   { transform: scaleX(1); }
-    }
-    @keyframes bqTravel-{{ $uid }} {
-        0%   { top: 0; opacity: 0; }
-        12%  { opacity: 1; }
-        88%  { opacity: 1; }
-        100% { top: 100%; opacity: 0; }
-    }
-    @keyframes bqSpin-{{ $uid }} { to { --bq-angle: 360deg; } }
-    @keyframes bqRotate-{{ $uid }} { to { transform: rotate(360deg); } }
-    @keyframes bqBlobA-{{ $uid }} {
-        0%, 100% { transform: translate(0, 0) scale(1); }
-        50%      { transform: translate(70px, 40px) scale(1.25); }
-    }
-    @keyframes bqBlobB-{{ $uid }} {
-        0%, 100% { transform: translate(0, 0) scale(1); }
-        50%      { transform: translate(-80px, -30px) scale(1.18); }
-    }
-    @keyframes bqRise-{{ $uid }} {
-        from { background-position: 0 0; }
-        to   { background-position: 0 -240px; }
-    }
-    @keyframes bqDrop-{{ $uid }} {
-        0%   { opacity: 0; transform: translateY(-80px) scale(1.3) rotate(-8deg); }
-        60%  { opacity: .22; transform: translateY(8px) scale(.98) rotate(2deg); }
-        100% { opacity: .2; transform: none; }
-    }
-    @keyframes bqPop-{{ $uid }} {
-        0%   { opacity: 0; transform: scale(.2) rotate(-40deg); }
-        100% { opacity: 1; transform: none; }
-    }
-    @keyframes bqPulse-{{ $uid }} {
-        0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--bq-accent) 45%, transparent); }
-        100% { box-shadow: 0 0 0 16px transparent; }
-    }
+    @keyframes rq-flip-{{ $uid }} { from { opacity: 0; transform: translateY(26px) rotateX(-70deg); } to { opacity: 1; transform: none; } }
+    @keyframes rq-blur-{{ $uid }} { from { opacity: 0; transform: translateY(28px) scale(.9); filter: blur(14px); } to { opacity: 1; transform: none; filter: blur(0); } }
+    @keyframes rq-mask-{{ $uid }} { from { transform: translateY(118%) rotate(6deg); } to { transform: none; } }
+    @keyframes rq-up-{{ $uid }} { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+    @keyframes rq-pop-{{ $uid }} { from { opacity: 0; scale: .2; rotate: -30deg; } }
+    @keyframes rq-sweep-{{ $uid }} { 0% { left: 0; opacity: 1; } 92% { opacity: 1; } 100% { left: 100%; opacity: 0; } }
+    @keyframes rq-clip-{{ $uid }} { from { clip-path: inset(-30% 100% -30% 0); } to { clip-path: inset(-30% 0 -30% 0); } }
+    @keyframes rq-grid-{{ $uid }} { to { background-position: 44px 44px; } }
+    @keyframes rq-bracket-{{ $uid }} { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
+    @keyframes rq-float-{{ $uid }} { 0%, 100% { translate: 0 0; } 50% { translate: 0 -10px; } }
+    @keyframes rq-foil-{{ $uid }} { from { background-position: 0% 20%; } to { background-position: 100% 80%; } }
+    @keyframes rq-twinkle-{{ $uid }} { 0%, 100% { opacity: 0; scale: .3; } 50% { opacity: 1; scale: 1; } }
+    @keyframes rq-pulse-{{ $uid }} { 0% { box-shadow: 0 16px 30px -10px var(--a), 0 0 0 0 color-mix(in srgb, var(--a) 50%, transparent); } 100% { box-shadow: 0 16px 30px -10px var(--a), 0 0 0 18px transparent; } }
+    @keyframes rq-spin-{{ $uid }} { to { rotate: 360deg; } }
+    @keyframes rq-ring-{{ $uid }} { to { transform: rotate(360deg); } }
+    @keyframes rq-angle-{{ $uid }} { to { --rq-ang: 360deg; } }
+    @keyframes rq-rise-{{ $uid }} { 0% { transform: translateY(0); opacity: 0; } 15% { opacity: .9; } 100% { transform: translateY(-520px); opacity: 0; } }
+    @keyframes rq-glow-{{ $uid }} { from { text-shadow: 0 0 18px color-mix(in srgb, var(--a) 35%, transparent); } to { text-shadow: 0 0 40px color-mix(in srgb, var(--b) 75%, transparent); } }
+    @keyframes rq-drift-{{ $uid }} { 0%, 100% { scale: 1; } 50% { scale: 1.25; } }
+    @keyframes rq-blink-{{ $uid }} { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
 
-    #{{ $uid }} { --bq-accent: {{ $accent }}; --bq-accent2: {{ $accent2 }}; --bq-text: {{ $textColor }}; --bq-size: {{ $sizeCss }}; width: 100%; padding: {{ $paddingY }}px 16px; }
+    #{{ $uid }} { --a: {{ $accent }}; --b: {{ $accent2 }}; --t: {{ $textColor }}; --rq-size: {{ $sizeCss }}; width: 100%; padding: {{ $paddingY }}px 16px; }
     #{{ $uid }} *, #{{ $uid }} *::before, #{{ $uid }} *::after { box-sizing: border-box; }
 
-    #{{ $uid }} .rj-bq-wrap { --rx: 0deg; --ry: 0deg; --mx: 50%; --my: 50%; position: relative; max-width: 840px; margin: 0 auto; text-align: {{ $align }}; isolation: isolate; transition: transform .4s cubic-bezier(.2,.8,.2,1), box-shadow .5s ease; }
-    #{{ $uid }} .rj-bq-quote, #{{ $uid }} .rj-bq-author { position: relative; z-index: 3; }
+    #{{ $uid }} .rq { --rx: 0deg; --ry: 0deg; --mx: 50%; --my: 50%; --px: 50; --py: 50; --bx: 30%; --by: 35%; --mpx: 0; --mpy: 0; position: relative; max-width: 860px; margin: 0 auto; text-align: {{ $align }}; isolation: isolate; }
+    #{{ $uid }} .rq-grid, #{{ $uid }} .rq-aur, #{{ $uid }} .rq-foil, #{{ $uid }} .rq-glare, #{{ $uid }} .rq-beam, #{{ $uid }} .rq-blob, #{{ $uid }} .rq-badge, #{{ $uid }} .rq-tape, #{{ $uid }} .rq-mark, #{{ $uid }} .rq-star, #{{ $uid }} .rq-p, #{{ $uid }} .rq-caret { display: none; }
+    #{{ $uid }} .rq-mark { font-family: Georgia, 'Times New Roman', serif; font-weight: 900; line-height: 1; pointer-events: none; user-select: none; }
 
-    #{{ $uid }} .rj-bq-quote { margin: 0 0 28px; padding: 0; border: 0; background: transparent; font-size: var(--bq-size); font-weight: 600; line-height: 1.5; letter-spacing: -.012em; color: var(--bq-text); quotes: none; perspective: 700px; }
-    #{{ $uid }} .rj-bq-quote::before, #{{ $uid }} .rj-bq-quote::after { content: none; }
-    #{{ $uid }} .rj-w { display: inline-block; transform-origin: 50% 100%; }
+    #{{ $uid }} .rq-body { position: relative; z-index: 3; }
+    #{{ $uid }} .rq-text { margin: 0 0 28px; padding: 0; border: 0; background: transparent; font-size: var(--rq-size); font-weight: 600; line-height: 1.5; letter-spacing: -.012em; color: var(--t); quotes: none; perspective: 800px; }
+    #{{ $uid }} .rq-text::before, #{{ $uid }} .rq-text::after { content: none; }
+    #{{ $uid }} .rq-w, #{{ $uid }} .rq-w > span { display: inline-block; }
 
-    #{{ $uid }} .rj-bq-author { display: inline-flex; align-items: center; gap: 14px; }
-    #{{ $uid }} .rj-bq-ring { position: relative; flex: none; width: 56px; height: 56px; padding: 3px; border-radius: 50%; transition: transform .5s cubic-bezier(.34,1.56,.64,1); }
-    #{{ $uid }} .rj-bq-ring::before { content: ""; position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, var(--bq-accent), var(--bq-accent2), transparent 60%, var(--bq-accent)); animation: bqRotate-{{ $uid }} 5s linear infinite; }
-    #{{ $uid }} .rj-bq-wrap:hover .rj-bq-ring { transform: scale(1.1) rotate(-8deg); }
-    #{{ $uid }} .rj-bq-avatar { position: relative; display: grid; place-items: center; width: 100%; height: 100%; overflow: hidden; border-radius: 50%; border: 3px solid #fff; background: linear-gradient(135deg, var(--bq-accent), var(--bq-accent2)); color: #fff; font-size: 18px; font-weight: 800; }
-    #{{ $uid }} .rj-bq-avatar img { display: block; width: 100%; height: 100%; max-width: none; object-fit: cover; }
-    #{{ $uid }} .rj-bq-meta { display: flex; flex-direction: column; text-align: left; }
-    #{{ $uid }} .rj-bq-name { font-size: 15px; font-weight: 800; letter-spacing: -.01em; color: var(--bq-text); }
-    #{{ $uid }} .rj-bq-role { margin-top: 2px; font-size: 12.5px; font-weight: 500; color: #64748b; }
-    #{{ $uid }} .rj-bq-wrap[data-align="center"] .rj-bq-author { justify-content: center; }
-    #{{ $uid }} .rj-bq-wrap[data-align="right"] .rj-bq-author { flex-direction: row-reverse; }
-    #{{ $uid }} .rj-bq-wrap[data-align="right"] .rj-bq-meta { text-align: right; }
+    #{{ $uid }} .rq-author { position: relative; z-index: 3; display: inline-flex; align-items: center; gap: 14px; }
+    #{{ $uid }} .rq-ring { position: relative; flex: none; width: 56px; height: 56px; padding: 3px; border-radius: 50%; transition: transform .5s cubic-bezier(.34,1.56,.64,1); }
+    #{{ $uid }} .rq-ring::before { content: ""; position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, var(--a), var(--b), transparent 60%, var(--a)); animation: rq-ring-{{ $uid }} 5s linear infinite; }
+    #{{ $uid }} .rq:hover .rq-ring { transform: scale(1.1) rotate(-8deg); }
+    #{{ $uid }} .rq-avatar { position: relative; display: grid; place-items: center; width: 100%; height: 100%; overflow: hidden; border-radius: 50%; border: 3px solid #fff; background: linear-gradient(135deg, var(--a), var(--b)); color: #fff; font-size: 18px; font-weight: 800; }
+    #{{ $uid }} .rq-avatar img { display: block; width: 100%; height: 100%; max-width: none; object-fit: cover; }
+    #{{ $uid }} .rq-meta { display: flex; flex-direction: column; text-align: left; }
+    #{{ $uid }} .rq-name { font-size: 15px; font-weight: 800; letter-spacing: -.01em; color: var(--t); }
+    #{{ $uid }} .rq-role { margin-top: 2px; font-size: 12.5px; font-weight: 500; color: #64748b; }
+    #{{ $uid }} .rq[data-align="center"] .rq-author { justify-content: center; }
+    #{{ $uid }} .rq[data-align="right"] .rq-author { flex-direction: row-reverse; }
+    #{{ $uid }} .rq[data-align="right"] .rq-meta { text-align: right; }
 
-    #{{ $uid }} .rj-bq-rail, #{{ $uid }} .rj-bq-badge, #{{ $uid }} .rj-bq-glow, #{{ $uid }} .rj-bq-blob, #{{ $uid }} .rj-bq-dots, #{{ $uid }} .rj-bq-ln, #{{ $uid }} .rj-bq-mark { display: none; }
-    #{{ $uid }} .rj-bq-mark { font-family: Georgia, 'Times New Roman', serif; font-weight: 900; line-height: 1; pointer-events: none; user-select: none; }
+    #{{ $uid }} .rq[data-style="accent-bar"] { padding: clamp(34px, 5vw, 64px); border-radius: 28px; overflow: hidden; background: #05060f; box-shadow: 0 0 0 1px rgba(255,255,255,.08), 0 40px 90px -40px var(--a); }
+    #{{ $uid }} .rq[data-style="accent-bar"] .rq-grid { display: block; position: absolute; inset: 0; z-index: 0; pointer-events: none; background-image: linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px); background-size: 44px 44px; -webkit-mask-image: radial-gradient(ellipse at center, #000 30%, transparent 80%); mask-image: radial-gradient(ellipse at center, #000 30%, transparent 80%); animation: rq-grid-{{ $uid }} 12s linear infinite; }
+    #{{ $uid }} .rq[data-style="accent-bar"]::before, #{{ $uid }} .rq[data-style="accent-bar"]::after { content: ""; position: absolute; z-index: 2; width: 34px; height: 34px; border: 2px solid var(--a); pointer-events: none; animation: rq-bracket-{{ $uid }} 2.4s ease-in-out infinite; }
+    #{{ $uid }} .rq[data-style="accent-bar"]::before { top: 16px; left: 16px; border-right: 0; border-bottom: 0; }
+    #{{ $uid }} .rq[data-style="accent-bar"]::after { right: 16px; bottom: 16px; border-left: 0; border-top: 0; animation-delay: 1.2s; }
+    #{{ $uid }} .rq[data-style="accent-bar"] .rq-beam { display: block; position: absolute; top: -24px; bottom: -24px; left: 0; z-index: 4; width: 2px; opacity: 0; pointer-events: none; background: linear-gradient(transparent, var(--b) 15%, #fff 50%, var(--a) 85%, transparent); box-shadow: 0 0 18px 3px var(--a), 0 0 60px 12px color-mix(in srgb, var(--a) 55%, transparent); }
+    #{{ $uid }} .rq[data-style="accent-bar"] .rq-beam::before { content: ""; position: absolute; top: 0; bottom: 0; right: 2px; width: 140px; background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--a) 28%, transparent)); }
+    #{{ $uid }} .rq[data-style="accent-bar"] .rq-text { color: #fff; text-shadow: 0 0 28px color-mix(in srgb, var(--a) 45%, transparent); }
+    #{{ $uid }} .rq[data-style="accent-bar"] .rq-name { color: #fff; }
+    #{{ $uid }} .rq[data-style="accent-bar"] .rq-role { color: rgba(255,255,255,.6); }
+    #{{ $uid }} .rq[data-style="accent-bar"] .rq-avatar { border-color: #05060f; }
+    #{{ $uid }} .rq[data-style="accent-bar"] .rq-mark.open { display: block; position: relative; z-index: 3; height: 40px; margin-bottom: 8px; font-size: 72px; background: linear-gradient(135deg, var(--a), var(--b)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; filter: drop-shadow(0 0 14px var(--a)); }
 
-    #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"] { padding: 10px 0 10px 44px; }
-    #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"]::before { content: ""; position: absolute; z-index: 0; inset: -10px -20px -10px -20px; border-radius: 24px; background: linear-gradient(90deg, color-mix(in srgb, var(--bq-accent) 9%, transparent), transparent 70%); opacity: .8; transition: opacity .5s ease; pointer-events: none; }
-    #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"]:hover::before { opacity: 1; }
-    #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"] .rj-bq-rail { display: block; position: absolute; z-index: 2; left: 0; top: 0; bottom: 0; width: 4px; border-radius: 4px; background: color-mix(in srgb, var(--bq-accent) 16%, transparent); }
-    #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"] .rj-bq-rail::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(180deg, var(--bq-accent), var(--bq-accent2)); transform-origin: top; box-shadow: 0 0 24px -2px var(--bq-accent); }
-    #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"] .rj-bq-rail::after { content: ""; position: absolute; left: 50%; top: 0; width: 14px; height: 14px; margin: -7px 0 0 -7px; background: #fff; transform: rotate(45deg); border-radius: 3px; box-shadow: 0 0 0 3px var(--bq-accent), 0 0 20px 4px var(--bq-accent); animation: bqTravel-{{ $uid }} 3.6s ease-in-out infinite; }
-    #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"][data-align="right"] { padding: 10px 44px 10px 0; }
-    #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"][data-align="right"] .rj-bq-rail { left: auto; right: 0; }
-    #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"][data-align="center"] { padding: 10px 44px; }
-    #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"] .rj-bq-mark.open { display: block; position: relative; z-index: 3; font-size: 72px; height: 38px; margin-bottom: 6px; background: linear-gradient(135deg, var(--bq-accent), var(--bq-accent2)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; transform-origin: left bottom; }
-    #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"][data-align="center"] .rj-bq-mark.open { transform-origin: center bottom; }
-    #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"] .rj-bq-quote { transition: transform .5s cubic-bezier(.2,.8,.2,1); }
-    #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"]:hover .rj-bq-quote { transform: translateX(6px); }
+    #{{ $uid }} .rq[data-style="card"] { margin-top: 12px; padding: clamp(44px, 5vw, 64px) clamp(26px, 4.5vw, 56px) clamp(30px, 4vw, 48px); border-radius: 30px; background: linear-gradient(145deg, #13162e, #0a0b1a); border: 1px solid rgba(255,255,255,.14); transform: perspective(1100px) rotateX(var(--rx)) rotateY(var(--ry)); transition: transform .25s ease-out; animation: rq-float-{{ $uid }} 6s ease-in-out infinite; box-shadow: 0 50px 80px -40px color-mix(in srgb, var(--a) 60%, transparent), 0 2px 0 rgba(255,255,255,.08) inset; }
+    #{{ $uid }} .rq[data-style="card"] .rq-foil { display: block; position: absolute; inset: 0; z-index: 1; border-radius: inherit; pointer-events: none; mix-blend-mode: color-dodge; opacity: .5; background: linear-gradient(115deg, transparent 10%, rgba(255,0,128,.45), rgba(255,200,0,.4), rgba(0,255,170,.4), rgba(0,140,255,.45), transparent 90%); background-size: 240% 240%; animation: rq-foil-{{ $uid }} 6s ease-in-out infinite alternate; }
+    #{{ $uid }} .rq[data-style="card"]:hover .rq-foil { animation: none; background-position: calc(var(--px) * 1%) calc(var(--py) * 1%); }
+    #{{ $uid }} .rq[data-style="card"] .rq-glare { display: block; position: absolute; inset: 0; z-index: 2; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .3s ease; background: radial-gradient(circle at var(--mx) var(--my), rgba(255,255,255,.26), transparent 55%); }
+    #{{ $uid }} .rq[data-style="card"]:hover .rq-glare { opacity: 1; }
+    #{{ $uid }} .rq[data-style="card"] .rq-text, #{{ $uid }} .rq[data-style="card"] .rq-name { color: #fff; }
+    #{{ $uid }} .rq[data-style="card"] .rq-role { color: rgba(255,255,255,.62); }
+    #{{ $uid }} .rq[data-style="card"] .rq-avatar { border-color: #0a0b1a; }
+    #{{ $uid }} .rq[data-style="card"] .rq-star { display: block; position: absolute; z-index: 3; left: var(--l); top: var(--t2); width: 14px; height: 14px; background: #fff; clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%); filter: drop-shadow(0 0 6px #fff); opacity: 0; animation: rq-twinkle-{{ $uid }} 3s ease-in-out infinite; animation-delay: var(--d); pointer-events: none; }
+    #{{ $uid }} .rq[data-style="card"] .rq-badge { display: grid; place-items: center; position: absolute; z-index: 5; top: -30px; left: 50%; width: 62px; height: 62px; margin-left: -31px; padding-top: 14px; border: 4px solid #fff; border-radius: 50%; background: linear-gradient(135deg, var(--a), var(--b)); color: #fff; font-family: Georgia, serif; font-size: 44px; font-weight: 900; line-height: 1; animation: rq-pulse-{{ $uid }} 2.2s ease-out infinite; }
+    #{{ $uid }} .rq[data-style="card"][data-align="left"] .rq-badge { left: 40px; margin-left: 0; }
+    #{{ $uid }} .rq[data-style="card"][data-align="right"] .rq-badge { left: auto; right: 40px; margin-left: 0; }
 
-    #{{ $uid }} .rj-bq-wrap[data-style="card"] { margin-top: 30px; padding: clamp(40px, 5vw, 60px) clamp(26px, 4.5vw, 56px) clamp(30px, 4vw, 48px); border-radius: 30px; background: #fff; transform: perspective(1200px) rotateX(var(--rx)) rotateY(var(--ry)); box-shadow: 0 1px 2px rgba(15,23,42,.05), 0 34px 60px -30px rgba(15,23,42,.3); }
-    #{{ $uid }} .rj-bq-wrap[data-style="card"]::before, #{{ $uid }} .rj-bq-wrap[data-style="card"]::after { content: ""; position: absolute; z-index: -1; inset: 0; border-radius: inherit; transition: transform .7s cubic-bezier(.34,1.3,.64,1), opacity .5s ease; }
-    #{{ $uid }} .rj-bq-wrap[data-style="card"]::before { background: linear-gradient(135deg, var(--bq-accent), var(--bq-accent2)); transform: rotate(-2.5deg) translateY(6px); opacity: .85; }
-    #{{ $uid }} .rj-bq-wrap[data-style="card"]::after { background: color-mix(in srgb, var(--bq-accent2) 35%, #fff); transform: rotate(2.5deg) translateY(10px); opacity: .6; }
-    #{{ $uid }} .rj-bq-wrap[data-style="card"]:hover::before { transform: rotate(-6deg) translate(-14px, 8px); }
-    #{{ $uid }} .rj-bq-wrap[data-style="card"]:hover::after { transform: rotate(5deg) translate(14px, 12px); }
-    #{{ $uid }} .rj-bq-wrap[data-style="card"] .rj-bq-glow { display: block; position: absolute; z-index: 1; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .4s ease; background: radial-gradient(380px circle at var(--mx) var(--my), color-mix(in srgb, var(--bq-accent) 14%, transparent), transparent 70%); }
-    #{{ $uid }} .rj-bq-wrap[data-style="card"]:hover .rj-bq-glow { opacity: 1; }
-    #{{ $uid }} .rj-bq-wrap[data-style="card"] .rj-bq-badge { display: grid; place-items: center; position: absolute; z-index: 4; top: -30px; left: 50%; width: 62px; height: 62px; margin-left: -31px; border-radius: 50%; background: linear-gradient(135deg, var(--bq-accent), var(--bq-accent2)); border: 4px solid #fff; color: #fff; font-family: Georgia, serif; font-size: 44px; font-weight: 900; line-height: 1; padding-top: 14px; box-shadow: 0 16px 30px -10px var(--bq-accent); animation: bqPulse-{{ $uid }} 2.2s ease-out infinite; }
-    #{{ $uid }} .rj-bq-wrap[data-style="card"][data-align="left"] .rj-bq-badge { left: 40px; margin-left: 0; }
-    #{{ $uid }} .rj-bq-wrap[data-style="card"][data-align="right"] .rj-bq-badge { left: auto; right: 40px; margin-left: 0; }
+    #{{ $uid }} .rq[data-style="gradient"] { padding: clamp(40px, 6vw, 76px) clamp(28px, 5vw, 72px); border-radius: 36px; overflow: hidden; background: #070816; transform: perspective(1200px) rotateX(var(--rx)) rotateY(var(--ry)); transition: transform .25s ease-out; box-shadow: 0 50px 100px -45px var(--a); }
+    #{{ $uid }} .rq[data-style="gradient"] .rq-aur { display: block; position: absolute; z-index: 0; left: 50%; top: 50%; width: max(900px, 170%); aspect-ratio: 1; translate: -50% -50%; pointer-events: none; opacity: .6; filter: blur(80px); background: conic-gradient(from 0deg, var(--a), var(--b), #06b6d4, var(--a)); animation: rq-spin-{{ $uid }} 18s linear infinite; }
+    #{{ $uid }} .rq[data-style="gradient"]::after { content: ""; position: absolute; inset: 0; z-index: 1; border-radius: inherit; pointer-events: none; background: radial-gradient(ellipse at 50% 50%, rgba(7,8,22,.72), rgba(7,8,22,.15) 80%); }
+    #{{ $uid }} .rq[data-style="gradient"]::before { content: ""; position: absolute; inset: 0; z-index: 5; border-radius: inherit; padding: 1.5px; pointer-events: none; background: conic-gradient(from var(--rq-ang), transparent 0 55%, var(--a) 75%, #fff 88%, transparent 100%); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); mask-composite: exclude; animation: rq-angle-{{ $uid }} 6s linear infinite; }
+    #{{ $uid }} .rq[data-style="gradient"] .rq-p { display: block; position: absolute; z-index: 2; left: var(--l); bottom: -12px; width: 5px; height: 5px; border-radius: 50%; background: #fff; opacity: 0; box-shadow: 0 0 12px 2px var(--a); animation: rq-rise-{{ $uid }} var(--s) linear infinite; animation-delay: var(--d); pointer-events: none; }
+    #{{ $uid }} .rq[data-style="gradient"] .rq-text { color: #fff; animation: rq-glow-{{ $uid }} 4s ease-in-out infinite alternate; }
+    #{{ $uid }} .rq[data-style="gradient"] .rq-name { color: #fff; }
+    #{{ $uid }} .rq[data-style="gradient"] .rq-role { color: rgba(255,255,255,.65); }
+    #{{ $uid }} .rq[data-style="gradient"] .rq-avatar { border-color: #070816; }
+    #{{ $uid }} .rq[data-style="gradient"] .rq-mark.open { display: block; position: absolute; z-index: 2; top: 4px; right: 28px; font-size: 180px; color: #fff; opacity: .1; }
 
-    #{{ $uid }} .rj-bq-wrap[data-style="gradient"] { padding: clamp(34px, 5vw, 60px) clamp(26px, 5vw, 60px); border-radius: 32px; overflow: hidden; background: #0a0d1f; border: 1px solid rgba(255,255,255,.12); transform: perspective(1200px) rotateX(var(--rx)) rotateY(var(--ry)); box-shadow: 0 40px 80px -36px color-mix(in srgb, var(--bq-accent) 65%, transparent); }
-    #{{ $uid }} .rj-bq-wrap[data-style="gradient"] .rj-bq-quote, #{{ $uid }} .rj-bq-wrap[data-style="gradient"] .rj-bq-name { color: #fff; }
-    #{{ $uid }} .rj-bq-wrap[data-style="gradient"] .rj-bq-role { color: rgba(255,255,255,.65); }
-    #{{ $uid }} .rj-bq-wrap[data-style="gradient"] .rj-bq-avatar { border-color: #0a0d1f; }
-    #{{ $uid }} .rj-bq-wrap[data-style="gradient"] .rj-bq-blob { display: block; position: absolute; z-index: 0; width: 340px; height: 340px; border-radius: 50%; filter: blur(70px); pointer-events: none; }
-    #{{ $uid }} .rj-bq-wrap[data-style="gradient"] .rj-bq-blob.a { top: -130px; left: -90px; background: var(--bq-accent); opacity: .55; animation: bqBlobA-{{ $uid }} 12s ease-in-out infinite; }
-    #{{ $uid }} .rj-bq-wrap[data-style="gradient"] .rj-bq-blob.b { right: -110px; bottom: -140px; background: var(--bq-accent2); opacity: .5; animation: bqBlobB-{{ $uid }} 15s ease-in-out infinite; }
-    #{{ $uid }} .rj-bq-wrap[data-style="gradient"] .rj-bq-dots { display: block; position: absolute; z-index: 1; inset: 0; pointer-events: none; opacity: .5; background-image: radial-gradient(circle, rgba(255,255,255,.55) 1px, transparent 1.6px), radial-gradient(circle, rgba(255,255,255,.35) 1px, transparent 1.6px); background-size: 120px 120px, 77px 77px; background-position: 0 0, 30px 40px; animation: bqRise-{{ $uid }} 14s linear infinite; -webkit-mask-image: linear-gradient(to bottom, transparent, #000 25%, #000 75%, transparent); mask-image: linear-gradient(to bottom, transparent, #000 25%, #000 75%, transparent); }
-    #{{ $uid }} .rj-bq-wrap[data-style="gradient"] .rj-bq-glow { display: block; position: absolute; z-index: 1; inset: 0; pointer-events: none; opacity: 0; transition: opacity .4s ease; background: radial-gradient(360px circle at var(--mx) var(--my), rgba(255,255,255,.12), transparent 70%); }
-    #{{ $uid }} .rj-bq-wrap[data-style="gradient"]:hover .rj-bq-glow { opacity: 1; }
-    #{{ $uid }} .rj-bq-wrap[data-style="gradient"] .rj-bq-mark.open { display: block; position: absolute; z-index: 2; top: 6px; right: 26px; font-size: 170px; color: #fff; opacity: .1; }
+    #{{ $uid }} .rq[data-style="big-marks"] { padding: 70px 12px 20px; }
+    #{{ $uid }} .rq[data-style="big-marks"] .rq-blob { display: block; position: absolute; z-index: 0; left: var(--bx); top: var(--by); width: 460px; height: 460px; translate: -50% -50%; border-radius: 50%; pointer-events: none; background: radial-gradient(circle, color-mix(in srgb, var(--a) 32%, transparent), color-mix(in srgb, var(--b) 12%, transparent) 45%, transparent 68%); transition: left .9s cubic-bezier(.2,.8,.2,1), top .9s cubic-bezier(.2,.8,.2,1); animation: rq-drift-{{ $uid }} 7s ease-in-out infinite; }
+    #{{ $uid }} .rq[data-style="big-marks"] .rq-text { font-weight: 800; letter-spacing: -.028em; line-height: 1.3; }
+    #{{ $uid }} .rq[data-style="big-marks"] .rq-w { overflow: hidden; vertical-align: top; padding: .05em 0 .16em; margin-bottom: -.16em; }
+    #{{ $uid }} .rq[data-style="big-marks"] .rq-mark { display: block; position: absolute; z-index: 1; transition: translate .5s ease-out; }
+    #{{ $uid }} .rq[data-style="big-marks"] .rq-mark.open { top: -34px; left: -8px; font-size: 300px; color: transparent; -webkit-text-stroke: 3px var(--a); opacity: .55; translate: calc(var(--mpx) * 46px) calc(var(--mpy) * 46px); }
+    #{{ $uid }} .rq[data-style="big-marks"] .rq-mark.close { right: -6px; bottom: -130px; font-size: 280px; opacity: .22; background: linear-gradient(135deg, var(--a), var(--b)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; translate: calc(var(--mpx) * -60px) calc(var(--mpy) * -60px); }
+    #{{ $uid }} .rq[data-style="big-marks"][data-align="center"] .rq-mark.open { left: 50%; margin-left: -80px; }
+    #{{ $uid }} .rq[data-style="big-marks"][data-align="right"] .rq-mark.open { left: auto; right: -8px; }
+    #{{ $uid }} .rq[data-style="big-marks"][data-align="right"] .rq-mark.close { right: auto; left: -6px; }
+    #{{ $uid }} .rq[data-style="big-marks"] .rq-name { position: relative; }
+    #{{ $uid }} .rq[data-style="big-marks"] .rq-name::after { content: ""; position: absolute; left: 0; right: 0; bottom: -3px; height: 3px; border-radius: 3px; background: linear-gradient(90deg, var(--a), var(--b)); transform: scaleX(.35); transform-origin: left; transition: transform .6s cubic-bezier(.2,.8,.2,1); }
+    #{{ $uid }} .rq[data-style="big-marks"]:hover .rq-name::after { transform: scaleX(1); }
 
-    #{{ $uid }} .rj-bq-wrap[data-style="big-marks"] { padding: 54px 10px 10px; }
-    #{{ $uid }} .rj-bq-wrap[data-style="big-marks"] .rj-bq-quote { font-weight: 800; letter-spacing: -.025em; line-height: 1.32; }
-    #{{ $uid }} .rj-bq-wrap[data-style="big-marks"] .rj-bq-mark.open { display: block; position: absolute; z-index: 1; top: -30px; left: -6px; font-size: 300px; opacity: .2; background: linear-gradient(135deg, var(--bq-accent), var(--bq-accent2)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; filter: drop-shadow(0 20px 30px color-mix(in srgb, var(--bq-accent) 30%, transparent)); }
-    #{{ $uid }} .rj-bq-wrap[data-style="big-marks"] .rj-bq-mark.close { display: block; position: absolute; z-index: 1; right: -4px; bottom: -120px; font-size: 260px; color: transparent; -webkit-text-stroke: 2px var(--bq-accent); opacity: .35; transition: opacity .4s ease, transform .6s cubic-bezier(.2,.8,.2,1); }
-    #{{ $uid }} .rj-bq-wrap[data-style="big-marks"]:hover .rj-bq-mark.close { opacity: .7; transform: translate(-8px, -8px) rotate(-4deg); }
-    #{{ $uid }} .rj-bq-wrap[data-style="big-marks"][data-align="center"] .rj-bq-mark.open { left: 50%; margin-left: -80px; }
-    #{{ $uid }} .rj-bq-wrap[data-style="big-marks"][data-align="right"] .rj-bq-mark.open { left: auto; right: -6px; }
-    #{{ $uid }} .rj-bq-wrap[data-style="big-marks"][data-align="right"] .rj-bq-mark.close { right: auto; left: -4px; }
-    #{{ $uid }} .rj-bq-wrap[data-style="big-marks"] .rj-bq-ln.b { display: block; position: relative; z-index: 3; width: 110px; height: 5px; margin: 0 0 26px; border-radius: 5px; background: linear-gradient(90deg, var(--bq-accent), var(--bq-accent2)); transform-origin: left; transition: width .5s ease; }
-    #{{ $uid }} .rj-bq-wrap[data-style="big-marks"]:hover .rj-bq-ln.b { width: 180px; }
-    #{{ $uid }} .rj-bq-wrap[data-style="big-marks"][data-align="center"] .rj-bq-ln.b { margin-inline: auto; transform-origin: center; }
-    #{{ $uid }} .rj-bq-wrap[data-style="big-marks"][data-align="right"] .rj-bq-ln.b { margin-left: auto; transform-origin: right; }
+    #{{ $uid }} .rq[data-style="minimal"] { margin-top: 14px; padding: 48px clamp(26px, 5vw, 56px) 38px clamp(54px, 8vw, 88px); border: 1px solid #ece6d3; border-radius: 6px; background: #fffdf7; rotate: -.6deg; box-shadow: 0 1px 1px rgba(60,50,20,.06), 0 2px 4px rgba(60,50,20,.05), 0 20px 40px -18px rgba(60,50,20,.32); transition: rotate .6s cubic-bezier(.2,.8,.2,1), translate .6s cubic-bezier(.2,.8,.2,1), box-shadow .6s ease; }
+    #{{ $uid }} .rq[data-style="minimal"]:hover { rotate: 0deg; translate: 0 -6px; box-shadow: 0 1px 1px rgba(60,50,20,.06), 0 2px 4px rgba(60,50,20,.05), 0 34px 54px -20px rgba(60,50,20,.38); }
+    #{{ $uid }} .rq[data-style="minimal"]::before { content: ""; position: absolute; top: 0; bottom: 0; left: clamp(40px, 6vw, 68px); width: 1px; background: rgba(239,68,68,.35); }
+    #{{ $uid }} .rq[data-style="minimal"] .rq-tape { display: block; position: absolute; z-index: 4; top: -15px; left: 50%; width: 120px; height: 30px; margin-left: -60px; rotate: -3deg; background: color-mix(in srgb, var(--a) 30%, rgba(255,255,255,.65)); box-shadow: 0 2px 6px rgba(0,0,0,.12); }
+    #{{ $uid }} .rq[data-style="minimal"] .rq-text { font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-weight: 400; letter-spacing: 0; line-height: 1.75; background: linear-gradient(to bottom, transparent calc(100% - 1px), color-mix(in srgb, var(--a) 28%, transparent) 0) 0 0 / 100% calc(var(--rq-size) * 1.75); }
+    #{{ $uid }} .rq[data-style="minimal"] .rq-name { font-family: Georgia, serif; font-style: italic; text-decoration: underline wavy var(--a); text-decoration-thickness: 1px; text-underline-offset: 5px; }
+    #{{ $uid }} .rq[data-style="minimal"] .rq-ring { width: 46px; height: 46px; padding: 2px; }
+    #{{ $uid }} .rq[data-style="minimal"] .rq-ring::before { background: conic-gradient(from 0deg, var(--a), transparent 70%, var(--a)); }
+    #{{ $uid }} .rq[data-style="minimal"] .rq-caret { display: inline-block; width: 2px; height: 1.05em; margin-left: 3px; vertical-align: -.15em; background: var(--a); animation: rq-blink-{{ $uid }} 1s steps(1) infinite; }
 
-    #{{ $uid }} .rj-bq-wrap[data-style="minimal"] { padding: 36px 0; }
-    #{{ $uid }} .rj-bq-wrap[data-style="minimal"] .rj-bq-quote { font-family: Georgia, 'Times New Roman', serif; font-weight: 400; font-style: italic; line-height: 1.55; letter-spacing: 0; }
-    #{{ $uid }} .rj-bq-wrap[data-style="minimal"] .rj-bq-ln { display: block; position: absolute; z-index: 1; left: 0; right: 0; height: 1px; background: color-mix(in srgb, var(--bq-text) 18%, transparent); transform-origin: left; transition: background .5s ease; }
-    #{{ $uid }} .rj-bq-wrap[data-style="minimal"] .rj-bq-ln.t { top: 0; }
-    #{{ $uid }} .rj-bq-wrap[data-style="minimal"] .rj-bq-ln.b { bottom: 0; transform-origin: right; }
-    #{{ $uid }} .rj-bq-wrap[data-style="minimal"] .rj-bq-ln::after { content: ""; position: absolute; top: -2px; left: 0; width: 56px; height: 5px; background: var(--bq-accent); transition: width .6s cubic-bezier(.2,.8,.2,1); }
-    #{{ $uid }} .rj-bq-wrap[data-style="minimal"] .rj-bq-ln.b::after { left: auto; right: 0; background: var(--bq-accent2); }
-    #{{ $uid }} .rj-bq-wrap[data-style="minimal"]:hover .rj-bq-ln::after { width: 45%; }
-    #{{ $uid }} .rj-bq-wrap[data-style="minimal"] .rj-bq-name { font-size: 12.5px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; }
-    #{{ $uid }} .rj-bq-wrap[data-style="minimal"] .rj-bq-role { font-size: 12px; letter-spacing: .04em; }
-    #{{ $uid }} .rj-bq-wrap[data-style="minimal"] .rj-bq-ring { width: 46px; height: 46px; padding: 2px; }
-    #{{ $uid }} .rj-bq-wrap[data-style="minimal"] .rj-bq-ring::before { background: conic-gradient(from 0deg, var(--bq-accent), transparent 70%, var(--bq-accent)); }
+    #{{ $uid }} .rq.js:not(.vis):is([data-style="card"], [data-style="gradient"], [data-style="big-marks"]) .rq-w > span { opacity: 0; }
+    #{{ $uid }} .rq.js:not(.vis) :is(.rq-author, .rq-mark, .rq-badge) { opacity: 0; }
+    #{{ $uid }} .rq[data-style="accent-bar"].js:not(.vis) .rq-text { clip-path: inset(-30% 100% -30% 0); }
+    #{{ $uid }} .rq[data-style="minimal"].js .rq-w > span { opacity: 0; }
+    #{{ $uid }} .rq[data-style="minimal"].js .rq-w.on > span { opacity: 1; }
+    #{{ $uid }} .rq[data-style="minimal"].js .rq-author { opacity: 0; transition: opacity .8s ease .1s; }
+    #{{ $uid }} .rq[data-style="minimal"].js.done .rq-author { opacity: 1; }
 
-    #{{ $uid }} .rj-bq-wrap.rj-bq-js:not(.is-visible) .rj-w,
-    #{{ $uid }} .rj-bq-wrap.rj-bq-js:not(.is-visible) .rj-bq-author,
-    #{{ $uid }} .rj-bq-wrap.rj-bq-js:not(.is-visible) .rj-bq-mark,
-    #{{ $uid }} .rj-bq-wrap.rj-bq-js:not(.is-visible) .rj-bq-badge,
-    #{{ $uid }} .rj-bq-wrap.rj-bq-js:not(.is-visible) .rj-bq-rail,
-    #{{ $uid }} .rj-bq-wrap.rj-bq-js:not(.is-visible) .rj-bq-ln { opacity: 0; }
-
-    #{{ $uid }} .rj-bq-wrap.is-visible .rj-w { animation: bqWord-{{ $uid }} .85s cubic-bezier(.2,.8,.2,1) backwards; animation-delay: calc(var(--w, 0) * 50ms + 300ms); }
-    #{{ $uid }} .rj-bq-wrap.is-visible .rj-bq-author { animation: bqUp-{{ $uid }} .8s cubic-bezier(.2,.8,.2,1) backwards; animation-delay: calc(var(--total, 0) * 50ms + 550ms); }
-    #{{ $uid }} .rj-bq-wrap.is-visible .rj-bq-rail::before { animation: bqDraw-{{ $uid }} 1.2s cubic-bezier(.2,.8,.2,1) backwards; }
-    #{{ $uid }} .rj-bq-wrap.is-visible .rj-bq-ln { animation: bqDrawX-{{ $uid }} 1.1s cubic-bezier(.2,.8,.2,1) .15s backwards; }
-    #{{ $uid }} .rj-bq-wrap.is-visible .rj-bq-badge { animation: bqPop-{{ $uid }} .8s cubic-bezier(.34,1.56,.64,1) .1s backwards, bqPulse-{{ $uid }} 2.2s ease-out .9s infinite; }
-    #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"].is-visible .rj-bq-mark.open { animation: bqPop-{{ $uid }} .8s cubic-bezier(.34,1.56,.64,1) .1s backwards; }
-    #{{ $uid }} .rj-bq-wrap[data-style="gradient"].is-visible .rj-bq-mark.open { animation: bqUp-{{ $uid }} 1.1s ease .2s backwards; }
-    #{{ $uid }} .rj-bq-wrap[data-style="big-marks"].is-visible .rj-bq-mark.open { animation: bqDrop-{{ $uid }} 1.1s cubic-bezier(.3,1.2,.5,1) backwards; }
-    #{{ $uid }} .rj-bq-wrap[data-style="big-marks"].is-visible .rj-bq-mark.close { animation: bqUp-{{ $uid }} 1s ease .6s backwards; }
+    #{{ $uid }} .rq.vis[data-style="card"] .rq-w > span { animation: rq-flip-{{ $uid }} .9s cubic-bezier(.2,.8,.2,1) backwards; animation-delay: calc(var(--w, 0) * 50ms + 300ms); }
+    #{{ $uid }} .rq.vis[data-style="gradient"] .rq-w > span { animation: rq-blur-{{ $uid }} 1s cubic-bezier(.2,.8,.2,1) backwards; animation-delay: calc(var(--w, 0) * 55ms + 300ms); }
+    #{{ $uid }} .rq.vis[data-style="big-marks"] .rq-w > span { animation: rq-mask-{{ $uid }} .9s cubic-bezier(.2,.8,.2,1) backwards; animation-delay: calc(var(--w, 0) * 60ms + 300ms); }
+    #{{ $uid }} .rq.vis[data-style="accent-bar"] .rq-text { animation: rq-clip-{{ $uid }} 1.9s cubic-bezier(.65,0,.35,1) backwards; }
+    #{{ $uid }} .rq.vis[data-style="accent-bar"] .rq-beam { animation: rq-sweep-{{ $uid }} 1.9s cubic-bezier(.65,0,.35,1) forwards; }
+    #{{ $uid }} .rq.vis:not([data-style="minimal"]) .rq-author { animation: rq-up-{{ $uid }} .9s cubic-bezier(.2,.8,.2,1) backwards; animation-delay: calc(var(--total, 0) * 55ms + 650ms); }
+    #{{ $uid }} .rq.vis[data-style="accent-bar"] .rq-author { animation-delay: 1.8s; }
+    #{{ $uid }} .rq.vis .rq-mark.open { animation: rq-pop-{{ $uid }} .9s cubic-bezier(.34,1.56,.64,1) .1s backwards; }
+    #{{ $uid }} .rq.vis .rq-mark.close { animation: rq-up-{{ $uid }} 1s ease .7s backwards; }
+    #{{ $uid }} .rq.vis .rq-badge { animation: rq-pop-{{ $uid }} .8s cubic-bezier(.34,1.56,.64,1) .1s backwards, rq-pulse-{{ $uid }} 2.2s ease-out .9s infinite; }
 
     @media (max-width: 639px) {
-        #{{ $uid }} .rj-bq-wrap[data-style="accent-bar"] { padding-left: 28px; }
-        #{{ $uid }} .rj-bq-wrap[data-style="big-marks"] .rj-bq-mark.open { font-size: 200px; }
-        #{{ $uid }} .rj-bq-wrap[data-style="big-marks"] .rj-bq-mark.close { font-size: 160px; bottom: -80px; }
-        #{{ $uid }} .rj-bq-wrap[data-style="gradient"] .rj-bq-mark.open { font-size: 110px; }
-        #{{ $uid }} .rj-bq-ring { width: 48px; height: 48px; }
+        #{{ $uid }} .rq[data-style="big-marks"] .rq-mark.open { font-size: 200px; }
+        #{{ $uid }} .rq[data-style="big-marks"] .rq-mark.close { font-size: 170px; bottom: -80px; }
+        #{{ $uid }} .rq[data-style="gradient"] .rq-mark.open { font-size: 110px; }
+        #{{ $uid }} .rq[data-style="minimal"] { padding-left: 48px; }
+        #{{ $uid }} .rq-ring { width: 48px; height: 48px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
         #{{ $uid }} *, #{{ $uid }} *::before, #{{ $uid }} *::after { animation: none !important; transition-duration: .01ms !important; transition-delay: 0ms !important; }
-        #{{ $uid }} .rj-bq-wrap.rj-bq-js:not(.is-visible) .rj-w,
-        #{{ $uid }} .rj-bq-wrap.rj-bq-js:not(.is-visible) .rj-bq-author,
-        #{{ $uid }} .rj-bq-wrap.rj-bq-js:not(.is-visible) .rj-bq-mark,
-        #{{ $uid }} .rj-bq-wrap.rj-bq-js:not(.is-visible) .rj-bq-badge,
-        #{{ $uid }} .rj-bq-wrap.rj-bq-js:not(.is-visible) .rj-bq-rail,
-        #{{ $uid }} .rj-bq-wrap.rj-bq-js:not(.is-visible) .rj-bq-ln { opacity: 1; }
     }
 </style>
 
 <div id="{{ $uid }}">
-    <div class="rj-bq-wrap" data-style="{{ $style }}" data-align="{{ $align }}" data-animate="{{ $animate ? 1 : 0 }}">
+    <div class="rq" data-style="{{ $style }}" data-align="{{ $align }}" data-animate="{{ $animate ? 1 : 0 }}">
 
-        <span class="rj-bq-rail" aria-hidden="true"></span>
-        <span class="rj-bq-blob a" aria-hidden="true"></span>
-        <span class="rj-bq-blob b" aria-hidden="true"></span>
-        <span class="rj-bq-dots" aria-hidden="true"></span>
-        <span class="rj-bq-glow" aria-hidden="true"></span>
+        <span class="rq-grid" aria-hidden="true"></span>
+        <span class="rq-aur" aria-hidden="true"></span>
+        <span class="rq-blob" aria-hidden="true"></span>
+        <span class="rq-foil" aria-hidden="true"></span>
+        <span class="rq-glare" aria-hidden="true"></span>
+        <span class="rq-tape" aria-hidden="true"></span>
 
-        @if ($style === 'minimal')
-            <span class="rj-bq-ln t" aria-hidden="true"></span>
-            <span class="rj-bq-ln b" aria-hidden="true"></span>
+        @if ($style === 'card')
+            @foreach ([['8%', '14%', '0s'], ['90%', '22%', '.9s'], ['82%', '78%', '1.8s'], ['12%', '70%', '2.4s']] as $s)
+                <span class="rq-star" style="--l: {{ $s[0] }}; --t2: {{ $s[1] }}; --d: {{ $s[2] }};" aria-hidden="true"></span>
+            @endforeach
+        @endif
+
+        @if ($style === 'gradient')
+            @foreach ([['6%', '0s', '9s'], ['18%', '3s', '12s'], ['31%', '1s', '10s'], ['44%', '5s', '13s'], ['58%', '2s', '9s'], ['71%', '6s', '11s'], ['84%', '4s', '14s'], ['94%', '7s', '10s']] as $p)
+                <span class="rq-p" style="--l: {{ $p[0] }}; --d: {{ $p[1] }}; --s: {{ $p[2] }};" aria-hidden="true"></span>
+            @endforeach
         @endif
 
         @if ($showMarks)
             @if ($style === 'card')
-                <span class="rj-bq-badge" aria-hidden="true">&ldquo;</span>
+                <span class="rq-badge" aria-hidden="true">&ldquo;</span>
             @elseif ($style === 'big-marks')
-                <span class="rj-bq-mark open" aria-hidden="true">&ldquo;</span>
-                <span class="rj-bq-mark close" aria-hidden="true">&rdquo;</span>
+                <span class="rq-mark open" aria-hidden="true">&ldquo;</span>
+                <span class="rq-mark close" aria-hidden="true">&rdquo;</span>
             @elseif ($style === 'accent-bar' || $style === 'gradient')
-                <span class="rj-bq-mark open" aria-hidden="true">&ldquo;</span>
+                <span class="rq-mark open" aria-hidden="true">&ldquo;</span>
             @endif
         @endif
 
-        @if ($quote !== '')
-            <blockquote class="rj-bq-quote">@foreach ($lines as $line)@foreach (preg_split('/\s+/u', trim($line), -1, PREG_SPLIT_NO_EMPTY) ?: [] as $word)<span class="rj-w" style="--w: {{ min($n++, 80) }};">{{ $word }}</span> @endforeach @if (!$loop->last)<br>@endif @endforeach</blockquote>
-        @endif
-
-        @if ($style === 'big-marks')
-            <span class="rj-bq-ln b" aria-hidden="true"></span>
-        @endif
+        <div class="rq-body">
+            <span class="rq-beam" aria-hidden="true"></span>
+            @if ($quote !== '')
+                <blockquote class="rq-text">@foreach ($lines as $line)@foreach (preg_split('/\s+/u', trim($line), -1, PREG_SPLIT_NO_EMPTY) ?: [] as $word)<span class="rq-w" style="--w: {{ min($n++, 80) }};"><span>{{ $word }}</span></span> @endforeach @if (!$loop->last)<br>@endif @endforeach</blockquote>
+            @endif
+        </div>
 
         @if ($author !== '')
-            <div class="rj-bq-author">
-                <div class="rj-bq-ring">
-                    <div class="rj-bq-avatar">
+            <div class="rq-author">
+                <div class="rq-ring">
+                    <div class="rq-avatar">
                         @if ($avatar !== '')
                             <img src="{{ $avatar }}" alt="{{ $author }}" loading="lazy" decoding="async">
                         @else
@@ -248,10 +218,10 @@
                         @endif
                     </div>
                 </div>
-                <div class="rj-bq-meta">
-                    <span class="rj-bq-name">{{ $author }}</span>
+                <div class="rq-meta">
+                    <span class="rq-name">{{ $author }}</span>
                     @if ($role !== '')
-                        <span class="rj-bq-role">{{ $role }}</span>
+                        <span class="rq-role">{{ $role }}</span>
                     @endif
                 </div>
             </div>
@@ -265,46 +235,90 @@
     if (!root || root.dataset.ready) { return; }
     root.dataset.ready = '1';
 
-    var el = root.querySelector('.rj-bq-wrap');
+    var el = root.querySelector('.rq');
     if (!el) { return; }
 
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var canHover = window.matchMedia && window.matchMedia('(hover: hover)').matches;
     var style = el.getAttribute('data-style');
-    var words = el.querySelectorAll('.rj-w').length;
+    var words = [].slice.call(el.querySelectorAll('.rq-w'));
+    var timer = 0;
 
-    el.style.setProperty('--total', Math.min(words, 80));
+    el.style.setProperty('--total', Math.min(words.length, 80));
+
+    function typeIt() {
+        clearTimeout(timer);
+        el.classList.remove('done');
+        words.forEach(function (w) { w.classList.remove('on'); });
+        var caret = el.querySelector('.rq-caret');
+        if (!caret) {
+            caret = document.createElement('span');
+            caret.className = 'rq-caret';
+            caret.setAttribute('aria-hidden', 'true');
+        }
+        var i = 0;
+        (function step() {
+            if (i >= words.length) { el.classList.add('done'); return; }
+            var w = words[i++];
+            w.classList.add('on');
+            w.parentNode.insertBefore(caret, w.nextSibling);
+            timer = setTimeout(step, 55 + w.textContent.length * 30);
+        })();
+    }
+
+    function start() {
+        el.classList.add('vis');
+        if (style === 'minimal') { typeIt(); }
+    }
 
     if (el.dataset.animate === '1' && !reduce) {
-        el.classList.add('rj-bq-js');
+        el.classList.add('js');
 
         if ('IntersectionObserver' in window) {
             var io = new IntersectionObserver(function (entries) {
-                if (entries[0].isIntersecting) {
-                    el.classList.add('is-visible');
-                    io.disconnect();
-                }
-            }, { threshold: 0.2 });
+                if (entries[0].isIntersecting) { start(); io.disconnect(); }
+            }, { threshold: 0.25 });
             io.observe(el);
         } else {
-            el.classList.add('is-visible');
+            start();
         }
+
+        if (style === 'minimal') { el.addEventListener('click', typeIt); }
     }
 
-    if (canHover && !reduce && (style === 'card' || style === 'gradient')) {
-        el.addEventListener('pointermove', function (e) {
-            var r = el.getBoundingClientRect();
-            var x = e.clientX - r.left;
-            var y = e.clientY - r.top;
-            el.style.setProperty('--mx', x + 'px');
-            el.style.setProperty('--my', y + 'px');
-            el.style.setProperty('--ry', ((x / r.width - 0.5) * 6).toFixed(2) + 'deg');
-            el.style.setProperty('--rx', ((0.5 - y / r.height) * 6).toFixed(2) + 'deg');
-        });
-        el.addEventListener('pointerleave', function () {
-            el.style.setProperty('--rx', '0deg');
-            el.style.setProperty('--ry', '0deg');
-        });
+    if (canHover && !reduce) {
+        if (style === 'card' || style === 'gradient') {
+            var k = style === 'card' ? 8 : 5;
+            el.addEventListener('pointermove', function (e) {
+                var r = el.getBoundingClientRect();
+                var x = e.clientX - r.left, y = e.clientY - r.top;
+                el.style.setProperty('--mx', x + 'px');
+                el.style.setProperty('--my', y + 'px');
+                el.style.setProperty('--px', (x / r.width * 100).toFixed(1));
+                el.style.setProperty('--py', (y / r.height * 100).toFixed(1));
+                el.style.setProperty('--ry', ((x / r.width - 0.5) * k).toFixed(2) + 'deg');
+                el.style.setProperty('--rx', ((0.5 - y / r.height) * k).toFixed(2) + 'deg');
+            });
+            el.addEventListener('pointerleave', function () {
+                el.style.setProperty('--rx', '0deg');
+                el.style.setProperty('--ry', '0deg');
+            });
+        }
+
+        if (style === 'big-marks') {
+            el.addEventListener('pointermove', function (e) {
+                var r = el.getBoundingClientRect();
+                var x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+                el.style.setProperty('--bx', (x * 100).toFixed(1) + '%');
+                el.style.setProperty('--by', (y * 100).toFixed(1) + '%');
+                el.style.setProperty('--mpx', (x - 0.5).toFixed(3));
+                el.style.setProperty('--mpy', (y - 0.5).toFixed(3));
+            });
+            el.addEventListener('pointerleave', function () {
+                el.style.setProperty('--mpx', '0');
+                el.style.setProperty('--mpy', '0');
+            });
+        }
     }
 })();
 </script>
