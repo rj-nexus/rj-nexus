@@ -21,5 +21,60 @@
 </head>
 <body class="font-sans bg-gray-100 text-gray-900 antialiased h-screen overflow-hidden">
     @yield('content')
+
+    <script>
+    (function() {
+        var placeholderUrl = 'https://raw.githubusercontent.com/mr-ruhid/rare-logos-vault/main/placeholder/fallback-image/rj-nexus-no-image.webp';
+
+        function applyPlaceholder(img) {
+            if (img.dataset.placeholderApplied) return;
+            img.dataset.placeholderApplied = 'true';
+
+            img.src = placeholderUrl;
+            img.style.background = '#f8fafc';
+            img.style.objectFit = 'contain';
+            img.style.padding = '2rem';
+            img.style.opacity = '0.5';
+            img.style.filter = 'grayscale(100%)';
+        }
+
+        function checkImages(container) {
+            container.querySelectorAll('img').forEach(function(img) {
+                if (!img.src || img.src.includes('undefined') || img.src === window.location.href || img.src === '') {
+                    applyPlaceholder(img);
+                }
+
+                img.addEventListener('error', function() {
+                    applyPlaceholder(this);
+                });
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            checkImages(document);
+        });
+
+        var observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.addedNodes) {
+                    mutation.addedNodes.forEach(function(node) {
+                        if (node.nodeType === 1) {
+                            if (node.tagName === 'IMG') {
+                                if (!node.src || node.src === '') applyPlaceholder(node);
+                                node.addEventListener('error', function() { applyPlaceholder(this); });
+                            } else {
+                                checkImages(node);
+                            }
+                        }
+                    });
+                }
+            });
+        });
+
+        document.addEventListener("DOMContentLoaded", function() {
+            observer.observe(document.body, { childList: true, subtree: true });
+        });
+    })();
+    </script>
 </body>
 </html>
