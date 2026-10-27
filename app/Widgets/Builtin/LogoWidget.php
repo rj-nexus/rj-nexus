@@ -33,14 +33,15 @@ class LogoWidget extends BaseWidget
 
     public function schema(): array
     {
+        $defaultLogo = rj_logo_mask_url() ?: asset('images/logo.svg');
+
         return [
             [
                 'name'    => 'image',
                 'type'    => 'media',
                 'label'   => __('Logo Image'),
-                'default' => '',
+                'default' => $defaultLogo,
                 'tab'     => 'content',
-                'help'    => __('Leave empty to use the site default logo or name.'),
             ],
             [
                 'name'    => 'url',

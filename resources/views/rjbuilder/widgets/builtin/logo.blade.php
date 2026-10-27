@@ -1,62 +1,98 @@
-@php
-    $image        = $settings['image'] ?? '';
-    $url          = $settings['url'] ?? '/';
-    $alt          = $settings['alt'] ?? rj_get_option('site_name', 'Logo');
-    $width        = (int) ($settings['width'] ?? 140);
-    $align        = $settings['align'] ?? 'left';
-    $hoverOpacity = $settings['hover_opacity'] ?? true;
+<?php
 
-    // Əgər istifadəçi şəkil seçməyibsə, saytın default loqosunu yoxla
-    $logoMask = function_exists('rj_logo_mask_url') ? rj_logo_mask_url() : '';
-    $siteName = rj_get_option('site_name', 'RJ CMS');
+namespace App\Widgets\Builtin;
 
-    $justify = 'flex-start';
-    if ($align === 'center') $justify = 'center';
-    elseif ($align === 'right') $justify = 'flex-end';
-@endphp
+use App\Widgets\BaseWidget;
 
-<style>
-    #{{ $uid }} {
-        display: flex;
-        justify-content: {{ $justify }};
-        width: 100%;
+class LogoWidget extends BaseWidget
+{
+    public function id(): string
+    {
+        return 'logo';
     }
-    #{{ $uid }} .rj-logo-link {
-        display: inline-block;
-        line-height: 0;
-        transition: opacity .2s ease;
-        text-decoration: none;
-    }
-    @if($hoverOpacity)
-    #{{ $uid }} .rj-logo-link:hover {
-        opacity: 0.7;
-    }
-    @endif
-    #{{ $uid }} .rj-logo-img {
-        width: {{ $width }}px;
-        max-width: 100%;
-        height: auto;
-        max-height: 80px;
-        display: block;
-        object-fit: contain;
-    }
-    #{{ $uid }} .rj-logo-text {
-        font-size: 24px;
-        font-weight: 800;
-        color: currentColor;
-        line-height: 1.2;
-        letter-spacing: -0.02em;
-    }
-</style>
 
-<div id="{{ $uid }}">
-    <a href="{{ $url }}" class="rj-logo-link">
-        @if($image)
-            <img src="{{ $image }}" alt="{{ $alt }}" class="rj-logo-img" loading="lazy">
-        @elseif($logoMask)
-            <div style="width: {{ $width }}px; height: 40px; background-color: currentColor; -webkit-mask-image: url('{{ $logoMask }}'); mask-image: url('{{ $logoMask }}'); -webkit-mask-size: contain; mask-size: contain; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; -webkit-mask-position: left center; mask-position: left center;"></div>
-        @else
-            <span class="rj-logo-text">{{ $siteName }}</span>
-        @endif
-    </a>
-</div>
+    public function name(): string
+    {
+        return __('Logo');
+    }
+
+    public function icon(): string
+    {
+        return '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>';
+    }
+
+    public function category(): string
+    {
+        return 'header';
+    }
+
+    public function description(): string
+    {
+        return __('Display your site logo with a custom link and size.');
+    }
+
+    public function schema(): array
+    {
+        $defaultLogo = rj_logo_mask_url() ?: asset('images/logo.svg');
+
+        return [
+            [
+                'name'    => 'image',
+                'type'    => 'media',
+                'label'   => __('Logo Image'),
+                'default' => $defaultLogo,
+                'tab'     => 'content',
+            ],
+            [
+                'name'    => 'url',
+                'type'    => 'text',
+                'label'   => __('Link URL'),
+                'default' => '/',
+                'tab'     => 'content',
+            ],
+            [
+                'name'    => 'alt',
+                'type'    => 'text',
+                'label'   => __('Alt Text (SEO)'),
+                'default' => '',
+                'tab'     => 'content',
+            ],
+            [
+                'name'    => 'width',
+                'type'    => 'range',
+                'label'   => __('Width (px)'),
+                'default' => 140,
+                'min'     => 20,
+                'max'     => 400,
+                'step'    => 5,
+                'tab'     => 'style',
+            ],
+            [
+                'name'    => 'align',
+                'type'    => 'select',
+                'label'   => __('Alignment'),
+                'default' => 'left',
+                'tab'     => 'style',
+                'options' => [
+                    'left'   => __('Left'),
+                    'center' => __('Center'),
+                    'right'  => __('Right'),
+                ],
+            ],
+            [
+                'name'    => 'hover_opacity',
+                'type'    => 'toggle',
+                'label'   => __('Fade on Hover'),
+                'default' => true,
+                'tab'     => 'style',
+            ],
+        ];
+    }
+
+    public function render(array $settings): string
+    {
+        $uid = 'logo_' . substr(md5(uniqid('', true)), 0, 8);
+
+        return view('rjbuilder.widgets.builtin.logo', compact('settings', 'uid'))->render();
+    }
+}
