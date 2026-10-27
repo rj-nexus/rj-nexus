@@ -106,6 +106,13 @@ class GalleryAdvancedWidget extends BaseWidget
                 ],
             ],
             [
+                'name'    => 'accent',
+                'type'    => 'color',
+                'label'   => __('Accent Color'),
+                'default' => '#14b8a6',
+                'tab'     => 'style',
+            ],
+            [
                 'name'   => 'items',
                 'type'   => 'repeater',
                 'label'  => __('Gallery Items'),
