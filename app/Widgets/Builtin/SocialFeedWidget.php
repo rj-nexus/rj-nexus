@@ -12,6 +12,13 @@ class SocialFeedWidget extends BaseWidget
 {
     protected const PLATFORMS = ['twitter', 'instagram', 'piokio', 'dehliz', 'reax', 'web'];
 
+    protected const LINK_KEYS    = ['url', 'link', 'permalink', 'external_url', 'post_url', 'href'];
+    protected const TEXT_KEYS    = ['content_html', 'content_text', 'content', 'description', 'summary', 'caption', 'text', 'body', 'message'];
+    protected const TITLE_KEYS   = ['title', 'name'];
+    protected const IMAGE_KEYS   = ['image', 'image_url', 'imageurl', 'thumbnail', 'thumbnail_url', 'media', 'media_url', 'picture', 'photo', 'banner_image', 'cover', 'enclosure', 'attachments'];
+    protected const DATE_KEYS    = ['date_published', 'date_modified', 'pubdate', 'published', 'date', 'created_at', 'updated', 'timestamp'];
+    protected const LIST_KEYS    = ['items', 'data', 'posts', 'entries', 'results'];
+
     public function id(): string
     {
         return 'social-feed';
@@ -34,7 +41,7 @@ class SocialFeedWidget extends BaseWidget
 
     public function description(): string
     {
-        return __('A social feed grid with RSS auto-feed and manual posts.');
+        return __('A social feed grid with RSS/JSON/CSV auto-feed and manual posts.');
     }
 
     public function schema(): array
@@ -45,25 +52,25 @@ class SocialFeedWidget extends BaseWidget
             [
                 'name'           => 'enable_rss',
                 'type'           => 'toggle',
-                'label'          => __('Enable RSS Auto-Feed'),
+                'label'          => __('Enable Auto-Feed'),
                 'default'        => false,
                 'tab'            => 'content',
-                'help'           => __('Posts are fetched on the server and cached, so no browser CORS limits apply. Works with rss.app, fetchrss.com and any RSS or Atom feed.'),
+                'help'           => __('Posts are fetched on the server and cached. Supports RSS, Atom, JSON Feed and CSV.'),
                 'help_link'      => 'https://rss.app/pricing',
                 'help_link_text' => __('View pricing →'),
             ],
             [
                 'name'           => 'rss_url',
                 'type'           => 'text',
-                'label'          => __('RSS Feed URL'),
+                'label'          => __('Feed URL'),
                 'default'        => '',
                 'tab'            => 'content',
-                'help'           => __('Paste the feed address, for example https://rss.app/feeds/xxxx.xml'),
+                'help'           => __('Any XML, JSON or CSV feed address, for example https://rss.app/feeds/xxxx.xml'),
                 'help_link'      => 'https://rss.app',
                 'help_link_text' => __('Open rss.app →'),
             ],
-            ['name' => 'rss_limit', 'type' => 'number', 'label' => __('RSS Post Limit'), 'default' => 9, 'min' => 1, 'max' => 30, 'step' => 1, 'tab' => 'content'],
-            ['name' => 'rss_cache', 'type' => 'number', 'label' => __('RSS Cache (minutes)'), 'default' => 15, 'min' => 1, 'max' => 1440, 'step' => 1, 'tab' => 'content'],
+            ['name' => 'rss_limit', 'type' => 'number', 'label' => __('Post Limit'), 'default' => 9, 'min' => 1, 'max' => 30, 'step' => 1, 'tab' => 'content'],
+            ['name' => 'rss_cache', 'type' => 'number', 'label' => __('Cache (minutes)'), 'default' => 15, 'min' => 1, 'max' => 1440, 'step' => 1, 'tab' => 'content'],
             [
                 'name'    => 'layout',
                 'type'    => 'select',
@@ -133,8 +140,6 @@ class SocialFeedWidget extends BaseWidget
         ];
     }
 
-
-
     public function render(array $settings): string
     {
         $uid      = 'sf_' . substr(md5(uniqid('', true)), 0, 8);
@@ -143,9 +148,9 @@ class SocialFeedWidget extends BaseWidget
         $rssUrl   = trim((string) ($settings['rss_url'] ?? ''));
 
         if (filter_var($settings['enable_rss'] ?? false, FILTER_VALIDATE_BOOLEAN) && $rssUrl !== '') {
-            $limit  = max(1, min(30, (int) ($settings['rss_limit'] ?? 9)));
-            $minute = max(1, min(1440, (int) ($settings['rss_cache'] ?? 15)));
-            $result = $this->fetchRss($rssUrl, $limit, $minute);
+            $limit    = max(1, min(30, (int) ($settings['rss_limit'] ?? 9)));
+            $minutes  = max(1, min(1440, (int) ($settings['rss_cache'] ?? 15)));
+            $result   = $this->fetchRss($rssUrl, $limit, $minutes);
             $items    = $result['items'];
             $rssError = $result['error'];
         }
@@ -153,8 +158,6 @@ class SocialFeedWidget extends BaseWidget
         if (!$items) {
             $items = $this->manualItems($settings['items'] ?? []);
         }
-
-        Log::info('social-feed render', ['enable_rss' => $settings['enable_rss'] ?? null, 'rss_url' => $settings['rss_url'] ?? null, 'layout' => $settings['layout'] ?? null]);
 
         return view('rjbuilder.widgets.builtin.social-feed', compact('settings', 'uid', 'items', 'rssError'))->render();
     }
@@ -186,9 +189,9 @@ class SocialFeedWidget extends BaseWidget
             return ['items' => [], 'error' => 'Invalid feed URL'];
         }
 
-        $key  = 'rj_sf_rss_' . md5($url . '|' . $limit);
-        $hit  = Cache::get($key);
-        if (is_array($hit) && !empty($hit)) {
+        $key = 'rj_sf_feed_' . md5($url . '|' . $limit);
+        $hit = Cache::get($key);
+        if (is_array($hit) && $hit) {
             return ['items' => $hit, 'error' => ''];
         }
 
@@ -201,7 +204,7 @@ class SocialFeedWidget extends BaseWidget
             $response = Http::timeout(10)
                 ->withHeaders([
                     'User-Agent' => 'Mozilla/5.0 (compatible; RJ-CMS FeedReader)',
-                    'Accept'     => 'application/rss+xml, application/atom+xml, application/xml, text/xml, */*',
+                    'Accept'     => 'application/rss+xml, application/atom+xml, application/feed+json, application/json, application/xml, text/xml, text/csv, */*',
                 ])
                 ->get($url);
 
@@ -219,7 +222,7 @@ class SocialFeedWidget extends BaseWidget
 
             return ['items' => $items, 'error' => ''];
         } catch (\Throwable $e) {
-            Log::warning('SocialFeed RSS failed: ' . $e->getMessage(), ['url' => $url]);
+            Log::warning('SocialFeed failed: ' . $e->getMessage(), ['url' => $url]);
             $last = Cache::get($key . '_last');
 
             return ['items' => is_array($last) ? $last : [], 'error' => $e->getMessage()];
@@ -227,6 +230,60 @@ class SocialFeedWidget extends BaseWidget
     }
 
     protected function parseFeed(string $body, int $limit): array
+    {
+        $body  = ltrim($body, "\xEF\xBB\xBF \t\n\r");
+        $first = $body[0] ?? '';
+
+        if ($first === '<') return $this->parseXml($body, $limit);
+        if ($first === '{' || $first === '[') return $this->parseJson($body, $limit);
+
+        return $this->parseCsv($body, $limit);
+    }
+
+    protected function parseJson(string $body, int $limit): array
+    {
+        $data = json_decode($body, true);
+        if (!is_array($data)) return [];
+
+        $rows = $data;
+        if (!array_is_list($data)) {
+            $rows = [];
+            foreach (self::LIST_KEYS as $k) {
+                if (isset($data[$k]) && is_array($data[$k])) { $rows = $data[$k]; break; }
+            }
+        }
+
+        $feedPlatform = $this->platformFromUrl((string) ($data['home_page_url'] ?? $data['link'] ?? ''));
+
+        return $this->buildItems($rows, $feedPlatform, $limit);
+    }
+
+    protected function parseCsv(string $body, int $limit): array
+    {
+        $firstLine = strtok($body, "\n") ?: '';
+        $delims    = [',' => substr_count($firstLine, ','), ';' => substr_count($firstLine, ';'), "\t" => substr_count($firstLine, "\t")];
+        arsort($delims);
+        $delim = (string) array_key_first($delims);
+
+        $h = fopen('php://temp', 'r+');
+        fwrite($h, $body);
+        rewind($h);
+
+        $head = fgetcsv($h, 0, $delim, '"', '');
+        if (!$head) { fclose($h); return []; }
+        $head = array_map(fn ($v) => strtolower(trim((string) $v)), $head);
+
+        $rows = [];
+        while (($line = fgetcsv($h, 0, $delim, '"', '')) !== false) {
+            if ($line === [null]) continue;
+            $rows[] = array_combine($head, array_slice(array_pad($line, count($head), ''), 0, count($head)));
+        }
+        fclose($h);
+
+        return $this->buildItems($rows, 'web', $limit);
+    }
+
+    protected function parseXml(string $body, int $limit): array
     {
         $previous = libxml_use_internal_errors(true);
         $xml = simplexml_load_string($body, \SimpleXMLElement::class, LIBXML_NOCDATA | LIBXML_NONET);
@@ -250,18 +307,15 @@ class SocialFeedWidget extends BaseWidget
             }
 
             $html = (string) $n->children('http://purl.org/rss/1.0/modules/content/')->encoded;
-            if ($html === '') $html = (string) $n->description;
-            if ($html === '') $html = (string) $n->content;
-            if ($html === '') $html = (string) $n->summary;
+            foreach (['description', 'content', 'summary'] as $f) {
+                if ($html === '') $html = (string) $n->$f;
+            }
 
-            $caption = $this->cleanText($html);
-            if ($caption === '') $caption = $this->cleanText((string) $n->title);
-
-            $image = $this->findImage($n, $html);
+            $caption = $this->cleanText($html) ?: $this->cleanText((string) $n->title);
+            $image   = $this->findImage($n, $html);
             if ($image === '' && $caption === '') continue;
 
             $raw = (string) $n->pubDate ?: (string) $n->published ?: (string) $n->updated ?: (string) $n->children('http://purl.org/dc/elements/1.1/')->date;
-            $ts  = $raw !== '' ? strtotime($raw) : false;
 
             $platform = $this->platformFromUrl($link);
             if ($platform === 'web') $platform = $feedPlatform;
@@ -271,11 +325,73 @@ class SocialFeedWidget extends BaseWidget
                 'image'    => $image,
                 'caption'  => Str::limit($caption, 320),
                 'url'      => $this->safeUrl($link),
-                'date'     => $ts ? date('M j, Y', $ts) : '',
+                'date'     => $this->formatDate($raw),
             ];
         }
 
         return $items;
+    }
+
+    protected function buildItems(array $rows, string $feedPlatform, int $limit): array
+    {
+        $items = [];
+        foreach ($rows as $row) {
+            if (count($items) >= $limit) break;
+            if (!is_array($row)) continue;
+
+            $item = $this->rowToItem($row, $feedPlatform);
+            if ($item) $items[] = $item;
+        }
+
+        return $items;
+    }
+
+    protected function rowToItem(array $row, string $feedPlatform): ?array
+    {
+        $row     = array_change_key_case($row, CASE_LOWER);
+        $link    = $this->pick($row, self::LINK_KEYS);
+        $html    = $this->pick($row, self::TEXT_KEYS);
+        $caption = $this->cleanText($html) ?: $this->cleanText($this->pick($row, self::TITLE_KEYS));
+        $image   = $this->safeImage($this->pick($row, self::IMAGE_KEYS));
+
+        if ($image === '' && preg_match('/<img[^>]+src=["\']([^"\']+)["\']/i', $html, $m)) {
+            $image = $this->safeImage($m[1]);
+        }
+        if ($image === '' && $caption === '') return null;
+
+        $platform = $this->platformFromUrl($link);
+        if ($platform === 'web') $platform = $feedPlatform;
+
+        return [
+            'platform' => $platform,
+            'image'    => $image,
+            'caption'  => Str::limit($caption, 320),
+            'url'      => $this->safeUrl($link),
+            'date'     => $this->formatDate($this->pick($row, self::DATE_KEYS)),
+        ];
+    }
+
+    protected function pick(array $row, array $keys): string
+    {
+        foreach ($keys as $k) {
+            $v = $row[$k] ?? null;
+            if (is_array($v)) {
+                $v = $v['url'] ?? ($v[0]['url'] ?? ($v[0] ?? null));
+            }
+            if (is_scalar($v) && trim((string) $v) !== '') return trim((string) $v);
+        }
+
+        return '';
+    }
+
+    protected function formatDate(string $raw): string
+    {
+        if ($raw === '') return '';
+
+        $ts = is_numeric($raw) ? (int) $raw : strtotime($raw);
+        if ($ts && $ts > 100000000000) $ts = intdiv($ts, 1000);
+
+        return $ts ? date('M j, Y', $ts) : '';
     }
 
     protected function findImage(\SimpleXMLElement $n, string $html): string
