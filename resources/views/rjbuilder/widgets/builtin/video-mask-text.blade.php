@@ -1,32 +1,47 @@
 @php
-    $text          = $settings['text'] ?? 'CREATIVE';
-    $subtitle      = $settings['subtitle'] ?? '';
-    $videoUrl      = trim($settings['video_url'] ?? '');
-    $poster        = $settings['poster'] ?? '';
-    $fontSizeVw    = max(6, min(30, (int) ($settings['font_size'] ?? 18)));
-    $weight        = in_array($settings['font_weight'] ?? '900', ['700', '800', '900'], true) ? $settings['font_weight'] : '900';
-    $letterSpacing = max(-10, min(40, (int) ($settings['letter_spacing'] ?? -2)));
-    $align         = in_array($settings['align'] ?? 'center', ['left', 'center', 'right'], true) ? $settings['align'] : 'center';
-    $fallbackColor = $settings['fallback_color'] ?? '#0f172a';
-    $subtitleColor = $settings['subtitle_color'] ?? '#64748b';
-    $hoverAccent   = !empty($settings['hover_accent'] ?? true);
-    $hoverColor    = $settings['hover_color'] ?? '#8b5cf6';
-    $overlay       = !empty($settings['overlay'] ?? false);
-    $overlayColor  = $settings['overlay_color'] ?? '#8b5cf6';
-    $paddingY      = max(0, min(200, (int) ($settings['padding_y'] ?? 60)));
+    $text      = trim((string) ($settings['text'] ?? 'CREATIVE'));
+    $text      = $text !== '' ? $text : 'CREATIVE';
+    $subtitle  = trim((string) ($settings['subtitle'] ?? ''));
+    $videoUrl  = trim((string) ($settings['video_url'] ?? ''));
+    $poster    = trim((string) ($settings['poster'] ?? ''));
+    $weight    = in_array((string) ($settings['font_weight'] ?? '900'), ['700', '800', '900'], true)
+                    ? (string) $settings['font_weight'] : '900';
+    $align     = in_array($settings['align'] ?? 'center', ['left', 'center', 'right'], true)
+                    ? $settings['align'] : 'center';
+    $hoverOn   = !empty($settings['hover_accent'] ?? true);
+    $overlayOn = !empty($settings['overlay'] ?? false);
+    $paddingY  = max(0, min(200, (int) ($settings['padding_y'] ?? 60)));
 
-    $justify = match($align) { 'left' => 'flex-start', 'right' => 'flex-end', default => 'center' };
-    $textAlign = $align;
-    $fontSizeCss = 'clamp(64px, ' . $fontSizeVw . 'vw, 420px)';
+    $hexOk = function ($v, $d) {
+        $v = trim((string) $v);
+        return preg_match('/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/', $v) ? $v : $d;
+    };
+    $fallbackColor = $hexOk($settings['fallback_color'] ?? '', '#0f172a');
+    $hoverColor    = $hexOk($settings['hover_color'] ?? '', '#8b5cf6');
+    $overlayColor  = $hexOk($settings['overlay_color'] ?? '', '#8b5cf6');
+    $subtitleColor = $hexOk($settings['subtitle_color'] ?? '', '#64748b');
+
+    // Text is rendered as an SVG mask. viewBox 1200x240, text fitted to fixed width.
+    $x      = match ($align) { 'left' => 40, 'right' => 1160, default => 600 };
+    $anchor = match ($align) { 'left' => 'start', 'right' => 'end', default => 'middle' };
+    $safe   = htmlspecialchars($text, ENT_XML1 | ENT_QUOTES, 'UTF-8');
+    $svg    = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 240">'
+            . '<text x="' . $x . '" y="185" text-anchor="' . $anchor . '"'
+            . ' font-family="Arial Black, Helvetica Neue, Arial, sans-serif"'
+            . ' font-weight="' . $weight . '" font-size="200"'
+            . ' textLength="1120" lengthAdjust="spacingAndGlyphs" fill="#000">'
+            . $safe . '</text></svg>';
+    $maskUrl = 'data:image/svg+xml;base64,' . base64_encode($svg);
 @endphp
 
 <style>
     #{{ $uid }} {
+        --vmt-mask: url("{{ $maskUrl }}");
         --vmt-fallback: {{ $fallbackColor }};
         --vmt-hover: {{ $hoverColor }};
         --vmt-overlay: {{ $overlayColor }};
-        width: 100%;
         box-sizing: border-box;
+        width: 100%;
         padding: {{ $paddingY }}px 16px;
     }
     #{{ $uid }} *, #{{ $uid }} *::before, #{{ $uid }} *::after { box-sizing: border-box; }
@@ -35,116 +50,112 @@
         position: relative;
         width: 100%;
         max-width: 1200px;
+        aspect-ratio: 1200 / 240;
         margin: 0 auto;
-        display: flex;
-        justify-content: {{ $justify }};
         overflow: hidden;
-        isolation: isolate;
     }
 
+    #{{ $uid }} .vmt-layer {
+        position: absolute;
+        inset: 0;
+        -webkit-mask: var(--vmt-mask) center / 100% 100% no-repeat;
+        mask: var(--vmt-mask) center / 100% 100% no-repeat;
+    }
+
+    /* Fallback: visible only when the video is not loaded */
+    #{{ $uid }} .vmt-base {
+        z-index: 0;
+        background: var(--vmt-fallback);
+    }
+
+    /* Video (and optional tint) inside the text mask */
+    #{{ $uid }} .vmt-media {
+        z-index: 1;
+        overflow: hidden;
+    }
     #{{ $uid }} .vmt-video {
         position: absolute;
         inset: 0;
         width: 100%;
         height: 100%;
         object-fit: cover;
-        z-index: 0;
+        display: block;
         pointer-events: none;
-        background: var(--vmt-fallback);
     }
-
-    #{{ $uid }} .vmt-overlay {
+    #{{ $uid }} .vmt-tint {
         position: absolute;
         inset: 0;
-        z-index: 1;
         background: var(--vmt-overlay);
         opacity: .35;
         mix-blend-mode: overlay;
         pointer-events: none;
     }
 
-    /* The text itself is the mask: video shows through the glyphs */
-    #{{ $uid }} .vmt-text {
-        position: relative;
-        z-index: 2;
-        margin: 0;
-        font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-        font-size: {{ $fontSizeCss }};
-        font-weight: {{ $weight }};
-        line-height: .95;
-        letter-spacing: {{ $letterSpacing / 100 }}em;
-        text-align: {{ $textAlign }};
-        white-space: nowrap;
-        color: transparent;
-        -webkit-background-clip: text;
-        background-clip: text;
-        background-color: var(--vmt-fallback);
-        transition: background-color .35s ease, filter .35s ease;
-    }
-
-    @if($videoUrl !== '')
-        #{{ $uid }} .vmt-text {
-            color: transparent;
-            background-color: transparent;
-            background-image: none;
-        }
-        #{{ $uid }} .vmt-text::before {
-            content: attr(data-text);
-            position: absolute;
-            inset: 0;
-            z-index: -1;
-        }
-    @endif
-
+    /* Hover color fill */
     #{{ $uid }} .vmt-hover {
-        position: absolute;
-        inset: 0;
-        z-index: 3;
+        z-index: 2;
         background: var(--vmt-hover);
         opacity: 0;
         transition: opacity .35s ease;
         pointer-events: none;
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
     }
-    #{{ $uid }} .vmt-stage:hover .vmt-hover { opacity: {{ $hoverAccent ? 1 : 0 }}; }
+    @media (hover: hover) {
+        #{{ $uid }} .vmt-stage:hover .vmt-hover { opacity: 1; }
+    }
+
+    /* Screen-reader heading, visually hidden */
+    #{{ $uid }} .vmt-sr {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+        margin: -1px;
+        padding: 0;
+        border: 0;
+    }
 
     #{{ $uid }} .vmt-subtitle {
         margin: 20px auto 0;
         max-width: 720px;
-        text-align: {{ $textAlign }};
+        text-align: {{ $align }};
         font-size: clamp(14px, 1.4vw, 18px);
         font-weight: 500;
         line-height: 1.6;
         color: {{ $subtitleColor }};
     }
 
-    @media (hover: none) {
-        #{{ $uid }} .vmt-hover { display: none; }
-    }
     @media (prefers-reduced-motion: reduce) {
-        #{{ $uid }} .vmt-hover, #{{ $uid }} .vmt-text { transition: none; }
+        #{{ $uid }} .vmt-hover { transition: none; }
     }
 </style>
 
 <div id="{{ $uid }}">
     <div class="vmt-stage">
+        <h2 class="vmt-sr">{{ $text }}</h2>
+
+        <div class="vmt-layer vmt-base" aria-hidden="true"></div>
+
         @if($videoUrl !== '')
-            <video class="vmt-video"
-                   autoplay muted loop playsinline preload="auto"
-                   @if($poster !== '') poster="{{ $poster }}" @endif>
-                <source src="{{ $videoUrl }}">
-            </video>
-            @if($overlay)
-                <span class="vmt-overlay" aria-hidden="true"></span>
-            @endif
+            <div class="vmt-layer vmt-media" aria-hidden="true">
+                <video class="vmt-video"
+                       autoplay
+                       muted
+                       loop
+                       playsinline
+                       preload="auto"
+                       @if($poster !== '') poster="{{ $poster }}" @endif>
+                    <source src="{{ $videoUrl }}">
+                </video>
+                @if($overlayOn)
+                    <span class="vmt-tint"></span>
+                @endif
+            </div>
         @endif
 
-        <h2 class="vmt-text" data-text="{{ $text }}" aria-label="{{ $text }}">{{ $text }}</h2>
-
-        @if($hoverAccent)
-            <span class="vmt-hover" aria-hidden="true">{{ $text }}</span>
+        @if($hoverOn)
+            <div class="vmt-layer vmt-hover" aria-hidden="true"></div>
         @endif
     </div>
 
@@ -152,3 +163,22 @@
         <p class="vmt-subtitle">{{ $subtitle }}</p>
     @endif
 </div>
+
+@if($videoUrl !== '')
+<script>
+(function () {
+    var root = document.getElementById(@js($uid));
+    if (!root) return;
+    var video = root.querySelector('video');
+    if (!video) return;
+
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) {
+        video.pause();
+        return;
+    }
+    var p = video.play();
+    if (p && p.catch) p.catch(function () {});
+})();
+</script>
+@endif
