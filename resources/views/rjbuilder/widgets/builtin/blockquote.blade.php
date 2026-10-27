@@ -23,49 +23,82 @@
 
     $lines = preg_split('/\R/u', $quote) ?: [];
     $n = 0;
+
+    $sparks = [['-46px', '-38px', '0s'], ['48px', '-34px', '.05s'], ['-54px', '10px', '.1s'], ['56px', '14px', '.15s'], ['-20px', '52px', '.08s'], ['24px', '-54px', '.12s']];
 @endphp
 
 <style>
-    @property --rq-ang { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+    @keyframes rqFloat-{{ $uid }} { 0%, 100% { translate: 0 0; } 50% { translate: 0 -6px; } }
+    @keyframes rqPop-{{ $uid }} { from { opacity: 0; scale: .2; rotate: -40deg; } }
+    @keyframes rqRipple-{{ $uid }} { 0% { transform: scale(1); opacity: .6; } 100% { transform: scale(1.9); opacity: 0; } }
+    @keyframes rqL-{{ $uid }} { 0%, 100% { transform: translate(0, 0) rotate(0) scale(1); } 50% { transform: translate(-2px, -2.5px) rotate(-14deg) scale(1.14); } }
+    @keyframes rqR-{{ $uid }} { 0%, 100% { transform: translate(0, 0) rotate(0) scale(1); } 50% { transform: translate(2px, 2.5px) rotate(14deg) scale(1.14); } }
+    @keyframes rqBurst-{{ $uid }} { 0% { opacity: 0; transform: translate(0, 0) scale(.3); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--x), var(--y)) scale(1); } }
+    @keyframes rqDrawY-{{ $uid }} { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+    @keyframes rqDrawX-{{ $uid }} { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+    @keyframes rqTY-{{ $uid }} { 0% { top: 0; opacity: 0; } 12% { opacity: 1; } 88% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+    @keyframes rqTX-{{ $uid }} { 0% { left: 0; opacity: 0; } 12% { opacity: 1; } 88% { opacity: 1; } 100% { left: 100%; opacity: 0; } }
+    @keyframes rqBlink-{{ $uid }} { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+    @keyframes rqFlow-{{ $uid }} { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+    @keyframes rqBlobA-{{ $uid }} { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(50px, 30px) scale(1.2); } }
+    @keyframes rqBlobB-{{ $uid }} { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(-60px, -24px) scale(1.15); } }
+    @keyframes rqRing-{{ $uid }} { to { transform: rotate(360deg); } }
+    @keyframes rqUp-{{ $uid }} { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
 
-    @keyframes rq-flip-{{ $uid }} { from { opacity: 0; transform: translateY(26px) rotateX(-70deg); } to { opacity: 1; transform: none; } }
-    @keyframes rq-blur-{{ $uid }} { from { opacity: 0; transform: translateY(28px) scale(.9); filter: blur(14px); } to { opacity: 1; transform: none; filter: blur(0); } }
-    @keyframes rq-mask-{{ $uid }} { from { transform: translateY(118%) rotate(6deg); } to { transform: none; } }
-    @keyframes rq-up-{{ $uid }} { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
-    @keyframes rq-pop-{{ $uid }} { from { opacity: 0; scale: .2; rotate: -30deg; } }
-    @keyframes rq-sweep-{{ $uid }} { 0% { left: 0; opacity: 1; } 92% { opacity: 1; } 100% { left: 100%; opacity: 0; } }
-    @keyframes rq-clip-{{ $uid }} { from { clip-path: inset(-30% 100% -30% 0); } to { clip-path: inset(-30% 0 -30% 0); } }
-    @keyframes rq-grid-{{ $uid }} { to { background-position: 44px 44px; } }
-    @keyframes rq-bracket-{{ $uid }} { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
-    @keyframes rq-float-{{ $uid }} { 0%, 100% { translate: 0 0; } 50% { translate: 0 -10px; } }
-    @keyframes rq-foil-{{ $uid }} { from { background-position: 0% 20%; } to { background-position: 100% 80%; } }
-    @keyframes rq-twinkle-{{ $uid }} { 0%, 100% { opacity: 0; scale: .3; } 50% { opacity: 1; scale: 1; } }
-    @keyframes rq-pulse-{{ $uid }} { 0% { box-shadow: 0 16px 30px -10px var(--a), 0 0 0 0 color-mix(in srgb, var(--a) 50%, transparent); } 100% { box-shadow: 0 16px 30px -10px var(--a), 0 0 0 18px transparent; } }
-    @keyframes rq-spin-{{ $uid }} { to { rotate: 360deg; } }
-    @keyframes rq-ring-{{ $uid }} { to { transform: rotate(360deg); } }
-    @keyframes rq-angle-{{ $uid }} { to { --rq-ang: 360deg; } }
-    @keyframes rq-rise-{{ $uid }} { 0% { transform: translateY(0); opacity: 0; } 15% { opacity: .9; } 100% { transform: translateY(-520px); opacity: 0; } }
-    @keyframes rq-glow-{{ $uid }} { from { text-shadow: 0 0 18px color-mix(in srgb, var(--a) 35%, transparent); } to { text-shadow: 0 0 40px color-mix(in srgb, var(--b) 75%, transparent); } }
-    @keyframes rq-drift-{{ $uid }} { 0%, 100% { scale: 1; } 50% { scale: 1.25; } }
-    @keyframes rq-blink-{{ $uid }} { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
-
-    #{{ $uid }} { --a: {{ $accent }}; --b: {{ $accent2 }}; --t: {{ $textColor }}; --rq-size: {{ $sizeCss }}; width: 100%; padding: {{ $paddingY }}px 16px; }
+    #{{ $uid }} { --a: {{ $accent }}; --b: {{ $accent2 }}; --t: {{ $textColor }}; --rq-size: {{ $sizeCss }}; width: 100%; padding: {{ $paddingY }}px 16px; overflow-x: clip; }
     #{{ $uid }} *, #{{ $uid }} *::before, #{{ $uid }} *::after { box-sizing: border-box; }
 
-    #{{ $uid }} .rq { --rx: 0deg; --ry: 0deg; --mx: 50%; --my: 50%; --px: 50; --py: 50; --bx: 30%; --by: 35%; --mpx: 0; --mpy: 0; position: relative; max-width: 860px; margin: 0 auto; text-align: {{ $align }}; isolation: isolate; }
-    #{{ $uid }} .rq-grid, #{{ $uid }} .rq-aur, #{{ $uid }} .rq-foil, #{{ $uid }} .rq-glare, #{{ $uid }} .rq-beam, #{{ $uid }} .rq-blob, #{{ $uid }} .rq-badge, #{{ $uid }} .rq-tape, #{{ $uid }} .rq-mark, #{{ $uid }} .rq-star, #{{ $uid }} .rq-p, #{{ $uid }} .rq-caret { display: none; }
-    #{{ $uid }} .rq-mark { font-family: Georgia, 'Times New Roman', serif; font-weight: 900; line-height: 1; pointer-events: none; user-select: none; }
+    /* ---------- Layout ---------- */
+    #{{ $uid }} .rq { --rx: 0deg; --ry: 0deg; --mx: 50%; --my: 50%; --mpx: 0; --mpy: 0; position: relative; display: flex; gap: 28px; align-items: stretch; max-width: 860px; margin: 0 auto; text-align: {{ $align }}; isolation: isolate; }
+    #{{ $uid }} .rq[data-align="right"] { flex-direction: row-reverse; }
+    #{{ $uid }} .rq[data-align="center"] { flex-direction: column; align-items: center; gap: 20px; }
+    #{{ $uid }} .rq-main { position: relative; z-index: 3; flex: 1; min-width: 0; align-self: center; }
+    #{{ $uid }} .rq-side { position: relative; z-index: 3; flex: none; width: 64px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+    #{{ $uid }} .rq[data-align="center"] .rq-side { width: auto; flex-direction: row; justify-content: center; }
 
-    #{{ $uid }} .rq-body { position: relative; z-index: 3; }
-    #{{ $uid }} .rq-text { margin: 0 0 28px; padding: 0; border: 0; background: transparent; font-size: var(--rq-size); font-weight: 600; line-height: 1.5; letter-spacing: -.012em; color: var(--t); quotes: none; perspective: 800px; }
+    /* ---------- Side line ---------- */
+    #{{ $uid }} .rq-line { position: relative; flex: 1; width: 3px; min-height: 50px; border-radius: 3px; background: color-mix(in srgb, var(--a) 16%, transparent); }
+    #{{ $uid }} .rq-line.l1 { display: none; }
+    #{{ $uid }} .rq-line::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(180deg, var(--a), var(--b)); transform-origin: top; box-shadow: 0 0 18px -3px var(--a); }
+    #{{ $uid }} .rq-line i { position: absolute; left: 50%; top: 0; width: 11px; height: 11px; margin: -5px 0 0 -5px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 3px var(--a), 0 0 14px 2px var(--a); animation: rqTY-{{ $uid }} 3.4s ease-in-out infinite; }
+    #{{ $uid }} .rq[data-align="center"] .rq-line { flex: none; width: 90px; height: 3px; min-height: 0; }
+    #{{ $uid }} .rq[data-align="center"] .rq-line.l1 { display: block; }
+    #{{ $uid }} .rq[data-align="center"] .rq-line::before { transform-origin: left; background: linear-gradient(90deg, var(--a), var(--b)); }
+    #{{ $uid }} .rq[data-align="center"] .rq-line.l1::before { transform-origin: right; background: linear-gradient(270deg, var(--a), var(--b)); }
+    #{{ $uid }} .rq[data-align="center"] .rq-line i { left: 0; top: 50%; margin: -5px 0 0 -5px; animation-name: rqTX-{{ $uid }}; }
+
+    /* ---------- Quote icon ---------- */
+    #{{ $uid }} .rq-icon { position: relative; flex: none; display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; color: var(--a); background: color-mix(in srgb, var(--a) 12%, #fff); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--a) 30%, transparent); transition: transform .9s cubic-bezier(.34,1.56,.64,1), background .4s ease, color .4s ease, box-shadow .4s ease; animation: rqFloat-{{ $uid }} 5s ease-in-out infinite; }
+    #{{ $uid }} .rq-icon svg { position: relative; z-index: 2; width: 30px; height: 30px; display: block; overflow: visible; }
+    #{{ $uid }} .rq-icon .m1, #{{ $uid }} .rq-icon .m2 { transform-box: fill-box; transform-origin: center; }
+    #{{ $uid }} .rq-icon::before, #{{ $uid }} .rq-icon::after { content: ""; position: absolute; inset: 0; border-radius: 50%; border: 2px solid var(--a); opacity: 0; pointer-events: none; }
+    #{{ $uid }} .rq-sp { position: absolute; left: 50%; top: 50%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; background: var(--b); opacity: 0; pointer-events: none; }
+    #{{ $uid }} .rq-sp:nth-child(odd) { background: var(--a); }
+
+    #{{ $uid }} .rq:hover .rq-icon { transform: rotate(360deg) scale(1.14); color: #fff; background: linear-gradient(135deg, var(--a), var(--b)); box-shadow: 0 18px 34px -10px var(--a); }
+    #{{ $uid }} .rq:hover .rq-icon .m1 { animation: rqL-{{ $uid }} 1.1s ease-in-out infinite; }
+    #{{ $uid }} .rq:hover .rq-icon .m2 { animation: rqR-{{ $uid }} 1.1s ease-in-out .15s infinite; }
+    #{{ $uid }} .rq:hover .rq-icon::before { animation: rqRipple-{{ $uid }} 1.6s ease-out infinite; }
+    #{{ $uid }} .rq:hover .rq-icon::after { animation: rqRipple-{{ $uid }} 1.6s ease-out .8s infinite; }
+    #{{ $uid }} .rq:hover .rq-sp { animation: rqBurst-{{ $uid }} 1s ease-out var(--d) both; }
+
+    /* ---------- Text ---------- */
+    #{{ $uid }} .rq-text { margin: 0 0 26px; padding: 0; border: 0; background: transparent; font-size: var(--rq-size); font-weight: 600; line-height: 1.5; letter-spacing: -.012em; color: var(--t); quotes: none; }
     #{{ $uid }} .rq-text::before, #{{ $uid }} .rq-text::after { content: none; }
     #{{ $uid }} .rq-w, #{{ $uid }} .rq-w > span { display: inline-block; }
+    #{{ $uid }} .rq-caret { display: inline-block; width: 3px; height: 1em; margin-left: 4px; vertical-align: -.12em; border-radius: 2px; background: var(--a); animation: rqBlink-{{ $uid }} .9s steps(1) infinite; }
 
-    #{{ $uid }} .rq-author { position: relative; z-index: 3; display: inline-flex; align-items: center; gap: 14px; }
-    #{{ $uid }} .rq-ring { position: relative; flex: none; width: 56px; height: 56px; padding: 3px; border-radius: 50%; transition: transform .5s cubic-bezier(.34,1.56,.64,1); }
-    #{{ $uid }} .rq-ring::before { content: ""; position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, var(--a), var(--b), transparent 60%, var(--a)); animation: rq-ring-{{ $uid }} 5s linear infinite; }
-    #{{ $uid }} .rq:hover .rq-ring { transform: scale(1.1) rotate(-8deg); }
-    #{{ $uid }} .rq-avatar { position: relative; display: grid; place-items: center; width: 100%; height: 100%; overflow: hidden; border-radius: 50%; border: 3px solid #fff; background: linear-gradient(135deg, var(--a), var(--b)); color: #fff; font-size: 18px; font-weight: 800; }
+    #{{ $uid }} .rq.js .rq-w > span { opacity: 0; transform: translateY(14px); filter: blur(8px); transition: opacity .5s ease, transform .6s cubic-bezier(.2,.8,.2,1), filter .5s ease; }
+    #{{ $uid }} .rq.js .rq-w.on > span { opacity: 1; transform: none; filter: blur(0); }
+    #{{ $uid }} .rq.js .rq-author { opacity: 0; transform: translateY(14px); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.8,.2,1); }
+    #{{ $uid }} .rq.js.done .rq-author { opacity: 1; transform: none; }
+
+    /* ---------- Author ---------- */
+    #{{ $uid }} .rq-author { display: inline-flex; align-items: center; gap: 14px; }
+    #{{ $uid }} .rq-ring { position: relative; flex: none; width: 52px; height: 52px; padding: 3px; border-radius: 50%; transition: transform .5s cubic-bezier(.34,1.56,.64,1); }
+    #{{ $uid }} .rq-ring::before { content: ""; position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, var(--a), var(--b), transparent 60%, var(--a)); animation: rqRing-{{ $uid }} 5s linear infinite; }
+    #{{ $uid }} .rq:hover .rq-ring { transform: scale(1.08) rotate(-8deg); }
+    #{{ $uid }} .rq-avatar { position: relative; display: grid; place-items: center; width: 100%; height: 100%; overflow: hidden; border-radius: 50%; border: 3px solid #fff; background: linear-gradient(135deg, var(--a), var(--b)); color: #fff; font-size: 17px; font-weight: 800; }
     #{{ $uid }} .rq-avatar img { display: block; width: 100%; height: 100%; max-width: none; object-fit: cover; }
     #{{ $uid }} .rq-meta { display: flex; flex-direction: column; text-align: left; }
     #{{ $uid }} .rq-name { font-size: 15px; font-weight: 800; letter-spacing: -.01em; color: var(--t); }
@@ -74,92 +107,75 @@
     #{{ $uid }} .rq[data-align="right"] .rq-author { flex-direction: row-reverse; }
     #{{ $uid }} .rq[data-align="right"] .rq-meta { text-align: right; }
 
-    #{{ $uid }} .rq[data-style="accent-bar"] { padding: clamp(34px, 5vw, 64px); border-radius: 28px; overflow: hidden; background: #05060f; box-shadow: 0 0 0 1px rgba(255,255,255,.08), 0 40px 90px -40px var(--a); }
-    #{{ $uid }} .rq[data-style="accent-bar"] .rq-grid { display: block; position: absolute; inset: 0; z-index: 0; pointer-events: none; background-image: linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px); background-size: 44px 44px; -webkit-mask-image: radial-gradient(ellipse at center, #000 30%, transparent 80%); mask-image: radial-gradient(ellipse at center, #000 30%, transparent 80%); animation: rq-grid-{{ $uid }} 12s linear infinite; }
-    #{{ $uid }} .rq[data-style="accent-bar"]::before, #{{ $uid }} .rq[data-style="accent-bar"]::after { content: ""; position: absolute; z-index: 2; width: 34px; height: 34px; border: 2px solid var(--a); pointer-events: none; animation: rq-bracket-{{ $uid }} 2.4s ease-in-out infinite; }
-    #{{ $uid }} .rq[data-style="accent-bar"]::before { top: 16px; left: 16px; border-right: 0; border-bottom: 0; }
-    #{{ $uid }} .rq[data-style="accent-bar"]::after { right: 16px; bottom: 16px; border-left: 0; border-top: 0; animation-delay: 1.2s; }
-    #{{ $uid }} .rq[data-style="accent-bar"] .rq-beam { display: block; position: absolute; top: -24px; bottom: -24px; left: 0; z-index: 4; width: 2px; opacity: 0; pointer-events: none; background: linear-gradient(transparent, var(--b) 15%, #fff 50%, var(--a) 85%, transparent); box-shadow: 0 0 18px 3px var(--a), 0 0 60px 12px color-mix(in srgb, var(--a) 55%, transparent); }
-    #{{ $uid }} .rq[data-style="accent-bar"] .rq-beam::before { content: ""; position: absolute; top: 0; bottom: 0; right: 2px; width: 140px; background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--a) 28%, transparent)); }
-    #{{ $uid }} .rq[data-style="accent-bar"] .rq-text { color: #fff; text-shadow: 0 0 28px color-mix(in srgb, var(--a) 45%, transparent); }
-    #{{ $uid }} .rq[data-style="accent-bar"] .rq-name { color: #fff; }
-    #{{ $uid }} .rq[data-style="accent-bar"] .rq-role { color: rgba(255,255,255,.6); }
-    #{{ $uid }} .rq[data-style="accent-bar"] .rq-avatar { border-color: #05060f; }
-    #{{ $uid }} .rq[data-style="accent-bar"] .rq-mark.open { display: block; position: relative; z-index: 3; height: 40px; margin-bottom: 8px; font-size: 72px; background: linear-gradient(135deg, var(--a), var(--b)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; filter: drop-shadow(0 0 14px var(--a)); }
+    /* ---------- Extras hidden by default ---------- */
+    #{{ $uid }} .rq-blob, #{{ $uid }} .rq-mark, #{{ $uid }} .rq-ln, #{{ $uid }} .rq-glow { display: none; }
+    #{{ $uid }} .rq-mark { font-family: Georgia, 'Times New Roman', serif; font-weight: 900; line-height: 1; pointer-events: none; user-select: none; }
 
-    #{{ $uid }} .rq[data-style="card"] { margin-top: 12px; padding: clamp(44px, 5vw, 64px) clamp(26px, 4.5vw, 56px) clamp(30px, 4vw, 48px); border-radius: 30px; background: linear-gradient(145deg, #13162e, #0a0b1a); border: 1px solid rgba(255,255,255,.14); transform: perspective(1100px) rotateX(var(--rx)) rotateY(var(--ry)); transition: transform .25s ease-out; animation: rq-float-{{ $uid }} 6s ease-in-out infinite; box-shadow: 0 50px 80px -40px color-mix(in srgb, var(--a) 60%, transparent), 0 2px 0 rgba(255,255,255,.08) inset; }
-    #{{ $uid }} .rq[data-style="card"] .rq-foil { display: block; position: absolute; inset: 0; z-index: 1; border-radius: inherit; pointer-events: none; mix-blend-mode: color-dodge; opacity: .5; background: linear-gradient(115deg, transparent 10%, rgba(255,0,128,.45), rgba(255,200,0,.4), rgba(0,255,170,.4), rgba(0,140,255,.45), transparent 90%); background-size: 240% 240%; animation: rq-foil-{{ $uid }} 6s ease-in-out infinite alternate; }
-    #{{ $uid }} .rq[data-style="card"]:hover .rq-foil { animation: none; background-position: calc(var(--px) * 1%) calc(var(--py) * 1%); }
-    #{{ $uid }} .rq[data-style="card"] .rq-glare { display: block; position: absolute; inset: 0; z-index: 2; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .3s ease; background: radial-gradient(circle at var(--mx) var(--my), rgba(255,255,255,.26), transparent 55%); }
-    #{{ $uid }} .rq[data-style="card"]:hover .rq-glare { opacity: 1; }
-    #{{ $uid }} .rq[data-style="card"] .rq-text, #{{ $uid }} .rq[data-style="card"] .rq-name { color: #fff; }
-    #{{ $uid }} .rq[data-style="card"] .rq-role { color: rgba(255,255,255,.62); }
-    #{{ $uid }} .rq[data-style="card"] .rq-avatar { border-color: #0a0b1a; }
-    #{{ $uid }} .rq[data-style="card"] .rq-star { display: block; position: absolute; z-index: 3; left: var(--l); top: var(--t2); width: 14px; height: 14px; background: #fff; clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%); filter: drop-shadow(0 0 6px #fff); opacity: 0; animation: rq-twinkle-{{ $uid }} 3s ease-in-out infinite; animation-delay: var(--d); pointer-events: none; }
-    #{{ $uid }} .rq[data-style="card"] .rq-badge { display: grid; place-items: center; position: absolute; z-index: 5; top: -30px; left: 50%; width: 62px; height: 62px; margin-left: -31px; padding-top: 14px; border: 4px solid #fff; border-radius: 50%; background: linear-gradient(135deg, var(--a), var(--b)); color: #fff; font-family: Georgia, serif; font-size: 44px; font-weight: 900; line-height: 1; animation: rq-pulse-{{ $uid }} 2.2s ease-out infinite; }
-    #{{ $uid }} .rq[data-style="card"][data-align="left"] .rq-badge { left: 40px; margin-left: 0; }
-    #{{ $uid }} .rq[data-style="card"][data-align="right"] .rq-badge { left: auto; right: 40px; margin-left: 0; }
+    /* ---------- Style: accent-bar ---------- */
+    #{{ $uid }} .rq[data-style="accent-bar"] { padding: 6px 0; }
+    #{{ $uid }} .rq[data-style="accent-bar"] .rq-main { transition: transform .5s cubic-bezier(.2,.8,.2,1); }
+    #{{ $uid }} .rq[data-style="accent-bar"]:hover .rq-main { transform: translateX(6px); }
+    #{{ $uid }} .rq[data-style="accent-bar"][data-align="right"]:hover .rq-main { transform: translateX(-6px); }
+    #{{ $uid }} .rq[data-style="accent-bar"][data-align="center"]:hover .rq-main { transform: none; }
+    #{{ $uid }} .rq[data-style="accent-bar"] .rq-line { width: 5px; }
 
-    #{{ $uid }} .rq[data-style="gradient"] { padding: clamp(40px, 6vw, 76px) clamp(28px, 5vw, 72px); border-radius: 36px; overflow: hidden; background: #070816; transform: perspective(1200px) rotateX(var(--rx)) rotateY(var(--ry)); transition: transform .25s ease-out; box-shadow: 0 50px 100px -45px var(--a); }
-    #{{ $uid }} .rq[data-style="gradient"] .rq-aur { display: block; position: absolute; z-index: 0; left: 50%; top: 50%; width: max(900px, 170%); aspect-ratio: 1; translate: -50% -50%; pointer-events: none; opacity: .6; filter: blur(80px); background: conic-gradient(from 0deg, var(--a), var(--b), #06b6d4, var(--a)); animation: rq-spin-{{ $uid }} 18s linear infinite; }
-    #{{ $uid }} .rq[data-style="gradient"]::after { content: ""; position: absolute; inset: 0; z-index: 1; border-radius: inherit; pointer-events: none; background: radial-gradient(ellipse at 50% 50%, rgba(7,8,22,.72), rgba(7,8,22,.15) 80%); }
-    #{{ $uid }} .rq[data-style="gradient"]::before { content: ""; position: absolute; inset: 0; z-index: 5; border-radius: inherit; padding: 1.5px; pointer-events: none; background: conic-gradient(from var(--rq-ang), transparent 0 55%, var(--a) 75%, #fff 88%, transparent 100%); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); mask-composite: exclude; animation: rq-angle-{{ $uid }} 6s linear infinite; }
-    #{{ $uid }} .rq[data-style="gradient"] .rq-p { display: block; position: absolute; z-index: 2; left: var(--l); bottom: -12px; width: 5px; height: 5px; border-radius: 50%; background: #fff; opacity: 0; box-shadow: 0 0 12px 2px var(--a); animation: rq-rise-{{ $uid }} var(--s) linear infinite; animation-delay: var(--d); pointer-events: none; }
-    #{{ $uid }} .rq[data-style="gradient"] .rq-text { color: #fff; animation: rq-glow-{{ $uid }} 4s ease-in-out infinite alternate; }
-    #{{ $uid }} .rq[data-style="gradient"] .rq-name { color: #fff; }
-    #{{ $uid }} .rq[data-style="gradient"] .rq-role { color: rgba(255,255,255,.65); }
-    #{{ $uid }} .rq[data-style="gradient"] .rq-avatar { border-color: #070816; }
-    #{{ $uid }} .rq[data-style="gradient"] .rq-mark.open { display: block; position: absolute; z-index: 2; top: 4px; right: 28px; font-size: 180px; color: #fff; opacity: .1; }
+    /* ---------- Style: card ---------- */
+    #{{ $uid }} .rq[data-style="card"] { padding: clamp(28px, 4vw, 48px); border-radius: 28px; background: #fff; border: 1px solid #e7e9f3; box-shadow: 0 1px 2px rgba(15,23,42,.05), 0 30px 60px -34px rgba(15,23,42,.3); transform: perspective(1200px) rotateX(var(--rx)) rotateY(var(--ry)); transition: transform .3s ease-out, box-shadow .5s ease; }
+    #{{ $uid }} .rq[data-style="card"]:hover { box-shadow: 0 1px 2px rgba(15,23,42,.05), 0 40px 70px -34px color-mix(in srgb, var(--a) 55%, transparent); }
+    #{{ $uid }} .rq[data-style="card"] .rq-glow { display: block; position: absolute; inset: 0; z-index: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .4s ease; background: radial-gradient(420px circle at var(--mx) var(--my), color-mix(in srgb, var(--a) 10%, transparent), transparent 70%); }
+    #{{ $uid }} .rq[data-style="card"]:hover .rq-glow { opacity: 1; }
+    #{{ $uid }} .rq[data-style="card"]::after { content: ""; position: absolute; top: -1px; left: 36px; right: 36px; z-index: 2; height: 3px; border-radius: 3px; background: linear-gradient(90deg, var(--a), var(--b)); transform: scaleX(.15); transform-origin: left; transition: transform .7s cubic-bezier(.2,.8,.2,1); }
+    #{{ $uid }} .rq[data-style="card"]:hover::after { transform: scaleX(1); }
 
-    #{{ $uid }} .rq[data-style="big-marks"] { padding: 70px 12px 20px; }
-    #{{ $uid }} .rq[data-style="big-marks"] .rq-blob { display: block; position: absolute; z-index: 0; left: var(--bx); top: var(--by); width: 460px; height: 460px; translate: -50% -50%; border-radius: 50%; pointer-events: none; background: radial-gradient(circle, color-mix(in srgb, var(--a) 32%, transparent), color-mix(in srgb, var(--b) 12%, transparent) 45%, transparent 68%); transition: left .9s cubic-bezier(.2,.8,.2,1), top .9s cubic-bezier(.2,.8,.2,1); animation: rq-drift-{{ $uid }} 7s ease-in-out infinite; }
+    /* ---------- Style: gradient ---------- */
+    #{{ $uid }} .rq[data-style="gradient"] { padding: clamp(30px, 4.5vw, 54px); border-radius: 32px; overflow: hidden; background: #f5f3ff; background: linear-gradient(120deg, color-mix(in srgb, var(--a) 14%, #fff), color-mix(in srgb, var(--b) 14%, #fff), color-mix(in srgb, var(--a) 9%, #fff)); background-size: 250% 250%; border: 1px solid color-mix(in srgb, var(--a) 22%, transparent); animation: rqFlow-{{ $uid }} 10s ease-in-out infinite; transition: box-shadow .5s ease; }
+    #{{ $uid }} .rq[data-style="gradient"]:hover { box-shadow: 0 34px 60px -36px color-mix(in srgb, var(--a) 60%, transparent); }
+    #{{ $uid }} .rq[data-style="gradient"] .rq-blob { display: block; position: absolute; z-index: 0; width: 280px; height: 280px; border-radius: 50%; filter: blur(55px); pointer-events: none; opacity: .3; }
+    #{{ $uid }} .rq[data-style="gradient"] .rq-blob.a { top: -100px; left: -70px; background: var(--a); animation: rqBlobA-{{ $uid }} 11s ease-in-out infinite; }
+    #{{ $uid }} .rq[data-style="gradient"] .rq-blob.b { right: -90px; bottom: -110px; background: var(--b); animation: rqBlobB-{{ $uid }} 14s ease-in-out infinite; }
+
+    /* ---------- Style: big-marks ---------- */
+    #{{ $uid }} .rq[data-style="big-marks"] { padding: 40px 0 14px; }
     #{{ $uid }} .rq[data-style="big-marks"] .rq-text { font-weight: 800; letter-spacing: -.028em; line-height: 1.3; }
-    #{{ $uid }} .rq[data-style="big-marks"] .rq-w { overflow: hidden; vertical-align: top; padding: .05em 0 .16em; margin-bottom: -.16em; }
     #{{ $uid }} .rq[data-style="big-marks"] .rq-mark { display: block; position: absolute; z-index: 1; transition: translate .5s ease-out; }
-    #{{ $uid }} .rq[data-style="big-marks"] .rq-mark.open { top: -34px; left: -8px; font-size: 300px; color: transparent; -webkit-text-stroke: 3px var(--a); opacity: .55; translate: calc(var(--mpx) * 46px) calc(var(--mpy) * 46px); }
-    #{{ $uid }} .rq[data-style="big-marks"] .rq-mark.close { right: -6px; bottom: -130px; font-size: 280px; opacity: .22; background: linear-gradient(135deg, var(--a), var(--b)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; translate: calc(var(--mpx) * -60px) calc(var(--mpy) * -60px); }
-    #{{ $uid }} .rq[data-style="big-marks"][data-align="center"] .rq-mark.open { left: 50%; margin-left: -80px; }
-    #{{ $uid }} .rq[data-style="big-marks"][data-align="right"] .rq-mark.open { left: auto; right: -8px; }
-    #{{ $uid }} .rq[data-style="big-marks"][data-align="right"] .rq-mark.close { right: auto; left: -6px; }
+    #{{ $uid }} .rq[data-style="big-marks"] .rq-mark.open { top: -34px; left: -6px; font-size: 280px; color: transparent; -webkit-text-stroke: 3px var(--a); opacity: .3; translate: calc(var(--mpx) * 40px) calc(var(--mpy) * 40px); }
+    #{{ $uid }} .rq[data-style="big-marks"] .rq-mark.close { right: -4px; bottom: -120px; font-size: 260px; opacity: .16; background: linear-gradient(135deg, var(--a), var(--b)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; translate: calc(var(--mpx) * -52px) calc(var(--mpy) * -52px); }
+    #{{ $uid }} .rq[data-style="big-marks"][data-align="right"] .rq-mark.open { left: auto; right: -6px; }
+    #{{ $uid }} .rq[data-style="big-marks"][data-align="right"] .rq-mark.close { right: auto; left: -4px; }
+    #{{ $uid }} .rq[data-style="big-marks"][data-align="center"] .rq-mark.open { left: 50%; margin-left: -90px; }
     #{{ $uid }} .rq[data-style="big-marks"] .rq-name { position: relative; }
-    #{{ $uid }} .rq[data-style="big-marks"] .rq-name::after { content: ""; position: absolute; left: 0; right: 0; bottom: -3px; height: 3px; border-radius: 3px; background: linear-gradient(90deg, var(--a), var(--b)); transform: scaleX(.35); transform-origin: left; transition: transform .6s cubic-bezier(.2,.8,.2,1); }
+    #{{ $uid }} .rq[data-style="big-marks"] .rq-name::after { content: ""; position: absolute; left: 0; right: 0; bottom: -3px; height: 3px; border-radius: 3px; background: linear-gradient(90deg, var(--a), var(--b)); transform: scaleX(.3); transform-origin: left; transition: transform .6s cubic-bezier(.2,.8,.2,1); }
     #{{ $uid }} .rq[data-style="big-marks"]:hover .rq-name::after { transform: scaleX(1); }
 
-    #{{ $uid }} .rq[data-style="minimal"] { margin-top: 14px; padding: 48px clamp(26px, 5vw, 56px) 38px clamp(54px, 8vw, 88px); border: 1px solid #ece6d3; border-radius: 6px; background: #fffdf7; rotate: -.6deg; box-shadow: 0 1px 1px rgba(60,50,20,.06), 0 2px 4px rgba(60,50,20,.05), 0 20px 40px -18px rgba(60,50,20,.32); transition: rotate .6s cubic-bezier(.2,.8,.2,1), translate .6s cubic-bezier(.2,.8,.2,1), box-shadow .6s ease; }
-    #{{ $uid }} .rq[data-style="minimal"]:hover { rotate: 0deg; translate: 0 -6px; box-shadow: 0 1px 1px rgba(60,50,20,.06), 0 2px 4px rgba(60,50,20,.05), 0 34px 54px -20px rgba(60,50,20,.38); }
-    #{{ $uid }} .rq[data-style="minimal"]::before { content: ""; position: absolute; top: 0; bottom: 0; left: clamp(40px, 6vw, 68px); width: 1px; background: rgba(239,68,68,.35); }
-    #{{ $uid }} .rq[data-style="minimal"] .rq-tape { display: block; position: absolute; z-index: 4; top: -15px; left: 50%; width: 120px; height: 30px; margin-left: -60px; rotate: -3deg; background: color-mix(in srgb, var(--a) 30%, rgba(255,255,255,.65)); box-shadow: 0 2px 6px rgba(0,0,0,.12); }
-    #{{ $uid }} .rq[data-style="minimal"] .rq-text { font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-weight: 400; letter-spacing: 0; line-height: 1.75; background: linear-gradient(to bottom, transparent calc(100% - 1px), color-mix(in srgb, var(--a) 28%, transparent) 0) 0 0 / 100% calc(var(--rq-size) * 1.75); }
-    #{{ $uid }} .rq[data-style="minimal"] .rq-name { font-family: Georgia, serif; font-style: italic; text-decoration: underline wavy var(--a); text-decoration-thickness: 1px; text-underline-offset: 5px; }
-    #{{ $uid }} .rq[data-style="minimal"] .rq-ring { width: 46px; height: 46px; padding: 2px; }
-    #{{ $uid }} .rq[data-style="minimal"] .rq-ring::before { background: conic-gradient(from 0deg, var(--a), transparent 70%, var(--a)); }
-    #{{ $uid }} .rq[data-style="minimal"] .rq-caret { display: inline-block; width: 2px; height: 1.05em; margin-left: 3px; vertical-align: -.15em; background: var(--a); animation: rq-blink-{{ $uid }} 1s steps(1) infinite; }
+    /* ---------- Style: minimal ---------- */
+    #{{ $uid }} .rq[data-style="minimal"] { padding: 36px 0; }
+    #{{ $uid }} .rq[data-style="minimal"] .rq-text { font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-weight: 400; letter-spacing: 0; line-height: 1.6; }
+    #{{ $uid }} .rq[data-style="minimal"] .rq-name { font-size: 12.5px; letter-spacing: .16em; text-transform: uppercase; }
+    #{{ $uid }} .rq[data-style="minimal"] .rq-line { width: 2px; }
+    #{{ $uid }} .rq[data-style="minimal"] .rq-ln { display: block; position: absolute; left: 0; right: 0; z-index: 1; height: 1px; background: color-mix(in srgb, var(--t) 16%, transparent); }
+    #{{ $uid }} .rq[data-style="minimal"] .rq-ln.t { top: 0; transform-origin: left; }
+    #{{ $uid }} .rq[data-style="minimal"] .rq-ln.b { bottom: 0; transform-origin: right; }
+    #{{ $uid }} .rq[data-style="minimal"] .rq-ln::after { content: ""; position: absolute; top: -1px; left: 0; width: 56px; height: 3px; border-radius: 3px; background: var(--a); transition: width .7s cubic-bezier(.2,.8,.2,1); }
+    #{{ $uid }} .rq[data-style="minimal"] .rq-ln.b::after { left: auto; right: 0; background: var(--b); }
+    #{{ $uid }} .rq[data-style="minimal"]:hover .rq-ln::after { width: 45%; }
 
-    #{{ $uid }} .rq.js:not(.vis):is([data-style="card"], [data-style="gradient"], [data-style="big-marks"]) .rq-w > span { opacity: 0; }
-    #{{ $uid }} .rq.js:not(.vis) :is(.rq-author, .rq-mark, .rq-badge) { opacity: 0; }
-    #{{ $uid }} .rq[data-style="accent-bar"].js:not(.vis) .rq-text { clip-path: inset(-30% 100% -30% 0); }
-    #{{ $uid }} .rq[data-style="minimal"].js .rq-w > span { opacity: 0; }
-    #{{ $uid }} .rq[data-style="minimal"].js .rq-w.on > span { opacity: 1; }
-    #{{ $uid }} .rq[data-style="minimal"].js .rq-author { opacity: 0; transition: opacity .8s ease .1s; }
-    #{{ $uid }} .rq[data-style="minimal"].js.done .rq-author { opacity: 1; }
-
-    #{{ $uid }} .rq.vis[data-style="card"] .rq-w > span { animation: rq-flip-{{ $uid }} .9s cubic-bezier(.2,.8,.2,1) backwards; animation-delay: calc(var(--w, 0) * 50ms + 300ms); }
-    #{{ $uid }} .rq.vis[data-style="gradient"] .rq-w > span { animation: rq-blur-{{ $uid }} 1s cubic-bezier(.2,.8,.2,1) backwards; animation-delay: calc(var(--w, 0) * 55ms + 300ms); }
-    #{{ $uid }} .rq.vis[data-style="big-marks"] .rq-w > span { animation: rq-mask-{{ $uid }} .9s cubic-bezier(.2,.8,.2,1) backwards; animation-delay: calc(var(--w, 0) * 60ms + 300ms); }
-    #{{ $uid }} .rq.vis[data-style="accent-bar"] .rq-text { animation: rq-clip-{{ $uid }} 1.9s cubic-bezier(.65,0,.35,1) backwards; }
-    #{{ $uid }} .rq.vis[data-style="accent-bar"] .rq-beam { animation: rq-sweep-{{ $uid }} 1.9s cubic-bezier(.65,0,.35,1) forwards; }
-    #{{ $uid }} .rq.vis:not([data-style="minimal"]) .rq-author { animation: rq-up-{{ $uid }} .9s cubic-bezier(.2,.8,.2,1) backwards; animation-delay: calc(var(--total, 0) * 55ms + 650ms); }
-    #{{ $uid }} .rq.vis[data-style="accent-bar"] .rq-author { animation-delay: 1.8s; }
-    #{{ $uid }} .rq.vis .rq-mark.open { animation: rq-pop-{{ $uid }} .9s cubic-bezier(.34,1.56,.64,1) .1s backwards; }
-    #{{ $uid }} .rq.vis .rq-mark.close { animation: rq-up-{{ $uid }} 1s ease .7s backwards; }
-    #{{ $uid }} .rq.vis .rq-badge { animation: rq-pop-{{ $uid }} .8s cubic-bezier(.34,1.56,.64,1) .1s backwards, rq-pulse-{{ $uid }} 2.2s ease-out .9s infinite; }
+    /* ---------- Entrance ---------- */
+    #{{ $uid }} .rq.js:not(.vis) .rq-icon { opacity: 0; }
+    #{{ $uid }} .rq.js:not(.vis) .rq-line::before { transform: scale(0); }
+    #{{ $uid }} .rq.js:not(.vis) .rq-ln { transform: scaleX(0); }
+    #{{ $uid }} .rq.vis .rq-icon { animation: rqPop-{{ $uid }} .9s cubic-bezier(.34,1.56,.64,1) backwards, rqFloat-{{ $uid }} 5s ease-in-out .9s infinite; }
+    #{{ $uid }} .rq.vis .rq-line::before { animation: rqDrawY-{{ $uid }} 1.3s cubic-bezier(.2,.8,.2,1) .2s backwards; }
+    #{{ $uid }} .rq.vis[data-align="center"] .rq-line::before { animation-name: rqDrawX-{{ $uid }}; }
+    #{{ $uid }} .rq.vis .rq-ln { animation: rqDrawX-{{ $uid }} 1.2s cubic-bezier(.2,.8,.2,1) .1s backwards; }
+    #{{ $uid }} .rq.vis .rq-mark { animation: rqUp-{{ $uid }} 1.1s ease .2s backwards; }
 
     @media (max-width: 639px) {
-        #{{ $uid }} .rq[data-style="big-marks"] .rq-mark.open { font-size: 200px; }
-        #{{ $uid }} .rq[data-style="big-marks"] .rq-mark.close { font-size: 170px; bottom: -80px; }
-        #{{ $uid }} .rq[data-style="gradient"] .rq-mark.open { font-size: 110px; }
-        #{{ $uid }} .rq[data-style="minimal"] { padding-left: 48px; }
-        #{{ $uid }} .rq-ring { width: 48px; height: 48px; }
+        #{{ $uid }} .rq { gap: 16px; }
+        #{{ $uid }} .rq-side { width: 52px; }
+        #{{ $uid }} .rq-icon { width: 52px; height: 52px; }
+        #{{ $uid }} .rq-icon svg { width: 25px; height: 25px; }
+        #{{ $uid }} .rq[data-style="big-marks"] .rq-mark.open { font-size: 190px; }
+        #{{ $uid }} .rq[data-style="big-marks"] .rq-mark.close { font-size: 160px; bottom: -80px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -170,62 +186,58 @@
 <div id="{{ $uid }}">
     <div class="rq" data-style="{{ $style }}" data-align="{{ $align }}" data-animate="{{ $animate ? 1 : 0 }}">
 
-        <span class="rq-grid" aria-hidden="true"></span>
-        <span class="rq-aur" aria-hidden="true"></span>
-        <span class="rq-blob" aria-hidden="true"></span>
-        <span class="rq-foil" aria-hidden="true"></span>
-        <span class="rq-glare" aria-hidden="true"></span>
-        <span class="rq-tape" aria-hidden="true"></span>
+        <span class="rq-blob a" aria-hidden="true"></span>
+        <span class="rq-blob b" aria-hidden="true"></span>
+        <span class="rq-glow" aria-hidden="true"></span>
 
-        @if ($style === 'card')
-            @foreach ([['8%', '14%', '0s'], ['90%', '22%', '.9s'], ['82%', '78%', '1.8s'], ['12%', '70%', '2.4s']] as $s)
-                <span class="rq-star" style="--l: {{ $s[0] }}; --t2: {{ $s[1] }}; --d: {{ $s[2] }};" aria-hidden="true"></span>
-            @endforeach
+        @if ($style === 'minimal')
+            <span class="rq-ln t" aria-hidden="true"></span>
+            <span class="rq-ln b" aria-hidden="true"></span>
         @endif
 
-        @if ($style === 'gradient')
-            @foreach ([['6%', '0s', '9s'], ['18%', '3s', '12s'], ['31%', '1s', '10s'], ['44%', '5s', '13s'], ['58%', '2s', '9s'], ['71%', '6s', '11s'], ['84%', '4s', '14s'], ['94%', '7s', '10s']] as $p)
-                <span class="rq-p" style="--l: {{ $p[0] }}; --d: {{ $p[1] }}; --s: {{ $p[2] }};" aria-hidden="true"></span>
-            @endforeach
+        @if ($style === 'big-marks' && $showMarks)
+            <span class="rq-mark open" aria-hidden="true">&ldquo;</span>
+            <span class="rq-mark close" aria-hidden="true">&rdquo;</span>
         @endif
 
-        @if ($showMarks)
-            @if ($style === 'card')
-                <span class="rq-badge" aria-hidden="true">&ldquo;</span>
-            @elseif ($style === 'big-marks')
-                <span class="rq-mark open" aria-hidden="true">&ldquo;</span>
-                <span class="rq-mark close" aria-hidden="true">&rdquo;</span>
-            @elseif ($style === 'accent-bar' || $style === 'gradient')
-                <span class="rq-mark open" aria-hidden="true">&ldquo;</span>
+        <div class="rq-side" aria-hidden="true">
+            <span class="rq-line l1"><i></i></span>
+            @if ($showMarks)
+                <div class="rq-icon">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path class="m1" d="M6 17h3l2-4V7H5v6h3z"/><path class="m2" d="M14 17h3l2-4V7h-6v6h3z"/></svg>
+                    @foreach ($sparks as $s)
+                        <span class="rq-sp" style="--x: {{ $s[0] }}; --y: {{ $s[1] }}; --d: {{ $s[2] }};"></span>
+                    @endforeach
+                </div>
             @endif
-        @endif
-
-        <div class="rq-body">
-            <span class="rq-beam" aria-hidden="true"></span>
-            @if ($quote !== '')
-                <blockquote class="rq-text">@foreach ($lines as $line)@foreach (preg_split('/\s+/u', trim($line), -1, PREG_SPLIT_NO_EMPTY) ?: [] as $word)<span class="rq-w" style="--w: {{ min($n++, 80) }};"><span>{{ $word }}</span></span> @endforeach @if (!$loop->last)<br>@endif @endforeach</blockquote>
-            @endif
+            <span class="rq-line l2"><i></i></span>
         </div>
 
-        @if ($author !== '')
-            <div class="rq-author">
-                <div class="rq-ring">
-                    <div class="rq-avatar">
-                        @if ($avatar !== '')
-                            <img src="{{ $avatar }}" alt="{{ $author }}" loading="lazy" decoding="async">
-                        @else
-                            {{ mb_strtoupper(mb_substr($author, 0, 1)) }}
+        <div class="rq-main">
+            @if ($quote !== '')
+                <blockquote class="rq-text">@foreach ($lines as $line)@foreach (preg_split('/\s+/u', trim($line), -1, PREG_SPLIT_NO_EMPTY) ?: [] as $word)<span class="rq-w"><span>{{ $word }}</span></span> @endforeach @if (!$loop->last)<br>@endif @endforeach</blockquote>
+            @endif
+
+            @if ($author !== '')
+                <div class="rq-author">
+                    <div class="rq-ring">
+                        <div class="rq-avatar">
+                            @if ($avatar !== '')
+                                <img src="{{ $avatar }}" alt="{{ $author }}" loading="lazy" decoding="async">
+                            @else
+                                {{ mb_strtoupper(mb_substr($author, 0, 1)) }}
+                            @endif
+                        </div>
+                    </div>
+                    <div class="rq-meta">
+                        <span class="rq-name">{{ $author }}</span>
+                        @if ($role !== '')
+                            <span class="rq-role">{{ $role }}</span>
                         @endif
                     </div>
                 </div>
-                <div class="rq-meta">
-                    <span class="rq-name">{{ $author }}</span>
-                    @if ($role !== '')
-                        <span class="rq-role">{{ $role }}</span>
-                    @endif
-                </div>
-            </div>
-        @endif
+            @endif
+        </div>
     </div>
 </div>
 
@@ -243,32 +255,38 @@
     var style = el.getAttribute('data-style');
     var words = [].slice.call(el.querySelectorAll('.rq-w'));
     var timer = 0;
-
-    el.style.setProperty('--total', Math.min(words.length, 80));
+    var typing = false;
 
     function typeIt() {
         clearTimeout(timer);
+        typing = true;
         el.classList.remove('done');
         words.forEach(function (w) { w.classList.remove('on'); });
-        var caret = el.querySelector('.rq-caret');
-        if (!caret) {
-            caret = document.createElement('span');
-            caret.className = 'rq-caret';
-            caret.setAttribute('aria-hidden', 'true');
-        }
+
+        var old = el.querySelector('.rq-caret');
+        if (old) { old.remove(); }
+        var caret = document.createElement('span');
+        caret.className = 'rq-caret';
+        caret.setAttribute('aria-hidden', 'true');
+
         var i = 0;
         (function step() {
-            if (i >= words.length) { el.classList.add('done'); return; }
+            if (i >= words.length) {
+                typing = false;
+                el.classList.add('done');
+                timer = setTimeout(function () { caret.remove(); }, 1600);
+                return;
+            }
             var w = words[i++];
             w.classList.add('on');
             w.parentNode.insertBefore(caret, w.nextSibling);
-            timer = setTimeout(step, 55 + w.textContent.length * 30);
+            timer = setTimeout(step, 45 + w.textContent.length * 24);
         })();
     }
 
     function start() {
         el.classList.add('vis');
-        if (style === 'minimal') { typeIt(); }
+        setTimeout(typeIt, 350);
     }
 
     if (el.dataset.animate === '1' && !reduce) {
@@ -283,21 +301,18 @@
             start();
         }
 
-        if (style === 'minimal') { el.addEventListener('click', typeIt); }
+        el.addEventListener('click', function () { if (!typing) { typeIt(); } });
     }
 
     if (canHover && !reduce) {
-        if (style === 'card' || style === 'gradient') {
-            var k = style === 'card' ? 8 : 5;
+        if (style === 'card') {
             el.addEventListener('pointermove', function (e) {
                 var r = el.getBoundingClientRect();
                 var x = e.clientX - r.left, y = e.clientY - r.top;
                 el.style.setProperty('--mx', x + 'px');
                 el.style.setProperty('--my', y + 'px');
-                el.style.setProperty('--px', (x / r.width * 100).toFixed(1));
-                el.style.setProperty('--py', (y / r.height * 100).toFixed(1));
-                el.style.setProperty('--ry', ((x / r.width - 0.5) * k).toFixed(2) + 'deg');
-                el.style.setProperty('--rx', ((0.5 - y / r.height) * k).toFixed(2) + 'deg');
+                el.style.setProperty('--ry', ((x / r.width - 0.5) * 5).toFixed(2) + 'deg');
+                el.style.setProperty('--rx', ((0.5 - y / r.height) * 5).toFixed(2) + 'deg');
             });
             el.addEventListener('pointerleave', function () {
                 el.style.setProperty('--rx', '0deg');
@@ -308,11 +323,8 @@
         if (style === 'big-marks') {
             el.addEventListener('pointermove', function (e) {
                 var r = el.getBoundingClientRect();
-                var x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
-                el.style.setProperty('--bx', (x * 100).toFixed(1) + '%');
-                el.style.setProperty('--by', (y * 100).toFixed(1) + '%');
-                el.style.setProperty('--mpx', (x - 0.5).toFixed(3));
-                el.style.setProperty('--mpy', (y - 0.5).toFixed(3));
+                el.style.setProperty('--mpx', ((e.clientX - r.left) / r.width - 0.5).toFixed(3));
+                el.style.setProperty('--mpy', ((e.clientY - r.top) / r.height - 0.5).toFixed(3));
             });
             el.addEventListener('pointerleave', function () {
                 el.style.setProperty('--mpx', '0');

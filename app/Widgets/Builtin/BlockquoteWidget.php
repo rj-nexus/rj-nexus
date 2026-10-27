@@ -28,7 +28,7 @@ class BlockquoteWidget extends BaseWidget
 
     public function description(): string
     {
-        return __('An elegant quote block with five styles, optional author, avatar, and decorative marks.');
+        return __('An animated quote block with five styles, typing text, side animation and an interactive quote icon.');
     }
 
     public function schema(): array
@@ -41,11 +41,11 @@ class BlockquoteWidget extends BaseWidget
                 'default' => 'accent-bar',
                 'tab'     => 'content',
                 'options' => [
-                    'accent-bar'   => __('Accent Bar'),
-                    'card'         => __('Card'),
-                    'gradient'     => __('Gradient Box'),
-                    'big-marks'    => __('Giant Quote Marks'),
-                    'minimal'      => __('Minimal'),
+                    'accent-bar' => __('Accent Bar'),
+                    'card'       => __('Card'),
+                    'gradient'   => __('Gradient Box'),
+                    'big-marks'  => __('Giant Quote Marks'),
+                    'minimal'    => __('Minimal'),
                 ],
             ],
             [
@@ -85,6 +85,7 @@ class BlockquoteWidget extends BaseWidget
                 'options' => [
                     'left'   => __('Left'),
                     'center' => __('Center'),
+                    'right'  => __('Right'),
                 ],
             ],
             [
@@ -94,9 +95,9 @@ class BlockquoteWidget extends BaseWidget
                 'default' => 'lg',
                 'tab'     => 'style',
                 'options' => [
-                    'md'  => __('Medium'),
-                    'lg'  => __('Large'),
-                    'xl'  => __('Extra Large'),
+                    'md' => __('Medium'),
+                    'lg' => __('Large'),
+                    'xl' => __('Extra Large'),
                 ],
             ],
             [
@@ -123,14 +124,14 @@ class BlockquoteWidget extends BaseWidget
             [
                 'name'    => 'show_marks',
                 'type'    => 'toggle',
-                'label'   => __('Show Decorative Quote Marks'),
+                'label'   => __('Show Quote Icon and Marks'),
                 'default' => true,
                 'tab'     => 'style',
             ],
             [
                 'name'    => 'animate',
                 'type'    => 'toggle',
-                'label'   => __('Animate on Scroll'),
+                'label'   => __('Animate on Scroll (typing text)'),
                 'default' => true,
                 'tab'     => 'style',
             ],
