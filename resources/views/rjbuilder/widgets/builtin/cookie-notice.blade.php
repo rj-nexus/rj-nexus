@@ -4,19 +4,19 @@
     $pick  = fn ($k, $opts, $d) => in_array($settings[$k] ?? $d, $opts, true) ? $settings[$k] : $d;
     $text  = fn ($k, $d) => trim((string) ($settings[$k] ?? '')) !== '' ? $settings[$k] : $d;
 
-    $pos      = $pick('position', ['bottom', 'bottom-left', 'bottom-right', 'center', 'top'], 'bottom');
-    $style    = $pick('style', ['card', 'dark', 'glass', 'minimal'], 'card');
-    $accent   = $color($settings['accent'] ?? '', '#8b5cf6');
-    $ink      = $color($settings['text_color'] ?? '', '#0f172a');
-    $muted    = $color($settings['muted_color'] ?? '', '#64748b');
-    $bg       = $color($settings['bg_color'] ?? '', '#ffffff');
+    $pos       = $pick('position', ['bottom', 'bottom-left', 'bottom-right', 'center', 'top'], 'bottom');
+    $style     = $pick('style', ['card', 'dark', 'glass', 'minimal'], 'card');
+    $accent    = $color($settings['accent'] ?? '', '#8b5cf6');
+    $ink       = $color($settings['text_color'] ?? '', '#0f172a');
+    $muted     = $color($settings['muted_color'] ?? '', '#64748b');
+    $bg        = $color($settings['bg_color'] ?? '', '#ffffff');
     $radiusCss = ['none' => '0px', 'md' => '12px', 'lg' => '20px', 'xl' => '28px'][$settings['radius'] ?? 'lg'] ?? '20px';
-    $days     = max(1, (int) ($settings['expire_days'] ?? 365));
+    $days      = max(1, (int) ($settings['expire_days'] ?? 365));
 
-    $title    = $settings['title'] ?? __('We value your privacy');
-    $message  = $settings['message'] ?? '';
-    $privacy  = trim((string) ($settings['privacy_url'] ?? ''));
-    $privacy  = preg_match('#^(https?://|/|\#)#i', $privacy) ? $privacy : '';
+    $title   = $settings['title'] ?? __('We value your privacy');
+    $message = $settings['message'] ?? '';
+    $privacy = trim((string) ($settings['privacy_url'] ?? ''));
+    $privacy = preg_match('#^(https?://|/|\#)#i', $privacy) ? $privacy : '';
 
     $showSettings = $bool('show_settings');
     $showReject   = $bool('show_reject');
@@ -48,33 +48,39 @@
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
         &[data-style="dark"] { --bg: #0f172a; --solid: #0f172a; --ink: #f1f5f9; --muted: #94a3b8; --link: color-mix(in srgb, var(--accent) 55%, #fff); }
-        &[data-style="glass"] { --bg: rgba(255, 255, 255, .7); --solid: #fff;
+        &[data-style="glass"] { --bg: rgba(255, 255, 255, .72); --solid: #fff;
             .cn-card { -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
         }
         &[data-style="minimal"] .cn-card { box-shadow: none; }
 
-        .cn-banner { position: fixed; z-index: 99980; display: none; --cr: var(--r); --from: 40px;
+        .cn-banner { position: fixed; z-index: 99980; display: none; --cr: var(--r); --from: 50px;
             &.is-visible { display: block; animation: rj-cn-in .7s cubic-bezier(.2, .9, .3, 1.1) both; }
         }
         &[data-pos="bottom"] .cn-banner { inset: auto 0 0; --cr: var(--r) var(--r) 0 0; }
-        &[data-pos="top"] .cn-banner { inset: 0 0 auto; --cr: 0 0 var(--r) var(--r); --from: -40px; }
-        &[data-pos="bottom-left"] .cn-banner { left: 20px; bottom: 20px; width: min(440px, calc(100% - 24px)); }
-        &[data-pos="bottom-right"] .cn-banner { right: 20px; bottom: 20px; width: min(440px, calc(100% - 24px)); }
-        &[data-pos="center"] .cn-banner { top: 50%; left: 50%; translate: -50% -50%; width: min(540px, calc(100% - 32px)); }
+        &[data-pos="top"] .cn-banner { inset: 0 0 auto; --cr: 0 0 var(--r) var(--r); --from: -50px; }
+        &[data-pos="bottom-left"] .cn-banner { left: 20px; bottom: 20px; width: min(460px, calc(100% - 24px)); }
+        &[data-pos="bottom-right"] .cn-banner { right: 20px; bottom: 20px; width: min(460px, calc(100% - 24px)); }
+        &[data-pos="center"] .cn-banner { top: 50%; left: 50%; translate: -50% -50%; width: min(560px, calc(100% - 32px)); }
 
-        .cn-card { --px: 24px; position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 16px 24px; padding: 22px var(--px); border: 1px solid var(--line); border-radius: var(--cr); background: var(--bg); color: var(--ink); box-shadow: 0 24px 60px -20px rgba(15, 23, 42, .35);
-            &::before { content: ""; position: absolute; inset: 0 var(--r) auto; height: 3px; border-radius: 0 0 3px 3px; background: linear-gradient(90deg, var(--accent), #fbbc04, #34a853, #ea4335, var(--accent)) 0 0 / 200% 100%; animation: rj-cn-flow 5s linear infinite; }
+        .cn-card { --px: 24px; position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 16px 24px; padding: 26px var(--px) 44px; overflow: hidden; border: 1px solid var(--line); border-radius: var(--cr); background: var(--bg); color: var(--ink); box-shadow: 0 -18px 60px -24px rgba(15, 23, 42, .4);
+            &::before { content: ""; position: absolute; inset: 0 0 auto; z-index: 2; height: 3px; background: linear-gradient(90deg, var(--accent), #fbbc04, #34a853, #ea4335, var(--accent)) 0 0 / 200% 100%; animation: rj-cn-flow 5s linear infinite; }
         }
         &[data-pos="bottom"] .cn-card, &[data-pos="top"] .cn-card { --px: max(24px, calc((100% - 1200px) / 2)); }
-        .has-cookie .cn-card { padding-top: 42px; }
-        &[data-pos="top"] .has-cookie .cn-card { padding-top: 22px; padding-bottom: 42px; }
+        .has-cookie .cn-card { padding-inline-start: calc(var(--px) + 64px); }
 
-        .cn-cookie { position: absolute; top: -30px; right: var(--px); z-index: 2; width: 66px; height: 66px; pointer-events: none;
-            svg { display: block; width: 100%; height: 100%; filter: drop-shadow(0 10px 10px rgba(120, 66, 18, .35)); animation: rj-cn-wobble 5s ease-in-out infinite; }
-            i { position: absolute; top: 78%; left: 50%; width: 5px; height: 5px; border-radius: 50%; background: #b9743a; opacity: 0; translate: var(--x) 0; animation: rj-cn-crumb 2.6s ease-in infinite var(--d); }
+        .cn-waves { position: absolute; inset: auto 0 0; z-index: 0; height: 36px; pointer-events: none;
+            svg { position: absolute; bottom: 0; left: 0; width: 200%; height: 100%; fill: var(--accent); }
+            svg:nth-child(1) { opacity: .14; animation: rj-cn-wave 9s linear infinite; }
+            svg:nth-child(2) { height: 72%; opacity: .2; animation: rj-cn-wave 6s linear infinite reverse; }
+            svg:nth-child(3) { height: 44%; opacity: .28; animation: rj-cn-wave 4s linear infinite; }
         }
-        &[data-pos="top"] .cn-cookie { top: auto; bottom: -30px; }
 
+        .cn-cookie { position: absolute; top: 14px; inset-inline-start: max(14px, calc(var(--px) - 6px)); z-index: 3; width: 58px; height: 58px; pointer-events: none;
+            svg { display: block; width: 100%; height: 100%; filter: drop-shadow(0 8px 8px rgba(120, 66, 18, .35)); animation: rj-cn-wobble 5s ease-in-out infinite; }
+            i { position: absolute; top: 80%; left: 50%; width: 5px; height: 5px; border-radius: 50%; background: #b9743a; opacity: 0; translate: var(--x) 0; animation: rj-cn-crumb 2.6s ease-in infinite var(--d); }
+        }
+
+        .cn-body, .cn-actions { position: relative; z-index: 1; }
         .cn-body { flex: 1; min-width: 240px; }
         .cn-title { margin: 0 0 6px; font-size: 16px; font-weight: 800; letter-spacing: -.01em; }
         .cn-msg { margin: 0; font-size: 13.5px; line-height: 1.6; color: var(--muted); }
@@ -121,12 +127,6 @@
         }
         .cn-box-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 22px; border-top: 1px solid var(--line); }
 
-        .cn-reopen { position: fixed; bottom: 16px; inset-inline-start: 16px; z-index: 99979; display: none; width: 48px; height: 48px; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: var(--solid); box-shadow: 0 10px 24px -10px rgba(15, 23, 42, .4); cursor: pointer; transition: transform .2s;
-            &.is-visible { display: grid; place-items: center; }
-            &:hover { transform: scale(1.1); }
-            svg { width: 32px; height: 32px; animation: rj-cn-wobble 5s ease-in-out infinite; }
-        }
-
         @media (max-width: 720px) {
             .cn-actions { width: 100%; }
             .cn-btn { flex: 1; }
@@ -139,18 +139,20 @@
         }
     }
 
-    @keyframes rj-cn-in { from { opacity: 0; transform: translateY(var(--from)) scale(.97); } to { opacity: 1; transform: none; } }
+    @keyframes rj-cn-in { from { opacity: 0; transform: translateY(var(--from)); } to { opacity: 1; transform: none; } }
     @keyframes rj-cn-pop { from { opacity: 0; transform: scale(.9) translateY(12px); } to { opacity: 1; transform: none; } }
     @keyframes rj-cn-flow { to { background-position: 200% 0; } }
     @keyframes rj-cn-shine { 0%, 55% { left: -60%; } 100% { left: 130%; } }
+    @keyframes rj-cn-wave { to { transform: translateX(-50%); } }
     @keyframes rj-cn-wobble { 0%, 100% { transform: rotate(-9deg); } 50% { transform: rotate(9deg) translateY(-4px); } }
-    @keyframes rj-cn-crumb { 0% { opacity: 0; transform: translateY(0) scale(.6); } 15% { opacity: 1; } 100% { opacity: 0; transform: translateY(38px) rotate(200deg) scale(1); } }
+    @keyframes rj-cn-crumb { 0% { opacity: 0; transform: translateY(0) scale(.6); } 15% { opacity: 1; } 100% { opacity: 0; transform: translateY(34px) rotate(200deg) scale(1); } }
 </style>
 
 <div id="{{ $uid }}" data-pos="{{ $pos }}" data-style="{{ $style }}" data-key="{{ $storageKey }}" data-days="{{ $days }}" data-scripts="{{ json_encode($scripts) }}">
     <svg width="0" height="0" style="position:absolute" aria-hidden="true">
         <defs>
             <mask id="{{ $uid }}-m"><rect width="64" height="64" fill="#fff"/><circle cx="53" cy="13" r="10" fill="#000"/></mask>
+            <path id="{{ $uid }}-w" d="M0 20Q150 0 300 20T600 20T900 20T1200 20V40H0Z"/>
         </defs>
         <symbol id="{{ $uid }}-ck" viewBox="0 0 64 64">
             <g mask="url(#{{ $uid }}-m)">
@@ -171,6 +173,12 @@
 
     <div class="cn-banner {{ $showCookie ? 'has-cookie' : '' }}" role="region" aria-label="{{ $title }}">
         <div class="cn-card">
+            <div class="cn-waves" aria-hidden="true">
+                @foreach([0, 1, 2] as $i)
+                    <svg viewBox="0 0 1200 40" preserveAspectRatio="none"><use href="#{{ $uid }}-w"/></svg>
+                @endforeach
+            </div>
+
             @if($showCookie)
                 <div class="cn-cookie" aria-hidden="true">
                     <svg viewBox="0 0 64 64"><use href="#{{ $uid }}-ck"/></svg>
@@ -225,10 +233,6 @@
             </div>
         </div>
     </div>
-
-    <button type="button" class="cn-reopen" data-do="customize" aria-label="{{ __('Cookie Settings') }}">
-        <svg viewBox="0 0 64 64"><use href="#{{ $uid }}-ck"/></svg>
-    </button>
 </div>
 
 <script>
@@ -238,7 +242,6 @@
 
     var banner = root.querySelector('.cn-banner');
     var modal  = root.querySelector('.cn-modal');
-    var reopen = root.querySelector('.cn-reopen');
     var inputs = root.querySelectorAll('[data-cat]');
     var key    = root.dataset.key;
     var days   = parseInt(root.dataset.days, 10) || 365;
@@ -342,9 +345,19 @@
     function choose(cats) {
         save(cats);
         banner.classList.remove('is-visible');
-        reopen.classList.add('is-visible');
         modal.classList.remove('is-open');
     }
+
+    function openSettings() {
+        var c = read();
+        if (c) fill(c.categories || {});
+        modal.classList.add('is-open');
+    }
+
+    window.rjCookieSettings = openSettings;
+    document.addEventListener('click', function (e) {
+        if (e.target.closest('[data-cookie-settings]')) { e.preventDefault(); openSettings(); }
+    });
 
     apply({ necessary: true });
 
@@ -352,7 +365,6 @@
     if (existing) {
         fill(existing.categories || {});
         apply(existing.categories || {});
-        reopen.classList.add('is-visible');
     } else {
         banner.classList.add('is-visible');
     }
@@ -364,11 +376,8 @@
         if (a === 'accept') choose({ necessary: true, analytics: true, marketing: true, preferences: true });
         else if (a === 'reject') choose({ necessary: true, analytics: false, marketing: false, preferences: false });
         else if (a === 'save') choose(collect());
-        else if (a === 'customize') {
-            var c = read();
-            if (c) fill(c.categories || {});
-            modal.classList.add('is-open');
-        } else if (a === 'close') modal.classList.remove('is-open');
+        else if (a === 'customize') openSettings();
+        else if (a === 'close') modal.classList.remove('is-open');
     });
 
     document.addEventListener('keydown', function (e) {
