@@ -20,6 +20,14 @@
     $enableCats    = $settings['enable_categories'] ?? true;
     $saveLabel     = $settings['save_label'] ?? __('Save Preferences');
 
+    $gaId           = trim($settings['ga_id'] ?? '');
+    $gtmId          = trim($settings['gtm_id'] ?? '');
+    $fbPixelId      = trim($settings['fb_pixel_id'] ?? '');
+    $hotjarId       = trim($settings['hotjar_id'] ?? '');
+    $customAnalytics = trim($settings['custom_analytics_script'] ?? '');
+    $customMarketing = trim($settings['custom_marketing_script'] ?? '');
+    $customNecessary = trim($settings['custom_necessary_script'] ?? '');
+
     $radiusMap = ['none' => '0px', 'md' => '12px', 'lg' => '18px', 'xl' => '26px'];
     $radiusCss = $radiusMap[$radius] ?? '18px';
 
@@ -47,6 +55,18 @@
     ];
 
     $storageKey = 'rj_cookie_consent_' . substr(md5($title . '|' . $privacyUrl), 0, 8);
+
+    $scriptsConfig = [
+        'gaId'              => $gaId,
+        'gtmId'             => $gtmId,
+        'fbPixelId'         => $fbPixelId,
+        'hotjarId'          => $hotjarId,
+        'customAnalytics'   => $customAnalytics,
+        'customMarketing'   => $customMarketing,
+        'customNecessary'   => $customNecessary,
+    ];
+
+    $hasAnyScript = $gaId || $gtmId || $fbPixelId || $hotjarId || $customAnalytics || $customMarketing || $customNecessary;
 @endphp
 
 <style>
@@ -59,7 +79,6 @@
     #{{ $uid }}.is-visible { display: block; }
     #{{ $uid }}.is-hidden { display: none !important; }
 
-    /* ---------- POSITIONS ---------- */
     #{{ $uid }}[data-pos="bottom"] {
         bottom: 0; left: 0; right: 0;
         padding: 0;
@@ -89,7 +108,6 @@
         }
     }
 
-    /* ---------- CARD ---------- */
     #{{ $uid }} .rj-cn-card {
         position: relative;
         border-radius: {{ $radiusCss }};
@@ -112,7 +130,6 @@
         border-top-right-radius: 0;
     }
 
-    /* ---------- STYLES ---------- */
     #{{ $uid }}[data-style="card"] .rj-cn-card {
         background: {{ $bgColor }};
         color: {{ $textColor }};
@@ -152,7 +169,6 @@
         box-shadow: none;
     }
 
-    /* ---------- ICON ---------- */
     #{{ $uid }} .rj-cn-icon {
         flex-shrink: 0;
         width: 40px;
@@ -166,7 +182,6 @@
     }
     #{{ $uid }} .rj-cn-icon svg { width: 22px; height: 22px; }
 
-    /* ---------- BODY ---------- */
     #{{ $uid }} .rj-cn-body {
         flex: 1;
         min-width: 220px;
@@ -193,7 +208,6 @@
         margin-inline-start: 4px;
     }
 
-    /* ---------- ACTIONS ---------- */
     #{{ $uid }} .rj-cn-actions {
         display: flex;
         gap: 10px;
@@ -236,7 +250,6 @@
         background: {{ $mutedColor }}12;
     }
 
-    /* ---------- SETTINGS MODAL ---------- */
     #{{ $uid }} .rj-cn-modal {
         position: fixed;
         inset: 0;
@@ -400,7 +413,6 @@
     }
     #{{ $uid }} .rj-cn-save:hover { opacity: .92; }
 
-    /* ---------- FLOATING SETTINGS BUTTON (RE-OPEN) ---------- */
     #{{ $uid }} .rj-cn-reopen {
         position: fixed;
         z-index: 99979;
@@ -441,7 +453,8 @@
      data-style="{{ $style }}"
      data-key="{{ $storageKey }}"
      data-expire-days="{{ $expireDays }}"
-     data-enable-cats="{{ $enableCats ? '1' : '0' }}">
+     data-enable-cats="{{ $enableCats ? '1' : '0' }}"
+     data-scripts='@json($scriptsConfig)'>
 
     <div class="rj-cn-card">
         @if($showIcon)
@@ -537,8 +550,121 @@
 
     var storageKey = root.getAttribute('data-key') || 'rj_cookie_consent';
     var expireDays = parseInt(root.getAttribute('data-expire-days'), 10) || 365;
+    var scriptsConfig = {};
+    try { scriptsConfig = JSON.parse(root.getAttribute('data-scripts') || '{}'); } catch (e) {}
+
     var modal = root.querySelector('[data-modal]');
     var reopenBtn = root.querySelector('[data-reopen]');
+
+    var loaded = { analytics: false, marketing: false, preferences: false, necessary: false };
+
+    /* ============================================
+       SCRIPT LOADERS
+       ============================================ */
+
+    function loadGA(id) {
+        if (!id || loaded.analytics) return;
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(id);
+        document.head.appendChild(s);
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = function () { window.dataLayer.push(arguments); };
+        window.gtag('js', new Date());
+        window.gtag('config', id, { anonymize_ip: true });
+    }
+
+    function loadGTM(id) {
+        if (!id) return;
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://www.googletagmanager.com/gtm.js?id=' + encodeURIComponent(id);
+        document.head.appendChild(s);
+    }
+
+    function loadFbPixel(id) {
+        if (!id || loaded.marketing) return;
+        !function(f,b,e,v,n,t,s){
+            if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+            n.queue=[];t=b.createElement(e);t.async=!0;
+            t.src=v;s=b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t,s)
+        }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+        window.fbq('init', id);
+        window.fbq('track', 'PageView');
+    }
+
+    function loadHotjar(id) {
+        if (!id || loaded.analytics) return;
+        (function(h,o,t,j,a,r){
+            h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
+            h._hjSettings={hjid:parseInt(id,10),hjsv:6};
+            a=o.getElementsByTagName('head')[0];
+            r=o.createElement('script');r.async=1;
+            r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
+            a.appendChild(r);
+        })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
+    }
+
+    function injectCustom(html, marker) {
+        if (!html) return;
+        var temp = document.createElement('div');
+        temp.innerHTML = html;
+        var nodes = Array.prototype.slice.call(temp.childNodes);
+        nodes.forEach(function (node) {
+            if (node.tagName === 'SCRIPT') {
+                var s = document.createElement('script');
+                Array.from(node.attributes).forEach(function (a) {
+                    s.setAttribute(a.name, a.value);
+                });
+                if (node.src) {
+                    s.src = node.src;
+                    s.async = false;
+                    document.head.appendChild(s);
+                } else {
+                    s.text = node.textContent;
+                    document.head.appendChild(s);
+                }
+            } else {
+                document.head.appendChild(node.cloneNode(true));
+            }
+        });
+    }
+
+    /* ============================================
+       APPLY CONSENT
+       ============================================ */
+
+    function applyConsent(cats) {
+        cats = cats || {};
+
+        if (cats.necessary && !loaded.necessary) {
+            loaded.necessary = true;
+            injectCustom(scriptsConfig.customNecessary || '', 'necessary');
+        }
+
+        if (cats.analytics && !loaded.analytics) {
+            loaded.analytics = true;
+            if (scriptsConfig.gaId) loadGA(scriptsConfig.gaId);
+            if (scriptsConfig.gtmId) loadGTM(scriptsConfig.gtmId);
+            if (scriptsConfig.hotjarId) loadHotjar(scriptsConfig.hotjarId);
+            if (scriptsConfig.customAnalytics) injectCustom(scriptsConfig.customAnalytics, 'analytics');
+        }
+
+        if (cats.marketing && !loaded.marketing) {
+            loaded.marketing = true;
+            if (scriptsConfig.fbPixelId) loadFbPixel(scriptsConfig.fbPixelId);
+            if (scriptsConfig.customMarketing) injectCustom(scriptsConfig.customMarketing, 'marketing');
+        }
+    }
+
+    /* ============================================
+       STORAGE
+       ============================================ */
 
     function readConsent() {
         try {
@@ -568,6 +694,8 @@
         try {
             document.dispatchEvent(new CustomEvent('rj:cookie-consent', { detail: payload }));
         } catch (e) {}
+
+        applyConsent(cats);
     }
 
     function getAllCategories() {
@@ -590,6 +718,10 @@
             if (typeof cats[key] === 'boolean') input.checked = cats[key];
         });
     }
+
+    /* ============================================
+       UI
+       ============================================ */
 
     function showBanner() {
         root.classList.add('is-visible');
@@ -615,10 +747,18 @@
         modal.classList.remove('is-open');
     }
 
+    /* ============================================
+       INIT
+       ============================================ */
+
+    injectCustom(scriptsConfig.customNecessary || '', 'necessary');
+    loaded.necessary = true;
+
     var existing = readConsent();
     if (existing) {
         if (reopenBtn) reopenBtn.classList.add('is-visible');
         applyToInputs(existing.categories || {});
+        applyConsent(existing.categories || {});
     } else {
         showBanner();
     }
