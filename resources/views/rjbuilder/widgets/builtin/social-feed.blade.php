@@ -37,7 +37,7 @@
         'piokio' => [
             'name'     => 'Piokio',
             'color'    => '#FF6B35',
-            'image'    => $rawBase . '/piokio/piokio_icon.svg',
+            'image'    => $rawBase . '/piokio/piokio_logo.svg',
             'fallback' => 'P',
         ],
         'dehliz' => [
