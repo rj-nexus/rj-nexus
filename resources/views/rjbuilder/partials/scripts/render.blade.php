@@ -3,6 +3,24 @@ function builderRender() {
     return {
         cssv(v) { return String(v == null ? '' : v).replace(/[^#\w(),.%\s-]/g, ''); },
 
+        ico(name, size) {
+            const s = size || 14;
+            const paths = {
+                parent: '<path d="M9 14L4 9l5-5"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/>',
+                up: '<path d="M12 19V5M5 12l7-7 7 7"/>',
+                down: '<path d="M12 5v14M19 12l-7 7-7-7"/>',
+                copy: '<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/>',
+                close: '<path d="M6 6l12 12M18 6L6 18"/>',
+                grip: '<g fill="currentColor" stroke="none"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></g>',
+                sparkle: '<path fill="currentColor" stroke-width="1" d="M12 3l2.2 6.3L21 12l-6.8 2.7L12 21l-2.2-6.3L3 12l6.8-2.7z"/>',
+                caret: '<path d="M6 9l6 6 6-6"/>',
+                bolt: '<path fill="currentColor" stroke-width="1.2" d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
+                menu: '<path d="M4 6h16M4 12h16M4 18h16"/>',
+                arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+            };
+            return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0;" aria-hidden="true">${paths[name] || ''}</svg>`;
+        },
+
         resp(s, name, fallback) {
             const dev = this.device;
             if (dev === 'desktop') {
@@ -178,13 +196,13 @@ function builderRender() {
                 <div class="rj-block${customClass}"${cssId ? cssId.replace(' id=', ' data-css-id=') : ''} data-block-id="${bid}" style="position:relative; ${hiddenHere ? 'opacity:.35;' : ''}" onclick="event.stopPropagation(); window.__builder.selectBlock('${bid}')">
                     ${hiddenNote}
                     <div style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);z-index:30;display:flex;align-items:center;gap:2px;background:#1a1030;color:#fff;border-radius:9999px;padding:2px 6px;box-shadow:0 4px 12px rgba(0,0,0,0.2);opacity:${isSelected ? 1 : 0};pointer-events:${isSelected ? 'auto' : 'none'};transition:opacity 0.15s;white-space:nowrap;">
-                        <span style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;padding:0 4px;color:#a855f7;">${this.esc(this.blockLabel(block.type))}${hasAnim ? ' ✦' : ''}</span>
-                        <span draggable="true" ondragstart="event.stopPropagation(); window.__builder.startDragMove('${bid}', event)" title="Drag to move" style="width:22px;height:22px;display:flex;align-items:center;justify-content:center;cursor:grab;font-size:13px;">⠿</span>
-                        ${this.toolbarBtn('⇱', this.esc(this.t('Select parent')), `window.__builder.selectParent('${bid}')`)}
-                        ${this.toolbarBtn('↑', this.esc(this.t('Move up')), `window.__builder.moveUp('${bid}')`)}
-                        ${this.toolbarBtn('↓', this.esc(this.t('Move down')), `window.__builder.moveDown('${bid}')`)}
-                        ${this.toolbarBtn('⧉', this.esc(this.t('Duplicate')), `window.__builder.duplicateBlock('${bid}')`)}
-                        ${this.toolbarBtn('✕', this.esc(this.t('Delete')), `window.__builder.removeBlock('${bid}')`, true)}
+                        <span style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;padding:0 4px;color:#a855f7;display:inline-flex;align-items:center;gap:4px;">${this.esc(this.blockLabel(block.type))}${hasAnim ? this.ico('sparkle', 9) : ''}</span>
+                        <span draggable="true" ondragstart="event.stopPropagation(); window.__builder.startDragMove('${bid}', event)" title="Drag to move" style="width:22px;height:22px;display:flex;align-items:center;justify-content:center;cursor:grab;">${this.ico('grip', 13)}</span>
+                        ${this.toolbarBtn(this.ico('parent', 13), this.esc(this.t('Select parent')), `window.__builder.selectParent('${bid}')`)}
+                        ${this.toolbarBtn(this.ico('up', 13), this.esc(this.t('Move up')), `window.__builder.moveUp('${bid}')`)}
+                        ${this.toolbarBtn(this.ico('down', 13), this.esc(this.t('Move down')), `window.__builder.moveDown('${bid}')`)}
+                        ${this.toolbarBtn(this.ico('copy', 13), this.esc(this.t('Duplicate')), `window.__builder.duplicateBlock('${bid}')`)}
+                        ${this.toolbarBtn(this.ico('close', 13), this.esc(this.t('Delete')), `window.__builder.removeBlock('${bid}')`, true)}
                     </div>
                     <div class="rj-ring" style="${isSelected ? 'outline:2px solid #7c3aed; outline-offset:-2px;' : ''} border-radius:12px;">${inner}</div>
                 </div>
@@ -355,7 +373,7 @@ function builderRender() {
 
             if (settings.show_read_more) {
                 const label = this.esc(settings.read_more_text || this.t('Read more'));
-                html += `<a href="${this.esc(url)}" class="rj-post-read-more">${label} →</a>`;
+                html += `<a href="${this.esc(url)}" class="rj-post-read-more">${label} ${this.ico('arrow', 14)}</a>`;
             }
 
             html += `</div></article>`;
@@ -408,7 +426,7 @@ function builderRender() {
                 if (!url) {
                     if (this.preview) return '';
                     const hint = this.isDynamicValue(urlRaw)
-                        ? '⚡ ' + this.getDynamicTagLabel(urlRaw)
+                        ? this.ico('bolt', 13) + ' ' + esc(this.getDynamicTagLabel(urlRaw))
                         : esc(this.t('Image'));
                     return `<div style="padding:2rem 1rem; text-align:center; color:#9ca3af; font-size:0.75rem; background:#f3f4f6; border-radius:8px; margin:0.75rem 1rem;">
                                 <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="display:block; margin:0 auto 4px;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
@@ -461,7 +479,7 @@ function builderRender() {
                 if (!url) {
                     if (this.preview) return '';
                     const hint = this.isDynamicValue(urlRaw)
-                        ? '⚡ ' + this.getDynamicTagLabel(urlRaw)
+                        ? this.ico('bolt', 13) + ' ' + esc(this.getDynamicTagLabel(urlRaw))
                         : esc(this.t('Logo')) + ' — ' + esc(this.t('Select Image'));
                     return `<div style="padding:1.5rem 1rem; text-align:center; color:#9ca3af; font-size:0.75rem; background:#f3f4f6; border-radius:8px; margin:0.5rem 1rem;">
                                 ${hint}
@@ -525,7 +543,7 @@ function builderRender() {
                 const renderItems = (list) => list.map(it => {
                     const kids = it.children && it.children.length > 0;
                     return `<li class="rj-mi">
-                        <a href="${esc(it.url || '#')}" target="${esc(it.target || '_self')}" class="rj-ml" ${noNav}>${esc(it.label)}${kids ? ' <span class="rj-car">▾</span>' : ''}</a>
+                        <a href="${esc(it.url || '#')}" target="${esc(it.target || '_self')}" class="rj-ml" ${noNav}>${esc(it.label)}${kids ? ' <span class="rj-car">' + this.ico('caret', 11) + '</span>' : ''}</a>
                         ${kids ? `<ul class="rj-dd">${renderItems(it.children)}</ul>` : ''}
                     </li>`;
                 }).join('');
@@ -536,7 +554,7 @@ function builderRender() {
                     ? `<div style="display:flex; align-items:center; gap:10px; color:#6b7280; font-size:11px; font-weight:600; margin-bottom:6px; text-transform:uppercase; letter-spacing:.05em;">
                            <span style="color:#8b5cf6;">${esc(menuName)}</span>
                            <span style="color:#c4c7d3;">·</span>
-                           <span>${layout === 'horizontal' ? 'Horizontal' : 'Vertical'} · ${align}${mobileBehavior === 'hamburger' ? ' · ☰' : ''}</span>
+                           <span style="display:inline-flex; align-items:center; gap:6px;">${layout === 'horizontal' ? 'Horizontal' : 'Vertical'} · ${align}${mobileBehavior === 'hamburger' ? ' · ' + this.ico('menu', 12) : ''}</span>
                        </div>`
                     : '';
 
