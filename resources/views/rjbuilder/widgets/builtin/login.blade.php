@@ -116,7 +116,6 @@
         text-decoration: none;
     }
     #{{ $uid }} .rj-lg-link:hover { text-decoration: underline; }
-
     #{{ $uid }} .rj-lg-submit {
         width: 100%;
         padding: 12px;
@@ -238,12 +237,18 @@
     }
 </style>
 
-<div id="{{ $uid }}" x-data="rjLogin_{{ $uid }}()" x-init="init(@js($initialUser))">
+<!-- Diqqət: x-data üçün tək dırnaq (') istifadə olunub ki, JS-dəki dırnaqlar HTML-i sındırmasın -->
+<div id="{{ $uid }}" x-data='rjLogin_{{ $uid }}({
+    title: @js($title),
+    subtitle: @js($subtitle),
+    loggedTitle: @js($loggedTitle),
+    initialUser: @js($initialUser)
+})'>
     <div class="rj-lg-card">
         <template x-if="!user">
             <form @submit.prevent="submit($event)" novalidate>
-                <h2 class="rj-lg-title" x-text="{{ \Illuminate\Support\Js::from($title) }}"></h2>
-                <p class="rj-lg-sub" x-text="{{ \Illuminate\Support\Js::from($subtitle) }}"></p>
+                <h2 class="rj-lg-title" x-text="title"></h2>
+                <p class="rj-lg-sub" x-text="subtitle"></p>
 
                 <div x-show="error" x-cloak class="rj-lg-err" x-text="error"></div>
 
@@ -273,7 +278,7 @@
 
                 <button type="submit" class="rj-lg-submit" :disabled="loading">
                     <svg x-show="loading" class="rj-lg-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>
-                    <span x-text="loading ? @js(__('Signing in...')) : @js(__('Sign In'))"></span>
+                    <span x-text="loading ? texts.signingIn : texts.signIn"></span>
                 </button>
 
                 @if($showRegister && \Illuminate\Support\Facades\Route::has('register'))
@@ -287,14 +292,14 @@
 
         <template x-if="user">
             <div class="rj-lg-user">
-                <h2 class="rj-lg-title" x-text="{{ \Illuminate\Support\Js::from($loggedTitle) }}"></h2>
-                <div class="rj-lg-avatar" x-text="user ? user.initials : ''"></div>
-                <p class="rj-lg-uname" x-text="user ? user.name : ''"></p>
-                <p class="rj-lg-email" x-text="user ? user.email : ''"></p>
+                <h2 class="rj-lg-title" x-text="loggedTitle"></h2>
+                <div class="rj-lg-avatar" x-text="user.initials || ''"></div>
+                <p class="rj-lg-uname" x-text="user.name || ''"></p>
+                <p class="rj-lg-email" x-text="user.email || ''"></p>
 
                 <div class="rj-lg-actions">
                     @if($showAdminBtn)
-                        <template x-if="user && user.admin && user.adminUrl">
+                        <template x-if="user.admin && user.adminUrl">
                             <a :href="user.adminUrl" class="rj-lg-btn primary">
                                 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>
                                 <span>{{ __('Go to Admin') }}</span>
@@ -302,7 +307,7 @@
                         </template>
                     @endif
 
-                    <a :href="user ? user.account : '#'" class="rj-lg-btn">
+                    <a :href="user.account || '#'" class="rj-lg-btn">
                         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path stroke-linecap="round" stroke-linejoin="round" d="M4 21v-1a8 8 0 0116 0v1"/></svg>
                         <span>{{ __('My Account') }}</span>
                     </a>
@@ -318,23 +323,31 @@
 </div>
 
 <script>
-window['rjLogin_{{ $uid }}'] = function () {
+window['rjLogin_{{ $uid }}'] = function (config) {
     return {
-        user: null,
+        user: config.initialUser || null,
         email: '',
         password: '',
         remember: false,
         loading: false,
         error: '',
 
-        init(initial) {
-            if (initial) this.user = initial;
+        title: config.title,
+        subtitle: config.subtitle,
+        loggedTitle: config.loggedTitle,
+
+        texts: {
+            signingIn: @js(__('Signing in...')),
+            signIn: @js(__('Sign In')),
+            fillFields: @js(__('Please fill in all fields.')),
+            loginFailed: @js(__('Login failed.')),
+            networkError: @js(__('Network error. Please try again.'))
         },
 
         async submit(e) {
             this.error = '';
             if (!this.email || !this.password) {
-                this.error = @js(__('Please fill in all fields.'));
+                this.error = this.texts.fillFields;
                 return;
             }
             this.loading = true;
@@ -358,13 +371,11 @@ window['rjLogin_{{ $uid }}'] = function () {
                 if (res.ok && data.ok) {
                     this.user = data.user;
                     this.password = '';
-                    // Uğurlu girişdən sonra profil səhifəsinə yönləndirmək istəsən, aşağıdakı sətri aça bilərsən:
-                    // window.location.href = data.user.account;
                 } else {
-                    this.error = data.message || @js(__('Login failed.'));
+                    this.error = data.message || this.texts.loginFailed;
                 }
             } catch (err) {
-                this.error = @js(__('Network error. Please try again.'));
+                this.error = this.texts.networkError;
             } finally {
                 this.loading = false;
             }
@@ -387,7 +398,7 @@ window['rjLogin_{{ $uid }}'] = function () {
                 this.remember = false;
                 this.error = '';
             } catch (err) {
-                this.error = @js(__('Network error. Please try again.'));
+                this.error = this.texts.networkError;
             } finally {
                 this.loading = false;
             }
