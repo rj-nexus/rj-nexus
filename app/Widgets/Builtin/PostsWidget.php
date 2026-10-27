@@ -2,9 +2,7 @@
 
 namespace App\Widgets\Builtin;
 
-use App\Models\Category;
 use App\Models\Post;
-use App\Models\Tag;
 use App\Widgets\BaseWidget;
 
 class PostsWidget extends BaseWidget
@@ -321,184 +319,12 @@ class PostsWidget extends BaseWidget
     public function render(array $settings): string
     {
         $query = $this->buildQuery($settings);
-
         $limit = max(1, (int) ($settings['limit'] ?? 6));
         $posts = $query->limit($limit)->get();
 
-        if ($posts->isEmpty()) {
-            return $this->renderEmpty($settings);
-        }
+        $uid = 'rjp_' . substr(md5(uniqid('', true)), 0, 8);
 
-        $layout = $settings['layout'] ?? 'grid';
-
-        if ($layout === 'compact') {
-            return $this->renderCompact($posts, $settings);
-        }
-
-        $columns = (int) ($settings['columns'] ?? 3);
-
-        $gapMap = ['none' => '0', 'sm' => '12px', 'md' => '20px', 'lg' => '32px', 'xl' => '48px'];
-        $gap = $gapMap[$settings['gap'] ?? 'md'] ?? '20px';
-
-        $radiusMap = ['none' => '0', 'sm' => '4px', 'md' => '8px', 'lg' => '16px'];
-        $radius = $radiusMap[$settings['card_radius'] ?? 'md'] ?? '8px';
-
-        $titleSizes = ['sm' => '14px', 'base' => '16px', 'lg' => '18px', 'xl' => '22px'];
-        $titleSize = $titleSizes[$settings['title_size'] ?? 'lg'] ?? '18px';
-
-        $wrapperStyles = [
-            '--rj-posts-gap:' . $gap,
-            '--rj-posts-radius:' . $radius,
-            '--rj-posts-bg:' . ($settings['card_bg'] ?? '#ffffff'),
-            '--rj-posts-title-color:' . ($settings['title_color'] ?? '#111827'),
-            '--rj-posts-title-size:' . $titleSize,
-            '--rj-posts-text-color:' . ($settings['text_color'] ?? '#6b7280'),
-            '--rj-posts-meta-color:' . ($settings['meta_color'] ?? '#9ca3af'),
-        ];
-
-        $padding = $this->dimensionCss($settings, 'padding_dim');
-        if ($padding !== '') $wrapperStyles[] = 'padding:' . $padding;
-
-        $margin = $this->dimensionCss($settings, 'margin_dim');
-        if ($margin !== '') $wrapperStyles[] = 'margin:' . $margin;
-
-        $bg = $this->backgroundCss($settings);
-        if ($bg !== '') $wrapperStyles[] = rtrim($bg, ';');
-
-        $wrapperAttrs = [
-            'class' => 'rj-posts rj-posts-' . $layout . ' rj-posts-cols-' . $columns . ' rj-posts-card-' . ($settings['card_style'] ?? 'default'),
-            'style' => implode(';', $wrapperStyles),
-        ];
-
-        if (!empty($settings['hover_lift'])) {
-            $wrapperAttrs['class'] .= ' rj-posts-hover-lift';
-        }
-
-        $id = $this->cssId($settings);
-        if ($id !== '') $wrapperAttrs['id'] = $id;
-
-        $class = $this->cssClass($settings);
-        if ($class !== '') $wrapperAttrs['class'] .= ' ' . $class;
-
-        $itemsHtml = '';
-
-        foreach ($posts as $post) {
-            $itemsHtml .= $this->renderPostCard($post, $settings);
-        }
-
-        $pagination = $settings['pagination'] ?? 'none';
-        $paginationHtml = '';
-
-        if ($pagination === 'load_more') {
-            $paginationHtml = '<div class="rj-posts-loadmore"><button type="button" class="rj-posts-btn-load" data-post-type="' . e($settings['post_type'] ?? 'post') . '">' . __('Load More') . '</button></div>';
-        } elseif ($pagination === 'numbers') {
-            $paginationHtml = '<div class="rj-posts-pagination"></div>';
-        }
-
-        $html = '<div' . $this->attr($wrapperAttrs) . '>'
-            . '<div class="rj-posts-grid">' . $itemsHtml . '</div>'
-            . $paginationHtml
-            . '</div>';
-
-        return $this->applyAnimation($html, $settings);
-    }
-
-    protected function renderCompact($posts, array $settings): string
-    {
-        $uid = 'rjc_' . substr(md5(uniqid('', true)), 0, 8);
-
-        $showImage = !empty($settings['show_image']);
-        $showDate = !empty($settings['show_date']);
-        $showAuthor = !empty($settings['show_author']);
-        $showCategories = !empty($settings['show_categories']);
-        $showExcerpt = !empty($settings['show_excerpt']);
-
-        $titleColor = $settings['title_color'] ?? '#111827';
-        $textColor = $settings['text_color'] ?? '#6b7280';
-        $metaColor = $settings['meta_color'] ?? '#9ca3af';
-        $cardRadiusMap = ['none' => '0px', 'sm' => '4px', 'md' => '8px', 'lg' => '16px'];
-        $thumbRadius = $cardRadiusMap[$settings['card_radius'] ?? 'md'] ?? '8px';
-
-        $gapMap = ['none' => '4px', 'sm' => '10px', 'md' => '16px', 'lg' => '24px', 'xl' => '32px'];
-        $itemGap = $gapMap[$settings['gap'] ?? 'md'] ?? '16px';
-
-        $hoverLift = !empty($settings['hover_lift']);
-
-        $padding = $this->dimensionCss($settings, 'padding_dim');
-        $margin = $this->dimensionCss($settings, 'margin_dim');
-
-        $wrapperStyle = '';
-        if ($padding !== '') $wrapperStyle .= 'padding:' . $padding . ';';
-        if ($margin !== '') $wrapperStyle .= 'margin:' . $margin . ';';
-
-        $html = '<style>'
-            . '#' . $uid . '{display:flex;flex-direction:column;gap:' . $itemGap . ';' . $wrapperStyle . '}'
-            . '#' . $uid . ' .rj-cmp-item{display:flex;gap:14px;align-items:flex-start;text-decoration:none;color:inherit;' . ($hoverLift ? 'transition:transform .25s cubic-bezier(.2,.8,.2,1);' : '') . '}'
-            . ($hoverLift ? '#' . $uid . ' .rj-cmp-item:hover{transform:translateX(4px);}' : '')
-            . '#' . $uid . ' .rj-cmp-thumb{width:72px;height:72px;flex-shrink:0;border-radius:' . $thumbRadius . ';overflow:hidden;background:#f1f5f9;}'
-            . '#' . $uid . ' .rj-cmp-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s cubic-bezier(.2,.8,.2,1);}'
-            . '#' . $uid . ' .rj-cmp-item:hover .rj-cmp-thumb img{transform:scale(1.08);}'
-            . '#' . $uid . ' .rj-cmp-body{flex:1;min-width:0;padding-top:2px;}'
-            . '#' . $uid . ' .rj-cmp-cats{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px;}'
-            . '#' . $uid . ' .rj-cmp-cat{font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#8b5cf6;}'
-            . '#' . $uid . ' .rj-cmp-title{font-size:13.5px;font-weight:700;color:' . $titleColor . ';margin:0 0 4px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;letter-spacing:-.005em;}'
-            . '#' . $uid . ' .rj-cmp-item:hover .rj-cmp-title{color:#8b5cf6;}'
-            . '#' . $uid . ' .rj-cmp-excerpt{font-size:11.5px;color:' . $textColor . ';margin:3px 0 4px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;}'
-            . '#' . $uid . ' .rj-cmp-meta{font-size:10.5px;color:' . $metaColor . ';font-weight:500;display:flex;align-items:center;gap:5px;}'
-            . '#' . $uid . ' .rj-cmp-sep{opacity:.5;}'
-            . '@media (prefers-reduced-motion: reduce){#' . $uid . ',#' . $uid . ' *{animation:none!important;transition:none!important;}}'
-            . '</style>';
-
-        $html .= '<div id="' . $uid . '">';
-
-        foreach ($posts as $post) {
-            $url = url('/blog/' . $post->slug);
-
-            $html .= '<a href="' . e($url) . '" class="rj-cmp-item">';
-
-            if ($showImage && $post->featured_image) {
-                $html .= '<div class="rj-cmp-thumb">';
-                $html .= '<img src="' . e($post->featured_image) . '" alt="' . e($post->title) . '" loading="lazy">';
-                $html .= '</div>';
-            }
-
-            $html .= '<div class="rj-cmp-body">';
-
-            if ($showCategories && $post->categories->isNotEmpty()) {
-                $html .= '<div class="rj-cmp-cats">';
-                foreach ($post->categories->take(1) as $cat) {
-                    $html .= '<span class="rj-cmp-cat">' . e($cat->name) . '</span>';
-                }
-                $html .= '</div>';
-            }
-
-            $html .= '<h4 class="rj-cmp-title">' . e($post->title) . '</h4>';
-
-            if ($showExcerpt) {
-                $length = max(5, (int) ($settings['excerpt_length'] ?? 20));
-                $excerpt = \Illuminate\Support\Str::words(strip_tags((string) $post->excerpt), $length, '…');
-                if ($excerpt !== '') {
-                    $html .= '<p class="rj-cmp-excerpt">' . e($excerpt) . '</p>';
-                }
-            }
-
-            $meta = [];
-            if ($showDate && $post->published_at) {
-                $meta[] = '<span>' . e($post->published_at->format('M j, Y')) . '</span>';
-            }
-            if ($showAuthor && $post->author) {
-                $meta[] = '<span>' . e($post->author->name) . '</span>';
-            }
-            if (!empty($meta)) {
-                $html .= '<div class="rj-cmp-meta">' . implode('<span class="rj-cmp-sep">·</span>', $meta) . '</div>';
-            }
-
-            $html .= '</div></a>';
-        }
-
-        $html .= '</div>';
-
-        return $html;
+        return view('rjbuilder.widgets.builtin.posts', compact('posts', 'settings', 'uid'))->render();
     }
 
     protected function buildQuery(array $settings)
@@ -520,7 +346,6 @@ class PostsWidget extends BaseWidget
 
         if (!empty($settings['categories'])) {
             $ids = array_filter(array_map('intval', explode(',', (string) $settings['categories'])));
-
             if (!empty($ids)) {
                 $query->whereHas('categories', fn($q) => $q->whereIn('rj_categories.id', $ids));
             }
@@ -528,7 +353,6 @@ class PostsWidget extends BaseWidget
 
         if (!empty($settings['tags'])) {
             $ids = array_filter(array_map('intval', explode(',', (string) $settings['tags'])));
-
             if (!empty($ids)) {
                 $query->whereHas('tags', fn($q) => $q->whereIn('rj_tags.id', $ids));
             }
@@ -536,86 +360,11 @@ class PostsWidget extends BaseWidget
 
         if (!empty($settings['exclude_ids'])) {
             $ids = array_filter(array_map('intval', explode(',', (string) $settings['exclude_ids'])));
-
             if (!empty($ids)) {
                 $query->whereNotIn('id', $ids);
             }
         }
 
         return $query;
-    }
-
-    protected function renderPostCard(Post $post, array $settings): string
-    {
-        $url = url('/blog/' . $post->slug);
-        $showImage = !empty($settings['show_image']);
-        $image = $post->featured_image;
-        $ratio = $settings['image_ratio'] ?? '16/9';
-
-        $cardStyles = [];
-        if ($ratio !== 'auto') {
-            $cardStyles[] = '--rj-post-ratio:' . $ratio;
-        }
-
-        $html = '<article class="rj-post-card" style="' . implode(';', $cardStyles) . '">';
-
-        if ($showImage && $image) {
-            $html .= '<a href="' . e($url) . '" class="rj-post-image">';
-            $html .= '<img src="' . e($image) . '" alt="' . e($post->title) . '" loading="lazy">';
-            $html .= '</a>';
-        }
-
-        $html .= '<div class="rj-post-body">';
-
-        if (!empty($settings['show_categories']) && $post->categories->isNotEmpty()) {
-            $cats = $post->categories->take(2);
-            $html .= '<div class="rj-post-cats">';
-
-            foreach ($cats as $cat) {
-                $html .= '<span class="rj-post-cat">' . e($cat->name) . '</span>';
-            }
-
-            $html .= '</div>';
-        }
-
-        $html .= '<h3 class="rj-post-title"><a href="' . e($url) . '">' . e($post->title) . '</a></h3>';
-
-        if (!empty($settings['show_excerpt'])) {
-            $length = max(5, (int) ($settings['excerpt_length'] ?? 20));
-            $excerpt = \Illuminate\Support\Str::words(strip_tags((string) $post->excerpt), $length, '...');
-            $html .= '<p class="rj-post-excerpt">' . e($excerpt) . '</p>';
-        }
-
-        $meta = [];
-
-        if (!empty($settings['show_date']) && $post->published_at) {
-            $meta[] = '<span class="rj-post-meta-item">' . e($post->published_at->format('M j, Y')) . '</span>';
-        }
-
-        if (!empty($settings['show_author']) && $post->author) {
-            $meta[] = '<span class="rj-post-meta-item">' . e($post->author->name) . '</span>';
-        }
-
-        if (!empty($meta)) {
-            $html .= '<div class="rj-post-meta">' . implode('<span class="rj-post-meta-sep">·</span>', $meta) . '</div>';
-        }
-
-        if (!empty($settings['show_read_more'])) {
-            $label = $settings['read_more_text'] ?? __('Read more');
-            $html .= '<a href="' . e($url) . '" class="rj-post-read-more">' . e($label) . ' →</a>';
-        }
-
-        $html .= '</div></article>';
-
-        return $html;
-    }
-
-    protected function renderEmpty(array $settings): string
-    {
-        return '<div class="rj-posts rj-posts-empty">'
-            . '<div style="padding:32px 20px; text-align:center; color:#9ca3af; font-size:13px; border:1px dashed #e5e7eb; border-radius:8px;">'
-            . '<svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="display:block; margin:0 auto 8px;"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 12h6M9 16h4"/></svg>'
-            . e(__('No posts found.'))
-            . '</div></div>';
     }
 }
