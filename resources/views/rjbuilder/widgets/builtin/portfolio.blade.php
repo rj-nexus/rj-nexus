@@ -10,21 +10,24 @@
     if (!empty($settings['items']) && is_array($settings['items'])) {
         foreach ($settings['items'] as $row) {
             if (!is_array($row) || empty($row['image'])) continue;
+            $cat = trim((string) ($row['category'] ?? ''));
             $items[] = [
                 'image'    => $row['image'],
                 'title'    => $row['title'] ?? '',
-                'category' => trim($row['category'] ?? ''),
+                'category' => $cat !== '' ? $cat : __('Uncategorized'),
                 'link'     => $row['link'] ?? '',
             ];
         }
     }
 
+    // Kateqoriyaları yığırıq (yalnız şəkli olanlardan)
     $categories = [];
     foreach ($items as $it) {
         if ($it['category'] !== '' && !in_array($it['category'], $categories, true)) {
             $categories[] = $it['category'];
         }
     }
+    sort($categories);
 
     $gapMap    = ['sm' => '10px', 'md' => '18px', 'lg' => '28px'];
     $gapPx     = $gapMap[$gap] ?? '18px';
@@ -354,19 +357,23 @@ window['rjPortfolio_{{ $uid }}'] = function () {
         active: '',
         current: 0,
         sources: [],
-        init() {
-            var root = document.getElementById(@js($uid));
-            if (!root) return;
-            this.sources = Array.prototype.slice.call(root.querySelectorAll('.rj-pf-card')).map(function (el) {
-                return el.getAttribute('data-src');
-            });
-        },
+        init() {},
         lb() { return document.getElementById(@js($uid)).querySelector('.rj-pf-lb'); },
         img() { return document.getElementById(@js($uid)).querySelector('.rj-pf-lb-img'); },
         count() { return document.getElementById(@js($uid)).querySelector('.rj-pf-lb-count'); },
-        openLb(i) {
-            if (!this.sources.length) return;
-            this.current = (i + this.sources.length) % this.sources.length;
+        openLb(index) {
+            var root = document.getElementById(@js($uid));
+            // Yalnız görünən (filterdən keçən) şəkilləri tapırıq
+            var visibleCards = Array.prototype.slice.call(root.querySelectorAll('.rj-pf-card:not(.is-hidden)'));
+
+            this.sources = visibleCards.map(function (el) {
+                return el.getAttribute('data-src');
+            });
+
+            var clickedCard = root.querySelector('.rj-pf-card[data-index="' + index + '"]');
+            this.current = visibleCards.indexOf(clickedCard);
+            if (this.current === -1) this.current = 0;
+
             var img = this.img(), lb = this.lb(), c = this.count();
             img.src = this.sources[this.current];
             if (c) c.textContent = (this.current + 1) + ' / ' + this.sources.length;
