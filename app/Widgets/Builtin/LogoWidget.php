@@ -4,133 +4,72 @@ namespace App\Widgets\Builtin;
 
 use App\Widgets\BaseWidget;
 
-class LottieWidget extends BaseWidget
+class LogoWidget extends BaseWidget
 {
     public function id(): string
     {
-        return 'lottie';
+        return 'logo';
     }
 
     public function name(): string
     {
-        return __('Lottie Animation');
+        return __('Logo');
     }
 
     public function icon(): string
     {
-        return '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2.1 2.1m8.6 8.6l2.1 2.1M5.6 18.4l2.1-2.1m8.6-8.6l2.1-2.1"/><circle cx="12" cy="12" r="4"/></svg>';
+        return '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>';
     }
 
     public function category(): string
     {
-        return 'media';
+        return 'basic';
     }
 
     public function description(): string
     {
-        return __('A Lottie JSON animation player with hover, scroll and click triggers plus fallback image. Requires a .json animation URL.');
+        return __('Display your site logo with a custom link and size.');
     }
 
     public function schema(): array
     {
         return [
             [
-                'name'    => 'source_type',
-                'type'    => 'select',
-                'label'   => __('Source'),
-                'default' => 'url',
-                'tab'     => 'content',
-                'options' => [
-                    'url'  => __('Remote URL'),
-                    'json' => __('Paste JSON'),
-                ],
-            ],
-            [
-                'name'           => 'url',
-                'type'           => 'text',
-                'label'          => __('Lottie JSON URL'),
-                'default'        => 'https://assets10.lottiefiles.com/packages/lf20_kyu7xb1v.json',
-                'tab'            => 'content',
-                'help'           => __('Direct link to a .json file (NOT a video). Get free animations at lottiefiles.com — click any animation, then copy the .json URL from the download menu.'),
-                'help_link'      => 'https://lottiefiles.com/free-animations',
-                'help_link_text' => __('Browse free Lottie animations →'),
-            ],
-            [
-                'name'    => 'json_data',
-                'type'    => 'textarea',
-                'label'   => __('Paste Lottie JSON'),
-                'default' => '',
-                'tab'     => 'content',
-                'help'    => __('Paste the contents of a Lottie JSON file here.'),
-            ],
-            [
-                'name'    => 'fallback',
+                'name'    => 'image',
                 'type'    => 'media',
-                'label'   => __('Fallback Image'),
+                'label'   => __('Logo Image'),
                 'default' => '',
                 'tab'     => 'content',
-                'help'    => __('Shown if Lottie fails to load.'),
             ],
             [
-                'name'    => 'trigger',
-                'type'    => 'select',
-                'label'   => __('Trigger'),
-                'default' => 'autoplay',
-                'tab'     => 'style',
-                'options' => [
-                    'autoplay' => __('Autoplay'),
-                    'hover'    => __('Play on Hover'),
-                    'scroll'   => __('Play on Scroll Into View'),
-                    'click'    => __('Play on Click'),
-                ],
+                'name'    => 'url',
+                'type'    => 'text',
+                'label'   => __('Link URL'),
+                'default' => '/',
+                'tab'     => 'content',
             ],
             [
-                'name'    => 'loop',
-                'type'    => 'toggle',
-                'label'   => __('Loop'),
-                'default' => true,
-                'tab'     => 'style',
+                'name'    => 'alt',
+                'type'    => 'text',
+                'label'   => __('Alt Text (SEO)'),
+                'default' => '',
+                'tab'     => 'content',
             ],
             [
-                'name'    => 'speed',
+                'name'    => 'width',
                 'type'    => 'range',
-                'label'   => __('Speed'),
-                'default' => 100,
+                'label'   => __('Width (px)'),
+                'default' => 140,
                 'min'     => 20,
-                'max'     => 300,
+                'max'     => 400,
                 'step'    => 5,
                 'tab'     => 'style',
-            ],
-            [
-                'name'    => 'direction',
-                'type'    => 'select',
-                'label'   => __('Direction'),
-                'default' => '1',
-                'tab'     => 'style',
-                'options' => [
-                    '1'  => __('Forward'),
-                    '-1' => __('Reverse'),
-                ],
-            ],
-            [
-                'name'    => 'size',
-                'type'    => 'select',
-                'label'   => __('Size'),
-                'default' => 'md',
-                'tab'     => 'style',
-                'options' => [
-                    'sm'   => __('Small (200px)'),
-                    'md'   => __('Medium (320px)'),
-                    'lg'   => __('Large (480px)'),
-                    'xl'   => __('Extra Large (640px)'),
-                    'full' => __('Full Width'),
-                ],
             ],
             [
                 'name'    => 'align',
                 'type'    => 'select',
                 'label'   => __('Alignment'),
-                'default' => 'center',
+                'default' => 'left',
                 'tab'     => 'style',
                 'options' => [
                     'left'   => __('Left'),
@@ -139,13 +78,10 @@ class LottieWidget extends BaseWidget
                 ],
             ],
             [
-                'name'    => 'padding_y',
-                'type'    => 'range',
-                'label'   => __('Vertical Padding'),
-                'default' => 40,
-                'min'     => 0,
-                'max'     => 160,
-                'step'    => 4,
+                'name'    => 'hover_opacity',
+                'type'    => 'toggle',
+                'label'   => __('Fade on Hover'),
+                'default' => true,
                 'tab'     => 'style',
             ],
         ];
@@ -153,8 +89,8 @@ class LottieWidget extends BaseWidget
 
     public function render(array $settings): string
     {
-        $uid = 'lt_' . substr(md5(uniqid('', true)), 0, 8);
+        $uid = 'logo_' . substr(md5(uniqid('', true)), 0, 8);
 
-        return view('rjbuilder.widgets.builtin.lottie', compact('settings', 'uid'))->render();
+        return view('rjbuilder.widgets.builtin.logo', compact('settings', 'uid'))->render();
     }
 }
