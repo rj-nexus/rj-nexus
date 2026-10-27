@@ -78,6 +78,21 @@
                                 </template>
                             </select>
                         </template>
+
+                        <!-- YENİ ƏLAVƏ: Datalist tipi -->
+                        <template x-if="sub.type === 'datalist'">
+                            <div>
+                                <input type="text" class="rj-in" :list="'rj-datalist-' + field.name + '-' + si"
+                                       :value="repeaterEdit.item ? (repeaterEdit.item[sub.name] || '') : ''"
+                                       @input="setRepeaterField(sub.name, $event.target.value)"
+                                       placeholder="{{ __('Select or type new...') }}">
+                                <datalist :id="'rj-datalist-' + field.name + '-' + si">
+                                    <template x-for="opt in (currentSettings[sub.source] || '').split(',').map(s => s.trim()).filter(Boolean)" :key="opt">
+                                        <option :value="opt"></option>
+                                    </template>
+                                </datalist>
+                            </div>
+                        </template>
                     </div>
                 </template>
 
