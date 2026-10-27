@@ -8,16 +8,17 @@
     $size            = $settings['size'] ?? 'md';
     $btnStyle        = $settings['btn_style'] ?? 'ghost';
     $accent          = $settings['accent'] ?? '#8b5cf6';
-    $radius          = $settings['radius'] ?? 'md';
+    $radius          = $settings['radius'] ?? 'full';
     $showCodeCompact = $settings['show_code_on_compact'] ?? true;
 
     $radiusMap = ['none' => '0px', 'sm' => '6px', 'md' => '10px', 'lg' => '14px', 'full' => '9999px'];
-    $radiusCss = $radiusMap[$radius] ?? '10px';
+    $radiusCss = $radiusMap[$radius] ?? '9999px';
 
+    // İkonları və adları daha qabarıq göstərmək üçün ölçüləri artırdıq
     $sizeMap = [
-        'sm' => ['pad' => '6px 10px', 'fs' => '12px', 'flag' => '16px', 'gap' => '6px', 'icon' => '11px'],
-        'md' => ['pad' => '8px 12px', 'fs' => '13px', 'flag' => '18px', 'gap' => '8px', 'icon' => '12px'],
-        'lg' => ['pad' => '10px 16px', 'fs' => '14px', 'flag' => '20px', 'gap' => '10px', 'icon' => '14px'],
+        'sm' => ['pad' => '6px 14px', 'fs' => '13px', 'flag' => '26px', 'gap' => '8px', 'icon' => '14px'],
+        'md' => ['pad' => '8px 18px', 'fs' => '14px', 'flag' => '34px', 'gap' => '10px', 'icon' => '16px'],
+        'lg' => ['pad' => '10px 22px', 'fs' => '15px', 'flag' => '42px', 'gap' => '12px', 'icon' => '18px'],
     ];
     $sz = $sizeMap[$size] ?? $sizeMap['md'];
 
@@ -34,17 +35,17 @@
         'nl' => '🇳🇱', 'pl' => '🇵🇱', 'sv' => '🇸🇪', 'uk' => '🇺🇦',
     ];
 
-    $globeIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:100%;height:100%;display:block;"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>';
+    $globeIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:60%;height:60%;display:block;"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>';
 
-$getFlag = function (string $code) use ($flags, $globeIcon): string {
-    if (function_exists('rj_lang_flag_url')) {
-        $url = rj_lang_flag_url($code);
-        if ($url) {
-            return '<img src="' . e($url) . '" alt="" style="width:100%;height:100%;object-fit:contain;border-radius:2px;">';
+    $getFlag = function (string $code) use ($flags, $globeIcon): string {
+        if (function_exists('rj_lang_flag_url')) {
+            $url = rj_lang_flag_url($code);
+            if ($url) {
+                return '<img src="' . e($url) . '" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">';
+            }
         }
-    }
-    return $flags[$code] ?? $globeIcon;
-};
+        return $flags[$code] ?? $globeIcon;
+    };
 
     $getName = function (string $code) use ($showFullName): string {
         $upper = strtoupper($code);
@@ -114,23 +115,26 @@ $getFlag = function (string $code) use ($flags, $globeIcon): string {
         opacity: .9;
     }
 
-    /* ---------- FLAG ---------- */
+    /* ---------- DAİRƏVİ BAYRAQ / İKON ---------- */
     #{{ $uid }} .rj-hls-flag {
         width: {{ $sz['flag'] }};
         height: {{ $sz['flag'] }};
-        display: inline-flex;
+        border-radius: 50%;
+        overflow: hidden;
+        display: flex;
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
-        font-size: {{ $sz['flag'] }};
+        font-size: calc({{ $sz['flag'] }} * 0.8);
         line-height: 1;
-        overflow: hidden;
+        background: #f8fafc;
+        border: 2px solid #fff;
+        box-shadow: 0 2px 8px rgba(15,23,42,0.12);
     }
     #{{ $uid }} .rj-hls-flag img {
         width: 100%;
         height: 100%;
-        object-fit: contain;
-        border-radius: 2px;
+        object-fit: cover;
         display: block;
     }
 
@@ -155,18 +159,18 @@ $getFlag = function (string $code) use ($flags, $globeIcon): string {
     #{{ $uid }} .rj-hls-menu {
         position: absolute;
         top: calc(100% + 8px);
-        min-width: 180px;
+        min-width: 200px;
         background: #fff;
         border: 1px solid rgba(15,23,42,.08);
-        border-radius: 12px;
+        border-radius: 16px;
         box-shadow: 0 20px 40px -16px rgba(15,23,42,.35);
-        padding: 6px;
+        padding: 8px;
         opacity: 0;
         transform: translateY(-6px) scale(.96);
         pointer-events: none;
         transition: opacity .2s ease, transform .22s cubic-bezier(.34,1.56,.64,1);
         z-index: 9999;
-        max-height: 340px;
+        max-height: 380px;
         overflow-y: auto;
     }
     #{{ $uid }}[data-align="right"] .rj-hls-menu { right: 0; left: auto; }
@@ -185,11 +189,11 @@ $getFlag = function (string $code) use ($flags, $globeIcon): string {
     #{{ $uid }} .rj-hls-item {
         display: flex;
         align-items: center;
-        gap: 10px;
-        padding: 9px 12px;
-        border-radius: 8px;
+        gap: 12px;
+        padding: 8px 12px;
+        border-radius: 10px;
         color: #334155;
-        font-size: 13px;
+        font-size: 14px;
         font-weight: 600;
         text-decoration: none;
         cursor: pointer;
@@ -209,8 +213,8 @@ $getFlag = function (string $code) use ($flags, $globeIcon): string {
         color: var(--hls-accent);
     }
     #{{ $uid }} .rj-hls-item .rj-hls-check {
-        width: 14px;
-        height: 14px;
+        width: 16px;
+        height: 16px;
         margin-left: auto;
         color: var(--hls-accent);
         opacity: 0;
@@ -219,13 +223,13 @@ $getFlag = function (string $code) use ($flags, $globeIcon): string {
         opacity: 1;
     }
 
-    /* ---------- INLINE FLAGS / NAMES ---------- */
+    /* ---------- INLINE FLAGS / NAMES / PILLS ---------- */
     #{{ $uid }}[data-style="inline-flags"] .rj-hls-inline,
     #{{ $uid }}[data-style="inline-names"] .rj-hls-inline,
     #{{ $uid }}[data-style="pills"] .rj-hls-inline {
         display: inline-flex;
         align-items: center;
-        gap: 4px;
+        gap: 6px;
         flex-wrap: wrap;
     }
 
@@ -233,7 +237,7 @@ $getFlag = function (string $code) use ($flags, $globeIcon): string {
     #{{ $uid }}[data-style="inline-names"] .rj-hls-inline-btn {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
+        gap: 8px;
         padding: 4px 8px;
         border-radius: {{ $radiusCss }};
         font-size: {{ $sz['fs'] }};
@@ -259,7 +263,7 @@ $getFlag = function (string $code) use ($flags, $globeIcon): string {
     #{{ $uid }}[data-style="pills"] .rj-hls-inline-btn {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
+        gap: 8px;
         padding: {{ $sz['pad'] }};
         border-radius: {{ $radiusCss }};
         font-size: {{ $sz['fs'] }};
@@ -279,6 +283,9 @@ $getFlag = function (string $code) use ($flags, $globeIcon): string {
         background: var(--hls-accent);
         border-color: var(--hls-accent);
         color: #fff;
+    }
+    #{{ $uid }}[data-style="pills"] .rj-hls-inline-btn.is-active .rj-hls-flag {
+        border-color: rgba(255,255,255,0.2);
     }
 
     @media (max-width: 640px) {
