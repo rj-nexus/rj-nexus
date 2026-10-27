@@ -108,7 +108,7 @@ class PortfolioWidget extends BaseWidget
                 'fields' => [
                     ['name' => 'image',    'type' => 'media', 'label' => __('Image')],
                     ['name' => 'title',    'type' => 'text',  'label' => __('Title')],
-                    ['name' => 'category', 'type' => 'datalist', 'label' => __('Category'), 'source' => 'categories'],
+                    ['name' => 'category', 'type' => 'text', 'label' => __('Category'), 'source' => 'categories'],
                     ['name' => 'link',     'type' => 'text',  'label' => __('Link URL')],
                 ],
             ],
