@@ -140,7 +140,7 @@ class SocialFeedWidget extends BaseWidget
         $rssError = '';
         $rssUrl   = trim((string) ($settings['rss_url'] ?? ''));
 
-        if (!empty($settings['enable_rss']) && $rssUrl !== '') {
+        if (filter_var($settings['enable_rss'] ?? false, FILTER_VALIDATE_BOOLEAN) && $rssUrl !== '') {
             $limit  = max(1, min(30, (int) ($settings['rss_limit'] ?? 9)));
             $minute = max(1, min(1440, (int) ($settings['rss_cache'] ?? 15)));
             $result = $this->fetchRss($rssUrl, $limit, $minute);
