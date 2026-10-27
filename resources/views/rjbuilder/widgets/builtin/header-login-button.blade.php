@@ -43,8 +43,8 @@
             'initials' => $initials,
             'admin'    => $isAdmin,
             'adminUrl' => $isAdmin ? route('admin.dashboard', absolute: false) : null,
-            'accountUrl' => route('frontend.account.index', absolute: false),
-            'settingsUrl' => route('frontend.account.settings', absolute: false),
+            'account'  => route('frontend.account.index', absolute: false),
+            'settings' => route('frontend.account.settings', absolute: false),
         ];
     }
 @endphp
@@ -60,7 +60,6 @@
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
-    /* ---------- BUTTONS ---------- */
     #{{ $uid }} .rj-hlb-btn {
         display: inline-flex;
         align-items: center;
@@ -84,7 +83,6 @@
         flex-shrink: 0;
     }
 
-    /* Login button — gradient */
     #{{ $uid }}[data-style="gradient"] .rj-hlb-btn.login {
         background: linear-gradient(135deg, var(--hlb-accent), var(--hlb-accent2));
         color: #fff;
@@ -94,14 +92,12 @@
         box-shadow: 0 10px 20px -8px color-mix(in srgb, var(--hlb-accent) 70%, transparent);
     }
 
-    /* Login button — solid */
     #{{ $uid }}[data-style="solid"] .rj-hlb-btn.login {
         background: var(--hlb-accent);
         color: #fff;
     }
     #{{ $uid }}[data-style="solid"] .rj-hlb-btn.login:hover { opacity: .9; }
 
-    /* Login button — outline */
     #{{ $uid }}[data-style="outline"] .rj-hlb-btn.login {
         background: transparent;
         color: var(--hlb-accent);
@@ -111,7 +107,6 @@
         background: color-mix(in srgb, var(--hlb-accent) 8%, transparent);
     }
 
-    /* Login button — ghost */
     #{{ $uid }}[data-style="ghost"] .rj-hlb-btn.login {
         background: transparent;
         color: inherit;
@@ -121,7 +116,6 @@
         background: rgba(0,0,0,.04);
     }
 
-    /* Login button — dark */
     #{{ $uid }}[data-style="dark"] .rj-hlb-btn.login {
         background: #0f172a;
         color: #fff;
@@ -130,7 +124,6 @@
         background: #1e293b;
     }
 
-    /* Register button — always outline variant */
     #{{ $uid }} .rj-hlb-btn.register {
         background: transparent;
         color: var(--hlb-accent);
@@ -148,7 +141,6 @@
         margin: 0 4px;
     }
 
-    /* ---------- USER BUTTON (logged in) ---------- */
     #{{ $uid }} .rj-hlb-user {
         display: inline-flex;
         align-items: center;
@@ -205,7 +197,6 @@
         transform: rotate(180deg);
     }
 
-    /* ---------- DROPDOWN ---------- */
     #{{ $uid }} .rj-hlb-menu {
         position: absolute;
         top: calc(100% + 10px);
@@ -227,7 +218,6 @@
         transform: none;
         pointer-events: auto;
     }
-    #{{ $uid }}[dir="rtl"] .rj-hlb-menu,
     html[dir="rtl"] #{{ $uid }} .rj-hlb-menu {
         right: auto;
         left: 0;
@@ -300,7 +290,6 @@
         margin: 6px 4px;
     }
 
-    /* ---------- LOGIN MODAL ---------- */
     #{{ $uid }} .rj-hlb-modal {
         position: fixed;
         inset: 0;
@@ -640,7 +629,6 @@
     var menuName    = root.querySelector('[data-menu-name]');
     var menuEmail   = root.querySelector('[data-menu-email]');
 
-    /* ---------- USER STATE ---------- */
     function setUser(user) {
         if (user) {
             if (loggedOutEl) loggedOutEl.style.display = 'none';
@@ -659,8 +647,8 @@
                     adminLink.style.display = 'none';
                 }
             }
-            if (accountLink && user.accountUrl) accountLink.href = user.accountUrl;
-            if (settingsLink && user.settingsUrl) settingsLink.href = user.settingsUrl;
+            if (accountLink && user.account) accountLink.href = user.account;
+            if (settingsLink && user.settings) settingsLink.href = user.settings;
         } else {
             if (loggedOutEl) loggedOutEl.style.display = '';
             if (loggedInEl)  loggedInEl.style.display = 'none';
@@ -668,7 +656,6 @@
         }
     }
 
-    /* ---------- USER MENU ---------- */
     function openMenu() {
         if (!userMenu) return;
         userMenu.classList.add('is-open');
@@ -703,7 +690,6 @@
         }
     });
 
-    /* ---------- LOGIN ---------- */
     function openLoginModal() {
         if (!modal) return;
         if (errorEl) errorEl.style.display = 'none';
@@ -782,6 +768,10 @@
                     setUser(data.user);
                     closeLoginModal();
                     if (loginForm) loginForm.reset();
+                    // Uğurlu girişdən sonra profil səhifəsinə yönləndir
+                    if (data.user && data.user.account) {
+                        window.location.href = data.user.account;
+                    }
                 } else {
                     showError(data.message || @js(__('Login failed.')));
                 }
@@ -793,7 +783,6 @@
         });
     }
 
-    /* ---------- LOGOUT ---------- */
     if (logoutBtn) {
         logoutBtn.addEventListener('click', async function () {
             logoutBtn.disabled = true;
@@ -816,7 +805,6 @@
         });
     }
 
-    /* ---------- INIT ---------- */
     if (initialUser) setUser(initialUser);
 })();
 </script>
