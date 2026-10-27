@@ -70,7 +70,6 @@
     }
     #{{ $uid }} *, #{{ $uid }} *::before, #{{ $uid }} *::after { box-sizing: border-box; }
 
-    /* Soft ambient glow behind the section */
     #{{ $uid }}::before {
         content: "";
         position: absolute;
@@ -157,7 +156,7 @@
         flex-direction: column;
         padding: 34px 26px 30px;
         border-radius: {{ $radiusCss }};
-        background: rgba(255, 255, 255, .85);
+        background: rgba(255, 255, 255, .9);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
         border: 1px solid rgba(226, 232, 240, .9);
@@ -166,6 +165,7 @@
         animation-delay: calc(.15s + var(--i, 0) * .12s);
         transition: transform .45s cubic-bezier(.2,.8,.2,1), box-shadow .45s ease, border-color .35s ease;
     }
+
     /* Cursor spotlight */
     #{{ $uid }} .pt-card::before {
         content: "";
@@ -176,8 +176,49 @@
         opacity: 0;
         transition: opacity .4s ease;
         pointer-events: none;
+        z-index: 0;
     }
     #{{ $uid }} .pt-card:hover::before { opacity: 1; }
+
+    /* Decorative large dollar sign, clipped inside the card */
+    #{{ $uid }} .pt-mark-wrap {
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        overflow: hidden;
+        pointer-events: none;
+        z-index: 0;
+    }
+    #{{ $uid }} .pt-mark {
+        position: absolute;
+        right: -28px;
+        bottom: -70px;
+        font-family: Georgia, 'Times New Roman', serif;
+        font-size: 290px;
+        font-weight: 900;
+        line-height: 1;
+        color: transparent;
+        background: linear-gradient(160deg, var(--pt-accent), var(--pt-accent2));
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-stroke: 1.5px color-mix(in srgb, var(--pt-accent) 45%, transparent);
+        opacity: .13;
+        transform: rotate(-12deg);
+        transform-origin: center;
+        animation: ptDrift 9s ease-in-out infinite;
+        transition: opacity .6s ease, transform .8s cubic-bezier(.2,.8,.2,1);
+    }
+    #{{ $uid }} .pt-card:hover .pt-mark {
+        opacity: .26;
+        transform: rotate(-4deg) scale(1.06);
+    }
+
+    /* Everything except the watermark sits above it */
+    #{{ $uid }} .pt-card > *:not(.pt-mark-wrap) {
+        position: relative;
+        z-index: 1;
+    }
+    #{{ $uid }} .pt-card > .pt-badge { position: absolute; z-index: 2; }
 
     @if($hoverLift)
     #{{ $uid }} .pt-card:hover {
@@ -189,7 +230,7 @@
 
     /* Featured card: animated gradient border */
     #{{ $uid }} .pt-card.is-featured {
-        background: linear-gradient(#fff, #fff) padding-box,
+        background: linear-gradient(rgba(255,255,255,.94), rgba(255,255,255,.94)) padding-box,
                     linear-gradient(120deg, var(--pt-accent), var(--pt-accent2), var(--pt-accent)) border-box;
         background-size: 100% 100%, 200% 100%;
         border: 2px solid transparent;
@@ -197,13 +238,11 @@
         animation-delay: calc(.15s + var(--i, 0) * .12s), 0s;
         box-shadow: 0 30px 60px -28px color-mix(in srgb, var(--pt-accent) 55%, transparent);
     }
-    #{{ $uid }} .pt-card.is-featured:hover {
-        box-shadow: 0 40px 70px -28px color-mix(in srgb, var(--pt-accent) 65%, transparent);
-    }
+    #{{ $uid }} .pt-card.is-featured .pt-mark { opacity: .2; }
+    #{{ $uid }} .pt-card.is-featured:hover .pt-mark { opacity: .34; }
 
     /* Badge */
     #{{ $uid }} .pt-badge {
-        position: absolute;
         top: -13px;
         left: 26px;
         padding: 6px 14px;
@@ -256,6 +295,7 @@
         color: #94a3b8;
     }
 
+    /* Divider with traveling light */
     #{{ $uid }} .pt-divider {
         position: relative;
         height: 1px;
@@ -323,7 +363,7 @@
         font-weight: 700;
         text-decoration: none;
         transition: transform .2s ease, box-shadow .3s ease;
-        z-index: 0;
+        isolation: isolate;
     }
     #{{ $uid }} .pt-cta::before {
         content: "";
@@ -345,41 +385,6 @@
         transition: transform .3s ease;
     }
     #{{ $uid }} .pt-cta:hover svg { transform: translateX(4px); }
-
-    /* Dollar coin, bottom-right corner of each card */
-    #{{ $uid }} .pt-coin {
-        position: absolute;
-        right: -14px;
-        bottom: -16px;
-        z-index: 3;
-        width: 52px;
-        height: 52px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: radial-gradient(circle at 30% 25%, #ffffff 0%, transparent 35%),
-                    linear-gradient(135deg, var(--pt-accent), var(--pt-accent2));
-        color: #fff;
-        font-size: 24px;
-        font-weight: 900;
-        line-height: 1;
-        box-shadow: 0 0 0 4px #fff, 0 14px 26px -8px color-mix(in srgb, var(--pt-accent) 70%, transparent);
-        transform-style: preserve-3d;
-        animation: ptFloat 3.4s ease-in-out infinite;
-        transition: transform .9s cubic-bezier(.2,.8,.2,1);
-        pointer-events: none;
-    }
-    #{{ $uid }} .pt-coin span {
-        display: block;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, .25);
-    }
-    #{{ $uid }} .pt-card:hover .pt-coin {
-        transform: rotateY(360deg) scale(1.08);
-    }
-    #{{ $uid }} .pt-card.is-featured .pt-coin {
-        box-shadow: 0 0 0 4px var(--pt-ink), 0 14px 26px -8px color-mix(in srgb, var(--pt-accent) 70%, transparent);
-    }
 
     /* Empty state */
     #{{ $uid }} .pt-empty {
@@ -403,9 +408,9 @@
         from { opacity: 0; transform: translateY(40px) scale(.96); }
         to   { opacity: 1; transform: none; }
     }
-    @keyframes ptFloat {
-        0%, 100% { transform: translateY(0); }
-        50%      { transform: translateY(-6px); }
+    @keyframes ptDrift {
+        0%, 100% { transform: rotate(-12deg) translate(0, 0); }
+        50%      { transform: rotate(-8deg) translate(-8px, -10px); }
     }
     @keyframes ptBorder {
         0%   { background-position: 0 0, 0% 50%; }
@@ -446,6 +451,10 @@
             <div class="pt-grid">
                 @foreach($plans as $i => $plan)
                     <article class="pt-card {{ $plan['featured'] ? 'is-featured' : '' }}" style="--i: {{ $i }};">
+                        <span class="pt-mark-wrap" aria-hidden="true">
+                            <span class="pt-mark">$</span>
+                        </span>
+
                         @if($plan['badge'] !== '')
                             <span class="pt-badge">{{ $plan['badge'] }}</span>
                         @endif
@@ -483,8 +492,6 @@
                                 <svg fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                             </a>
                         @endif
-
-                        <span class="pt-coin" aria-hidden="true"><span>$</span></span>
                     </article>
                 @endforeach
             </div>
