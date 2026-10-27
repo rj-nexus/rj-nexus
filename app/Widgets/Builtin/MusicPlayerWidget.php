@@ -54,7 +54,6 @@ class MusicPlayerWidget extends BaseWidget
                     'local'    => __('Local Files'),
                     'custom'   => __('Custom URLs'),
                 ],
-                'help'    => __('Choose where the playlist is loaded from. You can still add local/URL tracks via the repeater fields below.'),
             ],
             [
                 'name'    => 'jamendo_client_id',
@@ -69,18 +68,18 @@ class MusicPlayerWidget extends BaseWidget
             [
                 'name'    => 'audius_playlist_id',
                 'type'    => 'text',
-                'label'   => __('Audius Playlist ID (optional)'),
+                'label'   => __('Audius Playlist ID or Name'),
                 'default' => '',
                 'tab'     => 'content',
-                'help'    => __('Leave empty to load trending tracks. Example: D7KyD'),
+                'help'    => __('Enter the Playlist ID (e.g., D7KyD) or the playlist name to search (e.g., Rihanna). Leave empty to load trending tracks.'),
             ],
             [
                 'name'    => 'deezer_playlist_id',
                 'type'    => 'text',
-                'label'   => __('Deezer Playlist ID (optional)'),
+                'label'   => __('Deezer Playlist ID or Name'),
                 'default' => '',
                 'tab'     => 'content',
-                'help'    => __('Leave empty to load charts. Example: 908622995'),
+                'help'    => __('Enter the numeric Playlist ID (e.g., 908622995) or the playlist name to search. Leave empty to load charts.'),
             ],
             [
                 'name'    => 'visualizer',
