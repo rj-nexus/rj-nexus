@@ -3,6 +3,9 @@
 namespace App\Widgets\Builtin;
 
 use App\Widgets\BaseWidget;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class GoogleReviewsWidget extends BaseWidget
 {
@@ -28,37 +31,22 @@ class GoogleReviewsWidget extends BaseWidget
 
     public function description(): string
     {
-        return __('Display real Google reviews — either fetched live via Places API or entered manually.');
+        return __('Display real Google reviews, fetched live via Places API or entered manually.');
     }
 
     public function schema(): array
     {
         return [
-            [
-                'name'    => 'title',
-                'type'    => 'text',
-                'label'   => __('Section Title'),
-                'default' => __('What our customers say'),
-                'tab'     => 'content',
-            ],
-            [
-                'name'    => 'subtitle',
-                'type'    => 'text',
-                'label'   => __('Section Subtitle'),
-                'default' => '',
-                'tab'     => 'content',
-            ],
+            ['name' => 'title', 'type' => 'text', 'label' => __('Section Title'), 'default' => __('What our customers say'), 'tab' => 'content'],
+            ['name' => 'subtitle', 'type' => 'text', 'label' => __('Section Subtitle'), 'default' => '', 'tab' => 'content'],
             [
                 'name'    => 'mode',
                 'type'    => 'select',
                 'label'   => __('Data Source'),
                 'default' => 'manual',
                 'tab'     => 'content',
-                'options' => [
-                    'manual' => __('Manual (repeater)'),
-                    'api'    => __('Google Places API (live)'),
-                ],
-                'help'    => __('Manual mode works offline with any number of reviews. API mode fetches live reviews (max 5 per request, requires a Places API key).'),
+                'options' => ['manual' => __('Manual (repeater)'), 'api' => __('Google Places API (live)')],
+                'help'    => __('Manual mode works with any number of reviews. API mode fetches live reviews (max 5 per request, requires Places API (New) key).'),
             ],
             [
                 'name'           => 'place_id',
@@ -66,7 +54,7 @@ class GoogleReviewsWidget extends BaseWidget
                 'label'          => __('Google Place ID'),
                 'default'        => '',
                 'tab'            => 'content',
-                'help'           => __('Find your Place ID at developers.google.com/maps/documentation/places/web-service/place-id'),
+                'help'           => __('Find your Place ID with the Google Place ID finder.'),
                 'help_link'      => 'https://developers.google.com/maps/documentation/places/web-service/place-id',
                 'help_link_text' => __('Find Place ID →'),
             ],
@@ -76,43 +64,20 @@ class GoogleReviewsWidget extends BaseWidget
                 'label'          => __('Google Places API Key'),
                 'default'        => '',
                 'tab'            => 'content',
-                'help'           => __('Create a Places API key in Google Cloud Console. Free tier covers typical usage; billing required.'),
+                'help'           => __('Enable "Places API (New)" in Google Cloud Console and keep billing active. The key must not be restricted to HTTP referrers.'),
                 'help_link'      => 'https://console.cloud.google.com/google/maps-apis/credentials',
                 'help_link_text' => __('Get API Key →'),
             ],
-            [
-                'name'    => 'google_maps_url',
-                'type'    => 'text',
-                'label'   => __('Google Maps Business URL'),
-                'default' => '',
-                'tab'     => 'content',
-                'help'    => __('Link to your Google Maps business page — shown as "View all reviews" button.'),
-            ],
-            [
-                'name'    => 'overall_rating',
-                'type'    => 'text',
-                'label'   => __('Overall Rating (manual)'),
-                'default' => '5.0',
-                'tab'     => 'content',
-                'help'    => __('Used in manual mode. For API mode, rating is fetched automatically.'),
-            ],
-            [
-                'name'    => 'review_count',
-                'type'    => 'text',
-                'label'   => __('Total Review Count (manual)'),
-                'default' => '',
-                'tab'     => 'content',
-            ],
+            ['name' => 'google_maps_url', 'type' => 'text', 'label' => __('Google Maps Business URL'), 'default' => '', 'tab' => 'content', 'help' => __('Shown as the "View all on Google" button.')],
+            ['name' => 'overall_rating', 'type' => 'text', 'label' => __('Overall Rating (manual)'), 'default' => '5.0', 'tab' => 'content', 'help' => __('Used in manual mode. API mode fetches it automatically.')],
+            ['name' => 'review_count', 'type' => 'text', 'label' => __('Total Review Count (manual)'), 'default' => '', 'tab' => 'content'],
             [
                 'name'    => 'layout',
                 'type'    => 'select',
                 'label'   => __('Layout'),
                 'default' => 'grid',
                 'tab'     => 'style',
-                'options' => [
-                    'grid'    => __('Grid'),
-                    'carousel'=> __('Carousel'),
-                ],
+                'options' => ['grid' => __('Grid'), 'masonry' => __('Masonry'), 'carousel' => __('Carousel')],
             ],
             [
                 'name'    => 'columns',
@@ -120,11 +85,7 @@ class GoogleReviewsWidget extends BaseWidget
                 'label'   => __('Columns'),
                 'default' => '3',
                 'tab'     => 'style',
-                'options' => [
-                    '2' => __('2 Columns'),
-                    '3' => __('3 Columns'),
-                    '4' => __('4 Columns'),
-                ],
+                'options' => ['2' => __('2 Columns'), '3' => __('3 Columns'), '4' => __('4 Columns')],
             ],
             [
                 'name'    => 'card_style',
@@ -132,92 +93,35 @@ class GoogleReviewsWidget extends BaseWidget
                 'label'   => __('Card Style'),
                 'default' => 'card',
                 'tab'     => 'style',
-                'options' => [
-                    'card'     => __('Card (shadow)'),
-                    'bordered' => __('Bordered'),
-                    'minimal'  => __('Minimal (no bg)'),
-                    'glass'    => __('Glass'),
-                ],
+                'options' => ['card' => __('Card (shadow)'), 'bordered' => __('Bordered'), 'minimal' => __('Minimal'), 'glass' => __('Glass')],
             ],
-            [
-                'name'    => 'star_color',
-                'type'    => 'color',
-                'label'   => __('Star Color'),
-                'default' => '#fbbf24',
-                'tab'     => 'style',
-            ],
-            [
-                'name'    => 'accent',
-                'type'    => 'color',
-                'label'   => __('Accent Color'),
-                'default' => '#4285F4',
-                'tab'     => 'style',
-            ],
-            [
-                'name'    => 'show_avatar',
-                'type'    => 'toggle',
-                'label'   => __('Show Reviewer Avatar'),
-                'default' => true,
-                'tab'     => 'style',
-            ],
-            [
-                'name'    => 'show_date',
-                'type'    => 'toggle',
-                'label'   => __('Show Review Date'),
-                'default' => true,
-                'tab'     => 'style',
-            ],
-            [
-                'name'    => 'show_google_badge',
-                'type'    => 'toggle',
-                'label'   => __('Show Google Attribution Badge'),
-                'default' => true,
-                'tab'     => 'style',
-            ],
-            [
-                'name'    => 'show_summary',
-                'type'    => 'toggle',
-                'label'   => __('Show Rating Summary (top)'),
-                'default' => true,
-                'tab'     => 'style',
-            ],
+            ['name' => 'star_color', 'type' => 'color', 'label' => __('Star Color'), 'default' => '#fbbc04', 'tab' => 'style'],
+            ['name' => 'accent', 'type' => 'color', 'label' => __('Accent Color'), 'default' => '#1a73e8', 'tab' => 'style'],
+            ['name' => 'show_avatar', 'type' => 'toggle', 'label' => __('Show Reviewer Avatar'), 'default' => true, 'tab' => 'style'],
+            ['name' => 'show_date', 'type' => 'toggle', 'label' => __('Show Review Date'), 'default' => true, 'tab' => 'style'],
+            ['name' => 'show_google_badge', 'type' => 'toggle', 'label' => __('Show Google Icon and Link'), 'default' => true, 'tab' => 'style'],
+            ['name' => 'show_summary', 'type' => 'toggle', 'label' => __('Show Rating Summary (top)'), 'default' => true, 'tab' => 'style'],
             [
                 'name'    => 'radius',
                 'type'    => 'select',
                 'label'   => __('Card Radius'),
                 'default' => 'lg',
                 'tab'     => 'style',
-                'options' => [
-                    'none' => __('None'),
-                    'md'   => __('Medium'),
-                    'lg'   => __('Large'),
-                    'xl'   => __('Extra Large'),
-                ],
+                'options' => ['none' => __('None'), 'md' => __('Medium'), 'lg' => __('Large'), 'xl' => __('Extra Large')],
             ],
-            [
-                'name'    => 'padding_y',
-                'type'    => 'range',
-                'label'   => __('Vertical Padding'),
-                'default' => 60,
-                'min'     => 0,
-                'max'     => 160,
-                'step'    => 4,
-                'tab'     => 'style',
-            ],
+            ['name' => 'padding_y', 'type' => 'range', 'label' => __('Vertical Padding'), 'default' => 60, 'min' => 0, 'max' => 160, 'step' => 4, 'tab' => 'style'],
             [
                 'name'   => 'reviews',
                 'type'   => 'repeater',
                 'label'  => __('Manual Reviews'),
                 'tab'    => 'content',
                 'fields' => [
-                    ['name' => 'author',   'type' => 'text',     'label' => __('Reviewer Name')],
-                    ['name' => 'avatar',   'type' => 'media',    'label' => __('Avatar (optional)')],
-                    ['name' => 'rating',   'type' => 'select',   'label' => __('Rating'), 'options' => [
-                        '5' => '5 ★', '4' => '4 ★', '3' => '3 ★', '2' => '2 ★', '1' => '1 ★',
-                    ]],
-                    ['name' => 'text',     'type' => 'textarea', 'label' => __('Review Text')],
-                    ['name' => 'date',     'type' => 'text',     'label' => __('Date (e.g. "2 weeks ago")')],
-                    ['name' => 'link',     'type' => 'text',     'label' => __('Review URL (optional)')],
+                    ['name' => 'author', 'type' => 'text', 'label' => __('Reviewer Name')],
+                    ['name' => 'avatar', 'type' => 'media', 'label' => __('Avatar (optional)')],
+                    ['name' => 'rating', 'type' => 'select', 'label' => __('Rating'), 'options' => ['5' => '5 ★', '4' => '4 ★', '3' => '3 ★', '2' => '2 ★', '1' => '1 ★']],
+                    ['name' => 'text', 'type' => 'textarea', 'label' => __('Review Text')],
+                    ['name' => 'date', 'type' => 'text', 'label' => __('Date (e.g. "2 weeks ago")')],
+                    ['name' => 'link', 'type' => 'text', 'label' => __('Review URL (optional)')],
                 ],
             ],
         ];
@@ -225,8 +129,66 @@ class GoogleReviewsWidget extends BaseWidget
 
     public function render(array $settings): string
     {
-        $uid = 'gr_' . substr(md5(uniqid('', true)), 0, 8);
+        $uid     = 'gr_' . substr(md5(uniqid('', true)), 0, 8);
+        $placeId = trim((string) ($settings['place_id'] ?? ''));
+        $apiKey  = trim((string) ($settings['api_key'] ?? ''));
+        $api     = ['rating' => null, 'total' => null, 'reviews' => [], 'error' => ''];
 
-        return view('rjbuilder.widgets.builtin.google-reviews', compact('settings', 'uid'))->render();
+        if (($settings['mode'] ?? 'manual') === 'api' && $placeId !== '' && $apiKey !== '') {
+            $api = $this->fetchPlace($placeId, $apiKey);
+        }
+
+        return view('rjbuilder.widgets.builtin.google-reviews', compact('settings', 'uid', 'api'))->render();
+    }
+
+    protected function fetchPlace(string $placeId, string $apiKey): array
+    {
+        $lang  = str_replace('_', '-', app()->getLocale() ?: 'en');
+        $key   = 'rj_gr_v1_' . md5($placeId . '|' . $lang);
+        $empty = ['rating' => null, 'total' => null, 'reviews' => [], 'error' => ''];
+
+        $hit = Cache::get($key);
+        if (is_array($hit)) return $hit;
+
+        try {
+            $res = Http::timeout(10)
+                ->withHeaders([
+                    'X-Goog-Api-Key'   => $apiKey,
+                    'X-Goog-FieldMask' => 'rating,userRatingCount,reviews',
+                ])
+                ->get('https://places.googleapis.com/v1/places/' . rawurlencode($placeId), ['languageCode' => $lang]);
+
+            if (!$res->successful()) {
+                throw new \RuntimeException($res->json('error.message') ?: 'HTTP ' . $res->status());
+            }
+
+            $body    = $res->json();
+            $reviews = [];
+            foreach (($body['reviews'] ?? []) as $rv) {
+                $reviews[] = [
+                    'author' => $rv['authorAttribution']['displayName'] ?? '',
+                    'avatar' => $rv['authorAttribution']['photoUri'] ?? '',
+                    'rating' => (int) ($rv['rating'] ?? 5),
+                    'text'   => $rv['text']['text'] ?? ($rv['originalText']['text'] ?? ''),
+                    'date'   => $rv['relativePublishTimeDescription'] ?? '',
+                    'link'   => $rv['authorAttribution']['uri'] ?? ($rv['googleMapsUri'] ?? ''),
+                ];
+            }
+
+            $data = [
+                'rating'  => $body['rating'] ?? null,
+                'total'   => $body['userRatingCount'] ?? null,
+                'reviews' => $reviews,
+                'error'   => $reviews ? '' : 'Google returned no reviews for this place',
+            ];
+
+            if ($reviews) Cache::put($key, $data, now()->addHours(6));
+
+            return $data;
+        } catch (\Throwable $e) {
+            Log::warning('GoogleReviews failed: ' . $e->getMessage(), ['place_id' => $placeId]);
+
+            return array_merge($empty, ['error' => $e->getMessage()]);
+        }
     }
 }
