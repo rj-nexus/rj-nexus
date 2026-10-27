@@ -124,7 +124,7 @@ class GenerateAiContext extends Command
             }
 
             foreach ($files as $file) {
-                $marker = is_dir($full . '/' . $file) ? '📁' : '📄';
+                $marker = is_dir($full . '/' . $file) ? '[DIR]' : '[FILE]';
                 $out .= "- {$marker} `{$file}`\n";
             }
 
@@ -342,22 +342,22 @@ class GenerateAiContext extends Command
             }
 
             if (!$route) {
-                $out .= "| {$label} | `{$routeName}` | — | ❌ missing |\n";
+                $out .= "| {$label} | `{$routeName}` | — | [MISSING] |\n";
                 continue;
             }
 
             $action = $route->getActionName();
             $controller = '—';
-            $status = '❌ coming-soon';
+            $status = '[SOON]';
 
             if (str_contains($action, 'Controller') && str_contains($action, '@')) {
                 $parts = explode('@', $action);
                 $controllerClass = class_basename($parts[0] ?? '');
                 $method = $parts[1] ?? 'index';
                 $controller = "`{$controllerClass}@{$method}`";
-                $status = '✅ working';
+                $status = '[OK]';
             } elseif (str_contains($action, 'view')) {
-                $status = '⏳ view only';
+                $status = '[VIEW]';
             }
 
             $out .= "| {$label} | `{$routeName}` | {$controller} | {$status} |\n";
@@ -389,7 +389,7 @@ class GenerateAiContext extends Command
         $out = "| Section | Status | Notes |\n|---|---|---|\n";
 
         foreach ($sections as $label => $names) {
-            $status = '❌ missing';
+            $status = '[MISSING]';
             $note = '';
 
             foreach ($names as $routeName) {
@@ -398,9 +398,9 @@ class GenerateAiContext extends Command
                         $action = $r->getActionName();
 
                         if (str_contains($action, 'Controller') && !str_contains($action, 'coming-soon')) {
-                            $status = '✅ working';
+                            $status = '[OK]';
                         } elseif (str_contains($action, 'view')) {
-                            $status = '⏳ placeholder';
+                            $status = '[PLACEHOLDER]';
                         }
                         break 2;
                     }
