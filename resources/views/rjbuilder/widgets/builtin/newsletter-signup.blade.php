@@ -149,89 +149,125 @@
         text-align: center;
     }
 
-    #{{ $uid }} .rj-nl-env {
-        --env: {{ $isDark ? '#ffffff' : 'var(--nl-a)' }};
-        --env-in: {{ $isDark ? 'rgba(255,255,255,.5)' : 'color-mix(in srgb, var(--nl-a) 50%, #fff)' }};
+    #{{ $uid }} .rj-nl-pg-wrap {
+        --pg-body: {{ $isDark ? '#e2e8f0' : '#94a3b8' }};
+        --pg-wing: {{ $isDark ? '#b4c2d6' : '#64748b' }};
+        --pg-sheen: {{ $isDark ? '#c4b5fd' : 'var(--nl-a)' }};
+        --face: 1;
+        --hr: 0;
+        --px: 1.4;
+        --py: 0;
         position: relative;
-        width: 76px;
-        height: 56px;
-        margin: {{ $align === 'left' ? '0 0 26px' : '0 auto 26px' }};
-        perspective: 420px;
-        color: var(--env);
+        width: {{ $isInline || $isStrip ? '78px' : '104px' }};
+        margin: {{ $align === 'left' ? '0 0 20px' : '0 auto 20px' }};
+        color: var(--pg-body);
+        cursor: pointer;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
     }
-    #{{ $uid }} .rj-nl-env > * { position: absolute; }
-    #{{ $uid }} .rj-nl-env-back {
-        inset: 0;
-        border-radius: 8px;
-        background: var(--env-in);
-    }
-    #{{ $uid }} .rj-nl-env-letter {
-        z-index: 1;
-        left: 10%;
-        right: 10%;
-        top: 8%;
-        height: 80%;
-        display: grid;
-        align-content: start;
-        gap: 5px;
-        padding: 8px 7px;
-        border-radius: 4px;
-        background: #fff;
-        box-shadow: 0 4px 10px -4px rgba(15, 23, 42, .35);
-        transition: transform .5s cubic-bezier(.34, 1.56, .64, 1), opacity .3s;
-    }
-    #{{ $uid }} .rj-nl-env-letter i {
+    #{{ $uid }} .rj-nl-pg { display: block; }
+    #{{ $uid }} .rj-nl-pg-flip {
         display: block;
-        height: 3px;
-        border-radius: 2px;
-        background: var(--nl-a);
-        opacity: .5;
+        transform: scaleX(var(--face));
+        transition: transform .35s cubic-bezier(.4, 0, .2, 1);
     }
-    #{{ $uid }} .rj-nl-env-letter i:nth-child(2) { width: 70%; }
-    #{{ $uid }} .rj-nl-env-letter i:nth-child(3) { width: 45%; }
-    #{{ $uid }} .rj-nl-env-front {
-        z-index: 2;
-        inset: 0;
-        border-radius: 8px;
-        background: var(--env);
-        clip-path: polygon(0 0, 50% 55%, 100% 0, 100% 100%, 0 100%);
+    #{{ $uid }} .rj-nl-pg-svg {
+        display: block;
+        width: 100%;
+        height: auto;
+        overflow: visible;
+        transform-origin: 50% 100%;
+        animation: rjNlBreathe 3.6s ease-in-out infinite;
     }
-    #{{ $uid }} .rj-nl-env-flap {
-        z-index: 3;
-        left: 0;
-        right: 0;
-        top: 0;
-        height: 55%;
-        background: color-mix(in srgb, var(--env) 82%, #000);
-        clip-path: polygon(0 0, 100% 0, 50% 100%);
-        transform-origin: 50% 0;
-        transition: transform .45s ease;
+    #{{ $uid }} .pg-body { fill: var(--pg-body); }
+    #{{ $uid }} .pg-wing { fill: var(--pg-wing); }
+    #{{ $uid }} .pg-sheen { fill: var(--pg-sheen); opacity: .85; }
+    #{{ $uid }} .pg-beak { fill: #f59e0b; }
+    #{{ $uid }} .pg-feet { fill: none; stroke: #fb7185; stroke-width: 3; stroke-linecap: round; }
+    #{{ $uid }} .pg-cere { fill: #fff; }
+    #{{ $uid }} .pg-iris { fill: #f97316; }
+    #{{ $uid }} .pg-pupil {
+        fill: #0f172a;
+        transform: translate(calc(var(--px) * 1px), calc(var(--py) * 1px));
+        transition: transform .12s ease-out;
     }
-    #{{ $uid }} .rj-nl-env-plane {
-        z-index: 4;
-        left: 26px;
-        top: 14px;
-        width: 26px;
-        height: 26px;
+    #{{ $uid }} .pg-head {
+        transform-box: view-box;
+        transform-origin: 82px 46px;
+        transform: rotate(calc(var(--hr) * 1deg));
+        transition: transform .18s ease-out;
+    }
+    #{{ $uid }} .pg-eye {
+        transform-box: fill-box;
+        transform-origin: 50% 50%;
+        animation: rjNlBlink 5.5s infinite;
+    }
+    #{{ $uid }} .pg-wing-g {
+        transform-box: view-box;
+        transform-origin: 64px 52px;
+    }
+    #{{ $uid }} .pg-tail {
+        transform-box: view-box;
+        transform-origin: 32px 58px;
+    }
+
+    #{{ $uid }} .rj-nl-feather {
+        position: absolute;
+        top: 44%;
+        left: var(--fl);
+        width: 12px;
+        height: 6px;
+        color: var(--pg-body);
         opacity: 0;
-        rotate: 45deg;
+        pointer-events: none;
     }
+    #{{ $uid }} .rj-nl-feather:nth-of-type(1) { --fl: 30%; --fx: -26px; animation-delay: 0s; }
+    #{{ $uid }} .rj-nl-feather:nth-of-type(2) { --fl: 46%; --fx: 6px;   animation-delay: .15s; }
+    #{{ $uid }} .rj-nl-feather:nth-of-type(3) { --fl: 60%; --fx: 32px;  animation-delay: .3s; }
+    #{{ $uid }} .rj-nl-feather svg { display: block; width: 100%; height: 100%; }
 
-    #{{ $uid }} .rj-nl-env[data-state="open"] .rj-nl-env-flap,
-    #{{ $uid }} .rj-nl-env[data-state="valid"] .rj-nl-env-flap { transform: rotateX(180deg); z-index: 0; }
-    #{{ $uid }} .rj-nl-env[data-state="open"] .rj-nl-env-letter { transform: translateY(-14px); }
-    #{{ $uid }} .rj-nl-env[data-state="valid"] .rj-nl-env-letter { transform: translateY(-26px) rotate(-3deg); }
-    #{{ $uid }} .rj-nl-env[data-state="sending"] { animation: rjNlBob .6s ease-in-out infinite; }
-    #{{ $uid }} .rj-nl-env[data-state="error"] { animation: rjNlShake .5s; }
-    #{{ $uid }} .rj-nl-env[data-state="sent"] .rj-nl-env-letter { opacity: 0; transform: translateY(0); }
-    #{{ $uid }} .rj-nl-env[data-state="sent"] .rj-nl-env-plane { animation: rjNlFly 1.1s cubic-bezier(.5, 0, .9, .6) forwards; }
+    #{{ $uid }} .rj-nl-pg-wrap[data-state="open"] .pg-tail { animation: rjNlWag .5s ease-in-out infinite alternate; }
+    #{{ $uid }} .rj-nl-pg-wrap[data-state="valid"] .rj-nl-pg { animation: rjNlHop .8s ease-out; }
+    #{{ $uid }} .rj-nl-pg-wrap[data-state="valid"] .pg-wing-g { animation: rjNlFlap .22s ease-in-out 4; }
+    #{{ $uid }} .rj-nl-pg-wrap[data-state="sending"] .rj-nl-pg { animation: rjNlHover .5s ease-in-out infinite; }
+    #{{ $uid }} .rj-nl-pg-wrap[data-state="sending"] .pg-wing-g { animation: rjNlFlap .16s ease-in-out infinite; }
+    #{{ $uid }} .rj-nl-pg-wrap[data-state="error"] .rj-nl-pg { animation: rjNlShake .5s; }
+    #{{ $uid }} .rj-nl-pg-wrap[data-state="sent"] .rj-nl-pg { animation: rjNlFlyOff 1.2s cubic-bezier(.5, 0, .8, .5) forwards; }
+    #{{ $uid }} .rj-nl-pg-wrap[data-state="sent"] .pg-wing-g { animation: rjNlFlap .14s ease-in-out infinite; }
+    #{{ $uid }} .rj-nl-pg-wrap.is-ruffle .rj-nl-pg { animation: rjNlRuffle .6s ease; }
+    #{{ $uid }} .rj-nl-pg-wrap.is-ruffle .pg-wing-g { animation: rjNlFlap .12s ease-in-out 5; }
+    #{{ $uid }} .rj-nl-pg-wrap.is-ruffle .rj-nl-feather,
+    #{{ $uid }} .rj-nl-pg-wrap[data-state="sent"] .rj-nl-feather { animation: rjNlFeather 1.4s ease-out forwards; }
 
-    @keyframes rjNlBob { 50% { transform: translateY(-5px) scale(1.04); } }
-    @keyframes rjNlShake { 20%, 60% { transform: translateX(-5px) rotate(-4deg); } 40%, 80% { transform: translateX(5px) rotate(4deg); } }
-    @keyframes rjNlFly {
-        0%   { opacity: 0; transform: translate(0, 0) scale(.6); }
+    @keyframes rjNlBreathe { 50% { transform: scale(1, 1.025); } }
+    @keyframes rjNlBlink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+    @keyframes rjNlWag { from { transform: rotate(-9deg); } to { transform: rotate(9deg); } }
+    @keyframes rjNlFlap { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(42deg); } }
+    @keyframes rjNlHop {
+        0%, 100% { transform: translateY(0); }
+        35%      { transform: translateY(-14px); }
+        60%      { transform: translateY(0); }
+        78%      { transform: translateY(-5px); }
+    }
+    @keyframes rjNlHover { 50% { transform: translateY(-7px); } }
+    @keyframes rjNlShake {
+        20%, 60% { transform: translateX(-5px) rotate(-4deg); }
+        40%, 80% { transform: translateX(5px) rotate(4deg); }
+    }
+    @keyframes rjNlRuffle {
+        20% { transform: scale(1.08, .94) rotate(-3deg); }
+        40% { transform: scale(.96, 1.06) rotate(3deg); }
+        60% { transform: scale(1.04, .98) rotate(-2deg); }
+    }
+    @keyframes rjNlFlyOff {
+        0%   { opacity: 1; transform: translate(0, 0) scale(1); }
+        18%  { opacity: 1; transform: translate(-4px, 6px) scale(1.04, .92); }
+        100% { opacity: 0; transform: translate(220px, -170px) scale(.7) rotate(-14deg); }
+    }
+    @keyframes rjNlFeather {
+        0%   { opacity: 0; transform: translate(0, 0) rotate(0); }
         15%  { opacity: 1; }
-        100% { opacity: 0; transform: translate(190px, -150px) scale(1.2); }
+        100% { opacity: 0; transform: translate(var(--fx), 58px) rotate(160deg); }
     }
 
     #{{ $uid }} .rj-nl-title {
@@ -499,12 +535,35 @@
         <div class="rj-nl-inner">
             <div data-form-area>
                 @if($showIcon)
-                    <div class="rj-nl-env" data-env data-state="idle" aria-hidden="true">
-                        <div class="rj-nl-env-back"></div>
-                        <div class="rj-nl-env-letter"><i></i><i></i><i></i></div>
-                        <div class="rj-nl-env-front"></div>
-                        <div class="rj-nl-env-flap"></div>
-                        <svg class="rj-nl-env-plane" viewBox="0 0 24 24" fill="currentColor"><path d="M2.5 11.2 21 3.5c.8-.3 1.5.4 1.2 1.2l-7.7 18.5c-.4.9-1.6.9-2 0l-2.4-6.2a1 1 0 0 0-.6-.6l-6.2-2.4c-.9-.4-.9-1.6 0-2Z"/></svg>
+                    <div class="rj-nl-pg-wrap" data-env data-state="idle" aria-hidden="true">
+                        <div class="rj-nl-pg">
+                            <div class="rj-nl-pg-flip">
+                                <svg class="rj-nl-pg-svg" viewBox="0 0 120 100" fill="none">
+                                    <g class="pg-tail"><path class="pg-wing" d="M30 56 4 50 7 62 4 73 32 70Z"/></g>
+                                    <path class="pg-feet" d="M48 80V91M43 93H53M62 80V91M57 93H67"/>
+                                    <ellipse class="pg-body" cx="54" cy="62" rx="32" ry="20"/>
+                                    <ellipse cx="66" cy="70" rx="16" ry="9" fill="#fff" opacity=".22"/>
+                                    <g class="pg-wing-g">
+                                        <path class="pg-wing" d="M64 52C50 46 30 52 20 68C34 77 56 73 70 62Z"/>
+                                        <path d="M30 66C40 68 52 66 62 60" stroke="#000" stroke-width="1.5" stroke-linecap="round" opacity=".12"/>
+                                    </g>
+                                    <ellipse class="pg-body" cx="80" cy="47" rx="12" ry="15"/>
+                                    <ellipse class="pg-sheen" cx="78" cy="50" rx="8" ry="9"/>
+                                    <g class="pg-head">
+                                        <circle class="pg-body" cx="90" cy="34" r="12"/>
+                                        <path class="pg-beak" d="M101 31 115 36 101 41Z"/>
+                                        <circle class="pg-cere" cx="102" cy="32.5" r="2"/>
+                                        <g class="pg-eye">
+                                            <circle class="pg-iris" cx="94" cy="31" r="4.6"/>
+                                            <circle class="pg-pupil" cx="94" cy="31" r="2.4"/>
+                                        </g>
+                                    </g>
+                                </svg>
+                            </div>
+                        </div>
+                        <span class="rj-nl-feather"><svg viewBox="0 0 16 8"><path d="M0 4C4 0 11 0 16 4C11 8 4 8 0 4Z" fill="currentColor"/></svg></span>
+                        <span class="rj-nl-feather"><svg viewBox="0 0 16 8"><path d="M0 4C4 0 11 0 16 4C11 8 4 8 0 4Z" fill="currentColor"/></svg></span>
+                        <span class="rj-nl-feather"><svg viewBox="0 0 16 8"><path d="M0 4C4 0 11 0 16 4C11 8 4 8 0 4Z" fill="currentColor"/></svg></span>
                     </div>
                 @endif
 
@@ -587,8 +646,45 @@
     var privacyRequired = {{ $privacyRequired ? 'true' : 'false' }};
     var emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+    var pointer = null, frame = 0, face = 1, ruffling = false;
+
+    function setVars(hr, px, py) {
+        envEl.style.setProperty('--hr', hr.toFixed(1));
+        envEl.style.setProperty('--px', px.toFixed(2));
+        envEl.style.setProperty('--py', py.toFixed(2));
+    }
+
+    function look() {
+        if (!envEl) return;
+        var s = envEl.dataset.state;
+
+        if (s === 'open') return setVars(26, 1.2, 1.6);
+        if (s === 'valid') return setVars(-10, 1.4, -.8);
+        if (s === 'error') return setVars(22, 0, 1.8);
+        if (s === 'sending' || s === 'sent') return setVars(-6, 1.5, -.5);
+        if (!pointer) return setVars(0, 1.4, .2);
+
+        var r = envEl.getBoundingClientRect();
+        var mid = r.left + r.width / 2;
+        if (pointer.x < mid - 14) face = -1;
+        else if (pointer.x > mid + 14) face = 1;
+        envEl.style.setProperty('--face', face);
+
+        var cx = r.left + r.width * (face === 1 ? .75 : .25);
+        var cy = r.top + r.height * .36;
+        var dx = Math.abs(pointer.x - cx);
+        var dy = pointer.y - cy;
+        var ang = Math.atan2(dy, Math.max(dx, 1));
+        var deg = Math.max(-30, Math.min(38, ang * 180 / Math.PI));
+        var rad = deg * Math.PI / 180;
+
+        setVars(deg, Math.cos(rad) * 1.6, Math.sin(rad) * 1.6);
+    }
+
     function env(s) {
-        if (envEl) envEl.dataset.state = s;
+        if (!envEl) return;
+        envEl.dataset.state = s;
+        look();
     }
 
     function envRest() {
@@ -617,6 +713,26 @@
     function setLoading(on) {
         if (submitBtn) submitBtn.disabled = on;
         if (spinner) spinner.style.display = on ? 'inline-block' : 'none';
+    }
+
+    if (envEl) {
+        document.addEventListener('pointermove', function (e) {
+            pointer = { x: e.clientX, y: e.clientY };
+            if (!frame) frame = requestAnimationFrame(function () { frame = 0; look(); });
+        });
+
+        envEl.addEventListener('click', function () {
+            var s = envEl.dataset.state;
+            if (ruffling || s === 'sending' || s === 'sent') return;
+            ruffling = true;
+            envEl.classList.remove('is-ruffle');
+            void envEl.offsetWidth;
+            envEl.classList.add('is-ruffle');
+            setTimeout(function () {
+                envEl.classList.remove('is-ruffle');
+                ruffling = false;
+            }, 1500);
+        });
     }
 
     [emailEl, nameEl].forEach(function (el) {
@@ -677,7 +793,7 @@
                             }
                             descEl.textContent = data.message || @js($successMessage);
                         }
-                    }, envEl ? 1000 : 0);
+                    }, envEl ? 1100 : 0);
                 } else {
                     showMsg('error', data.message || @js(__('Subscription failed. Please try again.')));
                     setLoading(false);
@@ -690,5 +806,7 @@
             }
         });
     }
+
+    look();
 })();
 </script>
