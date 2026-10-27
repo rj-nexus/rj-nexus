@@ -1,88 +1,122 @@
 <?php
 
-namespace App\Http\Controllers\Frontend;
+namespace App\Widgets\Builtin;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Support\Str;
-use Illuminate\Validation\ValidationException;
+use App\Widgets\BaseWidget;
 
-class WidgetAuthController extends Controller
+class LoginWidget extends BaseWidget
 {
-    public function login(Request $request): JsonResponse
+    public function id(): string
     {
-        $data = $request->validate([
-            'email'    => ['required', 'string', 'email'],
-            'password' => ['required', 'string'],
-            'remember' => ['nullable', 'boolean'],
-        ]);
+        return 'login';
+    }
 
-        $key = Str::lower($data['email']) . '|' . $request->ip();
+    public function name(): string
+    {
+        return __('Login');
+    }
 
-        if (RateLimiter::tooManyAttempts($key, 5)) {
-            $seconds = RateLimiter::availableIn($key);
-            return response()->json([
-                'ok'      => false,
-                'message' => __('Too many login attempts. Please try again in :s seconds.', ['s' => $seconds]),
-            ], 429);
-        }
+    public function icon(): string
+    {
+        return '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>';
+    }
 
-        if (!Auth::attempt(['email' => $data['email'], 'password' => $data['password']], (bool) ($data['remember'] ?? false))) {
-            RateLimiter::hit($key, 60);
+    public function category(): string
+    {
+        return 'forms';
+    }
 
-            return response()->json([
-                'ok'      => false,
-                'message' => __('These credentials do not match our records.'),
-            ], 422);
-        }
+    public function description(): string
+    {
+        return __('A login form that turns into a user card when logged in.');
+    }
 
-        RateLimiter::clear($key);
-        $request->session()->regenerate();
-
-        $user = Auth::user();
-        $initials = $this->initials($user->name);
-
-        return response()->json([
-            'ok'   => true,
-            'user' => [
-                'name'     => $user->name,
-                'email'    => $user->email,
-                'initials' => $initials,
-                'admin'    => method_exists($user, 'isAdmin') ? $user->isAdmin() : false,
-                'account'  => route('frontend.account.index', absolute: false),
-                'adminUrl' => method_exists($user, 'isAdmin') && $user->isAdmin() ? route('admin.dashboard', absolute: false) : null,
+    public function schema(): array
+    {
+        return [
+            [
+                'name'    => 'title',
+                'type'    => 'text',
+                'label'   => __('Card Title'),
+                'default' => __('Welcome back'),
+                'tab'     => 'content',
             ],
-        ]);
+            [
+                'name'    => 'subtitle',
+                'type'    => 'text',
+                'label'   => __('Card Subtitle'),
+                'default' => __('Sign in to your account to continue'),
+                'tab'     => 'content',
+            ],
+            [
+                'name'    => 'logged_title',
+                'type'    => 'text',
+                'label'   => __('Logged-in Heading'),
+                'default' => __('Welcome'),
+                'tab'     => 'content',
+            ],
+            [
+                'name'    => 'show_remember',
+                'type'    => 'toggle',
+                'label'   => __('Show "Remember me"'),
+                'default' => true,
+                'tab'     => 'content',
+            ],
+            [
+                'name'    => 'show_forgot',
+                'type'    => 'toggle',
+                'label'   => __('Show "Forgot password" link'),
+                'default' => true,
+                'tab'     => 'content',
+            ],
+            [
+                'name'    => 'show_register',
+                'type'    => 'toggle',
+                'label'   => __('Show "Create account" link'),
+                'default' => true,
+                'tab'     => 'content',
+            ],
+            [
+                'name'    => 'show_admin_btn',
+                'type'    => 'toggle',
+                'label'   => __('Show "Go to Admin" for admins'),
+                'default' => true,
+                'tab'     => 'content',
+            ],
+            [
+                'name'    => 'accent',
+                'type'    => 'color',
+                'label'   => __('Accent Color'),
+                'default' => '#8b5cf6',
+                'tab'     => 'style',
+            ],
+            [
+                'name'    => 'radius',
+                'type'    => 'select',
+                'label'   => __('Card Radius'),
+                'default' => 'xl',
+                'tab'     => 'style',
+                'options' => [
+                    'none' => __('None'),
+                    'md'   => __('Medium'),
+                    'xl'   => __('Large'),
+                    '2xl'  => __('Extra Large'),
+                ],
+            ],
+            [
+                'name'    => 'shadow',
+                'type'    => 'toggle',
+                'label'   => __('Card Shadow'),
+                'default' => true,
+                'tab'     => 'style',
+            ],
+        ];
     }
 
-    public function logout(Request $request): JsonResponse
+    public function render(array $settings): string
     {
-        Auth::guard('web')->logout();
+        $uid = 'login_' . substr(md5(uniqid('', true)), 0, 8);
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return response()->json(['ok' => true]);
-    }
-
-    private function initials(?string $name): string
-    {
-        $name = trim((string) $name);
-        if ($name === '') {
-            return '?';
-        }
-
-        $parts = preg_split('/\s+/u', $name) ?: [];
-        if (count($parts) === 1) {
-            return mb_strtoupper(mb_substr($parts[0], 0, 1));
-        }
-
-        $first = mb_substr($parts[0], 0, 1);
-        $last  = mb_substr($parts[count($parts) - 1], 0, 1);
-
-        return mb_strtoupper($first . $last);
+        return view('rjbuilder.widgets.builtin.login', compact('settings', 'uid'))->render();
     }
 }
