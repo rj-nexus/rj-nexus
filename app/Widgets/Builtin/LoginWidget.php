@@ -28,88 +28,38 @@ class LoginWidget extends BaseWidget
 
     public function description(): string
     {
-        return __('A login form that turns into a user card when logged in.');
+        return __('An animated login block with characters that react to typing, turning into a user card when logged in.');
     }
 
     public function schema(): array
     {
         return [
+            ['name' => 'title', 'type' => 'text', 'label' => __('Card Title'), 'default' => __('Welcome back'), 'tab' => 'content'],
+            ['name' => 'subtitle', 'type' => 'text', 'label' => __('Card Subtitle'), 'default' => __('Sign in to your account to continue'), 'tab' => 'content'],
+            ['name' => 'logged_title', 'type' => 'text', 'label' => __('Logged-in Heading'), 'default' => __('Welcome'), 'tab' => 'content'],
+            ['name' => 'show_remember', 'type' => 'toggle', 'label' => __('Show "Remember me"'), 'default' => true, 'tab' => 'content'],
+            ['name' => 'show_forgot', 'type' => 'toggle', 'label' => __('Show "Forgot password" link'), 'default' => true, 'tab' => 'content'],
+            ['name' => 'show_register', 'type' => 'toggle', 'label' => __('Show "Create account" link'), 'default' => true, 'tab' => 'content'],
+            ['name' => 'show_admin_btn', 'type' => 'toggle', 'label' => __('Show "Go to Admin" for admins'), 'default' => true, 'tab' => 'content'],
+            ['name' => 'show_bubble', 'type' => 'toggle', 'label' => __('Show Speech Bubble'), 'default' => true, 'tab' => 'content'],
             [
-                'name'    => 'title',
-                'type'    => 'text',
-                'label'   => __('Card Title'),
-                'default' => __('Welcome back'),
-                'tab'     => 'content',
-            ],
-            [
-                'name'    => 'subtitle',
-                'type'    => 'text',
-                'label'   => __('Card Subtitle'),
-                'default' => __('Sign in to your account to continue'),
-                'tab'     => 'content',
-            ],
-            [
-                'name'    => 'logged_title',
-                'type'    => 'text',
-                'label'   => __('Logged-in Heading'),
-                'default' => __('Welcome'),
-                'tab'     => 'content',
-            ],
-            [
-                'name'    => 'show_remember',
-                'type'    => 'toggle',
-                'label'   => __('Show "Remember me"'),
-                'default' => true,
-                'tab'     => 'content',
-            ],
-            [
-                'name'    => 'show_forgot',
-                'type'    => 'toggle',
-                'label'   => __('Show "Forgot password" link'),
-                'default' => true,
-                'tab'     => 'content',
-            ],
-            [
-                'name'    => 'show_register',
-                'type'    => 'toggle',
-                'label'   => __('Show "Create account" link'),
-                'default' => true,
-                'tab'     => 'content',
-            ],
-            [
-                'name'    => 'show_admin_btn',
-                'type'    => 'toggle',
-                'label'   => __('Show "Go to Admin" for admins'),
-                'default' => true,
-                'tab'     => 'content',
-            ],
-            [
-                'name'    => 'accent',
-                'type'    => 'color',
-                'label'   => __('Accent Color'),
-                'default' => '#8b5cf6',
+                'name'    => 'stage_side',
+                'type'    => 'select',
+                'label'   => __('Characters Side'),
+                'default' => 'right',
                 'tab'     => 'style',
+                'options' => ['right' => __('Right'), 'left' => __('Left')],
             ],
+            ['name' => 'accent', 'type' => 'color', 'label' => __('Accent Color'), 'default' => '#8b5cf6', 'tab' => 'style'],
             [
                 'name'    => 'radius',
                 'type'    => 'select',
                 'label'   => __('Card Radius'),
                 'default' => 'xl',
                 'tab'     => 'style',
-                'options' => [
-                    'none' => __('None'),
-                    'md'   => __('Medium'),
-                    'xl'   => __('Large'),
-                    '2xl'  => __('Extra Large'),
-                ],
+                'options' => ['none' => __('None'), 'md' => __('Medium'), 'xl' => __('Large'), '2xl' => __('Extra Large')],
             ],
-            [
-                'name'    => 'shadow',
-                'type'    => 'toggle',
-                'label'   => __('Card Shadow'),
-                'default' => true,
-                'tab'     => 'style',
-            ],
+            ['name' => 'shadow', 'type' => 'toggle', 'label' => __('Card Shadow'), 'default' => true, 'tab' => 'style'],
         ];
     }
 
