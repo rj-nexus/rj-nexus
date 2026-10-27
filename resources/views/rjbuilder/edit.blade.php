@@ -703,6 +703,7 @@
 window.RJ_TERMS = @json($termsByTaxonomy);
 window.RJ_FORMS = @json($formsData);
 window.RJ_POST_TYPES = @json($postTypesData);
+window.RJ_DEMO_DATA = @json(collect(\App\Widgets\WidgetList::get())->mapWithKeys(fn($w) => [$w->id() => \App\Widgets\WidgetDemoData::get($w->id())])->filter()->toArray());
 </script>
 
 @include('rjbuilder.partials.scripts.data')
