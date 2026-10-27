@@ -513,7 +513,7 @@ function builderState() {
             const value = this.getBlockField(block, name);
 
             if (this.isDynamicValue(value)) {
-                return '⚡ ' + this.getDynamicTagLabel(value);
+                return '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:inline-block; vertical-align:-1px; margin-right:4px; color:#fbbf24;"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>' + this.getDynamicTagLabel(value);
             }
 
             return value || '';
