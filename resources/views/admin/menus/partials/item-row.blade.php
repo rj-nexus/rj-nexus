@@ -7,15 +7,19 @@
         </span>
 
         <div class="w-8 h-8 rounded-lg bg-rj-purple/10 flex items-center justify-center flex-shrink-0 text-sm">
-            {{ \App\Models\MenuItem::types()[$item->type]['icon'] ?? '🔗' }}
+            {!! \App\Models\MenuItem::types()[$item->type]['icon'] ?? '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>' !!}
         </div>
 
         <div class="min-w-0 flex-1">
             <div class="text-sm font-medium text-gray-900 truncate">{{ $item->label }}</div>
-            <div class="text-xs text-gray-500 mt-0.5 truncate font-mono">
+            <div class="text-xs text-gray-500 mt-0.5 truncate font-mono flex items-center flex-wrap gap-1">
                 {{ $item->resolvedUrl() }}
                 @if ($item->translations && count($item->translations) > 0)
-                    · 🌐 {{ count($item->translations) }} {{ __('translation(s)') }}
+                    <span class="inline-flex items-center gap-1">
+                        ·
+                        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:inline-block; vertical-align:-1px;"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+                        {{ count($item->translations) }} {{ __('translation(s)') }}
+                    </span>
                 @endif
             </div>
         </div>
