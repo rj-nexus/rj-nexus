@@ -433,9 +433,7 @@
                             </template>
 
                             @include('rjbuilder.partials.fields.label')
-
                             @include('rjbuilder.partials.fields.text')
-
                             @include('rjbuilder.partials.fields.repeater')
 
                             <template x-if="field.type === 'number'">
