@@ -1,545 +1,233 @@
 @php
-    $position      = $settings['position'] ?? 'bottom';
-    $style         = $settings['style'] ?? 'card';
-    $title         = $settings['title'] ?? __('We value your privacy');
-    $message       = $settings['message'] ?? '';
-    $privacyUrl    = trim($settings['privacy_url'] ?? '');
-    $privacyLabel  = $settings['privacy_label'] ?? __('Privacy Policy');
-    $acceptLabel   = $settings['accept_label'] ?? __('Accept All');
-    $rejectLabel   = $settings['reject_label'] ?? __('Reject All');
-    $settingsLabel = $settings['settings_label'] ?? __('Customize');
-    $showSettings  = $settings['show_settings'] ?? true;
-    $showReject    = $settings['show_reject'] ?? true;
-    $showIcon      = $settings['show_icon'] ?? true;
-    $accent        = $settings['accent'] ?? '#8b5cf6';
-    $textColor     = $settings['text_color'] ?? '#0f172a';
-    $mutedColor    = $settings['muted_color'] ?? '#64748b';
-    $bgColor       = $settings['bg_color'] ?? '#ffffff';
-    $radius        = $settings['radius'] ?? 'lg';
-    $expireDays    = (int) ($settings['expire_days'] ?? 365);
-    $enableCats    = $settings['enable_categories'] ?? true;
-    $saveLabel     = $settings['save_label'] ?? __('Save Preferences');
+    $color = fn ($v, $d) => preg_match('/^#[0-9a-f]{3,8}$/i', (string) $v) ? $v : $d;
+    $bool  = fn ($k, $d = true) => filter_var($settings[$k] ?? $d, FILTER_VALIDATE_BOOLEAN);
+    $pick  = fn ($k, $opts, $d) => in_array($settings[$k] ?? $d, $opts, true) ? $settings[$k] : $d;
+    $text  = fn ($k, $d) => trim((string) ($settings[$k] ?? '')) !== '' ? $settings[$k] : $d;
 
-    $gaId           = trim($settings['ga_id'] ?? '');
-    $gtmId          = trim($settings['gtm_id'] ?? '');
-    $fbPixelId      = trim($settings['fb_pixel_id'] ?? '');
-    $hotjarId       = trim($settings['hotjar_id'] ?? '');
-    $customAnalytics = trim($settings['custom_analytics_script'] ?? '');
-    $customMarketing = trim($settings['custom_marketing_script'] ?? '');
-    $customNecessary = trim($settings['custom_necessary_script'] ?? '');
+    $pos      = $pick('position', ['bottom', 'bottom-left', 'bottom-right', 'center', 'top'], 'bottom');
+    $style    = $pick('style', ['card', 'dark', 'glass', 'minimal'], 'card');
+    $accent   = $color($settings['accent'] ?? '', '#8b5cf6');
+    $ink      = $color($settings['text_color'] ?? '', '#0f172a');
+    $muted    = $color($settings['muted_color'] ?? '', '#64748b');
+    $bg       = $color($settings['bg_color'] ?? '', '#ffffff');
+    $radiusCss = ['none' => '0px', 'md' => '12px', 'lg' => '20px', 'xl' => '28px'][$settings['radius'] ?? 'lg'] ?? '20px';
+    $days     = max(1, (int) ($settings['expire_days'] ?? 365));
 
-    $radiusMap = ['none' => '0px', 'md' => '12px', 'lg' => '18px', 'xl' => '26px'];
-    $radiusCss = $radiusMap[$radius] ?? '18px';
+    $title    = $settings['title'] ?? __('We value your privacy');
+    $message  = $settings['message'] ?? '';
+    $privacy  = trim((string) ($settings['privacy_url'] ?? ''));
+    $privacy  = preg_match('#^(https?://|/|\#)#i', $privacy) ? $privacy : '';
 
-    $cats = [
-        'necessary' => [
-            'label'    => $settings['cat_necessary_label'] ?? __('Necessary'),
-            'desc'     => $settings['cat_necessary_desc'] ?? '',
-            'required' => true,
-        ],
-        'analytics' => [
-            'label'    => $settings['cat_analytics_label'] ?? __('Analytics'),
-            'desc'     => $settings['cat_analytics_desc'] ?? '',
-            'required' => false,
-        ],
-        'marketing' => [
-            'label'    => $settings['cat_marketing_label'] ?? __('Marketing'),
-            'desc'     => $settings['cat_marketing_desc'] ?? '',
-            'required' => false,
-        ],
-        'preferences' => [
-            'label'    => $settings['cat_preferences_label'] ?? __('Preferences'),
-            'desc'     => $settings['cat_preferences_desc'] ?? '',
-            'required' => false,
-        ],
-    ];
+    $showSettings = $bool('show_settings');
+    $showReject   = $bool('show_reject');
+    $showCookie   = $bool('show_icon');
 
-    $storageKey = 'rj_cookie_consent_' . substr(md5($title . '|' . $privacyUrl), 0, 8);
+    $cats = [];
+    foreach (['necessary' => __('Necessary'), 'analytics' => __('Analytics'), 'marketing' => __('Marketing'), 'preferences' => __('Preferences')] as $k => $label) {
+        $cats[$k] = ['label' => $text("cat_{$k}_label", $label), 'desc' => (string) ($settings["cat_{$k}_desc"] ?? '')];
+    }
 
-    $scriptsConfig = [
-        'gaId'              => $gaId,
-        'gtmId'             => $gtmId,
-        'fbPixelId'         => $fbPixelId,
-        'hotjarId'          => $hotjarId,
-        'customAnalytics'   => $customAnalytics,
-        'customMarketing'   => $customMarketing,
-        'customNecessary'   => $customNecessary,
-    ];
+    $scripts = [];
+    foreach (['gaId' => 'ga_id', 'gtmId' => 'gtm_id', 'fbPixelId' => 'fb_pixel_id', 'hotjarId' => 'hotjar_id', 'customAnalytics' => 'custom_analytics_script', 'customMarketing' => 'custom_marketing_script', 'customNecessary' => 'custom_necessary_script'] as $js => $key) {
+        $scripts[$js] = trim((string) ($settings[$key] ?? ''));
+    }
 
-    $hasAnyScript = $gaId || $gtmId || $fbPixelId || $hotjarId || $customAnalytics || $customMarketing || $customNecessary;
+    $storageKey = 'rj_cookie_consent_' . substr(md5($title . '|' . $privacy), 0, 8);
 @endphp
 
 <style>
     #{{ $uid }} {
-        position: fixed;
-        z-index: 99980;
-        display: none;
+        --accent: {{ $accent }};
+        --ink: {{ $ink }};
+        --muted: {{ $muted }};
+        --bg: {{ $bg }};
+        --solid: {{ $bg }};
+        --r: {{ $radiusCss }};
+        --line: color-mix(in srgb, var(--muted) 28%, transparent);
+        --link: var(--accent);
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    }
-    #{{ $uid }}.is-visible { display: block; }
-    #{{ $uid }}.is-hidden { display: none !important; }
 
-    #{{ $uid }}[data-pos="bottom"] {
-        bottom: 0; left: 0; right: 0;
-        padding: 0;
-    }
-    #{{ $uid }}[data-pos="bottom-left"] {
-        bottom: 20px; left: 20px;
-        max-width: 420px;
-    }
-    #{{ $uid }}[data-pos="bottom-right"] {
-        bottom: 20px; right: 20px;
-        max-width: 420px;
-    }
-    #{{ $uid }}[data-pos="center"] {
-        top: 50%; left: 50%;
-        transform: translate(-50%, -50%);
-        max-width: 520px;
-        width: calc(100% - 32px);
-    }
-    #{{ $uid }}[data-pos="top"] {
-        top: 0; left: 0; right: 0;
-    }
-    @media (max-width: 640px) {
-        #{{ $uid }}[data-pos="bottom-left"],
-        #{{ $uid }}[data-pos="bottom-right"] {
-            left: 12px; right: 12px; bottom: 12px;
-            max-width: none;
+        &[data-style="dark"] { --bg: #0f172a; --solid: #0f172a; --ink: #f1f5f9; --muted: #94a3b8; --link: color-mix(in srgb, var(--accent) 55%, #fff); }
+        &[data-style="glass"] { --bg: rgba(255, 255, 255, .7); --solid: #fff;
+            .cn-card { -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
+        }
+        &[data-style="minimal"] .cn-card { box-shadow: none; }
+
+        .cn-banner { position: fixed; z-index: 99980; display: none; --cr: var(--r); --from: 40px;
+            &.is-visible { display: block; animation: rj-cn-in .7s cubic-bezier(.2, .9, .3, 1.1) both; }
+        }
+        &[data-pos="bottom"] .cn-banner { inset: auto 0 0; --cr: var(--r) var(--r) 0 0; }
+        &[data-pos="top"] .cn-banner { inset: 0 0 auto; --cr: 0 0 var(--r) var(--r); --from: -40px; }
+        &[data-pos="bottom-left"] .cn-banner { left: 20px; bottom: 20px; width: min(440px, calc(100% - 24px)); }
+        &[data-pos="bottom-right"] .cn-banner { right: 20px; bottom: 20px; width: min(440px, calc(100% - 24px)); }
+        &[data-pos="center"] .cn-banner { top: 50%; left: 50%; translate: -50% -50%; width: min(540px, calc(100% - 32px)); }
+
+        .cn-card { --px: 24px; position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 16px 24px; padding: 22px var(--px); border: 1px solid var(--line); border-radius: var(--cr); background: var(--bg); color: var(--ink); box-shadow: 0 24px 60px -20px rgba(15, 23, 42, .35);
+            &::before { content: ""; position: absolute; inset: 0 var(--r) auto; height: 3px; border-radius: 0 0 3px 3px; background: linear-gradient(90deg, var(--accent), #fbbc04, #34a853, #ea4335, var(--accent)) 0 0 / 200% 100%; animation: rj-cn-flow 5s linear infinite; }
+        }
+        &[data-pos="bottom"] .cn-card, &[data-pos="top"] .cn-card { --px: max(24px, calc((100% - 1200px) / 2)); }
+        .has-cookie .cn-card { padding-top: 42px; }
+        &[data-pos="top"] .has-cookie .cn-card { padding-top: 22px; padding-bottom: 42px; }
+
+        .cn-cookie { position: absolute; top: -30px; right: var(--px); z-index: 2; width: 66px; height: 66px; pointer-events: none;
+            svg { display: block; width: 100%; height: 100%; filter: drop-shadow(0 10px 10px rgba(120, 66, 18, .35)); animation: rj-cn-wobble 5s ease-in-out infinite; }
+            i { position: absolute; top: 78%; left: 50%; width: 5px; height: 5px; border-radius: 50%; background: #b9743a; opacity: 0; translate: var(--x) 0; animation: rj-cn-crumb 2.6s ease-in infinite var(--d); }
+        }
+        &[data-pos="top"] .cn-cookie { top: auto; bottom: -30px; }
+
+        .cn-body { flex: 1; min-width: 240px; }
+        .cn-title { margin: 0 0 6px; font-size: 16px; font-weight: 800; letter-spacing: -.01em; }
+        .cn-msg { margin: 0; font-size: 13.5px; line-height: 1.6; color: var(--muted); }
+        .cn-link { margin-inline-start: 4px; color: var(--link); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+
+        .cn-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+        .cn-btn { position: relative; overflow: hidden; padding: 11px 20px; border: 1.5px solid var(--line); border-radius: 12px; background: transparent; color: var(--ink); font-family: inherit; font-size: 13px; font-weight: 700; line-height: 1; white-space: nowrap; cursor: pointer; transition: transform .15s, background .2s, border-color .2s;
+            &:hover { background: color-mix(in srgb, var(--muted) 12%, transparent); }
+            &:active { transform: scale(.97); }
+            &.is-primary { border-color: var(--accent); background: var(--accent); color: #fff; box-shadow: 0 12px 22px -12px var(--accent);
+                &:hover { background: var(--accent); filter: brightness(1.08); }
+                &::after { content: ""; position: absolute; top: 0; bottom: 0; left: -60%; width: 40%; background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .55), transparent); transform: skewX(-20deg); animation: rj-cn-shine 3.4s ease-in-out infinite; }
+            }
+        }
+
+        .cn-modal { position: fixed; inset: 0; z-index: 99990; display: none; place-items: center; padding: 20px;
+            &.is-open { display: grid; }
+        }
+        .cn-back { position: absolute; inset: 0; background: rgba(2, 6, 23, .65); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+        .cn-box { position: relative; display: flex; flex-direction: column; width: 100%; max-width: 520px; max-height: 85vh; overflow: hidden; border-radius: var(--r); background: var(--solid); color: var(--ink); box-shadow: 0 40px 80px -20px rgba(0, 0, 0, .55); animation: rj-cn-pop .4s cubic-bezier(.34, 1.56, .64, 1) both; }
+        .cn-box-head { display: flex; align-items: center; gap: 12px; padding: 18px 22px; border-bottom: 1px solid var(--line);
+            svg { width: 32px; height: 32px; animation: rj-cn-wobble 5s ease-in-out infinite; }
+            h4 { flex: 1; margin: 0; font-size: 17px; font-weight: 800; letter-spacing: -.01em; }
+            button { display: grid; place-items: center; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 10px; background: color-mix(in srgb, var(--muted) 16%, transparent); color: var(--muted); cursor: pointer; transition: .2s;
+                &:hover { color: var(--ink); }
+                svg { width: 14px; height: 14px; animation: none; }
+            }
+        }
+        .cn-box-body { flex: 1; padding: 6px 22px; overflow-y: auto; }
+        .cn-cat { padding: 14px 0; border-bottom: 1px solid var(--line);
+            &:last-child { border-bottom: 0; }
+            div { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
+            b { font-size: 13.5px; font-weight: 700; }
+            p { margin: 0; font-size: 12px; line-height: 1.5; color: var(--muted); }
+        }
+        .cn-switch { position: relative; flex: none; width: 42px; height: 24px;
+            input { position: absolute; width: 0; height: 0; opacity: 0; }
+            span { position: absolute; inset: 0; border-radius: 24px; background: color-mix(in srgb, var(--muted) 40%, transparent); cursor: pointer; transition: background .25s;
+                &::before { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 2px 4px rgba(0, 0, 0, .2); transition: transform .25s cubic-bezier(.34, 1.56, .64, 1); }
+            }
+            input:checked + span { background: var(--accent); }
+            input:checked + span::before { transform: translateX(18px); }
+            input:disabled + span { opacity: .55; cursor: not-allowed; }
+        }
+        .cn-box-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 22px; border-top: 1px solid var(--line); }
+
+        .cn-reopen { position: fixed; bottom: 16px; inset-inline-start: 16px; z-index: 99979; display: none; width: 48px; height: 48px; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: var(--solid); box-shadow: 0 10px 24px -10px rgba(15, 23, 42, .4); cursor: pointer; transition: transform .2s;
+            &.is-visible { display: grid; place-items: center; }
+            &:hover { transform: scale(1.1); }
+            svg { width: 32px; height: 32px; animation: rj-cn-wobble 5s ease-in-out infinite; }
+        }
+
+        @media (max-width: 720px) {
+            .cn-actions { width: 100%; }
+            .cn-btn { flex: 1; }
+        }
+        @media (max-width: 640px) {
+            &[data-pos="bottom-left"] .cn-banner, &[data-pos="bottom-right"] .cn-banner { left: 12px; right: 12px; bottom: 12px; width: auto; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation: none !important; transition: none !important; }
         }
     }
 
-    #{{ $uid }} .rj-cn-card {
-        position: relative;
-        border-radius: {{ $radiusCss }};
-        padding: 22px 24px;
-        display: flex;
-        gap: 20px;
-        align-items: flex-start;
-        flex-wrap: wrap;
-    }
-    #{{ $uid }}[data-pos="bottom"] .rj-cn-card,
-    #{{ $uid }}[data-pos="top"] .rj-cn-card {
-        border-radius: 0;
-    }
-    #{{ $uid }}[data-pos="bottom"] .rj-cn-card {
-        border-bottom-left-radius: 0;
-        border-bottom-right-radius: 0;
-    }
-    #{{ $uid }}[data-pos="top"] .rj-cn-card {
-        border-top-left-radius: 0;
-        border-top-right-radius: 0;
-    }
-
-    #{{ $uid }}[data-style="card"] .rj-cn-card {
-        background: {{ $bgColor }};
-        color: {{ $textColor }};
-        border: 1px solid rgba(15,23,42,.08);
-        box-shadow: 0 -4px 40px -10px rgba(15,23,42,.18);
-    }
-    #{{ $uid }}[data-style="dark"] .rj-cn-card {
-        background: #0f172a;
-        color: #f1f5f9;
-        border: 1px solid rgba(255,255,255,.08);
-        box-shadow: 0 -4px 40px -10px rgba(0,0,0,.5);
-    }
-    #{{ $uid }}[data-style="dark"] .rj-cn-msg { color: rgba(241,245,249,.75); }
-    #{{ $uid }}[data-style="dark"] .rj-cn-link { color: #a5b4fc; }
-    #{{ $uid }}[data-style="dark"] .rj-cn-btn.reject,
-    #{{ $uid }}[data-style="dark"] .rj-cn-btn.customize {
-        background: transparent;
-        color: #f1f5f9;
-        border-color: rgba(255,255,255,.25);
-    }
-    #{{ $uid }}[data-style="dark"] .rj-cn-btn.reject:hover,
-    #{{ $uid }}[data-style="dark"] .rj-cn-btn.customize:hover {
-        background: rgba(255,255,255,.08);
-    }
-    #{{ $uid }}[data-style="glass"] .rj-cn-card {
-        background: rgba(255,255,255,.7);
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
-        color: {{ $textColor }};
-        border: 1px solid rgba(255,255,255,.6);
-        box-shadow: 0 -4px 40px -10px rgba(15,23,42,.18);
-    }
-    #{{ $uid }}[data-style="minimal"] .rj-cn-card {
-        background: {{ $bgColor }};
-        color: {{ $textColor }};
-        border: 1px solid {{ $mutedColor }}22;
-        box-shadow: none;
-    }
-
-    #{{ $uid }} .rj-cn-icon {
-        flex-shrink: 0;
-        width: 40px;
-        height: 40px;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: {{ $accent }}15;
-        color: {{ $accent }};
-    }
-    #{{ $uid }} .rj-cn-icon svg { width: 22px; height: 22px; }
-
-    #{{ $uid }} .rj-cn-body {
-        flex: 1;
-        min-width: 220px;
-    }
-    #{{ $uid }} .rj-cn-title {
-        font-size: 15px;
-        font-weight: 800;
-        color: {{ $textColor }};
-        margin: 0 0 6px;
-        letter-spacing: -.01em;
-    }
-    #{{ $uid }}[data-style="dark"] .rj-cn-title { color: #fff; }
-    #{{ $uid }} .rj-cn-msg {
-        font-size: 13px;
-        line-height: 1.6;
-        color: {{ $mutedColor }};
-        margin: 0;
-    }
-    #{{ $uid }} .rj-cn-link {
-        color: {{ $accent }};
-        font-weight: 600;
-        text-decoration: underline;
-        text-underline-offset: 2px;
-        margin-inline-start: 4px;
-    }
-
-    #{{ $uid }} .rj-cn-actions {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-        align-items: center;
-        flex-shrink: 0;
-    }
-    @media (max-width: 720px) {
-        #{{ $uid }} .rj-cn-actions {
-            width: 100%;
-            justify-content: flex-end;
-        }
-    }
-    #{{ $uid }} .rj-cn-btn {
-        padding: 10px 18px;
-        border-radius: 10px;
-        border: 1.5px solid transparent;
-        font-size: 13px;
-        font-weight: 700;
-        cursor: pointer;
-        transition: transform .15s ease, background .2s ease, opacity .2s ease, border-color .2s ease;
-        white-space: nowrap;
-        font-family: inherit;
-    }
-    #{{ $uid }} .rj-cn-btn:active { transform: scale(.98); }
-    #{{ $uid }} .rj-cn-btn.accept {
-        background: {{ $accent }};
-        color: #fff;
-        box-shadow: 0 8px 18px -8px {{ $accent }}80;
-    }
-    #{{ $uid }} .rj-cn-btn.accept:hover { opacity: .92; }
-    #{{ $uid }} .rj-cn-btn.reject,
-    #{{ $uid }} .rj-cn-btn.customize {
-        background: transparent;
-        color: {{ $textColor }};
-        border-color: {{ $mutedColor }}44;
-    }
-    #{{ $uid }} .rj-cn-btn.reject:hover,
-    #{{ $uid }} .rj-cn-btn.customize:hover {
-        background: {{ $mutedColor }}12;
-    }
-
-    #{{ $uid }} .rj-cn-modal {
-        position: fixed;
-        inset: 0;
-        z-index: 99990;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-    }
-    #{{ $uid }} .rj-cn-modal.is-open { display: flex; }
-    #{{ $uid }} .rj-cn-modal-back {
-        position: absolute;
-        inset: 0;
-        background: rgba(2,6,23,.7);
-        backdrop-filter: blur(6px);
-        -webkit-backdrop-filter: blur(6px);
-    }
-    #{{ $uid }} .rj-cn-modal-box {
-        position: relative;
-        background: #fff;
-        color: {{ $textColor }};
-        border-radius: {{ $radiusCss }};
-        max-width: 520px;
-        width: 100%;
-        max-height: 85vh;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        box-shadow: 0 40px 80px -20px rgba(0,0,0,.5);
-        animation: rjCnPop .35s cubic-bezier(.34,1.56,.64,1) both;
-    }
-    @keyframes rjCnPop {
-        from { opacity: 0; transform: scale(.92) translateY(10px); }
-        to   { opacity: 1; transform: none; }
-    }
-    #{{ $uid }} .rj-cn-modal-head {
-        padding: 20px 24px 14px;
-        border-bottom: 1px solid #f1f5f9;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 12px;
-    }
-    #{{ $uid }} .rj-cn-modal-title {
-        font-size: 17px;
-        font-weight: 800;
-        margin: 0;
-        letter-spacing: -.01em;
-    }
-    #{{ $uid }} .rj-cn-modal-close {
-        width: 30px;
-        height: 30px;
-        border-radius: 8px;
-        border: 0;
-        background: #f1f5f9;
-        color: #64748b;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0;
-        flex-shrink: 0;
-        transition: background .2s ease;
-    }
-    #{{ $uid }} .rj-cn-modal-close:hover { background: #e2e8f0; color: #0f172a; }
-
-    #{{ $uid }} .rj-cn-modal-body {
-        padding: 18px 24px;
-        overflow-y: auto;
-        flex: 1;
-    }
-    #{{ $uid }} .rj-cn-modal-body::-webkit-scrollbar { width: 8px; }
-    #{{ $uid }} .rj-cn-modal-body::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-
-    #{{ $uid }} .rj-cn-cat {
-        padding: 14px 0;
-        border-bottom: 1px solid #f1f5f9;
-    }
-    #{{ $uid }} .rj-cn-cat:last-child { border-bottom: 0; }
-    #{{ $uid }} .rj-cn-cat-head {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 4px;
-    }
-    #{{ $uid }} .rj-cn-cat-name {
-        font-size: 13.5px;
-        font-weight: 700;
-        color: {{ $textColor }};
-    }
-    #{{ $uid }} .rj-cn-cat-desc {
-        font-size: 12px;
-        line-height: 1.5;
-        color: {{ $mutedColor }};
-        margin: 0;
-    }
-
-    #{{ $uid }} .rj-cn-switch {
-        position: relative;
-        width: 40px;
-        height: 22px;
-        flex-shrink: 0;
-    }
-    #{{ $uid }} .rj-cn-switch input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-        position: absolute;
-    }
-    #{{ $uid }} .rj-cn-switch span {
-        position: absolute;
-        inset: 0;
-        background: #cbd5e1;
-        border-radius: 22px;
-        cursor: pointer;
-        transition: background .25s ease;
-    }
-    #{{ $uid }} .rj-cn-switch span::before {
-        content: '';
-        position: absolute;
-        top: 2px;
-        left: 2px;
-        width: 18px;
-        height: 18px;
-        background: #fff;
-        border-radius: 50%;
-        transition: transform .25s cubic-bezier(.34,1.56,.64,1);
-        box-shadow: 0 2px 4px rgba(0,0,0,.15);
-    }
-    #{{ $uid }} .rj-cn-switch input:checked + span {
-        background: {{ $accent }};
-    }
-    #{{ $uid }} .rj-cn-switch input:checked + span::before {
-        transform: translateX(18px);
-    }
-    #{{ $uid }} .rj-cn-switch input:disabled + span {
-        opacity: .55;
-        cursor: not-allowed;
-    }
-
-    #{{ $uid }} .rj-cn-modal-foot {
-        padding: 14px 24px;
-        border-top: 1px solid #f1f5f9;
-        display: flex;
-        justify-content: flex-end;
-        gap: 10px;
-        flex-shrink: 0;
-    }
-    #{{ $uid }} .rj-cn-save {
-        padding: 10px 20px;
-        border-radius: 10px;
-        background: {{ $accent }};
-        color: #fff;
-        border: 0;
-        font-size: 13px;
-        font-weight: 700;
-        cursor: pointer;
-        transition: opacity .2s ease;
-        font-family: inherit;
-    }
-    #{{ $uid }} .rj-cn-save:hover { opacity: .92; }
-
-    #{{ $uid }} .rj-cn-reopen {
-        position: fixed;
-        z-index: 99979;
-        bottom: 16px;
-        inset-inline-start: 16px;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: {{ $bgColor }};
-        border: 1px solid {{ $mutedColor }}33;
-        color: {{ $accent }};
-        cursor: pointer;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 8px 20px -8px rgba(15,23,42,.35);
-        transition: transform .2s ease, box-shadow .2s ease;
-    }
-    #{{ $uid }} .rj-cn-reopen.is-visible { display: flex; }
-    #{{ $uid }} .rj-cn-reopen:hover {
-        transform: scale(1.08);
-        box-shadow: 0 12px 24px -8px rgba(15,23,42,.4);
-    }
-    #{{ $uid }} .rj-cn-reopen svg { width: 18px; height: 18px; }
-
-    @media (prefers-reduced-motion: reduce) {
-        #{{ $uid }} *,
-        #{{ $uid }} *::before,
-        #{{ $uid }} *::after {
-            animation: none !important;
-            transition: none !important;
-        }
-    }
+    @keyframes rj-cn-in { from { opacity: 0; transform: translateY(var(--from)) scale(.97); } to { opacity: 1; transform: none; } }
+    @keyframes rj-cn-pop { from { opacity: 0; transform: scale(.9) translateY(12px); } to { opacity: 1; transform: none; } }
+    @keyframes rj-cn-flow { to { background-position: 200% 0; } }
+    @keyframes rj-cn-shine { 0%, 55% { left: -60%; } 100% { left: 130%; } }
+    @keyframes rj-cn-wobble { 0%, 100% { transform: rotate(-9deg); } 50% { transform: rotate(9deg) translateY(-4px); } }
+    @keyframes rj-cn-crumb { 0% { opacity: 0; transform: translateY(0) scale(.6); } 15% { opacity: 1; } 100% { opacity: 0; transform: translateY(38px) rotate(200deg) scale(1); } }
 </style>
 
-<div id="{{ $uid }}"
-     data-pos="{{ $position }}"
-     data-style="{{ $style }}"
-     data-key="{{ $storageKey }}"
-     data-expire-days="{{ $expireDays }}"
-     data-enable-cats="{{ $enableCats ? '1' : '0' }}"
-     data-scripts='@json($scriptsConfig)'>
+<div id="{{ $uid }}" data-pos="{{ $pos }}" data-style="{{ $style }}" data-key="{{ $storageKey }}" data-days="{{ $days }}" data-scripts="{{ json_encode($scripts) }}">
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+        <defs>
+            <mask id="{{ $uid }}-m"><rect width="64" height="64" fill="#fff"/><circle cx="53" cy="13" r="10" fill="#000"/></mask>
+        </defs>
+        <symbol id="{{ $uid }}-ck" viewBox="0 0 64 64">
+            <g mask="url(#{{ $uid }}-m)">
+                <circle cx="32" cy="32" r="29" fill="#e0a363"/>
+                <circle cx="32" cy="32" r="29" fill="none" stroke="#b9743a" stroke-width="3"/>
+                <path d="M12 24a22 22 0 0 1 14-14" fill="none" stroke="#f3c78f" stroke-width="3" stroke-linecap="round"/>
+                <g fill="#5a3825">
+                    <ellipse cx="22" cy="26" rx="4.2" ry="3.4" transform="rotate(-20 22 26)"/>
+                    <ellipse cx="38" cy="36" rx="4.6" ry="3.6" transform="rotate(25 38 36)"/>
+                    <ellipse cx="21" cy="42" rx="3.6" ry="3"/>
+                    <ellipse cx="34" cy="21" rx="3.4" ry="2.8"/>
+                    <ellipse cx="45" cy="48" rx="3.4" ry="2.8" transform="rotate(-30 45 48)"/>
+                    <ellipse cx="31" cy="50" rx="3" ry="2.4"/>
+                </g>
+            </g>
+        </symbol>
+    </svg>
 
-    <div class="rj-cn-card">
-        @if($showIcon)
-            <div class="rj-cn-icon">
-                <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    <circle cx="9" cy="10" r="1" fill="currentColor"/>
-                    <circle cx="15" cy="10" r="1" fill="currentColor"/>
-                    <circle cx="12" cy="15" r="1" fill="currentColor"/>
-                    <circle cx="16" cy="15" r="1" fill="currentColor"/>
-                </svg>
+    <div class="cn-banner {{ $showCookie ? 'has-cookie' : '' }}" role="region" aria-label="{{ $title }}">
+        <div class="cn-card">
+            @if($showCookie)
+                <div class="cn-cookie" aria-hidden="true">
+                    <svg viewBox="0 0 64 64"><use href="#{{ $uid }}-ck"/></svg>
+                    <i style="--x:-12px;--d:0s"></i><i style="--x:2px;--d:.9s"></i><i style="--x:14px;--d:1.7s"></i>
+                </div>
+            @endif
+
+            <div class="cn-body">
+                @if($title !== '')<h3 class="cn-title">{{ $title }}</h3>@endif
+                @if($message !== '' || $privacy !== '')
+                    <p class="cn-msg">
+                        {{ $message }}
+                        @if($privacy !== '')<a class="cn-link" href="{{ $privacy }}">{{ $text('privacy_label', __('Privacy Policy')) }}</a>@endif
+                    </p>
+                @endif
             </div>
-        @endif
 
-        <div class="rj-cn-body">
-            @if($title !== '')
-                <h3 class="rj-cn-title">{{ $title }}</h3>
-            @endif
-            @if($message !== '')
-                <p class="rj-cn-msg">
-                    {{ $message }}
-                    @if($privacyUrl !== '')
-                        <a href="{{ $privacyUrl }}" class="rj-cn-link">{{ $privacyLabel }}</a>
-                    @endif
-                </p>
-            @endif
-        </div>
-
-        <div class="rj-cn-actions">
-            @if($showSettings)
-                <button type="button" class="rj-cn-btn customize" data-action="customize">
-                    {{ $settingsLabel }}
-                </button>
-            @endif
-            @if($showReject)
-                <button type="button" class="rj-cn-btn reject" data-action="reject">
-                    {{ $rejectLabel }}
-                </button>
-            @endif
-            <button type="button" class="rj-cn-btn accept" data-action="accept">
-                {{ $acceptLabel }}
-            </button>
+            <div class="cn-actions">
+                @if($showSettings)<button type="button" class="cn-btn" data-do="customize">{{ $text('settings_label', __('Customize')) }}</button>@endif
+                @if($showReject)<button type="button" class="cn-btn" data-do="reject">{{ $text('reject_label', __('Reject All')) }}</button>@endif
+                <button type="button" class="cn-btn is-primary" data-do="accept">{{ $text('accept_label', __('Accept All')) }}</button>
+            </div>
         </div>
     </div>
 
-    <div class="rj-cn-modal" data-modal>
-        <div class="rj-cn-modal-back" data-modal-back></div>
-        <div class="rj-cn-modal-box" role="dialog" aria-modal="true">
-            <div class="rj-cn-modal-head">
-                <h4 class="rj-cn-modal-title">{{ __('Cookie Settings') }}</h4>
-                <button type="button" class="rj-cn-modal-close" data-modal-back aria-label="{{ __('Close') }}">
-                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+    <div class="cn-modal">
+        <div class="cn-back" data-do="close"></div>
+        <div class="cn-box" role="dialog" aria-modal="true">
+            <div class="cn-box-head">
+                <svg viewBox="0 0 64 64"><use href="#{{ $uid }}-ck"/></svg>
+                <h4>{{ __('Cookie Settings') }}</h4>
+                <button type="button" data-do="close" aria-label="{{ __('Close') }}">
+                    <svg fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
-            <div class="rj-cn-modal-body">
+            <div class="cn-box-body">
                 @foreach($cats as $key => $cat)
-                    <div class="rj-cn-cat" data-cat="{{ $key }}">
-                        <div class="rj-cn-cat-head">
-                            <span class="rj-cn-cat-name">{{ $cat['label'] }}</span>
-                            <label class="rj-cn-switch">
-                                <input type="checkbox" data-cat-input="{{ $key }}"
-                                       @if($cat['required']) checked disabled @endif
-                                       @if(!$cat['required']) checked @endif>
+                    <div class="cn-cat">
+                        <div>
+                            <b>{{ $cat['label'] }}</b>
+                            <label class="cn-switch">
+                                <input type="checkbox" data-cat="{{ $key }}" checked @if($key === 'necessary') disabled @endif>
                                 <span></span>
                             </label>
                         </div>
-                        @if($cat['desc'] !== '')
-                            <p class="rj-cn-cat-desc">{{ $cat['desc'] }}</p>
-                        @endif
+                        @if($cat['desc'] !== '')<p>{{ $cat['desc'] }}</p>@endif
                     </div>
                 @endforeach
             </div>
-            <div class="rj-cn-modal-foot">
-                <button type="button" class="rj-cn-save" data-action="save">{{ $saveLabel }}</button>
+            <div class="cn-box-foot">
+                <button type="button" class="cn-btn is-primary" data-do="save">{{ $text('save_label', __('Save Preferences')) }}</button>
             </div>
         </div>
     </div>
 
-    <button type="button" class="rj-cn-reopen" data-reopen aria-label="{{ __('Cookie Settings') }}">
-        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            <circle cx="9" cy="10" r="1" fill="currentColor"/>
-            <circle cx="15" cy="10" r="1" fill="currentColor"/>
-            <circle cx="12" cy="15" r="1" fill="currentColor"/>
-        </svg>
+    <button type="button" class="cn-reopen" data-do="customize" aria-label="{{ __('Cookie Settings') }}">
+        <svg viewBox="0 0 64 64"><use href="#{{ $uid }}-ck"/></svg>
     </button>
 </div>
 
@@ -548,264 +236,143 @@
     var root = document.getElementById(@js($uid));
     if (!root) return;
 
-    var storageKey = root.getAttribute('data-key') || 'rj_cookie_consent';
-    var expireDays = parseInt(root.getAttribute('data-expire-days'), 10) || 365;
-    var scriptsConfig = {};
-    try { scriptsConfig = JSON.parse(root.getAttribute('data-scripts') || '{}'); } catch (e) {}
+    var banner = root.querySelector('.cn-banner');
+    var modal  = root.querySelector('.cn-modal');
+    var reopen = root.querySelector('.cn-reopen');
+    var inputs = root.querySelectorAll('[data-cat]');
+    var key    = root.dataset.key;
+    var days   = parseInt(root.dataset.days, 10) || 365;
+    var cfg    = {};
+    var done   = {};
+    try { cfg = JSON.parse(root.dataset.scripts || '{}'); } catch (e) {}
 
-    var modal = root.querySelector('[data-modal]');
-    var reopenBtn = root.querySelector('[data-reopen]');
-
-    var loaded = { analytics: false, marketing: false, preferences: false, necessary: false };
-
-    /* ============================================
-       SCRIPT LOADERS
-       ============================================ */
-
-    function loadGA(id) {
-        if (!id || loaded.analytics) return;
+    function addScript(src) {
         var s = document.createElement('script');
         s.async = true;
-        s.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(id);
-        document.head.appendChild(s);
-        window.dataLayer = window.dataLayer || [];
-        window.gtag = function () { window.dataLayer.push(arguments); };
-        window.gtag('js', new Date());
-        window.gtag('config', id, { anonymize_ip: true });
-    }
-
-    function loadGTM(id) {
-        if (!id) return;
-        window.dataLayer = window.dataLayer || [];
-        window.dataLayer.push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
-        var s = document.createElement('script');
-        s.async = true;
-        s.src = 'https://www.googletagmanager.com/gtm.js?id=' + encodeURIComponent(id);
+        s.src = src;
         document.head.appendChild(s);
     }
 
-    function loadFbPixel(id) {
-        if (!id || loaded.marketing) return;
-        !function(f,b,e,v,n,t,s){
-            if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-            n.queue=[];t=b.createElement(e);t.async=!0;
-            t.src=v;s=b.getElementsByTagName(e)[0];
-            s.parentNode.insertBefore(t,s)
-        }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
-        window.fbq('init', id);
-        window.fbq('track', 'PageView');
-    }
-
-    function loadHotjar(id) {
-        if (!id || loaded.analytics) return;
-        (function(h,o,t,j,a,r){
-            h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
-            h._hjSettings={hjid:parseInt(id,10),hjsv:6};
-            a=o.getElementsByTagName('head')[0];
-            r=o.createElement('script');r.async=1;
-            r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
-            a.appendChild(r);
-        })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
-    }
-
-    function injectCustom(html, marker) {
+    function inject(html) {
         if (!html) return;
-        var temp = document.createElement('div');
-        temp.innerHTML = html;
-        var nodes = Array.prototype.slice.call(temp.childNodes);
-        nodes.forEach(function (node) {
-            if (node.tagName === 'SCRIPT') {
-                var s = document.createElement('script');
-                Array.from(node.attributes).forEach(function (a) {
-                    s.setAttribute(a.name, a.value);
-                });
-                if (node.src) {
-                    s.src = node.src;
-                    s.async = false;
-                    document.head.appendChild(s);
-                } else {
-                    s.text = node.textContent;
-                    document.head.appendChild(s);
+        var box = document.createElement('div');
+        box.innerHTML = html;
+        Array.prototype.slice.call(box.children).forEach(function (node) {
+            if (node.tagName !== 'SCRIPT') { document.head.appendChild(node); return; }
+            var s = document.createElement('script');
+            Array.prototype.forEach.call(node.attributes, function (a) { s.setAttribute(a.name, a.value); });
+            s.text = node.textContent;
+            document.head.appendChild(s);
+        });
+    }
+
+    var loaders = {
+        necessary: function () {
+            inject(cfg.customNecessary);
+        },
+        analytics: function () {
+            window.dataLayer = window.dataLayer || [];
+            if (cfg.gaId) {
+                addScript('https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(cfg.gaId));
+                window.gtag = function () { window.dataLayer.push(arguments); };
+                window.gtag('js', new Date());
+                window.gtag('config', cfg.gaId, { anonymize_ip: true });
+            }
+            if (cfg.gtmId) {
+                window.dataLayer.push({ 'gtm.start': Date.now(), event: 'gtm.js' });
+                addScript('https://www.googletagmanager.com/gtm.js?id=' + encodeURIComponent(cfg.gtmId));
+            }
+            if (cfg.hotjarId) {
+                window.hj = window.hj || function () { (window.hj.q = window.hj.q || []).push(arguments); };
+                window._hjSettings = { hjid: parseInt(cfg.hotjarId, 10), hjsv: 6 };
+                addScript('https://static.hotjar.com/c/hotjar-' + encodeURIComponent(cfg.hotjarId) + '.js?sv=6');
+            }
+            inject(cfg.customAnalytics);
+        },
+        marketing: function () {
+            if (cfg.fbPixelId) {
+                if (!window.fbq) {
+                    var n = window.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); };
+                    if (!window._fbq) window._fbq = n;
+                    n.push = n; n.loaded = true; n.version = '2.0'; n.queue = [];
+                    addScript('https://connect.facebook.net/en_US/fbevents.js');
                 }
-            } else {
-                document.head.appendChild(node.cloneNode(true));
+                window.fbq('init', cfg.fbPixelId);
+                window.fbq('track', 'PageView');
             }
+            inject(cfg.customMarketing);
+        }
+    };
+
+    function apply(cats) {
+        Object.keys(loaders).forEach(function (k) {
+            if (cats[k] && !done[k]) { done[k] = true; loaders[k](); }
         });
     }
 
-    /* ============================================
-       APPLY CONSENT
-       ============================================ */
-
-    function applyConsent(cats) {
-        cats = cats || {};
-
-        if (cats.necessary && !loaded.necessary) {
-            loaded.necessary = true;
-            injectCustom(scriptsConfig.customNecessary || '', 'necessary');
-        }
-
-        if (cats.analytics && !loaded.analytics) {
-            loaded.analytics = true;
-            if (scriptsConfig.gaId) loadGA(scriptsConfig.gaId);
-            if (scriptsConfig.gtmId) loadGTM(scriptsConfig.gtmId);
-            if (scriptsConfig.hotjarId) loadHotjar(scriptsConfig.hotjarId);
-            if (scriptsConfig.customAnalytics) injectCustom(scriptsConfig.customAnalytics, 'analytics');
-        }
-
-        if (cats.marketing && !loaded.marketing) {
-            loaded.marketing = true;
-            if (scriptsConfig.fbPixelId) loadFbPixel(scriptsConfig.fbPixelId);
-            if (scriptsConfig.customMarketing) injectCustom(scriptsConfig.customMarketing, 'marketing');
-        }
-    }
-
-    /* ============================================
-       STORAGE
-       ============================================ */
-
-    function readConsent() {
+    function read() {
         try {
-            var raw = localStorage.getItem(storageKey);
-            if (!raw) return null;
-            var data = JSON.parse(raw);
-            if (!data || !data.expires) return null;
-            if (Date.now() > data.expires) {
-                localStorage.removeItem(storageKey);
-                return null;
-            }
-            return data;
-        } catch (e) { return null; }
-    }
-
-    function saveConsent(cats) {
-        var expires = Date.now() + expireDays * 86400000;
-        var payload = {
-            categories: cats,
-            timestamp: Date.now(),
-            expires: expires,
-        };
-        try {
-            localStorage.setItem(storageKey, JSON.stringify(payload));
+            var d = JSON.parse(localStorage.getItem(key));
+            if (d && d.expires > Date.now()) return d;
+            localStorage.removeItem(key);
         } catch (e) {}
-
-        try {
-            document.dispatchEvent(new CustomEvent('rj:cookie-consent', { detail: payload }));
-        } catch (e) {}
-
-        applyConsent(cats);
+        return null;
     }
 
-    function getAllCategories() {
+    function save(cats) {
+        var payload = { categories: cats, timestamp: Date.now(), expires: Date.now() + days * 86400000 };
+        try { localStorage.setItem(key, JSON.stringify(payload)); } catch (e) {}
+        try { document.dispatchEvent(new CustomEvent('rj:cookie-consent', { detail: payload })); } catch (e) {}
+        apply(cats);
+    }
+
+    function collect() {
         var cats = {};
-        root.querySelectorAll('[data-cat-input]').forEach(function (input) {
-            var key = input.getAttribute('data-cat-input');
-            cats[key] = input.checked;
-        });
-        if (!Object.keys(cats).length) {
-            cats = { necessary: true, analytics: false, marketing: false, preferences: false };
-        }
+        inputs.forEach(function (i) { cats[i.dataset.cat] = i.checked; });
+        cats.necessary = true;
         return cats;
     }
 
-    function applyToInputs(cats) {
-        if (!cats) return;
-        root.querySelectorAll('[data-cat-input]').forEach(function (input) {
-            var key = input.getAttribute('data-cat-input');
-            if (input.disabled) return;
-            if (typeof cats[key] === 'boolean') input.checked = cats[key];
+    function fill(cats) {
+        inputs.forEach(function (i) {
+            if (!i.disabled && typeof cats[i.dataset.cat] === 'boolean') i.checked = cats[i.dataset.cat];
         });
     }
 
-    /* ============================================
-       UI
-       ============================================ */
-
-    function showBanner() {
-        root.classList.add('is-visible');
-        root.classList.remove('is-hidden');
-        if (reopenBtn) reopenBtn.classList.remove('is-visible');
-    }
-
-    function hideBanner() {
-        root.classList.remove('is-visible');
-        root.classList.add('is-hidden');
-        if (reopenBtn) reopenBtn.classList.add('is-visible');
-    }
-
-    function openModal() {
-        if (!modal) return;
-        var consent = readConsent();
-        if (consent && consent.categories) applyToInputs(consent.categories);
-        modal.classList.add('is-open');
-    }
-
-    function closeModal() {
-        if (!modal) return;
+    function choose(cats) {
+        save(cats);
+        banner.classList.remove('is-visible');
+        reopen.classList.add('is-visible');
         modal.classList.remove('is-open');
     }
 
-    /* ============================================
-       INIT
-       ============================================ */
+    apply({ necessary: true });
 
-    injectCustom(scriptsConfig.customNecessary || '', 'necessary');
-    loaded.necessary = true;
-
-    var existing = readConsent();
+    var existing = read();
     if (existing) {
-        if (reopenBtn) reopenBtn.classList.add('is-visible');
-        applyToInputs(existing.categories || {});
-        applyConsent(existing.categories || {});
+        fill(existing.categories || {});
+        apply(existing.categories || {});
+        reopen.classList.add('is-visible');
     } else {
-        showBanner();
+        banner.classList.add('is-visible');
     }
 
     root.addEventListener('click', function (e) {
-        var action = e.target.closest('[data-action]');
-        if (!action) {
-            if (e.target.closest('[data-modal-back]')) closeModal();
-            if (e.target.closest('[data-reopen]')) {
-                if (reopenBtn) reopenBtn.classList.remove('is-visible');
-                if (root.classList.contains('is-hidden')) {
-                    root.classList.remove('is-hidden');
-                    root.classList.add('is-visible');
-                }
-                openModal();
-            }
-            return;
-        }
-
-        var type = action.getAttribute('data-action');
-
-        if (type === 'accept') {
-            saveConsent({ necessary: true, analytics: true, marketing: true, preferences: true });
-            hideBanner();
-            closeModal();
-        } else if (type === 'reject') {
-            saveConsent({ necessary: true, analytics: false, marketing: false, preferences: false });
-            hideBanner();
-            closeModal();
-        } else if (type === 'customize') {
-            if (root.classList.contains('is-hidden')) {
-                root.classList.remove('is-hidden');
-                root.classList.add('is-visible');
-            }
-            if (reopenBtn) reopenBtn.classList.remove('is-visible');
-            openModal();
-        } else if (type === 'save') {
-            saveConsent(getAllCategories());
-            hideBanner();
-            closeModal();
-        }
+        var t = e.target.closest('[data-do]');
+        if (!t) return;
+        var a = t.dataset.do;
+        if (a === 'accept') choose({ necessary: true, analytics: true, marketing: true, preferences: true });
+        else if (a === 'reject') choose({ necessary: true, analytics: false, marketing: false, preferences: false });
+        else if (a === 'save') choose(collect());
+        else if (a === 'customize') {
+            var c = read();
+            if (c) fill(c.categories || {});
+            modal.classList.add('is-open');
+        } else if (a === 'close') modal.classList.remove('is-open');
     });
 
     document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && modal && modal.classList.contains('is-open')) {
-            closeModal();
-        }
+        if (e.key === 'Escape') modal.classList.remove('is-open');
     });
 })();
 </script>
