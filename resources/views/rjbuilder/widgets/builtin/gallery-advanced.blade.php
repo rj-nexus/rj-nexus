@@ -333,7 +333,7 @@
             @foreach($items as $i => $it)
                 <article class="rj-ga-item"
                          style="--d: {{ number_format($i * 0.05, 2, '.', '') }}s;"
-                         :class="{ 'is-hidden': !isVisible(@js($it['title']), @js($it['category'])) }"
+                         :class="{ 'is-hidden': active !== '' && active !== @js($it['category']) }"
                          data-src="{{ $it['image'] }}"
                          data-index="{{ $i }}"
                          data-title="{{ $it['title'] }}"
@@ -399,9 +399,6 @@ window['rjGalAdv_{{ $uid }}'] = function () {
             });
             this.items.forEach(function (it, i) { it.el.setAttribute('data-ref', i); });
             this.$watch('sort', function () { self.reorder(); });
-        },
-        isVisible(title, category) {
-            return this.active === '' || this.active === category;
         },
         reorder() {
             var grid = document.getElementById(@js($uid)).querySelector('.rj-ga-grid');
