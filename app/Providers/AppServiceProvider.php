@@ -7,6 +7,8 @@ use App\Services\PluginManager;
 use App\Services\ThemeManager;
 use App\Services\IconService;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Schema;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -27,7 +29,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $themeManager = $this->app->make(ThemeManager::class);
-
         $themeManager->registerViews();
 
         if (method_exists($themeManager, 'registerProviders')) {
@@ -35,5 +36,21 @@ class AppServiceProvider extends ServiceProvider
         }
 
         $this->app->make(PluginManager::class)->boot();
+
+        if (Schema::hasTable('rj_options')) {
+            $mailHost = rj_get_option('smtp_host');
+
+            if ($mailHost) {
+                Config::set('mail.default', 'smtp');
+                Config::set('mail.mailers.smtp.host', $mailHost);
+                Config::set('mail.mailers.smtp.port', rj_get_option('smtp_port', 587));
+                Config::set('mail.mailers.smtp.username', rj_get_option('smtp_username'));
+                Config::set('mail.mailers.smtp.password', rj_get_option('smtp_password'));
+                Config::set('mail.mailers.smtp.encryption', rj_get_option('smtp_encryption', 'tls'));
+
+                Config::set('mail.from.address', rj_get_option('smtp_from_address', 'hello@example.com'));
+                Config::set('mail.from.name', rj_get_option('smtp_from_name', config('app.name')));
+            }
+        }
     }
 }
