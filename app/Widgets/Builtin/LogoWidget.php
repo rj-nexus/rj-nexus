@@ -96,19 +96,6 @@ class LogoWidget extends BaseWidget
                 ],
             ],
             [
-                'name'    => 'color_filter',
-                'type'    => 'select',
-                'label'   => __('Logo Color'),
-                'default' => 'none',
-                'tab'     => 'style',
-                'help'    => __('Use "Force white" for light logos on dark headers (or the opposite).'),
-                'options' => [
-                    'none'  => __('Original'),
-                    'white' => __('Force white'),
-                    'black' => __('Force black'),
-                ],
-            ],
-            [
                 'name'    => 'hover_opacity',
                 'type'    => 'toggle',
                 'label'   => __('Fade on Hover'),
@@ -139,7 +126,6 @@ class LogoWidget extends BaseWidget
             'max_h'    => max(20, min(240, (int) ($settings['max_height'] ?? 80))),
             'justify'  => ['left' => 'flex-start', 'center' => 'center', 'right' => 'flex-end'][$align],
             'objpos'   => $align,
-            'filter'   => $this->pick($settings['color_filter'] ?? 'none', ['none', 'white', 'black'], 'none'),
             'hover'    => $this->flag($settings['hover_opacity'] ?? null, true),
         ];
 
@@ -151,105 +137,63 @@ class LogoWidget extends BaseWidget
         ])->render();
     }
 
-    /**
-     * Normalizes whatever the media field stored (string, array, object) into an absolute URL that
-     * loads from any document context: the frontend, the builder canvas (iframe / srcdoc / blob) and previews.
-     */
     private function imageUrl(mixed $value): string
     {
-        if (is_object($value)) {
-            $value = (array) $value;
-        }
+        if (is_object($value)) { $value = (array) $value; }
 
         if (is_array($value)) {
             $found = '';
-
             foreach (['url', 'src', 'path', 'file', 'original', 'full'] as $key) {
-                if (!empty($value[$key]) && is_string($value[$key])) {
-                    $found = $value[$key];
-                    break;
-                }
+                if (!empty($value[$key]) && is_string($value[$key])) { $found = $value[$key]; break; }
             }
-
             $value = $found;
         }
 
-        if (!is_string($value)) {
-            return '';
-        }
-
+        if (!is_string($value)) { return ''; }
         $value = trim($value);
+        if ($value === '') { return ''; }
 
-        if ($value === '') {
-            return '';
-        }
-
-        if (str_starts_with($value, '//')) {
-            $value = request()->getScheme() . ':' . $value;
-        }
-
-        if (preg_match('#^data:image/(png|jpe?g|gif|webp|avif|svg\+xml)[;,]#i', $value)) {
-            return $value;
-        }
+        if (str_starts_with($value, '//')) { $value = request()->getScheme() . ':' . $value; }
+        if (preg_match('#^data:image/(png|jpe?g|gif|webp|avif|svg\+xml)[;,]#i', $value)) { return $value; }
 
         $origin = rtrim(request()->getSchemeAndHttpHost(), '/');
 
         if (preg_match('/^[a-z][a-z0-9+.\-]*:/i', $value)) {
-            if (!preg_match('/^https?:/i', $value)) {
-                return '';
-            }
-
+            if (!preg_match('/^https?:/i', $value)) { return ''; }
             $parts = parse_url($value);
             $host = strtolower((string) ($parts['host'] ?? ''));
             $reqHost = strtolower(request()->getHost());
             $appHost = strtolower((string) parse_url((string) config('app.url'), PHP_URL_HOST));
-
-            $local = in_array($host, ['localhost', '127.0.0.1', '::1', '[::1]'], true)
-                || ($appHost !== '' && $host === $appHost);
-
-            // Same site saved under another host (http://localhost vs 127.0.0.1:8000): re-point it to the current origin
+            $local = in_array($host, ['localhost', '127.0.0.1', '::1', '[::1]'], true) || ($appHost !== '' && $host === $appHost);
             if ($host !== '' && $host !== $reqHost && $local) {
                 return $origin . ($parts['path'] ?? '/') . (isset($parts['query']) ? '?' . $parts['query'] : '');
             }
-
             return $value;
         }
 
-        if (str_starts_with($value, '/')) {
-            return $origin . $value;
-        }
-
+        if (str_starts_with($value, '/')) { return $origin . $value; }
         return $origin . '/' . ltrim($value, '/');
     }
 
     private function safeUrl(string $url): string
     {
         $url = trim($url);
-
-        if ($url === '') {
-            return '/';
-        }
-
+        if ($url === '') { return '/'; }
         if (preg_match('/^[a-z][a-z0-9+.\-]*:/i', $url)) {
             return preg_match('/^(https?|mailto|tel):/i', $url) ? $url : '/';
         }
-
         return $url;
     }
 
     private function pick(mixed $value, array $allowed, string $default): string
     {
         $value = (string) $value;
-
         return in_array($value, $allowed, true) ? $value : $default;
     }
 
     private function flag(mixed $value, bool $default): bool
     {
-        if ($value === null || $value === '') {
-            return $default;
-        }
-
+        if ($value === null || $value === '') { return $default; }
         return filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? $default;
     }
 }
