@@ -1,7 +1,3 @@
-@php
-    $pinfo = $platforms[$it['platform']] ?? []; // Əgər başqa yerdə istifadə olunursa, sadəcə rəy məlumatlarını götürürük
-@endphp
-
 <div class="rj-gr-card">
     <div class="rj-gr-card-head">
         @if($showAvatar)
