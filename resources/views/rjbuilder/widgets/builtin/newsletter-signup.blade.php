@@ -43,6 +43,7 @@
 
     $isInline = $layout === 'inline';
     $isStrip  = $layout === 'strip';
+    $compact  = $isInline || $isStrip;
 
     $alignCss = $align === 'left' ? 'left' : 'center';
 @endphp
@@ -62,18 +63,40 @@
         position: relative;
         overflow: hidden;
         border-radius: {{ $radiusCss }};
-        padding: {{ $isInline || $isStrip ? '26px 32px' : '48px 40px' }};
+        padding: {{ $compact ? '26px 32px' : '48px 40px' }};
         text-align: {{ $alignCss }};
         isolation: isolate;
+        transform: perspective(1100px) rotateX(var(--tx, 0deg)) rotateY(var(--ty, 0deg)) translateY(var(--ry, 0px));
+        transition: transform .35s ease-out, opacity .8s ease;
     }
+    #{{ $uid }}.is-pre .rj-nl-wrap {
+        opacity: 0;
+        --ry: 30px;
+    }
+    #{{ $uid }} .rj-nl-wrap::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: radial-gradient(460px circle at var(--mx, 50%) var(--my, 0%), {{ $isDark ? 'rgba(255,255,255,.2)' : 'color-mix(in srgb, var(--nl-a) 10%, transparent)' }}, transparent 60%);
+        opacity: 0;
+        transition: opacity .3s ease;
+    }
+    #{{ $uid }}:hover .rj-nl-wrap::after { opacity: 1; }
     @media (max-width: 720px) {
-        #{{ $uid }} .rj-nl-wrap { padding: {{ $isInline || $isStrip ? '20px' : '32px 22px' }}; }
+        #{{ $uid }} .rj-nl-wrap { padding: {{ $compact ? '20px' : '32px 22px' }}; }
     }
 
     #{{ $uid }}[data-style="gradient"] .rj-nl-wrap {
-        background: linear-gradient(125deg, var(--nl-a), var(--nl-b));
+        background: linear-gradient(125deg, var(--nl-a), var(--nl-b), var(--nl-a));
+        background-size: 220% 220%;
+        animation: rjNlGrad 12s ease-in-out infinite;
         color: #fff;
         box-shadow: 0 30px 60px -30px color-mix(in srgb, var(--nl-a) 55%, transparent);
+    }
+    @keyframes rjNlGrad {
+        0%, 100% { background-position: 0% 50%; }
+        50%      { background-position: 100% 50%; }
     }
     #{{ $uid }}[data-style="solid"] .rj-nl-wrap {
         background: var(--nl-a);
@@ -133,6 +156,25 @@
         50%      { transform: translate(20px, -25px) scale(1.08); }
     }
 
+    #{{ $uid }} .rj-nl-float {
+        position: absolute;
+        bottom: -30px;
+        left: var(--l);
+        width: var(--s);
+        height: var(--s);
+        color: {{ $isDark ? 'rgba(255,255,255,.5)' : 'color-mix(in srgb, var(--nl-a) 38%, transparent)' }};
+        opacity: 0;
+        animation: rjNlRise var(--t) linear infinite var(--d);
+    }
+    #{{ $uid }} .rj-nl-float svg { display: block; width: 100%; height: 100%; }
+    @keyframes rjNlRise {
+        0%   { opacity: 0; transform: translate(0, 0) rotate(0); }
+        10%  { opacity: 1; }
+        50%  { transform: translate(18px, -220px) rotate(140deg); }
+        90%  { opacity: 1; }
+        100% { opacity: 0; transform: translate(-12px, -460px) rotate(300deg); }
+    }
+
     #{{ $uid }} .rj-nl-inner {
         position: relative;
         z-index: 1;
@@ -151,6 +193,7 @@
 
     #{{ $uid }} .rj-nl-pg-wrap {
         --pg-body: {{ $isDark ? '#e2e8f0' : '#94a3b8' }};
+        --pg-belly: {{ $isDark ? '#ffffff' : '#cbd5e1' }};
         --pg-wing: {{ $isDark ? '#b4c2d6' : '#64748b' }};
         --pg-sheen: {{ $isDark ? '#c4b5fd' : 'var(--nl-a)' }};
         --face: 1;
@@ -158,7 +201,7 @@
         --px: 1.4;
         --py: 0;
         position: relative;
-        width: {{ $isInline || $isStrip ? '78px' : '104px' }};
+        width: {{ $compact ? '78px' : '104px' }};
         margin: {{ $align === 'left' ? '0 0 20px' : '0 auto 20px' }};
         color: var(--pg-body);
         cursor: pointer;
@@ -179,21 +222,40 @@
         transform-origin: 50% 100%;
         animation: rjNlBreathe 3.6s ease-in-out infinite;
     }
+    #{{ $uid }} .rj-nl-pg-shadow {
+        position: absolute;
+        left: 20%;
+        right: 20%;
+        top: 93%;
+        height: 6px;
+        border-radius: 50%;
+        background: rgba(15, 23, 42, .22);
+        filter: blur(2px);
+        transition: opacity .3s ease;
+    }
     #{{ $uid }} .pg-body { fill: var(--pg-body); }
+    #{{ $uid }} .pg-belly { fill: var(--pg-belly); opacity: .55; }
     #{{ $uid }} .pg-wing { fill: var(--pg-wing); }
-    #{{ $uid }} .pg-sheen { fill: var(--pg-sheen); opacity: .85; }
+    #{{ $uid }} .pg-tail-line { stroke: var(--pg-wing); stroke-width: 7; stroke-linecap: round; fill: none; }
+    #{{ $uid }} .pg-sheen { fill: var(--pg-sheen); opacity: .8; }
     #{{ $uid }} .pg-beak { fill: #f59e0b; }
+    #{{ $uid }} .pg-cere { fill: #fff; opacity: .85; }
     #{{ $uid }} .pg-feet { fill: none; stroke: #fb7185; stroke-width: 3; stroke-linecap: round; }
-    #{{ $uid }} .pg-cere { fill: #fff; }
-    #{{ $uid }} .pg-iris { fill: #f97316; }
-    #{{ $uid }} .pg-pupil {
-        fill: #0f172a;
+    #{{ $uid }} .pg-cheek { fill: #fb7185; opacity: .4; }
+    #{{ $uid }} .pg-tuft { fill: none; stroke: var(--pg-wing); stroke-width: 3; stroke-linecap: round; }
+    #{{ $uid }} .pg-sclera { fill: #fff; }
+    #{{ $uid }} .pg-pupil-g {
         transform: translate(calc(var(--px) * 1px), calc(var(--py) * 1px));
         transition: transform .12s ease-out;
     }
+    #{{ $uid }} .pg-pupil { fill: #0f172a; }
+    #{{ $uid }} .pg-glint { fill: #fff; }
+    #{{ $uid }} .pg-peck,
     #{{ $uid }} .pg-head {
         transform-box: view-box;
-        transform-origin: 82px 46px;
+        transform-origin: 84px 48px;
+    }
+    #{{ $uid }} .pg-head {
         transform: rotate(calc(var(--hr) * 1deg));
         transition: transform .18s ease-out;
     }
@@ -204,11 +266,11 @@
     }
     #{{ $uid }} .pg-wing-g {
         transform-box: view-box;
-        transform-origin: 64px 52px;
+        transform-origin: 66px 50px;
     }
     #{{ $uid }} .pg-tail {
         transform-box: view-box;
-        transform-origin: 32px 58px;
+        transform-origin: 34px 62px;
     }
 
     #{{ $uid }} .rj-nl-feather {
@@ -228,12 +290,16 @@
 
     #{{ $uid }} .rj-nl-pg-wrap[data-state="open"] .pg-tail { animation: rjNlWag .5s ease-in-out infinite alternate; }
     #{{ $uid }} .rj-nl-pg-wrap[data-state="valid"] .rj-nl-pg { animation: rjNlHop .8s ease-out; }
+    #{{ $uid }} .rj-nl-pg-wrap[data-state="valid"] .rj-nl-pg-shadow { animation: rjNlShadow .8s ease-out; }
     #{{ $uid }} .rj-nl-pg-wrap[data-state="valid"] .pg-wing-g { animation: rjNlFlap .22s ease-in-out 4; }
     #{{ $uid }} .rj-nl-pg-wrap[data-state="sending"] .rj-nl-pg { animation: rjNlHover .5s ease-in-out infinite; }
+    #{{ $uid }} .rj-nl-pg-wrap[data-state="sending"] .rj-nl-pg-shadow { animation: rjNlShadow .5s ease-in-out infinite; }
     #{{ $uid }} .rj-nl-pg-wrap[data-state="sending"] .pg-wing-g { animation: rjNlFlap .16s ease-in-out infinite; }
     #{{ $uid }} .rj-nl-pg-wrap[data-state="error"] .rj-nl-pg { animation: rjNlShake .5s; }
     #{{ $uid }} .rj-nl-pg-wrap[data-state="sent"] .rj-nl-pg { animation: rjNlFlyOff 1.2s cubic-bezier(.5, 0, .8, .5) forwards; }
+    #{{ $uid }} .rj-nl-pg-wrap[data-state="sent"] .rj-nl-pg-shadow { opacity: 0; }
     #{{ $uid }} .rj-nl-pg-wrap[data-state="sent"] .pg-wing-g { animation: rjNlFlap .14s ease-in-out infinite; }
+    #{{ $uid }} .rj-nl-pg-wrap.is-peck .pg-peck { animation: rjNlPeck 1s ease-in-out; }
     #{{ $uid }} .rj-nl-pg-wrap.is-ruffle .rj-nl-pg { animation: rjNlRuffle .6s ease; }
     #{{ $uid }} .rj-nl-pg-wrap.is-ruffle .pg-wing-g { animation: rjNlFlap .12s ease-in-out 5; }
     #{{ $uid }} .rj-nl-pg-wrap.is-ruffle .rj-nl-feather,
@@ -243,6 +309,11 @@
     @keyframes rjNlBlink { 0%, 92%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
     @keyframes rjNlWag { from { transform: rotate(-9deg); } to { transform: rotate(9deg); } }
     @keyframes rjNlFlap { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(42deg); } }
+    @keyframes rjNlPeck {
+        0%, 100% { transform: rotate(0); }
+        25%, 65% { transform: rotate(38deg); }
+        45%, 85% { transform: rotate(6deg); }
+    }
     @keyframes rjNlHop {
         0%, 100% { transform: translateY(0); }
         35%      { transform: translateY(-14px); }
@@ -250,6 +321,7 @@
         78%      { transform: translateY(-5px); }
     }
     @keyframes rjNlHover { 50% { transform: translateY(-7px); } }
+    @keyframes rjNlShadow { 40%, 50% { transform: scale(.72); opacity: .55; } }
     @keyframes rjNlShake {
         20%, 60% { transform: translateX(-5px) rotate(-4deg); }
         40%, 80% { transform: translateX(5px) rotate(4deg); }
@@ -268,6 +340,25 @@
         0%   { opacity: 0; transform: translate(0, 0) rotate(0); }
         15%  { opacity: 1; }
         100% { opacity: 0; transform: translate(var(--fx), 58px) rotate(160deg); }
+    }
+
+    #{{ $uid }} .rj-nl-conf {
+        position: absolute;
+        left: 50%;
+        top: 38%;
+        width: 8px;
+        height: 12px;
+        border-radius: 2px;
+        background: var(--c);
+        opacity: 0;
+        pointer-events: none;
+        z-index: 2;
+        animation: rjNlConf 1.6s cubic-bezier(.2, .7, .3, 1) forwards var(--cd);
+    }
+    @keyframes rjNlConf {
+        0%   { opacity: 1; transform: translate(0, 0) rotate(0); }
+        45%  { opacity: 1; transform: translate(calc(var(--dx) * .8), var(--dy)) rotate(calc(var(--rot) * .5)); }
+        100% { opacity: 0; transform: translate(var(--dx), calc(var(--dy) + 260px)) rotate(var(--rot)); }
     }
 
     #{{ $uid }} .rj-nl-title {
@@ -290,6 +381,7 @@
         margin: 0 0 22px;
     }
     #{{ $uid }} .rj-nl-count {
+        --pulse: {{ $isDark ? 'rgba(255,255,255,.6)' : 'color-mix(in srgb, var(--nl-a) 55%, transparent)' }};
         display: inline-flex;
         align-items: center;
         gap: 6px;
@@ -307,6 +399,11 @@
         height: 6px;
         border-radius: 50%;
         background: {{ $isDark ? '#fff' : 'var(--nl-a)' }};
+        animation: rjNlPulse 1.8s ease-out infinite;
+    }
+    @keyframes rjNlPulse {
+        0%       { box-shadow: 0 0 0 0 var(--pulse); }
+        70%, 100% { box-shadow: 0 0 0 7px transparent; }
     }
 
     #{{ $uid }} .rj-nl-form {
@@ -365,6 +462,8 @@
     }
 
     #{{ $uid }} .rj-nl-btn {
+        position: relative;
+        overflow: hidden;
         padding: 13px 26px;
         border-radius: 12px;
         border: 0;
@@ -378,6 +477,22 @@
         align-items: center;
         gap: 8px;
         flex-shrink: 0;
+    }
+    #{{ $uid }} .rj-nl-btn::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: -60%;
+        width: 40%;
+        background: linear-gradient(100deg, transparent, {{ $isDark ? 'color-mix(in srgb, var(--nl-a) 22%, transparent)' : 'rgba(255,255,255,.45)' }}, transparent);
+        transform: skewX(-20deg);
+        pointer-events: none;
+        animation: rjNlShine 4s ease-in-out infinite;
+    }
+    @keyframes rjNlShine {
+        0%, 60% { left: -60%; }
+        100%    { left: 140%; }
     }
     #{{ $uid }} .rj-nl-btn:active { transform: scale(.98); }
     #{{ $uid }} .rj-nl-btn:disabled { opacity: .6; cursor: wait; }
@@ -525,10 +640,22 @@
 
 <div id="{{ $uid }}" data-layout="{{ $layout }}" data-style="{{ $styleType }}" data-align="{{ $align }}">
     <div class="rj-nl-wrap">
-        @if($showShapes && !$isStrip && !$isInline)
+        @if($showShapes && !$compact)
             <div class="rj-nl-shapes" aria-hidden="true">
+                <svg width="0" height="0" style="position:absolute">
+                    <symbol id="{{ $uid }}-env" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 7l9 6 9-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+                    <symbol id="{{ $uid }}-plane" viewBox="0 0 24 24"><path d="M2.5 11.2 21 3.5c.8-.3 1.5.4 1.2 1.2l-7.7 18.5c-.4.9-1.6.9-2 0l-2.4-6.2a1 1 0 0 0-.6-.6l-6.2-2.4c-.9-.4-.9-1.6 0-2Z" fill="currentColor"/></symbol>
+                    <symbol id="{{ $uid }}-star" viewBox="0 0 24 24"><path d="M12 2l2.6 6.4L21 9.2l-5 4.4 1.6 6.6L12 16.6 6.4 20.2 8 13.6 3 9.2l6.4-.8Z" fill="currentColor"/></symbol>
+                </svg>
                 <span class="rj-nl-shape s1"></span>
                 <span class="rj-nl-shape s2"></span>
+                <span class="rj-nl-float" style="--l:8%;--s:18px;--d:0s;--t:11s"><svg><use href="#{{ $uid }}-env"/></svg></span>
+                <span class="rj-nl-float" style="--l:22%;--s:14px;--d:-3s;--t:9s"><svg><use href="#{{ $uid }}-plane"/></svg></span>
+                <span class="rj-nl-float" style="--l:38%;--s:12px;--d:-6s;--t:12s"><svg><use href="#{{ $uid }}-star"/></svg></span>
+                <span class="rj-nl-float" style="--l:55%;--s:20px;--d:-2s;--t:10s"><svg><use href="#{{ $uid }}-env"/></svg></span>
+                <span class="rj-nl-float" style="--l:70%;--s:15px;--d:-8s;--t:13s"><svg><use href="#{{ $uid }}-plane"/></svg></span>
+                <span class="rj-nl-float" style="--l:84%;--s:13px;--d:-4s;--t:9.5s"><svg><use href="#{{ $uid }}-star"/></svg></span>
+                <span class="rj-nl-float" style="--l:93%;--s:17px;--d:-7s;--t:11.5s"><svg><use href="#{{ $uid }}-env"/></svg></span>
             </div>
         @endif
 
@@ -536,26 +663,36 @@
             <div data-form-area>
                 @if($showIcon)
                     <div class="rj-nl-pg-wrap" data-env data-state="idle" aria-hidden="true">
+                        <div class="rj-nl-pg-shadow"></div>
                         <div class="rj-nl-pg">
                             <div class="rj-nl-pg-flip">
                                 <svg class="rj-nl-pg-svg" viewBox="0 0 120 100" fill="none">
-                                    <g class="pg-tail"><path class="pg-wing" d="M30 56 4 50 7 62 4 73 32 70Z"/></g>
-                                    <path class="pg-feet" d="M48 80V91M43 93H53M62 80V91M57 93H67"/>
-                                    <ellipse class="pg-body" cx="54" cy="62" rx="32" ry="20"/>
-                                    <ellipse cx="66" cy="70" rx="16" ry="9" fill="#fff" opacity=".22"/>
-                                    <g class="pg-wing-g">
-                                        <path class="pg-wing" d="M64 52C50 46 30 52 20 68C34 77 56 73 70 62Z"/>
-                                        <path d="M30 66C40 68 52 66 62 60" stroke="#000" stroke-width="1.5" stroke-linecap="round" opacity=".12"/>
+                                    <g class="pg-tail">
+                                        <path class="pg-tail-line" d="M34 62 8 50M34 64 6 63M34 66 9 76"/>
                                     </g>
-                                    <ellipse class="pg-body" cx="80" cy="47" rx="12" ry="15"/>
-                                    <ellipse class="pg-sheen" cx="78" cy="50" rx="8" ry="9"/>
-                                    <g class="pg-head">
-                                        <circle class="pg-body" cx="90" cy="34" r="12"/>
-                                        <path class="pg-beak" d="M101 31 115 36 101 41Z"/>
-                                        <circle class="pg-cere" cx="102" cy="32.5" r="2"/>
-                                        <g class="pg-eye">
-                                            <circle class="pg-iris" cx="94" cy="31" r="4.6"/>
-                                            <circle class="pg-pupil" cx="94" cy="31" r="2.4"/>
+                                    <path class="pg-feet" d="M50 82V92M45 94H55M64 82V92M59 94H69"/>
+                                    <ellipse class="pg-body" cx="56" cy="62" rx="34" ry="23"/>
+                                    <ellipse class="pg-belly" cx="62" cy="72" rx="22" ry="11"/>
+                                    <ellipse class="pg-body" cx="80" cy="50" rx="14" ry="17"/>
+                                    <path class="pg-sheen" d="M72 46Q80 40 88 48Q86 60 76 60Q70 54 72 46Z"/>
+                                    <g class="pg-wing-g">
+                                        <path class="pg-wing" d="M66 50C50 44 28 52 20 70C36 80 60 74 72 60Z"/>
+                                        <path d="M30 66C42 68 54 64 64 58M34 72C44 73 54 70 62 64" stroke="#000" stroke-width="1.4" stroke-linecap="round" opacity=".14"/>
+                                    </g>
+                                    <g class="pg-peck">
+                                        <g class="pg-head">
+                                            <circle class="pg-body" cx="91" cy="33" r="13"/>
+                                            <path class="pg-tuft" d="M87 22Q84 15 91 16"/>
+                                            <circle class="pg-cheek" cx="97" cy="40" r="3"/>
+                                            <path class="pg-beak" d="M102 28C108 28 113 31 114 33.5C113 36 108 38.5 102 39Z"/>
+                                            <ellipse class="pg-cere" cx="103.5" cy="30.5" rx="2.6" ry="1.8"/>
+                                            <g class="pg-eye">
+                                                <circle class="pg-sclera" cx="95" cy="31" r="6"/>
+                                                <g class="pg-pupil-g">
+                                                    <circle class="pg-pupil" cx="95" cy="31" r="3.4"/>
+                                                    <circle class="pg-glint" cx="96.2" cy="29.6" r="1.1"/>
+                                                </g>
+                                            </g>
                                         </g>
                                     </g>
                                 </svg>
@@ -586,7 +723,7 @@
 
                 <form class="rj-nl-form" data-form novalidate>
                     @if($showName)
-                        <div class="rj-nl-field" style="flex:0 0 auto; min-width:{{ $isInline || $isStrip ? '140px' : '200px' }};">
+                        <div class="rj-nl-field" style="flex:0 0 auto; min-width:{{ $compact ? '140px' : '200px' }};">
                             <input type="text" class="rj-nl-input" name="name" placeholder="{{ $namePlaceholder }}" autocomplete="name" data-name>
                         </div>
                     @endif
@@ -631,6 +768,7 @@
     var root = document.getElementById(@js($uid));
     if (!root) return;
 
+    var wrapEl    = root.querySelector('.rj-nl-wrap');
     var formEl    = root.querySelector('[data-form]');
     var emailEl   = root.querySelector('[data-email]');
     var nameEl    = root.querySelector('[data-name]');
@@ -644,9 +782,39 @@
     var envEl     = root.querySelector('[data-env]');
 
     var privacyRequired = {{ $privacyRequired ? 'true' : 'false' }};
+    var compact = {{ $compact ? 'true' : 'false' }};
     var emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     var pointer = null, frame = 0, face = 1, ruffling = false;
+
+    root.classList.add('is-pre');
+    if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (entries) {
+            if (entries[0].isIntersecting) {
+                root.classList.remove('is-pre');
+                io.disconnect();
+            }
+        }, { threshold: .15 });
+        io.observe(root);
+    } else {
+        root.classList.remove('is-pre');
+    }
+
+    if (!compact && window.matchMedia('(hover: hover)').matches) {
+        root.addEventListener('pointermove', function (e) {
+            var r = wrapEl.getBoundingClientRect();
+            var x = (e.clientX - r.left) / r.width;
+            var y = (e.clientY - r.top) / r.height;
+            wrapEl.style.setProperty('--ty', ((x - .5) * 5).toFixed(2) + 'deg');
+            wrapEl.style.setProperty('--tx', ((.5 - y) * 4).toFixed(2) + 'deg');
+            wrapEl.style.setProperty('--mx', (x * 100).toFixed(1) + '%');
+            wrapEl.style.setProperty('--my', (y * 100).toFixed(1) + '%');
+        });
+        root.addEventListener('pointerleave', function () {
+            wrapEl.style.setProperty('--ty', '0deg');
+            wrapEl.style.setProperty('--tx', '0deg');
+        });
+    }
 
     function setVars(hr, px, py) {
         envEl.style.setProperty('--hr', hr.toFixed(1));
@@ -658,11 +826,11 @@
         if (!envEl) return;
         var s = envEl.dataset.state;
 
-        if (s === 'open') return setVars(26, 1.2, 1.6);
-        if (s === 'valid') return setVars(-10, 1.4, -.8);
-        if (s === 'error') return setVars(22, 0, 1.8);
-        if (s === 'sending' || s === 'sent') return setVars(-6, 1.5, -.5);
-        if (!pointer) return setVars(0, 1.4, .2);
+        if (s === 'open') return setVars(26, 1.2, 1.8);
+        if (s === 'valid') return setVars(-10, 1.6, -.9);
+        if (s === 'error') return setVars(22, 0, 2);
+        if (s === 'sending' || s === 'sent') return setVars(-6, 1.7, -.6);
+        if (!pointer) return setVars(0, 1.6, .2);
 
         var r = envEl.getBoundingClientRect();
         var mid = r.left + r.width / 2;
@@ -670,15 +838,15 @@
         else if (pointer.x > mid + 14) face = 1;
         envEl.style.setProperty('--face', face);
 
-        var cx = r.left + r.width * (face === 1 ? .75 : .25);
-        var cy = r.top + r.height * .36;
+        var cx = r.left + r.width * (face === 1 ? .76 : .24);
+        var cy = r.top + r.height * .34;
         var dx = Math.abs(pointer.x - cx);
         var dy = pointer.y - cy;
         var ang = Math.atan2(dy, Math.max(dx, 1));
         var deg = Math.max(-30, Math.min(38, ang * 180 / Math.PI));
         var rad = deg * Math.PI / 180;
 
-        setVars(deg, Math.cos(rad) * 1.6, Math.sin(rad) * 1.6);
+        setVars(deg, Math.cos(rad) * 1.9, Math.sin(rad) * 1.9);
     }
 
     function env(s) {
@@ -696,6 +864,23 @@
     function envError() {
         env('error');
         setTimeout(envRest, 900);
+    }
+
+    function confetti() {
+        var colors = ['#fbbf24', '#ffffff', '#34d399', '#f472b6', '#60a5fa'];
+        for (var i = 0; i < 28; i++) {
+            var p = document.createElement('i');
+            var ang = -Math.PI * (.1 + .8 * Math.random());
+            var dist = 90 + Math.random() * 140;
+            p.className = 'rj-nl-conf';
+            p.style.setProperty('--c', colors[i % colors.length]);
+            p.style.setProperty('--dx', (Math.cos(ang) * dist).toFixed(0) + 'px');
+            p.style.setProperty('--dy', (Math.sin(ang) * dist).toFixed(0) + 'px');
+            p.style.setProperty('--rot', ((Math.random() - .5) * 1440).toFixed(0) + 'deg');
+            p.style.setProperty('--cd', (Math.random() * .15).toFixed(2) + 's');
+            wrapEl.appendChild(p);
+            (function (el) { setTimeout(function () { el.remove(); }, 2000); })(p);
+        }
     }
 
     function showMsg(type, text) {
@@ -733,6 +918,16 @@
                 ruffling = false;
             }, 1500);
         });
+
+        (function peck() {
+            setTimeout(function () {
+                if (envEl.dataset.state === 'idle' && !ruffling) {
+                    envEl.classList.add('is-peck');
+                    setTimeout(function () { envEl.classList.remove('is-peck'); }, 1000);
+                }
+                peck();
+            }, 4500 + Math.random() * 4500);
+        })();
     }
 
     [emailEl, nameEl].forEach(function (el) {
@@ -781,6 +976,7 @@
 
                 if (res.ok && data.ok) {
                     env('sent');
+                    setTimeout(confetti, 450);
                     setTimeout(function () {
                         if (formArea) formArea.style.display = 'none';
                         if (successEl) {
