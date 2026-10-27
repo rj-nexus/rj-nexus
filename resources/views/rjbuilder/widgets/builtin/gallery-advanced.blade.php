@@ -11,11 +11,12 @@
     if (!empty($settings['items']) && is_array($settings['items'])) {
         foreach ($settings['items'] as $i => $row) {
             if (!is_array($row) || empty($row['image'])) continue;
+            $cat = trim((string) ($row['category'] ?? ''));
             $items[] = [
                 'id'       => $i,
                 'image'    => $row['image'],
                 'title'    => $row['title'] ?? '',
-                'category' => trim($row['category'] ?? ''),
+                'category' => $cat !== '' ? $cat : __('Uncategorized'),
             ];
         }
     }
@@ -26,6 +27,7 @@
             $categories[] = $it['category'];
         }
     }
+    sort($categories);
 
     $gapMap = ['sm' => '10px', 'md' => '16px', 'lg' => '24px'];
     $gapPx  = $gapMap[$gap] ?? '16px';
@@ -338,8 +340,8 @@
                          data-category="{{ $it['category'] }}"
                          tabindex="0"
                          role="button"
-                         @click="openLb({{ $i }})"
-                         @keydown.enter.prevent="openLb({{ $i }})"
+                         @click="openLb($el)"
+                         @keydown.enter.prevent="openLb($el)"
                          aria-label="{{ $it['title'] ?: __('Open image') }}">
                     <img src="{{ $it['image'] }}" alt="{{ $it['title'] }}" loading="lazy">
                     @if($it['title'] || $it['category'])
@@ -414,21 +416,27 @@ window['rjGalAdv_{{ $uid }}'] = function () {
             }
             arr.forEach(function (it) { grid.appendChild(it.el); });
         },
-        visibleSources() {
-            var self = this;
-            return this.items
-                .filter(function (it) { return self.isVisible(it.title, it.category); })
-                .map(function (it) { return it.src; });
-        },
-        openLb(i) {
-            this.sources = this.visibleSources();
-            if (!this.sources.length) return;
-            var src = this.items[i] && this.items[i].src;
-            var pos = this.sources.indexOf(src);
-            this.current = pos >= 0 ? pos : 0;
+        openLb(el) {
+            var root = document.getElementById(@js($uid));
+            if (!root) return;
+
+            var visibleItems = Array.prototype.slice.call(root.querySelectorAll('.rj-ga-item')).filter(function(item) {
+                return !item.classList.contains('is-hidden');
+            });
+
+            var pos = visibleItems.indexOf(el);
+            if (pos === -1) pos = 0;
+
+            this.sources = visibleItems.map(function(item) {
+                return item.getAttribute('data-src');
+            });
+
+            this.current = pos;
+
             var img = this.imgEl(), lb = this.lbEl(), c = this.countEl();
             img.src = this.sources[this.current];
             if (c) c.textContent = (this.current + 1) + ' / ' + this.sources.length;
+
             lb.classList.add('is-open');
             document.body.style.overflow = 'hidden';
             this._boundKey = this._onKey.bind(this);
