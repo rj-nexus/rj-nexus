@@ -28,7 +28,7 @@ class CookieNoticeWidget extends BaseWidget
 
     public function description(): string
     {
-        return __('A GDPR-compliant cookie consent banner with accept, reject and settings panel.');
+        return __('A GDPR-compliant cookie consent banner with automatic script loading for GA, GTM, Pixel, Hotjar and custom scripts.');
     }
 
     public function schema(): array
@@ -253,6 +253,74 @@ class CookieNoticeWidget extends BaseWidget
                 'label'   => __('Save Preferences Label'),
                 'default' => __('Save Preferences'),
                 'tab'     => 'content',
+            ],
+            [
+                'name'    => 'ga_id',
+                'type'    => 'text',
+                'label'   => __('Google Analytics 4 ID'),
+                'default' => '',
+                'tab'     => 'content',
+                'placeholder' => 'G-XXXXXXXXXX',
+                'help'    => __('Loads GA4 automatically when user accepts Analytics. Get your ID at analytics.google.com.'),
+                'help_link'      => 'https://analytics.google.com/',
+                'help_link_text' => __('Open GA →'),
+            ],
+            [
+                'name'    => 'gtm_id',
+                'type'    => 'text',
+                'label'   => __('Google Tag Manager ID'),
+                'default' => '',
+                'tab'     => 'content',
+                'placeholder' => 'GTM-XXXXXXX',
+                'help'    => __('Loads GTM automatically when user accepts Analytics. Get your ID at tagmanager.google.com.'),
+                'help_link'      => 'https://tagmanager.google.com/',
+                'help_link_text' => __('Open GTM →'),
+            ],
+            [
+                'name'    => 'fb_pixel_id',
+                'type'    => 'text',
+                'label'   => __('Facebook Pixel ID'),
+                'default' => '',
+                'tab'     => 'content',
+                'placeholder' => '123456789012345',
+                'help'    => __('Loads Facebook Pixel automatically when user accepts Marketing. Get your ID at business.facebook.com/events_manager.'),
+                'help_link'      => 'https://business.facebook.com/events_manager',
+                'help_link_text' => __('Open Events Manager →'),
+            ],
+            [
+                'name'    => 'hotjar_id',
+                'type'    => 'text',
+                'label'   => __('Hotjar Site ID'),
+                'default' => '',
+                'tab'     => 'content',
+                'placeholder' => '1234567',
+                'help'    => __('Loads Hotjar tracking automatically when user accepts Analytics.'),
+                'help_link'      => 'https://www.hotjar.com/',
+                'help_link_text' => __('Open Hotjar →'),
+            ],
+            [
+                'name'    => 'custom_analytics_script',
+                'type'    => 'textarea',
+                'label'   => __('Custom Analytics Script'),
+                'default' => '',
+                'tab'     => 'content',
+                'help'    => __('Injected into page head only when user accepts Analytics. Paste full <script> tag.'),
+            ],
+            [
+                'name'    => 'custom_marketing_script',
+                'type'    => 'textarea',
+                'label'   => __('Custom Marketing Script'),
+                'default' => '',
+                'tab'     => 'content',
+                'help'    => __('Injected into page head only when user accepts Marketing. Paste full <script> tag.'),
+            ],
+            [
+                'name'    => 'custom_necessary_script',
+                'type'    => 'textarea',
+                'label'   => __('Custom Necessary Script'),
+                'default' => '',
+                'tab'     => 'content',
+                'help'    => __('Injected immediately (no consent required). For strictly necessary functionality only.'),
             ],
         ];
     }
