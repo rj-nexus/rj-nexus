@@ -61,7 +61,6 @@
                             </div>
                         </template>
 
-                        <!-- KATEQORİYA SEÇİMİ VƏ YENİ YARATMA -->
                         <template x-if="sub.type === 'text' && sub.source">
                             <div style="position: relative;" @click.outside="repeaterEdit.dropdown = null">
 
@@ -69,9 +68,10 @@
                                     <input type="text" class="rj-in" style="flex: 1;"
                                            :value="repeaterEdit.item ? (repeaterEdit.item[sub.name] || '') : ''"
                                            @input="setRepeaterField(sub.name, $event.target.value)"
+                                           @keydown.enter.prevent="saveNewCategory(sub)"
                                            placeholder="{{ __('Type new category...') }}" autofocus>
                                     <button type="button" class="rj-btn" style="padding: 0 12px;"
-                                            @click="repeaterEdit.creatingNewCat = null">
+                                            @click="saveNewCategory(sub)">
                                         {{ __('Done') }}
                                     </button>
                                 </div>
@@ -102,6 +102,10 @@
                                             <svg x-show="repeaterEdit.item && repeaterEdit.item[sub.name] === opt" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="color:#a78bfa;"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                                         </div>
                                     </template>
+
+                                    <div x-show="!(currentSettings[sub.source] || '').trim()" style="padding: 8px 10px; font-size: 11px; color: var(--mut); text-align: center;">
+                                        {{ __('No categories defined yet') }}
+                                    </div>
                                 </div>
                             </div>
                         </template>
