@@ -22,7 +22,7 @@
 
     $dirStyle = $dir !== 'row' ? "flex-direction:{$dir};" : '';
 
-    $style = "display:flex; flex-wrap:{$wrap}; {$dirStyle} justify-content:{$jc}; align-items:{$ai}; gap:{$gap}; box-sizing:border-box; width:100%; {$autoPad}";
+    $style = "display:flex; flex-wrap:{$wrap}; {$dirStyle} justify-content:flex-start; align-items:{$ai}; gap:{$gap}; box-sizing:border-box; width:100%; {$autoPad}";
 
     if ($pt !== '') $style .= " padding-top:{$pt};";
     if ($pr !== '') $style .= " padding-right:{$pr};";
@@ -46,10 +46,14 @@
                 $orderStyle = "--ord-d:{$oD}; --ord-t:{$oT}; --ord-m:{$oM};";
             }
 
-            // İlk elementi (Loqonu) sağa dartırıq ki, qalanları sağa sıxışsın
-            $pushRight = ($jc === 'space-between' && $i === 0) ? 'margin-right: auto;' : '';
+            $pushCss = '';
+            if ($jc === 'space-between') {
+                if ($i === 0) $pushCss = 'margin-right: auto;';
+                if ($i === 1) $pushCss = 'margin-left: auto; margin-right: auto;'; // Mərkəzləşdirir
+                if ($i === 2) $pushCss = 'margin-left: auto;'; // Sağa sıxışdırır
+            }
         @endphp
-        <div class="rj-slot" style="flex: 0 1 auto; min-width: 0; {!! $orderStyle !!} {!! $pushRight !!}">
+        <div class="rj-slot rj-slot-i-{!! $i !!}" style="flex: 0 1 auto; min-width: 0; {!! $orderStyle !!} {!! $pushCss !!}">
             @if($child)
                 {!! rj_render_block($child) !!}
             @endif

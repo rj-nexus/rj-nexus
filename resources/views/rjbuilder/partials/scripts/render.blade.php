@@ -263,12 +263,16 @@ function builderRender() {
                     orderStyle = `--ord-d:${oD}; --ord-t:${oT}; --ord-m:${oM};`;
                 }
 
-                // İlk elementi (Loqonu) sağa dartırıq
-                const pushRight = (jc === 'space-between' && i === 0) ? 'margin-right: auto;' : '';
+                let pushCss = '';
+                if (jc === 'space-between') {
+                    if (i === 0) pushCss = 'margin-right: auto;';
+                    if (i === 1) pushCss = 'margin-left: auto; margin-right: auto;';
+                    if (i === 2) pushCss = 'margin-left: auto;';
+                }
 
                 if (this.preview) {
                     if (!child) continue;
-                    slotsHtml += `<div class="rj-slot" style="min-width:0; ${flexInline} ${orderStyle} ${pushRight}">${this.renderBlockHtml(child, bid, i)}</div>`;
+                    slotsHtml += `<div class="rj-slot rj-slot-i-${i}" style="min-width:0; ${flexInline} ${orderStyle} ${pushCss}">${this.renderBlockHtml(child, bid, i)}</div>`;
                     continue;
                 }
 
@@ -280,7 +284,7 @@ function builderRender() {
                        </div>`;
 
                 slotsHtml += `
-                    <div class="rj-slot" style="position:relative; min-height:80px; min-width:0; ${flexInline} ${orderStyle} ${pushRight} border-radius:8px; transition:all .15s; border:2px ${child ? 'solid transparent' : 'dashed #e5e7eb'};"
+                    <div class="rj-slot rj-slot-i-${i}" style="position:relative; min-height:80px; min-width:0; ${flexInline} ${orderStyle} ${pushCss} border-radius:8px; transition:all .15s; border:2px ${child ? 'solid transparent' : 'dashed #e5e7eb'};"
                          ondragover="event.preventDefault(); event.stopPropagation(); this.classList.add('rj-drop');"
                          ondragleave="this.classList.remove('rj-drop');"
                          ondrop="event.preventDefault(); event.stopPropagation(); window.__builder.dropInto('${bid}', ${i});">
@@ -294,7 +298,7 @@ function builderRender() {
 
             return `
                 <div style="border-radius:0; ${outerStyle}">
-                    <div class="${gridClass}" style="--c:${cols}; --g:${gap}; --al:${ai}; --jc:${jc}; --dir:${dir}; --wrap:${wrap};">
+                    <div class="${gridClass}" style="--c:${cols}; --g:${gap}; --al:${ai}; --jc:flex-start; --dir:${dir}; --wrap:${wrap};">
                         ${slotsHtml}
                     </div>
                 </div>

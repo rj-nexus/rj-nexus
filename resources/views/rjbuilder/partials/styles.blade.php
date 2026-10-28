@@ -1218,4 +1218,15 @@
         order: var(--ord-m, var(--ord-t, var(--ord-d, 0)));
     }
 }
+
+/* Header Center Layout for Desktop, Grouped Right for Mobile */
+@container rj (max-width: {{ $bpTablet ?? 860 }}px) {
+    .rj-slot-i-1 {
+        margin-left: auto !important;
+        margin-right: 0 !important;
+    }
+    .rj-slot-i-2 {
+        margin-left: 0 !important;
+    }
+}
 </style>
