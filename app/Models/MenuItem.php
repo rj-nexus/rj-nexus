@@ -96,30 +96,65 @@ class MenuItem extends Model
 
     public function resolvedUrl(): string
     {
-        if ($this->type === 'custom' && $this->url) {
-            return $this->url;
-        }
+        $locale = app()->getLocale();
+        $raw = null;
 
-        if ($this->type === 'category' && $this->object_id) {
+        if ($this->type === 'page' && $this->object_id) {
+            $page = Post::find($this->object_id);
+            if ($page) {
+                $raw = '/' . $page->slug;
+            }
+        } elseif ($this->type === 'post' && $this->object_id) {
+            $post = Post::find($this->object_id);
+            if ($post) {
+                $raw = '/blog/' . $post->slug;
+            }
+        } elseif ($this->type === 'category' && $this->object_id) {
             $cat = Category::find($this->object_id);
-
             if ($cat) {
-                return url('/category/' . $cat->slug);
+                $raw = '/blog?term=' . $cat->slug . '&taxonomy=category';
             }
-        }
-
-        if ($this->type === 'tag' && $this->object_id) {
+        } elseif ($this->type === 'tag' && $this->object_id) {
             $tag = Tag::find($this->object_id);
-
             if ($tag) {
-                return url('/tag/' . $tag->slug);
+                $raw = '/blog?term=' . $tag->slug . '&taxonomy=tag';
             }
         }
 
-        if ($this->url) {
-            return $this->url;
+        if ($raw === null && $this->url) {
+            $raw = $this->url;
         }
 
-        return '#';
+        if ($raw === null) {
+            return '#';
+        }
+
+        return $this->withLocale($raw, $locale);
+    }
+
+    protected function withLocale(string $url, string $locale): string
+    {
+        if (preg_match('#^https?://#i', $url)) {
+            return $url;
+        }
+
+        $query = '';
+        if (str_contains($url, '?')) {
+            [$url, $query] = explode('?', $url, 2);
+            $query = '?' . $query;
+        }
+
+        $segments = array_values(array_filter(
+            explode('/', trim($url, '/')),
+            fn ($s) => $s !== ''
+        ));
+
+        if (!empty($segments) && preg_match('/^[a-z]{2}(_[A-Z]{2})?$/', $segments[0])) {
+            $segments[0] = $locale;
+        } else {
+            array_unshift($segments, $locale);
+        }
+
+        return url('/' . implode('/', $segments) . $query);
     }
 }
