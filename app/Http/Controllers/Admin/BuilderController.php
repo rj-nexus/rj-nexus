@@ -101,12 +101,19 @@ class BuilderController extends Controller
             'name' => ['required', 'string', 'max:200'],
             'content' => ['nullable', 'array'],
             'status' => ['nullable', 'in:draft,published'],
+            'settings' => ['nullable', 'array'], // YENİ ƏLAVƏ OLUNDU
         ]);
+
+        $settings = $template->settings ?? [];
+        if (isset($data['settings']) && is_array($data['settings'])) {
+            $settings = array_merge($settings, $data['settings']);
+        }
 
         $template->update([
             'name' => $data['name'],
             'content' => $data['content'] ?? ['blocks' => []],
             'status' => $data['status'] ?? $template->status,
+            'settings' => $settings, // YENİ ƏLAVƏ OLUNDU
         ]);
 
         if ($request->wantsJson() || $request->ajax()) {
