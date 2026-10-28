@@ -40,6 +40,40 @@ class StructureContainerWidget extends BaseWidget
     {
         return [
             [
+                'name' => 'width',
+                'type' => 'select',
+                'label' => __('Width'),
+                'default' => 'full',
+                'tab' => 'content',
+                'options' => [
+                    'boxed' => __('Boxed') . ' — ' . __('Centered'),
+                    'full' => __('Full Width') . ' — ' . __('Edge to edge'),
+                ],
+            ],
+            [
+                'name' => 'column_widths',
+                'type' => 'text',
+                'label' => __('Column Widths'),
+                'default' => '',
+                'tab' => 'content',
+                'placeholder' => '20,60,20',
+                'help' => __('Comma-separated ratios (e.g. 20,60,20). Leave empty for equal widths.'),
+            ],
+            [
+                'name' => 'keep_tablet',
+                'type' => 'toggle',
+                'label' => __('Keep Layout on Tablet'),
+                'default' => false,
+                'tab' => 'content',
+            ],
+            [
+                'name' => 'keep_mobile',
+                'type' => 'toggle',
+                'label' => __('Keep Layout on Mobile'),
+                'default' => false,
+                'tab' => 'content',
+            ],
+            [
                 'name' => 'flex_direction',
                 'type' => 'select',
                 'label' => __('Direction'),
