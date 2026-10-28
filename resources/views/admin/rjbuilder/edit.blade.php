@@ -105,6 +105,29 @@
         </dl>
     </div>
 
+    @if($template->type === 'header')
+        <div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-900">{{ __('Header Settings') }}</h2>
+                    <p class="text-xs text-gray-500 mt-1">{{ __('Configure how the header behaves on the website.') }}</p>
+                </div>
+            </div>
+            <form method="POST" action="{{ route('admin.rjbuilder.update', $template) }}" class="flex items-center gap-4">
+                @csrf
+                @method('PUT')
+                <input type="hidden" name="settings[sticky_header]" value="0">
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" name="settings[sticky_header]" value="1" {{ (isset($template->settings['sticky_header']) && $template->settings['sticky_header'] === '1') ? 'checked' : '' }} class="w-4 h-4 text-purple-600 rounded border-gray-300 focus:ring-purple-500">
+                    <span class="text-sm font-medium text-gray-700">{{ __('Sticky Header (Stays fixed at the top when scrolling)') }}</span>
+                </label>
+                <button type="submit" class="ml-auto px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800">
+                    {{ __('Save Setting') }}
+                </button>
+            </form>
+        </div>
+    @endif
+
     <div class="bg-white rounded-xl border border-gray-200 p-6">
         <div class="flex items-center justify-between mb-4">
             <div>
