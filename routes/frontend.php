@@ -89,7 +89,7 @@ Route::get('/', function () {
 })->name('home');
 
 Route::prefix('{locale}')
-    ->where('locale', '[a-z]{2}(_[A-Z]{2})?')
+    ->where(['locale' => '[a-z]{2}(_[A-Z]{2})?'])
     ->group(function () {
         Route::get('/', [FrontendController::class, 'home'])->name('frontend.home');
 
