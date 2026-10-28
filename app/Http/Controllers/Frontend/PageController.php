@@ -18,7 +18,7 @@ class PageController extends Controller
         $this->themes = $themes;
     }
 
-    public function show(string $slug)
+    public function show(string $locale, string $slug)
     {
         $page = Post::with(['author', 'translations', 'template'])
             ->where('type', 'page')

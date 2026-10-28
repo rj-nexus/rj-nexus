@@ -8,17 +8,17 @@ use Illuminate\Support\Facades\Hash;
 
 class AccountController extends Controller
 {
-    public function index()
+    public function index(string $locale)
     {
         return view('frontend.account.index');
     }
 
-    public function settings()
+    public function settings(string $locale)
     {
         return view('frontend.account.settings');
     }
 
-    public function updateSettings(Request $request)
+    public function updateSettings(string $locale, Request $request)
     {
         $user = $request->user();
 
@@ -32,7 +32,7 @@ class AccountController extends Controller
         return back()->with('success', __('Profile information updated successfully.'));
     }
 
-    public function updatePassword(Request $request)
+    public function updatePassword(string $locale, Request $request)
     {
         $validated = $request->validateWithBag('updatePassword', [
             'current_password' => ['required', 'current_password'],

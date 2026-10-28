@@ -19,7 +19,7 @@ class FrontendController extends Controller
         $this->themes = $themes;
     }
 
-    public function home()
+    public function home(string $locale)
     {
         $header = $this->resolver->header();
         $footer = $this->resolver->footer();

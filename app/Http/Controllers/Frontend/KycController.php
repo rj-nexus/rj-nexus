@@ -15,18 +15,18 @@ class KycController extends Controller
         $this->kycManager = $kycManager;
     }
 
-    public function index()
+    public function index(string $locale)
     {
         $user = auth()->user();
 
         if ($user->kyc_status === 'approved') {
-            return redirect()->route('frontend.profile')->with('success', __('Your identity is already verified.'));
+            return redirect()->route('frontend.account.index')->with('success', __('Your identity is already verified.'));
         }
 
         return view('frontend.kyc', compact('user'));
     }
 
-    public function submit(Request $request)
+    public function submit(string $locale, Request $request)
     {
         $validated = $request->validate([
             'document_type' => 'required|string|in:id_card,passport',
@@ -38,7 +38,7 @@ class KycController extends Controller
         $result = $this->kycManager->submit($request->user(), $validated);
 
         if ($result) {
-            return redirect()->route('frontend.profile')->with('success', __('Your documents have been submitted for review.'));
+            return redirect()->route('frontend.account.index')->with('success', __('Your documents have been submitted for review.'));
         }
 
         return back()->with('error', __('Failed to submit KYC documents. Please try again.'))->withInput();

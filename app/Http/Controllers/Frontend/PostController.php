@@ -20,7 +20,7 @@ class PostController extends Controller
         $this->themes = $themes;
     }
 
-    public function show(string $slug)
+    public function show(string $locale, string $slug)
     {
         $post = Post::with(['author', 'categories', 'tags', 'translations', 'template'])
             ->where('type', 'post')
@@ -57,7 +57,7 @@ class PostController extends Controller
         ]);
     }
 
-    public function archive(Request $request)
+    public function archive(string $locale, Request $request)
     {
         $query = Post::with(['author', 'categories', 'tags'])
             ->where('type', 'post')
