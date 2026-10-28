@@ -5,9 +5,6 @@
     $wrap = $settings['flex_wrap'] ?? 'nowrap';
     $cols = max(2, min(5, (int)($settings['columns'] ?? 3)));
 
-    // Əgər space-between seçilibsə, elementləri bir-birindən ayırmaq əvəzinə flex-start edirik
-    $justifyCss = ($jc === 'space-between') ? 'flex-start' : $jc;
-
     $gapMap = ['none' => '0', 'sm' => '12px', 'md' => '24px', 'lg' => '36px', 'xl' => '48px'];
     $gap = $gapMap[$settings['gap'] ?? 'md'] ?? '24px';
 
@@ -25,7 +22,7 @@
 
     $dirStyle = $dir !== 'row' ? "flex-direction:{$dir};" : '';
 
-    $style = "display:flex; flex-wrap:{$wrap}; {$dirStyle} justify-content:{$justifyCss}; align-items:{$ai}; gap:{$gap}; box-sizing:border-box; width:100%; {$autoPad}";
+    $style = "display:flex; flex-wrap:{$wrap}; {$dirStyle} justify-content:{$jc}; align-items:{$ai}; gap:{$gap}; box-sizing:border-box; width:100%; {$autoPad}";
 
     if ($pt !== '') $style .= " padding-top:{$pt};";
     if ($pr !== '') $style .= " padding-right:{$pr};";
@@ -49,8 +46,8 @@
                 $orderStyle = "--ord-d:{$oD}; --ord-t:{$oT}; --ord-m:{$oM};";
             }
 
-            // Əgər space-between-dirsə, 2-ci elementi (Dil) sağa tərəf itələyirik
-            $pushRight = ($jc === 'space-between' && $i === 1) ? 'margin-left: auto;' : '';
+            // İlk elementi (Loqonu) sağa dartırıq ki, qalanları sağa sıxışsın
+            $pushRight = ($jc === 'space-between' && $i === 0) ? 'margin-right: auto;' : '';
         @endphp
         <div class="rj-slot" style="flex: 0 1 auto; min-width: 0; {!! $orderStyle !!} {!! $pushRight !!}">
             @if($child)

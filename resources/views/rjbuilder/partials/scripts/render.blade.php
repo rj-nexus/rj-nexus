@@ -230,7 +230,6 @@ function builderRender() {
 
             const jcMap = { start: 'flex-start', center: 'center', end: 'flex-end', 'space-between': 'space-between', 'space-around': 'space-around', 'space-evenly': 'space-evenly' };
             const jc = jcMap[settings.justify_content] || 'space-between';
-            const justifyCss = (jc === 'space-between') ? 'flex-start' : jc;
 
             const dir = ['row', 'column', 'row-reverse', 'column-reverse'].includes(settings.flex_direction) ? settings.flex_direction : 'row';
             const wrap = ['nowrap', 'wrap', 'wrap-reverse'].includes(settings.flex_wrap) ? settings.flex_wrap : 'nowrap';
@@ -264,7 +263,8 @@ function builderRender() {
                     orderStyle = `--ord-d:${oD}; --ord-t:${oT}; --ord-m:${oM};`;
                 }
 
-                const pushRight = (jc === 'space-between' && i === 1) ? 'margin-left: auto;' : '';
+                // İlk elementi (Loqonu) sağa dartırıq
+                const pushRight = (jc === 'space-between' && i === 0) ? 'margin-right: auto;' : '';
 
                 if (this.preview) {
                     if (!child) continue;
@@ -294,7 +294,7 @@ function builderRender() {
 
             return `
                 <div style="border-radius:0; ${outerStyle}">
-                    <div class="${gridClass}" style="--c:${cols}; --g:${gap}; --al:${ai}; --jc:${justifyCss}; --dir:${dir}; --wrap:${wrap};">
+                    <div class="${gridClass}" style="--c:${cols}; --g:${gap}; --al:${ai}; --jc:${jc}; --dir:${dir}; --wrap:${wrap};">
                         ${slotsHtml}
                     </div>
                 </div>
