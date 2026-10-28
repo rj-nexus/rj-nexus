@@ -11,12 +11,22 @@
 
     $pad = $settings['padding_dim'] ?? [];
     $unit = $pad['unit'] ?? 'px';
-    $pt = ($pad['top'] ?? '') !== '' ? $pad['top'] . $unit : '0';
-    $pr = ($pad['right'] ?? '') !== '' ? $pad['right'] . $unit : '0';
-    $pb = ($pad['bottom'] ?? '') !== '' ? $pad['bottom'] . $unit : '0';
-    $pl = ($pad['left'] ?? '') !== '' ? $pad['left'] . $unit : '0';
+    $pt = ($pad['top'] ?? '') !== '' ? $pad['top'] . $unit : '';
+    $pr = ($pad['right'] ?? '') !== '' ? $pad['right'] . $unit : '';
+    $pb = ($pad['bottom'] ?? '') !== '' ? $pad['bottom'] . $unit : '';
+    $pl = ($pad['left'] ?? '') !== '' ? $pad['left'] . $unit : '';
 
-    $style = "display:flex; flex-direction:{$dir}; justify-content:{$jc}; align-items:{$ai}; gap:{$gap}; padding:{$pt} {$pr} {$pb} {$pl}; box-sizing:border-box; width:100%;";
+    $hasPad = $pt !== '' || $pr !== '' || $pb !== '' || $pl !== '';
+    $autoPad = !$hasPad ? 'padding-left:16px; padding-right:16px;' : '';
+
+    $dirStyle = $dir !== 'row' ? "flex-direction:{$dir};" : '';
+
+    $style = "display:flex; flex-wrap:wrap; {$dirStyle} justify-content:{$jc}; align-items:{$ai}; gap:{$gap}; box-sizing:border-box; width:100%; {$autoPad}";
+
+    if ($pt !== '') $style .= " padding-top:{$pt};";
+    if ($pr !== '') $style .= " padding-right:{$pr};";
+    if ($pb !== '') $style .= " padding-bottom:{$pb};";
+    if ($pl !== '') $style .= " padding-left:{$pl};";
 
     if ($bg !== '') {
         $style .= " background-color:{$bg};";
