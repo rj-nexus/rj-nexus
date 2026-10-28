@@ -5,7 +5,7 @@
 @endphp
 
 <article class="rj-card">
-    <a href="{{ route('frontend.posts.show', $post->slug) }}" class="rj-card-link">
+    <a href="{{ route('frontend.posts.show', ['slug' => $post->slug]) }}" class="rj-card-link">
         <div class="rj-card-media">
             @if($featured)
                 <img src="{{ $featured }}" alt="{{ $post->title }}" loading="lazy">
