@@ -255,9 +255,17 @@ function builderRender() {
                 const growValue = hasWidth ? widths[i] : 1;
                 const flexInline = `flex:${growValue} 1 0;`;
 
+                // BURADA CİHAZA GÖRƏ SIRALAMANI TƏYİN EDİRİK
+                let orderStyle = '';
+                if (child && child.settings) {
+                    const oD = child.settings._order_desktop || child.settings.order || 0;
+                    const oM = child.settings._order_mobile || oD;
+                    orderStyle = `--ord-d:${oD}; --ord-m:${oM};`;
+                }
+
                 if (this.preview) {
                     if (!child) continue;
-                    slotsHtml += `<div class="rj-slot" style="min-width:0; ${flexInline}">${this.renderBlockHtml(child, bid, i)}</div>`;
+                    slotsHtml += `<div class="rj-slot" style="min-width:0; ${flexInline} ${orderStyle}">${this.renderBlockHtml(child, bid, i)}</div>`;
                     continue;
                 }
 
@@ -269,7 +277,7 @@ function builderRender() {
                        </div>`;
 
                 slotsHtml += `
-                    <div class="rj-slot" style="position:relative; min-height:80px; min-width:0; ${flexInline} border-radius:8px; transition:all .15s; border:2px ${child ? 'solid transparent' : 'dashed #e5e7eb'};"
+                    <div class="rj-slot" style="position:relative; min-height:80px; min-width:0; ${flexInline} ${orderStyle} border-radius:8px; transition:all .15s; border:2px ${child ? 'solid transparent' : 'dashed #e5e7eb'};"
                          ondragover="event.preventDefault(); event.stopPropagation(); this.classList.add('rj-drop');"
                          ondragleave="this.classList.remove('rj-drop');"
                          ondrop="event.preventDefault(); event.stopPropagation(); window.__builder.dropInto('${bid}', ${i});">

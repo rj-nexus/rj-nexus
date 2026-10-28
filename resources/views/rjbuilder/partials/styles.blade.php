@@ -1203,4 +1203,13 @@
         font-size: 20px;
         line-height: 1;
     }
+    /* Responsive Ordering */
+.rj-slot {
+    order: var(--ord-d, 0);
+}
+@container rj (max-width: {{ $bpMobile ?? 560 }}px) {
+    .rj-slot {
+        order: var(--ord-m, var(--ord-d, 0));
+    }
+}
 </style>

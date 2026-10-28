@@ -35,9 +35,18 @@
 
 <div class="rj-structure-container" style="{!! $style !!}">
     @for($i = 0; $i < $cols; $i++)
-        <div class="rj-slot" style="flex: 1 1 0; min-width: 0;">
-            @if(isset($children[$i]))
-                {!! rj_render_block($children[$i]) !!}
+        @php
+            $child = $children[$i] ?? null;
+            $orderStyle = '';
+            if ($child && isset($child['settings'])) {
+                $oD = $child['settings']['_order_desktop'] ?? $child['settings']['order'] ?? 0;
+                $oM = $child['settings']['_order_mobile'] ?? $oD;
+                $orderStyle = "--ord-d:{$oD}; --ord-m:{$oM};";
+            }
+        @endphp
+        <div class="rj-slot" style="flex: 1 1 0; min-width: 0; {!! $orderStyle !!}">
+            @if($child)
+                {!! rj_render_block($child) !!}
             @endif
         </div>
     @endfor
