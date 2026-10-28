@@ -139,13 +139,13 @@ class LayoutContainerWidget extends BaseWidget
         $gapCss = $gapMap[$gap] ?? '24px';
 
         $styles = [
-            'display' => 'flex',
-            'flex-direction' => $direction,
+            'display'         => 'flex',
+            'flex-direction'  => $direction,
             'justify-content' => $justify,
-            'align-items' => $align,
-            'flex-wrap' => $wrap,
-            'gap' => $gapCss,
-            'width' => '100%',
+            'align-items'     => $align,
+            'flex-wrap'       => $wrap,
+            'gap'             => $gapCss,
+            'width'           => '100%',
         ];
 
         if ($bgColor !== 'transparent' && $bgColor !== '') {
@@ -167,11 +167,6 @@ class LayoutContainerWidget extends BaseWidget
             $styleStr .= "{$key}: {$val}; ";
         }
 
-        $childrenHtml = '';
-        if (!empty($children)) {
-            $childrenHtml = rj_render_blocks($children);
-        }
-
-        return '<div class="rj-lc-wrapper" style="' . e($styleStr) . '">' . $childrenHtml . '</div>';
+        return view('rjbuilder.widgets.builtin.layout-container', compact('styleStr', 'children'))->render();
     }
 }
