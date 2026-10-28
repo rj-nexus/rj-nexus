@@ -40,11 +40,11 @@
             $orderStyle = '';
             if ($child && isset($child['settings'])) {
                 $oD = $child['settings']['_order_desktop'] ?? $child['settings']['order'] ?? 0;
-                $oM = $child['settings']['_order_mobile'] ?? $oD;
-                $orderStyle = "--ord-d:{$oD}; --ord-m:{$oM};";
+                $oT = $child['settings']['_order_tablet'] ?? $oD;
+                $oM = $child['settings']['_order_mobile'] ?? $oT;
+                $orderStyle = "--ord-d:{$oD}; --ord-t:{$oT}; --ord-m:{$oM};";
             }
 
-            // 2-ci elementi sağa tərəf itələyirik ki, qalanları sağda qruplaşsın
             $pushRight = ($jc === 'space-between' && $i === 1) ? 'margin-left: auto;' : '';
         @endphp
         <div class="rj-slot" style="flex: 0 1 auto; min-width: 0; {!! $orderStyle !!} {!! $pushRight !!}">

@@ -1203,13 +1203,19 @@
         font-size: 20px;
         line-height: 1;
     }
-    /* Responsive Ordering */
+
+/* Responsive Ordering */
 .rj-slot {
     order: var(--ord-d, 0);
 }
+@container rj (max-width: {{ $bpTablet ?? 860 }}px) and (min-width: {{ ($bpMobile ?? 560) + 1 }}px) {
+    .rj-slot {
+        order: var(--ord-t, var(--ord-d, 0));
+    }
+}
 @container rj (max-width: {{ $bpMobile ?? 560 }}px) {
     .rj-slot {
-        order: var(--ord-m, var(--ord-d, 0));
+        order: var(--ord-m, var(--ord-t, var(--ord-d, 0)));
     }
 }
 </style>
