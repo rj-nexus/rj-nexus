@@ -135,7 +135,16 @@ class MenuItem extends Model
     protected function withLocale(string $url, string $locale): string
     {
         if (preg_match('#^https?://#i', $url)) {
-            return $url;
+            $host = parse_url($url, PHP_URL_HOST);
+            $ownHost = parse_url(config('app.url'), PHP_URL_HOST);
+
+            if ($host && $ownHost && strcasecmp($host, $ownHost) !== 0) {
+                return $url;
+            }
+
+            $path = parse_url($url, PHP_URL_PATH) ?? '/';
+            $query = parse_url($url, PHP_URL_QUERY);
+            $url = $path . ($query ? '?' . $query : '');
         }
 
         $query = '';
