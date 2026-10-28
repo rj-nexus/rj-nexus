@@ -265,9 +265,11 @@ function builderRender() {
 
                 let pushCss = '';
                 if (jc === 'space-between') {
-                    if (i === 0) pushCss = 'margin-right: auto;';
-                    if (i === 1) pushCss = 'margin-left: auto; margin-right: auto;';
-                    if (i === 2) pushCss = 'margin-left: auto;';
+                    if (i === 0) {
+                        pushCss = 'margin-right: auto;';
+                    } else if (i === 1 && cols === 3) {
+                        pushCss = 'margin-left: auto; margin-right: auto;';
+                    }
                 }
 
                 if (this.preview) {

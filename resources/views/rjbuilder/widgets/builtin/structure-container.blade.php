@@ -47,10 +47,15 @@
             }
 
             $pushCss = '';
+            // Universal məntiq: İlk element (Loqo) həmişə sola gedir, qalanlar sağa sıxlaşır
             if ($jc === 'space-between') {
-                if ($i === 0) $pushCss = 'margin-right: auto;';
-                if ($i === 1) $pushCss = 'margin-left: auto; margin-right: auto;'; // Mərkəzləşdirir
-                if ($i === 2) $pushCss = 'margin-left: auto;'; // Sağa sıxışdırır
+                if ($i === 0) {
+                    $pushCss = 'margin-right: auto;';
+                }
+                // Əgər cəmi 3 element varsa və PC-dədirsə, ortadakı (Menyu) tam mərkəzdə olsun
+                elseif ($i === 1 && $cols === 3) {
+                    $pushCss = 'margin-left: auto; margin-right: auto;';
+                }
             }
         @endphp
         <div class="rj-slot rj-slot-i-{!! $i !!}" style="flex: 0 1 auto; min-width: 0; {!! $orderStyle !!} {!! $pushCss !!}">

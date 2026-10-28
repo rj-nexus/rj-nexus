@@ -1229,4 +1229,12 @@
         margin-left: 0 !important;
     }
 }
+/* Responsive Header Layout */
+@container rj (max-width: {{ $bpTablet ?? 860 }}px) {
+    /* Mobil və Tabletdə mərkəzləşdirməni söndürürük, hər şey sağa sıxlaşır */
+    .rj-slot-i-1 {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+}
 </style>
