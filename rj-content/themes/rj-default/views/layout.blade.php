@@ -41,10 +41,17 @@
         }
 
         .rj-frontend-header {
+            background: #ffffff;
+            width: 100%;
+            position: relative;
+            z-index: 40;
+        }
+
+        body.has-sticky-header .rj-frontend-header {
             position: sticky;
             top: 0;
             z-index: 50;
-            overflow: visible;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
 
         .rj-frontend-footer {
@@ -168,7 +175,7 @@
 
     @stack('styles')
 </head>
-<body>
+<body class="{{ rj_get_option('header_sticky', '1') === '1' ? 'has-sticky-header' : '' }}">
     <div class="rj-frontend rj-frontend-wrapper">
         @yield('content')
     </div>
