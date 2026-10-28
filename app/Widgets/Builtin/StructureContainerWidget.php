@@ -53,6 +53,18 @@ class StructureContainerWidget extends BaseWidget
                 ],
             ],
             [
+                'name' => 'middle_position',
+                'type' => 'select',
+                'label' => __('Middle Element Position'),
+                'default' => 'center',
+                'tab' => 'content',
+                'options' => [
+                    'center' => __('Center'),
+                    'right' => __('Right (next to the last element)'),
+                ],
+                'help' => __('Applies to 3 or more elements on desktop and tablet.'),
+            ],
+            [
                 'name' => 'flex_direction',
                 'type' => 'select',
                 'label' => __('Direction'),
@@ -61,17 +73,6 @@ class StructureContainerWidget extends BaseWidget
                 'options' => [
                     'row' => __('Row (Horizontal)'),
                     'column' => __('Column (Vertical)'),
-                ],
-            ],
-            [
-                'name' => 'flex_wrap',
-                'type' => 'select',
-                'label' => __('Wrap'),
-                'default' => 'nowrap',
-                'tab' => 'content',
-                'options' => [
-                    'nowrap' => __('No Wrap (Keep on one line)'),
-                    'wrap' => __('Wrap (Go to next line if no space)'),
                 ],
             ],
             [

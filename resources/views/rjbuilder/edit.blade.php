@@ -82,6 +82,7 @@
         'Select Terms', 'Search terms...', 'No terms found.', 'Selected', 'Clear selection', 'Selected: :n',
         'No taxonomies yet.', 'No post types found.',
         'Responsive Order', 'Desktop Order', 'Tablet Order', 'Mobile Order', 'Lower numbers appear first.', 'Lower numbers appear first on tablet.', 'Lower numbers appear first on mobile.',
+        'Leave empty to use the desktop order.', 'Leave empty to use the tablet order. In a 5-column container, empty hides this element on mobile.',
     ])->unique()->mapWithKeys(fn ($s) => [$s => __($s)])->toArray();
 @endphp
 
@@ -589,20 +590,22 @@
 
                             <div class="rj-field">
                                 <div class="rj-lbl"><span x-text="t('Desktop Order')"></span></div>
-                                <input type="number" class="rj-in" :value="currentSettings._order_desktop || 0" @input="updateSetting('_order_desktop', $event.target.value)" placeholder="0">
+                                <input type="number" class="rj-in" :value="currentSettings._order_desktop ?? ''" @input="updateSetting('_order_desktop', $event.target.value)" placeholder="0">
                                 <p class="rj-help" x-text="t('Lower numbers appear first.')"></p>
                             </div>
 
                             <div class="rj-field">
                                 <div class="rj-lbl"><span x-text="t('Tablet Order')"></span></div>
-                                <input type="number" class="rj-in" :value="currentSettings._order_tablet || 0" @input="updateSetting('_order_tablet', $event.target.value)" placeholder="0">
+                                <input type="number" class="rj-in" :value="currentSettings._order_tablet ?? ''" @input="updateSetting('_order_tablet', $event.target.value)" :placeholder="currentSettings._order_desktop ?? 0">
                                 <p class="rj-help" x-text="t('Lower numbers appear first on tablet.')"></p>
+                                <p class="rj-help" x-text="t('Leave empty to use the desktop order.')"></p>
                             </div>
 
                             <div class="rj-field">
                                 <div class="rj-lbl"><span x-text="t('Mobile Order')"></span></div>
-                                <input type="number" class="rj-in" :value="currentSettings._order_mobile || 0" @input="updateSetting('_order_mobile', $event.target.value)" placeholder="0">
+                                <input type="number" class="rj-in" :value="currentSettings._order_mobile ?? ''" @input="updateSetting('_order_mobile', $event.target.value)" :placeholder="currentSettings._order_tablet ?? currentSettings._order_desktop ?? 0">
                                 <p class="rj-help" x-text="t('Lower numbers appear first on mobile.')"></p>
+                                <p class="rj-help" x-text="t('Leave empty to use the tablet order. In a 5-column container, empty hides this element on mobile.')"></p>
                             </div>
                         </div>
                     </div>

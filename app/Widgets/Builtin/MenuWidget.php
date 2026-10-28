@@ -207,7 +207,7 @@ class MenuWidget extends BaseWidget
             return '';
         }
 
-        $layout = $settings['layout'] ?? 'horizontal';
+        $layout = ($settings['layout'] ?? 'horizontal') === 'vertical' ? 'vertical' : 'horizontal';
         $align = in_array($settings['align'] ?? 'center', ['left', 'center', 'right'], true) ? $settings['align'] : 'center';
         $mobileBehavior = in_array($settings['mobile_behavior'] ?? 'hamburger', ['hamburger', 'stack', 'scroll'], true)
             ? $settings['mobile_behavior']
@@ -227,13 +227,13 @@ class MenuWidget extends BaseWidget
         $jc = $jcMap[$align];
 
         $vars = [
-            '--mt:' . ($settings['text_color'] ?? '#111827'),
-            '--mh:' . ($settings['hover_color'] ?? '#7c3aed'),
-            '--ma:' . ($settings['active_color'] ?? '#7c3aed'),
-            '--mbg:' . ($settings['dropdown_bg'] ?? '#ffffff'),
+            '--mt:' . $this->cssValue($settings['text_color'] ?? '#111827'),
+            '--mh:' . $this->cssValue($settings['hover_color'] ?? '#7c3aed'),
+            '--ma:' . $this->cssValue($settings['active_color'] ?? '#7c3aed'),
+            '--mbg:' . $this->cssValue($settings['dropdown_bg'] ?? '#ffffff'),
             '--mbd:' . (($settings['dropdown_border'] ?? 'yes') === 'yes' ? '1px solid #e5e7eb' : '0'),
             '--fs:' . $fontSize,
-            '--fw:' . ($settings['font_weight'] ?? '500'),
+            '--fw:' . $this->cssValue($settings['font_weight'] ?? '500'),
             '--gap:' . $gap,
             '--dir:' . ($layout === 'vertical' ? 'column' : 'row'),
             '--ai:' . ($layout === 'vertical' ? $jc : 'center'),
@@ -241,8 +241,7 @@ class MenuWidget extends BaseWidget
             '--mjc:' . $jc,
         ];
 
-        // Menyunun tam en tutmasını təmin edirik ki, mərkəzləşmə işləsin
-        $wrapperStyles = ['width: 100%;'];
+        $wrapperStyles = [];
 
         $padding = $this->dimensionCss($settings, 'padding_dim');
         if ($padding !== '') {
@@ -260,7 +259,9 @@ class MenuWidget extends BaseWidget
         }
 
         $wrapperAttrs = [];
-        $wrapperAttrs['style'] = implode(';', $wrapperStyles);
+        if (!empty($wrapperStyles)) {
+            $wrapperAttrs['style'] = implode(';', $wrapperStyles);
+        }
 
         $id = $this->cssId($settings);
         if ($id !== '') {
@@ -282,12 +283,12 @@ class MenuWidget extends BaseWidget
 
         $itemsHtml = $this->renderItems($items);
 
-        $desktop = '<nav class="rj-menu-d" style="width:100%;"><ul>' . $itemsHtml . '</ul></nav>';
+        $desktop = '<nav class="rj-menu-d"><ul>' . $itemsHtml . '</ul></nav>';
 
         $toggle = "event.preventDefault();var m=this.closest('.rj-menu');var o=m.classList.toggle('rj-open');this.setAttribute('aria-expanded',o);";
 
-        $mobile = '<nav class="rj-menu-m" style="width:100%;">'
-            . '<div class="rj-bm" style="width:100%; display:flex; justify-content:' . $jc . ';">'
+        $mobile = '<nav class="rj-menu-m">'
+            . '<div class="rj-bm">'
             . '<button type="button" class="rj-bb" aria-label="Menu" aria-expanded="false" onclick="' . $toggle . '">'
             . '<svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>'
             . '</button>'
@@ -303,6 +304,11 @@ class MenuWidget extends BaseWidget
             . '</div>';
 
         return $this->applyAnimation($html, $settings);
+    }
+
+    protected function cssValue($value): string
+    {
+        return preg_replace('/[^#\w(),.%\s-]/', '', (string) $value);
     }
 
     protected function buildTree(array $items, ?int $parentId = null): array

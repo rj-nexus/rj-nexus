@@ -210,12 +210,118 @@ function builderRender() {
             `;
         },
 
+        ordNum(v) {
+            if (v === null || v === undefined || v === '') return null;
+            const n = parseInt(v, 10);
+            return Number.isNaN(n) ? null : n;
+        },
+
+        structurePlacement(settings, children, cols, widthsMode, isRow) {
+            const small = this.device !== 'desktop';
+            const mid = settings.middle_position === 'right' ? 'right' : 'center';
+            const items = [];
+
+            for (let i = 0; i < cols; i++) {
+                const child = children[i];
+                if (!child) continue;
+                const cs = child.settings || {};
+                const oD = this.ordNum(cs._order_desktop) ?? this.ordNum(cs.order) ?? 0;
+                const oT = this.ordNum(cs._order_tablet) ?? oD;
+                const oMraw = this.ordNum(cs._order_mobile);
+                const hide = small && cols === 5 && oMraw === null;
+                const o = small ? (oMraw ?? oT) : oD;
+                items.push({ i, o, hide });
+            }
+
+            const visible = items.filter(x => !x.hide).sort((a, b) => (a.o - b.o) || (a.i - b.i));
+            const m = visible.length;
+            const out = {};
+
+            visible.forEach((it, r) => {
+                let ml = '0';
+                let mr = '0';
+                if (isRow && !widthsMode && m >= 2 && r === 1) {
+                    ml = 'auto';
+                    if (!small && m >= 3 && mid === 'center') mr = 'auto';
+                }
+                out[it.i] = { order: r, ml, mr, hide: false };
+            });
+
+            items.filter(x => x.hide).forEach(it => {
+                out[it.i] = { order: m, ml: '0', mr: '0', hide: true };
+            });
+
+            return out;
+        },
+
+        emptySlotHtml(i) {
+            return `<div style="min-height:80px; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#c3c7d0; pointer-events:none;">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                        <span style="font-size:9px; text-transform:uppercase; letter-spacing:.08em; margin-top:2px;">${this.esc(this.t('Drop here'))} · ${i + 1}</span>
+                    </div>`;
+        },
+
+        renderStructure(block) {
+            const s = block.settings || {};
+            const cols = Math.max(2, Math.min(5, parseInt(s.columns) || 3));
+
+            const gapMap = { none: '0', sm: '12px', md: '24px', lg: '36px', xl: '48px' };
+            const gap = gapMap[s.gap] || '24px';
+
+            const dir = ['row', 'column', 'row-reverse', 'column-reverse'].includes(s.flex_direction) ? s.flex_direction : 'row';
+            const jc = ['flex-start', 'center', 'flex-end', 'space-between', 'space-around'].includes(s.justify_content) ? s.justify_content : 'space-between';
+            const ai = ['flex-start', 'center', 'flex-end', 'stretch'].includes(s.align_items) ? s.align_items : 'center';
+
+            const padding = this.dimResp(s, 'padding_dim');
+            const padCss = padding ? `padding:${padding};` : 'padding:16px 24px;';
+            const bg = this.bgCss(s) || (s.bg_color ? `background-color:${this.cssv(s.bg_color)};` : '');
+
+            const children = block.children || [];
+            const bid = block.id;
+            const widths = this.dimWidths(s);
+            const place = this.structurePlacement(s, children, cols, !!widths, dir === 'row');
+
+            let slotsHtml = '';
+            for (let i = 0; i < cols; i++) {
+                const child = children[i] || null;
+                const p = child ? place[i] : null;
+
+                if (this.preview && (!child || (p && p.hide))) continue;
+
+                const hasWidth = !!(widths && widths[i] > 0);
+                const flexCss = hasWidth ? `flex:${widths[i]} 1 0;` : 'flex:0 1 auto;';
+                const posCss = p
+                    ? `order:${p.order}; margin-left:${p.ml}; margin-right:${p.mr};`
+                    : `order:${cols + i};`;
+
+                if (this.preview) {
+                    slotsHtml += `<div class="rj-slot rj-slot-i-${i}" style="min-width:0; ${flexCss} ${posCss}">${this.renderBlockHtml(child, bid, i)}</div>`;
+                    continue;
+                }
+
+                const dim = (p && p.hide) ? 'opacity:.35;' : '';
+                const inner = child ? this.renderBlockHtml(child, bid, i) : this.emptySlotHtml(i);
+
+                slotsHtml += `
+                    <div class="rj-slot rj-slot-i-${i}" style="position:relative; min-height:80px; min-width:${child ? '0' : '96px'}; ${flexCss} ${posCss} ${dim} border-radius:8px; transition:all .15s; border:2px ${child ? 'solid transparent' : 'dashed #e5e7eb'};"
+                         ondragover="event.preventDefault(); event.stopPropagation(); this.classList.add('rj-drop');"
+                         ondragleave="this.classList.remove('rj-drop');"
+                         ondrop="event.preventDefault(); event.stopPropagation(); window.__builder.dropInto('${bid}', ${i});">
+                        ${inner}
+                    </div>
+                `;
+            }
+
+            return `<div class="rj-structure-container" style="display:flex; flex-wrap:nowrap; flex-direction:${dir}; justify-content:${jc}; align-items:${ai}; gap:${gap}; box-sizing:border-box; width:100%; ${padCss} ${bg}">${slotsHtml}</div>`;
+        },
+
         renderContainer(block) {
             if (!block) return '';
 
+            if (block.type === 'structure-container') return this.renderStructure(block);
+
             const settings = block.settings || {};
-            const isStructure = block.type === 'structure-container';
-            const cols = isStructure ? Math.max(2, Math.min(5, parseInt(settings.columns) || 3)) : (parseInt(settings.columns) || 1);
+            const cols = parseInt(settings.columns) || 1;
 
             const gapMap = { none: '0', sm: '0.5rem', md: '1rem', lg: '1.5rem', xl: '2rem' };
             const gap = gapMap[settings.gap] || '1rem';
@@ -233,7 +339,6 @@ function builderRender() {
 
             const dir = ['row', 'column', 'row-reverse', 'column-reverse'].includes(settings.flex_direction) ? settings.flex_direction : 'row';
 
-            // Wrap-ı nowrap edirik
             const wrap = 'nowrap';
 
             const isFixedLayout = ['header', 'footer', 'popup'].includes(this.templateType);
@@ -264,30 +369,16 @@ function builderRender() {
                     orderStyle = `--ord-d:${oD}; --ord-t:${oT}; --ord-m:${oM};`;
                 }
 
-                let pushCss = '';
-                if (jc === 'space-between') {
-                    if (i === 0) {
-                        pushCss = 'margin-right: auto;';
-                    } else if (i === 1) {
-                        pushCss = (cols === 3) ? 'margin-left: auto; margin-right: auto;' : 'margin-left: auto;';
-                    }
-                }
-
                 if (this.preview) {
                     if (!child) continue;
-                    slotsHtml += `<div class="rj-slot rj-slot-i-${i}" style="min-width:0; ${flexInline} ${orderStyle} ${pushCss}">${this.renderBlockHtml(child, bid, i)}</div>`;
+                    slotsHtml += `<div class="rj-slot rj-slot-i-${i}" style="min-width:0; ${flexInline} ${orderStyle}">${this.renderBlockHtml(child, bid, i)}</div>`;
                     continue;
                 }
 
-                const inner = child
-                    ? this.renderBlockHtml(child, bid, i)
-                    : `<div style="min-height:80px; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#c3c7d0; pointer-events:none;">
-                           <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                           <span style="font-size:9px; text-transform:uppercase; letter-spacing:.08em; margin-top:2px;">${this.esc(this.t('Drop here'))} · ${i + 1}</span>
-                       </div>`;
+                const inner = child ? this.renderBlockHtml(child, bid, i) : this.emptySlotHtml(i);
 
                 slotsHtml += `
-                    <div class="rj-slot rj-slot-i-${i}" style="position:relative; min-height:80px; min-width:0; ${flexInline} ${orderStyle} ${pushCss} border-radius:8px; transition:all .15s; border:2px ${child ? 'solid transparent' : 'dashed #e5e7eb'};"
+                    <div class="rj-slot rj-slot-i-${i}" style="position:relative; min-height:80px; min-width:0; ${flexInline} ${orderStyle} border-radius:8px; transition:all .15s; border:2px ${child ? 'solid transparent' : 'dashed #e5e7eb'};"
                          ondragover="event.preventDefault(); event.stopPropagation(); this.classList.add('rj-drop');"
                          ondragleave="this.classList.remove('rj-drop');"
                          ondrop="event.preventDefault(); event.stopPropagation(); window.__builder.dropInto('${bid}', ${i});">
@@ -538,14 +629,12 @@ function builderRender() {
 
                 const toggle = `event.stopPropagation(); const m = this.closest('.rj-menu'); const o = m.classList.toggle('rj-open'); this.setAttribute('aria-expanded', o);`;
 
-                // "MAIN - HORIZONTAL" yazısı SİLİNDİ
-
                 const pad = padAttr || 'padding:0.5rem 1rem;';
-                return `<div style="${pad} ${marAttr} ${bgCss} width:100%;">
-                    <div class="rj-menu" data-hover="${hoverStyle}" data-mobile="${esc(mobileBehavior)}" data-align="${align}" style="${vars}; width:100%;">
-                        <nav class="rj-menu-d" style="width:100%;"><ul>${renderItems(items)}</ul></nav>
-                        <nav class="rj-menu-m" style="width:100%;">
-                            <div class="rj-bm" style="width:100%; display:flex; justify-content:${jc};">
+                return `<div style="${pad} ${marAttr} ${bgCss}">
+                    <div class="rj-menu" data-hover="${hoverStyle}" data-mobile="${esc(mobileBehavior)}" data-align="${align}" style="${vars};">
+                        <nav class="rj-menu-d"><ul>${renderItems(items)}</ul></nav>
+                        <nav class="rj-menu-m">
+                            <div class="rj-bm">
                                 <button type="button" class="rj-bb" aria-label="Menu" aria-expanded="false" onclick="${toggle}">
                                     <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
                                 </button>
