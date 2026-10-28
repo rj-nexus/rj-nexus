@@ -117,6 +117,7 @@
                 @csrf
                 @method('PUT')
                 <input type="hidden" name="name" value="{{ $template->name }}">
+                <input type="hidden" name="content" value="{{ htmlspecialchars(json_encode($template->content), ENT_QUOTES, 'UTF-8') }}">
                 <input type="hidden" name="settings[sticky_header]" value="0">
                 <label class="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" name="settings[sticky_header]" value="1" {{ (isset($template->settings['sticky_header']) && $template->settings['sticky_header'] === '1') ? 'checked' : '' }} class="w-4 h-4 text-purple-600 rounded border-gray-300 focus:ring-purple-500">

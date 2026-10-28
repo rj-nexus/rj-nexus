@@ -1,286 +1,276 @@
-@extends('admin.layouts.app')
+<?php
 
-@section('title', $template->name)
+namespace App\Http\Controllers\Admin;
 
-@section('content')
+use App\Http\Controllers\Controller;
+use App\Models\Template;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
-<div class="max-w-4xl mx-auto py-8" x-data="templateEdit()">
+class BuilderController extends Controller
+{
+    public function index(Request $request)
+    {
+        $type = $request->input('type', 'header');
 
-    <div class="mb-6 flex items-center justify-between flex-wrap gap-4">
-        <div>
-            <a href="{{ route('admin.rjbuilder.index') }}" class="text-sm text-gray-500 hover:text-gray-700">← {{ __('Back') }}</a>
-            <h1 class="text-2xl font-bold text-gray-900 mt-2">{{ $template->name }}</h1>
-            <p class="text-sm text-gray-500 mt-1">{{ $template->typeLabel() }} · {{ $template->status }}</p>
-        </div>
-        <div class="flex gap-2 flex-wrap">
-            @if($template->status === 'published' && $template->type === 'page')
-                <a href="{{ route('frontend.preview', $template) }}" target="_blank" class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
-                    {{ __('Preview on site') }} ↗
-                </a>
-            @endif
+        $allowedTypes = array_keys(Template::types());
 
-            @if(!$template->is_default)
-                <form method="POST" action="{{ route('admin.rjbuilder.set-default', $template) }}" class="inline">
-                    @csrf
-                    <button type="submit" class="px-4 py-2 border border-amber-300 text-amber-700 rounded-lg text-sm font-medium hover:bg-amber-50">
-                        {{ __('Set as Default') }}
-                    </button>
-                </form>
-            @endif
-
-            @if($template->status === 'published')
-                <form method="POST" action="{{ route('admin.rjbuilder.unpublish', $template) }}" class="inline">
-                    @csrf
-                    <button type="submit" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50">
-                        {{ __('Unpublish') }}
-                    </button>
-                </form>
-            @else
-                <form method="POST" action="{{ route('admin.rjbuilder.publish', $template) }}" class="inline">
-                    @csrf
-                    <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700">
-                        {{ __('Publish') }}
-                    </button>
-                </form>
-            @endif
-
-            <a href="{{ route('admin.rjbuilder.build', $template) }}" class="px-5 py-2 bg-gradient-to-r from-purple-600 to-pink-500 text-white rounded-lg text-sm font-semibold hover:opacity-90">
-                {{ __('Open Builder') }} →
-            </a>
-        </div>
-    </div>
-
-    @if(session('success'))
-        <div class="mb-4 bg-green-50 border-l-4 border-green-500 text-green-800 px-4 py-3 rounded-r-lg">
-            {{ session('success') }}
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="mb-4 bg-red-50 border-l-4 border-red-500 text-red-800 px-4 py-3 rounded-r-lg">
-            {{ session('error') }}
-        </div>
-    @endif
-
-    <div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">{{ __('Template Info') }}</h2>
-        <dl class="grid grid-cols-2 gap-4 text-sm">
-            <div>
-                <dt class="text-gray-500">{{ __('Name') }}</dt>
-                <dd class="font-medium text-gray-900 mt-1">{{ $template->name }}</dd>
-            </div>
-            <div>
-                <dt class="text-gray-500">{{ __('Type') }}</dt>
-                <dd class="font-medium text-gray-900 mt-1">{{ $template->typeLabel() }}</dd>
-            </div>
-            <div>
-                <dt class="text-gray-500">{{ __('Status') }}</dt>
-                <dd class="mt-1">
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $template->status === 'published' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800' }}">
-                        {{ ucfirst($template->status) }}
-                    </span>
-                </dd>
-            </div>
-            <div>
-                <dt class="text-gray-500">{{ __('Default') }}</dt>
-                <dd class="font-medium text-gray-900 mt-1">
-                    @if($template->is_default)
-                        <span class="inline-flex items-center gap-1 text-green-700">
-                            <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                            {{ __('Yes') }}
-                        </span>
-                    @else
-                        {{ __('No') }}
-                    @endif
-                </dd>
-            </div>
-            <div>
-                <dt class="text-gray-500">{{ __('Blocks') }}</dt>
-                <dd class="font-medium text-gray-900 mt-1">{{ $template->blockCount() }}</dd>
-            </div>
-            <div>
-                <dt class="text-gray-500">{{ __('Updated') }}</dt>
-                <dd class="font-medium text-gray-900 mt-1">{{ $template->updated_at->diffForHumans() }}</dd>
-            </div>
-        </dl>
-    </div>
-
-    @if($template->type === 'header')
-        <div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
-            <div class="flex items-center justify-between mb-4">
-                <div>
-                    <h2 class="text-lg font-semibold text-gray-900">{{ __('Header Settings') }}</h2>
-                    <p class="text-xs text-gray-500 mt-1">{{ __('Configure how the header behaves on the website.') }}</p>
-                </div>
-            </div>
-            <form method="POST" action="{{ route('admin.rjbuilder.update', $template) }}" class="flex items-center gap-4">
-                @csrf
-                @method('PUT')
-                <input type="hidden" name="name" value="{{ $template->name }}">
-                <input type="hidden" name="content" value="{{ htmlspecialchars(json_encode($template->content), ENT_QUOTES, 'UTF-8') }}">
-                <input type="hidden" name="settings[sticky_header]" value="0">
-                <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" name="settings[sticky_header]" value="1" {{ (isset($template->settings['sticky_header']) && $template->settings['sticky_header'] === '1') ? 'checked' : '' }} class="w-4 h-4 text-purple-600 rounded border-gray-300 focus:ring-purple-500">
-                    <span class="text-sm font-medium text-gray-700">{{ __('Sticky Header (Stays fixed at the top when scrolling)') }}</span>
-                </label>
-                <button type="submit" class="ml-auto px-4 py-2 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800">
-                    {{ __('Save Setting') }}
-                </button>
-            </form>
-        </div>
-    @endif
-
-    <div class="bg-white rounded-xl border border-gray-200 p-6">
-        <div class="flex items-center justify-between mb-4">
-            <div>
-                <h2 class="text-lg font-semibold text-gray-900">{{ __('Display Conditions') }}</h2>
-                <p class="text-xs text-gray-500 mt-1">{{ __('Choose where this template is displayed.') }}</p>
-            </div>
-            <button type="button" @click="openConditions()"
-                    class="px-4 py-2 border border-purple-300 text-purple-700 rounded-lg text-sm font-medium hover:bg-purple-50">
-                {{ __('Edit Conditions') }}
-            </button>
-        </div>
-
-        <div x-show="!hasConditions" class="text-sm text-gray-500 italic">
-            {{ __('No conditions set. This template will not appear anywhere by default.') }}
-        </div>
-
-        <div x-show="hasConditions" x-cloak>
-            <div class="flex items-center gap-2 mb-2 text-xs text-gray-500">
-                <span>{{ __('Match') }}:</span>
-                <span class="font-semibold uppercase" x-text="conditions.match"></span>
-            </div>
-            <ul class="space-y-2">
-                <template x-for="(rule, i) in (conditions.rules || [])" :key="i">
-                    <li class="flex items-center gap-2 text-sm">
-                        <span class="w-2 h-2 rounded-full bg-purple-500"></span>
-                        <span class="font-medium" x-text="ruleLabel(rule.type)"></span>
-                        <span x-show="rule.value" class="text-gray-500" x-text="'→ ' + rule.value"></span>
-                    </li>
-                </template>
-            </ul>
-        </div>
-    </div>
-
-    <div x-show="showModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold">{{ __('Display Conditions') }}</h3>
-                <button type="button" @click="showModal = false" class="text-gray-400 hover:text-gray-600">✕</button>
-            </div>
-
-            <div class="mb-4">
-                <label class="block text-sm font-medium mb-2">{{ __('Match') }}</label>
-                <select x-model="draft.match" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                    <option value="all">{{ __('All conditions must match') }}</option>
-                    <option value="any">{{ __('Any condition can match') }}</option>
-                </select>
-            </div>
-
-            <div class="mb-4 space-y-2">
-                <template x-for="(rule, i) in draft.rules" :key="i">
-                    <div class="flex items-center gap-2">
-                        <select x-model="rule.type" class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                            <option value="entire_site">{{ __('Entire Site') }}</option>
-                            <option value="front_page">{{ __('Front Page') }}</option>
-                            <option value="not_front_page">{{ __('Not Front Page') }}</option>
-                            <option value="search">{{ __('Search Results') }}</option>
-                            <option value="url_contains">{{ __('URL Contains') }}</option>
-                            <option value="url_exact">{{ __('URL Is') }}</option>
-                        </select>
-                        <input type="text" x-model="rule.value" x-show="rule.type === 'url_contains' || rule.type === 'url_exact'"
-                               placeholder="{{ __('Value') }}"
-                               class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                        <button type="button" @click="draft.rules.splice(i, 1)" class="text-red-500 hover:text-red-700 px-2">✕</button>
-                    </div>
-                </template>
-            </div>
-
-            <button type="button" @click="addRule()" class="text-sm text-purple-600 hover:text-purple-800 font-medium mb-4">
-                + {{ __('Add Condition') }}
-            </button>
-
-            <div class="flex justify-end gap-2 pt-4 border-t border-gray-200">
-                <button type="button" @click="showModal = false" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800">
-                    {{ __('Cancel') }}
-                </button>
-                <button type="button" @click="saveConditions()" :disabled="saving"
-                        class="px-5 py-2 bg-purple-600 text-white rounded-lg text-sm font-semibold hover:bg-purple-700 disabled:opacity-60">
-                    <span x-text="saving ? '{{ __('Saving...') }}' : '{{ __('Save') }}'"></span>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        window.__templateId = {{ $template->id }};
-        window.__initialConditions = @json($template->conditions ?? []);
-        window.__updateConditionsUrl = @json(route('admin.rjbuilder.conditions', $template));
-        window.__csrf = @json(csrf_token());
-    </script>
-
-    <script>
-        function templateEdit() {
-            return {
-                showModal: false,
-                saving: false,
-                conditions: window.__initialConditions || {},
-                draft: { match: 'all', rules: [] },
-
-                get hasConditions() {
-                    return this.conditions && Array.isArray(this.conditions.rules) && this.conditions.rules.length > 0;
-                },
-
-                ruleLabel(type) {
-                    const labels = {
-                        'entire_site': '{{ __('Entire Site') }}',
-                        'front_page': '{{ __('Front Page') }}',
-                        'not_front_page': '{{ __('Not Front Page') }}',
-                        'search': '{{ __('Search Results') }}',
-                        'url_contains': '{{ __('URL Contains') }}',
-                        'url_exact': '{{ __('URL Is') }}',
-                    };
-                    return labels[type] || type;
-                },
-
-                openConditions() {
-                    this.draft = {
-                        match: this.conditions.match || 'all',
-                        rules: Array.isArray(this.conditions.rules) ? JSON.parse(JSON.stringify(this.conditions.rules)) : [],
-                    };
-                    this.showModal = true;
-                },
-
-                addRule() {
-                    this.draft.rules.push({ type: 'entire_site', value: '' });
-                },
-
-                async saveConditions() {
-                    this.saving = true;
-                    try {
-                        const res = await fetch(window.__updateConditionsUrl, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Accept': 'application/json',
-                                'X-CSRF-TOKEN': window.__csrf,
-                            },
-                            body: JSON.stringify({ conditions: this.draft }),
-                        });
-                        if (res.ok) {
-                            this.conditions = this.draft;
-                            this.showModal = false;
-                        }
-                    } catch (e) {
-                        console.error(e);
-                    } finally {
-                        this.saving = false;
-                    }
-                },
-            };
+        if (!in_array($type, $allowedTypes, true)) {
+            $type = 'header';
         }
-    </script>
-</div>
 
-@endsection
+        $query = Template::with('author')->type($type)->latest();
+
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('slug', 'like', "%{$search}%");
+            });
+        }
+
+        $templates = $query->paginate(20)->withQueryString();
+
+        $counts = [];
+        foreach ($allowedTypes as $t) {
+            $counts[$t] = Template::type($t)->count();
+        }
+
+        return view('admin.rjbuilder.index', compact('templates', 'type', 'counts'));
+    }
+
+    public function create(Request $request)
+    {
+        $type = $request->input('type', 'header');
+
+        if (!array_key_exists($type, Template::types())) {
+            $type = 'header';
+        }
+
+        return view('admin.rjbuilder.create', compact('type'));
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:200'],
+            'type' => ['required', 'string', 'in:header,footer,page,popup,block'],
+        ]);
+
+        $slug = $this->uniqueSlug(Str::slug($data['name']));
+
+        $template = Template::create([
+            'name' => $data['name'],
+            'slug' => $slug,
+            'type' => $data['type'],
+            'content' => ['blocks' => []],
+            'status' => 'draft',
+            'author_id' => $request->user()->id,
+        ]);
+
+        return redirect()->route('admin.rjbuilder.edit', $template)
+            ->with('success', __('Template created. Start building!'));
+    }
+
+    public function edit(Template $template)
+    {
+        return view('admin.rjbuilder.edit', compact('template'));
+    }
+
+    public function build(Template $template)
+    {
+        $builder = [
+            'entityType' => 'template',
+            'entityId' => $template->id,
+            'name' => $template->name,
+            'subtitle' => $template->typeLabel(),
+            'templateType' => $template->type,
+            'blocks' => $template->content['blocks'] ?? [],
+            'updateUrl' => route('admin.rjbuilder.update', $template),
+            'backUrl' => route('admin.rjbuilder.edit', $template),
+            'status' => $template->status,
+            'locales' => $template->type === 'page' ? rj_available_locales() : [],
+            'baseLocale' => config('app.locale'),
+        ];
+
+        return view('rjbuilder.edit', compact('builder'));
+    }
+
+    public function update(Request $request, Template $template)
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:200'],
+            'content' => ['nullable', 'array'],
+            'status' => ['nullable', 'in:draft,published'],
+            'settings' => ['nullable', 'array'],
+        ]);
+
+        $settings = $template->settings ?? [];
+        if (isset($data['settings']) && is_array($data['settings'])) {
+            $settings = array_merge($settings, $data['settings']);
+        }
+
+        $template->update([
+            'name' => $data['name'],
+            'content' => $data['content'] ?? $template->content,
+            'status' => $data['status'] ?? $template->status,
+            'settings' => $settings,
+        ]);
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => __('Template saved.'),
+                'blocks_count' => count($template->content['blocks'] ?? []),
+            ]);
+        }
+
+        return back()->with('success', __('Template saved.'));
+    }
+
+    public function destroy(Template $template)
+    {
+        if ($template->is_default) {
+            return back()->with('error', __('Cannot delete the default template. Set another as default first.'));
+        }
+
+        $type = $template->type;
+        $template->delete();
+
+        return redirect()->route('admin.rjbuilder.index', ['type' => $type])
+            ->with('success', __('Template deleted.'));
+    }
+
+    public function duplicate(Template $template)
+    {
+        $new = $template->replicate();
+        $new->name = $template->name . ' (Copy)';
+        $new->slug = $this->uniqueSlug(Str::slug($new->name));
+        $new->status = 'draft';
+        $new->is_default = false;
+        $new->save();
+
+        return back()->with('success', __('Template duplicated.'));
+    }
+
+    public function setDefault(Template $template)
+    {
+        Template::type($template->type)->update(['is_default' => false]);
+
+        $template->update(['is_default' => true]);
+
+        return back()->with('success', __('Default :type set.', ['type' => strtolower($template->typeLabel())]));
+    }
+
+    public function publish(Template $template)
+    {
+        $template->update(['status' => 'published']);
+
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true, 'status' => 'published']);
+        }
+
+        return back()->with('success', __('Template published.'));
+    }
+
+    public function unpublish(Template $template)
+    {
+        $template->update(['status' => 'draft']);
+
+        if (request()->expectsJson()) {
+            return response()->json(['success' => true, 'status' => 'draft']);
+        }
+
+        return back()->with('success', __('Template unpublished.'));
+    }
+
+    public function updateConditions(Request $request, Template $template)
+    {
+        $validated = $request->validate([
+            'conditions' => 'nullable|array',
+            'conditions.match' => 'nullable|in:all,any',
+            'conditions.rules' => 'nullable|array',
+            'conditions.rules.*.type' => 'required|string',
+            'conditions.rules.*.value' => 'nullable|string',
+        ]);
+
+        $conditions = $validated['conditions'] ?? [];
+
+        if (empty($conditions['rules'])) {
+            $conditions = null;
+        }
+
+        $template->update([
+            'conditions' => $conditions,
+        ]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'conditions' => $template->conditions,
+            ]);
+        }
+
+        return back()->with('success', __('Conditions saved.'));
+    }
+
+    public function updatePopupSettings(Request $request, Template $template)
+    {
+        if ($template->type !== 'popup') {
+            if ($request->expectsJson()) {
+                return response()->json(['error' => 'Not a popup template.'], 422);
+            }
+            return back();
+        }
+
+        $validated = $request->validate([
+            'settings' => 'nullable|array',
+            'settings.trigger' => 'nullable|in:page_load,scroll_percent,after_inactivity,click_element,exit_intent',
+            'settings.trigger_value' => 'nullable|string',
+            'settings.delay' => 'nullable|integer|min:0|max:60',
+            'settings.frequency' => 'nullable|in:always,once_per_session,once_per_day,once_per_week,once',
+            'settings.position' => 'nullable|in:center,top,bottom,top-left,top-right,bottom-left,bottom-right',
+            'settings.width' => 'nullable|in:sm,md,lg,xl,full',
+            'settings.overlay' => 'nullable|boolean',
+            'settings.overlay_color' => 'nullable|string',
+            'settings.overlay_opacity' => 'nullable|integer|min:0|max:100',
+            'settings.close_on_overlay' => 'nullable|boolean',
+            'settings.close_button' => 'nullable|boolean',
+            'settings.animation' => 'nullable|in:none,fadeIn,fadeInUp,fadeInDown,zoomIn,slideInLeft,slideInRight',
+            'settings.animation_duration' => 'nullable|in:sm,md,lg,xl',
+            'settings.auto_close' => 'nullable|integer|min:0|max:120',
+        ]);
+
+        $settings = $validated['settings'] ?? [];
+
+        $template->update([
+            'settings' => $settings,
+        ]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'settings' => $template->popupSettings(),
+            ]);
+        }
+
+        return back()->with('success', __('Popup settings saved.'));
+    }
+
+    protected function uniqueSlug(string $slug): string
+    {
+        $base = $slug ?: 'template';
+        $slug = $base;
+        $i = 1;
+
+        while (Template::where('slug', $slug)->exists()) {
+            $slug = $base . '-' . $i;
+            $i++;
+
+            if ($i > 100) {
+                return $base . '-' . Str::random(6);
+            }
+        }
+
+        return $slug;
+    }
+}
