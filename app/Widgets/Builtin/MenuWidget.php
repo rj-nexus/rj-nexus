@@ -57,7 +57,7 @@ class MenuWidget extends BaseWidget
                 'name' => 'align',
                 'type' => 'select',
                 'label' => __('Alignment'),
-                'default' => 'right',
+                'default' => 'center',
                 'tab' => 'content',
                 'options' => [
                     'left' => __('Left'),
@@ -208,7 +208,7 @@ class MenuWidget extends BaseWidget
         }
 
         $layout = $settings['layout'] ?? 'horizontal';
-        $align = in_array($settings['align'] ?? 'right', ['left', 'center', 'right'], true) ? $settings['align'] : 'right';
+        $align = in_array($settings['align'] ?? 'center', ['left', 'center', 'right'], true) ? $settings['align'] : 'center';
         $mobileBehavior = in_array($settings['mobile_behavior'] ?? 'hamburger', ['hamburger', 'stack', 'scroll'], true)
             ? $settings['mobile_behavior']
             : 'hamburger';
@@ -241,7 +241,8 @@ class MenuWidget extends BaseWidget
             '--mjc:' . $jc,
         ];
 
-        $wrapperStyles = [];
+        // Menyunun tam en tutmasını təmin edirik ki, mərkəzləşmə işləsin
+        $wrapperStyles = ['width: 100%;'];
 
         $padding = $this->dimensionCss($settings, 'padding_dim');
         if ($padding !== '') {
@@ -259,10 +260,7 @@ class MenuWidget extends BaseWidget
         }
 
         $wrapperAttrs = [];
-
-        if (!empty($wrapperStyles)) {
-            $wrapperAttrs['style'] = implode(';', $wrapperStyles);
-        }
+        $wrapperAttrs['style'] = implode(';', $wrapperStyles);
 
         $id = $this->cssId($settings);
         if ($id !== '') {
@@ -284,12 +282,12 @@ class MenuWidget extends BaseWidget
 
         $itemsHtml = $this->renderItems($items);
 
-        $desktop = '<nav class="rj-menu-d"><ul>' . $itemsHtml . '</ul></nav>';
+        $desktop = '<nav class="rj-menu-d" style="width:100%;"><ul>' . $itemsHtml . '</ul></nav>';
 
         $toggle = "event.preventDefault();var m=this.closest('.rj-menu');var o=m.classList.toggle('rj-open');this.setAttribute('aria-expanded',o);";
 
-        $mobile = '<nav class="rj-menu-m">'
-            . '<div class="rj-bm">'
+        $mobile = '<nav class="rj-menu-m" style="width:100%;">'
+            . '<div class="rj-bm" style="width:100%; display:flex; justify-content:' . $jc . ';">'
             . '<button type="button" class="rj-bb" aria-label="Menu" aria-expanded="false" onclick="' . $toggle . '">'
             . '<svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>'
             . '</button>'
