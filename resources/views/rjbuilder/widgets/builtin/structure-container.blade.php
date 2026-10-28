@@ -2,6 +2,7 @@
     $dir = $settings['flex_direction'] ?? 'row';
     $jc = $settings['justify_content'] ?? 'space-between';
     $ai = $settings['align_items'] ?? 'center';
+    $wrap = $settings['flex_wrap'] ?? 'nowrap';
     $cols = max(2, min(5, (int)($settings['columns'] ?? 3)));
 
     $gapMap = ['none' => '0', 'sm' => '12px', 'md' => '24px', 'lg' => '36px', 'xl' => '48px'];
@@ -21,7 +22,7 @@
 
     $dirStyle = $dir !== 'row' ? "flex-direction:{$dir};" : '';
 
-    $style = "display:flex; flex-wrap:wrap; {$dirStyle} justify-content:{$jc}; align-items:{$ai}; gap:{$gap}; box-sizing:border-box; width:100%; {$autoPad}";
+    $style = "display:flex; flex-wrap:{$wrap}; {$dirStyle} justify-content:{$jc}; align-items:{$ai}; gap:{$gap}; box-sizing:border-box; width:100%; {$autoPad}";
 
     if ($pt !== '') $style .= " padding-top:{$pt};";
     if ($pr !== '') $style .= " padding-right:{$pr};";

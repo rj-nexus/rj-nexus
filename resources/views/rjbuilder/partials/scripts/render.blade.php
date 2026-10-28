@@ -232,7 +232,7 @@ function builderRender() {
             const jc = jcMap[settings.justify_content] || 'space-between';
 
             const dir = ['row', 'column', 'row-reverse', 'column-reverse'].includes(settings.flex_direction) ? settings.flex_direction : 'row';
-            const wrap = ['nowrap', 'wrap', 'wrap-reverse'].includes(settings.flex_wrap) ? settings.flex_wrap : 'wrap';
+            const wrap = ['nowrap', 'wrap', 'wrap-reverse'].includes(settings.flex_wrap) ? settings.flex_wrap : 'nowrap';
 
             const isFixedLayout = ['header', 'footer', 'popup'].includes(this.templateType);
             const keepTablet = isFixedLayout || !!settings.keep_tablet;

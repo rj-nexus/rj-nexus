@@ -28,7 +28,7 @@ class StructureContainerWidget extends BaseWidget
 
     public function description(): string
     {
-        return __('A flexible container with fixed columns for structural templates.');
+        return __('A flexible container for structural templates (Header, Footer, etc.).');
     }
 
     public function contexts(): array
@@ -61,6 +61,17 @@ class StructureContainerWidget extends BaseWidget
                 'options' => [
                     'row' => __('Row (Horizontal)'),
                     'column' => __('Column (Vertical)'),
+                ],
+            ],
+            [
+                'name' => 'flex_wrap',
+                'type' => 'select',
+                'label' => __('Wrap'),
+                'default' => 'nowrap',
+                'tab' => 'content',
+                'options' => [
+                    'nowrap' => __('No Wrap (Keep on one line)'),
+                    'wrap' => __('Wrap (Go to next line if no space)'),
                 ],
             ],
             [
