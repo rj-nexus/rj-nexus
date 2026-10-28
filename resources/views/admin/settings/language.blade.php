@@ -113,6 +113,57 @@
         </div>
     </div>
 
+    <div class="bg-white rounded-lg shadow-sm border border-gray-100">
+        <div class="px-6 py-4 border-b border-gray-100">
+            <h2 class="text-base font-semibold text-gray-900">{{ __('Frontend Languages') }}</h2>
+            <p class="text-sm text-gray-500 mt-1">{{ __('Select which languages appear in the frontend language switcher. Admin panel always shows all installed languages.') }}</p>
+        </div>
+
+        <form method="POST" action="{{ route('admin.settings.language.frontend-locales') }}">
+            @csrf
+            @method('PUT')
+
+            <div class="divide-y divide-gray-100">
+                @foreach ($data['locales'] as $loc)
+                    @php
+                        $isChecked = in_array($loc, $data['frontend_locales'] ?? [], true);
+                    @endphp
+                    <label class="px-6 py-3 flex items-center gap-4 cursor-pointer hover:bg-gray-50 transition">
+                        <input type="checkbox" name="frontend_locales[]" value="{{ $loc }}"
+                               {{ $isChecked ? 'checked' : '' }}
+                               class="rounded border-gray-300 text-rj-purple focus:ring-rj-purple">
+                        <div class="flex-shrink-0">
+                            @php $flag = rj_lang_flag_url($loc); @endphp
+                            @if ($flag)
+                                <img src="{{ $flag }}" alt="{{ strtoupper($loc) }}" class="w-8 h-6 object-cover rounded shadow-sm border border-gray-200">
+                            @else
+                                <div class="w-8 h-6 rounded bg-gray-100 border border-gray-200 flex items-center justify-center text-[10px] text-gray-400 font-medium">
+                                    {{ strtoupper($loc) }}
+                                </div>
+                            @endif
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <div class="text-sm font-medium text-gray-900">
+                                {{ rj_lang_name($loc) }}
+                                <span class="text-xs font-normal text-gray-400 ml-1">({{ strtoupper($loc) }})</span>
+                            </div>
+                        </div>
+                        @if ($loc === config('app.locale'))
+                            <span class="text-xs text-gray-400">{{ __('Default') }}</span>
+                        @endif
+                    </label>
+                @endforeach
+            </div>
+
+            <div class="px-6 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-between gap-4">
+                <p class="text-xs text-gray-500">{{ __('If none are selected, only the default language will be available in the frontend switcher.') }}</p>
+                <button type="submit" class="inline-flex items-center px-4 py-2 rounded-lg bg-gradient-to-r from-rj-purple to-rj-pink text-white text-sm font-medium hover:opacity-90 transition whitespace-nowrap">
+                    {{ __('Save') }}
+                </button>
+            </div>
+        </form>
+    </div>
+
     <form method="POST" action="{{ route('admin.settings.language.update') }}" class="space-y-6">
         @csrf
         @method('PUT')
