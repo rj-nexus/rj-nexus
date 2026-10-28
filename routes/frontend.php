@@ -9,6 +9,7 @@ use App\Http\Controllers\Frontend\AccountController;
 use App\Http\Controllers\Frontend\LocaleController;
 use App\Http\Controllers\Frontend\NewsletterController;
 use App\Http\Controllers\Frontend\WidgetAuthController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/theme-assets/{slug}/{path}', function (string $slug, string $path) {
@@ -60,31 +61,25 @@ Route::get('/rj-fonts.css', [\App\Http\Controllers\Admin\CustomFontController::c
 
 Route::get('/blog', function () {
     $locale = session('locale', config('app.locale'));
-
     if (!in_array($locale, rj_frontend_locales(), true)) {
         $locale = config('app.locale');
     }
-
     return redirect('/' . $locale . '/blog', 301);
 });
 
 Route::get('/blog/{slug}', function (string $slug) {
     $locale = session('locale', config('app.locale'));
-
     if (!in_array($locale, rj_frontend_locales(), true)) {
         $locale = config('app.locale');
     }
-
     return redirect('/' . $locale . '/blog/' . $slug, 301);
 });
 
 Route::get('/', function () {
     $locale = session('locale', config('app.locale'));
-
     if (!in_array($locale, rj_frontend_locales(), true)) {
         $locale = config('app.locale');
     }
-
     return redirect('/' . $locale);
 })->name('home');
 
@@ -110,3 +105,22 @@ Route::prefix('{locale}')
             ->where('slug', '^(?!admin|login|register|logout|password|email|verification|api|rj-preview|rj-form|rj-fonts|rj-widget|theme-assets|plugin-assets|blog|account|kyc|profile|storage|up|sanctum|livewire|shop|cart|checkout|product).*$')
             ->name('frontend.page');
     });
+
+Route::get('/{path}', function (Request $request, string $path) {
+    $segments = explode('/', trim($path, '/'));
+    $first = $segments[0] ?? '';
+
+    if (preg_match('/^[a-z]{2}(_[A-Z]{2})?$/', $first) && in_array($first, rj_frontend_locales(), true)) {
+        abort(404);
+    }
+
+    $locale = session('locale', config('app.locale'));
+    if (!in_array($locale, rj_frontend_locales(), true)) {
+        $locale = config('app.locale');
+    }
+
+    $qs = $request->getQueryString();
+    $url = '/' . $locale . '/' . $path . ($qs ? '?' . $qs : '');
+
+    return redirect($url, 301);
+})->where('path', '^(?!admin|login|register|logout|password|email|verification|api|rj-|theme-assets|plugin-assets|storage|up|sanctum|livewire|shop|cart|checkout|product|favicon|robots|sitemap).*$')->name('frontend.fallback');
