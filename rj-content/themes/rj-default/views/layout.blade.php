@@ -32,7 +32,8 @@
 
         .rj-frontend { min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; width: 100%; max-width: 100%; }
         .rj-frontend > main { flex: 1; width: 100%; max-width: 100%; overflow-x: hidden; }
-        .rj-frontend-wrapper { container-type: inline-size; container-name: rj; width: 100%; }
+        .rj-frontend-wrapper { width: 100%; }
+        .rj-frontend-main { container-type: inline-size; container-name: rj; }
 
         .rj-frontend-header,
         .rj-frontend-footer {
