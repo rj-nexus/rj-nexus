@@ -1,3 +1,12 @@
+@php
+    $activeHeaderTemplate = app(\App\Services\ThemeResolver::class)->header();
+    $isSticky = true; // Default
+    if ($activeHeaderTemplate) {
+        $isSticky = ($activeHeaderTemplate->settings['sticky_header'] ?? '1') === '1';
+    } else {
+        $isSticky = rj_get_option('header_sticky', '1') === '1';
+    }
+@endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
@@ -175,7 +184,7 @@
 
     @stack('styles')
 </head>
-<body class="{{ rj_get_option('header_sticky', '1') === '1' ? 'has-sticky-header' : '' }}">
+<body class="{{ $isSticky ? 'has-sticky-header' : '' }}">
     <div class="rj-frontend rj-frontend-wrapper">
         @yield('content')
     </div>
