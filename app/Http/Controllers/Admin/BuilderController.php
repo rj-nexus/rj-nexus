@@ -57,11 +57,27 @@ class BuilderController extends Controller
 
         $slug = $this->uniqueSlug(Str::slug($data['name']));
 
+        $blocks = [];
+
+        if (in_array($data['type'], ['header', 'footer', 'popup', 'block'])) {
+            $blocks[] = [
+                'id' => 'container_' . uniqid(),
+                'type' => 'structure-container',
+                'settings' => [
+                    'flex_direction' => 'row',
+                    'justify_content' => 'space-between',
+                    'align_items' => 'center',
+                    'gap' => 'md',
+                ],
+                'children' => []
+            ];
+        }
+
         $template = Template::create([
             'name' => $data['name'],
             'slug' => $slug,
             'type' => $data['type'],
-            'content' => ['blocks' => []],
+            'content' => ['blocks' => $blocks],
             'status' => 'draft',
             'author_id' => $request->user()->id,
         ]);
