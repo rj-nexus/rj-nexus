@@ -648,10 +648,42 @@ function builderRender() {
 
             const w = this.widgets.find(x => x.id === block.type);
             if (this.preview) return '';
-            return `<div style="padding:14px 16px; margin:0.5rem 1rem; display:flex; align-items:center; gap:12px; border:1px dashed #d1d5db; border-radius:10px; background:#fafafa; color:#6b7280; font-size:12px;">
-                        <span style="width:28px; height:28px; display:flex; align-items:center; justify-content:center; color:#8b5cf6; flex-shrink:0;" class="rj-ico">${w && w.icon ? w.icon : ''}</span>
-                        <span style="font-weight:600; color:#374151;">${esc(w ? w.name : block.type)}</span>
-                    </div>`;
+
+            const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+            const renderUrl = '{{ route('admin.rjbuilder.render-block') }}';
+            const settingsStr = this.esc(JSON.stringify(settings));
+
+            return `<div x-data="{
+                html: '',
+                loading: true,
+                init() {
+                    fetch('${renderUrl}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '${csrf}',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            type: '${block.type}',
+                            settings: JSON.parse(this.$el.dataset.settings)
+                        })
+                    })
+                    .then(r => r.json())
+                    .then(d => {
+                        this.html = d.html;
+                        this.loading = false;
+                        this.$nextTick(() => { if(window.Alpine) window.Alpine.initTree(this.$el.querySelector('.rj-real-html')) });
+                    })
+                    .catch(e => { console.error(e); this.loading = false; });
+                }
+            }" x-init="init()" data-settings="${settingsStr}" style="min-height:40px; position:relative; margin: 0.5rem 1rem;">
+                <div x-show="loading" style="padding:14px 16px; display:flex; align-items:center; gap:12px; border:1px dashed #d1d5db; border-radius:10px; background:#fafafa; color:#6b7280; font-size:12px;">
+                    <span class="animate-spin" style="width:14px; height:14px; border:2px solid #ccc; border-top-color:#8b5cf6; border-radius:50%; display:inline-block;"></span>
+                    <span style="font-weight:600; color:#374151;">${esc(w ? w.name : block.type)}...</span>
+                </div>
+                <div x-show="!loading" class="rj-real-html" x-html="html"></div>
+            </div>`;
         },
 
         animationWrapper(html, settings, stateClass) {
