@@ -232,7 +232,9 @@ function builderRender() {
             const jc = jcMap[settings.justify_content] || 'space-between';
 
             const dir = ['row', 'column', 'row-reverse', 'column-reverse'].includes(settings.flex_direction) ? settings.flex_direction : 'row';
-            const wrap = ['nowrap', 'wrap', 'wrap-reverse'].includes(settings.flex_wrap) ? settings.flex_wrap : 'nowrap';
+
+            // Wrap-ı nowrap edirik
+            const wrap = 'nowrap';
 
             const isFixedLayout = ['header', 'footer', 'popup'].includes(this.templateType);
             const keepTablet = isFixedLayout || !!settings.keep_tablet;
@@ -252,7 +254,6 @@ function builderRender() {
             for (let i = 0; i < cols; i++) {
                 const child = children[i] || null;
                 const hasWidth = !!(widths && widths[i] > 0);
-                // Flex 1 təyin edirik ki, elementlər bərabər paylansın
                 const flexInline = hasWidth ? `flex:${widths[i]} 1 0;` : 'flex: 1 1 0%;';
 
                 let orderStyle = '';
@@ -263,9 +264,18 @@ function builderRender() {
                     orderStyle = `--ord-d:${oD}; --ord-t:${oT}; --ord-m:${oM};`;
                 }
 
+                let pushCss = '';
+                if (jc === 'space-between') {
+                    if (i === 0) {
+                        pushCss = 'margin-right: auto;';
+                    } else if (i === 1) {
+                        pushCss = (cols === 3) ? 'margin-left: auto; margin-right: auto;' : 'margin-left: auto;';
+                    }
+                }
+
                 if (this.preview) {
                     if (!child) continue;
-                    slotsHtml += `<div class="rj-slot rj-slot-i-${i}" style="min-width:0; ${flexInline} ${orderStyle}">${this.renderBlockHtml(child, bid, i)}</div>`;
+                    slotsHtml += `<div class="rj-slot rj-slot-i-${i}" style="min-width:0; ${flexInline} ${orderStyle} ${pushCss}">${this.renderBlockHtml(child, bid, i)}</div>`;
                     continue;
                 }
 
@@ -277,7 +287,7 @@ function builderRender() {
                        </div>`;
 
                 slotsHtml += `
-                    <div class="rj-slot rj-slot-i-${i}" style="position:relative; min-height:80px; min-width:0; ${flexInline} ${orderStyle} border-radius:8px; transition:all .15s; border:2px ${child ? 'solid transparent' : 'dashed #e5e7eb'};"
+                    <div class="rj-slot rj-slot-i-${i}" style="position:relative; min-height:80px; min-width:0; ${flexInline} ${orderStyle} ${pushCss} border-radius:8px; transition:all .15s; border:2px ${child ? 'solid transparent' : 'dashed #e5e7eb'};"
                          ondragover="event.preventDefault(); event.stopPropagation(); this.classList.add('rj-drop');"
                          ondragleave="this.classList.remove('rj-drop');"
                          ondrop="event.preventDefault(); event.stopPropagation(); window.__builder.dropInto('${bid}', ${i});">
@@ -291,7 +301,7 @@ function builderRender() {
 
             return `
                 <div style="border-radius:0; ${outerStyle}">
-                    <div class="${gridClass}" style="--c:${cols}; --g:${gap}; --al:${ai}; --jc:${jc}; --dir:${dir}; --wrap:${wrap};">
+                    <div class="${gridClass}" style="--c:${cols}; --g:${gap}; --al:${ai}; --jc:${jc}; --dir:${dir}; --wrap:${wrap}; display:flex; flex-wrap:nowrap; align-items:${ai};">
                         ${slotsHtml}
                     </div>
                 </div>
