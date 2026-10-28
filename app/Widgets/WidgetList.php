@@ -15,7 +15,7 @@ use App\Widgets\Builtin\CallToActionWidget;
 use App\Widgets\Builtin\CodeHighlightWidget;
 use App\Widgets\Builtin\ContactInfoWidget;
 use App\Widgets\Builtin\ContainerWidget;
-use App\Widgets\Builtin\LayoutContainerWidget;
+use App\Widgets\Builtin\StructureContainerWidget;
 use App\Widgets\Builtin\CookieNoticeWidget;
 use App\Widgets\Builtin\CounterWidget;
 use App\Widgets\Builtin\CountdownWidget;
@@ -80,7 +80,7 @@ class WidgetList
             new TextWidget(),
             new ImageWidget(),
             new ContainerWidget(),
-            new LayoutContainerWidget(),
+            new StructureContainerWidget(),
             new ButtonWidget(),
             new DividerWidget(),
             new CustomHtmlWidget(),
