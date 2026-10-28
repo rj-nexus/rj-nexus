@@ -161,7 +161,7 @@ function builderRender() {
             const hiddenHere = !!s['_hide_' + this.device];
             const hasAnim = s._animation && s._animation !== 'none';
 
-            const isContainer = ['container', 'layout-container', 'structure-container'].includes(block.type);
+            const isContainer = ['container', 'structure-container', 'layout-container'].includes(block.type);
             let inner = isContainer ? this.renderContainer(block) : this.renderSimpleWidget(block);
 
             if (this.preview && inner === '') return '';
@@ -252,20 +252,22 @@ function builderRender() {
             for (let i = 0; i < cols; i++) {
                 const child = children[i] || null;
                 const hasWidth = !!(widths && widths[i] > 0);
-                const growValue = hasWidth ? widths[i] : 1;
-                const flexInline = `flex:${growValue} 1 0;`;
+                const growValue = hasWidth ? widths[i] : 0;
+                const flexInline = hasWidth ? `flex:${growValue} 1 0;` : 'flex:0 1 auto;';
 
-                // BURADA CİHAZA GÖRƏ SIRALAMANI TƏYİN EDİRİK
                 let orderStyle = '';
                 if (child && child.settings) {
                     const oD = child.settings._order_desktop || child.settings.order || 0;
-                    const oM = child.settings._order_mobile || oD;
-                    orderStyle = `--ord-d:${oD}; --ord-m:${oM};`;
+                    const oT = child.settings._order_tablet !== undefined ? child.settings._order_tablet : oD;
+                    const oM = child.settings._order_mobile !== undefined ? child.settings._order_mobile : oT;
+                    orderStyle = `--ord-d:${oD}; --ord-t:${oT}; --ord-m:${oM};`;
                 }
+
+                const pushRight = (jc === 'space-between' && i === 1) ? 'margin-left: auto;' : '';
 
                 if (this.preview) {
                     if (!child) continue;
-                    slotsHtml += `<div class="rj-slot" style="min-width:0; ${flexInline} ${orderStyle}">${this.renderBlockHtml(child, bid, i)}</div>`;
+                    slotsHtml += `<div class="rj-slot" style="min-width:0; ${flexInline} ${orderStyle} ${pushRight}">${this.renderBlockHtml(child, bid, i)}</div>`;
                     continue;
                 }
 
@@ -277,7 +279,7 @@ function builderRender() {
                        </div>`;
 
                 slotsHtml += `
-                    <div class="rj-slot" style="position:relative; min-height:80px; min-width:0; ${flexInline} ${orderStyle} border-radius:8px; transition:all .15s; border:2px ${child ? 'solid transparent' : 'dashed #e5e7eb'};"
+                    <div class="rj-slot" style="position:relative; min-height:80px; min-width:0; ${flexInline} ${orderStyle} ${pushRight} border-radius:8px; transition:all .15s; border:2px ${child ? 'solid transparent' : 'dashed #e5e7eb'};"
                          ondragover="event.preventDefault(); event.stopPropagation(); this.classList.add('rj-drop');"
                          ondragleave="this.classList.remove('rj-drop');"
                          ondrop="event.preventDefault(); event.stopPropagation(); window.__builder.dropInto('${bid}', ${i});">
