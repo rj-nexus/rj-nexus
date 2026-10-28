@@ -58,6 +58,53 @@ if (!function_exists('rj_available_locales')) {
     }
 }
 
+if (!function_exists('rj_frontend_locales')) {
+    function rj_frontend_locales(): array
+    {
+        $raw = rj_get_option('frontend_locales', '[]');
+
+        if (is_string($raw)) {
+            $decoded = json_decode($raw, true);
+            $locales = is_array($decoded) ? $decoded : [];
+        } else {
+            $locales = is_array($raw) ? $raw : [];
+        }
+
+        $locales = array_values(array_filter($locales, fn ($l) => is_string($l) && $l !== ''));
+
+        if (empty($locales)) {
+            return [config('app.locale', 'en')];
+        }
+
+        $available = rj_available_locales();
+        $locales = array_values(array_intersect($locales, $available));
+
+        return $locales ?: [config('app.locale', 'en')];
+    }
+}
+
+if (!function_exists('rj_set_frontend_locales')) {
+    function rj_set_frontend_locales(array $locales): void
+    {
+        $available = rj_available_locales();
+
+        $locales = array_values(array_filter(
+            array_unique($locales),
+            fn ($l) => in_array($l, $available, true)
+        ));
+
+        rj_set_option('frontend_locales', json_encode($locales, JSON_UNESCAPED_UNICODE));
+        rj_flush_options();
+    }
+}
+
+if (!function_exists('rj_is_frontend_locale')) {
+    function rj_is_frontend_locale(string $locale): bool
+    {
+        return in_array($locale, rj_frontend_locales(), true);
+    }
+}
+
 if (!function_exists('rj_lang_name')) {
     function rj_lang_name(string $locale): string
     {
