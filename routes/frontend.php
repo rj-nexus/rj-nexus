@@ -48,8 +48,6 @@ Route::post('/rj-widget/logout', [WidgetAuthController::class, 'logout'])->name(
 Route::get('/rj-widget/locale/{locale}', [LocaleController::class, 'switch'])->name('rj.widget.locale');
 Route::post('/rj-widget/newsletter', [NewsletterController::class, 'subscribe'])->name('rj.widget.newsletter');
 
-Route::get('/', [FrontendController::class, 'home'])->name('home');
-
 Route::get('/rj-preview/{template}', [FrontendController::class, 'preview'])
     ->name('frontend.preview')
     ->middleware('auth');
@@ -60,20 +58,55 @@ Route::post('/rj-form/{slug}', [FormSubmitController::class, 'submit'])
 Route::get('/rj-fonts.css', [\App\Http\Controllers\Admin\CustomFontController::class, 'css'])
     ->name('frontend.fonts.css');
 
-Route::get('/blog', [PostController::class, 'archive'])->name('frontend.posts.index');
-Route::get('/blog/{slug}', [PostController::class, 'show'])->name('frontend.posts.show');
+Route::get('/blog', function () {
+    $locale = session('locale', config('app.locale'));
 
-Route::middleware(['auth'])->group(function () {
-    Route::get('/account', [AccountController::class, 'index'])->name('frontend.account.index');
+    if (!in_array($locale, rj_frontend_locales(), true)) {
+        $locale = config('app.locale');
+    }
 
-    Route::get('/account/settings', [AccountController::class, 'settings'])->name('frontend.account.settings');
-    Route::put('/account/settings', [AccountController::class, 'updateSettings'])->name('frontend.account.settings.update');
-    Route::put('/account/password', [AccountController::class, 'updatePassword'])->name('frontend.account.password.update');
-
-    Route::get('/kyc', [KycController::class, 'index'])->name('frontend.kyc.index');
-    Route::post('/kyc', [KycController::class, 'submit'])->name('frontend.kyc.submit');
+    return redirect('/' . $locale . '/blog', 301);
 });
 
-Route::get('/{slug}', [PageController::class, 'show'])
-    ->where('slug', '^(?!admin|login|register|logout|password|email|verification|api|rj-preview|rj-form|rj-fonts|rj-widget|theme-assets|plugin-assets|blog|account|kyc|profile|storage|up|sanctum|livewire|shop|cart|checkout|product).*$')
-    ->name('frontend.page');
+Route::get('/blog/{slug}', function (string $slug) {
+    $locale = session('locale', config('app.locale'));
+
+    if (!in_array($locale, rj_frontend_locales(), true)) {
+        $locale = config('app.locale');
+    }
+
+    return redirect('/' . $locale . '/blog/' . $slug, 301);
+});
+
+Route::get('/', function () {
+    $locale = session('locale', config('app.locale'));
+
+    if (!in_array($locale, rj_frontend_locales(), true)) {
+        $locale = config('app.locale');
+    }
+
+    return redirect('/' . $locale);
+})->name('home');
+
+Route::prefix('{locale}')
+    ->where('locale', '[a-z]{2}(_[A-Z]{2})?')
+    ->group(function () {
+        Route::get('/', [FrontendController::class, 'home'])->name('frontend.home');
+
+        Route::get('/blog', [PostController::class, 'archive'])->name('frontend.posts.index');
+        Route::get('/blog/{slug}', [PostController::class, 'show'])->name('frontend.posts.show');
+
+        Route::middleware(['auth'])->group(function () {
+            Route::get('/account', [AccountController::class, 'index'])->name('frontend.account.index');
+            Route::get('/account/settings', [AccountController::class, 'settings'])->name('frontend.account.settings');
+            Route::put('/account/settings', [AccountController::class, 'updateSettings'])->name('frontend.account.settings.update');
+            Route::put('/account/password', [AccountController::class, 'updatePassword'])->name('frontend.account.password.update');
+
+            Route::get('/kyc', [KycController::class, 'index'])->name('frontend.kyc.index');
+            Route::post('/kyc', [KycController::class, 'submit'])->name('frontend.kyc.submit');
+        });
+
+        Route::get('/{slug}', [PageController::class, 'show'])
+            ->where('slug', '^(?!admin|login|register|logout|password|email|verification|api|rj-preview|rj-form|rj-fonts|rj-widget|theme-assets|plugin-assets|blog|account|kyc|profile|storage|up|sanctum|livewire|shop|cart|checkout|product).*$')
+            ->name('frontend.page');
+    });
