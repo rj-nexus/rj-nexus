@@ -1,42 +1,38 @@
 <?php
 
-namespace App\Http\Middleware;
+use Illuminate\Foundation\Application;
+use Illuminate\Foundation\Configuration\Exceptions;
+use Illuminate\Foundation\Configuration\Middleware;
 
-use Closure;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\URL;
-use Symfony\Component\HttpFoundation\Response;
+return Application::configure(basePath: dirname(__DIR__))
+    ->withRouting(
+        web: __DIR__.'/../routes/web.php',
+        commands: __DIR__.'/../routes/console.php',
+        health: '/up',
+        then: function () {
+            \Illuminate\Support\Facades\Route::middleware('web')
+                ->group(base_path('routes/auth.php'));
 
-class SetLocale
-{
-    public function handle(Request $request, Closure $next): Response
-    {
-        $routeLocale = $request->route('locale');
-        $available = rj_frontend_locales();
-        $default = config('app.locale');
+            \Illuminate\Support\Facades\Route::middleware('web')
+                ->prefix('admin')
+                ->name('admin.')
+                ->group(base_path('routes/admin.php'));
 
-        if (is_string($routeLocale) && $routeLocale !== '') {
-            if (!in_array($routeLocale, $available, true)) {
-                abort(404);
-            }
+            \Illuminate\Support\Facades\Route::middleware('web')
+                ->group(base_path('routes/frontend.php'));
+        },
+    )
+    ->withMiddleware(function (Middleware $middleware) {
+        $middleware->alias([
+            'admin' => \App\Http\Middleware\AdminMiddleware::class,
+        ]);
 
-            $locale = $routeLocale;
-            session(['locale' => $locale]);
-        } else {
-            $sessionLocale = session('locale');
-            $locale = ($sessionLocale && $this->isValidLocale($sessionLocale))
-                ? $sessionLocale
-                : $default;
-        }
-
-        app()->setLocale($locale);
-        URL::defaults(['locale' => $locale]);
-
-        return $next($request);
-    }
-
-    protected function isValidLocale(string $locale): bool
-    {
-        return (bool) preg_match('/^[a-z]{2}(_[A-Z]{2})?$/', $locale);
-    }
-}
+        $middleware->web(append: [
+            \App\Http\Middleware\SetLocale::class,
+            \App\Http\Middleware\CheckMaintenanceMode::class,
+            \App\Http\Middleware\InjectRtlDirection::class,
+        ]);
+    })
+    ->withExceptions(function (Exceptions $exceptions) {
+        //
+    })->create();

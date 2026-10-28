@@ -22,7 +22,6 @@ class SetLocale
 
             $locale = $routeLocale;
             session(['locale' => $locale]);
-            URL::defaults(['locale' => $locale]);
         } else {
             $sessionLocale = session('locale');
             $locale = ($sessionLocale && $this->isValidLocale($sessionLocale))
@@ -31,6 +30,7 @@ class SetLocale
         }
 
         app()->setLocale($locale);
+        URL::defaults(['locale' => $locale]);
 
         return $next($request);
     }
