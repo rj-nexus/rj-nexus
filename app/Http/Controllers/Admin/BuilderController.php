@@ -12,7 +12,6 @@ class BuilderController extends Controller
     public function index(Request $request)
     {
         $type = $request->input('type', 'header');
-
         $allowedTypes = array_keys(Template::types());
 
         if (!in_array($type, $allowedTypes, true)) {
@@ -155,7 +154,6 @@ class BuilderController extends Controller
     public function setDefault(Template $template)
     {
         Template::type($template->type)->update(['is_default' => false]);
-
         $template->update(['is_default' => true]);
 
         return back()->with('success', __('Default :type set.', ['type' => strtolower($template->typeLabel())]));
