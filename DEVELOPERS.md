@@ -116,9 +116,3 @@ The full list of available hooks is in `App\Helpers\hooks.php`.
 - **Commit format:** `type(scope): short description` (lowercase verb)
 - **One concern per commit.**
 - **Pre-release branch:** `main` (current release: RJ Nexus `v1.0.0-rc1`)
-
-Example:
-
-```text
-feat(builder): add container width control
-```
