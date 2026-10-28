@@ -14,7 +14,6 @@
     $radiusMap = ['none' => '0px', 'sm' => '6px', 'md' => '10px', 'lg' => '14px', 'full' => '9999px'];
     $radiusCss = $radiusMap[$radius] ?? '9999px';
 
-    // İkonları və adları daha qabarıq göstərmək üçün ölçüləri artırdıq
     $sizeMap = [
         'sm' => ['pad' => '6px 14px', 'fs' => '13px', 'flag' => '26px', 'gap' => '8px', 'icon' => '14px'],
         'md' => ['pad' => '8px 18px', 'fs' => '14px', 'flag' => '34px', 'gap' => '10px', 'icon' => '16px'],
@@ -22,11 +21,9 @@
     ];
     $sz = $sizeMap[$size] ?? $sizeMap['md'];
 
-    $available = function_exists('rj_available_locales') ? rj_available_locales() : ['en'];
+    $available = function_exists('rj_frontend_locales') ? rj_frontend_locales() : ['en'];
     $current   = app()->getLocale();
-    if (!in_array($current, $available, true)) {
-        $current = $available[0] ?? 'en';
-    }
+    $isCompact = !$showFlag && !$showName && $showCodeCompact;
 
     $flags = [
         'az' => '🇦🇿', 'en' => '🇬🇧', 'de' => '🇩🇪', 'es' => '🇪🇸',
@@ -55,11 +52,9 @@
         }
         return $upper;
     };
-
-    $currentUrl = request()->fullUrl();
-    $isCompact = !$showFlag && !$showName && $showCodeCompact;
 @endphp
 
+@if (count($available) > 1)
 <style>
     #{{ $uid }} {
         --hls-accent: {{ $accent }};
@@ -89,7 +84,6 @@
     }
     #{{ $uid }} .rj-hls-btn:active { transform: scale(.97); }
 
-    /* ---------- BUTTON STYLES ---------- */
     #{{ $uid }}[data-btn="ghost"] .rj-hls-btn:hover {
         background: rgba(15,23,42,.06);
     }
@@ -115,7 +109,6 @@
         opacity: .9;
     }
 
-    /* ---------- DAİRƏVİ BAYRAQ / İKON ---------- */
     #{{ $uid }} .rj-hls-flag {
         width: {{ $sz['flag'] }};
         height: {{ $sz['flag'] }};
@@ -155,7 +148,6 @@
         transform: rotate(180deg);
     }
 
-    /* ---------- DROPDOWN ---------- */
     #{{ $uid }} .rj-hls-menu {
         position: absolute;
         top: calc(100% + 8px);
@@ -223,7 +215,6 @@
         opacity: 1;
     }
 
-    /* ---------- INLINE FLAGS / NAMES / PILLS ---------- */
     #{{ $uid }}[data-style="inline-flags"] .rj-hls-inline,
     #{{ $uid }}[data-style="inline-names"] .rj-hls-inline,
     #{{ $uid }}[data-style="pills"] .rj-hls-inline {
@@ -402,3 +393,4 @@
     });
 })();
 </script>
+@endif

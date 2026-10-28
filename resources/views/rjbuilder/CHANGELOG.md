@@ -2,7 +2,7 @@
 
 All notable changes to the RJ Builder core and built-in widgets will be documented in this file.
 
-## [v1.3.28] - 2026-10-27
+## [v1.3.29] - 2026-10-28
 
 This release focuses on significantly expanding the built-in widget library, resolving critical backend rendering issues, and drastically improving the user experience (UX) for content management.
 
