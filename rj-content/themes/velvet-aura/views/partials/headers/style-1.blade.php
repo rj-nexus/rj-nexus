@@ -41,7 +41,7 @@
             </div>
 
             <div class="flex justify-center">
-                <a href="{{ url('/') }}" class="block">
+                <a href="{{ rj_locale_url() }}" class="block">
                     <img src="{{ $logoUrl }}" alt="{{ rj_get_option('site_name', 'VelvetAura') }}" class="h-12 w-auto object-contain brightness-0 invert">
                 </a>
             </div>
@@ -78,12 +78,12 @@
                     </a>
                 @endforeach
             @else
-                <a href="{{ url('/') }}" class="text-[11px] font-semibold tracking-[0.15em] uppercase text-white hover:text-slate-400 transition-colors">{{ __('Home') }}</a>
+                <a href="{{ rj_locale_url() }}" class="text-[11px] font-semibold tracking-[0.15em] uppercase text-white hover:text-slate-400 transition-colors">{{ __('Home') }}</a>
                 @if(function_exists('rj_commerce_url'))
                     <a href="{{ rj_commerce_url('shop') }}" class="text-[11px] font-semibold tracking-[0.15em] uppercase text-white hover:text-slate-400 transition-colors">{{ __('Shop') }}</a>
                 @endif
-                <a href="{{ url('/about') }}" class="text-[11px] font-semibold tracking-[0.15em] uppercase text-white hover:text-slate-400 transition-colors">{{ __('About') }}</a>
-                <a href="{{ url('/contact') }}" class="text-[11px] font-semibold tracking-[0.15em] uppercase text-white hover:text-slate-400 transition-colors">{{ __('Contact') }}</a>
+                <a href="{{ rj_locale_url('about') }}" class="text-[11px] font-semibold tracking-[0.15em] uppercase text-white hover:text-slate-400 transition-colors">{{ __('About') }}</a>
+                <a href="{{ rj_locale_url('contact') }}" class="text-[11px] font-semibold tracking-[0.15em] uppercase text-white hover:text-slate-400 transition-colors">{{ __('Contact') }}</a>
             @endif
             <a href="#" class="text-[11px] font-semibold tracking-[0.15em] uppercase text-slate-400 italic hover:text-white transition-colors">{{ __('Need Help ?') }}</a>
         </nav>

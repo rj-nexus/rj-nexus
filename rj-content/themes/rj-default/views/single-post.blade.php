@@ -319,7 +319,7 @@
         <div class="rj-post-hero-inner">
 
             <nav class="rj-post-breadcrumb">
-                <a href="{{ url('/') }}">{{ rj_get_option('site_name', __('Home')) }}</a>
+                <a href="{{ rj_locale_url() }}">{{ rj_get_option('site_name', __('Home')) }}</a>
                 <span>/</span>
                 <a href="{{ route('frontend.posts.index') }}">{{ __('Blog') }}</a>
             </nav>

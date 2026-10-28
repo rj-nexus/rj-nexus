@@ -31,7 +31,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8 mb-16">
 
             <div class="space-y-6">
-                <a href="{{ url('/') }}" class="block">
+                <a href="{{ rj_locale_url() }}" class="block">
                     @if($logoUrl)
                         <img src="{{ $logoUrl }}" alt="{{ rj_get_option('site_name', 'VelvetAura') }}" class="h-10 w-auto object-contain brightness-0 invert">
                     @else
@@ -76,7 +76,7 @@
                             <li><a href="{{ $item['url'] ?? '#' }}" target="{{ $item['target'] ?? '_self' }}" class="hover:text-[#d4af37] transition-colors">{{ $item['label'] ?? '' }}</a></li>
                         @endforeach
                     @else
-                        <li><a href="{{ url('/contact') }}" class="hover:text-[#d4af37] transition-colors">{{ __('Contact Us') }}</a></li>
+                        <li><a href="{{ rj_locale_url('contact') }}" class="hover:text-[#d4af37] transition-colors">{{ __('Contact Us') }}</a></li>
                         <li><a href="#" class="hover:text-[#d4af37] transition-colors">{{ __('Shipping & Returns') }}</a></li>
                         <li><a href="#" class="hover:text-[#d4af37] transition-colors">{{ __('FAQ') }}</a></li>
                     @endif

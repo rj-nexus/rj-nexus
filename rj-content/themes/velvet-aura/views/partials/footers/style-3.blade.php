@@ -68,9 +68,9 @@
                             <li><a href="{{ $item['url'] ?? '#' }}" target="{{ $item['target'] ?? '_self' }}" class="hover:text-[#d4af37] transition-colors">{{ $item['label'] ?? '' }}</a></li>
                         @endforeach
                     @else
-                        <li><a href="{{ url('/about') }}" class="hover:text-[#d4af37] transition-colors">{{ __('Our Story') }}</a></li>
+                        <li><a href="{{ rj_locale_url('about') }}" class="hover:text-[#d4af37] transition-colors">{{ __('Our Story') }}</a></li>
                         <li><a href="#" class="hover:text-[#d4af37] transition-colors">{{ __('Careers') }}</a></li>
-                        <li><a href="{{ url('/contact') }}" class="hover:text-[#d4af37] transition-colors">{{ __('Contact') }}</a></li>
+                        <li><a href="{{ rj_locale_url('contact') }}" class="hover:text-[#d4af37] transition-colors">{{ __('Contact') }}</a></li>
                     @endif
                 </ul>
             </div>

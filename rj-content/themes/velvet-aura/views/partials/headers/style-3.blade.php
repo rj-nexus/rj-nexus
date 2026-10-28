@@ -49,13 +49,13 @@
                         @if(function_exists('rj_commerce_url'))
                             <a href="{{ rj_commerce_url('shop') }}" class="text-[11px] font-bold tracking-[0.2em] uppercase text-slate-900 hover:text-[#d4af37] transition-colors">{{ __('Shop') }}</a>
                         @endif
-                        <a href="{{ url('/collections') }}" class="text-[11px] font-bold tracking-[0.2em] uppercase text-slate-900 hover:text-[#d4af37] transition-colors">{{ __('New Arrivals') }}</a>
+                        <a href="{{ rj_locale_url('collections') }}" class="text-[11px] font-bold tracking-[0.2em] uppercase text-slate-900 hover:text-[#d4af37] transition-colors">{{ __('New Arrivals') }}</a>
                     @endif
                 </nav>
             </div>
 
             <div class="flex-shrink-0 flex items-center justify-center">
-                <a href="{{ url('/') }}" class="block">
+                <a href="{{ rj_locale_url() }}" class="block">
                     <img src="{{ $logoUrl }}" alt="{{ rj_get_option('site_name', 'VelvetAura') }}" class="h-10 md:h-14 w-auto object-contain">
                 </a>
             </div>
@@ -95,7 +95,7 @@
                 @if(function_exists('rj_commerce_url'))
                     <a href="{{ rj_commerce_url('shop') }}" class="block py-4 border-b border-[#e8e4db] text-sm font-bold tracking-[0.2em] uppercase text-slate-900">{{ __('Shop') }}</a>
                 @endif
-                <a href="{{ url('/collections') }}" class="block py-4 border-b border-[#e8e4db] text-sm font-bold tracking-[0.2em] uppercase text-slate-900">{{ __('New Arrivals') }}</a>
+                <a href="{{ rj_locale_url('collections') }}" class="block py-4 border-b border-[#e8e4db] text-sm font-bold tracking-[0.2em] uppercase text-slate-900">{{ __('New Arrivals') }}</a>
             @endif
             <a href="{{ route('login') }}" class="block py-4 text-sm font-bold tracking-[0.2em] uppercase text-[#d4af37]">{{ __('Login / Register') }}</a>
         </div>

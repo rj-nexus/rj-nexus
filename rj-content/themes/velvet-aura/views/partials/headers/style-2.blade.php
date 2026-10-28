@@ -31,7 +31,7 @@
         <div class="flex items-center justify-between h-20 md:h-24">
 
             <div class="flex-1 flex items-center justify-start">
-                <a href="{{ url('/') }}" class="block flex-shrink-0">
+                <a href="{{ rj_locale_url() }}" class="block flex-shrink-0">
                     <img src="{{ $logoUrl }}" alt="{{ rj_get_option('site_name', 'VelvetAura') }}" class="h-8 md:h-10 w-auto object-contain">
                 </a>
             </div>
@@ -44,11 +44,11 @@
                         </a>
                     @endforeach
                 @else
-                    <a href="{{ url('/') }}" class="text-[11px] font-bold tracking-[0.15em] uppercase text-slate-800 hover:text-brand-600 transition-colors">{{ __('Home') }}</a>
+                    <a href="{{ rj_locale_url() }}" class="text-[11px] font-bold tracking-[0.15em] uppercase text-slate-800 hover:text-brand-600 transition-colors">{{ __('Home') }}</a>
                     @if(function_exists('rj_commerce_url'))
                         <a href="{{ rj_commerce_url('shop') }}" class="text-[11px] font-bold tracking-[0.15em] uppercase text-slate-800 hover:text-brand-600 transition-colors">{{ __('Shop') }}</a>
                     @endif
-                    <a href="{{ url('/collections') }}" class="text-[11px] font-bold tracking-[0.15em] uppercase text-slate-800 hover:text-brand-600 transition-colors">{{ __('Collections') }}</a>
+                    <a href="{{ rj_locale_url('collections') }}" class="text-[11px] font-bold tracking-[0.15em] uppercase text-slate-800 hover:text-brand-600 transition-colors">{{ __('Collections') }}</a>
                 @endif
             </nav>
 
@@ -84,7 +84,7 @@
 
     <div x-show="searchOpen" x-cloak x-transition.opacity class="absolute top-full left-0 w-full bg-white border-b border-slate-200 shadow-sm">
         <div class="max-w-3xl mx-auto px-4 py-4">
-            <form action="{{ url('/search') }}" method="GET" class="relative">
+            <form action="{{ rj_locale_url('search') }}" method="GET" class="relative">
                 <input type="text" name="q" placeholder="{{ __('Search for products...') }}" class="w-full bg-transparent border-none text-xl font-light focus:ring-0 text-slate-900 placeholder-slate-400">
                 <button type="submit" class="absolute right-0 top-1/2 -translate-y-1/2 text-slate-400 hover:text-brand-600">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
@@ -102,11 +102,11 @@
                     </a>
                 @endforeach
             @else
-                <a href="{{ url('/') }}" class="block py-3 border-b border-slate-50 text-sm font-bold tracking-widest uppercase text-slate-900">{{ __('Home') }}</a>
+                <a href="{{ rj_locale_url() }}" class="block py-3 border-b border-slate-50 text-sm font-bold tracking-widest uppercase text-slate-900">{{ __('Home') }}</a>
                 @if(function_exists('rj_commerce_url'))
                     <a href="{{ rj_commerce_url('shop') }}" class="block py-3 border-b border-slate-50 text-sm font-bold tracking-widest uppercase text-slate-900">{{ __('Shop') }}</a>
                 @endif
-                <a href="{{ url('/collections') }}" class="block py-3 border-b border-slate-50 text-sm font-bold tracking-widest uppercase text-slate-900">{{ __('Collections') }}</a>
+                <a href="{{ rj_locale_url('collections') }}" class="block py-3 border-b border-slate-50 text-sm font-bold tracking-widest uppercase text-slate-900">{{ __('Collections') }}</a>
             @endif
             <a href="{{ route('login') }}" class="block py-3 text-sm font-bold tracking-widest uppercase text-brand-600">{{ __('Login / Register') }}</a>
         </div>
