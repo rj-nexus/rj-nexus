@@ -43,8 +43,11 @@
                 $oM = $child['settings']['_order_mobile'] ?? $oD;
                 $orderStyle = "--ord-d:{$oD}; --ord-m:{$oM};";
             }
+
+            // 2-ci elementi sağa tərəf itələyirik ki, qalanları sağda qruplaşsın
+            $pushRight = ($jc === 'space-between' && $i === 1) ? 'margin-left: auto;' : '';
         @endphp
-        <div class="rj-slot" style="flex: 1 1 0; min-width: 0; {!! $orderStyle !!}">
+        <div class="rj-slot" style="flex: 0 1 auto; min-width: 0; {!! $orderStyle !!} {!! $pushRight !!}">
             @if($child)
                 {!! rj_render_block($child) !!}
             @endif
