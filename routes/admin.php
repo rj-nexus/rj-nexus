@@ -260,6 +260,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/', [BuilderController::class, 'index'])->name('index');
         Route::get('/create', [BuilderController::class, 'create'])->name('create');
         Route::post('/', [BuilderController::class, 'store'])->name('store');
+        Route::post('/render-block', [BuilderController::class, 'renderBlock'])->name('render-block');
         Route::get('/{template}/edit', [BuilderController::class, 'edit'])->name('edit');
         Route::get('/{template}/build', [BuilderController::class, 'build'])->name('build');
         Route::put('/{template}', [BuilderController::class, 'update'])->name('update');
