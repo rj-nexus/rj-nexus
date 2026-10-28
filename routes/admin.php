@@ -512,6 +512,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
         Route::get('/language', [SettingsController::class, 'language'])->name('language');
         Route::put('/language', [SettingsController::class, 'updateLanguage'])->name('language.update');
+        Route::put('/language/frontend-locales', [SettingsController::class, 'updateFrontendLocales'])->name('language.frontend-locales');
         Route::post('/language/{locale}/meta', [SettingsController::class, 'updateLanguageMeta'])->name('language.meta');
         Route::post('/language/add', [SettingsController::class, 'addLanguage'])->name('language.add');
         Route::delete('/language/{locale}', [SettingsController::class, 'removeLanguage'])->name('language.remove');
