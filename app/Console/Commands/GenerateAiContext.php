@@ -315,7 +315,6 @@ class GenerateAiContext extends Command
             'Colors' => 'colors',
             'SEO' => 'seo',
             'Email / SMTP' => 'email',
-            'Payments' => 'payments',
             'Security' => 'security',
             'Backup' => 'backup',
             'Cache' => 'cache',
@@ -350,7 +349,10 @@ class GenerateAiContext extends Command
             $controller = '—';
             $status = '[SOON]';
 
-            if (str_contains($action, 'Controller') && str_contains($action, '@')) {
+            if (str_contains($action, 'RedirectController')) {
+                $status = '[REDIRECT]';
+                $controller = '`redirect`';
+            } elseif (str_contains($action, 'Controller') && str_contains($action, '@')) {
                 $parts = explode('@', $action);
                 $controllerClass = class_basename($parts[0] ?? '');
                 $method = $parts[1] ?? 'index';
