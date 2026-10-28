@@ -830,4 +830,18 @@ if (!function_exists('rj_dir')) {
     {
         return rj_is_rtl($locale) ? 'rtl' : 'ltr';
     }
+
+    if (!function_exists('rj_locale_url')) {
+    function rj_locale_url(string $path = ''): string
+    {
+        $locale = app()->getLocale();
+        $path = '/' . ltrim($path, '/');
+
+        if ($path === '/') {
+            return url('/' . $locale);
+        }
+
+        return url('/' . $locale . $path);
+    }
+}
 }
