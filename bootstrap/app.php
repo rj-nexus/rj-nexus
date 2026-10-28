@@ -14,8 +14,6 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->group(base_path('routes/auth.php'));
 
             \Illuminate\Support\Facades\Route::middleware('web')
-                ->prefix('admin')
-                ->name('admin.')
                 ->group(base_path('routes/admin.php'));
 
             \Illuminate\Support\Facades\Route::middleware('web')
