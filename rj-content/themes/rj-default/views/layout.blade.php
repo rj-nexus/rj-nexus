@@ -27,18 +27,27 @@
 
     <style>
         *, *::before, *::after { box-sizing: border-box; }
-        html, body { overflow-x: hidden; max-width: 100%; margin: 0; padding: 0; }
+        html, body { overflow-x: clip; max-width: 100%; margin: 0; padding: 0; }
         body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: #fff; color: #111827; }
 
-        .rj-frontend { min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; width: 100%; max-width: 100%; }
+        .rj-frontend { min-height: 100vh; display: flex; flex-direction: column; overflow-x: clip; width: 100%; max-width: 100%; }
         .rj-frontend > main { flex: 1; width: 100%; max-width: 100%; overflow-x: hidden; }
-        .rj-frontend-wrapper { width: 100%; }
-        .rj-frontend-main { container-type: inline-size; container-name: rj; }
+        .rj-frontend-wrapper { container-type: inline-size; container-name: rj; width: 100%; }
 
         .rj-frontend-header,
         .rj-frontend-footer {
             width: 100%;
             max-width: 100%;
+        }
+
+        .rj-frontend-header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            overflow: visible;
+        }
+
+        .rj-frontend-footer {
             overflow-x: hidden;
         }
 
