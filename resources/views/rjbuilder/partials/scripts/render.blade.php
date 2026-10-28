@@ -214,72 +214,38 @@ function builderRender() {
             if (!block) return '';
 
             const settings = block.settings || {};
-            const cols = parseInt(settings.columns) || 1;
+            const isStructure = block.type === 'structure-container';
 
-            const fit = settings.distribute === 'content';
+            // Structure container üçün sütun sayı 2-5, adi container üçün default 1
+            const cols = isStructure ? Math.max(2, Math.min(5, parseInt(settings.columns) || 3)) : (parseInt(settings.columns) || 1);
 
             const gapMap = { none: '0', sm: '0.5rem', md: '1rem', lg: '1.5rem', xl: '2rem' };
-            const bg = settings.background || 'transparent';
             const gap = gapMap[settings.gap] || '1rem';
 
             const padding = this.dimResp(settings, 'padding_dim') || gapMap[settings.padding] || '1rem';
             const margin = this.dimResp(settings, 'margin_dim') || '';
 
-            let minHeight = 'auto';
-            if (settings.min_height === 'custom') {
-                minHeight = this.cssv(settings.min_height_custom || 'auto');
-            } else if (settings.min_height === 'screen') {
-                minHeight = '100vh';
-            } else if (settings.min_height && settings.min_height !== 'auto') {
-                minHeight = { sm: '200px', md: '400px', lg: '600px', xl: '800px' }[settings.min_height] || 'auto';
-            }
-
-            const border = settings.border === 'solid' ? '2px solid #e5e7eb' : settings.border === 'dashed' ? '2px dashed #e5e7eb' : 'none';
-            const radiusMap = { none: '0', sm: '4px', md: '8px', lg: '16px', full: '9999px' };
-            const radius = radiusMap[settings.border_radius] || '12px';
-
-            const isFixedLayout = ['header', 'footer', 'popup'].includes(this.templateType);
-
             const alignMap = { start: 'flex-start', center: 'center', end: 'flex-end', stretch: 'stretch', baseline: 'baseline' };
-            const defaultAlign = isFixedLayout ? 'center' : 'stretch';
-            const ai = alignMap[settings.align_items || settings.align] || defaultAlign;
+            const ai = alignMap[settings.align_items || settings.align] || 'center';
 
             const jcMap = { start: 'flex-start', center: 'center', end: 'flex-end', 'space-between': 'space-between', 'space-around': 'space-around', 'space-evenly': 'space-evenly' };
-            const jc = jcMap[settings.justify_content] || 'flex-start';
+            const jc = jcMap[settings.justify_content] || 'space-between';
 
             const dir = ['row', 'column', 'row-reverse', 'column-reverse'].includes(settings.flex_direction) ? settings.flex_direction : 'row';
-            const wrap = ['nowrap', 'wrap', 'wrap-reverse'].includes(settings.flex_wrap) ? settings.flex_wrap : 'wrap';
-
-            const keepTablet = isFixedLayout || !!settings.keep_tablet;
-            const keepMobile = isFixedLayout || !!settings.keep_mobile;
-
-            const isFullWidth = settings.width === 'full';
 
             const children = block.children || [];
             const bid = block.id;
-
             const bgCss = this.bgCss(settings);
-            const shadow = this.boxShadowCss(settings.box_shadow);
 
-            const allEmpty = children.every(c => !c);
-
-            if (this.preview && allEmpty && !bgCss && minHeight === 'auto' && border === 'none') {
-                return '';
-            }
-
-            const widths = this.dimWidths(settings);
-            const slotCount = Math.max(cols, children.length);
             let slotsHtml = '';
 
-            for (let i = 0; i < slotCount; i++) {
+            for (let i = 0; i < cols; i++) {
                 const child = children[i] || null;
-                const hasWidth = !!(widths && widths[i] > 0);
-                const growValue = hasWidth ? widths[i] : 1;
-                const flexInline = `flex:${growValue} 1 0;`;
+                const flexInline = 'flex:1 1 0;';
 
                 if (this.preview) {
                     if (!child) continue;
-                    slotsHtml += `<div class="rj-slot${this.hideClasses(child.settings || {})}" style="min-width:0;${flexInline}">${this.renderBlockHtml(child, bid, i)}</div>`;
+                    slotsHtml += `<div class="rj-slot" style="min-width:0;${flexInline}">${this.renderBlockHtml(child, bid, i)}</div>`;
                     continue;
                 }
 
@@ -300,21 +266,12 @@ function builderRender() {
                 `;
             }
 
-            const chrome = `${bgCss} padding:${padding}; ${margin ? 'margin:' + margin + ';' : ''} border:${border}; min-height:${minHeight}; ${shadow}`;
-            const outerStyle = isFullWidth
-                ? `${chrome} width:100%; margin:0;`
-                : `${chrome} max-width:1100px; margin:0 auto; width:100%;`;
-            const useRadius = (this.preview && isFullWidth) ? '0' : radius;
-
-            const gridClass = 'rj-cg'
-                + (fit ? ' rj-fit' : '')
-                + (widths ? ' rj-cw' : '')
-                + (keepTablet ? ' rj-keep-tablet' : '')
-                + (keepMobile ? ' rj-keep-mobile' : '');
+            const chrome = `${bgCss} padding:${padding}; ${margin ? 'margin:' + margin + ';' : ''} border:none; min-height:auto;`;
+            const outerStyle = `${chrome} width:100%; margin:0;`;
 
             return `
-                <div style="border-radius:${useRadius}; ${outerStyle}">
-                    <div class="${gridClass}" style="--c:${cols}; --g:${gap}; --al:${ai}; --jc:${jc}; --dir:${dir}; --wrap:${wrap};">
+                <div style="border-radius:0; ${outerStyle}">
+                    <div class="rj-cg" style="display:flex; flex-direction:${dir}; justify-content:${jc}; align-items:${ai}; gap:${gap};">
                         ${slotsHtml}
                     </div>
                 </div>
