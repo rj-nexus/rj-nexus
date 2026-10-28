@@ -11,7 +11,8 @@ class LocaleController extends Controller
 {
     public function switch(Request $request, string $locale): RedirectResponse|JsonResponse
     {
-        $available = function_exists('rj_available_locales') ? rj_available_locales() : ['en'];
+        $available = function_exists('rj_frontend_locales') ? rj_frontend_locales() : ['en'];
+
         if (!in_array($locale, $available, true)) {
             if ($request->expectsJson()) {
                 return response()->json(['ok' => false, 'message' => __('Invalid language.')], 422);
@@ -27,10 +28,36 @@ class LocaleController extends Controller
         }
 
         $redirect = $request->query('redirect');
-        if (is_string($redirect) && $redirect !== '' && str_starts_with($redirect, '/')) {
-            return redirect($redirect);
+        $referer = (is_string($redirect) && $redirect !== '' && str_starts_with($redirect, '/'))
+            ? $redirect
+            : ($request->headers->get('referer') ?: '/');
+
+        $path = parse_url($referer, PHP_URL_PATH) ?: '/';
+        $path = '/' . ltrim($path, '/');
+
+        $utilityPrefixes = ['/admin', '/theme-assets', '/plugin-assets', '/rj-widget', '/rj-preview', '/rj-form', '/rj-fonts'];
+
+        foreach ($utilityPrefixes as $prefix) {
+            if ($path === $prefix || str_starts_with($path, $prefix . '/')) {
+                return redirect('/' . $locale);
+            }
         }
 
-        return redirect()->back();
+        $segments = array_values(array_filter(
+            explode('/', trim($path, '/')),
+            fn ($s) => $s !== ''
+        ));
+
+        if (empty($segments)) {
+            return redirect('/' . $locale);
+        }
+
+        if (preg_match('/^[a-z]{2}(_[A-Z]{2})?$/', $segments[0])) {
+            $segments[0] = $locale;
+        } else {
+            array_unshift($segments, $locale);
+        }
+
+        return redirect('/' . implode('/', $segments));
     }
 }
