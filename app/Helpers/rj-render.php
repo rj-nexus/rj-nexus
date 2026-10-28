@@ -70,7 +70,7 @@ if (!function_exists('rj_render_block')) {
 
         $children = $block['children'] ?? [];
 
-        if ($type === 'container') {
+        if (in_array($type, ['container', 'structure-container', 'layout-container'], true)) {
             return $widget->render($settings, $children);
         }
 

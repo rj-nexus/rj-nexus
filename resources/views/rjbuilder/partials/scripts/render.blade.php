@@ -161,7 +161,7 @@ function builderRender() {
             const hiddenHere = !!s['_hide_' + this.device];
             const hasAnim = s._animation && s._animation !== 'none';
 
-            const isContainer = ['container', 'layout-container'].includes(block.type);
+            const isContainer = ['container', 'layout-container', 'structure-container'].includes(block.type);
             let inner = isContainer ? this.renderContainer(block) : this.renderSimpleWidget(block);
 
             if (this.preview && inner === '') return '';
