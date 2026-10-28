@@ -4,17 +4,33 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
 use Symfony\Component\HttpFoundation\Response;
 
 class SetLocale
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $locale = session('locale');
+        $routeLocale = $request->route('locale');
+        $available = rj_frontend_locales();
+        $default = config('app.locale');
 
-        if ($locale && $this->isValidLocale($locale)) {
-            app()->setLocale($locale);
+        if (is_string($routeLocale) && $routeLocale !== '') {
+            if (!in_array($routeLocale, $available, true)) {
+                abort(404);
+            }
+
+            $locale = $routeLocale;
+            session(['locale' => $locale]);
+            URL::defaults(['locale' => $locale]);
+        } else {
+            $sessionLocale = session('locale');
+            $locale = ($sessionLocale && $this->isValidLocale($sessionLocale))
+                ? $sessionLocale
+                : $default;
         }
+
+        app()->setLocale($locale);
 
         return $next($request);
     }
