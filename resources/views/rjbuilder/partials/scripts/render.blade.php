@@ -223,7 +223,6 @@ function builderRender() {
             const padding = this.dimResp(settings, 'padding_dim') || '';
             const margin = this.dimResp(settings, 'margin_dim') || '';
             const hasPad = padding !== '';
-            // Default padding: 16px top/bottom, 24px left/right
             const autoPad = !hasPad ? 'padding: 16px 24px;' : `padding:${padding};`;
 
             const alignMap = { start: 'flex-start', center: 'center', end: 'flex-end', stretch: 'stretch', baseline: 'baseline' };
@@ -231,9 +230,10 @@ function builderRender() {
 
             const jcMap = { start: 'flex-start', center: 'center', end: 'flex-end', 'space-between': 'space-between', 'space-around': 'space-around', 'space-evenly': 'space-evenly' };
             const jc = jcMap[settings.justify_content] || 'space-between';
+            const justifyCss = (jc === 'space-between') ? 'flex-start' : jc;
 
             const dir = ['row', 'column', 'row-reverse', 'column-reverse'].includes(settings.flex_direction) ? settings.flex_direction : 'row';
-            const wrap = ['nowrap', 'wrap', 'wrap-reverse'].includes(settings.flex_wrap) ? settings.flex_wrap : 'nowrap'; // Default to nowrap
+            const wrap = ['nowrap', 'wrap', 'wrap-reverse'].includes(settings.flex_wrap) ? settings.flex_wrap : 'nowrap';
 
             const isFixedLayout = ['header', 'footer', 'popup'].includes(this.templateType);
             const keepTablet = isFixedLayout || !!settings.keep_tablet;
@@ -294,7 +294,7 @@ function builderRender() {
 
             return `
                 <div style="border-radius:0; ${outerStyle}">
-                    <div class="${gridClass}" style="--c:${cols}; --g:${gap}; --al:${ai}; --jc:${jc}; --dir:${dir}; --wrap:${wrap};">
+                    <div class="${gridClass}" style="--c:${cols}; --g:${gap}; --al:${ai}; --jc:${justifyCss}; --dir:${dir}; --wrap:${wrap};">
                         ${slotsHtml}
                     </div>
                 </div>
