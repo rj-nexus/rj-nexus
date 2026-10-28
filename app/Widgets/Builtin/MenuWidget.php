@@ -319,7 +319,7 @@ class MenuWidget extends BaseWidget
 
                 $tree[] = [
                     'label' => $this->itemLabel($item),
-                    'url' => $item->url ?: '#',
+                    'url' => $item->resolvedUrl() ?: '#',
                     'target' => $item->target ?: '_self',
                     'children' => $children,
                 ];
