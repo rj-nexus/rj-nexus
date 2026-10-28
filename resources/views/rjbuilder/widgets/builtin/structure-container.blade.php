@@ -17,8 +17,9 @@
     $pb = ($pad['bottom'] ?? '') !== '' ? $pad['bottom'] . $unit : '';
     $pl = ($pad['left'] ?? '') !== '' ? $pad['left'] . $unit : '';
 
+    // Əgər istifadəçi özü boşluq verməyibsə, standart olaraq yuxarıdan-aşağı 16px, sağdan-soldan 24px boşluq veririk
     $hasPad = $pt !== '' || $pr !== '' || $pb !== '' || $pl !== '';
-    $autoPad = !$hasPad ? 'padding-left:16px; padding-right:16px;' : '';
+    $autoPad = !$hasPad ? 'padding: 16px 24px;' : '';
 
     $dirStyle = $dir !== 'row' ? "flex-direction:{$dir};" : '';
 
