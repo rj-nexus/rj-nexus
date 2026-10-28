@@ -122,6 +122,7 @@ class SettingsController extends Controller
 
         $data = [
             'locales' => rj_available_locales(),
+            'frontend_locales' => rj_frontend_locales(),
         ];
 
         return view('admin.settings.language', compact('options', 'data'));
@@ -150,6 +151,20 @@ class SettingsController extends Controller
         }
 
         return back()->with('success', __('Language settings saved.'));
+    }
+
+    public function updateFrontendLocales(Request $request)
+    {
+        $data = $request->validate([
+            'frontend_locales' => ['nullable', 'array'],
+            'frontend_locales.*' => ['string'],
+        ]);
+
+        $locales = $data['frontend_locales'] ?? [];
+
+        rj_set_frontend_locales($locales);
+
+        return back()->with('success', __('Frontend languages updated.'));
     }
 
     public function addLanguage(Request $request)
@@ -189,6 +204,10 @@ class SettingsController extends Controller
 
         Option::forget('lang_name_' . $locale);
         Option::forget('lang_flag_' . $locale);
+
+        $frontend = rj_frontend_locales();
+        $frontend = array_values(array_filter($frontend, fn ($l) => $l !== $locale));
+        rj_set_frontend_locales($frontend);
 
         return back()->with('success', __('Language removed: :locale', ['locale' => strtoupper($locale)]));
     }
