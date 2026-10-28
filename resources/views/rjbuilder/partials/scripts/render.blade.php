@@ -216,14 +216,16 @@ function builderRender() {
             const settings = block.settings || {};
             const isStructure = block.type === 'structure-container';
 
-            // Structure container üçün sütun sayı 2-5, adi container üçün default 1
             const cols = isStructure ? Math.max(2, Math.min(5, parseInt(settings.columns) || 3)) : (parseInt(settings.columns) || 1);
 
             const gapMap = { none: '0', sm: '0.5rem', md: '1rem', lg: '1.5rem', xl: '2rem' };
             const gap = gapMap[settings.gap] || '1rem';
 
-            const padding = this.dimResp(settings, 'padding_dim') || gapMap[settings.padding] || '1rem';
+            const padding = this.dimResp(settings, 'padding_dim') || '';
             const margin = this.dimResp(settings, 'margin_dim') || '';
+
+            const hasPad = padding !== '';
+            const autoPad = !hasPad ? 'padding-left:16px; padding-right:16px;' : `padding:${padding};`;
 
             const alignMap = { start: 'flex-start', center: 'center', end: 'flex-end', stretch: 'stretch', baseline: 'baseline' };
             const ai = alignMap[settings.align_items || settings.align] || 'center';
@@ -232,6 +234,7 @@ function builderRender() {
             const jc = jcMap[settings.justify_content] || 'space-between';
 
             const dir = ['row', 'column', 'row-reverse', 'column-reverse'].includes(settings.flex_direction) ? settings.flex_direction : 'row';
+            const dirStyle = dir !== 'row' ? `flex-direction:${dir};` : '';
 
             const children = block.children || [];
             const bid = block.id;
@@ -266,12 +269,12 @@ function builderRender() {
                 `;
             }
 
-            const chrome = `${bgCss} padding:${padding}; ${margin ? 'margin:' + margin + ';' : ''} border:none; min-height:auto;`;
+            const chrome = `${bgCss} ${autoPad} ${margin ? 'margin:' + margin + ';' : ''} border:none; min-height:auto;`;
             const outerStyle = `${chrome} width:100%; margin:0;`;
 
             return `
                 <div style="border-radius:0; ${outerStyle}">
-                    <div class="rj-cg" style="display:flex; flex-direction:${dir}; justify-content:${jc}; align-items:${ai}; gap:${gap};">
+                    <div class="rj-cg" style="display:flex; flex-wrap:wrap; ${dirStyle} justify-content:${jc}; align-items:${ai}; gap:${gap};">
                         ${slotsHtml}
                     </div>
                 </div>
