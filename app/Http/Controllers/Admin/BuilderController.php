@@ -126,6 +126,20 @@ class BuilderController extends Controller
         return back()->with('success', __('Template saved.'));
     }
 
+    public function renderBlock(Request $request)
+    {
+        $block = [
+            'id' => 'preview_' . uniqid(),
+            'type' => $request->input('type'),
+            'settings' => $request->input('settings', []),
+            'children' => $request->input('children', []),
+        ];
+
+        return response()->json([
+            'html' => rj_render_block($block)
+        ]);
+    }
+
     public function destroy(Template $template)
     {
         if ($template->is_default) {
