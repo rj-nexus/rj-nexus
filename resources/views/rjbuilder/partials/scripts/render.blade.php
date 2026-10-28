@@ -223,7 +223,8 @@ function builderRender() {
             const padding = this.dimResp(settings, 'padding_dim') || '';
             const margin = this.dimResp(settings, 'margin_dim') || '';
             const hasPad = padding !== '';
-            const autoPad = !hasPad ? 'padding-left:16px; padding-right:16px;' : `padding:${padding};`;
+            // Default padding: 16px top/bottom, 24px left/right
+            const autoPad = !hasPad ? 'padding: 16px 24px;' : `padding:${padding};`;
 
             const alignMap = { start: 'flex-start', center: 'center', end: 'flex-end', stretch: 'stretch', baseline: 'baseline' };
             const ai = alignMap[settings.align_items || settings.align] || 'center';
@@ -232,7 +233,7 @@ function builderRender() {
             const jc = jcMap[settings.justify_content] || 'space-between';
 
             const dir = ['row', 'column', 'row-reverse', 'column-reverse'].includes(settings.flex_direction) ? settings.flex_direction : 'row';
-            const wrap = ['nowrap', 'wrap', 'wrap-reverse'].includes(settings.flex_wrap) ? settings.flex_wrap : 'nowrap';
+            const wrap = ['nowrap', 'wrap', 'wrap-reverse'].includes(settings.flex_wrap) ? settings.flex_wrap : 'nowrap'; // Default to nowrap
 
             const isFixedLayout = ['header', 'footer', 'popup'].includes(this.templateType);
             const keepTablet = isFixedLayout || !!settings.keep_tablet;
