@@ -252,6 +252,7 @@ function builderRender() {
             for (let i = 0; i < cols; i++) {
                 const child = children[i] || null;
                 const hasWidth = !!(widths && widths[i] > 0);
+                // Flex 1 təyin edirik ki, elementlər bərabər paylansın
                 const flexInline = hasWidth ? `flex:${widths[i]} 1 0;` : 'flex: 1 1 0%;';
 
                 let orderStyle = '';
@@ -296,316 +297,6 @@ function builderRender() {
                 </div>
             `;
         },
-
-        renderSimpleWidget(block) {
-            if (!block) return '';
-
-            const settings = block.settings || {};
-            const esc = (s) => this.esc(s);
-            const bid = block.id;
-            const inlineCls = this.preview ? '' : ' rj-inline-edit';
-            const inlineAttr = this.preview ? '' : `ondblclick="event.stopPropagation(); window.__builder.startInline(this, '${bid}')"`;
-            const noNav = `onclick="event.preventDefault()"`;
-
-            const padCss = this.dimResp(settings, 'padding_dim');
-            const marCss = this.dimResp(settings, 'margin_dim');
-            const padAttr = padCss ? `padding:${padCss};` : '';
-            const marAttr = marCss ? `margin:${marCss};` : '';
-            const typo = this.typoCss(settings);
-            const bgCss = this.bgCss(settings);
-            const shadow = this.boxShadowCss(settings.box_shadow);
-
-            if (block.type === 'heading') {
-                const level = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(settings.level) ? settings.level : 'h2';
-                const sizes = { h1: '2rem', h2: '1.5rem', h3: '1.25rem', h4: '1.125rem', h5: '1rem', h6: '0.875rem' };
-                const mobileSizes = { h1: '1.6rem', h2: '1.3rem', h3: '1.15rem', h4: '1.05rem', h5: '1rem', h6: '0.875rem' };
-                const aligns = { left: 'left', center: 'center', right: 'right' };
-                const align = this.resp(settings, 'align', 'left');
-                const pad = padAttr || 'padding:0.75rem 1rem;';
-                const sizeOverride = settings.font_size ? '' : `--fs:${sizes[level]}; --fsm:${mobileSizes[level]};`;
-                return `<${level} class="rj-hd${inlineCls}" ${inlineAttr} style="${sizeOverride} text-align:${aligns[align] || 'left'}; color:${this.cssv(settings.color || '#111827')}; ${pad} ${marAttr} ${bgCss} ${shadow} ${typo}">${esc(this.displayField(block, 'text') || 'Heading')}</${level}>`;
-            }
-
-            if (block.type === 'text') {
-                const aligns = { left: 'left', center: 'center', right: 'right', justify: 'justify' };
-                const sizes = { sm: '0.875rem', base: '1rem', lg: '1.125rem', xl: '1.25rem' };
-                const align = this.resp(settings, 'align', 'left');
-                const pad = padAttr || 'padding:0.75rem 1rem;';
-                const sizeOverride = settings.font_size ? '' : `font-size:${sizes[settings.size] || '1rem'};`;
-                return `<p class="${inlineCls.trim()}" ${inlineAttr} style="${sizeOverride} text-align:${aligns[align] || 'left'}; color:${this.cssv(settings.color || '#374151')}; ${pad} ${marAttr} ${bgCss} ${shadow} line-height:1.6; white-space:pre-wrap; margin:0; ${typo}">${esc(this.displayField(block, 'text') || 'Text')}</p>`;
-            }
-
-            if (block.type === 'image') {
-                const urlRaw = settings.url || '';
-                const url = this.isDynamicValue(urlRaw) ? '' : urlRaw;
-
-                if (!url) {
-                    if (this.preview) return '';
-                    const hint = this.isDynamicValue(urlRaw)
-                        ? this.ico('bolt', 13) + ' ' + esc(this.getDynamicTagLabel(urlRaw))
-                        : esc(this.t('Image'));
-                    return `<div style="padding:2rem 1rem; text-align:center; color:#9ca3af; font-size:0.75rem; background:#f3f4f6; border-radius:8px; margin:0.75rem 1rem;">
-                                <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="display:block; margin:0 auto 4px;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-                                ${hint}
-                            </div>`;
-                }
-
-                const aligns = { left: '0 auto 0 0', center: '0 auto', right: '0 0 0 auto' };
-                const widthMap = { auto: 'auto', full: '100%', half: '50%', third: '33.333%' };
-                const roundedMap = { none: '0', sm: '4px', md: '8px', lg: '16px', full: '9999px' };
-
-                let w = widthMap[settings.width] || '100%';
-                if (settings.width === 'custom' && settings.custom_width) w = this.cssv(settings.custom_width);
-
-                const h = settings.height ? this.cssv(settings.height) : 'auto';
-                const fit = ['cover', 'contain', 'fill', 'none'].includes(settings.object_fit) ? settings.object_fit : 'cover';
-                const radius = roundedMap[settings.rounded] || '8px';
-                const opacity = (settings.opacity != null && settings.opacity !== '') ? parseInt(settings.opacity) / 100 : 1;
-                const align = this.resp(settings, 'align', 'center');
-
-                let imgStyle = `width:${w}; height:${h}; object-fit:${h !== 'auto' ? fit : 'fill'};`;
-                imgStyle += `border-radius:${radius};`;
-                imgStyle += `opacity:${opacity};`;
-                if (shadow) imgStyle += shadow;
-                imgStyle += `margin:${aligns[align] || '0 auto'}; display:block;`;
-
-                let imgHtml = `<img src="${esc(url)}" alt="${esc(this.getBlockField(block, 'alt') || '')}" style="${imgStyle}">`;
-
-                const link = settings.link || '';
-                if (link && !this.preview) {
-                    imgHtml = `<a href="${esc(link)}" target="${esc(settings.target || '_self')}" ${noNav} style="display:inline-block; text-decoration:none;">${imgHtml}</a>`;
-                } else if (link) {
-                    imgHtml = `<a href="${esc(link)}" target="${esc(settings.target || '_self')}" style="display:inline-block; text-decoration:none;">${imgHtml}</a>`;
-                }
-
-                const pad = padAttr || 'padding:0.75rem 1rem;';
-                return `<figure style="${pad} ${marAttr} ${bgCss} margin:0;">${imgHtml}</figure>`;
-            }
-
-            if (block.type === 'logo') {
-                const urlRaw = settings.image || '';
-                const url = this.isDynamicValue(urlRaw) ? '' : urlRaw;
-                const alt = this.getBlockField(block, 'alt') || '';
-                const link = settings.url || '/';
-                const target = settings.new_tab ? '_blank' : '_self';
-                const w = settings.width || 140;
-                const h = settings.max_height || 80;
-                const align = settings.align || 'left';
-
-                if (!url) {
-                    if (this.preview) return '';
-                    const hint = this.isDynamicValue(urlRaw)
-                        ? this.ico('bolt', 13) + ' ' + esc(this.getDynamicTagLabel(urlRaw))
-                        : esc(this.t('Logo')) + ' — ' + esc(this.t('Select Image'));
-                    return `<div style="padding:1.5rem 1rem; text-align:center; color:#9ca3af; font-size:0.75rem; background:#f3f4f6; border-radius:8px; margin:0.5rem 1rem;">
-                                ${hint}
-                            </div>`;
-                }
-
-                const jcMap = { left: 'flex-start', center: 'center', right: 'flex-end' };
-
-                let imgStyle = `display:block; max-width:100%; width:${w}px; max-height:${h}px; object-fit:contain;`;
-
-                let imgHtml = `<img src="${esc(url)}" alt="${esc(alt)}" style="${imgStyle}">`;
-                if (link) {
-                    imgHtml = `<a href="${esc(link)}" target="${esc(target)}" ${noNav} style="display:inline-block; text-decoration:none; max-width:100%;">${imgHtml}</a>`;
-                }
-
-                const pad = padAttr || 'padding:0.5rem 1rem;';
-                return `<div style="display:flex; justify-content:${jcMap[align] || 'flex-start'}; ${pad} ${marAttr} ${bgCss}">${imgHtml}</div>`;
-            }
-
-            if (block.type === 'menu') {
-                const menuId = String(settings.menu_id || '');
-                const menuOption = this.menuOptions.find(m => String(m.id) === menuId);
-                const menuTree = this.menuTrees[menuId] || null;
-                const menuName = menuOption ? menuOption.label : null;
-                const items = menuTree ? (menuTree.items || []) : [];
-
-                if (!menuId || !menuName) {
-                    if (this.preview) return '';
-                    return `<div style="padding:14px 16px; margin:0.5rem 1rem; display:flex; align-items:center; gap:12px; border:1px dashed #d1d5db; border-radius:10px; background:#fafafa; color:#6b7280; font-size:12px;">
-                                <span style="width:28px; height:28px; display:flex; align-items:center; justify-content:center; color:#8b5cf6; flex-shrink:0;" class="rj-ico">
-                                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
-                                </span>
-                                <span style="font-weight:600; color:#374151;">${esc(this.t('Menu'))}</span>
-                                <span style="color:#9ca3af;">— ${esc(this.t('— Select menu —'))}</span>
-                            </div>`;
-                }
-
-                const layout = settings.layout || 'horizontal';
-                const align = ['left', 'center', 'right'].includes(settings.align) ? settings.align : 'center';
-                const gap = { none: '0', sm: '12px', md: '24px', lg: '36px', xl: '48px' }[settings.gap || 'md'];
-                const fontSize = { sm: '13px', base: '15px', lg: '17px' }[settings.font_size || 'base'];
-                const hoverStyle = ['underline', 'background', 'both'].includes(settings.hover_style) ? settings.hover_style : 'underline';
-                const mobileBehavior = settings.mobile_behavior || 'hamburger';
-                const jc = { left: 'flex-start', center: 'center', right: 'flex-end' }[align];
-
-                const vars = [
-                    `--mt:${this.cssv(settings.text_color || '#111827')}`,
-                    `--mh:${this.cssv(settings.hover_color || '#7c3aed')}`,
-                    `--ma:${this.cssv(settings.active_color || '#7c3aed')}`,
-                    `--mbg:${this.cssv(settings.dropdown_bg || '#ffffff')}`,
-                    `--mbd:${settings.dropdown_border === 'yes' ? '1px solid #e5e7eb' : '0'}`,
-                    `--fs:${fontSize}`,
-                    `--fw:${this.cssv(settings.font_weight || '500')}`,
-                    `--gap:${gap}`,
-                    `--dir:${layout === 'vertical' ? 'column' : 'row'}`,
-                    `--ai:${layout === 'vertical' ? jc : 'center'}`,
-                    `--jc:${layout === 'vertical' ? 'flex-start' : jc}`,
-                    `--mjc:${jc}`,
-                ].join(';');
-
-                const renderItems = (list) => list.map(it => {
-                    const kids = it.children && it.children.length > 0;
-                    return `<li class="rj-mi">
-                        <a href="${esc(it.url || '#')}" target="${esc(it.target || '_self')}" class="rj-ml" ${noNav}>${esc(it.label)}${kids ? ' <span class="rj-car">' + this.ico('caret', 11) + '</span>' : ''}</a>
-                        ${kids ? `<ul class="rj-dd">${renderItems(it.children)}</ul>` : ''}
-                    </li>`;
-                }).join('');
-
-                const toggle = `event.stopPropagation(); const m = this.closest('.rj-menu'); const o = m.classList.toggle('rj-open'); this.setAttribute('aria-expanded', o);`;
-
-                // SİLİNDİ: infoBar və onun yaratdığı qarışıqlıq
-
-                const pad = padAttr || 'padding:0.5rem 1rem;';
-                return `<div style="${pad} ${marAttr} ${bgCss} width:100%;">
-                    <div class="rj-menu" data-hover="${hoverStyle}" data-mobile="${esc(mobileBehavior)}" data-align="${align}" style="${vars}; width:100%;">
-                        <nav class="rj-menu-d" style="width:100%;"><ul>${renderItems(items)}</ul></nav>
-                        <nav class="rj-menu-m" style="width:100%;">
-                            <div class="rj-bm" style="width:100%; display:flex; justify-content:${jc};">
-                                <button type="button" class="rj-bb" aria-label="Menu" aria-expanded="false" onclick="${toggle}">
-                                    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
-                                </button>
-                                <ul class="rj-bl">${renderItems(items)}</ul>
-                            </div>
-                        </nav>
-                    </div>
-                </div>`;
-            }
-
-            if (block.type === 'posts') {
-                const postType = settings.post_type || 'post';
-                const layout = settings.layout || 'grid';
-                const columns = parseInt(settings.columns) || 3;
-                const limit = parseInt(settings.limit) || 6;
-                const orderBy = settings.order_by || 'published_at';
-                const order = settings.order || 'desc';
-
-                const posts = this.filteredPreviewPosts(settings);
-
-                const pad = padAttr || 'padding:0.5rem 1rem;';
-
-                if (!this.preview) {
-                    return `<div style="${pad} ${marAttr} ${bgCss}">
-                        <div class="rj-posts-info">
-                            <span class="rj-posts-info-icon">
-                                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-                            </span>
-                            <span class="rj-posts-info-title">Posts — ${esc(postType)}</span>
-                            <span class="rj-posts-info-meta">${layout} · ${columns} cols · ${limit} items · ${posts.length} available</span>
-                        </div>
-                    </div>`;
-                }
-
-                if (posts.length === 0) {
-                    return `<div style="${pad} ${marAttr} ${bgCss}">
-                        <div class="rj-posts-empty-preview">
-                            <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="display:block; margin:0 auto 8px;"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 12h6M9 16h4"/></svg>
-                            ${esc(this.t('No posts found.'))}
-                        </div>
-                    </div>`;
-                }
-
-                const gapMap = { none: '0', sm: '12px', md: '20px', lg: '32px', xl: '48px' };
-                const gap = gapMap[settings.gap] || '20px';
-
-                const radiusMap = { none: '0', sm: '4px', md: '8px', lg: '16px' };
-                const radius = radiusMap[settings.card_radius] || '8px';
-
-                const titleSizes = { sm: '14px', base: '16px', lg: '18px', xl: '22px' };
-                const titleSize = titleSizes[settings.title_size] || '18px';
-
-                const wrapperStyles = [
-                    `--rj-posts-gap:${gap}`,
-                    `--rj-posts-radius:${radius}`,
-                    `--rj-posts-bg:${this.cssv(settings.card_bg || '#ffffff')}`,
-                    `--rj-posts-title-color:${this.cssv(settings.title_color || '#111827')}`,
-                    `--rj-posts-title-size:${titleSize}`,
-                    `--rj-posts-text-color:${this.cssv(settings.text_color || '#6b7280')}`,
-                    `--rj-posts-meta-color:${this.cssv(settings.meta_color || '#9ca3af')}`,
-                ];
-
-                if (padAttr) wrapperStyles.push(padAttr.replace(/;$/, ''));
-                if (marAttr) wrapperStyles.push(marAttr.replace(/;$/, ''));
-                if (bgCss) wrapperStyles.push(bgCss.replace(/;$/, ''));
-
-                const wrapperClass = `rj-posts rj-posts-${layout} rj-posts-cols-${columns} rj-posts-card-${settings.card_style || 'default'}${settings.hover_lift ? ' rj-posts-hover-lift' : ''}`;
-
-                const itemsHtml = posts.map(p => this.renderPreviewPostCard(p, settings)).join('');
-
-                let paginationHtml = '';
-                if ((settings.pagination || 'none') === 'load_more') {
-                    paginationHtml = `<div class="rj-posts-loadmore"><button type="button" class="rj-posts-btn-load">${esc(this.t('Load More'))}</button></div>`;
-                }
-
-                return `<div class="${wrapperClass}" style="${wrapperStyles.join(';')}">
-                    <div class="rj-posts-grid">${itemsHtml}</div>
-                    ${paginationHtml}
-                </div>`;
-            }
-
-            const w = this.widgets.find(x => x.id === block.type);
-            if (this.preview) return '';
-
-            const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-            const renderUrl = '{{ route('admin.rjbuilder.render-block') }}';
-            const settingsStr = this.esc(JSON.stringify(settings));
-
-            return `<div x-data="{
-                html: '',
-                loading: true,
-                init() {
-                    fetch('${renderUrl}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '${csrf}',
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            type: '${block.type}',
-                            settings: JSON.parse(this.$el.dataset.settings)
-                        })
-                    })
-                    .then(r => r.json())
-                    .then(d => {
-                        this.html = d.html;
-                        this.loading = false;
-                        this.$nextTick(() => { if(window.Alpine) window.Alpine.initTree(this.$el.querySelector('.rj-real-html')) });
-                    })
-                    .catch(e => { console.error(e); this.loading = false; });
-                }
-            }" x-init="init()" data-settings="${settingsStr}" style="min-height:40px; position:relative; margin: 0.5rem 1rem;">
-                <div x-show="loading" style="padding:14px 16px; display:flex; align-items:center; gap:12px; border:1px dashed #d1d5db; border-radius:10px; background:#fafafa; color:#6b7280; font-size:12px;">
-                    <span class="animate-spin" style="width:14px; height:14px; border:2px solid #ccc; border-top-color:#8b5cf6; border-radius:50%; display:inline-block;"></span>
-                    <span style="font-weight:600; color:#374151;">${esc(w ? w.name : block.type)}...</span>
-                </div>
-                <div x-show="!loading" class="rj-real-html" x-html="html"></div>
-            </div>`;
-        },
-
-        animationWrapper(html, settings, stateClass) {
-            const dur = settings._animation_duration || 'md';
-            const delay = settings._animation_delay || '0';
-            const durations = { sm: '300ms', md: '600ms', lg: '1000ms', xl: '1500ms' };
-            let style = `animation-duration:${durations[dur] || '600ms'};`;
-            if (delay !== '0') style += ` animation-delay:${this.cssv(delay)};`;
-            return `<div class="rj-a rj-a-${this.esc(settings._animation)} ${stateClass}" style="${style}">${html}</div>`;
-        },
-    };
-}
-</script>
 
         renderPreviewPostCard(post, settings) {
             const url = post.url || '#';
@@ -805,7 +496,7 @@ function builderRender() {
                 }
 
                 const layout = settings.layout || 'horizontal';
-                const align = ['left', 'center', 'right'].includes(settings.align) ? settings.align : 'right';
+                const align = ['left', 'center', 'right'].includes(settings.align) ? settings.align : 'center';
                 const gap = { none: '0', sm: '12px', md: '24px', lg: '36px', xl: '48px' }[settings.gap || 'md'];
                 const fontSize = { sm: '13px', base: '15px', lg: '17px' }[settings.font_size || 'base'];
                 const hoverStyle = ['underline', 'background', 'both'].includes(settings.hover_style) ? settings.hover_style : 'underline';
@@ -837,21 +528,14 @@ function builderRender() {
 
                 const toggle = `event.stopPropagation(); const m = this.closest('.rj-menu'); const o = m.classList.toggle('rj-open'); this.setAttribute('aria-expanded', o);`;
 
-                const infoBar = !this.preview
-                    ? `<div style="display:flex; align-items:center; gap:10px; color:#6b7280; font-size:11px; font-weight:600; margin-bottom:6px; text-transform:uppercase; letter-spacing:.05em;">
-                           <span style="color:#8b5cf6;">${esc(menuName)}</span>
-                           <span style="color:#c4c7d3;">·</span>
-                           <span style="display:inline-flex; align-items:center; gap:6px;">${layout === 'horizontal' ? 'Horizontal' : 'Vertical'} · ${align}${mobileBehavior === 'hamburger' ? ' · ' + this.ico('menu', 12) : ''}</span>
-                       </div>`
-                    : '';
+                // "MAIN - HORIZONTAL" yazısı SİLİNDİ
 
                 const pad = padAttr || 'padding:0.5rem 1rem;';
-                return `<div style="${pad} ${marAttr} ${bgCss}">
-                    ${infoBar}
-                    <div class="rj-menu" data-hover="${hoverStyle}" data-mobile="${esc(mobileBehavior)}" data-align="${align}" style="${vars}">
-                        <nav class="rj-menu-d"><ul>${renderItems(items)}</ul></nav>
-                        <nav class="rj-menu-m">
-                            <div class="rj-bm">
+                return `<div style="${pad} ${marAttr} ${bgCss} width:100%;">
+                    <div class="rj-menu" data-hover="${hoverStyle}" data-mobile="${esc(mobileBehavior)}" data-align="${align}" style="${vars}; width:100%;">
+                        <nav class="rj-menu-d" style="width:100%;"><ul>${renderItems(items)}</ul></nav>
+                        <nav class="rj-menu-m" style="width:100%;">
+                            <div class="rj-bm" style="width:100%; display:flex; justify-content:${jc};">
                                 <button type="button" class="rj-bb" aria-label="Menu" aria-expanded="false" onclick="${toggle}">
                                     <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
                                 </button>
