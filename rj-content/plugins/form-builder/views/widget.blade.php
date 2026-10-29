@@ -1,119 +1,108 @@
 @php
-    $layoutClass = match($layout) {
-        'grid-2' => 'rj-form-grid-2',
-        'inline' => 'rj-form-inline',
-        default => 'rj-form-stack',
-    };
+    $form = \RjPlugins\FormBuilder\Models\Form::with('fields')->find($settings['form_id'] ?? 0);
 @endphp
 
-<style>
-    .rj-form-preset-default .rj-form-label { font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px; display: block; }
-    .rj-form-preset-default .rj-form-input, .rj-form-preset-default textarea, .rj-form-preset-default select { width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; background: #fff; color: #111827; outline: none; transition: all .15s; }
-    .rj-form-preset-default .rj-form-input:focus, .rj-form-preset-default textarea:focus, .rj-form-preset-default select:focus { border-color: #7c3aed; box-shadow: 0 0 0 3px rgba(124,58,237,.1); }
-    .rj-form-preset-default .rj-form-submit { padding: 12px 24px; background: #7c3aed; color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all .15s; }
-    .rj-form-preset-default .rj-form-submit:hover { background: #6d28d9; }
+@if($form)
+    <div class="rj-form-widget-container w-full max-w-2xl mx-auto">
+        <style>
+            .rj-f-anim {
+                animation: rjFadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            @keyframes rjFadeInUp {
+                to { opacity: 1; transform: translateY(0); }
+            }
+            .rj-input-modern {
+                width: 100%;
+                background-color: #f8fafc;
+                border: 1px solid #e2e8f0;
+                border-radius: 0.75rem;
+                padding: 0.875rem 1rem;
+                font-size: 0.95rem;
+                color: #1e293b;
+                transition: all 0.25s ease;
+                outline: none;
+                font-family: inherit;
+            }
+            .rj-input-modern:focus {
+                background-color: #ffffff;
+                border-color: #8b5cf6;
+                box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15);
+            }
+            .rj-btn-modern {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
+                color: white;
+                font-weight: 600;
+                padding: 0.875rem 2rem;
+                border-radius: 0.75rem;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+                border: none;
+                cursor: pointer;
+                width: 100%;
+                font-family: inherit;
+            }
+            .rj-btn-modern:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(124, 58, 237, 0.4);
+                background: linear-gradient(135deg, #6d28d9 0%, #4f46e5 100%);
+            }
+            .rj-btn-modern:active {
+                transform: translateY(0);
+            }
+            .rj-btn-modern:disabled {
+                opacity: 0.7;
+                cursor: not-allowed;
+                transform: none;
+            }
+        </style>
 
-    .rj-form-preset-modern .rj-form-field { margin-bottom: 20px; }
-    .rj-form-preset-modern .rj-form-label { font-size: 13px; font-weight: 600; color: #111827; margin-bottom: 8px; display: block; }
-    .rj-form-preset-modern .rj-form-input, .rj-form-preset-modern textarea, .rj-form-preset-modern select { width: 100%; padding: 14px 16px; border: 1px solid transparent; border-radius: 12px; font-size: 15px; background: #f3f4f6; color: #111827; outline: none; transition: all .2s; box-shadow: inset 0 1px 2px rgba(0,0,0,.02); }
-    .rj-form-preset-modern .rj-form-input:focus, .rj-form-preset-modern textarea:focus, .rj-form-preset-modern select:focus { background: #fff; border-color: #c4b5fd; box-shadow: 0 0 0 4px rgba(196,181,253,.3); }
-    .rj-form-preset-modern .rj-form-submit { width: 100%; padding: 16px; background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%); color: #fff; border: none; border-radius: 12px; font-weight: 600; font-size: 16px; cursor: pointer; transition: transform .15s, box-shadow .15s; box-shadow: 0 4px 12px rgba(124,58,237,.3); }
-    .rj-form-preset-modern .rj-form-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(124,58,237,.4); }
+        <form class="rj-form flex flex-col gap-5" action="{{ route('frontend.form.submit', $form->slug ?? $form->id) }}" method="POST">
+            @csrf
 
-    .rj-form-preset-minimal .rj-form-field { margin-bottom: 24px; }
-    .rj-form-preset-minimal .rj-form-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #6b7280; margin-bottom: 4px; display: block; }
-    .rj-form-preset-minimal .rj-form-input, .rj-form-preset-minimal textarea, .rj-form-preset-minimal select { width: 100%; padding: 8px 0; border: none; border-bottom: 2px solid #e5e7eb; border-radius: 0; font-size: 16px; background: transparent; color: #111827; outline: none; transition: border-color .2s; }
-    .rj-form-preset-minimal .rj-form-input:focus, .rj-form-preset-minimal textarea:focus, .rj-form-preset-minimal select:focus { border-bottom-color: #7c3aed; }
-    .rj-form-preset-minimal .rj-form-submit { padding: 10px 0; background: transparent; color: #7c3aed; border: none; border-bottom: 2px solid #7c3aed; border-radius: 0; font-weight: 700; font-size: 15px; cursor: pointer; transition: opacity .15s; }
-    .rj-form-preset-minimal .rj-form-submit:hover { opacity: .7; }
+            @foreach($form->fields as $index => $field)
+                <div class="rj-form-field rj-f-anim" style="animation-delay: {{ $index * 0.08 }}s;">
+                    <label class="rj-form-label block text-sm font-semibold text-slate-700 mb-2">
+                        {{ __($field->label) }}
+                        @if($field->required) <span class="text-red-500">*</span> @endif
+                    </label>
 
-    .rj-form-preset-dark { background: #1e1b4b; padding: 32px; border-radius: 16px; box-shadow: 0 24px 48px -12px rgba(0,0,0,.3); }
-    .rj-form-preset-dark .rj-form-field { margin-bottom: 20px; }
-    .rj-form-preset-dark .rj-form-label { font-size: 13px; font-weight: 600; color: #e5e7eb; margin-bottom: 8px; display: block; }
-    .rj-form-preset-dark .rj-form-input, .rj-form-preset-dark textarea, .rj-form-preset-dark select { width: 100%; padding: 12px 16px; border: 1px solid rgba(255,255,255,.1); border-radius: 8px; font-size: 14px; background: rgba(255,255,255,.05); color: #fff; outline: none; backdrop-filter: blur(10px); transition: all .2s; }
-    .rj-form-preset-dark .rj-form-input:focus, .rj-form-preset-dark textarea:focus, .rj-form-preset-dark select:focus { border-color: rgba(255,255,255,.3); background: rgba(255,255,255,.1); }
-    .rj-form-preset-dark .rj-form-submit { width: 100%; padding: 14px; background: rgba(255,255,255,.1); color: #fff; border: 1px solid rgba(255,255,255,.2); border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; backdrop-filter: blur(10px); transition: background .15s; }
-    .rj-form-preset-dark .rj-form-submit:hover { background: rgba(255,255,255,.2); }
-</style>
-
-<div class="rj-form-wrap rj-form-preset-{{ $designPreset }}">
-    <form method="POST" action="{{ route('plugin.form.submit', $form->slug) }}" class="rj-form {{ $layoutClass }}">
-        @csrf
-
-        @foreach($form->fields as $field)
-            @php
-                $required = $field->is_required ? 'required' : '';
-                $reqMark = $field->is_required ? '<span class="rj-form-req" style="color:#ef4444;">*</span>' : '';
-            @endphp
-
-            @if($field->type === 'textarea')
-                <div class="rj-form-field rj-form-field-textarea">
-                    <label class="rj-form-label">{{ $field->label }} {!! $reqMark !!}</label>
-                    <textarea name="{{ $field->name }}" placeholder="{{ $field->placeholder }}" {{ $required }} rows="5"></textarea>
-                    @if($field->help_text)
-                        <div class="rj-form-help" style="font-size:11px; color:#6b7280; margin-top:4px;">{{ $field->help_text }}</div>
-                    @endif
-                </div>
-
-            @elseif($field->type === 'select')
-                <div class="rj-form-field">
-                    <label class="rj-form-label">{{ $field->label }} {!! $reqMark !!}</label>
-                    <select name="{{ $field->name }}" {{ $required }}>
-                        <option value="">{{ $field->placeholder ?: __('Select an option') }}</option>
-                        @if(is_array($field->options))
-                            @foreach($field->options as $option)
-                                <option value="{{ $option }}">{{ $option }}</option>
+                    @if($field->type === 'textarea')
+                        <textarea name="{{ $field->name }}" class="rj-input-modern" rows="4" placeholder="{{ __($field->placeholder ?? 'Enter ' . $field->label) }}" {{ $field->required ? 'required' : '' }}></textarea>
+                    @elseif($field->type === 'select')
+                        <select name="{{ $field->name }}" class="rj-input-modern" {{ $field->required ? 'required' : '' }}>
+                            <option value="">{{ __('— Select an option —') }}</option>
+                            @foreach($field->options ?? [] as $opt)
+                                <option value="{{ $opt }}">{{ $opt }}</option>
                             @endforeach
-                        @endif
-                    </select>
-                    @if($field->help_text)
-                        <div class="rj-form-help" style="font-size:11px; color:#6b7280; margin-top:4px;">{{ $field->help_text }}</div>
+                        </select>
+                    @elseif($field->type === 'checkbox' || $field->type === 'radio')
+                        <div class="flex items-center gap-3 mt-2">
+                            <input type="{{ $field->type }}" name="{{ $field->name }}" class="w-5 h-5 accent-purple-600 rounded cursor-pointer" {{ $field->required ? 'required' : '' }}>
+                            <span class="text-sm text-slate-600">{{ __($field->placeholder ?? '') }}</span>
+                        </div>
+                    @else
+                        <input type="{{ $field->type }}" name="{{ $field->name }}" class="rj-input-modern" placeholder="{{ __($field->placeholder ?? 'Enter ' . $field->label) }}" {{ $field->required ? 'required' : '' }}>
                     @endif
                 </div>
+            @endforeach
 
-            @elseif($field->type === 'checkbox')
-                <div class="rj-form-field">
-                    <label class="rj-form-label">{{ $field->label }} {!! $reqMark !!}</label>
-                    <div class="rj-form-checkbox-group" style="display:flex; flex-direction:column; gap:8px;">
-                        @if(is_array($field->options))
-                            @foreach($field->options as $option)
-                                <label class="rj-form-checkbox" style="display:inline-flex; align-items:center; gap:8px; font-size:14px; cursor:pointer;">
-                                    <input type="checkbox" name="{{ $field->name }}[]" value="{{ $option }}" {{ $required }} style="accent-color:#7c3aed;">
-                                    <span>{{ $option }}</span>
-                                </label>
-                            @endforeach
-                        @else
-                            <label class="rj-form-checkbox" style="display:inline-flex; align-items:center; gap:8px; font-size:14px; cursor:pointer;">
-                                <input type="checkbox" name="{{ $field->name }}" value="1" {{ $required }} style="accent-color:#7c3aed;">
-                                <span>{{ $field->placeholder ?: $field->label }}</span>
-                            </label>
-                        @endif
-                    </div>
-                    @if($field->help_text)
-                        <div class="rj-form-help" style="font-size:11px; color:#6b7280; margin-top:4px;">{{ $field->help_text }}</div>
-                    @endif
-                </div>
+            <div class="rj-form-message mt-2" style="display:none;"></div>
 
-            @else
-                @php
-                    $type = in_array($field->type, ['text', 'email', 'tel', 'url', 'number', 'date', 'time']) ? $field->type : 'text';
-                @endphp
-                <div class="rj-form-field {{ $field->type === 'textarea' ? 'rj-form-field-full' : '' }}">
-                    <label class="rj-form-label">{{ $field->label }} {!! $reqMark !!}</label>
-                    <input type="{{ $type }}" name="{{ $field->name }}" placeholder="{{ $field->placeholder }}" class="rj-form-input" {{ $required }}>
-                    @if($field->help_text)
-                        <div class="rj-form-help" style="font-size:11px; color:#6b7280; margin-top:4px;">{{ $field->help_text }}</div>
-                    @endif
-                </div>
-            @endif
-        @endforeach
-
-        <div class="rj-form-actions {{ $layoutClass === 'rj-form-inline' ? 'rj-form-field-full' : '' }}">
-            <button type="submit" class="rj-form-submit">
-                {{ __('Submit') }}
-            </button>
-        </div>
-
-        <div class="rj-form-message" style="display: none; padding: 12px; border-radius: 8px; font-size: 14px; margin-top: 16px;"></div>
-    </form>
-</div>
+            <div class="rj-form-actions rj-f-anim mt-2" style="animation-delay: {{ (count($form->fields) + 1) * 0.08 }}s;">
+                <button type="submit" class="rj-btn-modern rj-form-submit">
+                    {{ __($settings['button_text'] ?? 'Submit') }}
+                </button>
+            </div>
+        </form>
+    </div>
+@else
+    <div class="text-center p-8 bg-slate-50 border border-dashed border-slate-300 rounded-2xl">
+        <svg class="w-12 h-12 mx-auto text-slate-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+        <p class="text-slate-500 font-medium">{{ __('No form selected. Please select a form in the settings panel.') }}</p>
+    </div>
+@endif
