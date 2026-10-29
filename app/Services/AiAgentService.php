@@ -13,72 +13,73 @@ class AiAgentService
 
     public function __construct()
     {
-        // Yalnız işləyən açarsız API-lər
         $this->providers = [
             [
                 'name' => 'pollinations',
                 'url'  => 'https://text.pollinations.ai/openai',
-                'type' => 'openai',
                 'model'=> 'openai',
-            ],
-            [
-                'name' => 'llm7',
-                'url'  => 'https://api.llm7.io/v1/chat/completions',
-                'type' => 'openai',
-                'model'=> 'gpt-4o', // Model adı dəyişdirildi (gpt-4o-mini yox)
-            ],
+            ]
         ];
     }
 
     public function ask(string $question, string $extraContext = ''): array
     {
-        $docContext = $this->searchDocs($question);
-        $systemContext = $this->getSystemContext($question);
+        $docContext = '';
+        $systemContext = '';
+        
+        try {
+            $docContext = $this->searchDocs($question);
+            $systemContext = $this->getSystemContext($question);
+        } catch (\Throwable $e) {
+            // Əgər daxili axtarış xəta versə, AI yenə də işləsin
+            Log::warning('Context generation error: ' . $e->getMessage());
+        }
 
         $fullContext = trim($extraContext . "\n" . $docContext . "\n" . $systemContext);
 
-        $systemPrompt = "You are the intelligent support AI for RJ Nexus (a self-hosted CMS).
-        INSTRUCTIONS:
-        1. Read the provided DOCUMENTATION CONTEXT and SYSTEM DATA carefully.
-        2. If the user asks about site stats, use the SYSTEM DATA.
-        3. If the user asks how to do something, use the DOCUMENTATION CONTEXT.
-        4. If the user asks for ideas, be creative and provide 3-4 engaging blog post ideas.
-        5. Answer clearly and in the same language as the user's question.";
+        // AI-a həmişə İngilis dilində düşünməyi, lakin istifadəçinin dilində cavab verməyi tapşırırıq
+        $systemPrompt = "You are the official support AI for RJ Nexus CMS. 
+        Use the provided CONTEXT to answer the user's question.
+        If the context doesn't have the answer, answer from your general knowledge.
+        Respond in the SAME LANGUAGE as the user's question.";
 
-        $prompt = $systemPrompt . "\n\n--- DOCUMENTATION CONTEXT ---\n" . mb_substr($fullContext, 0, 4000) . "\n\n--- USER QUESTION ---\n" . $question;
+        $prompt = $systemPrompt . "\n\n--- CONTEXT ---\n" . mb_substr($fullContext, 0, 3500) . "\n\n--- USER ---\n" . $question;
+
+        $debugErrors = [];
 
         foreach ($this->providers as $provider) {
             try {
-                $response = Http::withOptions([
-                    'verify' => false, // SSL xətalarını keçmək üçün
-                ])->withHeaders([
-                    'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                $response = Http::withHeaders([
+                    'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                     'Accept' => 'application/json',
                     'Content-Type' => 'application/json',
-                ])->timeout(45)->post($provider['url'], [
+                ])->timeout(30)->post($provider['url'], [
                     'model' => $provider['model'],
                     'messages' => [['role' => 'user', 'content' => $prompt]],
                 ]);
 
                 if ($response->successful()) {
-                    // Düzgün JSON oxunması
                     $content = $response->json('choices.0.message.content');
                     
                     if ($content) {
                         return ['success' => true, 'answer' => trim($content), 'provider' => $provider['name']];
                     }
+                    
+                    $debugErrors[] = "{$provider['name']}: Empty content in JSON";
+                } else {
+                    $debugErrors[] = "{$provider['name']}: HTTP " . $response->status() . " - " . mb_substr($response->body(), 0, 150);
                 }
-                
-                Log::warning("AI Provayder Xətası ({$provider['name']}): Status " . $response->status() . " - " . mb_substr($response->body(), 0, 200));
 
             } catch (\Throwable $e) {
-                Log::error("AI Provayder İstisnası ({$provider['name']}): " . $e->getMessage());
+                $debugErrors[] = "{$provider['name']}: " . $e->getMessage();
             }
         }
 
+        // Əgər bura çatdıqsa, heç bir API işləməyib. Xətanı birbaşa frontend-ə qaytarırıq.
         return [
             'success' => false, 
-            'answer' => __('Bütün AI xidmətləri hazırda əlçatmazdır. Zəhmət olmasa bir az sonra yenidən cəhd edin.')
+            'answer' => 'AI service is currently unavailable.',
+            'debug' => $debugErrors 
         ];
     }
 
@@ -123,11 +124,6 @@ class AiAgentService
             $totalPosts = Post::where('type', 'post')->count();
             $context .= "Today's Post Count: {$todayPosts}\n";
             $context .= "Total Posts: {$totalPosts}\n";
-        }
-
-        if (str_contains($q, 'page') || str_contains($q, 'səhifə')) {
-            $totalPages = Post::where('type', 'page')->count();
-            $context .= "Total Pages: {$totalPages}\n";
         }
 
         return $context;
