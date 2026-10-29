@@ -24,6 +24,12 @@ use App\Widgets\Builtin\CustomHtmlWidget;
 use App\Widgets\Builtin\DividerWidget;
 use App\Widgets\Builtin\DualColorHeadingWidget;
 use App\Widgets\Builtin\FlipBoxWidget;
+use App\Widgets\Builtin\FooterAboutWidget;
+use App\Widgets\Builtin\FooterBadgesWidget;
+use App\Widgets\Builtin\FooterContactWidget;
+use App\Widgets\Builtin\FooterCopyrightWidget;
+use App\Widgets\Builtin\FooterLinksWidget;
+use App\Widgets\Builtin\FooterNewsletterWidget;
 use App\Widgets\Builtin\GalleryAdvancedWidget;
 use App\Widgets\Builtin\Google360Widget;
 use App\Widgets\Builtin\GoogleReviewsWidget;
@@ -74,6 +80,14 @@ class WidgetList
             // --- Header Widgets ---
             new HeaderLoginButtonWidget(),
             new HeaderLanguageSwitcherWidget(),
+
+            // --- Footer Widgets ---
+            new FooterAboutWidget(),
+            new FooterBadgesWidget(),
+            new FooterContactWidget(),
+            new FooterCopyrightWidget(),
+            new FooterLinksWidget(),
+            new FooterNewsletterWidget(),
 
             // --- Core / Basic ---
             new HeadingWidget(),
