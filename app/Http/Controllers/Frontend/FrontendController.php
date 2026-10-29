@@ -79,4 +79,38 @@ class FrontendController extends Controller
             'title' => $template->name,
         ]);
     }
+
+    public function previewPost(Post $post)
+    {
+        $previewLocale = request()->query('locale');
+
+        if (!$previewLocale || !in_array($previewLocale, rj_available_locales(), true)) {
+            $previewLocale = config('app.locale');
+        }
+
+        app()->setLocale($previewLocale);
+
+        $header = $this->resolver->header();
+        $footer = $this->resolver->footer();
+
+        $blocks = $post->blocks['blocks'] ?? [];
+
+        $title = $post->title;
+
+        if ($previewLocale !== config('app.locale')) {
+            $translation = $post->translations->firstWhere('locale', $previewLocale);
+            if ($translation && !empty($translation->title)) {
+                $title = $translation->title;
+            }
+        }
+
+        return view('frontend.preview', [
+            'template' => null,
+            'header' => $header,
+            'footer' => $footer,
+            'blocks' => $blocks,
+            'isPage' => true,
+            'title' => $title ?: __('Untitled'),
+        ]);
+    }
 }
