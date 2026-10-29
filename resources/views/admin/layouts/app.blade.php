@@ -274,7 +274,7 @@
         ];
     @endphp
 
-    <div class="flex min-h-screen" x-data="{ 
+    <div class="flex min-h-screen" x-data="{
         userMenu: false, 
         langMenu: false,
         notifMenu: false,
@@ -288,7 +288,7 @@
         
         init() {
             this.fetchNotifications();
-            setInterval(() => this.fetchNotifications(), 60000); // Hər dəqiqə yenilə
+            setInterval(() => this.fetchNotifications(), 60000);
         },
         
         fetchNotifications() {
@@ -308,7 +308,7 @@
                 headers: { 
                     'Accept': 'application/json', 
                     'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name=\"csrf-token\"]').content
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 }
             })
             .then(r => r.json())
