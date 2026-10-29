@@ -34,14 +34,11 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->render(function (\Throwable $e, $request) {
             if (config('app.debug') && !$request->expectsJson()) {
-                $statusCode = 500;
                 $isHttpException = $e instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+                $statusCode = $isHttpException ? $e->getStatusCode() : 500;
 
-                if ($isHttpException) {
-                    $statusCode = $e->getStatusCode();
-                }
-
-                if (!$isHttpException || $statusCode >= 500) {
+                // Yalnız və yalnız 500 xətası və ya HTTP olmayan daxili xətalar üçün RJ Debug ekranı
+                if (!$isHttpException || $statusCode === 500) {
                     return response()->view('errors.rj-debug', [
                         'exception' => $e,
                         'statusCode' => $statusCode,
