@@ -13,7 +13,8 @@ class AiAgentService
 
     public function __construct()
     {
-        // Ən stabil işləyən açarsız provayderlər
+        // DNS xətası verən keylessai çıxarıldı.
+        // Əvəzinə Pollinations, Kilo Gateway və LLM7 əlavə edildi.
         $this->providers = [
             [
                 'name' => 'pollinations-openai',
@@ -21,13 +22,13 @@ class AiAgentService
                 'type' => 'openai',
             ],
             [
-                'name' => 'keylessai',
-                'url'  => 'https://keylessai.thryx.workers.dev/v1/chat/completions',
+                'name' => 'kilo',
+                'url'  => 'https://api.kilo.ai/api/gateway/chat/completions',
                 'type' => 'openai',
             ],
             [
-                'name' => 'kilo',
-                'url'  => 'https://api.kilo.ai/api/gateway/chat/completions',
+                'name' => 'llm7',
+                'url'  => 'https://api.llm7.io/v1/chat/completions',
                 'type' => 'openai',
             ],
         ];
@@ -65,13 +66,9 @@ class AiAgentService
         return ['success' => false, 'answer' => __('Bütün AI xidmətləri hazırda əlçatmazdır. Zəhmət olmasa bir az sonra yenidən cəhd edin.')];
     }
 
-    /**
-     * OpenAI uyğunluğunda olan API-lər üçün (SSL yoxlaması söndürülüb, timeout artırılıb)
-     */
     protected function callOpenAiCompatible(string $url, string $prompt): ?string
     {
-        // Shared hostinglərdə SSL sertifikatı problemlərini keçmək üçün 'verify' => false
-        // Timeout-u 60 saniyəyə qaldırırıq
+        // SSL yoxlaması söndürüldü və timeout artırıldı
         $response = Http::withOptions([
             'verify' => false,
         ])->withHeaders([
