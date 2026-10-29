@@ -67,6 +67,9 @@
         .lg-card { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); max-width: 1040px; margin: 0 auto; overflow: hidden; border: 1px solid var(--line); border-radius: var(--r); background: #fff; color: var(--ink); box-shadow: {{ ($bool('shadow')) ? '0 40px 80px -36px rgba(15, 23, 42, .35)' : 'none' }}; }
 
         .lg-main { display: flex; flex-direction: column; justify-content: center; padding: clamp(28px, 5vw, 56px); }
+        .lg-ico { display: grid; place-items: center; width: 52px; height: 52px; margin-bottom: 18px; border-radius: 50%; background: color-mix(in srgb, var(--accent) 12%, #fff); color: var(--accent); box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent);
+            svg { width: 26px; height: 26px; }
+        }
         .lg-title { margin: 0 0 8px; font-size: clamp(26px, 3vw, 34px); font-weight: 800; letter-spacing: -.02em; line-height: 1.15; }
         .lg-sub { margin: 0 0 26px; font-size: 14px; line-height: 1.6; color: var(--muted); }
 
@@ -137,7 +140,7 @@
             &:nth-child(2) { bottom: 22cqw; left: -12cqw; width: 30cqw; height: 30cqw; animation-delay: -5s; }
         }
 
-        .lg-bubble { position: absolute; top: clamp(16px, 6cqw, 40px); left: 50%; z-index: 6; max-width: 86%; padding: 10px 18px; translate: -50% 0; border-radius: 999px; background: #fff; color: var(--ink); font-size: 13.5px; font-weight: 700; white-space: nowrap; box-shadow: 0 14px 28px -14px rgba(15, 23, 42, .4);
+        .lg-bubble { position: absolute; top: clamp(16px, 6cqw, 40px); left: 50%; z-index: 6; max-width: 86%; margin: 0; padding: 10px 18px; translate: -50% 0; border-radius: 999px; background: #fff; color: var(--ink); font-size: 13.5px; font-weight: 700; white-space: nowrap; box-shadow: 0 14px 28px -14px rgba(15, 23, 42, .4);
             &.is-pop { animation: rj-lg-pop .4s cubic-bezier(.34, 1.56, .64, 1); }
             &::after { content: ""; position: absolute; bottom: -5px; left: 50%; width: 12px; height: 12px; translate: -50% 0; rotate: 45deg; border-radius: 2px; background: #fff; }
         }
@@ -169,9 +172,43 @@
         &[data-state="error"] .m { rotate: 180deg; }
 
         @media (max-width: 760px) {
-            .lg-card { grid-template-columns: 1fr; }
-            .lg-stage { order: -1; aspect-ratio: 4 / 3; }
-            .lg-cast { scale: .78; }
+            & { padding: 12px 10px; }
+
+            .lg-card { grid-template-columns: 1fr; border-radius: min(var(--r), 18px); }
+            .lg-stage { order: -1; aspect-ratio: auto; height: 196px; }
+            .lg-cast { scale: .66; }
+            .lg-orb:nth-child(2) { display: none; }
+
+            .lg-bubble { top: 12px; padding: 6px 12px; font-size: 12px; }
+
+            .lg-main { padding: 20px 18px 22px; justify-content: flex-start; }
+            .lg-ico { width: 42px; height: 42px; margin-bottom: 12px;
+                svg { width: 21px; height: 21px; }
+            }
+            .lg-title { margin-bottom: 4px; font-size: 22px; }
+            .lg-sub { margin-bottom: 16px; font-size: 13px; line-height: 1.5; }
+
+            .lg-err { margin-bottom: 12px; padding: 9px 12px; font-size: 12.5px; }
+            .lg-f { margin-bottom: 12px;
+                label { margin-bottom: 5px; font-size: 12px; }
+            }
+            .lg-w {
+                & > svg { left: 12px; width: 16px; height: 16px; }
+                input { padding: 11px 12px 11px 38px; border-radius: 10px; font-size: 16px; }
+                &.has-eye input { padding-right: 44px; }
+            }
+            .lg-eye { right: 5px; width: 32px; height: 32px; }
+            .lg-row { flex-wrap: wrap; gap: 6px 10px; margin: 0 0 16px; font-size: 12.5px; }
+            .lg-submit { padding: 12px; border-radius: 10px; font-size: 14px; }
+            .lg-foot { margin-top: 14px; font-size: 12.5px; }
+
+            .lg-out {
+                h2 { margin-bottom: 14px; }
+                h3 { font-size: 20px; }
+            }
+            .lg-av { width: 72px; height: 72px; margin-bottom: 16px; font-size: 24px; }
+            .lg-act { gap: 8px; margin-top: 18px; }
+            .lg-btn { padding: 10px 14px; border-radius: 10px; font-size: 13.5px; }
         }
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation: none !important; transition: none !important; }
@@ -194,6 +231,9 @@
     <div class="lg-card">
         <section class="lg-main">
             <div class="lg-in">
+                <span class="lg-ico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg>
+                </span>
                 <h2 class="lg-title">{{ $title }}</h2>
                 <p class="lg-sub">{{ $subtitle }}</p>
 
