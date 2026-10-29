@@ -35,18 +35,14 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (\Throwable $e, $request) {
             if (config('app.debug') && !$request->expectsJson()) {
                 $statusCode = 500;
-                $isHttpException = $e instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
-
-                if ($isHttpException) {
+                if ($e instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface) {
                     $statusCode = $e->getStatusCode();
                 }
 
-                if (!$isHttpException || $statusCode >= 500) {
-                    return response()->view('errors.rj-debug', [
-                        'exception' => $e,
-                        'statusCode' => $statusCode,
-                    ], $statusCode);
-                }
+                return response()->view('errors.rj-debug', [
+                    'exception' => $e,
+                    'statusCode' => $statusCode,
+                ], $statusCode);
             }
         });
     })->create();
