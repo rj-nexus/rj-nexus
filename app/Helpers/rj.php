@@ -854,19 +854,34 @@ if (!function_exists('rj_set_env')) {
             return false;
         }
 
-        $content = file_get_contents($path);
+        try {
+            $content = file_get_contents($path);
+            $pattern = "/^{$key}=.*/m";
 
-        if (preg_match("/^{$key}=.*/m", $content)) {
-            $content = preg_replace("/^{$key}=.*/m", "{$key}={$value}", $content);
-        } else {
-            $content .= "\n{$key}={$value}";
-        }
+            if (preg_match($pattern, $content)) {
+                $content = preg_replace($pattern, "{$key}={$value}", $content);
+            } else {
+                $content .= "\n{$key}={$value}";
+            }
 
-        if (file_put_contents($path, $content) !== false) {
-            \Illuminate\Support\Facades\Artisan::call('config:clear');
+            // Faylı təhlükəsiz yazmaq üçün müvəqqəti fayl
+            $tmpPath = $path . '.tmp_' . uniqid();
+            if (file_put_contents($tmpPath, $content) !== false) {
+                rename($tmpPath, $path);
+            } else {
+                file_put_contents($path, $content);
+            }
+
+            // Əgər Laravel Octane və ya xüsusi bir mühitdirsə xəta verməsin deyə try-catch
+            if (function_exists('shell_exec')) {
+                @shell_exec('php artisan config:clear 2>&1');
+            } else {
+                \Illuminate\Support\Facades\Artisan::call('config:clear');
+            }
+
             return true;
+        } catch (\Throwable $e) {
+            return false;
         }
-
-        return false;
     }
 }
