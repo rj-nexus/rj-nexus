@@ -154,14 +154,14 @@
 
             <span class="rj-badge" :data-saved="saved"><i></i><span x-text="saved ? t('Saved') : t('Unsaved')"></span></span>
 
-            @if($builder['templateType'] === 'page' && !empty($builder['slug']))
+            @if($builder['templateType'] === 'page' && isset($builder['slug']))
                 <a href="{{ url('/' . $builder['slug']) }}" target="_blank" class="rj-btn" title="{{ __('View Live Page') }}">
                     <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                     <span>{{ __('View Page') }}</span>
                 </a>
             @endif
 
-            <a href="{{ route('frontend.preview', $builder['id'] ?? $builder['slug']) }}" target="_blank" class="rj-btn" title="{{ __('Real Preview') }}">
+            <a href="{{ route('frontend.preview', $builder['id'] ?? 0) }}" target="_blank" class="rj-btn" title="{{ __('Real Preview') }}">
                 <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.46 12C3.73 7.94 7.52 5 12 5s8.27 2.94 9.54 7c-1.27 4.06-5.06 7-9.54 7S3.73 16.06 2.46 12z"/></svg>
                 <span>{{ __('Live Preview') }}</span>
             </a>
