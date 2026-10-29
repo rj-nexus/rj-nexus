@@ -96,6 +96,8 @@ class BuilderController extends Controller
         $builder = [
             'entityType' => 'template',
             'entityId' => $template->id,
+            'id' => $template->id,
+            'slug' => $template->slug,
             'name' => $template->name,
             'subtitle' => $template->typeLabel(),
             'templateType' => $template->type,
