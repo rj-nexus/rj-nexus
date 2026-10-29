@@ -39,7 +39,6 @@
         <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <img src="{{ asset('images/logo.svg') }}" alt="RJ Nexus" class="h-8 w-auto" style="filter: brightness(0) invert(1);">
-                <span class="font-bold text-lg tracking-tight ml-1">RJ <span class="text-rjaccent">Nexus</span></span>
                 <span class="px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold uppercase tracking-wider ml-2">Debug Mode</span>
             </div>
             <div class="flex items-center gap-4 text-sm text-gray-400 font-medium">
