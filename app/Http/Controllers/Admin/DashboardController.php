@@ -31,18 +31,16 @@ class DashboardController extends Controller
     }
 
     public function askAi(Request $request, AiAgentService $aiService, DocSearchService $docSearch)
-    {
-        $validated = $request->validate([
-            'question' => 'required|string|max:1000',
-        ]);
+{
+    $validated = $request->validate([
+        'question' => 'required|string|max:1000',
+    ]);
 
-        $question = $validated['question'];
+    $question = $validated['question'];
 
-        // Mövcud DocSearchService-dən gələn konteksti alırıq (əgər varsa)
-        $searchResult = $docSearch->getContext($question);
-        $extraContext = $searchResult['context'] ?? '';
-        $result = $aiService->ask($question, $extraContext);
+    $searchResult = $docSearch->getContext($question);
+    $extraContext = is_array($searchResult) ? ($searchResult['context'] ?? '') : '';
 
-        return response()->json($result);
-    }
+    return response()->json($aiService->ask($question, $extraContext));
+}
 }
