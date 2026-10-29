@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $statusCode }} | RJ CMS — System Error</title>
+    <title>{{ $statusCode }} | RJ Nexus — System Error</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -38,10 +38,8 @@
     <header class="w-full border-b border-rjborder bg-rjbg/80 backdrop-blur-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-rjaccent to-rjaccent2 flex items-center justify-center shadow-lg glow">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                </div>
-                <span class="font-bold text-lg tracking-tight">RJ <span class="text-rjaccent">CMS</span></span>
+                <img src="{{ asset('images/logo.svg') }}" alt="RJ Nexus" class="h-8 w-auto" style="filter: brightness(0) invert(1);">
+                <span class="font-bold text-lg tracking-tight ml-1">RJ <span class="text-rjaccent">Nexus</span></span>
                 <span class="px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold uppercase tracking-wider ml-2">Debug Mode</span>
             </div>
             <div class="flex items-center gap-4 text-sm text-gray-400 font-medium">
@@ -155,7 +153,7 @@
     </main>
 
     <footer class="border-t border-rjborder py-6 text-center text-sm text-gray-600">
-        RJ CMS &copy; {{ date('Y') }} — Built with Laravel. All rights reserved.
+        RJ Nexus &copy; {{ date('Y') }} — Built with Laravel. All rights reserved.
     </footer>
 
 </body>
