@@ -11,16 +11,15 @@
     $accent           = $settings['accent'] ?? '#8b5cf6';
     $accent2          = $settings['accent2'] ?? '#ec4899';
     $radius           = $settings['radius'] ?? 'full';
-    $showIcon         = $settings['show_icon'] ?? true;
     $showDivider      = $settings['show_divider'] ?? false;
 
     $radiusMap = ['none' => '0px', 'sm' => '6px', 'md' => '10px', 'lg' => '14px', 'full' => '9999px'];
     $radiusCss = $radiusMap[$radius] ?? '9999px';
 
     $sizeMap = [
-        'sm' => ['pad' => '6px 14px', 'fs' => '12.5px', 'icon' => 14, 'avatar' => 32],
-        'md' => ['pad' => '9px 18px', 'fs' => '13.5px', 'icon' => 16, 'avatar' => 42],
-        'lg' => ['pad' => '12px 24px', 'fs' => '14.5px', 'icon' => 18, 'avatar' => 52],
+        'sm' => ['pad' => '6px 14px', 'fs' => '12.5px', 'icon' => 15, 'btn' => 34, 'mbtn' => 28, 'avatar' => 34, 'mavatar' => 28],
+        'md' => ['pad' => '9px 18px', 'fs' => '13.5px', 'icon' => 18, 'btn' => 42, 'mbtn' => 34, 'avatar' => 42, 'mavatar' => 34],
+        'lg' => ['pad' => '12px 24px', 'fs' => '14.5px', 'icon' => 21, 'btn' => 52, 'mbtn' => 40, 'avatar' => 52, 'mavatar' => 40],
     ];
     $sz = $sizeMap[$size] ?? $sizeMap['md'];
 
@@ -51,7 +50,13 @@
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
-    /* ---------- LOGIN / REGISTER BUTTONS ---------- */
+    #{{ $uid }} [data-logged-out],
+    #{{ $uid }} [data-logged-in] {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
     #{{ $uid }} .rj-hlb-btn {
         display: inline-flex;
         align-items: center;
@@ -67,9 +72,22 @@
         white-space: nowrap;
         font-family: inherit;
         line-height: 1;
+        -webkit-tap-highlight-color: transparent;
     }
-    #{{ $uid }} .rj-hlb-btn:active { transform: scale(.97); }
-    #{{ $uid }} .rj-hlb-btn svg {
+    #{{ $uid }} .rj-hlb-btn:active { transform: scale(.94); }
+
+    #{{ $uid }} .rj-hlb-btn.login {
+        position: relative;
+        overflow: hidden;
+        justify-content: center;
+        width: {{ $sz['btn'] }}px;
+        height: {{ $sz['btn'] }}px;
+        padding: 0;
+        gap: 0;
+    }
+    #{{ $uid }} .rj-hlb-btn.login svg {
+        position: relative;
+        z-index: 1;
         width: {{ $sz['icon'] }}px;
         height: {{ $sz['icon'] }}px;
         flex-shrink: 0;
@@ -90,14 +108,45 @@
         border-color: var(--hlb-accent);
     }
     #{{ $uid }}[data-style="ghost"] .rj-hlb-btn.login {
-        background: transparent;
-        color: inherit;
+        background: color-mix(in srgb, var(--hlb-accent) 10%, transparent);
+        color: var(--hlb-accent);
         border-color: transparent;
     }
     #{{ $uid }}[data-style="dark"] .rj-hlb-btn.login {
         background: #0f172a;
         color: #fff;
     }
+
+    @if($pulse)
+    #{{ $uid }} .rj-hlb-btn.login::after,
+    #{{ $uid }} .rj-hlb-avatar::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: -70%;
+        width: 45%;
+        background: linear-gradient(100deg, transparent, rgba(255,255,255,.55), transparent);
+        transform: skewX(-20deg);
+        animation: rjHlbShine 3.4s ease-in-out infinite;
+        pointer-events: none;
+    }
+    #{{ $uid }}[data-style="outline"] .rj-hlb-btn.login::after,
+    #{{ $uid }}[data-style="ghost"] .rj-hlb-btn.login::after {
+        background: linear-gradient(100deg, transparent, color-mix(in srgb, var(--hlb-accent) 28%, transparent), transparent);
+    }
+    #{{ $uid }} .rj-hlb-btn.login svg {
+        animation: rjHlbNudge 3.4s ease-in-out infinite;
+    }
+    @keyframes rjHlbShine {
+        0%, 55% { left: -70%; }
+        100% { left: 140%; }
+    }
+    @keyframes rjHlbNudge {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-1.5px); }
+    }
+    @endif
 
     #{{ $uid }} .rj-hlb-btn.register {
         background: transparent;
@@ -112,7 +161,6 @@
         margin: 0 4px;
     }
 
-    /* ---------- LOGGED IN AVATAR ---------- */
     #{{ $uid }} .rj-hlb-user-link {
         display: inline-flex;
         align-items: center;
@@ -120,13 +168,15 @@
         text-decoration: none;
         color: inherit;
         cursor: pointer;
-        transition: transform .25s cubic-bezier(.34,1.56,.64,1);
+        transition: transform .2s ease;
+        -webkit-tap-highlight-color: transparent;
     }
-    #{{ $uid }} .rj-hlb-user-link:hover {
-        transform: scale(1.05);
-    }
+    #{{ $uid }} .rj-hlb-user-link:hover { transform: scale(1.05); }
+    #{{ $uid }} .rj-hlb-user-link:active { transform: scale(.94); }
 
     #{{ $uid }} .rj-hlb-avatar {
+        position: relative;
+        overflow: hidden;
         width: {{ $sz['avatar'] }}px;
         height: {{ $sz['avatar'] }}px;
         border-radius: 50%;
@@ -140,26 +190,7 @@
         flex-shrink: 0;
         letter-spacing: .02em;
         box-shadow: 0 4px 12px -4px color-mix(in srgb, var(--hlb-accent) 55%, transparent);
-        position: relative;
-        z-index: 2;
     }
-
-    @if($pulse)
-    #{{ $uid }} .rj-hlb-avatar::before {
-        content: '';
-        position: absolute;
-        inset: -3px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, var(--hlb-accent), var(--hlb-accent2));
-        z-index: -1;
-        opacity: .6;
-        animation: rjHlbPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    }
-    @keyframes rjHlbPulse {
-        0%, 100% { transform: scale(1); opacity: 0.6; }
-        50% { transform: scale(1.15); opacity: 0.1; }
-    }
-    @endif
 
     #{{ $uid }} .rj-hlb-uname {
         font-size: {{ $sz['fs'] }};
@@ -168,7 +199,6 @@
         white-space: nowrap;
     }
 
-    /* ---------- LOGIN MODAL ---------- */
     #{{ $uid }} .rj-hlb-modal {
         position: fixed;
         inset: 0;
@@ -235,9 +265,7 @@
         margin: 0 0 22px;
         text-align: center;
     }
-    #{{ $uid }} .rj-hlb-field {
-        margin-bottom: 14px;
-    }
+    #{{ $uid }} .rj-hlb-field { margin-bottom: 14px; }
     #{{ $uid }} .rj-hlb-label {
         display: block;
         font-size: 12px;
@@ -336,6 +364,42 @@
         text-decoration: none;
     }
     #{{ $uid }} .rj-hlb-modal-foot a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+        #{{ $uid }} { gap: 6px; }
+        #{{ $uid }} .rj-hlb-btn.login {
+            width: {{ $sz['mbtn'] }}px;
+            height: {{ $sz['mbtn'] }}px;
+        }
+        #{{ $uid }} .rj-hlb-btn.login svg {
+            width: {{ round($sz['icon'] * 0.85) }}px;
+            height: {{ round($sz['icon'] * 0.85) }}px;
+        }
+        #{{ $uid }} .rj-hlb-btn.register,
+        #{{ $uid }} .rj-hlb-divider,
+        #{{ $uid }} .rj-hlb-uname {
+            display: none;
+        }
+        #{{ $uid }} .rj-hlb-avatar {
+            width: {{ $sz['mavatar'] }}px;
+            height: {{ $sz['mavatar'] }}px;
+            font-size: {{ round($sz['mavatar'] * 0.4) }}px;
+        }
+        #{{ $uid }} .rj-hlb-modal { padding: 14px; }
+        #{{ $uid }} .rj-hlb-modal-box { padding: 24px 20px 20px; border-radius: 18px; }
+        #{{ $uid }} .rj-hlb-modal-title { font-size: 20px; }
+        #{{ $uid }} .rj-hlb-modal-sub { margin-bottom: 16px; }
+        #{{ $uid }} .rj-hlb-input { font-size: 16px; padding: 10px 12px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        #{{ $uid }} *,
+        #{{ $uid }} *::before,
+        #{{ $uid }} *::after {
+            animation: none !important;
+            transition-duration: .01ms !important;
+        }
+    }
 </style>
 
 <div id="{{ $uid }}" data-style="{{ $btnStyle }}" data-mode="{{ $loginMode }}" data-initial-user='@json($initialUser)'>
@@ -350,13 +414,11 @@
             @endif
         @endif
 
-        <button type="button" class="rj-hlb-btn login" data-login-btn>
-            @if($showIcon)
-                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"/>
-                </svg>
-            @endif
-            <span>{{ $loginLabel }}</span>
+        <button type="button" class="rj-hlb-btn login" data-login-btn aria-label="{{ $loginLabel }}" title="{{ $loginLabel }}">
+            <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <circle cx="12" cy="8" r="4"/>
+                <path d="M4 21v-1a8 8 0 0116 0v1"/>
+            </svg>
         </button>
     </div>
 
@@ -439,7 +501,6 @@
     var errorEl     = root.querySelector('[data-login-error]');
     var submitBtn   = root.querySelector('[data-login-submit]');
     var spinner     = root.querySelector('[data-login-spinner]');
-    var btnText     = root.querySelector('[data-login-btn-text]');
 
     var userAvatar  = root.querySelector('[data-user-avatar]');
     var userName    = root.querySelector('[data-user-name]');
