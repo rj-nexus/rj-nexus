@@ -8,7 +8,46 @@
     <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
     @vite(['resources/css/admin.css', 'resources/js/app.js'])
-    <style>:root { {!! rj_css_variables() !!} }</style>
+    <style>
+        :root { {!! rj_css_variables() !!} }
+
+        /* AI Search Animations */
+        @keyframes gradientBorder {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 10px rgba(124, 58, 237, 0.2); }
+            50% { box-shadow: 0 0 20px rgba(124, 58, 237, 0.6); }
+        }
+        @keyframes floatSparkle {
+            0%, 100% { transform: translateY(0) scale(1); opacity: 1; }
+            50% { transform: translateY(-3px) scale(1.1); opacity: 0.8; }
+        }
+
+        .ai-search-btn {
+            background: linear-gradient(90deg, #ffffff, #f3e8ff, #ffffff);
+            background-size: 200% 200%;
+            animation: gradientBorder 3s ease infinite;
+            transition: all 0.3s ease;
+        }
+        .ai-search-btn:hover {
+            animation: gradientBorder 3s ease infinite, pulseGlow 2s infinite;
+            border-color: #a855f7;
+        }
+        .ai-sparkle {
+            animation: floatSparkle 2s ease-in-out infinite;
+        }
+
+        .search-modal-backdrop {
+            backdrop-filter: blur(8px);
+            background: rgba(15, 23, 42, 0.4);
+        }
+        .search-result-item:hover {
+            background: #f8fafc;
+        }
+    </style>
 </head>
 <body class="font-sans bg-gray-50 text-gray-900 antialiased">
     @php
@@ -235,7 +274,39 @@
         ];
     @endphp
 
-    <div class="flex min-h-screen" x-data="{ userMenu: false, langMenu: false }">
+    <div class="flex min-h-screen" x-data="{
+        userMenu: false,
+        langMenu: false,
+        searchOpen: false,
+        searchQuery: '',
+        searchLoading: false,
+        searchResults: [],
+        searchTimeout: null,
+
+        performSearch() {
+            if (this.searchQuery.length < 2) {
+                this.searchResults = [];
+                return;
+            }
+            this.searchLoading = true;
+            fetch('{{ route('admin.search') }}?q=' + encodeURIComponent(this.searchQuery), {
+                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(r => r.json())
+            .then(data => {
+                this.searchResults = data.results || [];
+                this.searchLoading = false;
+            })
+            .catch(e => {
+                this.searchLoading = false;
+            });
+        },
+
+        openSearch() {
+            this.searchOpen = true;
+            this.$nextTick(() => { this.$refs.searchInput.focus(); });
+        }
+    }" @keydown.window.prevent.cmd.k="openSearch()" @keydown.window.prevent.ctrl.k="openSearch()" @keydown.escape.window="searchOpen = false">
 
         <aside class="w-64 h-screen sticky top-0 self-start z-50 bg-gradient-to-b from-rj-dark-1 via-rj-dark-2 to-rj-dark-1 text-gray-300 flex-shrink-0 flex flex-col">
             <div class="h-20 flex items-center justify-center px-5 border-b border-white/5 flex-shrink-0">
@@ -374,7 +445,14 @@
                     <h1 class="text-lg font-semibold text-gray-900">@yield('title', __('Dashboard'))</h1>
                 </div>
 
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-4">
+
+                    <!-- AI Search Button -->
+                    <button type="button" @click="openSearch()" class="ai-search-btn hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full border border-purple-100 text-sm text-gray-500 shadow-sm">
+                        <svg class="w-4 h-4 text-purple-500 ai-sparkle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+                        <span>{{ __('Search or ask AI...') }}</span>
+                        <kbd class="hidden lg:inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-sans font-medium text-gray-400 bg-gray-100 border border-gray-200 rounded">⌘K</kbd>
+                    </button>
 
                     <div class="relative" @click.away="langMenu = false">
                         <button @click="langMenu = !langMenu" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition text-sm text-gray-600">
@@ -463,6 +541,63 @@
                 @yield('content')
             </main>
         </div>
+
+        <!-- AI Search Modal -->
+        <div x-show="searchOpen" x-cloak class="fixed inset-0 z-[100] flex items-start justify-center pt-[10vh] px-4" @click.self="searchOpen = false">
+            <div class="absolute inset-0 search-modal-backdrop transition-opacity" x-show="searchOpen" x-transition.opacity></div>
+
+            <div class="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100"
+                 x-show="searchOpen"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 scale-95 translate-y-4"
+                 x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                 x-transition:leave-end="opacity-0 scale-95 translate-y-4">
+
+                <!-- Input Area -->
+                <div class="relative flex items-center px-4 py-3 border-b border-gray-100">
+                    <svg class="w-5 h-5 text-purple-500 mr-3 ai-sparkle" x-show="!searchLoading" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    <svg class="w-5 h-5 text-purple-500 mr-3 animate-spin" x-show="searchLoading" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+
+                    <input type="text"
+                           x-ref="searchInput"
+                           x-model="searchQuery"
+                           @input.debounce.400ms="performSearch()"
+                           placeholder="{{ __('Search menus, settings, or ask AI...') }}"
+                           class="w-full bg-transparent border-0 focus:ring-0 text-lg text-gray-800 placeholder-gray-400 p-0">
+
+                    <button @click="searchOpen = false" class="ml-3 text-xs font-semibold text-gray-400 hover:text-gray-600 px-2 py-1 rounded bg-gray-50 border border-gray-200">ESC</button>
+                </div>
+
+                <!-- Results Area -->
+                <div class="max-h-[60vh] overflow-y-auto p-2" x-show="searchQuery.length > 0">
+
+                    <div x-show="searchResults.length === 0 && !searchLoading" class="py-10 text-center text-gray-500 text-sm">
+                        {{ __('No results found for') }} "<strong x-text="searchQuery"></strong>"
+                    </div>
+
+                    <template x-for="(result, index) in searchResults" :key="index">
+                        <a :href="result.url" class="flex items-center gap-4 px-4 py-3 rounded-xl transition search-result-item group">
+                            <div class="w-10 h-10 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 group-hover:text-purple-600 group-hover:border-purple-200 group-hover:bg-purple-50 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="text-sm font-semibold text-gray-900 group-hover:text-purple-700" x-text="result.title"></div>
+                                <div class="text-xs text-gray-500 truncate" x-text="result.desc || result.description"></div>
+                            </div>
+                            <div class="text-xs text-gray-400 font-mono hidden sm:block" x-text="result.url"></div>
+                        </a>
+                    </template>
+                </div>
+
+                <div class="px-4 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-500" x-show="searchQuery.length === 0">
+                    <span class="flex items-center gap-1.5"><svg class="w-3.5 h-3.5 text-purple-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> {{ __('Powered by RJ AI Engine') }}</span>
+                    <span>{{ __('Try searching for "Email", "SEO", "Backup", or "Users"') }}</span>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     @include('admin.partials.media-picker')
