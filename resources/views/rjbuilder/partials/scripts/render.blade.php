@@ -721,14 +721,31 @@ function builderRender() {
 
             const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
             const renderUrl = '{{ route('admin.rjbuilder.render-block') }}';
-            const settingsStr = this.esc(JSON.stringify(settings));
+
+            const settingsJson = JSON.stringify(settings);
+            const cacheKey = block.type + '_' + btoa(unescape(encodeURIComponent(settingsJson)));
+
+            if (window.RJ_WIDGET_CACHE && window.RJ_WIDGET_CACHE[cacheKey]) {
+                return `<div class="rj-real-html" style="margin: 0.5rem 1rem;">${window.RJ_WIDGET_CACHE[cacheKey]}</div>`;
+            }
 
             return `<div x-data="{
                 html: '',
                 loading: true,
+                controller: null,
                 init() {
+                    if (window.RJ_WIDGET_CACHE && window.RJ_WIDGET_CACHE['${cacheKey}']) {
+                        this.html = window.RJ_WIDGET_CACHE['${cacheKey}'];
+                        this.loading = false;
+                        return;
+                    }
+
+                    if (this.controller) this.controller.abort();
+                    this.controller = new AbortController();
+
                     fetch('${renderUrl}', {
                         method: 'POST',
+                        signal: this.controller.signal,
                         headers: {
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': '${csrf}',
@@ -736,18 +753,24 @@ function builderRender() {
                         },
                         body: JSON.stringify({
                             type: '${block.type}',
-                            settings: JSON.parse(this.$el.dataset.settings)
+                            settings: ${settingsJson}
                         })
                     })
                     .then(r => r.json())
                     .then(d => {
                         this.html = d.html;
                         this.loading = false;
+                        if (!window.RJ_WIDGET_CACHE) window.RJ_WIDGET_CACHE = {};
+                        window.RJ_WIDGET_CACHE['${cacheKey}'] = d.html;
                         this.$nextTick(() => { if(window.Alpine) window.Alpine.initTree(this.$el.querySelector('.rj-real-html')) });
                     })
-                    .catch(e => { console.error(e); this.loading = false; });
+                    .catch(e => {
+                        if (e.name === 'AbortError') return;
+                        console.error(e);
+                        this.loading = false;
+                    });
                 }
-            }" x-init="init()" data-settings="${settingsStr}" style="min-height:40px; position:relative; margin: 0.5rem 1rem;">
+            }" x-init="init()" style="min-height:40px; position:relative; margin: 0.5rem 1rem;">
                 <div x-show="loading" style="padding:14px 16px; display:flex; align-items:center; gap:12px; border:1px dashed #d1d5db; border-radius:10px; background:#fafafa; color:#6b7280; font-size:12px;">
                     <span class="animate-spin" style="width:14px; height:14px; border:2px solid #ccc; border-top-color:#8b5cf6; border-radius:50%; display:inline-block;"></span>
                     <span style="font-weight:600; color:#374151;">${esc(w ? w.name : block.type)}...</span>
