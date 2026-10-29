@@ -36,8 +36,41 @@ class FooterBadgesWidget extends BaseWidget
         return ['footer'];
     }
 
+    public function getLogos(): array
+    {
+        return [
+            'm10' => ['name' => 'M10', 'url' => 'https://cdn.jsdelivr.net/gh/mr-ruhid/rare-logos-vault@main/logo/payment-gateway/m10_azerbaijan/m10.svg'],
+            'alipay' => ['name' => 'Alipay', 'url' => 'https://cdn.jsdelivr.net/gh/mr-ruhid/rare-logos-vault@main/logo/payment-gateway/alipay/alipay.webp'],
+            'amex' => ['name' => 'American Express', 'url' => 'https://cdn.jsdelivr.net/gh/mr-ruhid/rare-logos-vault@main/logo/payment-gateway/amex/amex.svg'],
+            'apple-pay' => ['name' => 'Apple Pay', 'url' => 'https://cdn.jsdelivr.net/gh/mr-ruhid/rare-logos-vault@main/logo/payment-gateway/apple-pay/apple_pay_transparent.svg'],
+            'birbank' => ['name' => 'Birbank', 'url' => 'https://cdn.jsdelivr.net/gh/mr-ruhid/rare-logos-vault@main/logo/payment-gateway/birbank_azerbaijan/birbank.svg'],
+            'google-pay' => ['name' => 'Google Pay', 'url' => 'https://cdn.jsdelivr.net/gh/mr-ruhid/rare-logos-vault@main/logo/payment-gateway/google-pay/Google_Pay_Logo.webp'],
+            'jcb' => ['name' => 'JCB', 'url' => 'https://cdn.jsdelivr.net/gh/mr-ruhid/rare-logos-vault@main/logo/payment-gateway/jcb/jcb.webp'],
+            'leobank' => ['name' => 'Leobank', 'url' => 'https://cdn.jsdelivr.net/gh/mr-ruhid/rare-logos-vault@main/logo/payment-gateway/leobank_azerbaijan/Logo_of_Leobank.webp'],
+            'm-pesa' => ['name' => 'M-Pesa', 'url' => 'https://cdn.jsdelivr.net/gh/mr-ruhid/rare-logos-vault@main/logo/payment-gateway/m-pesa_africa/m-pesa.webp'],
+            'maestro' => ['name' => 'Maestro', 'url' => 'https://cdn.jsdelivr.net/gh/mr-ruhid/rare-logos-vault@main/logo/payment-gateway/maestro/maestro_logo_variant2.webp'],
+            'million' => ['name' => 'Million', 'url' => 'https://cdn.jsdelivr.net/gh/mr-ruhid/rare-logos-vault@main/logo/payment-gateway/million_azerbaijan/million.svg'],
+            'mastercard' => ['name' => 'Mastercard', 'url' => 'https://cdn.jsdelivr.net/gh/mr-ruhid/rare-logos-vault@main/logo/payment-gateway/mastercard/mastercard_footer_logo.webp'],
+            'paypal' => ['name' => 'PayPal', 'url' => 'https://cdn.jsdelivr.net/gh/mr-ruhid/rare-logos-vault@main/logo/payment-gateway/pay-pal/paypal.webp'],
+            '3d-secure' => ['name' => '3-D Secure', 'url' => 'https://cdn.jsdelivr.net/gh/mr-ruhid/rare-logos-vault@main/logo/payment-gateway/payment-component/3d-secure.svg'],
+            'pci-dss' => ['name' => 'PCI DSS', 'url' => 'https://cdn.jsdelivr.net/gh/mr-ruhid/rare-logos-vault@main/logo/payment-gateway/payment-component/pci-dss.svg'],
+            'phonepe' => ['name' => 'PhonePe', 'url' => 'https://cdn.jsdelivr.net/gh/mr-ruhid/rare-logos-vault@main/logo/payment-gateway/phonepe/PhonePe_Logo.webp'],
+            'pix' => ['name' => 'Pix', 'url' => 'https://cdn.jsdelivr.net/gh/mr-ruhid/rare-logos-vault@main/logo/payment-gateway/pix_brasil/pix.webp'],
+            'stc-pay' => ['name' => 'stc pay', 'url' => 'https://cdn.jsdelivr.net/gh/mr-ruhid/rare-logos-vault@main/logo/payment-gateway/stc_pay/stc-pay.webp'],
+            'stripe' => ['name' => 'Stripe', 'url' => 'https://cdn.jsdelivr.net/gh/mr-ruhid/rare-logos-vault@main/logo/payment-gateway/stripe/stripe.webp'],
+            'unionpay' => ['name' => 'UnionPay', 'url' => 'https://cdn.jsdelivr.net/gh/mr-ruhid/rare-logos-vault@main/logo/payment-gateway/unionpay/unionpay.webp'],
+            'visa' => ['name' => 'Visa', 'url' => 'https://cdn.jsdelivr.net/gh/mr-ruhid/rare-logos-vault@main/logo/payment-gateway/visa/visa_inc.webp'],
+            'wechat-pay' => ['name' => 'WeChat Pay', 'url' => 'https://cdn.jsdelivr.net/gh/mr-ruhid/rare-logos-vault@main/logo/payment-gateway/wechat-pay/wechat-pay.svg'],
+        ];
+    }
+
     public function schema(): array
     {
+        $logoOptions = [];
+        foreach ($this->getLogos() as $key => $logo) {
+            $logoOptions[$key] = $logo['name'];
+        }
+
         return [
             [
                 'name'    => 'title',
@@ -73,12 +106,25 @@ class FooterBadgesWidget extends BaseWidget
             [
                 'name'    => 'height',
                 'type'    => 'range',
-                'label'   => __('Badge Height (px)'),
-                'default' => 32,
+                'label'   => __('Max Logo Height (px)'),
+                'default' => 36,
                 'min'     => 16,
                 'max'     => 80,
                 'step'    => 2,
                 'tab'     => 'style',
+            ],
+            [
+                'name'    => 'color_mode',
+                'type'    => 'select',
+                'label'   => __('Logo Color Mode'),
+                'default' => 'original',
+                'tab'     => 'style',
+                'options' => [
+                    'original'  => __('Original Colors'),
+                    'white'     => __('Force White'),
+                    'black'     => __('Force Black'),
+                    'grayscale' => __('Grayscale'),
+                ],
             ],
             [
                 'name'    => 'title_color',
@@ -88,22 +134,22 @@ class FooterBadgesWidget extends BaseWidget
                 'tab'     => 'style',
             ],
             [
-                'name'    => 'grayscale',
-                'type'    => 'toggle',
-                'label'   => __('Grayscale by Default'),
-                'default' => true,
-                'tab'     => 'style',
-            ],
-            [
                 'name'    => 'items',
                 'type'    => 'repeater',
-                'label'   => __('Badges / Logos'),
+                'label'   => __('Selected Badges'),
                 'tab'     => 'content',
                 'fields'  => [
-                    ['name' => 'image', 'type' => 'media', 'label' => __('Image (SVG/PNG)')],
-                    ['name' => 'icon',  'type' => 'icon',  'label' => __('Or Iconify Icon')],
-                    ['name' => 'name',  'type' => 'text',  'label' => __('Alt Text')],
-                    ['name' => 'url',   'type' => 'text',  'label' => __('URL (optional)')],
+                    [
+                        'name'    => 'logo_id',
+                        'type'    => 'select',
+                        'label'   => __('Select Logo'),
+                        'options' => $logoOptions,
+                    ],
+                    [
+                        'name'  => 'url',
+                        'type'  => 'text',
+                        'label' => __('Custom URL (optional)'),
+                    ],
                 ],
             ],
         ];
@@ -113,6 +159,22 @@ class FooterBadgesWidget extends BaseWidget
     {
         $uid = 'fb_' . substr(md5(uniqid('', true)), 0, 8);
 
-        return view('rjbuilder.widgets.builtin.footer-badges', compact('settings', 'uid'))->render();
+        $allLogos = $this->getLogos();
+        $items = [];
+
+        if (!empty($settings['items']) && is_array($settings['items'])) {
+            foreach ($settings['items'] as $row) {
+                $id = $row['logo_id'] ?? '';
+                if (isset($allLogos[$id])) {
+                    $items[] = [
+                        'name' => $allLogos[$id]['name'],
+                        'url'  => $allLogos[$id]['url'],
+                        'link' => $row['url'] ?? '',
+                    ];
+                }
+            }
+        }
+
+        return view('rjbuilder.widgets.builtin.footer-badges', compact('settings', 'uid', 'items'))->render();
     }
 }
