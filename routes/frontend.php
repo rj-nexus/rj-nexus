@@ -53,6 +53,10 @@ Route::get('/rj-preview/{template}', [FrontendController::class, 'preview'])
     ->name('frontend.preview')
     ->middleware('auth');
 
+Route::get('/rj-preview/post/{post}', [FrontendController::class, 'previewPost'])
+    ->name('frontend.preview.post')
+    ->middleware('auth');
+
 Route::post('/rj-form/{slug}', [FormSubmitController::class, 'submit'])
     ->name('frontend.form.submit');
 
