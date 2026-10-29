@@ -43,10 +43,13 @@ use App\Http\Controllers\Admin\AboutController;
 use App\Http\Controllers\Admin\TwoFactorController;
 use App\Http\Controllers\Admin\KycController;
 use App\Http\Controllers\Admin\NewsletterController;
+use App\Http\Controllers\Admin\SearchController;
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', fn() => redirect()->route('admin.dashboard'))->name('home');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/search', [SearchController::class, 'search'])->name('search');
+
     Route::view('/services', 'admin.services.index')->name('services.index');
     Route::post('/dashboard/ask-ai', [DashboardController::class, 'askAi'])->name('ask-ai');
 
