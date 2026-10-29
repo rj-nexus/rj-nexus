@@ -12,9 +12,10 @@ class AiAgentService
 {
     protected const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
+    protected const COOLDOWN_KEY = 'ai_agent_cooldown_until';
+
     protected array $providers = [
         ['name' => 'pollinations-chat', 'type' => 'chat', 'url' => 'https://text.pollinations.ai/openai', 'model' => 'openai'],
-        ['name' => 'pollinations-single', 'type' => 'single', 'url' => 'https://text.pollinations.ai/openai', 'model' => 'openai'],
         ['name' => 'pollinations-get', 'type' => 'get', 'url' => 'https://text.pollinations.ai/', 'model' => 'openai'],
     ];
 
@@ -41,17 +42,21 @@ class AiAgentService
             return $cached;
         }
 
+        $until = (int) Cache::get(self::COOLDOWN_KEY, 0);
+        if ($until > time()) {
+            return $this->fallbackResult($docContext, $until - time(), []);
+        }
+
         $system = "You are the official support AI for RJ Nexus CMS. Use the provided CONTEXT to answer the user's question. If the context does not contain the answer, answer from your general knowledge. Respond in the SAME LANGUAGE as the user's question.\n\n--- CONTEXT ---\n" . mb_substr($fullContext, 0, 3500);
 
         $errors = [];
+        $wait = 0;
 
         foreach ($this->providers as $provider) {
             try {
-                $content = match ($provider['type']) {
-                    'get' => $this->callGet($provider, $system, $question),
-                    'single' => $this->callChat($provider, '', $system . "\n\n--- USER ---\n" . $question),
-                    default => $this->callChat($provider, $system, $question),
-                };
+                $content = $provider['type'] === 'get'
+                    ? $this->callGet($provider, $system, $question)
+                    : $this->callChat($provider, $system, $question);
 
                 if ($content !== null && $content !== '') {
                     $result = ['success' => true, 'answer' => $content, 'provider' => $provider['name']];
@@ -64,13 +69,25 @@ class AiAgentService
             } catch (\Throwable $e) {
                 $errors[] = $provider['name'] . ': ' . mb_substr($e->getMessage(), 0, 200);
                 Log::warning('AI provider failed: ' . $provider['name'] . ' - ' . $e->getMessage());
+
+                if (in_array($e->getCode(), [402, 429], true)) {
+                    $wait = $this->parseWait($e->getMessage());
+                    Cache::put(self::COOLDOWN_KEY, time() + $wait, $wait);
+                    break;
+                }
             }
         }
 
+        return $this->fallbackResult($docContext, $wait, $errors);
+    }
+
+    protected function fallbackResult(string $docContext, int $wait, array $errors): array
+    {
         $result = [
             'success' => true,
-            'answer' => $this->localFallback($docContext),
+            'answer' => $this->localFallback($docContext, $wait),
             'provider' => 'local',
+            'retry_after' => $wait,
         ];
 
         if (config('app.debug')) {
@@ -80,16 +97,17 @@ class AiAgentService
         return $result;
     }
 
-    protected function callChat(array $provider, string $system, string $question): ?string
+    protected function parseWait(string $message): int
     {
-        $messages = [];
-
-        if ($system !== '') {
-            $messages[] = ['role' => 'system', 'content' => $system];
+        if (preg_match('/(\d+)\s*seconds?/i', $message, $m)) {
+            return max(5, min(120, (int) $m[1] + 2));
         }
 
-        $messages[] = ['role' => 'user', 'content' => $question];
+        return 30;
+    }
 
+    protected function callChat(array $provider, string $system, string $question): ?string
+    {
         $response = Http::withHeaders([
             'User-Agent' => self::USER_AGENT,
             'Accept' => 'application/json',
@@ -99,11 +117,14 @@ class AiAgentService
             ->timeout(40)
             ->post($provider['url'], [
                 'model' => $provider['model'],
-                'messages' => $messages,
+                'messages' => [
+                    ['role' => 'system', 'content' => $system],
+                    ['role' => 'user', 'content' => $question],
+                ],
             ]);
 
         if (!$response->successful()) {
-            throw new \RuntimeException('HTTP ' . $response->status() . ' ' . mb_substr($response->body(), 0, 100));
+            throw new \RuntimeException('HTTP ' . $response->status() . ' ' . mb_substr($response->body(), 0, 300), $response->status());
         }
 
         $content = $response->json('choices.0.message.content');
@@ -122,27 +143,31 @@ class AiAgentService
             ]);
 
         if (!$response->successful()) {
-            throw new \RuntimeException('HTTP ' . $response->status() . ' ' . mb_substr($response->body(), 0, 100));
+            throw new \RuntimeException('HTTP ' . $response->status() . ' ' . mb_substr($response->body(), 0, 300), $response->status());
         }
 
         $body = trim($response->body());
 
         if ($body !== '' && str_starts_with($body, '{') && str_contains($body, '"error"')) {
-            throw new \RuntimeException('API error: ' . mb_substr($body, 0, 100));
+            throw new \RuntimeException('API error: ' . mb_substr($body, 0, 300));
         }
 
         return $body !== '' ? $body : null;
     }
 
-    protected function localFallback(string $docContext): string
+    protected function localFallback(string $docContext, int $wait = 0): string
     {
         $docContext = trim($docContext);
 
+        $head = $wait > 0
+            ? __('The free AI is busy right now. Please try again in :seconds seconds.', ['seconds' => $wait])
+            : __('AI service is currently unavailable. Please try again in a moment.');
+
         if ($docContext === '') {
-            return __('AI service is currently unavailable. Please try again in a moment.');
+            return $head;
         }
 
-        return __('AI service is currently unavailable. The closest documentation match:') . "\n\n" . mb_substr($docContext, 0, 1200);
+        return $head . "\n\n" . __('The closest documentation match:') . "\n\n" . mb_substr($docContext, 0, 1200);
     }
 
     protected function searchDocs(string $query): string
