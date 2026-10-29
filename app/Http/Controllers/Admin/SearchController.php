@@ -16,83 +16,63 @@ class SearchController extends Controller
         $query = trim($request->input('q', ''));
 
         if (empty($query)) {
-            return response()->json(['success' => true, 'results' => []]);
+            return response()->json(['success' => true, 'answer' => null, 'menus' => []]);
         }
 
         $menus = $this->getDynamicMenus();
+        $menusJson = json_encode(array_map(function($m) {
+            return ['title' => $m['title'], 'url' => $m['url'], 'desc' => $m['desc']];
+        }, $menus));
 
-        // 1. Yerli (Offline) Axtarış Məntiqi - AI xəta versə belə işləyəcək
-        $localResults = [];
-        foreach ($menus as $menu) {
-            $score = 0;
-            if (stripos($menu['title'], $query) !== false) $score += 10;
-            if (stripos($menu['keywords'], $query) !== false) $score += 5;
-            if (stripos($menu['desc'], $query) !== false) $score += 2;
+        $prompt = "You are an admin panel search AI. User query: '{$query}'.
+        Return ONLY a valid JSON object with exactly two keys:
+        1. 'answer': A short, helpful text answer to the user's question (based on your CMS/Laravel knowledge). If the user just typed a keyword (like 'Posts'), set this to null.
+        2. 'menus': An array of the top 3 most relevant admin menus from the provided list.
+        
+        AVAILABLE MENUS: {$menusJson}
+        
+        Example output: {\"answer\":\"To change your site colors, go to Appearance > Colors.\", \"menus\":[{\"title\":\"Colors\",\"url\":\"/admin/appearance/colors\",\"desc\":\"Appearance settings\"}]}
+        Do not include markdown formatting.";
 
-            if ($score > 0) {
-                $menu['score'] = $score;
-                $localResults[] = $menu;
-            }
-        }
-
-        usort($localResults, fn($a, $b) => $b['score'] - $a['score']);
-        $localResults = array_slice($localResults, 0, 5);
-        foreach ($localResults as &$item) unset($item['score']);
-
-        // 2. Ağıllı AI Axtarış Məntiqi (RAG + Dərin Düşüncə)
         try {
-            $menusJson = json_encode(array_map(function($m) {
-                return ['title' => $m['title'], 'url' => $m['url'], 'desc' => $m['desc']];
-            }, $menus));
-
-            $extraContext = "AVAILABLE ADMIN MENUS:\n{$menusJson}\n";
+            $response = $agent->ask($prompt, '');
             
-            $prompt = "You are a smart search assistant for RJ Nexus Admin Panel.
-            User query: '{$query}'.
-            
-            INSTRUCTIONS:
-            1. If the user is asking a 'how-to' question (e.g., 'how to change theme', 'where is email settings'), find the answer in the DOCUMENTATION CONTEXT and write a brief, helpful explanation in the 'desc' field. 
-            2. Match the answer to the most relevant URL from the AVAILABLE ADMIN MENUS.
-            3. If it's just a keyword (e.g., 'posts', 'users'), just return the matching menu with a short desc.
-            4. Return ONLY a valid JSON array of the top 3 most relevant matches. 
-            Example format: [{\"title\":\"Theme Settings\",\"url\":\"/admin/themes\",\"desc\":\"Go to Appearance > Themes to change your active site theme.\"}]. 
-            Do not include markdown formatting, just raw JSON.";
-
-            $response = $agent->ask($prompt, $extraContext);
-
             if ($response['success']) {
-                $answer = $response['answer'];
-                // Təmizləmə: AI bəzən ```json ... ``` kimi markdown qaytarır
-                $answer = preg_replace('/```json/i', '', $answer);
+                $answer = preg_replace('/```json/i', '', $response['answer']);
                 $answer = preg_replace('/```/i', '', $answer);
                 $answer = trim($answer);
-
-                $aiResults = json_decode($answer, true);
-
-                if (is_array($aiResults) && !empty($aiResults)) {
+                
+                $json = json_decode($answer, true);
+                
+                if (is_array($json)) {
                     return response()->json([
-                        'success' => true, 
-                        'results' => $aiResults, 
+                        'success' => true,
+                        'answer' => $json['answer'] ?? null,
+                        'menus' => $json['menus'] ?? [],
                         'source' => 'ai'
                     ]);
                 }
             }
         } catch (\Throwable $e) {
             Log::warning('AI Search Error: ' . $e->getMessage());
-            // AI xətası zamanı heç nə etmirik, aşağıdakı yerli nəticələr qayıdacaq
+        }
+
+        // Fallback (Yerli axtarış)
+        $localResults = [];
+        foreach ($menus as $menu) {
+            if (stripos($menu['title'], $query) !== false || stripos($menu['keywords'], $query) !== false) {
+                $localResults[] = $menu;
+            }
         }
 
         return response()->json([
             'success' => true, 
-            'results' => $localResults, 
+            'answer' => null,
+            'menus' => array_slice($localResults, 0, 5),
             'source' => 'local'
         ]);
     }
 
-    /**
-     * Laravel-in bütün Route-larını oxuyaraq menyu siyahısı yaradır.
-     * Beləliklə Settings daxilindəki bütün alt-menyular və plugin menyuları avtomatik daxil olur.
-     */
     protected function getDynamicMenus(): array
     {
         $menus = [];
@@ -104,13 +84,10 @@ class SearchController extends Controller
             $methods = $route->methods();
 
             if (in_array('GET', $methods) && $name && str_starts_with($name, 'admin.')) {
-                // Texniki action-ları (store, update, delete) siyahıdan çıxarırıq
-                if (preg_match('/(store|update|destroy|delete|bulk|clear|fetch|export|import|create|edit|recent|unread|mark)/i', $name)) {
-                    continue;
-                }
+                if (preg_match('/(store|update|destroy|delete|bulk|clear|fetch|export|import|create|edit|recent|unread|mark)/i', $name)) continue;
 
                 $cleanName = str_replace(['admin.', '.index', '.show', '.edit'], '', $name);
-                $title = Str::headline(str_replace('.', ' ', $cleanName));              
+                $title = Str::headline(str_replace('.', ' ', $cleanName));
                 $title = str_ireplace(['Seo', 'Smtp', 'Api', 'Kyc', 'Ai', 'Rjbuilder'], ['SEO', 'SMTP', 'API', 'KYC', 'AI', 'RJ Builder'], $title);
 
                 $menus[] = [
@@ -123,10 +100,7 @@ class SearchController extends Controller
         }
 
         $uniqueMenus = [];
-        foreach ($menus as $menu) {
-            $uniqueMenus[$menu['url']] = $menu;
-        }
-
+        foreach ($menus as $menu) $uniqueMenus[$menu['url']] = $menu;
         return array_values($uniqueMenus);
     }
 }
