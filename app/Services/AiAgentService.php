@@ -10,38 +10,20 @@ use Illuminate\Support\Facades\Log;
 
 class AiAgentService
 {
-    protected array $providers;
+    protected const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
-    public function __construct()
-    {
-        $this->providers = $this->buildProviders();
-    }
-
-    protected function buildProviders(): array
-    {
-        $providers = [];
-
-        $keyed = [
-            ['groq', 'https://api.groq.com/openai/v1/chat/completions', 'llama-3.3-70b-versatile', config('services.ai.groq_key')],
-            ['gemini', 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', 'gemini-2.0-flash', config('services.ai.gemini_key')],
-            ['openrouter', 'https://openrouter.ai/api/v1/chat/completions', 'meta-llama/llama-3.3-70b-instruct:free', config('services.ai.openrouter_key')],
-        ];
-
-        foreach ($keyed as [$name, $url, $model, $key]) {
-            if (!empty($key)) {
-                $providers[] = ['name' => $name, 'type' => 'openai', 'url' => $url, 'model' => $model, 'key' => $key];
-            }
-        }
-
-        $providers[] = ['name' => 'pollinations-openai', 'type' => 'openai', 'url' => 'https://text.pollinations.ai/openai', 'model' => 'openai', 'key' => null];
-        $providers[] = ['name' => 'pollinations-mistral', 'type' => 'openai', 'url' => 'https://text.pollinations.ai/openai', 'model' => 'mistral', 'key' => null];
-        $providers[] = ['name' => 'pollinations-get', 'type' => 'get', 'url' => 'https://text.pollinations.ai/', 'model' => 'openai', 'key' => null];
-
-        return $providers;
-    }
+    protected array $providers = [
+        ['name' => 'pollinations-openai', 'type' => 'chat', 'url' => 'https://text.pollinations.ai/openai', 'model' => 'openai'],
+        ['name' => 'pollinations-mistral', 'type' => 'chat', 'url' => 'https://text.pollinations.ai/openai', 'model' => 'mistral'],
+        ['name' => 'pollinations-llama', 'type' => 'chat', 'url' => 'https://text.pollinations.ai/openai', 'model' => 'llama'],
+        ['name' => 'pollinations-get-openai', 'type' => 'get', 'url' => 'https://text.pollinations.ai/', 'model' => 'openai'],
+        ['name' => 'pollinations-get-mistral', 'type' => 'get', 'url' => 'https://text.pollinations.ai/', 'model' => 'mistral'],
+    ];
 
     public function ask(string $question, string $extraContext = ''): array
     {
+        @set_time_limit(90);
+
         $docContext = '';
         $systemContext = '';
 
@@ -49,7 +31,7 @@ class AiAgentService
             $docContext = $this->searchDocs($question);
             $systemContext = $this->getSystemContext($question);
         } catch (\Throwable $e) {
-            Log::warning('Context generation error: ' . $e->getMessage());
+            Log::warning('AI context error: ' . $e->getMessage());
         }
 
         $fullContext = trim($extraContext . "\n" . $docContext . "\n" . $systemContext);
@@ -57,19 +39,19 @@ class AiAgentService
         $cacheKey = 'ai_agent:' . md5($question . '|' . $fullContext);
 
         $cached = Cache::get($cacheKey);
-        if ($cached) {
+        if (is_array($cached)) {
             return $cached;
         }
 
-        $systemPrompt = "You are the official support AI for RJ Nexus CMS. Use the provided CONTEXT to answer the user's question. If the context does not contain the answer, answer from your general knowledge. Respond in the SAME LANGUAGE as the user's question.\n\n--- CONTEXT ---\n" . mb_substr($fullContext, 0, 3500);
+        $system = "You are the official support AI for RJ Nexus CMS. Use the provided CONTEXT to answer the user's question. If the context does not contain the answer, answer from your general knowledge. Respond in the SAME LANGUAGE as the user's question.\n\n--- CONTEXT ---\n" . mb_substr($fullContext, 0, 3500);
 
         $errors = [];
 
         foreach ($this->providers as $provider) {
             try {
                 $content = $provider['type'] === 'get'
-                    ? $this->callGet($provider, $systemPrompt, $question)
-                    : $this->callOpenAi($provider, $systemPrompt, $question);
+                    ? $this->callGet($provider, $system, $question)
+                    : $this->callChat($provider, $system, $question);
 
                 if ($content !== null && $content !== '') {
                     $result = ['success' => true, 'answer' => $content, 'provider' => $provider['name']];
@@ -77,19 +59,17 @@ class AiAgentService
                     return $result;
                 }
 
-                $errors[] = "{$provider['name']}: empty response";
+                $errors[] = $provider['name'] . ': empty response';
+                Log::warning('AI provider empty: ' . $provider['name']);
             } catch (\Throwable $e) {
-                $errors[] = "{$provider['name']}: " . mb_substr($e->getMessage(), 0, 150);
+                $errors[] = $provider['name'] . ': ' . mb_substr($e->getMessage(), 0, 200);
+                Log::warning('AI provider failed: ' . $provider['name'] . ' - ' . $e->getMessage());
             }
         }
 
-        Log::warning('AI providers failed', $errors);
-
-        $local = $this->localFallback($docContext);
-
         $result = [
             'success' => true,
-            'answer' => $local,
+            'answer' => $this->localFallback($docContext),
             'provider' => 'local',
         ];
 
@@ -100,21 +80,15 @@ class AiAgentService
         return $result;
     }
 
-    protected function callOpenAi(array $provider, string $system, string $question): ?string
+    protected function callChat(array $provider, string $system, string $question): ?string
     {
-        $headers = [
-            'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        $response = Http::withHeaders([
+            'User-Agent' => self::USER_AGENT,
             'Accept' => 'application/json',
             'Content-Type' => 'application/json',
-        ];
-
-        if (!empty($provider['key'])) {
-            $headers['Authorization'] = 'Bearer ' . $provider['key'];
-        }
-
-        $response = Http::withHeaders($headers)
-            ->timeout(30)
-            ->retry(2, 700, throw: false)
+        ])
+            ->connectTimeout(5)
+            ->timeout(15)
             ->post($provider['url'], [
                 'model' => $provider['model'],
                 'messages' => [
@@ -125,7 +99,7 @@ class AiAgentService
             ]);
 
         if (!$response->successful()) {
-            throw new \RuntimeException('HTTP ' . $response->status());
+            throw new \RuntimeException('HTTP ' . $response->status() . ' ' . mb_substr($response->body(), 0, 100));
         }
 
         $content = $response->json('choices.0.message.content');
@@ -135,20 +109,23 @@ class AiAgentService
 
     protected function callGet(array $provider, string $system, string $question): ?string
     {
-        $response = Http::withHeaders([
-            'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        ])
-            ->timeout(40)
+        $response = Http::withHeaders(['User-Agent' => self::USER_AGENT])
+            ->connectTimeout(5)
+            ->timeout(20)
             ->get($provider['url'] . rawurlencode(mb_substr($question, 0, 500)), [
                 'system' => mb_substr($system, 0, 1500),
                 'model' => $provider['model'],
             ]);
 
         if (!$response->successful()) {
-            throw new \RuntimeException('HTTP ' . $response->status());
+            throw new \RuntimeException('HTTP ' . $response->status() . ' ' . mb_substr($response->body(), 0, 100));
         }
 
         $body = trim($response->body());
+
+        if ($body !== '' && str_starts_with($body, '{') && str_contains($body, '"error"')) {
+            throw new \RuntimeException('API error: ' . mb_substr($body, 0, 100));
+        }
 
         return $body !== '' ? $body : null;
     }
