@@ -3,16 +3,17 @@
 @section('title', __('Global Widgets'))
 
 @section('content')
-<div class="max-w-7xl mx-auto space-y-6">
+<div class="max-w-7xl mx-auto space-y-6" x-data="{ showCreateModal: false }">
+
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold text-gray-900">{{ __('Global Widgets') }}</h1>
             <p class="text-sm text-gray-500 mt-1">{{ __('Manage reusable blocks that can be inserted anywhere across your site.') }}</p>
         </div>
-        <a href="{{ route('admin.global-widgets.create') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-rj-purple to-rj-pink text-white font-medium hover:opacity-90 transition shadow-sm">
+        <button type="button" @click="showCreateModal = true" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-rj-purple to-rj-pink text-white font-medium hover:opacity-90 transition shadow-sm">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
             {{ __('Create New') }}
-        </a>
+        </button>
     </div>
 
     @if(session('success'))
@@ -34,9 +35,9 @@
                 </div>
                 <h3 class="text-lg font-bold text-gray-900">{{ __('No global widgets yet') }}</h3>
                 <p class="text-sm text-gray-500 mt-1 mb-6">{{ __('Create a reusable block and insert it anywhere in your builder.') }}</p>
-                <a href="{{ route('admin.global-widgets.create') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-900 text-white font-medium hover:bg-gray-800 transition">
+                <button type="button" @click="showCreateModal = true" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-900 text-white font-medium hover:bg-gray-800 transition">
                     {{ __('Create your first widget') }}
-                </a>
+                </button>
             </div>
         @else
             <div class="overflow-x-auto">
@@ -90,5 +91,50 @@
             @endif
         @endif
     </div>
+
+    <div x-show="showCreateModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4" style="display: none;">
+        <div x-show="showCreateModal" x-transition.opacity class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="showCreateModal = false"></div>
+
+        <div x-show="showCreateModal" x-transition.scale.origin.center class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="text-lg font-bold text-gray-900">{{ __('Create Global Widget') }}</h3>
+                <button type="button" @click="showCreateModal = false" class="text-gray-400 hover:text-gray-600 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <form method="POST" action="{{ route('admin.global-widgets.store') }}" class="p-6 space-y-4">
+                @csrf
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('Name') }}</label>
+                    <input type="text" name="name" required class="w-full rounded-xl border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm" placeholder="{{ __('e.g. Main Call to Action') }}">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('Type') }}</label>
+                    <select name="type" required class="w-full rounded-xl border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">
+                        <option value="block">{{ __('Block') }}</option>
+                        <option value="header">{{ __('Header') }}</option>
+                        <option value="footer">{{ __('Footer') }}</option>
+                        <option value="popup">{{ __('Popup') }}</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('Description (optional)') }}</label>
+                    <textarea name="description" rows="3" class="w-full rounded-xl border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm" placeholder="{{ __('Brief description of this widget') }}"></textarea>
+                </div>
+
+                <div class="pt-4 border-t border-gray-100 flex justify-end gap-3">
+                    <button type="button" @click="showCreateModal = false" class="px-4 py-2 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition">{{ __('Cancel') }}</button>
+                    <button type="submit" class="px-6 py-2 rounded-xl bg-rj-purple text-white font-medium hover:bg-rj-purple/90 transition">
+                        {{ __('Create') }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 </div>
 @endsection
