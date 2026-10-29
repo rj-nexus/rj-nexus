@@ -7,7 +7,7 @@ use App\Models\Post;
 use App\Models\Comment;
 use App\Models\User;
 use App\Models\Media;
-use App\Services\FreeAiService;
+use App\Services\AiAgentService;
 use App\Services\DocSearchService;
 use Illuminate\Http\Request;
 
@@ -30,7 +30,7 @@ class DashboardController extends Controller
         return view('admin.dashboard', compact('stats', 'recentPosts', 'recentComments'));
     }
 
-    public function askAi(Request $request, FreeAiService $aiService, DocSearchService $docSearch)
+    public function askAi(Request $request, AiAgentService $aiService, DocSearchService $docSearch)
     {
         $validated = $request->validate([
             'question' => 'required|string|max:1000',
@@ -38,9 +38,13 @@ class DashboardController extends Controller
 
         $question = $validated['question'];
 
+        // Mövcud DocSearchService-dən gələn konteksti alırıq (əgər varsa)
         $searchResult = $docSearch->getContext($question);
+        $extraContext = $searchResult['context'] ?? '';
 
-        $result = $aiService->ask($question, $searchResult['context']);
+        // Yeni AiAgentService-ə sualı və konteksti ötürürük. 
+        // O, həm bu kontekstə, həm öz daxili .md axtarışına, həm də real vaxtlı sistem məlumatlarına baxacaq.
+        $result = $aiService->ask($question, $extraContext);
 
         return response()->json($result);
     }
