@@ -845,3 +845,28 @@ if (!function_exists('rj_locale_url')) {
         return url('/' . $locale . $path);
     }
 }
+if (!function_exists('rj_set_env')) {
+    function rj_set_env(string $key, string $value): bool
+    {
+        $path = base_path('.env');
+
+        if (!file_exists($path)) {
+            return false;
+        }
+
+        $content = file_get_contents($path);
+
+        if (preg_match("/^{$key}=.*/m", $content)) {
+            $content = preg_replace("/^{$key}=.*/m", "{$key}={$value}", $content);
+        } else {
+            $content .= "\n{$key}={$value}";
+        }
+
+        if (file_put_contents($path, $content) !== false) {
+            \Illuminate\Support\Facades\Artisan::call('config:clear');
+            return true;
+        }
+
+        return false;
+    }
+}
