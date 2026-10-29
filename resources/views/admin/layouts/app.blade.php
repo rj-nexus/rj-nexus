@@ -233,8 +233,21 @@
             transition: transform .2s cubic-bezier(.34, 1.56, .64, 1), background .15s, color .15s, border-color .15s;
         }
         .rj-sm-it.is-active .rj-sm-ic { border-color: #ddd6fe; background: #f5f3ff; color: #7c3aed; transform: scale(1.08) rotate(-4deg); }
-        .rj-sm-it.is-ai .rj-sm-ic { border-color: transparent; background: linear-gradient(135deg, #8b5cf6, #ec4899); color: #fff; }
-        .rj-sm-it.is-ai .rj-sm-ic svg { animation: rj-spark 2s ease-in-out infinite; }
+        
+        /* AI Answer Specific Styles */
+        .rj-sm-it.is-ai-answer { 
+            align-items: flex-start;
+            border: 1px solid #ddd6fe;
+            background: #f5f3ff;
+        }
+        .rj-sm-it.is-ai-answer .rj-sm-ic { 
+            background: linear-gradient(135deg, #8b5cf6, #ec4899); 
+            color: #fff; 
+            border-color: transparent; 
+            margin-top: 2px;
+        }
+        .rj-sm-it.is-ai-answer .rj-sm-ic svg { animation: rj-spark 2s ease-in-out infinite; }
+        
         .rj-sm-tx { flex: 1; min-width: 0; }
         .rj-sm-tx b {
             display: block;
@@ -246,12 +259,22 @@
         }
         .rj-sm-tx small {
             display: block;
-            overflow: hidden;
             color: #64748b;
             font-size: 12px;
+        }
+        .rj-sm-tx small.truncate-txt {
+            overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
+        .rj-sm-tx small.ai-text {
+            white-space: pre-wrap;
+            line-height: 1.6;
+            margin-top: 4px;
+            font-size: 13.5px;
+            color: #334155;
+        }
+        
         .rj-sm mark { padding: 0 1px; border-radius: 3px; background: rgba(250, 204, 21, .4); color: inherit; }
         .rj-sm-url {
             max-width: 180px;
@@ -272,6 +295,7 @@
             transition: opacity .15s, transform .15s;
         }
         .rj-sm-it.is-active .rj-sm-go { opacity: 1; transform: none; }
+        .rj-sm-it.is-ai-answer .rj-sm-go { display: none; } /* Hide arrow for AI answer */
         .rj-sm-empty { padding: 30px 16px 18px; color: #64748b; font-size: 14px; text-align: center; }
         .rj-sm-empty svg { display: block; width: 38px; height: 38px; margin: 0 auto 10px; color: #cbd5e1; animation: rj-float 3s ease-in-out infinite; }
         .rj-sm-foot {
@@ -596,8 +620,7 @@
             'quick'   => __('Quick links'),
             'menu'    => __('Menu'),
             'results' => __('Results'),
-            'ai'      => __('AI'),
-            'askAi'   => __('Ask AI'),
+            'ai'      => __('RJ AI Answer'),
         ];
     @endphp
 
@@ -896,7 +919,7 @@
                                class="rj-sm-input"
                                x-ref="searchInput"
                                x-model="searchQuery"
-                               @input.debounce.300ms="performSearch()"
+                               @input.debounce.400ms="performSearch()"
                                @keydown.arrow-down.prevent="move(1)"
                                @keydown.arrow-up.prevent="move(-1)"
                                @keydown.enter.prevent="openActive()"
@@ -918,17 +941,22 @@
                                 <div class="rj-sm-gh" x-show="item.head" x-text="item.group"></div>
                                 <a :href="item.url"
                                    class="rj-sm-it"
-                                   :class="{ 'is-active': activeIndex === item.i, 'is-ai': item.kind === 'ai' }"
+                                   :class="{ 'is-active': activeIndex === item.i, 'is-ai-answer': item.kind === 'ai-answer' }"
                                    :data-i="item.i"
                                    :style="'--i:' + item.i"
                                    @mouseenter="activeIndex = item.i"
-                                   @click="remember(item)">
-                                    <span class="rj-sm-ic" x-html="icons[item.kind]"></span>
+                                   @click="item.kind === 'ai-answer' ? null : remember(item)">
+                                    <span class="rj-sm-ic" x-html="icons[item.kind] || icons['ai']"></span>
                                     <span class="rj-sm-tx">
-                                        <b x-html="hl(item.title)"></b>
-                                        <small x-show="item.sub" x-html="hl(item.sub)"></small>
+                                        <b x-html="item.kind === 'ai-answer' ? item.title : hl(item.title)"></b>
+                                        <template x-if="item.kind === 'ai-answer'">
+                                            <small class="ai-text" x-text="item.sub"></small>
+                                        </template>
+                                        <template x-if="item.kind !== 'ai-answer' && item.sub">
+                                            <small class="truncate-txt" x-html="hl(item.sub)"></small>
+                                        </template>
                                     </span>
-                                    <span class="rj-sm-url" x-show="item.kind !== 'ai'" x-text="short(item.url)"></span>
+                                    <span class="rj-sm-url" x-show="item.kind !== 'ai-answer' && item.kind !== 'ai'" x-text="short(item.url)"></span>
                                     <svg class="rj-sm-go" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 10l-5 5 5 5M20 4v7a4 4 0 01-4 4H4"/></svg>
                                 </a>
                             </div>
@@ -963,7 +991,6 @@
                 recent: @js(route('admin.notifications.recent')),
                 markAll: @js(route('admin.notifications.mark-all-read')),
                 search: @js(route('admin.search')),
-                ai: @js(route('admin.ai.index')),
                 csrf: @js(csrf_token())
             };
             const T = @js($searchTexts);
@@ -995,6 +1022,7 @@
                 searchQuery: '',
                 searchLoading: false,
                 serverResults: [],
+                searchAnswer: null,
                 activeIndex: 0,
                 reqId: 0,
                 recent: [],
@@ -1023,6 +1051,7 @@
                         this.activeIndex = 0;
                         if (this.searchQuery.trim().length < 2) {
                             this.serverResults = [];
+                            this.searchAnswer = null;
                             this.searchLoading = false;
                         }
                     });
@@ -1032,6 +1061,7 @@
                         if (!v) {
                             this.searchQuery = '';
                             this.serverResults = [];
+                            this.searchAnswer = null;
                             this.searchLoading = false;
                         }
                     });
@@ -1078,7 +1108,7 @@
                 },
 
                 remember(item) {
-                    if (!item || item.kind === 'ai' || !item.url || item.url === '#') return;
+                    if (!item || item.kind === 'ai-answer' || item.kind === 'ai' || !item.url || item.url === '#') return;
                     const entry = { title: item.title, path: item.path || '', url: item.url };
                     const list = this.recent.filter(r => r.url !== entry.url);
                     list.unshift(entry);
@@ -1109,6 +1139,7 @@
                     const q = this.searchQuery.trim();
                     if (q.length < 2) {
                         this.serverResults = [];
+                        this.searchAnswer = null;
                         this.searchLoading = false;
                         return;
                     }
@@ -1120,9 +1151,11 @@
                     .then(r => r.json())
                     .then(data => {
                         if (id !== this.reqId) return;
-                        this.serverResults = (data.results || []).map(r => ({
+                        
+                        this.searchAnswer = data.answer || null;
+                        this.serverResults = (data.menus || []).map(r => ({
                             title: r.title || '',
-                            sub: r.desc || r.description || '',
+                            sub: r.desc || '',
                             url: r.url || '#'
                         }));
                         this.searchLoading = false;
@@ -1165,18 +1198,31 @@
                         });
                     } else {
                         const seen = {};
+
+                        // 1. AI Answer (Ən üstdə göstərilir)
+                        if (this.searchAnswer) {
+                            out.push({ 
+                                kind: 'ai-answer', 
+                                group: T.ai, 
+                                title: 'RJ AI Assistant', 
+                                path: '', 
+                                sub: this.searchAnswer, 
+                                url: '#' 
+                            });
+                        }
+
+                        // 2. Yerli Menyu Nəticələri
                         this.localMatches(q).forEach((m) => {
                             seen[m.url] = true;
                             out.push({ kind: 'menu', group: T.menu, title: m.title, path: m.path, sub: m.path, url: m.url });
                         });
+
+                        // 3. Serverdən Gələn Menyu Nəticələri
                         this.serverResults.forEach((r) => {
                             if (seen[r.url]) return;
                             seen[r.url] = true;
                             out.push({ kind: 'result', group: T.results, title: r.title, path: '', sub: r.sub, url: r.url });
                         });
-                        if (q.length >= 2) {
-                            out.push({ kind: 'ai', group: T.ai, title: T.askAi + ': \u201C' + q + '\u201D', path: '', sub: '', url: urls.ai + '?q=' + encodeURIComponent(q) });
-                        }
                     }
 
                     let last = null;
@@ -1189,7 +1235,7 @@
                 },
 
                 get hasResults() {
-                    return this.items.some(i => i.kind !== 'ai');
+                    return this.items.some(i => i.kind !== 'ai-answer');
                 },
 
                 move(d) {
@@ -1205,6 +1251,7 @@
                 openActive() {
                     const it = this.items[this.activeIndex];
                     if (!it) return;
+                    if (it.kind === 'ai-answer') return; // AI cavabına Enter basanda heç nə etmirik
                     this.remember(it);
                     window.location.href = it.url;
                 },
