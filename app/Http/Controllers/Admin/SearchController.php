@@ -110,8 +110,7 @@ class SearchController extends Controller
                 }
 
                 $cleanName = str_replace(['admin.', '.index', '.show', '.edit'], '', $name);
-                $title = Str::headline(str_replace('.', ' ', $cleanName));
-                
+                $title = Str::headline(str_replace('.', ' ', $cleanName));              
                 $title = str_ireplace(['Seo', 'Smtp', 'Api', 'Kyc', 'Ai', 'Rjbuilder'], ['SEO', 'SMTP', 'API', 'KYC', 'AI', 'RJ Builder'], $title);
 
                 $menus[] = [
