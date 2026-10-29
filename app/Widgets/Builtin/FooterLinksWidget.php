@@ -117,7 +117,7 @@ class FooterLinksWidget extends BaseWidget
 
     public function render(array $settings): string
     {
-        $uid = 'fl_' . substr(md5(uniqid('', true)), 0, 8);
+        $uid = 'fl_' . substr(md5(json_encode($settings)), 0, 8);
 
         return view('rjbuilder.widgets.builtin.footer-links', compact('settings', 'uid'))->render();
     }
