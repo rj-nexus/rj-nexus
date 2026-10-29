@@ -41,9 +41,6 @@ class DashboardController extends Controller
         // Mövcud DocSearchService-dən gələn konteksti alırıq (əgər varsa)
         $searchResult = $docSearch->getContext($question);
         $extraContext = $searchResult['context'] ?? '';
-
-        // Yeni AiAgentService-ə sualı və konteksti ötürürük. 
-        // O, həm bu kontekstə, həm öz daxili .md axtarışına, həm də real vaxtlı sistem məlumatlarına baxacaq.
         $result = $aiService->ask($question, $extraContext);
 
         return response()->json($result);
