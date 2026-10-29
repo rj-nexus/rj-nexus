@@ -245,6 +245,8 @@ class PostController extends Controller
         $builder = [
             'entityType' => 'post',
             'entityId' => $post->id,
+            'id' => $post->id,
+            'slug' => $post->slug,
             'name' => $post->title ?: __('Untitled'),
             'subtitle' => $post->typeLabel(),
             'templateType' => 'page',
@@ -252,6 +254,7 @@ class PostController extends Controller
             'updateUrl' => route('admin.posts.blocks', $post),
             'backUrl' => route('admin.posts.edit', $post),
             'viewUrl' => $viewUrl,
+            'previewUrl' => route('frontend.preview.post', $post),
             'status' => $post->status,
             'locales' => rj_available_locales(),
             'baseLocale' => config('app.locale'),
