@@ -386,15 +386,41 @@ function builderActions() {
 
         updateSetting(name, value) {
             if (!this.currentBlock) return;
+            const block = this.currentBlock;
             const key = this.fieldKey(name);
-            this.setBlockField(this.currentBlock, key, value);
-            this.markDirty();
-            this.commitSoon(this.t('Edited') + ' ' + this.blockLabel(this.currentBlock.type));
 
-            if (name.startsWith('_animation')) {
-                const id = this.currentBlock.id;
+            if (!this._pendingUpdates) this._pendingUpdates = {};
+            this._pendingUpdates[key] = { block, value };
+
+            this.markDirty();
+            clearTimeout(this._updateTimer);
+            this._updateTimer = setTimeout(() => this.flushUpdates(), 250);
+        },
+
+        flushUpdates() {
+            if (!this._pendingUpdates || Object.keys(this._pendingUpdates).length === 0) return;
+            const updates = this._pendingUpdates;
+            this._pendingUpdates = {};
+
+            let hasAnim = false;
+            let animId = null;
+
+            for (const key in updates) {
+                const { block, value } = updates[key];
+                this.setBlockField(block, key, value);
+                if (key.startsWith('_animation')) {
+                    hasAnim = true;
+                    animId = block.id;
+                }
+            }
+
+            if (this.currentBlock) {
+                this.commitSoon(this.t('Edited') + ' ' + this.blockLabel(this.currentBlock.type));
+            }
+
+            if (hasAnim && animId) {
                 clearTimeout(this._animTimer);
-                this._animTimer = setTimeout(() => this.playAnimation(id), 250);
+                this._animTimer = setTimeout(() => this.playAnimation(animId), 250);
             }
         },
 
@@ -446,6 +472,7 @@ function builderActions() {
 
         async save(silent) {
             if (this.saving) return;
+            this.flushUpdates();
             clearTimeout(this._historyTimer);
             this.pushHistory(this._pendingLabel);
             this.saving = true;
