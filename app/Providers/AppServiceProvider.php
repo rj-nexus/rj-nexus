@@ -9,6 +9,21 @@ use App\Services\IconService;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Event;
+
+use App\Observers\ActivityLogObserver;
+use App\Models\Post;
+use App\Models\Media;
+use App\Models\User;
+use App\Models\Template;
+use App\Models\Category;
+use App\Models\Tag;
+use App\Models\Menu;
+use App\Models\Role;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Logout;
+use Illuminate\Auth\Events\Failed;
+use App\Models\ActivityLog;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -36,6 +51,48 @@ class AppServiceProvider extends ServiceProvider
         }
 
         $this->app->make(PluginManager::class)->boot();
+
+        // --- Activity Log Observers ---
+        Post::observe(ActivityLogObserver::class);
+        Media::observe(ActivityLogObserver::class);
+        User::observe(ActivityLogObserver::class);
+        Template::observe(ActivityLogObserver::class);
+        Category::observe(ActivityLogObserver::class);
+        Tag::observe(ActivityLogObserver::class);
+        Menu::observe(ActivityLogObserver::class);
+        Role::observe(ActivityLogObserver::class);
+
+        // --- Auth Events Logging ---
+        Event::listen(Login::class, function ($event) {
+            ActivityLog::record([
+                'log_name' => 'auth',
+                'description' => __('User logged in: :name', ['name' => $event->user->name]),
+                'subject_type' => get_class($event->user),
+                'subject_id' => $event->user->id,
+                'event' => 'login',
+            ]);
+        });
+
+        Event::listen(Logout::class, function ($event) {
+            if ($event->user) {
+                ActivityLog::record([
+                    'log_name' => 'auth',
+                    'description' => __('User logged out: :name', ['name' => $event->user->name]),
+                    'subject_type' => get_class($event->user),
+                    'subject_id' => $event->user->id,
+                    'event' => 'logout',
+                ]);
+            }
+        });
+
+        Event::listen(Failed::class, function ($event) {
+            ActivityLog::record([
+                'log_name' => 'auth',
+                'description' => __('Failed login attempt for: :email', ['email' => $event->credentials['email'] ?? 'Unknown']),
+                'event' => 'login_failed',
+            ]);
+        });
+        // -----------------------------
 
         if (Schema::hasTable('rj_options')) {
             $mailHost = rj_get_option('smtp_host');
