@@ -32,5 +32,17 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->render(function (\Throwable $e, $request) {
+            if (config('app.debug') && !$request->expectsJson()) {
+                $statusCode = 500;
+                if ($e instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface) {
+                    $statusCode = $e->getStatusCode();
+                }
+
+                return response()->view('errors.rj-debug', [
+                    'exception' => $e,
+                    'statusCode' => $statusCode,
+                ], $statusCode);
+            }
+        });
     })->create();
