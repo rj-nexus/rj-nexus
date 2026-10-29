@@ -10,43 +10,335 @@
     @vite(['resources/css/admin.css', 'resources/js/app.js'])
     <style>
         :root { {!! rj_css_variables() !!} }
-        
-        /* AI Search Animations */
-        @keyframes gradientBorder {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+
+        [x-cloak] { display: none !important; }
+
+        @property --rj-a {
+            syntax: '<angle>';
+            inherits: false;
+            initial-value: 0deg;
         }
-        @keyframes pulseGlow {
-            0%, 100% { box-shadow: 0 0 10px rgba(124, 58, 237, 0.2); }
-            50% { box-shadow: 0 0 20px rgba(124, 58, 237, 0.6); }
+
+        .rj-sb {
+            position: relative;
+            isolation: isolate;
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            height: 38px;
+            padding: 0 10px 0 11px;
+            border: 0;
+            border-radius: 999px;
+            background: transparent;
+            color: #64748b;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 500;
+            line-height: 1;
+            cursor: pointer;
+            transition: transform .15s ease, box-shadow .25s ease;
+            -webkit-tap-highlight-color: transparent;
         }
-        @keyframes floatSparkle {
-            0%, 100% { transform: translateY(0) scale(1); opacity: 1; }
-            50% { transform: translateY(-3px) scale(1.1); opacity: 0.8; }
+        .rj-sb::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: -2;
+            border-radius: inherit;
+            background: conic-gradient(from var(--rj-a), #8b5cf6, #ec4899, #f59e0b, #22d3ee, #8b5cf6);
+            animation: rj-ang 4s linear infinite;
         }
-        
-        .ai-search-btn {
-            background: linear-gradient(90deg, #ffffff, #f3e8ff, #ffffff);
-            background-size: 200% 200%;
-            animation: gradientBorder 3s ease infinite;
-            transition: all 0.3s ease;
+        .rj-sb::after {
+            content: "";
+            position: absolute;
+            inset: 1.5px;
+            z-index: -1;
+            border-radius: inherit;
+            background: #fff;
         }
-        .ai-search-btn:hover {
-            animation: gradientBorder 3s ease infinite, pulseGlow 2s infinite;
-            border-color: #a855f7;
+        .rj-sb:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 24px -10px rgba(139, 92, 246, .6);
+            color: #334155;
         }
-        .ai-sparkle {
-            animation: floatSparkle 2s ease-in-out infinite;
+        .rj-sb:active { transform: scale(.96); }
+        .rj-sb-ic { display: grid; place-items: center; color: #8b5cf6; }
+        .rj-sb-ic svg { width: 17px; height: 17px; animation: rj-spark 2.4s ease-in-out infinite; }
+        .rj-sb-t {
+            display: inline-block;
+            min-width: 170px;
+            text-align: start;
+            white-space: nowrap;
+            opacity: 0;
+            transform: translateY(5px);
+            transition: opacity .25s ease, transform .25s ease;
         }
-        
-        .search-modal-backdrop {
+        .rj-sb-t.is-on { opacity: 1; transform: none; }
+        .rj-sb kbd {
+            padding: 3px 6px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background: #f1f5f9;
+            color: #94a3b8;
+            font-family: ui-sans-serif, system-ui, sans-serif;
+            font-size: 10px;
+            font-weight: 600;
+            line-height: 1;
+        }
+
+        .rj-sm {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 10vh 16px 16px;
+        }
+        .rj-sm-back {
+            position: absolute;
+            inset: 0;
+            background: rgba(15, 23, 42, .45);
+            -webkit-backdrop-filter: blur(8px);
             backdrop-filter: blur(8px);
-            background: rgba(15, 23, 42, 0.4);
         }
-        .search-result-item:hover {
+        .rj-sm-box {
+            position: relative;
+            isolation: isolate;
+            width: 100%;
+            max-width: 680px;
+        }
+        .rj-sm-box::before,
+        .rj-sm-box::after {
+            content: "";
+            position: absolute;
+            border-radius: 22px;
+            background: conic-gradient(from var(--rj-a), #8b5cf6, #ec4899, #f59e0b, #22d3ee, #8b5cf6);
+            animation: rj-ang 5s linear infinite;
+        }
+        .rj-sm-box::before { inset: -2px; z-index: -2; filter: blur(16px); opacity: .5; }
+        .rj-sm-box::after { inset: -1.5px; z-index: -1; opacity: .9; }
+        .rj-sm-in {
+            position: relative;
+            overflow: hidden;
+            border-radius: 20px;
+            background: #fff;
+            box-shadow: 0 30px 70px -20px rgba(15, 23, 42, .5);
+        }
+        .rj-sm-load {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 2;
+            height: 3px;
+            overflow: hidden;
+            opacity: 0;
+            transition: opacity .2s;
+        }
+        .rj-sm-load.is-on { opacity: 1; }
+        .rj-sm-load i {
+            display: block;
+            width: 40%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, #8b5cf6, #ec4899, transparent);
+            animation: rj-ld 1s ease-in-out infinite;
+        }
+        .rj-sm-head {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 18px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .rj-sm-head > svg { flex-shrink: 0; width: 22px; height: 22px; color: #8b5cf6; }
+        .rj-sm-input {
+            flex: 1;
+            min-width: 0;
+            padding: 0 !important;
+            border: 0 !important;
+            outline: 0 !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            color: #0f172a;
+            font-size: 17px;
+        }
+        .rj-sm-input::placeholder { color: #94a3b8; }
+        .rj-sm-x, .rj-sm-esc {
+            flex-shrink: 0;
+            padding: 4px 8px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
             background: #f8fafc;
+            color: #94a3b8;
+            font-family: inherit;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: color .15s, border-color .15s;
         }
+        .rj-sm-x:hover, .rj-sm-esc:hover { color: #475569; border-color: #cbd5e1; }
+        .rj-sm-x { display: grid; place-items: center; width: 26px; height: 26px; padding: 0; border-radius: 50%; }
+        .rj-sm-x svg { width: 12px; height: 12px; }
+        .rj-sm-esc-m { display: none; }
+
+        .rj-sm-list {
+            max-height: min(60vh, 460px);
+            padding: 8px;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+        }
+        .rj-sm-gh {
+            padding: 10px 12px 6px;
+            color: #94a3b8;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+        .rj-sm-it {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            color: #0f172a;
+            text-decoration: none;
+            opacity: 0;
+            animation: rj-it .32s cubic-bezier(.16, 1, .3, 1) forwards;
+            animation-delay: calc(min(var(--i), 8) * 26ms);
+            transition: background .12s;
+        }
+        .rj-sm-it.is-active { background: linear-gradient(90deg, rgba(139, 92, 246, .11), rgba(236, 72, 153, .05)); }
+        .rj-sm-it.is-active::before {
+            content: "";
+            position: absolute;
+            inset-inline-start: 0;
+            top: 20%;
+            bottom: 20%;
+            width: 3px;
+            border-radius: 3px;
+            background: linear-gradient(#8b5cf6, #ec4899);
+        }
+        .rj-sm-ic {
+            display: grid;
+            place-items: center;
+            flex: 0 0 38px;
+            height: 38px;
+            border: 1px solid #eef2f7;
+            border-radius: 10px;
+            background: #f8fafc;
+            color: #94a3b8;
+            transition: transform .2s cubic-bezier(.34, 1.56, .64, 1), background .15s, color .15s, border-color .15s;
+        }
+        .rj-sm-it.is-active .rj-sm-ic { border-color: #ddd6fe; background: #f5f3ff; color: #7c3aed; transform: scale(1.08) rotate(-4deg); }
+        .rj-sm-it.is-ai .rj-sm-ic { border-color: transparent; background: linear-gradient(135deg, #8b5cf6, #ec4899); color: #fff; }
+        .rj-sm-it.is-ai .rj-sm-ic svg { animation: rj-spark 2s ease-in-out infinite; }
+        .rj-sm-tx { flex: 1; min-width: 0; }
+        .rj-sm-tx b {
+            display: block;
+            overflow: hidden;
+            font-size: 14px;
+            font-weight: 600;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .rj-sm-tx small {
+            display: block;
+            overflow: hidden;
+            color: #64748b;
+            font-size: 12px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .rj-sm mark { padding: 0 1px; border-radius: 3px; background: rgba(250, 204, 21, .4); color: inherit; }
+        .rj-sm-url {
+            max-width: 180px;
+            overflow: hidden;
+            color: #94a3b8;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 11px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .rj-sm-go {
+            flex-shrink: 0;
+            width: 18px;
+            height: 18px;
+            color: #8b5cf6;
+            opacity: 0;
+            transform: translateX(-4px);
+            transition: opacity .15s, transform .15s;
+        }
+        .rj-sm-it.is-active .rj-sm-go { opacity: 1; transform: none; }
+        .rj-sm-empty { padding: 30px 16px 18px; color: #64748b; font-size: 14px; text-align: center; }
+        .rj-sm-empty svg { display: block; width: 38px; height: 38px; margin: 0 auto 10px; color: #cbd5e1; animation: rj-float 3s ease-in-out infinite; }
+        .rj-sm-foot {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px 16px;
+            border-top: 1px solid #f1f5f9;
+            background: #f8fafc;
+            color: #64748b;
+            font-size: 11.5px;
+        }
+        .rj-sm-keys { display: flex; align-items: center; gap: 12px; }
+        .rj-sm-keys span { display: inline-flex; align-items: center; gap: 5px; }
+        .rj-sm-foot kbd {
+            padding: 2px 6px;
+            border: 1px solid #e2e8f0;
+            border-radius: 5px;
+            background: #fff;
+            color: #64748b;
+            font-family: ui-sans-serif, system-ui, sans-serif;
+            font-size: 10px;
+            font-weight: 600;
+        }
+        .rj-sm-pw { display: inline-flex; align-items: center; gap: 6px; }
+        .rj-sm-pw svg { width: 13px; height: 13px; color: #8b5cf6; }
+
+        .rj-o-e { transition: opacity .22s ease; }
+        .rj-o-l { transition: opacity .16s ease; }
+        .rj-o-0 { opacity: 0; }
+        .rj-o-1 { opacity: 1; }
+        .rj-b-e { transition: opacity .28s ease, transform .4s cubic-bezier(.34, 1.56, .64, 1); }
+        .rj-b-l { transition: opacity .16s ease, transform .16s ease; }
+        .rj-b-0 { opacity: 0; transform: translateY(-18px) scale(.94); }
+        .rj-b-1 { opacity: 1; transform: none; }
+
+        @media (max-width: 1023px) {
+            .rj-sb kbd { display: none; }
+            .rj-sb-t { min-width: 0; max-width: 130px; overflow: hidden; text-overflow: ellipsis; }
+        }
+        @media (max-width: 767px) {
+            .rj-sb { width: 38px; padding: 0; gap: 0; justify-content: center; }
+            .rj-sb-t, .rj-sb kbd { display: none; }
+            .rj-sm { padding: 0; }
+            .rj-sm-box { max-width: none; }
+            .rj-sm-box::before, .rj-sm-box::after { border-radius: 0 0 22px 22px; }
+            .rj-sm-in { border-radius: 0 0 20px 20px; }
+            .rj-sm-head { padding: 14px; }
+            .rj-sm-input { font-size: 16px; }
+            .rj-sm-esc { display: none; }
+            .rj-sm-esc-m { display: grid; }
+            .rj-sm-list { max-height: calc(100vh - 190px); max-height: calc(100dvh - 190px); padding: 6px; }
+            .rj-sm-url { display: none; }
+            .rj-sm-keys { display: none; }
+            .rj-sm-foot { justify-content: center; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .rj-sb::before, .rj-sm-box::before, .rj-sm-box::after, .rj-sb-ic svg, .rj-sm-it, .rj-sm-load i, .rj-sm-empty svg { animation: none !important; }
+            .rj-sm-it { opacity: 1; }
+        }
+
+        @keyframes rj-ang { to { --rj-a: 360deg; } }
+        @keyframes rj-spark { 0%, 100% { transform: scale(1) rotate(0); } 50% { transform: scale(1.18) rotate(14deg); } }
+        @keyframes rj-ld { from { transform: translateX(-100%); } to { transform: translateX(260%); } }
+        @keyframes rj-it { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+        @keyframes rj-float { 50% { transform: translateY(-5px); } }
     </style>
 </head>
 <body class="font-sans bg-gray-50 text-gray-900 antialiased">
@@ -272,78 +564,44 @@
             ['title' => __('Plugins'), 'items' => $pluginNav],
             ['title' => null, 'items' => $coreBottom],
         ];
+
+        $searchIndex = [];
+        foreach ($navSections as $section) {
+            foreach ($section['items'] as $item) {
+                $label = (string) ($item['label'] ?? '');
+                $first = $item['url'] ?? ($item['children'][0]['url'] ?? null);
+                if ($label !== '' && $first && $first !== '#') {
+                    $searchIndex[] = ['title' => $label, 'path' => (string) ($section['title'] ?? ''), 'url' => $first];
+                }
+                foreach ($item['children'] as $child) {
+                    if (!empty($child['label']) && !empty($child['url']) && $child['url'] !== '#') {
+                        $searchIndex[] = ['title' => $child['label'], 'path' => $label, 'url' => $child['url']];
+                    }
+                }
+            }
+        }
+        $searchIndex[] = ['title' => __('Profile'), 'path' => '', 'url' => route('admin.profile.edit')];
+        $searchIndex[] = ['title' => __('Notifications'), 'path' => '', 'url' => route('admin.notifications.index')];
+
+        $searchHints = [
+            __('Search menus, settings, or ask AI...'),
+            __('Try "Backup"'),
+            __('Try "Users"'),
+            __('Try "Site Health"'),
+            __('Ask AI anything'),
+        ];
+
+        $searchTexts = [
+            'recent'  => __('Recent'),
+            'quick'   => __('Quick links'),
+            'menu'    => __('Menu'),
+            'results' => __('Results'),
+            'ai'      => __('AI'),
+            'askAi'   => __('Ask AI'),
+        ];
     @endphp
 
-    <div class="flex min-h-screen" x-data="{
-        userMenu: false, 
-        langMenu: false,
-        notifMenu: false,
-        notifications: [],
-        unreadCount: 0,
-        
-        searchOpen: false,
-        searchQuery: '',
-        searchLoading: false,
-        searchResults: [],
-        
-        init() {
-            this.fetchNotifications();
-            setInterval(() => this.fetchNotifications(), 60000);
-        },
-        
-        fetchNotifications() {
-            fetch('{{ route('admin.notifications.recent') }}', {
-                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
-            })
-            .then(r => r.json())
-            .then(data => {
-                this.unreadCount = data.unread;
-                this.notifications = data.notifications;
-            });
-        },
-        
-        markAllRead() {
-            fetch('{{ route('admin.notifications.mark-all-read') }}', {
-                method: 'POST',
-                headers: { 
-                    'Accept': 'application/json', 
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                }
-            })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    this.unreadCount = 0;
-                    this.notifications.forEach(n => n.is_read = true);
-                }
-            });
-        },
-        
-        performSearch() {
-            if (this.searchQuery.length < 2) {
-                this.searchResults = [];
-                return;
-            }
-            this.searchLoading = true;
-            fetch('{{ route('admin.search') }}?q=' + encodeURIComponent(this.searchQuery), {
-                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
-            })
-            .then(r => r.json())
-            .then(data => {
-                this.searchResults = data.results || [];
-                this.searchLoading = false;
-            })
-            .catch(e => {
-                this.searchLoading = false;
-            });
-        },
-        
-        openSearch() {
-            this.searchOpen = true;
-            this.$nextTick(() => { this.$refs.searchInput.focus(); });
-        }
-    }" @keydown.window.prevent.cmd.k="openSearch()" @keydown.window.prevent.ctrl.k="openSearch()" @keydown.escape.window="searchOpen = false; notifMenu = false">
+    <div class="flex min-h-screen" x-data="rjAdminShell()" @keydown.window.prevent.cmd.k="openSearch()" @keydown.window.prevent.ctrl.k="openSearch()" @keydown.window="onKey($event)" @keydown.escape.window="searchOpen = false; notifMenu = false; langMenu = false; userMenu = false">
 
         <aside class="w-64 h-screen sticky top-0 self-start z-50 bg-gradient-to-b from-rj-dark-1 via-rj-dark-2 to-rj-dark-1 text-gray-300 flex-shrink-0 flex flex-col">
             <div class="h-20 flex items-center justify-center px-5 border-b border-white/5 flex-shrink-0">
@@ -484,14 +742,14 @@
 
                 <div class="flex items-center gap-4">
 
-                    <!-- AI Search Button -->
-                    <button type="button" @click="openSearch()" class="ai-search-btn hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full border border-purple-100 text-sm text-gray-500 shadow-sm">
-                        <svg class="w-4 h-4 text-purple-500 ai-sparkle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
-                        <span>{{ __('Search or ask AI...') }}</span>
-                        <kbd class="hidden lg:inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-sans font-medium text-gray-400 bg-gray-100 border border-gray-200 rounded">⌘K</kbd>
+                    <button type="button" class="rj-sb" @click="openSearch()" aria-label="{{ __('Search') }}">
+                        <span class="rj-sb-ic">
+                            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+                        </span>
+                        <span class="rj-sb-t" :class="hintShow ? 'is-on' : ''" x-text="hints[hintIdx]"></span>
+                        <kbd x-text="isMac ? '⌘K' : 'Ctrl K'"></kbd>
                     </button>
 
-                    <!-- Notifications Dropdown -->
                     <div class="relative" @click.away="notifMenu = false">
                         <button @click="notifMenu = !notifMenu" class="relative p-2 text-gray-400 hover:text-gray-600 transition rounded-full hover:bg-gray-100">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
@@ -503,7 +761,7 @@
                                 <h3 class="text-sm font-bold text-gray-900">{{ __('Notifications') }}</h3>
                                 <button type="button" @click="markAllRead()" class="text-xs font-medium text-rj-purple hover:underline">{{ __('Mark all read') }}</button>
                             </div>
-                            
+
                             <div class="max-h-80 overflow-y-auto">
                                 <template x-if="notifications.length === 0">
                                     <div class="p-6 text-center text-sm text-gray-500">{{ __('No notifications yet.') }}</div>
@@ -618,63 +876,358 @@
             </main>
         </div>
 
-        <!-- AI Search Modal -->
-        <div x-show="searchOpen" x-cloak class="fixed inset-0 z-[100] flex items-start justify-center pt-[10vh] px-4" @click.self="searchOpen = false">
-            <div class="absolute inset-0 search-modal-backdrop transition-opacity" x-show="searchOpen" x-transition.opacity></div>
-            
-            <div class="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100" 
-                 x-show="searchOpen" 
-                 x-transition:enter="transition ease-out duration-200" 
-                 x-transition:enter-start="opacity-0 scale-95 translate-y-4" 
-                 x-transition:enter-end="opacity-100 scale-100 translate-y-0" 
-                 x-transition:leave="transition ease-in duration-150" 
-                 x-transition:leave-start="opacity-100 scale-100 translate-y-0" 
-                 x-transition:leave-end="opacity-0 scale-95 translate-y-4">
-                
-                <!-- Input Area -->
-                <div class="relative flex items-center px-4 py-3 border-b border-gray-100">
-                    <svg class="w-5 h-5 text-purple-500 mr-3 ai-sparkle" x-show="!searchLoading" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                    <svg class="w-5 h-5 text-purple-500 mr-3 animate-spin" x-show="searchLoading" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                    
-                    <input type="text" 
-                           x-ref="searchInput"
-                           x-model="searchQuery" 
-                           @input.debounce.400ms="performSearch()"
-                           placeholder="{{ __('Search menus, settings, or ask AI...') }}" 
-                           class="w-full bg-transparent border-0 focus:ring-0 text-lg text-gray-800 placeholder-gray-400 p-0">
-                    
-                    <button @click="searchOpen = false" class="ml-3 text-xs font-semibold text-gray-400 hover:text-gray-600 px-2 py-1 rounded bg-gray-50 border border-gray-200">ESC</button>
-                </div>
+        <div class="rj-sm" x-show="searchOpen" x-cloak role="dialog" aria-modal="true" aria-label="{{ __('Search') }}">
+            <div class="rj-sm-back"
+                 @click="searchOpen = false"
+                 x-show="searchOpen"
+                 x-transition:enter="rj-o-e" x-transition:enter-start="rj-o-0" x-transition:enter-end="rj-o-1"
+                 x-transition:leave="rj-o-l" x-transition:leave-start="rj-o-1" x-transition:leave-end="rj-o-0"></div>
 
-                <!-- Results Area -->
-                <div class="max-h-[60vh] overflow-y-auto p-2" x-show="searchQuery.length > 0">
-                    
-                    <div x-show="searchResults.length === 0 && !searchLoading" class="py-10 text-center text-gray-500 text-sm">
-                        {{ __('No results found for') }} "<strong x-text="searchQuery"></strong>"
+            <div class="rj-sm-box"
+                 x-show="searchOpen"
+                 x-transition:enter="rj-b-e" x-transition:enter-start="rj-b-0" x-transition:enter-end="rj-b-1"
+                 x-transition:leave="rj-b-l" x-transition:leave-start="rj-b-1" x-transition:leave-end="rj-b-0">
+                <div class="rj-sm-in">
+                    <div class="rj-sm-load" :class="searchLoading ? 'is-on' : ''"><i></i></div>
+
+                    <div class="rj-sm-head">
+                        <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+                        <input type="text"
+                               class="rj-sm-input"
+                               x-ref="searchInput"
+                               x-model="searchQuery"
+                               @input.debounce.300ms="performSearch()"
+                               @keydown.arrow-down.prevent="move(1)"
+                               @keydown.arrow-up.prevent="move(-1)"
+                               @keydown.enter.prevent="openActive()"
+                               placeholder="{{ __('Search menus, settings, or ask AI...') }}"
+                               autocomplete="off"
+                               spellcheck="false">
+                        <button type="button" class="rj-sm-x" x-show="searchQuery.length > 0" x-cloak @click="searchQuery = ''; $refs.searchInput.focus()" aria-label="{{ __('Clear') }}">
+                            <svg fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                        </button>
+                        <button type="button" class="rj-sm-esc" @click="searchOpen = false">ESC</button>
+                        <button type="button" class="rj-sm-x rj-sm-esc-m" @click="searchOpen = false" aria-label="{{ __('Close') }}">
+                            <svg fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                        </button>
                     </div>
 
-                    <template x-for="(result, index) in searchResults" :key="index">
-                        <a :href="result.url" class="flex items-center gap-4 px-4 py-3 rounded-xl transition search-result-item group">
-                            <div class="w-10 h-10 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-400 group-hover:text-purple-600 group-hover:border-purple-200 group-hover:bg-purple-50 transition-colors">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    <div class="rj-sm-list">
+                        <template x-for="item in items" :key="item.kind + '|' + item.url">
+                            <div>
+                                <div class="rj-sm-gh" x-show="item.head" x-text="item.group"></div>
+                                <a :href="item.url"
+                                   class="rj-sm-it"
+                                   :class="{ 'is-active': activeIndex === item.i, 'is-ai': item.kind === 'ai' }"
+                                   :data-i="item.i"
+                                   :style="'--i:' + item.i"
+                                   @mouseenter="activeIndex = item.i"
+                                   @click="remember(item)">
+                                    <span class="rj-sm-ic" x-html="icons[item.kind]"></span>
+                                    <span class="rj-sm-tx">
+                                        <b x-html="hl(item.title)"></b>
+                                        <small x-show="item.sub" x-html="hl(item.sub)"></small>
+                                    </span>
+                                    <span class="rj-sm-url" x-show="item.kind !== 'ai'" x-text="short(item.url)"></span>
+                                    <svg class="rj-sm-go" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 10l-5 5 5 5M20 4v7a4 4 0 01-4 4H4"/></svg>
+                                </a>
                             </div>
-                            <div class="flex-1 min-w-0">
-                                <div class="text-sm font-semibold text-gray-900 group-hover:text-purple-700" x-text="result.title"></div>
-                                <div class="text-xs text-gray-500 truncate" x-text="result.desc || result.description"></div>
-                            </div>
-                            <div class="text-xs text-gray-400 font-mono hidden sm:block" x-text="result.url"></div>
-                        </a>
-                    </template>
-                </div>
-                
-                <div class="px-4 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-500" x-show="searchQuery.length === 0">
-                    <span class="flex items-center gap-1.5"><svg class="w-3.5 h-3.5 text-purple-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> {{ __('Powered by RJ AI Engine') }}</span>
-                    <span>{{ __('Try searching for "Email", "SEO", "Backup", or "Users"') }}</span>
+                        </template>
+
+                        <div class="rj-sm-empty" x-show="searchQuery.trim().length > 0 && !searchLoading && !hasResults" x-cloak>
+                            <svg fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3M8.5 11h5"/></svg>
+                            {{ __('No results found for') }} "<strong x-text="searchQuery"></strong>"
+                        </div>
+                    </div>
+
+                    <div class="rj-sm-foot">
+                        <div class="rj-sm-keys">
+                            <span><kbd>↑</kbd><kbd>↓</kbd> {{ __('Navigate') }}</span>
+                            <span><kbd>↵</kbd> {{ __('Open') }}</span>
+                            <span><kbd>Esc</kbd> {{ __('Close') }}</span>
+                        </div>
+                        <span class="rj-sm-pw">
+                            <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            {{ __('Powered by RJ AI Engine') }}
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
 
     </div>
+
+    <script>
+        function rjAdminShell() {
+            const urls = {
+                recent: @js(route('admin.notifications.recent')),
+                markAll: @js(route('admin.notifications.mark-all-read')),
+                search: @js(route('admin.search')),
+                ai: @js(route('admin.ai.index')),
+                csrf: @js(csrf_token())
+            };
+            const T = @js($searchTexts);
+            const svg = function (d) {
+                return '<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="' + d + '"/></svg>';
+            };
+            const icons = {
+                menu: svg('M4 6h16M4 12h16M4 18h7'),
+                quick: svg('M13 10V3L4 14h7v7l9-11h-7z'),
+                recent: svg('M12 8v4l3 2M21 12a9 9 0 11-18 0 9 9 0 0118 0z'),
+                result: svg('M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'),
+                ai: svg('M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z')
+            };
+            const norm = function (s) {
+                return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            };
+            const esc = function (s) {
+                return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+            };
+
+            return {
+                userMenu: false,
+                langMenu: false,
+                notifMenu: false,
+                notifications: [],
+                unreadCount: 0,
+
+                searchOpen: false,
+                searchQuery: '',
+                searchLoading: false,
+                serverResults: [],
+                activeIndex: 0,
+                reqId: 0,
+                recent: [],
+
+                hints: @js($searchHints),
+                hintIdx: 0,
+                hintShow: true,
+                isMac: /Mac|iPhone|iPad/i.test(navigator.platform || navigator.userAgent),
+
+                menuIndex: @js($searchIndex),
+                icons: icons,
+
+                init() {
+                    this.fetchNotifications();
+                    setInterval(() => this.fetchNotifications(), 60000);
+
+                    setInterval(() => {
+                        this.hintShow = false;
+                        setTimeout(() => {
+                            this.hintIdx = (this.hintIdx + 1) % this.hints.length;
+                            this.hintShow = true;
+                        }, 260);
+                    }, 3400);
+
+                    this.$watch('searchQuery', () => {
+                        this.activeIndex = 0;
+                        if (this.searchQuery.trim().length < 2) {
+                            this.serverResults = [];
+                            this.searchLoading = false;
+                        }
+                    });
+
+                    this.$watch('searchOpen', (v) => {
+                        document.body.style.overflow = v ? 'hidden' : '';
+                        if (!v) {
+                            this.searchQuery = '';
+                            this.serverResults = [];
+                            this.searchLoading = false;
+                        }
+                    });
+                },
+
+                fetchNotifications() {
+                    fetch(urls.recent, {
+                        headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        this.unreadCount = data.unread;
+                        this.notifications = data.notifications;
+                    })
+                    .catch(() => {});
+                },
+
+                markAllRead() {
+                    fetch(urls.markAll, {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': urls.csrf
+                        }
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            this.unreadCount = 0;
+                            this.notifications.forEach(n => n.is_read = true);
+                        }
+                    })
+                    .catch(() => {});
+                },
+
+                loadRecent() {
+                    try {
+                        const raw = JSON.parse(localStorage.getItem('rj-admin-recent') || '[]');
+                        this.recent = Array.isArray(raw) ? raw.slice(0, 5) : [];
+                    } catch (e) {
+                        this.recent = [];
+                    }
+                },
+
+                remember(item) {
+                    if (!item || item.kind === 'ai' || !item.url || item.url === '#') return;
+                    const entry = { title: item.title, path: item.path || '', url: item.url };
+                    const list = this.recent.filter(r => r.url !== entry.url);
+                    list.unshift(entry);
+                    this.recent = list.slice(0, 5);
+                    try { localStorage.setItem('rj-admin-recent', JSON.stringify(this.recent)); } catch (e) {}
+                },
+
+                openSearch() {
+                    this.loadRecent();
+                    this.activeIndex = 0;
+                    this.notifMenu = false;
+                    this.langMenu = false;
+                    this.userMenu = false;
+                    this.searchOpen = true;
+                    this.$nextTick(() => { if (this.$refs.searchInput) this.$refs.searchInput.focus(); });
+                },
+
+                onKey(e) {
+                    if (e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey || this.searchOpen) return;
+                    const el = document.activeElement;
+                    const tag = el ? el.tagName : '';
+                    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (el && el.isContentEditable)) return;
+                    e.preventDefault();
+                    this.openSearch();
+                },
+
+                performSearch() {
+                    const q = this.searchQuery.trim();
+                    if (q.length < 2) {
+                        this.serverResults = [];
+                        this.searchLoading = false;
+                        return;
+                    }
+                    const id = ++this.reqId;
+                    this.searchLoading = true;
+                    fetch(urls.search + '?q=' + encodeURIComponent(q), {
+                        headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (id !== this.reqId) return;
+                        this.serverResults = (data.results || []).map(r => ({
+                            title: r.title || '',
+                            sub: r.desc || r.description || '',
+                            url: r.url || '#'
+                        }));
+                        this.searchLoading = false;
+                    })
+                    .catch(() => {
+                        if (id === this.reqId) this.searchLoading = false;
+                    });
+                },
+
+                localMatches(q) {
+                    const tokens = norm(q).split(/\s+/).filter(Boolean);
+                    if (!tokens.length) return [];
+                    const scored = [];
+                    this.menuIndex.forEach((m) => {
+                        const title = norm(m.title);
+                        const hay = title + ' ' + norm(m.path);
+                        if (!tokens.every(t => hay.indexOf(t) > -1)) return;
+                        let score = 0;
+                        tokens.forEach((t) => {
+                            if (title.indexOf(t) === 0) score += 3;
+                            else if (title.indexOf(t) > -1) score += 2;
+                            else score += 1;
+                        });
+                        scored.push({ m: m, score: score });
+                    });
+                    scored.sort((a, b) => b.score - a.score);
+                    return scored.slice(0, 8).map(s => s.m);
+                },
+
+                get items() {
+                    const q = this.searchQuery.trim();
+                    let out = [];
+
+                    if (!q) {
+                        this.recent.forEach((r) => {
+                            out.push({ kind: 'recent', group: T.recent, title: r.title, path: r.path, sub: r.path, url: r.url });
+                        });
+                        this.menuIndex.filter(m => !m.path).slice(0, 7).forEach((m) => {
+                            out.push({ kind: 'quick', group: T.quick, title: m.title, path: '', sub: '', url: m.url });
+                        });
+                    } else {
+                        const seen = {};
+                        this.localMatches(q).forEach((m) => {
+                            seen[m.url] = true;
+                            out.push({ kind: 'menu', group: T.menu, title: m.title, path: m.path, sub: m.path, url: m.url });
+                        });
+                        this.serverResults.forEach((r) => {
+                            if (seen[r.url]) return;
+                            seen[r.url] = true;
+                            out.push({ kind: 'result', group: T.results, title: r.title, path: '', sub: r.sub, url: r.url });
+                        });
+                        if (q.length >= 2) {
+                            out.push({ kind: 'ai', group: T.ai, title: T.askAi + ': \u201C' + q + '\u201D', path: '', sub: '', url: urls.ai + '?q=' + encodeURIComponent(q) });
+                        }
+                    }
+
+                    let last = null;
+                    out.forEach((it, i) => {
+                        it.head = it.group !== last;
+                        last = it.group;
+                        it.i = i;
+                    });
+                    return out;
+                },
+
+                get hasResults() {
+                    return this.items.some(i => i.kind !== 'ai');
+                },
+
+                move(d) {
+                    const n = this.items.length;
+                    if (!n) return;
+                    this.activeIndex = (this.activeIndex + d + n) % n;
+                    this.$nextTick(() => {
+                        const el = this.$root.querySelector('[data-i="' + this.activeIndex + '"]');
+                        if (el) el.scrollIntoView({ block: 'nearest' });
+                    });
+                },
+
+                openActive() {
+                    const it = this.items[this.activeIndex];
+                    if (!it) return;
+                    this.remember(it);
+                    window.location.href = it.url;
+                },
+
+                short(u) {
+                    try {
+                        const x = new URL(u, window.location.origin);
+                        return x.pathname + x.search;
+                    } catch (e) {
+                        return u;
+                    }
+                },
+
+                hl(text) {
+                    const s = String(text || '');
+                    const toks = this.searchQuery.trim().split(/\s+/).filter(Boolean);
+                    if (!toks.length) return esc(s);
+                    const re = new RegExp('(' + toks.map(x => x.replace(/[.*+?^$()|[\]\\{}]/g, '\\$&')).join('|') + ')', 'gi');
+                    return s.split(re).map((part, i) => i % 2 ? '<mark>' + esc(part) + '</mark>' : esc(part)).join('');
+                }
+            };
+        }
+    </script>
 
     @include('admin.partials.media-picker')
 
