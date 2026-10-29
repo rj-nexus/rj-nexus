@@ -63,8 +63,19 @@ class FrontendController extends Controller
 
     public function preview(Template $template)
     {
+        $isPage = $template->type === 'page';
+
+        $header = $isPage ? $this->resolver->header() : null;
+        $footer = $isPage ? $this->resolver->footer() : null;
+
+        $blocks = $template->content['blocks'] ?? [];
+
         return view('frontend.preview', [
             'template' => $template,
+            'header' => $header,
+            'footer' => $footer,
+            'blocks' => $blocks,
+            'isPage' => $isPage,
             'title' => $template->name,
         ]);
     }
