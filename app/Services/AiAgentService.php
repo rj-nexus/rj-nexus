@@ -13,16 +13,14 @@ class AiAgentService
     protected const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
     protected array $providers = [
-        ['name' => 'pollinations-openai', 'type' => 'chat', 'url' => 'https://text.pollinations.ai/openai', 'model' => 'openai'],
-        ['name' => 'pollinations-mistral', 'type' => 'chat', 'url' => 'https://text.pollinations.ai/openai', 'model' => 'mistral'],
-        ['name' => 'pollinations-llama', 'type' => 'chat', 'url' => 'https://text.pollinations.ai/openai', 'model' => 'llama'],
-        ['name' => 'pollinations-get-openai', 'type' => 'get', 'url' => 'https://text.pollinations.ai/', 'model' => 'openai'],
-        ['name' => 'pollinations-get-mistral', 'type' => 'get', 'url' => 'https://text.pollinations.ai/', 'model' => 'mistral'],
+        ['name' => 'pollinations-chat', 'type' => 'chat', 'url' => 'https://text.pollinations.ai/openai', 'model' => 'openai'],
+        ['name' => 'pollinations-single', 'type' => 'single', 'url' => 'https://text.pollinations.ai/openai', 'model' => 'openai'],
+        ['name' => 'pollinations-get', 'type' => 'get', 'url' => 'https://text.pollinations.ai/', 'model' => 'openai'],
     ];
 
     public function ask(string $question, string $extraContext = ''): array
     {
-        @set_time_limit(90);
+        @set_time_limit(120);
 
         $docContext = '';
         $systemContext = '';
@@ -49,9 +47,11 @@ class AiAgentService
 
         foreach ($this->providers as $provider) {
             try {
-                $content = $provider['type'] === 'get'
-                    ? $this->callGet($provider, $system, $question)
-                    : $this->callChat($provider, $system, $question);
+                $content = match ($provider['type']) {
+                    'get' => $this->callGet($provider, $system, $question),
+                    'single' => $this->callChat($provider, '', $system . "\n\n--- USER ---\n" . $question),
+                    default => $this->callChat($provider, $system, $question),
+                };
 
                 if ($content !== null && $content !== '') {
                     $result = ['success' => true, 'answer' => $content, 'provider' => $provider['name']];
@@ -82,20 +82,24 @@ class AiAgentService
 
     protected function callChat(array $provider, string $system, string $question): ?string
     {
+        $messages = [];
+
+        if ($system !== '') {
+            $messages[] = ['role' => 'system', 'content' => $system];
+        }
+
+        $messages[] = ['role' => 'user', 'content' => $question];
+
         $response = Http::withHeaders([
             'User-Agent' => self::USER_AGENT,
             'Accept' => 'application/json',
             'Content-Type' => 'application/json',
         ])
             ->connectTimeout(5)
-            ->timeout(15)
+            ->timeout(40)
             ->post($provider['url'], [
                 'model' => $provider['model'],
-                'messages' => [
-                    ['role' => 'system', 'content' => $system],
-                    ['role' => 'user', 'content' => $question],
-                ],
-                'temperature' => 0.4,
+                'messages' => $messages,
             ]);
 
         if (!$response->successful()) {
@@ -111,7 +115,7 @@ class AiAgentService
     {
         $response = Http::withHeaders(['User-Agent' => self::USER_AGENT])
             ->connectTimeout(5)
-            ->timeout(20)
+            ->timeout(40)
             ->get($provider['url'] . rawurlencode(mb_substr($question, 0, 500)), [
                 'system' => mb_substr($system, 0, 1500),
                 'model' => $provider['model'],
