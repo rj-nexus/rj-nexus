@@ -58,7 +58,7 @@ class MediaController extends Controller
         return view('admin.media.index', compact('media', 'stats'));
     }
 
-        public function picker(Request $request)
+    public function picker(Request $request)
     {
         $query = Media::latest();
 
@@ -194,16 +194,66 @@ class MediaController extends Controller
         $basename = $basename !== '' ? $basename : 'file';
         $basename = substr($basename, 0, 80);
 
-        $filename = $basename . '-' . Str::random(8) . '.' . $extension;
-
         $destPath = public_path($folder);
 
         if (!is_dir($destPath)) {
             mkdir($destPath, 0755, true);
         }
 
-        $file->move($destPath, $filename);
+        $isImage = str_starts_with($mime, 'image/') && !in_array($extension, ['svg', 'gif']);
+        $canWebP = function_exists('imagewebp') && function_exists('imagecreatefromstring');
 
+        if ($isImage && $canWebP) {
+            $imageContent = file_get_contents($file->getRealPath());
+            $image = @imagecreatefromstring($imageContent);
+
+            if ($image !== false) {
+                $width = imagesx($image);
+                $height = imagesy($image);
+                $maxWidth = 1920;
+                $newWidth = $width;
+                $newHeight = $height;
+
+                if ($width > $maxWidth) {
+                    $newWidth = $maxWidth;
+                    $newHeight = floor($height * ($maxWidth / $width));
+                    $resized = imagecreatetruecolor($newWidth, $newHeight);
+                    imagealphablending($resized, false);
+                    imagesavealpha($resized, true);
+                    $transparent = imagecolorallocatealpha($resized, 255, 255, 255, 127);
+                    imagefilledrectangle($resized, 0, 0, $newWidth, $newHeight, $transparent);
+                    imagecopyresampled($resized, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+                    imagedestroy($image);
+                    $image = $resized;
+                } else {
+                    imagealphablending($image, false);
+                    imagesavealpha($image, true);
+                }
+
+                $filename = $basename . '-' . Str::random(8) . '.webp';
+                $fullPath = $destPath . '/' . $filename;
+
+                if (imagewebp($image, $fullPath, 85)) {
+                    imagedestroy($image);
+                    return Media::create([
+                        'filename' => $filename,
+                        'original_name' => $original,
+                        'path' => $folder . '/' . $filename,
+                        'url' => asset($folder . '/' . $filename),
+                        'mime_type' => 'image/webp',
+                        'size' => filesize($fullPath),
+                        'width' => $newWidth,
+                        'height' => $newHeight,
+                        'title' => pathinfo($original, PATHINFO_FILENAME),
+                        'uploaded_by' => $userId,
+                    ]);
+                }
+                imagedestroy($image);
+            }
+        }
+
+        $filename = $basename . '-' . Str::random(8) . '.' . $extension;
+        $file->move($destPath, $filename);
         $fullPath = $destPath . '/' . $filename;
         $dimensions = @getimagesize($fullPath);
 
