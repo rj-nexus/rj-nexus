@@ -11,13 +11,13 @@
     $radius          = $settings['radius'] ?? 'full';
     $showCodeCompact = $settings['show_code_on_compact'] ?? true;
 
-    $radiusMap = ['none' => '0px', 'sm' => '6px', 'md' => '10px', 'lg' => '14px', 'full' => '9999px'];
+    $radiusMap = ['none' => '0px', 'sm' => '6px', 'md' => '8px', 'lg' => '12px', 'full' => '9999px'];
     $radiusCss = $radiusMap[$radius] ?? '9999px';
 
     $sizeMap = [
-        'sm' => ['pad' => '6px 14px', 'fs' => '13px', 'flag' => '26px', 'gap' => '8px', 'icon' => '14px'],
-        'md' => ['pad' => '8px 18px', 'fs' => '14px', 'flag' => '34px', 'gap' => '10px', 'icon' => '16px'],
-        'lg' => ['pad' => '10px 22px', 'fs' => '15px', 'flag' => '42px', 'gap' => '12px', 'icon' => '18px'],
+        'sm' => ['pad' => '4px 10px', 'fs' => '12px', 'flag' => '18px', 'gap' => '6px', 'icon' => '12px', 'mflag' => '26px'],
+        'md' => ['pad' => '5px 12px', 'fs' => '13px', 'flag' => '22px', 'gap' => '8px', 'icon' => '14px', 'mflag' => '30px'],
+        'lg' => ['pad' => '7px 14px', 'fs' => '14px', 'flag' => '26px', 'gap' => '9px', 'icon' => '16px', 'mflag' => '34px'],
     ];
     $sz = $sizeMap[$size] ?? $sizeMap['md'];
 
@@ -25,32 +25,41 @@
     $current   = app()->getLocale();
     $isCompact = !$showFlag && !$showName && $showCodeCompact;
 
-    $flags = [
-        'az' => '🇦🇿', 'en' => '🇬🇧', 'de' => '🇩🇪', 'es' => '🇪🇸',
-        'fr' => '🇫🇷', 'pt' => '🇵🇹', 'ru' => '🇷🇺', 'tr' => '🇹🇷',
-        'it' => '🇮🇹', 'ja' => '🇯🇵', 'zh' => '🇨🇳', 'ar' => '🇸🇦',
-        'nl' => '🇳🇱', 'pl' => '🇵🇱', 'sv' => '🇸🇪', 'uk' => '🇺🇦',
-    ];
-
-    $globeIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:60%;height:60%;display:block;"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>';
-
-    $getFlag = function (string $code) use ($flags, $globeIcon): string {
+    $getFlag = function (string $code): string {
         if (function_exists('rj_lang_flag_url')) {
             $url = rj_lang_flag_url($code);
             if ($url) {
-                return '<img src="' . e($url) . '" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">';
+                return '<img src="' . e($url) . '" alt="">';
             }
         }
-        return $flags[$code] ?? $globeIcon;
+        $label = $code === 'en' ? 'GB' : strtoupper(mb_substr($code, 0, 2));
+        return '<b>' . e($label) . '</b>';
     };
 
-    $getName = function (string $code) use ($showFullName): string {
-        $upper = strtoupper($code);
-        if ($showFullName && function_exists('rj_lang_name')) {
+    $flagAttrs = function (string $code): string {
+        $hasImg = function_exists('rj_lang_flag_url') && rj_lang_flag_url($code);
+        if ($hasImg) {
+            return 'class="rj-hls-flag"';
+        }
+        $h  = crc32($code) % 360;
+        $h2 = ($h + 50) % 360;
+        return 'class="rj-hls-flag is-badge" style="background:linear-gradient(135deg,hsl(' . $h . ' 75% 62%),hsl(' . $h2 . ' 72% 48%));"';
+    };
+
+    $getShort = function (string $code): string {
+        return strtoupper($code);
+    };
+
+    $getFull = function (string $code): string {
+        if (function_exists('rj_lang_name')) {
             $full = rj_lang_name($code);
             if ($full) return $full;
         }
-        return $upper;
+        return strtoupper($code);
+    };
+
+    $getName = function (string $code) use ($showFullName, $getShort, $getFull): string {
+        return $showFullName ? $getFull($code) : $getShort($code);
     };
 @endphp
 
@@ -65,30 +74,31 @@
     }
 
     #{{ $uid }} .rj-hls-btn {
+        position: relative;
         display: inline-flex;
         align-items: center;
         gap: {{ $sz['gap'] }};
         padding: {{ $sz['pad'] }};
         border-radius: {{ $radiusCss }};
         font-size: {{ $sz['fs'] }};
-        font-weight: 700;
-        border: 1.5px solid transparent;
+        font-weight: 600;
+        border: 1px solid transparent;
         cursor: pointer;
         text-decoration: none;
         background: transparent;
         color: inherit;
-        transition: background .2s ease, border-color .2s ease, color .2s ease, transform .15s ease;
+        transition: background .18s ease, border-color .18s ease, color .18s ease, opacity .18s ease, transform .15s ease;
         font-family: inherit;
         line-height: 1;
         white-space: nowrap;
+        -webkit-tap-highlight-color: transparent;
     }
-    #{{ $uid }} .rj-hls-btn:active { transform: scale(.97); }
 
     #{{ $uid }}[data-btn="ghost"] .rj-hls-btn:hover {
         background: rgba(15,23,42,.06);
     }
     #{{ $uid }}[data-btn="outline"] .rj-hls-btn {
-        border-color: rgba(15,23,42,.15);
+        border-color: rgba(15,23,42,.14);
     }
     #{{ $uid }}[data-btn="outline"] .rj-hls-btn:hover {
         border-color: var(--hls-accent);
@@ -118,11 +128,9 @@
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
-        font-size: calc({{ $sz['flag'] }} * 0.8);
         line-height: 1;
-        background: #f8fafc;
-        border: 2px solid #fff;
-        box-shadow: 0 2px 8px rgba(15,23,42,0.12);
+        background: #f1f5f9;
+        box-shadow: 0 0 0 1px rgba(15,23,42,.08);
     }
     #{{ $uid }} .rj-hls-flag img {
         width: 100%;
@@ -130,10 +138,18 @@
         object-fit: cover;
         display: block;
     }
+    #{{ $uid }} .rj-hls-flag.is-badge b {
+        color: #fff;
+        font-size: calc({{ $sz['flag'] }} * 0.4);
+        font-weight: 800;
+        letter-spacing: .02em;
+        line-height: 1;
+        text-shadow: 0 1px 2px rgba(0,0,0,.18);
+    }
 
     #{{ $uid }} .rj-hls-code {
-        font-weight: 800;
-        letter-spacing: .04em;
+        font-weight: 700;
+        letter-spacing: .05em;
         text-transform: uppercase;
     }
 
@@ -141,28 +157,34 @@
         width: {{ $sz['icon'] }};
         height: {{ $sz['icon'] }};
         flex-shrink: 0;
-        opacity: .55;
-        transition: transform .25s ease;
+        opacity: .5;
+        transition: transform .2s ease;
     }
     #{{ $uid }} .rj-hls-btn.is-open .rj-hls-caret {
         transform: rotate(180deg);
     }
 
+    #{{ $uid }} .rj-hls-chip {
+        display: none;
+    }
+
     #{{ $uid }} .rj-hls-menu {
         position: absolute;
-        top: calc(100% + 8px);
-        min-width: 200px;
+        top: calc(100% + 6px);
+        min-width: 140px;
+        width: max-content;
+        max-width: calc(100vw - 24px);
         background: #fff;
         border: 1px solid rgba(15,23,42,.08);
-        border-radius: 16px;
-        box-shadow: 0 20px 40px -16px rgba(15,23,42,.35);
-        padding: 8px;
+        border-radius: 12px;
+        box-shadow: 0 12px 28px -12px rgba(15,23,42,.28);
+        padding: 4px;
         opacity: 0;
-        transform: translateY(-6px) scale(.96);
+        transform: translateY(-4px);
         pointer-events: none;
-        transition: opacity .2s ease, transform .22s cubic-bezier(.34,1.56,.64,1);
+        transition: opacity .16s ease, transform .16s ease;
         z-index: 9999;
-        max-height: 380px;
+        max-height: 320px;
         overflow-y: auto;
     }
     #{{ $uid }}[data-align="right"] .rj-hls-menu { right: 0; left: auto; }
@@ -175,52 +197,53 @@
         transform: none;
         pointer-events: auto;
     }
-    #{{ $uid }} .rj-hls-menu::-webkit-scrollbar { width: 6px; }
+    #{{ $uid }} .rj-hls-menu::-webkit-scrollbar { width: 5px; }
     #{{ $uid }} .rj-hls-menu::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 
     #{{ $uid }} .rj-hls-item {
         display: flex;
         align-items: center;
-        gap: 12px;
-        padding: 8px 12px;
-        border-radius: 10px;
-        color: #334155;
-        font-size: 14px;
-        font-weight: 600;
+        gap: 10px;
+        padding: 7px 10px;
+        border-radius: 8px;
+        color: #475569;
+        font-size: 13px;
+        font-weight: 500;
         text-decoration: none;
         cursor: pointer;
-        transition: background .15s ease, color .15s ease;
-        border: 0;
-        background: transparent;
+        transition: background .12s ease, color .12s ease;
         width: 100%;
-        text-align: left;
         font-family: inherit;
+        -webkit-tap-highlight-color: transparent;
     }
     #{{ $uid }} .rj-hls-item:hover {
         background: #f8fafc;
         color: var(--hls-accent);
     }
     #{{ $uid }} .rj-hls-item.is-active {
-        background: color-mix(in srgb, var(--hls-accent) 10%, transparent);
         color: var(--hls-accent);
+        font-weight: 700;
     }
-    #{{ $uid }} .rj-hls-item .rj-hls-check {
-        width: 16px;
-        height: 16px;
+    #{{ $uid }} .rj-hls-item .rj-hls-dot {
+        width: 5px;
+        height: 5px;
         margin-left: auto;
-        color: var(--hls-accent);
+        border-radius: 50%;
+        background: var(--hls-accent);
         opacity: 0;
+        flex-shrink: 0;
     }
-    #{{ $uid }} .rj-hls-item.is-active .rj-hls-check {
+    #{{ $uid }} .rj-hls-item.is-active .rj-hls-dot {
         opacity: 1;
     }
+    #{{ $uid }} .rj-hls-item .rj-hls-full { display: none; }
 
     #{{ $uid }}[data-style="inline-flags"] .rj-hls-inline,
     #{{ $uid }}[data-style="inline-names"] .rj-hls-inline,
     #{{ $uid }}[data-style="pills"] .rj-hls-inline {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
+        gap: 4px;
         flex-wrap: wrap;
     }
 
@@ -228,15 +251,15 @@
     #{{ $uid }}[data-style="inline-names"] .rj-hls-inline-btn {
         display: inline-flex;
         align-items: center;
-        gap: 8px;
-        padding: 4px 8px;
+        gap: 6px;
+        padding: 3px 6px;
         border-radius: {{ $radiusCss }};
         font-size: {{ $sz['fs'] }};
-        font-weight: 700;
+        font-weight: 600;
         color: inherit;
         text-decoration: none;
-        transition: background .2s ease, opacity .2s ease;
-        opacity: .55;
+        transition: background .18s ease, opacity .18s ease;
+        opacity: .5;
         line-height: 1;
     }
     #{{ $uid }}[data-style="inline-flags"] .rj-hls-inline-btn:hover,
@@ -254,16 +277,16 @@
     #{{ $uid }}[data-style="pills"] .rj-hls-inline-btn {
         display: inline-flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
         padding: {{ $sz['pad'] }};
         border-radius: {{ $radiusCss }};
         font-size: {{ $sz['fs'] }};
-        font-weight: 700;
+        font-weight: 600;
         color: inherit;
         text-decoration: none;
         background: transparent;
-        border: 1.5px solid rgba(15,23,42,.12);
-        transition: background .2s ease, border-color .2s ease, color .2s ease;
+        border: 1px solid rgba(15,23,42,.12);
+        transition: background .18s ease, border-color .18s ease, color .18s ease;
         line-height: 1;
     }
     #{{ $uid }}[data-style="pills"] .rj-hls-inline-btn:hover {
@@ -275,15 +298,153 @@
         border-color: var(--hls-accent);
         color: #fff;
     }
-    #{{ $uid }}[data-style="pills"] .rj-hls-inline-btn.is-active .rj-hls-flag {
-        border-color: rgba(255,255,255,0.2);
+
+    @keyframes rjHlsIn{{ $uid }} {
+        from { opacity: 0; transform: translateY(-6px); }
+        to   { opacity: 1; transform: none; }
     }
 
     @media (max-width: 640px) {
-        #{{ $uid }}[data-style="inline-names"] .rj-hls-inline-btn span[data-name] {
+        #{{ $uid }} .rj-hls-btn.has-flag {
+            padding: 0;
+            gap: 0;
+            border-radius: 50%;
+            background: transparent;
+            border-color: transparent;
+        }
+        #{{ $uid }} .rj-hls-btn.has-flag:active {
+            transform: scale(.92);
+        }
+        #{{ $uid }} .rj-hls-btn.has-flag .rj-hls-label,
+        #{{ $uid }} .rj-hls-btn.has-flag .rj-hls-caret {
             display: none;
         }
-        #{{ $uid }}[data-style="pills"] .rj-hls-inline-btn span[data-name] {
+        #{{ $uid }} .rj-hls-btn.has-flag .rj-hls-flag {
+            width: {{ $sz['mflag'] }};
+            height: {{ $sz['mflag'] }};
+            box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px color-mix(in srgb, var(--hls-accent) 45%, transparent), 0 4px 10px -2px rgba(15,23,42,.2);
+            transition: box-shadow .2s ease;
+        }
+        #{{ $uid }} .rj-hls-btn.has-flag .rj-hls-flag.is-badge b {
+            font-size: calc({{ $sz['mflag'] }} * 0.36);
+        }
+        #{{ $uid }} .rj-hls-btn.has-flag.is-open .rj-hls-flag {
+            box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px var(--hls-accent), 0 4px 10px -2px rgba(15,23,42,.2);
+        }
+        #{{ $uid }} .rj-hls-btn.has-flag .rj-hls-chip {
+            position: absolute;
+            right: -3px;
+            bottom: -3px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--hls-accent);
+            border: 2px solid #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            color: #fff;
+            transition: transform .25s ease;
+        }
+        #{{ $uid }} .rj-hls-btn.has-flag .rj-hls-chip svg {
+            width: 7px;
+            height: 7px;
+            display: block;
+        }
+        #{{ $uid }} .rj-hls-btn.has-flag.is-open .rj-hls-chip {
+            transform: rotate(180deg);
+        }
+        #{{ $uid }} .rj-hls-btn:not(.has-flag) {
+            padding: 4px 8px;
+        }
+
+        #{{ $uid }} .rj-hls-menu {
+            top: calc(100% + 12px);
+            min-width: 172px;
+            padding: 5px;
+            border-radius: 16px;
+            background: rgba(255,255,255,.9);
+            -webkit-backdrop-filter: blur(14px) saturate(1.4);
+            backdrop-filter: blur(14px) saturate(1.4);
+            border: 1px solid rgba(255,255,255,.7);
+            box-shadow: 0 18px 40px -14px rgba(15,23,42,.35), 0 0 0 1px rgba(15,23,42,.05);
+            overflow: visible;
+            max-height: none;
+        }
+        #{{ $uid }}[data-align="right"] .rj-hls-menu,
+        #{{ $uid }}[data-align="auto"] .rj-hls-menu {
+            right: -4px;
+            left: auto;
+        }
+        #{{ $uid }}[data-align="left"] .rj-hls-menu {
+            left: -4px;
+            right: auto;
+        }
+        #{{ $uid }} .rj-hls-menu::before {
+            content: "";
+            position: absolute;
+            top: -5px;
+            width: 10px;
+            height: 10px;
+            background: rgba(255,255,255,.95);
+            transform: rotate(45deg);
+            border-radius: 2px 0 0 0;
+            border-left: 1px solid rgba(15,23,42,.06);
+            border-top: 1px solid rgba(15,23,42,.06);
+        }
+        #{{ $uid }}[data-align="right"] .rj-hls-menu::before,
+        #{{ $uid }}[data-align="auto"] .rj-hls-menu::before {
+            right: 16px;
+        }
+        #{{ $uid }}[data-align="left"] .rj-hls-menu::before {
+            left: 16px;
+        }
+        #{{ $uid }} .rj-hls-menu.is-open .rj-hls-item {
+            animation: rjHlsIn{{ $uid }} .26s ease both;
+        }
+        #{{ $uid }} .rj-hls-menu.is-open .rj-hls-item:nth-child(2) { animation-delay: .04s; }
+        #{{ $uid }} .rj-hls-menu.is-open .rj-hls-item:nth-child(3) { animation-delay: .08s; }
+        #{{ $uid }} .rj-hls-menu.is-open .rj-hls-item:nth-child(4) { animation-delay: .12s; }
+        #{{ $uid }} .rj-hls-menu.is-open .rj-hls-item:nth-child(5) { animation-delay: .16s; }
+        #{{ $uid }} .rj-hls-menu.is-open .rj-hls-item:nth-child(n+6) { animation-delay: .2s; }
+
+        #{{ $uid }} .rj-hls-item {
+            justify-content: space-between;
+            gap: 18px;
+            padding: 11px 14px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 11px;
+        }
+        #{{ $uid }} .rj-hls-item .rj-hls-flag,
+        #{{ $uid }} .rj-hls-item .rj-hls-dot {
+            display: none;
+        }
+        #{{ $uid }} .rj-hls-item .rj-hls-full {
+            display: inline;
+            order: 1;
+            flex: 1;
+        }
+        #{{ $uid }} .rj-hls-item .rj-hls-short {
+            order: 2;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .08em;
+            opacity: .45;
+        }
+        #{{ $uid }} .rj-hls-item.is-active {
+            background: color-mix(in srgb, var(--hls-accent) 12%, transparent);
+        }
+        #{{ $uid }} .rj-hls-item.is-active .rj-hls-short {
+            opacity: .8;
+        }
+
+        #{{ $uid }} .rj-hls-inline.has-flag .rj-hls-inline-btn {
+            padding: 3px;
+            gap: 0;
+        }
+        #{{ $uid }} .rj-hls-inline.has-flag span[data-name] {
             display: none;
         }
     }
@@ -304,12 +465,12 @@
      data-align="{{ $dropdownAlign }}">
 
     @if($styleType === 'dropdown')
-        <button type="button" class="rj-hls-btn" data-toggle>
+        <button type="button" class="rj-hls-btn {{ $showFlag ? 'has-flag' : '' }}" data-toggle aria-haspopup="true" aria-label="{{ $getFull($current) }}">
             @if($showFlag)
-                <span class="rj-hls-flag">{!! $getFlag($current) !!}</span>
+                <span {!! $flagAttrs($current) !!}>{!! $getFlag($current) !!}</span>
             @endif
             @if($showName)
-                <span>{{ $getName($current) }}</span>
+                <span class="rj-hls-label">{{ $getName($current) }}</span>
             @elseif($isCompact)
                 <span class="rj-hls-code">{{ strtoupper($current) }}</span>
             @endif
@@ -317,6 +478,11 @@
                 <svg class="rj-hls-caret" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
                 </svg>
+                <span class="rj-hls-chip">
+                    <svg fill="none" stroke="currentColor" stroke-width="4" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </span>
             @endif
         </button>
 
@@ -326,23 +492,23 @@
                    class="rj-hls-item {{ $loc === $current ? 'is-active' : '' }}"
                    data-locale="{{ $loc }}">
                     @if($showFlag)
-                        <span class="rj-hls-flag">{!! $getFlag($loc) !!}</span>
+                        <span {!! $flagAttrs($loc) !!}>{!! $getFlag($loc) !!}</span>
                     @endif
-                    <span>{{ $getName($loc) }}</span>
-                    <svg class="rj-hls-check" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                    </svg>
+                    <span class="rj-hls-short">{{ $getName($loc) }}</span>
+                    <span class="rj-hls-full">{{ $getFull($loc) }}</span>
+                    <span class="rj-hls-dot"></span>
                 </a>
             @endforeach
         </div>
     @else
-        <div class="rj-hls-inline">
+        <div class="rj-hls-inline {{ $showFlag ? 'has-flag' : '' }}">
             @foreach($available as $loc)
                 <a href="{{ route('rj.widget.locale', ['locale' => $loc, 'redirect' => request()->path() === '/' ? '/' : request()->path()]) }}"
                    class="rj-hls-inline-btn {{ $loc === $current ? 'is-active' : '' }}"
-                   data-locale="{{ $loc }}">
+                   data-locale="{{ $loc }}"
+                   aria-label="{{ $getFull($loc) }}">
                     @if($showFlag)
-                        <span class="rj-hls-flag">{!! $getFlag($loc) !!}</span>
+                        <span {!! $flagAttrs($loc) !!}>{!! $getFlag($loc) !!}</span>
                     @endif
                     @if($showName)
                         <span data-name>{{ $getName($loc) }}</span>
