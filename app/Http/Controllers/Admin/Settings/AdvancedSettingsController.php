@@ -62,6 +62,12 @@ class AdvancedSettingsController extends BaseSettingsController
             Option::set($name, $value, 'advanced', $typeMap[$name] ?? 'text');
         }
 
+        // .env faylındakı ayarları yenilə
+        if (function_exists('rj_set_env')) {
+            rj_set_env('APP_DEBUG', $data['debug_mode'] === '1' ? 'true' : 'false');
+            rj_set_env('LOG_LEVEL', $data['log_level']);
+        }
+
         return back()->with('success', __('Advanced settings saved.'));
     }
 
