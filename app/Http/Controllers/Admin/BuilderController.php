@@ -104,6 +104,7 @@ class BuilderController extends Controller
             'blocks' => $template->content['blocks'] ?? [],
             'updateUrl' => route('admin.rjbuilder.update', $template),
             'backUrl' => route('admin.rjbuilder.edit', $template),
+            'previewUrl' => route('frontend.preview', $template),
             'status' => $template->status,
             'locales' => $template->type === 'page' ? rj_available_locales() : [],
             'baseLocale' => config('app.locale'),
