@@ -99,6 +99,24 @@
         container-type: inline-size;
     }
 
+    /* Form Title */
+    #{{ $fid }} .rjf-header {
+        margin-bottom: 24px;
+    }
+    #{{ $fid }} .rjf-title {
+        margin: 0 0 6px;
+        font-size: clamp(20px, 4vw, 26px);
+        font-weight: 800;
+        color: var(--fg);
+        letter-spacing: -0.02em;
+    }
+    #{{ $fid }} .rjf-desc {
+        margin: 0;
+        font-size: 14.5px;
+        color: var(--muted);
+        line-height: 1.5;
+    }
+
     #{{ $fid }} .rjf-progress {
         height: 4px;
         margin-bottom: 24px;
@@ -130,6 +148,7 @@
     #{{ $fid }} .rj-form-req { margin-left: 2px; color: #ef4444; }
     #{{ $fid }} .rj-form-help { margin-top: 6px; font-size: 11.5px; line-height: 1.4; color: var(--muted); }
 
+    /* Unified Input Styles */
     #{{ $fid }} .rj-form-input,
     #{{ $fid }} .rj-form textarea,
     #{{ $fid }} .rj-form select {
@@ -166,6 +185,7 @@
         cursor: pointer;
     }
 
+    /* Minimal Preset Overrides */
     #{{ $fid }}[data-preset="minimal"] .rj-form-label { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
     #{{ $fid }}[data-preset="minimal"] .rj-form-input,
     #{{ $fid }}[data-preset="minimal"] .rj-form textarea,
@@ -194,6 +214,7 @@
     }
     #{{ $fid }} .rj-form-checkbox input { flex-shrink: 0; width: 18px; height: 18px; margin: 0; accent-color: var(--accent); }
 
+    /* Layouts */
     #{{ $fid }} .rj-form-stack .rj-form-field { margin-bottom: 18px; }
     #{{ $fid }} .rj-form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
     #{{ $fid }} .rj-form-grid-2 .rj-form-field-full,
@@ -204,6 +225,7 @@
     #{{ $fid }} .rj-form-inline .rj-form-actions { flex: 0 0 auto; }
     #{{ $fid }} .rj-form-inline .rj-form-message { flex: 1 0 100%; }
 
+    /* Submit Button */
     #{{ $fid }} .rj-form-actions { margin-top: 6px; }
     #{{ $fid }} .rj-form-submit {
         position: relative;
@@ -252,6 +274,8 @@
         border-radius: 50%;
         animation: rjf-spin .7s linear infinite;
     }
+
+    /* Submit Button Presets */
     #{{ $fid }}[data-preset="modern"] .rj-form-submit { width: 100%; background: linear-gradient(135deg, var(--accent), var(--accent2)); }
     #{{ $fid }}[data-preset="dark"] .rj-form-submit { width: 100%; }
     #{{ $fid }}[data-preset="minimal"] .rj-form-submit {
@@ -265,6 +289,7 @@
     #{{ $fid }}[data-preset="minimal"] .rj-form-submit::after { display: none; }
     #{{ $fid }}[data-preset="minimal"] .rj-form-submit.is-loading::before { border-color: color-mix(in srgb, var(--accent) 30%, transparent); border-top-color: var(--accent); }
 
+    /* Stage & Mascot */
     #{{ $fid }} .rjf-stage {
         position: relative;
         overflow: hidden;
@@ -391,12 +416,14 @@
     }
     #{{ $fid }}:is([data-state="happy"], [data-state="success"]) .rjf-svg .sp { animation: rjf-spark 1.4s ease-out infinite var(--d, 0s); }
 
+    /* Media Queries */
     @container rjf-w (max-width: 760px) {
         #{{ $fid }} .rjf-card { grid-template-columns: minmax(0, 1fr); border-radius: min(var(--r), 20px); }
         #{{ $fid }} .rjf-stage { order: -1; height: 176px; min-height: 0; --bt: 44px; }
         #{{ $fid }} .rjf-orb:nth-child(2) { display: none; }
         #{{ $fid }} .rjf-bubble { top: 10px; padding: 6px 13px; font-size: 12px; }
         #{{ $fid }} .rjf-main { padding: 20px 18px 22px; }
+        #{{ $fid }} .rjf-header { margin-bottom: 18px; text-align: center; }
         #{{ $fid }} .rjf-progress { margin-bottom: 18px; }
     }
 
@@ -418,6 +445,7 @@
         #{{ $fid }} .rj-form-stack .rj-form-field { margin-bottom: 15px; }
     }
 
+    /* Keyframes */
     @keyframes rjf-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
     @keyframes rjf-pop { from { opacity: 0; scale: .85; } }
     @keyframes rjf-shine { 0%, 55% { left: -60%; } 100% { left: 130%; } }
@@ -456,6 +484,15 @@
      data-state="idle">
     <div class="rjf-card">
         <section class="rjf-main">
+            @if($form->name)
+                <div class="rjf-header rjf-in" style="--d: 0s;">
+                    <h2 class="rjf-title">{{ __($form->name) }}</h2>
+                    @if($form->description ?? $form->excerpt ?? false)
+                        <p class="rjf-desc">{{ __($form->description ?? $form->excerpt) }}</p>
+                    @endif
+                </div>
+            @endif
+
             <div class="rjf-progress" aria-hidden="true"><i></i></div>
 
             <form method="POST" action="{{ route('plugin.form.submit', $form->slug) }}" class="rj-form {{ $layoutClass }}">
@@ -465,7 +502,8 @@
                     @php
                         $required = $field->is_required ? 'required' : '';
                         $reqMark  = $field->is_required ? '<span class="rj-form-req">*</span>' : '';
-                        $delay    = number_format($index * 0.07, 2, '.', '');
+                        // Header varsa animasiya gecikməsini 1 addım artırırıq
+                        $delay    = number_format(($index + ($form->name ? 1 : 0)) * 0.07, 2, '.', '');
                     @endphp
 
                     @if($field->type === 'textarea')
@@ -530,7 +568,7 @@
                     @endif
                 @endforeach
 
-                <div class="rj-form-actions rjf-in" style="--d: {{ number_format($fieldCount * 0.07, 2, '.', '') }}s;">
+                <div class="rj-form-actions rjf-in" style="--d: {{ number_format(($fieldCount + ($form->name ? 1 : 0)) * 0.07, 2, '.', '') }}s;">
                     <button type="submit" class="rj-form-submit">
                         <span>{{ __('Submit') }}</span>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>
