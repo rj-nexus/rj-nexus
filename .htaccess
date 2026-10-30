@@ -1,35 +1,20 @@
 <IfModule mod_rewrite.c>
-    <IfModule mod_negotiation.c>
-        Options -MultiViews -Indexes
-    </IfModule>
-
     RewriteEngine On
 
-    RewriteCond %{HTTP:Authorization} .
-    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+    RewriteRule ^(\.env.*|composer\.(json|lock)|package(-lock)?\.json|artisan|phpunit\.xml|vite\.config\.js|tailwind\.config\.js|postcss\.config\.js|README\.md|CHANGELOG\.md|LICENSE)$ - [F,L]
 
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_URI} (.+)/$
-    RewriteRule ^ %1 [L,R=301]
+    RewriteRule ^(app|bootstrap|config|database|resources|routes|storage|vendor|tests|node_modules)/ - [F,L]
 
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^ index.php [L]
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>
 
 <FilesMatch "^\.">
     Require all denied
 </FilesMatch>
 
-<FilesMatch "\.(env|env\..*|log|sql|sqlite|bak|old|orig|swp|ini|yml|yaml|md|lock|json|xml|dist)$">
+<FilesMatch "\.(env|env\..*|log|sql|sqlite|bak|old|orig|swp|ini|yml|yaml|lock|dist)$">
     Require all denied
 </FilesMatch>
-
-<IfModule mod_headers.c>
-    Header always set X-Content-Type-Options "nosniff"
-    Header always set X-Frame-Options "SAMEORIGIN"
-    Header always set Referrer-Policy "strict-origin-when-cross-origin"
-    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
-</IfModule>
 
 Options -Indexes
