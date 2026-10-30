@@ -12,18 +12,18 @@ class UpdatesController extends Controller
 {
     protected string $repo;
     protected string $currentVersion;
+    protected string $proxyUrl;
 
     public function __construct()
     {
         $this->repo = rj_get_option('update_repo', 'rj-nexus/rj-nexus');
 
-        // 1. Koddakı versiyanı config faylından oxuyuruq (default: 1.5.0)
-        $configVersion = ltrim((string) config('rj.version', '1.5.0'), 'v');
+        // Cloudflare Proxy ünvanı (Sənin worker linkin)
+        $this->proxyUrl = env('RJ_VAULT_URL', 'https://twilight-art-0b0e.ruhidjavadoff.workers.dev') . '/updates';
 
-        // 2. Bazadakı mövcud versiyanı oxuyuruq (default: 1.5.0)
+        $configVersion = ltrim((string) config('rj.version', '1.5.0'), 'v');
         $dbVersion = ltrim((string) rj_get_option('rj_version', '1.5.0'), 'v');
 
-        // 3. Əgər koddakı versiya bazadakından yenidirsə, bazanı yeniləyirik
         if (version_compare($configVersion, $dbVersion, '>')) {
             rj_set_option('rj_version', $configVersion);
             $this->currentVersion = $configVersion;
@@ -50,29 +50,20 @@ class UpdatesController extends Controller
     public function check()
     {
         try {
-            $token = env('GITHUB_TOKEN');
-
-            $headers = [
-                'Accept' => 'application/vnd.github+json',
+            // Birbaşa GitHub-a yox, Cloudflare Proxy-yə sorğu göndəririk
+            $response = Http::withHeaders([
+                'Accept' => 'application/json',
                 'User-Agent' => 'RJ-CMS-Updater',
-            ];
-
-            if ($token) {
-                $headers['Authorization'] = 'Bearer ' . $token;
-            }
-
-            $response = Http::withHeaders($headers)
-                ->timeout(15)
-                ->get("https://api.github.com/repos/{$this->repo}/releases", ['per_page' => 20]);
+            ])
+                ->timeout(20)
+                ->get($this->proxyUrl);
 
             if (!$response->successful()) {
-                if ($response->status() === 403) {
-                    return back()->with('error', __('GitHub API rate limit exceeded. Please add a GITHUB_TOKEN to your .env file or try again later.'));
-                }
                 return back()->with('error', __('Could not reach update server. HTTP :code', ['code' => $response->status()]));
             }
 
-            $release = $this->pickLatestRelease($response->json() ?? []);
+            $releases = $response->json();
+            $release = $this->pickLatestRelease($releases ?? []);
 
             if (!$release) {
                 return back()->with('error', __('No releases found.'));
