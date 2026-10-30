@@ -9,6 +9,7 @@ use App\Models\PostType;
 use App\Models\Tag;
 use App\Models\Template;
 use App\Services\AiSeoService;
+use App\Services\AiAgentService;
 use App\Services\PostService;
 use Illuminate\Http\Request;
 
@@ -284,6 +285,47 @@ class PostController extends Controller
         }
 
         return back()->with('success', __('Post blocks saved.'));
+    }
+
+    public function aiGenerateSeo(Request $request, AiAgentService $ai)
+    {
+        $title = $request->input('title', '');
+        $content = $request->input('content', '');
+        $locale = $request->input('locale', config('app.locale'));
+
+        if (empty($title)) {
+            return response()->json(['success' => false, 'message' => __('Title is required.')]);
+        }
+
+        $prompt = "You are an expert SEO specialist. Based on the following title and content, generate:\n";
+        $prompt .= "1. SEO Title (strictly 50-60 characters)\n";
+        $prompt .= "2. SEO Description (strictly 150-160 characters)\n";
+        $prompt .= "3. Focus Keyword (1-3 words)\n\n";
+        $prompt .= "Return ONLY a valid JSON object with exactly these keys: 'seo_title', 'seo_description', 'focus_keyword'. Do not include markdown formatting, code blocks, or extra text.\n\n";
+        $prompt .= "Title: {$title}\n";
+        $prompt .= "Content: " . mb_substr(strip_tags($content), 0, 2000) . "\n";
+        $prompt .= "Language: {$locale}";
+
+        $response = $ai->ask($prompt, '');
+
+        if ($response['success']) {
+            $answer = preg_replace('/```json/i', '', $response['answer']);
+            $answer = preg_replace('/```/i', '', $answer);
+            $answer = trim($answer);
+
+            $data = json_decode($answer, true);
+
+            if (is_array($data) && isset($data['seo_title'])) {
+                return response()->json([
+                    'success' => true,
+                    'seo_title' => mb_substr($data['seo_title'], 0, 255),
+                    'seo_description' => mb_substr($data['seo_description'] ?? '', 0, 500),
+                    'focus_keyword' => mb_substr($data['focus_keyword'] ?? '', 0, 100),
+                ]);
+            }
+        }
+
+        return response()->json(['success' => false, 'message' => __('AI failed to generate SEO data. Please try again.')]);
     }
 
     public function analyzeSeo(Request $request, Post $post)
