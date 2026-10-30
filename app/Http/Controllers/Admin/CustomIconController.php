@@ -33,7 +33,8 @@ class CustomIconController extends Controller
             ->pluck('library')
             ->toArray();
 
-        return view('admin.icons.index', compact('icons', 'libraries'));
+        // DÜZƏLİŞ BURADADIR: admin.icons.index -> admin.custom-icons.index
+        return view('admin.custom-icons.index', compact('icons', 'libraries'));
     }
 
     public function store(Request $request)
