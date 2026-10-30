@@ -6,16 +6,19 @@ use App\Http\Controllers\Controller;
 use App\Models\Theme;
 use App\Services\GitHubRegistry;
 use App\Services\ThemeManager;
+use App\Services\GitHubService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
 class ThemeController extends Controller
 {
     protected ThemeManager $manager;
+    protected GitHubService $github;
 
-    public function __construct(ThemeManager $manager)
+    public function __construct(ThemeManager $manager, GitHubService $github)
     {
         $this->manager = $manager;
+        $this->github = $github;
     }
 
     public function index(Request $request)
