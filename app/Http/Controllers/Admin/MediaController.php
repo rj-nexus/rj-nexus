@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Media;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\File;
 
 class MediaController extends Controller
 {
@@ -110,9 +111,19 @@ class MediaController extends Controller
 
     public function store(Request $request)
     {
+        // TƏHLÜKƏSİZLİK YENİLİYİ: Yalnız icazə verilən təhlükəsiz fayl növləri
         $request->validate([
             'files' => ['required', 'array'],
-            'files.*' => ['file', 'max:10240'],
+            'files.*' => [
+                'file',
+                'max:10240',
+                File::types([
+                    'jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico',
+                    'mp4', 'webm', 'mov', 'avi', 'mkv',
+                    'mp3', 'wav', 'ogg',
+                    'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'csv', 'zip', 'rar'
+                ])->max(10240)
+            ],
         ]);
 
         $uploaded = [];
@@ -188,6 +199,12 @@ class MediaController extends Controller
         $original = $file->getClientOriginalName();
         $extension = strtolower($file->getClientOriginalExtension());
         $mime = $file->getMimeType();
+
+        // TƏHLÜKƏSİZLİK YENİLİYİ: PHP və icra oluna bilən faylların qarşısını qəti alırıq
+        $forbiddenExts = ['php', 'php3', 'php4', 'php5', 'phtml', 'exe', 'sh', 'bat', 'cmd', 'js', 'jsx', 'ts', 'tsx'];
+        if (in_array($extension, $forbiddenExts)) {
+            throw new \Exception('Forbidden file type.');
+        }
 
         $folder = 'uploads/' . date('Y/m');
         $basename = Str::slug(pathinfo($original, PATHINFO_FILENAME));
