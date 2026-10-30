@@ -19,10 +19,8 @@ class AiAgentService
 
     protected function loadProvidersFromVault(): void
     {
-        // Cloudflare Worker ünvanı
         $vaultUrl = env('RJ_VAULT_URL', 'https://twilight-art-0b0e.ruhidjavadoff.workers.dev');
 
-        // Açarları 1 saat (3600 saniyə) keşdə saxlayırıq ki, hər sorğuda Cloudflare-i yormayaq
         $keys = Cache::remember('rj_ai_keys_pool', 3600, function () use ($vaultUrl) {
             try {
                 $response = Http::timeout(10)->get($vaultUrl);
@@ -40,75 +38,22 @@ class AiAgentService
             return;
         }
 
-        // Açarlar varsa, hovuzu (Pool) qururuq
-        $this->providers = [
-            [
-                'name' => 'groq',
-                'type' => 'openai',
-                'url'  => 'https://api.groq.com/openai/v1/chat/completions',
-                'key'  => $keys['groq'] ?? '',
-                'model'=> 'llama-3.3-70b-versatile',
-            ],
-            [
-                'name' => 'ovh',
-                'type' => 'openai',
-                'url'  => 'https://oai.endpoints.kepler.ai.cloud.ovh.net/v1/chat/completions',
-                'key'  => $keys['ovh'] ?? '',
-                'model'=> 'Meta-Llama-3_3-70B-Instruct',
-            ],
-            [
-                'name' => 'gemini',
-                'type' => 'gemini',
-                'url'  => 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
-                'key'  => $keys['gemini'] ?? '',
-                'model'=> 'gemini-1.5-flash',
-            ],
-            [
-                'name' => 'mistral',
-                'type' => 'openai',
-                'url'  => 'https://api.mistral.ai/v1/chat/completions',
-                'key'  => $keys['mistral'] ?? '',
-                'model'=> 'open-mistral-7b',
-            ],
-            [
-                'name' => 'nvidia',
-                'type' => 'openai',
-                'url'  => 'https://integrate.api.nvidia.com/v1/chat/completions',
-                'key'  => $keys['nvidia'] ?? '',
-                'model'=> 'meta/llama3-70b-instruct',
-            ],
-            [
-                'name' => 'huggingface',
-                'type' => 'openai',
-                'url'  => 'https://api-inference.huggingface.co/v1/chat/completions',
-                'key'  => $keys['huggingface'] ?? '',
-                'model'=> 'mistralai/Mistral-7B-Instruct-v0.2',
-            ],
-            [
-                'name' => 'llm7',
-                'type' => 'openai',
-                'url'  => 'https://api.llm7.io/v1/chat/completions',
-                'key'  => $keys['llm7'] ?? '',
-                'model'=> 'gpt-4o',
-            ],
-            [
-                'name' => 'pollinations',
-                'type' => 'openai',
-                'url'  => 'https://text.pollinations.ai/openai',
-                'key'  => $keys['pollinations'] ?? '',
-                'model'=> 'openai',
-            ],
-            [
-                'name' => 'cohere',
-                'type' => 'cohere',
-                'url'  => 'https://api.cohere.ai/v1/chat',
-                'key'  => $keys['cohere'] ?? '',
-                'model'=> 'command-r',
-            ],
-        ];
+        $configuredProviders = config('rj-ai.providers', []);
+        $this->providers = [];
 
-        // Boş açarları siyahıdan çıxarırıq
-        $this->providers = array_values(array_filter($this->providers, fn($p) => !empty($p['key'])));
+        foreach ($configuredProviders as $p) {
+            $key = $keys[$p['key_name']] ?? null;
+
+            if ($key) {
+                $this->providers[] = [
+                    'name' => $p['name'],
+                    'type' => $p['type'],
+                    'url'  => $p['url'],
+                    'model'=> $p['model'],
+                    'key'  => $key,
+                ];
+            }
+        }
     }
 
     public function ask(string $question, string $extraContext = ''): array
