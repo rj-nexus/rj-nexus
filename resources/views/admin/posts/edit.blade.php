@@ -206,12 +206,21 @@
                                 <h3 class="text-sm font-semibold text-gray-900">{{ __('Search Engine Optimization') }}</h3>
                                 <p class="text-xs text-gray-500 mt-0.5">{{ __('Control how this page appears in search results.') }}</p>
                             </div>
-                            <button type="button" @click="analyzeSeo()" :disabled="analyzing"
-                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-rj-purple to-rj-pink text-white text-xs font-medium hover:opacity-90 transition disabled:opacity-60">
-                                <svg x-show="!analyzing" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
-                                <svg x-show="analyzing" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" opacity=".25"/><path fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z"/></svg>
-                                <span x-text="analyzing ? '{{ __('Analyzing...') }}' : '{{ __('Analyze') }}'"></span>
-                            </button>
+                            <div class="flex items-center gap-2">
+                                <button type="button" @click="generateSeo()" :disabled="seoLoading"
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-50 text-purple-700 text-xs font-bold border border-purple-200 hover:bg-purple-100 transition disabled:opacity-50">
+                                    <svg x-show="!seoLoading" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+                                    <svg x-show="seoLoading" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                    {{ __('Auto SEO') }}
+                                </button>
+
+                                <button type="button" @click="analyzeSeo()" :disabled="analyzing"
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-rj-purple to-rj-pink text-white text-xs font-medium hover:opacity-90 transition disabled:opacity-60">
+                                    <svg x-show="!analyzing" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                                    <svg x-show="analyzing" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" opacity=".25"/><path fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z"/></svg>
+                                    <span x-text="analyzing ? '{{ __('Analyzing...') }}' : '{{ __('Analyze') }}'"></span>
+                                </button>
+                            </div>
                         </div>
 
                         <div x-show="seoAnalysis" x-cloak class="rounded-lg border p-4 text-xs leading-relaxed"
@@ -773,6 +782,8 @@ function postEditor() {
         seoScore: null,
         seoColor: '#10b981',
 
+        seoLoading: false, // Yeni əlavə edildi
+
         init() {
             const saved = sessionStorage.getItem('rj_post_editor_tab_{{ $post->id }}');
             if (saved) this.activeTab = saved;
@@ -787,6 +798,63 @@ function postEditor() {
             if (s >= 80) return '#10b981';
             if (s >= 50) return '#f59e0b';
             return '#ef4444';
+        },
+
+        async generateSeo() {
+            const titleInput = document.querySelector(`[name="${this.activeLocale === '{{ $baseLocale }}' ? 'title' : 'translations[' + this.activeLocale + '][title]'}"]`);
+            const contentInput = document.querySelector('textarea[name="content"]');
+
+            const title = titleInput ? titleInput.value : '';
+            const content = contentInput ? contentInput.value : '';
+
+            if (!title) {
+                alert('{{ __('Please enter a title first.') }}');
+                return;
+            }
+
+            this.seoLoading = true;
+
+            try {
+                const res = await fetch('{{ route('admin.posts.ai.generate-seo') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title: title,
+                        content: content,
+                        locale: this.activeLocale
+                    })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    const prefix = this.activeLocale === '{{ $baseLocale }}' ? '' : `translations[${this.activeLocale}].`;
+                    const titleEl = document.querySelector(`[name="${prefix}seo_title"]`);
+                    const descEl = document.querySelector(`[name="${prefix}seo_description"]`);
+                    const kwEl = document.querySelector(`[name="${prefix}focus_keyword"]`);
+
+                    if (titleEl) {
+                        titleEl.value = data.seo_title;
+                        titleEl.dispatchEvent(new Event('input')); // Length counter üçün
+                    }
+                    if (descEl) {
+                        descEl.value = data.seo_description;
+                        descEl.dispatchEvent(new Event('input')); // Length counter üçün
+                    }
+                    if (kwEl) {
+                        kwEl.value = data.focus_keyword;
+                    }
+                } else {
+                    alert(data.message || '{{ __('AI generation failed.') }}');
+                }
+            } catch (e) {
+                alert('{{ __('Network error.') }}');
+            } finally {
+                this.seoLoading = false;
+            }
         },
 
         async analyzeSeo() {
