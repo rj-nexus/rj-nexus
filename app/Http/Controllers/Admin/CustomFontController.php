@@ -15,7 +15,8 @@ class CustomFontController extends Controller
             ->orderByDesc('updated_at')
             ->get();
 
-        return view('admin.fonts.index', compact('fonts'));
+        // DÜZƏLİŞ BURADADIR: admin.fonts.index -> admin.custom-fonts.index
+        return view('admin.custom-fonts.index', compact('fonts'));
     }
 
     public function store(Request $request)
@@ -106,7 +107,10 @@ class CustomFontController extends Controller
 
     public function destroy(CustomFont $customFont)
     {
-        foreach ($customFont->fonts() as $file) {
+        // Modeldə fonts() metodu varsa array qaytarır, yoxdursa files istifadə edirik
+        $files = $customFont->fonts() ?? ($customFont->files ?? []);
+
+        foreach ($files as $file) {
             $path = $file['path'] ?? '';
             if ($path && Storage::disk('public_uploads')->exists($path)) {
                 Storage::disk('public_uploads')->delete($path);
