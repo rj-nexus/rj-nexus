@@ -27,8 +27,8 @@ return [
             'name' => 'gemini',
             'key_name' => 'gemini',
             'type' => 'gemini',
-            'url'  => 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent',
-            'model'=> 'gemini-3.8-flash',
+            'url'  => 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent',
+            'model'=> 'gemini-3.5-flash',
         ],
         [
             'name' => 'nvidia',
@@ -49,7 +49,7 @@ return [
             'key_name' => 'llm7',
             'type' => 'openai',
             'url'  => 'https://api.llm7.io/v1/chat/completions',
-            'model'=> 'mistral-large-3:675b',
+            'model'=> 'gpt-oss:20b',
         ],
         [
             'name' => 'cohere',
