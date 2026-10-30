@@ -3,7 +3,63 @@
 @section('title', __('Create Post'))
 
 @section('content')
-<div class="space-y-6" x-data="{ activeLocale: '{{ $baseLocale }}', editMode: '{{ old('edit_mode', $type === 'page' ? 'builder' : 'classic') }}', themeTemplate: '{{ old('theme_template') }}' }">
+<div class="space-y-6" x-data="{
+    activeLocale: '{{ $baseLocale }}',
+    editMode: '{{ old('edit_mode', $type === 'page' ? 'builder' : 'classic') }}',
+    themeTemplate: '{{ old('theme_template') }}',
+    seoLoading: false,
+
+    async generateSeo() {
+        const titleInput = document.querySelector(`input[name="${this.activeLocale === '{{ $baseLocale }}' ? 'title' : 'translations[' + this.activeLocale + '][title]'}"]`);
+        const contentInput = document.querySelector('textarea[name="content"]');
+
+        const title = titleInput ? titleInput.value : '';
+        const content = contentInput ? contentInput.value : '';
+
+        if (!title) {
+            alert('{{ __('Please enter a title first.') }}');
+            return;
+        }
+
+        this.seoLoading = true;
+
+        try {
+            const res = await fetch('{{ route('admin.posts.ai.generate-seo') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    title: title,
+                    content: content,
+                    locale: this.activeLocale
+                })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                const prefix = this.activeLocale === '{{ $baseLocale }}' ? '' : `translations[${this.activeLocale}]`;
+
+                const setVal = (name, val) => {
+                    const el = document.querySelector(`[name="${prefix ? prefix + '[' + name + ']' : name}"]`);
+                    if (el) el.value = val;
+                };
+
+                setVal('seo_title', data.seo_title);
+                setVal('seo_description', data.seo_description);
+                setVal('focus_keyword', data.focus_keyword);
+            } else {
+                alert(data.message || '{{ __('AI generation failed.') }}');
+            }
+        } catch (e) {
+            alert('{{ __('Network error.') }}');
+        } finally {
+            this.seoLoading = false;
+        }
+    }
+}">
 
     <form method="POST" action="{{ route('admin.posts.store') }}" class="space-y-6" x-data="{ publishing: false }" @submit="publishing = true">
         @csrf
@@ -182,6 +238,52 @@
                             @endforeach
                         </div>
 
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm border border-gray-100">
+                    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                        <div>
+                            <h3 class="text-base font-semibold text-gray-900">{{ __('SEO Settings') }}</h3>
+                            <p class="text-xs text-gray-500 mt-1">{{ __('Optimize for search engines.') }}</p>
+                        </div>
+                        <button type="button" @click="generateSeo()" :disabled="seoLoading" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-50 text-purple-700 text-xs font-bold border border-purple-200 hover:bg-purple-100 transition disabled:opacity-50">
+                            <svg x-show="!seoLoading" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+                            <svg x-show="seoLoading" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                            {{ __('Auto SEO') }}
+                        </button>
+                    </div>
+
+                    <div class="p-6 space-y-4">
+                        @foreach ($locales as $locale)
+                            <div x-show="activeLocale === '{{ $locale }}'" x-cloak class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('SEO Title') }}</label>
+                                    <input type="text"
+                                           name="{{ $locale === $baseLocale ? 'seo_title' : "translations[{$locale}][seo_title]" }}"
+                                           value="{{ old($locale === $baseLocale ? 'seo_title' : "translations.{$locale}.seo_title") }}"
+                                           placeholder="{{ __('Meta title...') }}"
+                                           class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('SEO Description') }}</label>
+                                    <textarea name="{{ $locale === $baseLocale ? 'seo_description' : "translations[{$locale}][seo_description]" }}"
+                                              rows="3"
+                                              placeholder="{{ __('Meta description...') }}"
+                                              class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">{{ old($locale === $baseLocale ? 'seo_description' : "translations.{$locale}.seo_description") }}</textarea>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('Focus Keyword') }}</label>
+                                    <input type="text"
+                                           name="{{ $locale === $baseLocale ? 'focus_keyword' : "translations[{$locale}][focus_keyword]" }}"
+                                           value="{{ old($locale === $baseLocale ? 'focus_keyword' : "translations.{$locale}.focus_keyword") }}"
+                                           placeholder="{{ __('Main keyword...') }}"
+                                           class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
 
