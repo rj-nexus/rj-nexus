@@ -50,14 +50,25 @@ class UpdatesController extends Controller
     public function check()
     {
         try {
-            $response = Http::withHeaders([
+            $token = env('GITHUB_TOKEN');
+
+            $headers = [
                 'Accept' => 'application/vnd.github+json',
                 'User-Agent' => 'RJ-CMS-Updater',
-            ])
+            ];
+
+            if ($token) {
+                $headers['Authorization'] = 'Bearer ' . $token;
+            }
+
+            $response = Http::withHeaders($headers)
                 ->timeout(15)
                 ->get("https://api.github.com/repos/{$this->repo}/releases", ['per_page' => 20]);
 
             if (!$response->successful()) {
+                if ($response->status() === 403) {
+                    return back()->with('error', __('GitHub API rate limit exceeded. Please add a GITHUB_TOKEN to your .env file or try again later.'));
+                }
                 return back()->with('error', __('Could not reach update server. HTTP :code', ['code' => $response->status()]));
             }
 

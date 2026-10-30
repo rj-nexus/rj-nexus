@@ -85,4 +85,4 @@ This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) f
 ## Credits
 
 - **Author:** [mr-ruhid](https://github.com/mr-ruhid)
-- Built for [RJ CMS](https://github.com/mr-ruhid/rj-cms-ai)
+- Built for [RJ CMS](https://github.com/rj-nexus/rj-nexus)

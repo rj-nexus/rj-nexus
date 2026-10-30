@@ -4,7 +4,7 @@
 
 # 🎨 RJ Default
 
-**The official default theme for [RJ CMS](https://github.com/mr-ruhid/rj-cms-ai)**
+**The official default theme for [RJ CMS](https://github.com/rj-nexus/rj-nexus)**
 
 Clean, minimal, and builder-first. Designed to work seamlessly with **RJBuilder** — the drag-and-drop page builder included with RJ CMS.
 
@@ -160,6 +160,6 @@ MIT — see [LICENSE](LICENSE) for details.
 
 ## 🙏 Credits
 
-Built for [RJ CMS](https://github.com/mr-ruhid/rj-cms-ai)
+Built for [RJ CMS](https://github.com/rj-nexus/rj-nexus)
 
 Font: [Inter](https://fonts.google.com/specimen/Inter) (via Google Fonts)
