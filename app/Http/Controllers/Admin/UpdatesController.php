@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Option;
+use App\Services\GitHubService; // BU SƏTİ ƏLAVƏ ETDİK
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Artisan;
@@ -12,14 +13,10 @@ class UpdatesController extends Controller
 {
     protected string $repo;
     protected string $currentVersion;
-    protected string $proxyUrl;
 
     public function __construct()
     {
         $this->repo = rj_get_option('update_repo', 'rj-nexus/rj-nexus');
-
-        // Cloudflare Proxy ünvanı (Sənin worker linkin)
-        $this->proxyUrl = env('RJ_VAULT_URL', 'https://twilight-art-0b0e.ruhidjavadoff.workers.dev') . '/updates';
 
         $configVersion = ltrim((string) config('rj.version', '1.5.0'), 'v');
         $dbVersion = ltrim((string) rj_get_option('rj_version', '1.5.0'), 'v');
@@ -47,44 +44,44 @@ class UpdatesController extends Controller
         return view('admin.updates.index', compact('options', 'data'));
     }
 
-public function check(GitHubService $github)
-{
-    try {
-        $repoParts = explode('/', $this->repo);
-        if (count($repoParts) !== 2) {
-            return back()->with('error', __('Invalid repository format.'));
+    public function check(GitHubService $github)
+    {
+        try {
+            $repoParts = explode('/', $this->repo);
+            if (count($repoParts) !== 2) {
+                return back()->with('error', __('Invalid repository format.'));
+            }
+
+            $releases = $github->getReleases($repoParts[0], $repoParts[1]);
+            $release = $this->pickLatestRelease($releases);
+
+            if (!$release) {
+                return back()->with('error', __('No releases found.'));
+            }
+
+            $latest = ltrim($release['tag_name'], 'v');
+            $hasUpdate = version_compare($latest, $this->currentVersion, '>');
+
+            Option::set('last_checked', now()->toDateTimeString(), 'updates');
+            Option::set('last_release', json_encode([
+                'version' => $latest,
+                'name' => $release['name'] ?? $release['tag_name'],
+                'body' => $release['body'] ?? '',
+                'url' => $release['html_url'] ?? '',
+                'published_at' => $release['published_at'] ?? null,
+                'prerelease' => (bool) ($release['prerelease'] ?? false),
+                'has_update' => $hasUpdate,
+            ]), 'updates');
+
+            if ($hasUpdate) {
+                return back()->with('success', __('New version available: :version', ['version' => $latest]));
+            }
+
+            return back()->with('success', __('You are running the latest version.'));
+        } catch (\Throwable $e) {
+            return back()->with('error', __('Update check failed: :message', ['message' => $e->getMessage()]));
         }
-
-        $releases = $github->getReleases($repoParts[0], $repoParts[1]);
-        $release = $this->pickLatestRelease($releases);
-
-        if (!$release) {
-            return back()->with('error', __('No releases found.'));
-        }
-
-        $latest = ltrim($release['tag_name'], 'v');
-        $hasUpdate = version_compare($latest, $this->currentVersion, '>');
-
-        Option::set('last_checked', now()->toDateTimeString(), 'updates');
-        Option::set('last_release', json_encode([
-            'version' => $latest,
-            'name' => $release['name'] ?? $release['tag_name'],
-            'body' => $release['body'] ?? '',
-            'url' => $release['html_url'] ?? '',
-            'published_at' => $release['published_at'] ?? null,
-            'prerelease' => (bool) ($release['prerelease'] ?? false),
-            'has_update' => $hasUpdate,
-        ]), 'updates');
-
-        if ($hasUpdate) {
-            return back()->with('success', __('New version available: :version', ['version' => $latest]));
-        }
-
-        return back()->with('success', __('You are running the latest version.'));
-    } catch (\Throwable $e) {
-        return back()->with('error', __('Update check failed: :message', ['message' => $e->getMessage()]));
     }
-}
 
     public function update(Request $request)
     {
