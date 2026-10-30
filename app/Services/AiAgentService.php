@@ -2,234 +2,247 @@
 
 namespace App\Services;
 
-use App\Models\Post;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Cache;
+use App\Models\Post;
 
 class AiAgentService
 {
-    protected const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
+    protected array $providers = [];
 
-    protected const COOLDOWN_KEY = 'ai_agent_cooldown_until';
+    public function __construct()
+    {
+        $this->loadProvidersFromVault();
+    }
 
-    protected array $providers = [
-        ['name' => 'pollinations-chat', 'type' => 'chat', 'url' => 'https://text.pollinations.ai/openai', 'model' => 'openai'],
-        ['name' => 'pollinations-get', 'type' => 'get', 'url' => 'https://text.pollinations.ai/', 'model' => 'openai'],
-    ];
+    protected function loadProvidersFromVault(): void
+    {
+        // Cloudflare Worker ünvanı
+        $vaultUrl = env('RJ_VAULT_URL', 'https://twilight-art-0b0e.ruhidjavadoff.workers.dev');
+
+        // Açarları 1 saat (3600 saniyə) keşdə saxlayırıq ki, hər sorğuda Cloudflare-i yormayaq
+        $keys = Cache::remember('rj_ai_keys_pool', 3600, function () use ($vaultUrl) {
+            try {
+                $response = Http::timeout(10)->get($vaultUrl);
+                if ($response->successful()) {
+                    return $response->json() ?: [];
+                }
+                Log::error('AI Vault Error: HTTP ' . $response->status());
+            } catch (\Throwable $e) {
+                Log::error('AI Vault Exception: ' . $e->getMessage());
+            }
+            return [];
+        });
+
+        if (empty($keys)) {
+            return;
+        }
+
+        // Açarlar varsa, hovuzu (Pool) qururuq
+        $this->providers = [
+            [
+                'name' => 'groq',
+                'type' => 'openai',
+                'url'  => 'https://api.groq.com/openai/v1/chat/completions',
+                'key'  => $keys['groq'] ?? '',
+                'model'=> 'llama-3.3-70b-versatile',
+            ],
+            [
+                'name' => 'ovh',
+                'type' => 'openai',
+                'url'  => 'https://oai.endpoints.kepler.ai.cloud.ovh.net/v1/chat/completions',
+                'key'  => $keys['ovh'] ?? '',
+                'model'=> 'Meta-Llama-3_3-70B-Instruct',
+            ],
+            [
+                'name' => 'gemini',
+                'type' => 'gemini',
+                'url'  => 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
+                'key'  => $keys['gemini'] ?? '',
+                'model'=> 'gemini-1.5-flash',
+            ],
+            [
+                'name' => 'mistral',
+                'type' => 'openai',
+                'url'  => 'https://api.mistral.ai/v1/chat/completions',
+                'key'  => $keys['mistral'] ?? '',
+                'model'=> 'open-mistral-7b',
+            ],
+            [
+                'name' => 'nvidia',
+                'type' => 'openai',
+                'url'  => 'https://integrate.api.nvidia.com/v1/chat/completions',
+                'key'  => $keys['nvidia'] ?? '',
+                'model'=> 'meta/llama3-70b-instruct',
+            ],
+            [
+                'name' => 'huggingface',
+                'type' => 'openai',
+                'url'  => 'https://api-inference.huggingface.co/v1/chat/completions',
+                'key'  => $keys['huggingface'] ?? '',
+                'model'=> 'mistralai/Mistral-7B-Instruct-v0.2',
+            ],
+            [
+                'name' => 'llm7',
+                'type' => 'openai',
+                'url'  => 'https://api.llm7.io/v1/chat/completions',
+                'key'  => $keys['llm7'] ?? '',
+                'model'=> 'gpt-4o',
+            ],
+            [
+                'name' => 'pollinations',
+                'type' => 'openai',
+                'url'  => 'https://text.pollinations.ai/openai',
+                'key'  => $keys['pollinations'] ?? '',
+                'model'=> 'openai',
+            ],
+            [
+                'name' => 'cohere',
+                'type' => 'cohere',
+                'url'  => 'https://api.cohere.ai/v1/chat',
+                'key'  => $keys['cohere'] ?? '',
+                'model'=> 'command-r',
+            ],
+        ];
+
+        // Boş açarları siyahıdan çıxarırıq
+        $this->providers = array_values(array_filter($this->providers, fn($p) => !empty($p['key'])));
+    }
 
     public function ask(string $question, string $extraContext = ''): array
     {
-        @set_time_limit(120);
-
-        $docContext = '';
-        $systemContext = '';
-
-        try {
-            $docContext = $this->searchDocs($question);
-            $systemContext = $this->getSystemContext($question);
-        } catch (\Throwable $e) {
-            Log::warning('AI context error: ' . $e->getMessage());
-        }
-
+        $docContext = $this->searchDocs($question);
+        $systemContext = $this->getSystemContext($question);
         $fullContext = trim($extraContext . "\n" . $docContext . "\n" . $systemContext);
 
-        $cacheKey = 'ai_agent:' . md5($question . '|' . $fullContext);
+        $systemPrompt = "You are the intelligent support AI for RJ Nexus (a self-hosted CMS).
+        INSTRUCTIONS:
+        1. Use the provided CONTEXT to answer.
+        2. If the context doesn't have the answer, answer from your general knowledge.
+        3. Respond in the SAME LANGUAGE as the user's question.";
 
-        $cached = Cache::get($cacheKey);
-        if (is_array($cached)) {
-            return $cached;
-        }
+        $prompt = $systemPrompt . "\n\n--- CONTEXT ---\n" . mb_substr($fullContext, 0, 3500) . "\n\n--- USER ---\n" . $question;
 
-        $until = (int) Cache::get(self::COOLDOWN_KEY, 0);
-        if ($until > time()) {
-            return $this->fallbackResult($docContext, $until - time(), []);
-        }
-
-        $system = "You are the official support AI for RJ Nexus CMS. Use the provided CONTEXT to answer the user's question. If the context does not contain the answer, answer from your general knowledge. Respond in the SAME LANGUAGE as the user's question.\n\n--- CONTEXT ---\n" . mb_substr($fullContext, 0, 3500);
-
-        $errors = [];
-        $wait = 0;
+        $debugErrors = [];
 
         foreach ($this->providers as $provider) {
             try {
-                $content = $provider['type'] === 'get'
-                    ? $this->callGet($provider, $system, $question)
-                    : $this->callChat($provider, $system, $question);
+                $response = $this->callProvider($provider, $prompt);
 
-                if ($content !== null && $content !== '') {
-                    $result = ['success' => true, 'answer' => $content, 'provider' => $provider['name']];
-                    Cache::put($cacheKey, $result, now()->addHour());
-                    return $result;
+                if ($response) {
+                    return ['success' => true, 'answer' => trim($response), 'provider' => $provider['name']];
                 }
-
-                $errors[] = $provider['name'] . ': empty response';
-                Log::warning('AI provider empty: ' . $provider['name']);
             } catch (\Throwable $e) {
-                $errors[] = $provider['name'] . ': ' . mb_substr($e->getMessage(), 0, 200);
-                Log::warning('AI provider failed: ' . $provider['name'] . ' - ' . $e->getMessage());
-
-                if (in_array($e->getCode(), [402, 429], true)) {
-                    $wait = $this->parseWait($e->getMessage());
-                    Cache::put(self::COOLDOWN_KEY, time() + $wait, $wait);
-                    break;
-                }
+                $debugErrors[] = "{$provider['name']}: " . $e->getMessage();
+                Log::warning("AI Provider Error ({$provider['name']}): " . $e->getMessage());
             }
         }
 
-        return $this->fallbackResult($docContext, $wait, $errors);
-    }
+        if (!empty($docContext)) {
+            return [
+                'success' => true,
+                'answer' => __('The AI service is currently at its limit. Here is the most relevant information I found in the documentation:') . "\n\n" . strip_tags($docContext),
+                'provider' => 'local_rag'
+            ];
+        }
 
-    protected function fallbackResult(string $docContext, int $wait, array $errors): array
-    {
-        $result = [
-            'success' => true,
-            'answer' => $this->localFallback($docContext, $wait),
-            'provider' => 'local',
-            'retry_after' => $wait,
+        return [
+            'success' => false,
+            'answer' => __('All AI services are currently unavailable. Please try again later.'),
+            'debug' => $debugErrors
         ];
-
-        if (config('app.debug')) {
-            $result['debug'] = $errors;
-        }
-
-        return $result;
     }
 
-    protected function parseWait(string $message): int
+    protected function callProvider(array $provider, string $prompt): ?string
     {
-        if (preg_match('/(\d+)\s*seconds?/i', $message, $m)) {
-            return max(5, min(120, (int) $m[1] + 2));
-        }
-
-        return 30;
-    }
-
-    protected function callChat(array $provider, string $system, string $question): ?string
-    {
-        $response = Http::withHeaders([
-            'User-Agent' => self::USER_AGENT,
+        $headers = [
+            'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
             'Accept' => 'application/json',
             'Content-Type' => 'application/json',
-        ])
-            ->connectTimeout(5)
-            ->timeout(40)
-            ->post($provider['url'], [
-                'model' => $provider['model'],
-                'messages' => [
-                    ['role' => 'system', 'content' => $system],
-                    ['role' => 'user', 'content' => $question],
-                ],
+        ];
+
+        if ($provider['type'] === 'gemini') {
+            $url = $provider['url'] . '?key=' . $provider['key'];
+            $response = Http::withHeaders($headers)->timeout(20)->post($url, [
+                'contents' => [['parts' => [['text' => $prompt]]]]
             ]);
 
-        if (!$response->successful()) {
-            throw new \RuntimeException('HTTP ' . $response->status() . ' ' . mb_substr($response->body(), 0, 300), $response->status());
+            if ($response->successful()) {
+                return $response->json('candidates.0.content.parts.0.text');
+            }
+            throw new \Exception("HTTP " . $response->status());
         }
 
-        $content = $response->json('choices.0.message.content');
-
-        return is_string($content) ? trim($content) : null;
-    }
-
-    protected function callGet(array $provider, string $system, string $question): ?string
-    {
-        $response = Http::withHeaders(['User-Agent' => self::USER_AGENT])
-            ->connectTimeout(5)
-            ->timeout(40)
-            ->get($provider['url'] . rawurlencode(mb_substr($question, 0, 500)), [
-                'system' => mb_substr($system, 0, 1500),
+        if ($provider['type'] === 'cohere') {
+            $headers['Authorization'] = 'Bearer ' . $provider['key'];
+            $response = Http::withHeaders($headers)->timeout(20)->post($provider['url'], [
                 'model' => $provider['model'],
+                'message' => $prompt,
             ]);
 
-        if (!$response->successful()) {
-            throw new \RuntimeException('HTTP ' . $response->status() . ' ' . mb_substr($response->body(), 0, 300), $response->status());
+            if ($response->successful()) {
+                return $response->json('text');
+            }
+            throw new \Exception("HTTP " . $response->status());
         }
 
-        $body = trim($response->body());
+        $headers['Authorization'] = 'Bearer ' . $provider['key'];
 
-        if ($body !== '' && str_starts_with($body, '{') && str_contains($body, '"error"')) {
-            throw new \RuntimeException('API error: ' . mb_substr($body, 0, 300));
+        $response = Http::withHeaders($headers)->timeout(20)->post($provider['url'], [
+            'model' => $provider['model'],
+            'messages' => [['role' => 'user', 'content' => $prompt]],
+        ]);
+
+        if ($response->successful()) {
+            return $response->json('choices.0.message.content');
         }
 
-        return $body !== '' ? $body : null;
-    }
-
-    protected function localFallback(string $docContext, int $wait = 0): string
-    {
-        $docContext = trim($docContext);
-
-        $head = $wait > 0
-            ? __('The free AI is busy right now. Please try again in :seconds seconds.', ['seconds' => $wait])
-            : __('AI service is currently unavailable. Please try again in a moment.');
-
-        if ($docContext === '') {
-            return $head;
-        }
-
-        return $head . "\n\n" . __('The closest documentation match:') . "\n\n" . mb_substr($docContext, 0, 1200);
+        throw new \Exception("HTTP " . $response->status());
     }
 
     protected function searchDocs(string $query): string
     {
         $docsPath = resource_path('docs');
-        if (!File::exists($docsPath)) {
-            return '';
-        }
+        if (!File::exists($docsPath)) return '';
 
-        $keywords = array_values(array_unique(array_filter(
-            preg_split('/[^\p{L}\p{N}]+/u', mb_strtolower($query)),
-            fn($w) => mb_strlen($w) > 2
-        )));
+        $files = File::files($docsPath);
+        $results = [];
+        $keywords = array_filter(explode(' ', strtolower($query)), fn($w) => strlen($w) > 3);
 
-        if (empty($keywords)) {
-            return '';
-        }
-
-        $scores = [];
-        $contents = [];
-
-        foreach (File::files($docsPath) as $file) {
-            if ($file->getExtension() !== 'md') {
-                continue;
-            }
-
+        foreach ($files as $file) {
+            if ($file->getExtension() !== 'md') continue;
             $content = File::get($file->getPathname());
-            $lower = mb_strtolower($content);
             $score = 0;
-
             foreach ($keywords as $kw) {
-                $score += mb_substr_count($lower, $kw);
+                if (stripos($content, $kw) !== false) $score++;
             }
-
             if ($score > 0) {
-                $scores[$file->getFilename()] = $score;
-                $contents[$file->getFilename()] = $content;
+                $results[$file->getFilename()] = mb_substr($content, 0, 2000);
             }
         }
 
-        arsort($scores);
-
+        arsort($results);
+        $topResults = array_slice($results, 0, 2, true);
         $context = '';
-        foreach (array_slice($scores, 0, 2, true) as $name => $score) {
-            $context .= "\n[Source: {$name}]\n" . mb_substr($contents[$name], 0, 2500) . "\n";
+        foreach ($topResults as $name => $text) {
+            $context .= "\n[Source: {$name}]\n{$text}\n";
         }
-
         return $context;
     }
 
     protected function getSystemContext(string $query): string
     {
-        $q = mb_strtolower($query);
+        $q = strtolower($query);
         $context = "--- SYSTEM REAL-TIME DATA ---\n";
-        $context .= 'Current Date: ' . now()->format('Y-m-d H:i:s') . "\n";
+        $context .= "Current Date: " . now()->format('Y-m-d H:i:s') . "\n";
 
-        foreach (['post', 'blog', 'yazı', 'paylaşım'] as $needle) {
-            if (str_contains($q, $needle)) {
-                $context .= "Today's Post Count: " . Post::where('type', 'post')->whereDate('created_at', today())->count() . "\n";
-                $context .= 'Total Posts: ' . Post::where('type', 'post')->count() . "\n";
-                break;
-            }
+        if (str_contains($q, 'post') || str_contains($q, 'blog') || str_contains($q, 'yazı') || str_contains($q, 'paylaşım')) {
+            $todayPosts = Post::where('type', 'post')->whereDate('created_at', today())->count();
+            $totalPosts = Post::where('type', 'post')->count();
+            $context .= "Today's Post Count: {$todayPosts}\n";
+            $context .= "Total Posts: {$totalPosts}\n";
         }
 
         return $context;
