@@ -7,7 +7,7 @@ return [
             'key_name' => 'groq',
             'type' => 'openai',
             'url'  => 'https://api.groq.com/openai/v1/chat/completions',
-            'model'=> 'llama-3.1-8b-instant', // Dəyişdirildi (işlək model)
+            'model'=> 'openai/gpt-oss-20b',
         ],
         [
             'name' => 'pollinations',
@@ -21,43 +21,42 @@ return [
             'key_name' => 'mistral',
             'type' => 'openai',
             'url'  => 'https://api.mistral.ai/v1/chat/completions',
-            'model'=> 'ministral-8b-latest', // İşləyən model
+            'model'=> 'ministral-8b-latest',
         ],
         [
             'name' => 'gemini',
             'key_name' => 'gemini',
             'type' => 'gemini',
-            'url'  => 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent', // Dəyişdirildi
-            'model'=> 'gemini-2.0-flash',
+            'url'  => 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent',
+            'model'=> 'gemini-3.8-flash',
         ],
         [
             'name' => 'nvidia',
             'key_name' => 'nvidia',
             'type' => 'openai',
             'url'  => 'https://integrate.api.nvidia.com/v1/chat/completions',
-            'model'=> 'meta/llama-3.3-70b-instruct', // Dəyişdirildi
+            'model'=> 'mistralai/mistral-large-4-1t-a52b',
         ],
         [
             'name' => 'huggingface',
             'key_name' => 'huggingface',
             'type' => 'openai',
-            'url'  => 'https://router.huggingface.co/v1/chat/completions', // Yeni router endpoint
-            'model'=> 'meta-llama/Meta-Llama-3-8B-Instruct',
-            // Qeyd: HF tokeninə "Inference Providers" icazəsi əlavə edilməlidir.
+            'url'  => 'https://router.huggingface.co/v1/chat/completions',
+            'model'=> 'meta-llama/Llama-3.1-8B-Instruct',
         ],
         [
             'name' => 'llm7',
             'key_name' => 'llm7',
             'type' => 'openai',
             'url'  => 'https://api.llm7.io/v1/chat/completions',
-            'model'=> 'DeepSeek-V4-Flash-0731', // Dəyişdirildi (pulsuz model)
+            'model'=> 'mistral-large-3:675b',
         ],
         [
             'name' => 'cohere',
             'key_name' => 'cohere',
             'type' => 'cohere',
             'url'  => 'https://api.cohere.ai/v1/chat',
-            'model'=> 'command-r-08-2024', // Dəyişdirildi (işlək model)
+            'model'=> 'command-r-08-2024',
         ],
         [
             'name' => 'ovh',
@@ -65,7 +64,6 @@ return [
             'type' => 'openai',
             'url'  => 'https://oai.endpoints.kepler.ai.cloud.ovh.net/v1/chat/completions',
             'model'=> 'Meta-Llama-3_3-70B-Instruct',
-            // Qeyd: OVH açarı 403 verdi, yeni token lazımdır.
         ],
     ],
 ];
