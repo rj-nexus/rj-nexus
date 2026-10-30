@@ -4,9 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Option;
-use App\Services\GitHubService; // BU SƏTİ ƏLAVƏ ETDİK
+use App\Services\GitHubService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Artisan;
 
 class UpdatesController extends Controller
@@ -73,11 +72,9 @@ class UpdatesController extends Controller
                 'has_update' => $hasUpdate,
             ]), 'updates');
 
-            if ($hasUpdate) {
-                return back()->with('success', __('New version available: :version', ['version' => $latest]));
-            }
-
-            return back()->with('success', __('You are running the latest version.'));
+            // The result is shown on the page itself: green "latest version"
+            // status or pink "Update available" status plus the new version card.
+            return back();
         } catch (\Throwable $e) {
             return back()->with('error', __('Update check failed: :message', ['message' => $e->getMessage()]));
         }
@@ -145,6 +142,20 @@ class UpdatesController extends Controller
 
         $decoded = json_decode($raw, true);
 
-        return is_array($decoded) ? $decoded : null;
+        if (!is_array($decoded)) {
+            return null;
+        }
+
+        // Recompute against the installed version, so the status is correct
+        // right after an upgrade without needing a new check.
+        if (!empty($decoded['version'])) {
+            $decoded['has_update'] = version_compare(
+                ltrim((string) $decoded['version'], 'v'),
+                $this->currentVersion,
+                '>'
+            );
+        }
+
+        return $decoded;
     }
 }
