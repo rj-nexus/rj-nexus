@@ -21,14 +21,12 @@ class AiAgentService
     {
         $vaultUrl = env('RJ_VAULT_URL', 'https://twilight-art-0b0e.ruhidjavadoff.workers.dev');
 
-        // 1. Pulsuz açarları Cloudflare-dən çəkirik
         $keys = Cache::remember('rj_ai_keys_pool', 3600, function () use ($vaultUrl) {
             try {
                 $response = Http::timeout(15)->get($vaultUrl);
                 if ($response->successful()) {
                     return $response->json() ?: [];
                 }
-                Log::error('AI Vault Error: HTTP ' . $response->status());
             } catch (\Throwable $e) {
                 Log::error('AI Vault Exception: ' . $e->getMessage());
             }
@@ -39,7 +37,6 @@ class AiAgentService
 
         foreach ($configuredProviders as $p) {
             $key = $keys[$p['key_name']] ?? null;
-
             if ($key) {
                 $this->providers[] = [
                     'name' => $p['name'],
@@ -51,27 +48,20 @@ class AiAgentService
             }
         }
 
-        // 2. İstifadəçinin öz OpenRouter açarını yoxlayırıq (əgər qurubsa)
         $userOpenRouterKey = rj_get_option('openrouter_api_key');
-
         if (!empty($userOpenRouterKey)) {
-            // Əgər açarlar şifrələnmişsə (tövsiyə olunur), deşifrə edirik
             if (str_starts_with($userOpenRouterKey, 'eyJ')) {
                 try {
                     $userOpenRouterKey = \Illuminate\Support\Facades\Crypt::decryptString($userOpenRouterKey);
-                } catch (\Throwable $e) {
-                    // Şifrəni aça bilməsək, boş qəbul edirik
-                    $userOpenRouterKey = null;
-                }
+                } catch (\Throwable $e) { $userOpenRouterKey = null; }
             }
 
             if (!empty($userOpenRouterKey)) {
-                // Siyahının ən sonuna əlavə edirik ki, son çarə olsun
                 $this->providers[] = [
                     'name' => 'user_openrouter',
                     'type' => 'openai',
                     'url'  => 'https://openrouter.ai/api/v1/chat/completions',
-                    'model'=> 'openai/gpt-4o-mini', // İstifadəçinin seçdiyi model
+                    'model'=> 'openai/gpt-4o-mini',
                     'key'  => $userOpenRouterKey,
                 ];
             }
@@ -80,17 +70,44 @@ class AiAgentService
 
     public function ask(string $question, string $extraContext = ''): array
     {
+        // 1. KESHLƏMƏ (Semantic Caching): Eyni sual verilibsə, API-yə getmədən cavab qaytarırıq
+        $normalizedQuery = strtolower(trim(preg_replace('/[^\w\s]/u', '', $question)));
+        $cacheKey = 'rj_ai_q_' . md5($normalizedQuery);
+
+        if (Cache::has($cacheKey)) {
+            return Cache::get($cacheKey);
+        }
+
+        // 2. SİSTEM MƏLUMATLARI (System Context): Əgər sadə statistika soruşulursa, AI-a getmədən cavab veririk
+        $q = strtolower($question);
+        if (str_contains($q, 'neçə post') || str_contains($q, 'neçə yazı') || str_contains($q, 'how many posts')) {
+            $count = Post::where('type', 'post')->count();
+            $result = ['success' => true, 'answer' => __('Hazırda saytınızda ümumilikdə :count post var.', ['count' => $count]), 'provider' => 'system_direct'];
+            Cache::put($cacheKey, $result, 86400); // 24 saat yadda saxla
+            return $result;
+        }
+
+        // 3. LOKAL RAG (Local Search): Əgər cavab sənədlərdə varsa və çox uyğundursa, API-yə getmirik
         $docContext = $this->searchDocs($question);
+
+        // Əgər sənədlərdən kifayət qədər uzun (məzmunlu) cavab tapılıbsa, birbaşa onu qaytarırıq
+        if (!empty($docContext) && strlen($docContext) > 300) {
+            $result = [
+                'success' => true,
+                'answer' => __("Sənədlərdə bu suala uyğun məlumat tapdım:") . "\n\n" . strip_tags($docContext),
+                'provider' => 'local_rag_direct'
+            ];
+            Cache::put($cacheKey, $result, 43200); // 12 saat yadda saxla
+            return $result;
+        }
+
+        // 4. AI API-LƏRİ (Fallback): Əgər yuxarıdakılar işləməsə, API-lərə müraciət edirik
         $systemContext = $this->getSystemContext($question);
         $fullContext = trim($extraContext . "\n" . $docContext . "\n" . $systemContext);
 
-        $systemPrompt = "You are the intelligent support AI for RJ Nexus (a self-hosted CMS).
-        INSTRUCTIONS:
-        1. Use the provided CONTEXT to answer.
-        2. If the context doesn't have the answer, answer from your general knowledge.
-        3. Respond in the SAME LANGUAGE as the user's question.";
-
-        $prompt = $systemPrompt . "\n\n--- CONTEXT ---\n" . mb_substr($fullContext, 0, 3500) . "\n\n--- USER ---\n" . $question;
+        // Prompt-u qısaltdıq (Token qənaəti)
+        $systemPrompt = "You are the AI support for RJ Nexus CMS. Use the context to answer. If context is missing, use general knowledge. Reply in user's language.";
+        $prompt = $systemPrompt . "\n\nContext:\n" . mb_substr($fullContext, 0, 1500) . "\n\nUser: " . $question;
 
         $debugErrors = [];
 
@@ -99,7 +116,9 @@ class AiAgentService
                 $response = $this->callProvider($provider, $prompt);
 
                 if ($response) {
-                    return ['success' => true, 'answer' => trim($response), 'provider' => $provider['name']];
+                    $result = ['success' => true, 'answer' => trim($response), 'provider' => $provider['name']];
+                    Cache::put($cacheKey, $result, 86400); // Uğurlu cavabı 24 saat keşdə saxla
+                    return $result;
                 }
             } catch (\Throwable $e) {
                 $debugErrors[] = "{$provider['name']}: " . $e->getMessage();
@@ -107,18 +126,18 @@ class AiAgentService
             }
         }
 
-        // 3. Heç biri işləməzsə, Local RAG (sənədlər) işə düşür
+        // 5. Son Çarə: Local RAG (Əgər API-lər tamamilə çökübsə)
         if (!empty($docContext)) {
             return [
                 'success' => true,
-                'answer' => __('The AI service is currently at its limit. Here is the most relevant information I found in the documentation:') . "\n\n" . strip_tags($docContext),
-                'provider' => 'local_rag'
+                'answer' => __('AI xidmətləri hazırda əlçatmazdır. Sənədlərdə tapdığım məlumat:') . "\n\n" . strip_tags($docContext),
+                'provider' => 'local_rag_fallback'
             ];
         }
 
         return [
             'success' => false,
-            'answer' => __('All AI services are currently unavailable. Please try again later.'),
+            'answer' => __('Bütün AI xidmətləri hazırda əlçatmazdır. Zəhmət olmasa sonra yenidən cəhd edin.'),
             'debug' => $debugErrors
         ];
     }
@@ -134,7 +153,8 @@ class AiAgentService
         if ($provider['type'] === 'gemini') {
             $url = $provider['url'] . '?key=' . $provider['key'];
             $response = Http::withHeaders($headers)->timeout(45)->post($url, [
-                'contents' => [['parts' => [['text' => $prompt]]]]
+                'contents' => [['parts' => [['text' => $prompt]]]],
+                'generationConfig' => ['maxOutputTokens' => 400] // Cavab uzunluğunu məhdudlaşdırırıq
             ]);
 
             if ($response->successful()) {
@@ -148,6 +168,7 @@ class AiAgentService
             $response = Http::withHeaders($headers)->timeout(45)->post($provider['url'], [
                 'model' => $provider['model'],
                 'message' => $prompt,
+                'max_tokens' => 400
             ]);
 
             if ($response->successful()) {
@@ -161,6 +182,7 @@ class AiAgentService
         $response = Http::withHeaders($headers)->timeout(45)->post($provider['url'], [
             'model' => $provider['model'],
             'messages' => [['role' => 'user', 'content' => $prompt]],
+            'max_tokens' => 400 // OpenAI uyğun API-lər üçün
         ]);
 
         if ($response->successful()) {
@@ -187,7 +209,7 @@ class AiAgentService
                 if (stripos($content, $kw) !== false) $score++;
             }
             if ($score > 0) {
-                $results[$file->getFilename()] = mb_substr($content, 0, 2000);
+                $results[$file->getFilename()] = mb_substr($content, 0, 1500);
             }
         }
 
@@ -203,14 +225,13 @@ class AiAgentService
     protected function getSystemContext(string $query): string
     {
         $q = strtolower($query);
-        $context = "--- SYSTEM REAL-TIME DATA ---\n";
+        $context = "--- SYSTEM DATA ---\n";
         $context .= "Current Date: " . now()->format('Y-m-d H:i:s') . "\n";
 
-        if (str_contains($q, 'post') || str_contains($q, 'blog') || str_contains($q, 'yazı') || str_contains($q, 'paylaşım')) {
+        if (str_contains($q, 'post') || str_contains($q, 'blog') || str_contains($q, 'yazı')) {
             $todayPosts = Post::where('type', 'post')->whereDate('created_at', today())->count();
             $totalPosts = Post::where('type', 'post')->count();
-            $context .= "Today's Post Count: {$todayPosts}\n";
-            $context .= "Total Posts: {$totalPosts}\n";
+            $context .= "Today's Posts: {$todayPosts}, Total Posts: {$totalPosts}\n";
         }
 
         return $context;
