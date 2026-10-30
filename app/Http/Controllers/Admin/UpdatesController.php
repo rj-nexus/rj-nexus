@@ -47,51 +47,44 @@ class UpdatesController extends Controller
         return view('admin.updates.index', compact('options', 'data'));
     }
 
-    public function check()
-    {
-        try {
-            // Birbaşa GitHub-a yox, Cloudflare Proxy-yə sorğu göndəririk
-            $response = Http::withHeaders([
-                'Accept' => 'application/json',
-                'User-Agent' => 'RJ-CMS-Updater',
-            ])
-                ->timeout(20)
-                ->get($this->proxyUrl);
-
-            if (!$response->successful()) {
-                return back()->with('error', __('Could not reach update server. HTTP :code', ['code' => $response->status()]));
-            }
-
-            $releases = $response->json();
-            $release = $this->pickLatestRelease($releases ?? []);
-
-            if (!$release) {
-                return back()->with('error', __('No releases found.'));
-            }
-
-            $latest = ltrim($release['tag_name'], 'v');
-            $hasUpdate = version_compare($latest, $this->currentVersion, '>');
-
-            Option::set('last_checked', now()->toDateTimeString(), 'updates');
-            Option::set('last_release', json_encode([
-                'version' => $latest,
-                'name' => $release['name'] ?? $release['tag_name'],
-                'body' => $release['body'] ?? '',
-                'url' => $release['html_url'] ?? '',
-                'published_at' => $release['published_at'] ?? null,
-                'prerelease' => (bool) ($release['prerelease'] ?? false),
-                'has_update' => $hasUpdate,
-            ]), 'updates');
-
-            if ($hasUpdate) {
-                return back()->with('success', __('New version available: :version', ['version' => $latest]));
-            }
-
-            return back()->with('success', __('You are running the latest version.'));
-        } catch (\Throwable $e) {
-            return back()->with('error', __('Update check failed: :message', ['message' => $e->getMessage()]));
+public function check(GitHubService $github)
+{
+    try {
+        $repoParts = explode('/', $this->repo);
+        if (count($repoParts) !== 2) {
+            return back()->with('error', __('Invalid repository format.'));
         }
+
+        $releases = $github->getReleases($repoParts[0], $repoParts[1]);
+        $release = $this->pickLatestRelease($releases);
+
+        if (!$release) {
+            return back()->with('error', __('No releases found.'));
+        }
+
+        $latest = ltrim($release['tag_name'], 'v');
+        $hasUpdate = version_compare($latest, $this->currentVersion, '>');
+
+        Option::set('last_checked', now()->toDateTimeString(), 'updates');
+        Option::set('last_release', json_encode([
+            'version' => $latest,
+            'name' => $release['name'] ?? $release['tag_name'],
+            'body' => $release['body'] ?? '',
+            'url' => $release['html_url'] ?? '',
+            'published_at' => $release['published_at'] ?? null,
+            'prerelease' => (bool) ($release['prerelease'] ?? false),
+            'has_update' => $hasUpdate,
+        ]), 'updates');
+
+        if ($hasUpdate) {
+            return back()->with('success', __('New version available: :version', ['version' => $latest]));
+        }
+
+        return back()->with('success', __('You are running the latest version.'));
+    } catch (\Throwable $e) {
+        return back()->with('error', __('Update check failed: :message', ['message' => $e->getMessage()]));
     }
+}
 
     public function update(Request $request)
     {
