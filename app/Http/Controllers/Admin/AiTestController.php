@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Cache;
 
 class AiTestController extends Controller
 {
@@ -26,22 +25,12 @@ class AiTestController extends Controller
             $vaultStatus = $e->getMessage();
         }
 
-        $providers = [
-            ['name' => 'groq', 'key' => 'groq', 'url' => 'https://api.groq.com/openai/v1/chat/completions', 'model' => 'llama-3.3-70b-versatile', 'type' => 'openai'],
-            ['name' => 'ovh', 'key' => 'ovh', 'url' => 'https://oai.endpoints.kepler.ai.cloud.ovh.net/v1/chat/completions', 'model' => 'Meta-Llama-3_3-70B-Instruct', 'type' => 'openai'],
-            ['name' => 'gemini', 'key' => 'gemini', 'url' => 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent', 'model' => 'gemini-1.5-flash', 'type' => 'gemini'],
-            ['name' => 'mistral', 'key' => 'mistral', 'url' => 'https://api.mistral.ai/v1/chat/completions', 'model' => 'open-mistral-7b', 'type' => 'openai'],
-            ['name' => 'nvidia', 'key' => 'nvidia', 'url' => 'https://integrate.api.nvidia.com/v1/chat/completions', 'model' => 'meta/llama3-70b-instruct', 'type' => 'openai'],
-            ['name' => 'huggingface', 'key' => 'huggingface', 'url' => 'https://api-inference.huggingface.co/v1/chat/completions', 'model' => 'mistralai/Mistral-7B-Instruct-v0.2', 'type' => 'openai'],
-            ['name' => 'llm7', 'key' => 'llm7', 'url' => 'https://api.llm7.io/v1/chat/completions', 'model' => 'gpt-4o', 'type' => 'openai'],
-            ['name' => 'pollinations', 'key' => 'pollinations', 'url' => 'https://text.pollinations.ai/openai', 'model' => 'openai', 'type' => 'openai'],
-            ['name' => 'cohere', 'key' => 'cohere', 'url' => 'https://api.cohere.ai/v1/chat', 'model' => 'command-r', 'type' => 'cohere'],
-        ];
-
+        // Bütün provayderləri mərkəzi config faylından oxuyuruq
+        $providers = config('rj-ai.providers', []);
         $results = [];
 
         foreach ($providers as $p) {
-            $key = $keys[$p['key']] ?? null;
+            $key = $keys[$p['key_name']] ?? null;
 
             if (!$key) {
                 $results[] = ['name' => $p['name'], 'status' => 'Not Configured', 'code' => '-', 'response' => 'No key found in Vault', 'time' => 0];
