@@ -6,16 +6,19 @@ use App\Http\Controllers\Controller;
 use App\Models\Plugin;
 use App\Services\GitHubRegistry;
 use App\Services\PluginManager;
+use App\Services\GitHubService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
 class PluginController extends Controller
 {
     protected PluginManager $manager;
+    protected GitHubService $github;
 
-    public function __construct(PluginManager $manager)
+    public function __construct(PluginManager $manager, GitHubService $github)
     {
         $this->manager = $manager;
+        $this->github = $github;
     }
 
     public function index(Request $request)
