@@ -15,8 +15,21 @@ class UpdatesController extends Controller
 
     public function __construct()
     {
-        $this->repo = rj_get_option('update_repo', 'rj-nexus/rj-nexus.github.io');
-        $this->currentVersion = rj_get_option('rj_version', '1.0.0');
+        $this->repo = rj_get_option('update_repo', 'rj-nexus/rj-nexus');
+
+        // 1. Koddakı versiyanı config faylından oxuyuruq (default: 1.5.0)
+        $configVersion = ltrim((string) config('rj.version', '1.5.0'), 'v');
+
+        // 2. Bazadakı mövcud versiyanı oxuyuruq (default: 1.5.0)
+        $dbVersion = ltrim((string) rj_get_option('rj_version', '1.5.0'), 'v');
+
+        // 3. Əgər koddakı versiya bazadakından yenidirsə, bazanı yeniləyirik
+        if (version_compare($configVersion, $dbVersion, '>')) {
+            rj_set_option('rj_version', $configVersion);
+            $this->currentVersion = $configVersion;
+        } else {
+            $this->currentVersion = $dbVersion;
+        }
     }
 
     public function index()
@@ -42,15 +55,15 @@ class UpdatesController extends Controller
                 'User-Agent' => 'RJ-CMS-Updater',
             ])
                 ->timeout(15)
-                ->get("https://api.github.com/repos/{$this->repo}/releases/latest");
+                ->get("https://api.github.com/repos/{$this->repo}/releases", ['per_page' => 20]);
 
             if (!$response->successful()) {
                 return back()->with('error', __('Could not reach update server. HTTP :code', ['code' => $response->status()]));
             }
 
-            $release = $response->json();
+            $release = $this->pickLatestRelease($response->json() ?? []);
 
-            if (empty($release['tag_name'])) {
+            if (!$release) {
                 return back()->with('error', __('No releases found.'));
             }
 
@@ -64,6 +77,7 @@ class UpdatesController extends Controller
                 'body' => $release['body'] ?? '',
                 'url' => $release['html_url'] ?? '',
                 'published_at' => $release['published_at'] ?? null,
+                'prerelease' => (bool) ($release['prerelease'] ?? false),
                 'has_update' => $hasUpdate,
             ]), 'updates');
 
@@ -110,9 +124,28 @@ class UpdatesController extends Controller
         }
     }
 
+    protected function pickLatestRelease(array $releases): ?array
+    {
+        $best = null;
+
+        foreach ($releases as $release) {
+            if (!is_array($release) || !empty($release['draft']) || empty($release['tag_name'])) {
+                continue;
+            }
+
+            if ($best === null || version_compare(ltrim($release['tag_name'], 'v'), ltrim($best['tag_name'], 'v'), '>')) {
+                $best = $release;
+            }
+        }
+
+        return $best;
+    }
+
     protected function getCachedRelease(): ?array
     {
-        $raw = rj_get_option('last_release');
+        $raw = Option::where('option_group', 'updates')
+            ->where('option_name', 'last_release')
+            ->value('option_value');
 
         if (!$raw) {
             return null;
