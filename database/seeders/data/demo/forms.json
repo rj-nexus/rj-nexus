@@ -1,0 +1,15 @@
+[
+    {
+        "id": 1,
+        "name": "Contact me!",
+        "slug": "default",
+        "description": null,
+        "settings": null,
+        "notifications": null,
+        "actions": null,
+        "status": "active",
+        "author_id": null,
+        "created_at": "2026-10-18 21:51:15",
+        "updated_at": "2026-10-29 07:11:09"
+    }
+]

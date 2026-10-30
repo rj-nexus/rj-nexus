@@ -1,0 +1,38 @@
+[
+    {
+        "id": 1,
+        "name": "Categories",
+        "slug": "category",
+        "singular_name": "Category",
+        "plural_name": "Categories",
+        "description": "Organize posts into hierarchical categories.",
+        "is_hierarchical": 1,
+        "is_public": 1,
+        "show_in_menu": 1,
+        "post_types": "[\"post\"]",
+        "labels": null,
+        "settings": "{\"rewrite_slug\":\"category\",\"hierarchical_urls\":true,\"show_admin_column\":true,\"is_core\":true}",
+        "status": "active",
+        "author_id": null,
+        "created_at": "2026-10-17 00:08:29",
+        "updated_at": "2026-10-17 00:08:29"
+    },
+    {
+        "id": 2,
+        "name": "Tags",
+        "slug": "tag",
+        "singular_name": "Tag",
+        "plural_name": "Tags",
+        "description": "Flat keywords to describe posts.",
+        "is_hierarchical": 0,
+        "is_public": 1,
+        "show_in_menu": 1,
+        "post_types": "[\"post\"]",
+        "labels": null,
+        "settings": "{\"rewrite_slug\":\"tag\",\"hierarchical_urls\":false,\"show_admin_column\":true,\"is_core\":true}",
+        "status": "active",
+        "author_id": null,
+        "created_at": "2026-10-17 00:08:29",
+        "updated_at": "2026-10-17 00:08:29"
+    }
+]

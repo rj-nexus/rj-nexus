@@ -1,0 +1,922 @@
+[
+    {
+        "id": 1,
+        "option_name": "site_name",
+        "option_value": "RJ CMS",
+        "option_group": "general",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-11 22:22:50",
+        "updated_at": "2026-10-11 22:22:50"
+    },
+    {
+        "id": 2,
+        "option_name": "site_description",
+        "option_value": "A modern CMS built with Laravel",
+        "option_group": "general",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-11 22:22:51",
+        "updated_at": "2026-10-11 22:22:51"
+    },
+    {
+        "id": 3,
+        "option_name": "site_url",
+        "option_value": "http://127.0.0.1:8000",
+        "option_group": "general",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-11 22:22:51",
+        "updated_at": "2026-10-11 22:22:51"
+    },
+    {
+        "id": 4,
+        "option_name": "admin_email",
+        "option_value": "admin@example.com",
+        "option_group": "general",
+        "option_type": "email",
+        "autoload": 1,
+        "created_at": "2026-10-11 22:22:51",
+        "updated_at": "2026-10-11 22:22:51"
+    },
+    {
+        "id": 5,
+        "option_name": "timezone",
+        "option_value": "Asia/Baku",
+        "option_group": "general",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-11 22:22:51",
+        "updated_at": "2026-10-11 22:22:51"
+    },
+    {
+        "id": 6,
+        "option_name": "date_format",
+        "option_value": "Y-m-d",
+        "option_group": "general",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-11 22:22:51",
+        "updated_at": "2026-10-11 22:22:51"
+    },
+    {
+        "id": 7,
+        "option_name": "time_format",
+        "option_value": "H:i",
+        "option_group": "general",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-11 22:22:51",
+        "updated_at": "2026-10-11 22:22:51"
+    },
+    {
+        "id": 8,
+        "option_name": "language",
+        "option_value": "en",
+        "option_group": "general",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-11 22:22:51",
+        "updated_at": "2026-10-11 22:22:51"
+    },
+    {
+        "id": 9,
+        "option_name": "currency",
+        "option_value": "USD",
+        "option_group": "general",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-11 22:22:51",
+        "updated_at": "2026-10-11 22:22:51"
+    },
+    {
+        "id": 10,
+        "option_name": "posts_per_page",
+        "option_value": "10",
+        "option_group": "reading",
+        "option_type": "number",
+        "autoload": 1,
+        "created_at": "2026-10-11 22:22:51",
+        "updated_at": "2026-10-11 22:22:51"
+    },
+    {
+        "id": 11,
+        "option_name": "homepage_type",
+        "option_value": "latest",
+        "option_group": "reading",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-11 22:22:51",
+        "updated_at": "2026-10-11 22:22:51"
+    },
+    {
+        "id": 12,
+        "option_name": "feed_enabled",
+        "option_value": "1",
+        "option_group": "reading",
+        "option_type": "boolean",
+        "autoload": 1,
+        "created_at": "2026-10-11 22:22:51",
+        "updated_at": "2026-10-11 22:22:51"
+    },
+    {
+        "id": 13,
+        "option_name": "comments_enabled",
+        "option_value": "1",
+        "option_group": "discussion",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-11 22:22:51",
+        "updated_at": "2026-10-17 00:48:46"
+    },
+    {
+        "id": 14,
+        "option_name": "comments_moderation",
+        "option_value": "1",
+        "option_group": "discussion",
+        "option_type": "boolean",
+        "autoload": 1,
+        "created_at": "2026-10-11 22:22:51",
+        "updated_at": "2026-10-11 22:22:51"
+    },
+    {
+        "id": 15,
+        "option_name": "ai_moderation",
+        "option_value": "0",
+        "option_group": "discussion",
+        "option_type": "boolean",
+        "autoload": 1,
+        "created_at": "2026-10-11 22:22:51",
+        "updated_at": "2026-10-11 22:22:51"
+    },
+    {
+        "id": 16,
+        "option_name": "permalink_structure",
+        "option_value": "name",
+        "option_group": "permalinks",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-11 22:22:51",
+        "updated_at": "2026-10-17 00:34:51"
+    },
+    {
+        "id": 17,
+        "option_name": "admin_theme",
+        "option_value": "light",
+        "option_group": "colors",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-11 22:22:51",
+        "updated_at": "2026-10-11 22:22:51"
+    },
+    {
+        "id": 18,
+        "option_name": "admin_color",
+        "option_value": "#111827",
+        "option_group": "colors",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-11 22:22:51",
+        "updated_at": "2026-10-11 22:22:51"
+    },
+    {
+        "id": 19,
+        "option_name": "frontend_theme",
+        "option_value": "default",
+        "option_group": "colors",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-11 22:22:51",
+        "updated_at": "2026-10-11 22:22:51"
+    },
+    {
+        "id": 20,
+        "option_name": "seo_enabled",
+        "option_value": "1",
+        "option_group": "seo",
+        "option_type": "boolean",
+        "autoload": 1,
+        "created_at": "2026-10-11 22:22:51",
+        "updated_at": "2026-10-11 22:22:51"
+    },
+    {
+        "id": 21,
+        "option_name": "seo_ai_enabled",
+        "option_value": "0",
+        "option_group": "seo",
+        "option_type": "boolean",
+        "autoload": 1,
+        "created_at": "2026-10-11 22:22:51",
+        "updated_at": "2026-10-11 22:22:51"
+    },
+    {
+        "id": 22,
+        "option_name": "ai_enabled",
+        "option_value": "0",
+        "option_group": "ai",
+        "option_type": "boolean",
+        "autoload": 1,
+        "created_at": "2026-10-11 22:22:51",
+        "updated_at": "2026-10-11 22:22:51"
+    },
+    {
+        "id": 23,
+        "option_name": "ai_provider",
+        "option_value": "openai",
+        "option_group": "ai",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-11 22:22:51",
+        "updated_at": "2026-10-11 22:22:51"
+    },
+    {
+        "id": 24,
+        "option_name": "ai_model",
+        "option_value": "gpt-4o-mini",
+        "option_group": "ai",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-11 22:22:51",
+        "updated_at": "2026-10-11 22:22:51"
+    },
+    {
+        "id": 25,
+        "option_name": "ai_temperature",
+        "option_value": "0.7",
+        "option_group": "ai",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-11 22:22:51",
+        "updated_at": "2026-10-11 22:22:51"
+    },
+    {
+        "id": 26,
+        "option_name": "ai_max_tokens",
+        "option_value": "2000",
+        "option_group": "ai",
+        "option_type": "number",
+        "autoload": 1,
+        "created_at": "2026-10-11 22:22:51",
+        "updated_at": "2026-10-11 22:22:51"
+    },
+    {
+        "id": 27,
+        "option_name": "ai_monthly_limit",
+        "option_value": "100",
+        "option_group": "ai",
+        "option_type": "number",
+        "autoload": 1,
+        "created_at": "2026-10-11 22:22:51",
+        "updated_at": "2026-10-11 22:22:51"
+    },
+    {
+        "id": 28,
+        "option_name": "security_2fa",
+        "option_value": "0",
+        "option_group": "security",
+        "option_type": "boolean",
+        "autoload": 1,
+        "created_at": "2026-10-11 22:22:51",
+        "updated_at": "2026-10-11 22:22:51"
+    },
+    {
+        "id": 29,
+        "option_name": "security_login_limit",
+        "option_value": "5",
+        "option_group": "security",
+        "option_type": "number",
+        "autoload": 1,
+        "created_at": "2026-10-11 22:22:51",
+        "updated_at": "2026-10-11 22:22:51"
+    },
+    {
+        "id": 30,
+        "option_name": "backup_auto",
+        "option_value": "0",
+        "option_group": "backup",
+        "option_type": "boolean",
+        "autoload": 1,
+        "created_at": "2026-10-11 22:22:51",
+        "updated_at": "2026-10-11 22:22:51"
+    },
+    {
+        "id": 31,
+        "option_name": "backup_frequency",
+        "option_value": "daily",
+        "option_group": "backup",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-11 22:22:51",
+        "updated_at": "2026-10-11 22:22:51"
+    },
+    {
+        "id": 32,
+        "option_name": "cache_enabled",
+        "option_value": "0",
+        "option_group": "cache",
+        "option_type": "boolean",
+        "autoload": 1,
+        "created_at": "2026-10-11 22:22:51",
+        "updated_at": "2026-10-11 22:22:51"
+    },
+    {
+        "id": 33,
+        "option_name": "cache_ttl",
+        "option_value": "3600",
+        "option_group": "cache",
+        "option_type": "number",
+        "autoload": 1,
+        "created_at": "2026-10-11 22:22:51",
+        "updated_at": "2026-10-11 22:22:51"
+    },
+    {
+        "id": 34,
+        "option_name": "updates_core_auto",
+        "option_value": "0",
+        "option_group": "updates",
+        "option_type": "boolean",
+        "autoload": 1,
+        "created_at": "2026-10-11 22:22:51",
+        "updated_at": "2026-10-11 22:22:51"
+    },
+    {
+        "id": 35,
+        "option_name": "updates_plugin_auto",
+        "option_value": "0",
+        "option_group": "updates",
+        "option_type": "boolean",
+        "autoload": 1,
+        "created_at": "2026-10-11 22:22:51",
+        "updated_at": "2026-10-11 22:22:51"
+    },
+    {
+        "id": 36,
+        "option_name": "updates_theme_auto",
+        "option_value": "0",
+        "option_group": "updates",
+        "option_type": "boolean",
+        "autoload": 1,
+        "created_at": "2026-10-11 22:22:51",
+        "updated_at": "2026-10-11 22:22:51"
+    },
+    {
+        "id": 37,
+        "option_name": "rj_version",
+        "option_value": "1.5.0",
+        "option_group": "general",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-11 22:22:51",
+        "updated_at": "2026-10-30 09:22:58"
+    },
+    {
+        "id": 38,
+        "option_name": "rj_installed_at",
+        "option_value": "2026-10-17 00:08:29",
+        "option_group": "system",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-11 22:22:51",
+        "updated_at": "2026-10-17 00:08:29"
+    },
+    {
+        "id": 39,
+        "option_name": "admin_color_preset",
+        "option_value": "green",
+        "option_group": "colors",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-12 20:24:43",
+        "updated_at": "2026-10-22 18:27:53"
+    },
+    {
+        "id": 40,
+        "option_name": "last_checked",
+        "option_value": "2026-10-30 09:56:20",
+        "option_group": "updates",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-13 15:06:51",
+        "updated_at": "2026-10-30 09:56:20"
+    },
+    {
+        "id": 41,
+        "option_name": "last_release",
+        "option_value": "{\"version\":\"1.0.0-rc1\",\"name\":\"v1.0.0-rc1 - Pre-Release\",\"body\":\"# \\ud83d\\ude80 RJ CMS v1.0.0-rc1 (Release Candidate 1)\\r\\n\\r\\nWelcome to the first pre-release of **RJ CMS**! This version marks a major milestone with the completion of the core architecture and several advanced features. \\r\\n\\r\\n> **\\u26a0\\ufe0f Pre-Release Notice:** This is a Release Candidate. While the core is stable, you may encounter minor bugs. We do **not** recommend using this version in a live production environment just yet.\\r\\n\\r\\n## \\u2728 What's New in this Version?\\r\\n\\r\\n- **AI Content Generator & Bulk Translate:** Integrated with OpenRouter to automatically write posts and translate content (preserving HTML structure).\\r\\n- **Two-Factor Authentication (2FA):** Fully working Google Authenticator support for admin accounts.\\r\\n- **Custom Error Pages:** Brand new, animated standalone pages for 403, 404, 419, 429, 500, and 503.\\r\\n- **Maintenance Mode:** Easily put your site under maintenance with a beautiful animated 503 page.\\r\\n- **RTL Support:** Full Right-to-Left support for Arabic, Persian, and other RTL languages via middleware.\\r\\n- **Language Switcher Fix:** Language selection now persists across sessions and page reloads.\\r\\n- **Performance Optimizations:** Lazy loading implemented for all images, and LCP (Largest Contentful Paint) optimized for main post images.\\r\\n- **RJBuilder:** Visual page builder with drag-and-drop, responsive controls, and dynamic tags.\\r\\n\\r\\n## \\ud83d\\udee0\\ufe0f Installation\\r\\n\\r\\nPlease refer to the `README.md` file for detailed installation instructions. \\r\\n\\r\\n**Default Admin:**\\r\\n- Email: `admin@admin.com`\\r\\n- Password: `admin123`\\r\\n\\r\\n## \\u23f3 What's Next?\\r\\n\\r\\n- Massive translation updates for ES, DE, and PT languages.\\r\\n- KYC (Identity Verification) module.\\r\\n- Final UI\\/UX polish and bug fixes before the stable `v1.0.0` release.\\r\\n\\r\\n---\\r\\n*Thank you for testing RJ CMS! Please report any bugs or feedback in the Issues tab.*\",\"url\":\"https:\\/\\/github.com\\/rj-nexus\\/rj-nexus\\/releases\\/tag\\/v1.0.0-rc1\",\"published_at\":\"2026-10-22T03:44:52Z\",\"prerelease\":true,\"has_update\":false}",
+        "option_group": "updates",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-13 15:06:51",
+        "updated_at": "2026-10-30 08:26:27"
+    },
+    {
+        "id": 42,
+        "option_name": "global_colors",
+        "option_value": "[{\"id\":\"primary\",\"name\":\"Primary\",\"color\":\"#7c3aed\"},{\"id\":\"secondary\",\"name\":\"Secondary\",\"color\":\"#ec4899\"},{\"id\":\"text\",\"name\":\"Text\",\"color\":\"#111827\"},{\"id\":\"accent\",\"name\":\"Accent\",\"color\":\"#f59e0b\"},{\"id\":\"light\",\"name\":\"Light\",\"color\":\"#f3f4f6\"},{\"id\":\"dark\",\"name\":\"Dark\",\"color\":\"#1f2937\"}]",
+        "option_group": "design",
+        "option_type": "json",
+        "autoload": 1,
+        "created_at": "2026-10-14 18:07:57",
+        "updated_at": "2026-10-14 18:07:57"
+    },
+    {
+        "id": 43,
+        "option_name": "global_fonts",
+        "option_value": "[{\"id\":\"primary\",\"name\":\"Primary\",\"family\":\"Inter, sans-serif\",\"weight\":\"700\"},{\"id\":\"secondary\",\"name\":\"Secondary\",\"family\":\"Inter, sans-serif\",\"weight\":\"500\"},{\"id\":\"text\",\"name\":\"Body Text\",\"family\":\"Inter, sans-serif\",\"weight\":\"400\"},{\"id\":\"accent\",\"name\":\"Accent\",\"family\":\"Inter, sans-serif\",\"weight\":\"600\"}]",
+        "option_group": "design",
+        "option_type": "json",
+        "autoload": 1,
+        "created_at": "2026-10-14 18:07:57",
+        "updated_at": "2026-10-14 18:07:57"
+    },
+    {
+        "id": 44,
+        "option_name": "global_spacing",
+        "option_value": "[{\"id\":\"xs\",\"name\":\"Extra Small\",\"value\":\"4\"},{\"id\":\"sm\",\"name\":\"Small\",\"value\":\"8\"},{\"id\":\"md\",\"name\":\"Medium\",\"value\":\"16\"},{\"id\":\"lg\",\"name\":\"Large\",\"value\":\"24\"},{\"id\":\"xl\",\"name\":\"Extra Large\",\"value\":\"48\"}]",
+        "option_group": "design",
+        "option_type": "json",
+        "autoload": 1,
+        "created_at": "2026-10-14 18:07:57",
+        "updated_at": "2026-10-14 18:07:57"
+    },
+    {
+        "id": 45,
+        "option_name": "rj_breakpoints",
+        "option_value": "{\"mobile\":{\"label\":\"Mobile\",\"max\":560,\"icon\":\"mobile\"},\"tablet\":{\"label\":\"Tablet\",\"max\":860,\"icon\":\"tablet\"},\"desktop\":{\"label\":\"Desktop\",\"min\":861,\"icon\":\"desktop\"}}",
+        "option_group": "design",
+        "option_type": "json",
+        "autoload": 1,
+        "created_at": "2026-10-14 18:07:57",
+        "updated_at": "2026-10-14 18:07:57"
+    },
+    {
+        "id": 46,
+        "option_name": "active_theme",
+        "option_value": "rj-default",
+        "option_group": "general",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-16 22:26:35",
+        "updated_at": "2026-10-28 02:56:56"
+    },
+    {
+        "id": 47,
+        "option_name": "custom_structure",
+        "option_value": null,
+        "option_group": "permalinks",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-17 00:34:51",
+        "updated_at": "2026-10-17 00:34:51"
+    },
+    {
+        "id": 48,
+        "option_name": "category_base",
+        "option_value": "category",
+        "option_group": "permalinks",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-17 00:34:51",
+        "updated_at": "2026-10-17 00:34:51"
+    },
+    {
+        "id": 49,
+        "option_name": "tag_base",
+        "option_value": "tag",
+        "option_group": "permalinks",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-17 00:34:51",
+        "updated_at": "2026-10-17 00:34:51"
+    },
+    {
+        "id": 50,
+        "option_name": "author_base",
+        "option_value": "author",
+        "option_group": "permalinks",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-17 00:34:51",
+        "updated_at": "2026-10-17 00:34:51"
+    },
+    {
+        "id": 51,
+        "option_name": "post_slug_case",
+        "option_value": "lower",
+        "option_group": "permalinks",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-17 00:34:51",
+        "updated_at": "2026-10-17 00:34:51"
+    },
+    {
+        "id": 52,
+        "option_name": "redirect_old_urls",
+        "option_value": "1",
+        "option_group": "permalinks",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-17 00:34:51",
+        "updated_at": "2026-10-17 00:34:51"
+    },
+    {
+        "id": 53,
+        "option_name": "trailing_slash",
+        "option_value": "yes",
+        "option_group": "permalinks",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-17 00:34:51",
+        "updated_at": "2026-10-17 00:34:51"
+    },
+    {
+        "id": 54,
+        "option_name": "force_lowercase",
+        "option_value": "1",
+        "option_group": "permalinks",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-17 00:34:51",
+        "updated_at": "2026-10-17 00:34:51"
+    },
+    {
+        "id": 55,
+        "option_name": "strip_stop_words",
+        "option_value": "0",
+        "option_group": "permalinks",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-17 00:34:51",
+        "updated_at": "2026-10-17 00:34:51"
+    },
+    {
+        "id": 56,
+        "option_name": "api_keys",
+        "option_value": "[]",
+        "option_group": "general",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-20 01:53:38",
+        "updated_at": "2026-10-20 01:58:18"
+    },
+    {
+        "id": 57,
+        "option_name": "debug_mode",
+        "option_value": "1",
+        "option_group": "advanced",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-21 22:21:26",
+        "updated_at": "2026-10-29 08:29:01"
+    },
+    {
+        "id": 58,
+        "option_name": "maintenance_message",
+        "option_value": null,
+        "option_group": "advanced",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-21 22:21:26",
+        "updated_at": "2026-10-21 22:21:26"
+    },
+    {
+        "id": 59,
+        "option_name": "maintenance_retry",
+        "option_value": "3600",
+        "option_group": "advanced",
+        "option_type": "number",
+        "autoload": 1,
+        "created_at": "2026-10-21 22:21:26",
+        "updated_at": "2026-10-21 22:21:26"
+    },
+    {
+        "id": 60,
+        "option_name": "log_level",
+        "option_value": "error",
+        "option_group": "advanced",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-21 22:21:26",
+        "updated_at": "2026-10-21 22:21:26"
+    },
+    {
+        "id": 61,
+        "option_name": "log_retention_days",
+        "option_value": "14",
+        "option_group": "advanced",
+        "option_type": "number",
+        "autoload": 1,
+        "created_at": "2026-10-21 22:21:26",
+        "updated_at": "2026-10-21 22:21:26"
+    },
+    {
+        "id": 62,
+        "option_name": "custom_head_code",
+        "option_value": null,
+        "option_group": "advanced",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-21 22:21:26",
+        "updated_at": "2026-10-21 22:21:26"
+    },
+    {
+        "id": 63,
+        "option_name": "custom_footer_code",
+        "option_value": null,
+        "option_group": "advanced",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-21 22:21:26",
+        "updated_at": "2026-10-21 22:21:26"
+    },
+    {
+        "id": 64,
+        "option_name": "custom_css",
+        "option_value": null,
+        "option_group": "advanced",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-21 22:21:26",
+        "updated_at": "2026-10-21 22:21:26"
+    },
+    {
+        "id": 65,
+        "option_name": "maintenance_mode",
+        "option_value": "0",
+        "option_group": "advanced",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-21 22:21:26",
+        "updated_at": "2026-10-29 08:19:00"
+    },
+    {
+        "id": 66,
+        "option_name": "error_reporting",
+        "option_value": "0",
+        "option_group": "advanced",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-21 22:21:26",
+        "updated_at": "2026-10-21 22:21:26"
+    },
+    {
+        "id": 67,
+        "option_name": "track_visitors",
+        "option_value": "0",
+        "option_group": "advanced",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-21 22:21:26",
+        "updated_at": "2026-10-21 22:21:26"
+    },
+    {
+        "id": 68,
+        "option_name": "allow_file_editing",
+        "option_value": "0",
+        "option_group": "advanced",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-21 22:21:26",
+        "updated_at": "2026-10-21 22:21:26"
+    },
+    {
+        "id": 69,
+        "option_name": "commerce_store_name",
+        "option_value": "RJ CMS",
+        "option_group": "general",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-23 04:16:45",
+        "updated_at": "2026-10-23 04:16:45"
+    },
+    {
+        "id": 70,
+        "option_name": "commerce_currency",
+        "option_value": "USD",
+        "option_group": "general",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-23 04:16:45",
+        "updated_at": "2026-10-23 04:16:45"
+    },
+    {
+        "id": 71,
+        "option_name": "commerce_weight_unit",
+        "option_value": "kg",
+        "option_group": "general",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-23 04:16:45",
+        "updated_at": "2026-10-23 04:16:45"
+    },
+    {
+        "id": 72,
+        "option_name": "commerce_stripe_enabled",
+        "option_value": "0",
+        "option_group": "general",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-23 05:20:05",
+        "updated_at": "2026-10-23 05:20:05"
+    },
+    {
+        "id": 73,
+        "option_name": "commerce_stripe_pk",
+        "option_value": null,
+        "option_group": "general",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-23 05:20:05",
+        "updated_at": "2026-10-23 05:20:05"
+    },
+    {
+        "id": 74,
+        "option_name": "commerce_stripe_sk",
+        "option_value": null,
+        "option_group": "general",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-23 05:20:05",
+        "updated_at": "2026-10-23 05:20:05"
+    },
+    {
+        "id": 75,
+        "option_name": "commerce_paypal_enabled",
+        "option_value": "0",
+        "option_group": "general",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-23 05:20:05",
+        "updated_at": "2026-10-23 05:20:05"
+    },
+    {
+        "id": 76,
+        "option_name": "commerce_paypal_client_id",
+        "option_value": null,
+        "option_group": "general",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-23 05:20:05",
+        "updated_at": "2026-10-23 05:20:05"
+    },
+    {
+        "id": 77,
+        "option_name": "commerce_paypal_secret",
+        "option_value": null,
+        "option_group": "general",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-23 05:20:05",
+        "updated_at": "2026-10-23 05:20:05"
+    },
+    {
+        "id": 78,
+        "option_name": "commerce_checkout_enabled",
+        "option_value": "0",
+        "option_group": "general",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-23 05:20:05",
+        "updated_at": "2026-10-23 05:20:05"
+    },
+    {
+        "id": 79,
+        "option_name": "commerce_checkout_pk",
+        "option_value": null,
+        "option_group": "general",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-23 05:20:05",
+        "updated_at": "2026-10-23 05:20:05"
+    },
+    {
+        "id": 80,
+        "option_name": "commerce_checkout_sk",
+        "option_value": null,
+        "option_group": "general",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-23 05:20:05",
+        "updated_at": "2026-10-23 05:20:05"
+    },
+    {
+        "id": 81,
+        "option_name": "commerce_razorpay_enabled",
+        "option_value": "0",
+        "option_group": "general",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-23 05:20:05",
+        "updated_at": "2026-10-23 05:20:05"
+    },
+    {
+        "id": 82,
+        "option_name": "commerce_razorpay_key",
+        "option_value": null,
+        "option_group": "general",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-23 05:20:05",
+        "updated_at": "2026-10-23 05:20:05"
+    },
+    {
+        "id": 83,
+        "option_name": "commerce_razorpay_secret",
+        "option_value": null,
+        "option_group": "general",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-23 05:20:05",
+        "updated_at": "2026-10-23 05:20:05"
+    },
+    {
+        "id": 84,
+        "option_name": "commerce_crypto_enabled",
+        "option_value": "0",
+        "option_group": "general",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-23 05:20:05",
+        "updated_at": "2026-10-23 05:20:05"
+    },
+    {
+        "id": 85,
+        "option_name": "commerce_crypto_provider",
+        "option_value": "binance",
+        "option_group": "general",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-23 05:20:05",
+        "updated_at": "2026-10-23 05:20:05"
+    },
+    {
+        "id": 86,
+        "option_name": "commerce_crypto_api_key",
+        "option_value": null,
+        "option_group": "general",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-23 05:20:05",
+        "updated_at": "2026-10-23 05:20:05"
+    },
+    {
+        "id": 87,
+        "option_name": "commerce_cod_enabled",
+        "option_value": "1",
+        "option_group": "general",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-23 05:20:05",
+        "updated_at": "2026-10-23 05:20:05"
+    },
+    {
+        "id": 88,
+        "option_name": "commerce_page_shop",
+        "option_value": null,
+        "option_group": "general",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-23 05:59:31",
+        "updated_at": "2026-10-23 05:59:31"
+    },
+    {
+        "id": 89,
+        "option_name": "commerce_page_cart",
+        "option_value": null,
+        "option_group": "general",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-23 05:59:31",
+        "updated_at": "2026-10-23 05:59:31"
+    },
+    {
+        "id": 90,
+        "option_name": "commerce_page_checkout",
+        "option_value": null,
+        "option_group": "general",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-23 05:59:31",
+        "updated_at": "2026-10-23 05:59:31"
+    },
+    {
+        "id": 91,
+        "option_name": "lang_flag_az",
+        "option_value": "az.svg",
+        "option_group": "language",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-27 05:11:20",
+        "updated_at": "2026-10-27 05:11:20"
+    },
+    {
+        "id": 92,
+        "option_name": "frontend_locales",
+        "option_value": "[\"az\",\"de\",\"en\"]",
+        "option_group": "general",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-10-28 02:22:40",
+        "updated_at": "2026-10-28 02:22:40"
+    }
+]
