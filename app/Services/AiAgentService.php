@@ -23,7 +23,7 @@ class AiAgentService
 
         $keys = Cache::remember('rj_ai_keys_pool', 3600, function () use ($vaultUrl) {
             try {
-                $response = Http::timeout(10)->get($vaultUrl);
+                $response = Http::timeout(15)->get($vaultUrl);
                 if ($response->successful()) {
                     return $response->json() ?: [];
                 }
@@ -110,7 +110,7 @@ class AiAgentService
 
         if ($provider['type'] === 'gemini') {
             $url = $provider['url'] . '?key=' . $provider['key'];
-            $response = Http::withHeaders($headers)->timeout(20)->post($url, [
+            $response = Http::withHeaders($headers)->timeout(45)->post($url, [
                 'contents' => [['parts' => [['text' => $prompt]]]]
             ]);
 
@@ -122,7 +122,7 @@ class AiAgentService
 
         if ($provider['type'] === 'cohere') {
             $headers['Authorization'] = 'Bearer ' . $provider['key'];
-            $response = Http::withHeaders($headers)->timeout(20)->post($provider['url'], [
+            $response = Http::withHeaders($headers)->timeout(45)->post($provider['url'], [
                 'model' => $provider['model'],
                 'message' => $prompt,
             ]);
@@ -135,7 +135,7 @@ class AiAgentService
 
         $headers['Authorization'] = 'Bearer ' . $provider['key'];
 
-        $response = Http::withHeaders($headers)->timeout(20)->post($provider['url'], [
+        $response = Http::withHeaders($headers)->timeout(45)->post($provider['url'], [
             'model' => $provider['model'],
             'messages' => [['role' => 'user', 'content' => $prompt]],
         ]);
