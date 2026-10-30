@@ -51,7 +51,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/search', [SearchController::class, 'search'])->name('search');
     Route::get('/test-ai', [AiTestController::class, 'index'])->name('test-ai');
-    
+
     Route::view('/services', 'admin.services.index')->name('services.index');
     Route::post('/dashboard/ask-ai', [DashboardController::class, 'askAi'])->name('ask-ai');
 
