@@ -21,6 +21,7 @@ class AiAgentService
     {
         $vaultUrl = env('RJ_VAULT_URL', 'https://twilight-art-0b0e.ruhidjavadoff.workers.dev');
 
+        // 1. Pulsuz açarları Cloudflare-dən çəkirik
         $keys = Cache::remember('rj_ai_keys_pool', 3600, function () use ($vaultUrl) {
             try {
                 $response = Http::timeout(15)->get($vaultUrl);
@@ -34,12 +35,7 @@ class AiAgentService
             return [];
         });
 
-        if (empty($keys)) {
-            return;
-        }
-
         $configuredProviders = config('rj-ai.providers', []);
-        $this->providers = [];
 
         foreach ($configuredProviders as $p) {
             $key = $keys[$p['key_name']] ?? null;
@@ -51,6 +47,32 @@ class AiAgentService
                     'url'  => $p['url'],
                     'model'=> $p['model'],
                     'key'  => $key,
+                ];
+            }
+        }
+
+        // 2. İstifadəçinin öz OpenRouter açarını yoxlayırıq (əgər qurubsa)
+        $userOpenRouterKey = rj_get_option('openrouter_api_key');
+
+        if (!empty($userOpenRouterKey)) {
+            // Əgər açarlar şifrələnmişsə (tövsiyə olunur), deşifrə edirik
+            if (str_starts_with($userOpenRouterKey, 'eyJ')) {
+                try {
+                    $userOpenRouterKey = \Illuminate\Support\Facades\Crypt::decryptString($userOpenRouterKey);
+                } catch (\Throwable $e) {
+                    // Şifrəni aça bilməsək, boş qəbul edirik
+                    $userOpenRouterKey = null;
+                }
+            }
+
+            if (!empty($userOpenRouterKey)) {
+                // Siyahının ən sonuna əlavə edirik ki, son çarə olsun
+                $this->providers[] = [
+                    'name' => 'user_openrouter',
+                    'type' => 'openai',
+                    'url'  => 'https://openrouter.ai/api/v1/chat/completions',
+                    'model'=> 'openai/gpt-4o-mini', // İstifadəçinin seçdiyi model
+                    'key'  => $userOpenRouterKey,
                 ];
             }
         }
@@ -85,6 +107,7 @@ class AiAgentService
             }
         }
 
+        // 3. Heç biri işləməzsə, Local RAG (sənədlər) işə düşür
         if (!empty($docContext)) {
             return [
                 'success' => true,
