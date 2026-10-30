@@ -7,7 +7,7 @@ return [
             'key_name' => 'groq',
             'type' => 'openai',
             'url'  => 'https://api.groq.com/openai/v1/chat/completions',
-            'model'=> 'llama3-8b-8192', // Dəyişdirildi
+            'model'=> 'llama-3.1-8b-instant', // Dəyişdirildi (işlək model)
         ],
         [
             'name' => 'pollinations',
@@ -27,36 +27,37 @@ return [
             'name' => 'gemini',
             'key_name' => 'gemini',
             'type' => 'gemini',
-            'url'  => 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent', // Dəyişdirildi
-            'model'=> 'gemini-1.5-flash-latest',
+            'url'  => 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent', // Dəyişdirildi
+            'model'=> 'gemini-2.0-flash',
         ],
         [
             'name' => 'nvidia',
             'key_name' => 'nvidia',
             'type' => 'openai',
             'url'  => 'https://integrate.api.nvidia.com/v1/chat/completions',
-            'model'=> 'meta/llama-3.1-70b-instruct', // Model yeniləndi
+            'model'=> 'meta/llama-3.3-70b-instruct', // Dəyişdirildi
         ],
         [
             'name' => 'huggingface',
             'key_name' => 'huggingface',
             'type' => 'openai',
-            'url'  => 'https://router.huggingface.co/v1/chat/completions', // Yeni Router linki
+            'url'  => 'https://router.huggingface.co/v1/chat/completions', // Yeni router endpoint
             'model'=> 'meta-llama/Meta-Llama-3-8B-Instruct',
+            // Qeyd: HF tokeninə "Inference Providers" icazəsi əlavə edilməlidir.
         ],
         [
             'name' => 'llm7',
             'key_name' => 'llm7',
             'type' => 'openai',
             'url'  => 'https://api.llm7.io/v1/chat/completions',
-            'model'=> 'gpt-4o-mini', // Dəyişdirildi
+            'model'=> 'DeepSeek-V4-Flash-0731', // Dəyişdirildi (pulsuz model)
         ],
         [
             'name' => 'cohere',
             'key_name' => 'cohere',
             'type' => 'cohere',
             'url'  => 'https://api.cohere.ai/v1/chat',
-            'model'=> 'command-r-plus', // command-r silinib, bunu istifadə edirik
+            'model'=> 'command-r-08-2024', // Dəyişdirildi (işlək model)
         ],
         [
             'name' => 'ovh',
