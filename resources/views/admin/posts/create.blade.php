@@ -10,8 +10,12 @@
     seoLoading: false,
 
     async generateSeo() {
-        const titleInput = document.querySelector(`input[name="${this.activeLocale === '{{ $baseLocale }}' ? 'title' : 'translations[' + this.activeLocale + '][title]'}"]`);
-        const contentInput = document.querySelector('textarea[name="content"]');
+        const isBase = this.activeLocale === '{{ $baseLocale }}';
+        const titleName = isBase ? 'title' : 'translations[' + this.activeLocale + '][title]';
+        const contentName = isBase ? 'content' : '';
+
+        const titleInput = document.querySelector(`[name='${titleName}']`);
+        const contentInput = contentName ? document.querySelector(`[name='${contentName}']`) : null;
 
         const title = titleInput ? titleInput.value : '';
         const content = contentInput ? contentInput.value : '';
@@ -40,10 +44,10 @@
             const data = await res.json();
 
             if (data.success) {
-                const prefix = this.activeLocale === '{{ $baseLocale }}' ? '' : `translations[${this.activeLocale}]`;
+                const prefix = isBase ? '' : `translations[${this.activeLocale}]`;
 
                 const setVal = (name, val) => {
-                    const el = document.querySelector(`[name="${prefix ? prefix + '[' + name + ']' : name}"]`);
+                    const el = document.querySelector(`[name='${prefix ? prefix + '[' + name + ']' : name}']`);
                     if (el) el.value = val;
                 };
 
@@ -139,7 +143,6 @@
                     <div class="p-6 space-y-5">
                         @foreach ($locales as $locale)
                             <div x-show="activeLocale === '{{ $locale }}'" x-cloak class="space-y-5">
-
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1.5">
                                         {{ __('Title') }}
@@ -175,24 +178,19 @@
                                         <p class="text-xs text-gray-500 mt-1">{{ __('Supports HTML and RJ shortcodes.') }}</p>
                                     </div>
                                 </template>
-
                             </div>
                         @endforeach
                     </div>
                 </div>
-
             </div>
 
             <div class="space-y-6">
-
                 <div class="bg-white rounded-lg shadow-sm border border-gray-100">
                     <div class="px-6 py-4 border-b border-gray-100">
                         <h3 class="text-base font-semibold text-gray-900">{{ __('Edit Mode') }}</h3>
                         <p class="text-xs text-gray-500 mt-1">{{ __('Choose how to design this content.') }}</p>
                     </div>
-
                     <div class="p-6 space-y-3">
-
                         <label class="flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition"
                                :class="editMode === 'builder' ? 'border-rj-purple bg-rj-purple/5' : 'border-gray-200 hover:border-gray-300'">
                             <input type="radio" value="builder" x-model="editMode" class="mt-0.5 text-rj-purple focus:ring-rj-purple">
@@ -201,7 +199,6 @@
                                 <span class="block text-xs text-gray-500 mt-0.5">{{ __('Drag-and-drop blocks. Visual editing.') }}</span>
                             </span>
                         </label>
-
                         <label class="flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition"
                                :class="editMode === 'classic' ? 'border-rj-purple bg-rj-purple/5' : 'border-gray-200 hover:border-gray-300'">
                             <input type="radio" value="classic" x-model="editMode" class="mt-0.5 text-rj-purple focus:ring-rj-purple">
@@ -210,7 +207,6 @@
                                 <span class="block text-xs text-gray-500 mt-0.5">{{ __('HTML content in a plain textarea.') }}</span>
                             </span>
                         </label>
-
                         @if(!empty($themeTemplates))
                             <label class="flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition"
                                    :class="editMode === 'theme' ? 'border-rj-purple bg-rj-purple/5' : 'border-gray-200 hover:border-gray-300'">
@@ -221,7 +217,6 @@
                                 </span>
                             </label>
                         @endif
-
                         <div x-show="editMode === 'theme'" x-cloak class="pt-3 border-t border-gray-100">
                             <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('Template') }}</label>
                             <select x-model="themeTemplate"
@@ -237,7 +232,6 @@
                                 </p>
                             @endforeach
                         </div>
-
                     </div>
                 </div>
 
@@ -291,9 +285,7 @@
                     <div class="px-6 py-4 border-b border-gray-100">
                         <h3 class="text-base font-semibold text-gray-900">{{ __('Publish Settings') }}</h3>
                     </div>
-
                     <div class="p-6 space-y-4">
-
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('Status') }}</label>
                             <select name="status" class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">
@@ -302,7 +294,6 @@
                                 <option value="scheduled" {{ old('status') === 'scheduled' ? 'selected' : '' }}>{{ __('Scheduled') }}</option>
                             </select>
                         </div>
-
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('Publish Date') }}</label>
                             <input type="datetime-local"
@@ -310,7 +301,6 @@
                                    value="{{ old('published_at', now()->format('Y-m-d\TH:i')) }}"
                                    class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">
                         </div>
-
                         <div class="border-t border-gray-100 pt-4 space-y-3">
                             <label class="flex items-start gap-3 cursor-pointer">
                                 <input type="checkbox" name="is_sticky" value="1" {{ old('is_sticky') ? 'checked' : '' }}
@@ -320,7 +310,6 @@
                                     <span class="block text-xs text-gray-500 mt-0.5">{{ __('Pin to top of archive.') }}</span>
                                 </span>
                             </label>
-
                             <label class="flex items-start gap-3 cursor-pointer">
                                 <input type="checkbox" name="allow_comments" value="1" {{ old('allow_comments', '1') ? 'checked' : '' }}
                                        class="mt-0.5 rounded border-gray-300 text-rj-purple focus:ring-rj-purple">
@@ -330,7 +319,6 @@
                                 </span>
                             </label>
                         </div>
-
                     </div>
                 </div>
 
