@@ -102,6 +102,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::put('/tags/{tag}', [TagController::class, 'update'])->name('tags.update');
         Route::delete('/tags/{tag}', [TagController::class, 'destroy'])->name('tags.destroy');
 
+        Route::post('/ai/generate-seo', [PostController::class, 'aiGenerateSeo'])->name('ai.generate-seo');
+
         Route::get('/{post}/build', [PostController::class, 'build'])->name('build');
         Route::post('/{post}/blocks', [PostController::class, 'updateBlocks'])->name('blocks');
         Route::get('/{post}/edit', [PostController::class, 'edit'])->name('edit');
@@ -125,6 +127,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/create', [PostController::class, 'create'])->name('create')->defaults('type', 'page');
         Route::post('/', [PostController::class, 'store'])->name('store');
         Route::post('/bulk', [PostController::class, 'bulk'])->name('bulk');
+
+        Route::post('/ai/generate-seo', [PostController::class, 'aiGenerateSeo'])->name('ai.generate-seo');
+
         Route::get('/{post}/build', [PostController::class, 'build'])->name('build');
         Route::post('/{post}/blocks', [PostController::class, 'updateBlocks'])->name('blocks');
         Route::get('/{post}/edit', [PostController::class, 'edit'])->name('edit');
