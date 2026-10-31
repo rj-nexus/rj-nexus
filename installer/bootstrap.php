@@ -17,11 +17,11 @@ require_once __DIR__ . '/helpers.php';
 function rj_html_standalone(string $title, string $body): void
 {
     echo '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><title>' . rj_esc($title) . '</title><style>'
-        . 'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;background:#0a0a0b;color:#e5e7eb;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:24px;text-align:center;line-height:1.5}'
-        . '.card{max-width:480px;background:#131315;border:1px solid #26262a;border-radius:16px;padding:40px}'
-        . 'h1{font-size:22px;margin-bottom:12px}p{color:#8a8a92;margin-bottom:12px;line-height:1.5}'
-        . 'code{background:#1f1f23;padding:2px 8px;border-radius:4px;font-size:.9em}'
-        . 'a.btn,.btn{display:inline-block;background:#d4af37;color:#0a0a0b;padding:10px 22px;border-radius:8px;font-weight:600;text-decoration:none;margin-top:16px;border:none;cursor:pointer;font-family:inherit;font-size:14px}'
+        . 'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;background:#1a1030;color:#e5e7eb;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:24px;text-align:center;line-height:1.5}'
+        . '.card{max-width:480px;background:#231243;border:1px solid #2d1754;border-radius:16px;padding:40px}'
+        . 'h1{font-size:22px;margin-bottom:12px;color:#fff}p{color:#9ca3af;margin-bottom:12px;line-height:1.5}'
+        . 'code{background:#2d1754;padding:2px 8px;border-radius:4px;font-size:.9em;color:#e5e7eb}'
+        . 'a.btn,.btn{display:inline-block;background:linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);color:#fff;padding:10px 22px;border-radius:8px;font-weight:600;text-decoration:none;margin-top:16px;border:none;cursor:pointer;font-family:inherit;font-size:14px}'
         . '</style></head><body><div class="card">' . $body . '</div></body></html>';
 }
 
@@ -40,38 +40,39 @@ function rj_render(string $step, string $body, string $extra = ''): void
         }
     }
     $css = '*{box-sizing:border-box;margin:0;padding:0}'
-        . 'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;background:#0a0a0b;color:#e5e7eb;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;line-height:1.5}'
-        . '.card{width:100%;max-width:560px;background:#131315;border:1px solid #26262a;border-radius:16px;padding:32px}'
-        . '.brand{font-size:13px;letter-spacing:.3em;text-transform:uppercase;color:#d4af37;font-weight:700;margin-bottom:6px}'
-        . 'h1{font-size:24px;font-weight:700;margin-bottom:4px}'
-        . 'p.sub{color:#8a8a92;font-size:14px;margin-bottom:24px}'
+        . 'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;background:#1a1030;color:#e5e7eb;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;line-height:1.5}'
+        . '.card{width:100%;max-width:560px;background:#231243;border:1px solid #2d1754;border-radius:16px;padding:32px;box-shadow:0 10px 25px -5px rgba(0,0,0,0.5)}'
+        . '.brand{font-size:13px;letter-spacing:.3em;text-transform:uppercase;font-weight:700;margin-bottom:6px;background:linear-gradient(135deg,#7c3aed 0%,#ec4899 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:inline-block}'
+        . 'h1{font-size:24px;font-weight:700;margin-bottom:4px;color:#fff}'
+        . 'p.sub{color:#9ca3af;font-size:14px;margin-bottom:24px}'
         . '.steps{display:flex;align-items:center;margin:20px 0 28px}'
-        . '.dot{width:28px;height:28px;border-radius:50%;border:1px solid #2c2c31;color:#555;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0}'
-        . '.dot.active{border-color:#d4af37;color:#d4af37;background:rgba(212,175,55,.08)}'
-        . '.dot.done{border-color:#2e7d32;color:#2e7d32;background:rgba(46,125,50,.1)}'
-        . '.line{flex:1;height:1px;background:#2c2c31;margin:0 8px}'
-        . '.line.done{background:#2e7d32}'
-        . 'label{display:block;font-size:12px;color:#8a8a92;margin:12px 0 6px;letter-spacing:.02em}'
-        . 'input,select{width:100%;background:#0a0a0b;border:1px solid #26262a;color:#e5e7eb;border-radius:8px;padding:10px 12px;font-size:14px;font-family:inherit}'
-        . 'input:focus,select:focus{outline:none;border-color:#d4af37}'
+        . '.dot{width:28px;height:28px;border-radius:50%;border:1px solid #2d1754;color:#6b7280;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;transition:all .2s}'
+        . '.dot.active{border-color:#a855f7;color:#a855f7;background:rgba(168,85,247,.15)}'
+        . '.dot.done{border-color:#a855f7;color:#a855f7;background:rgba(168,85,247,.1)}'
+        . '.line{flex:1;height:1px;background:#2d1754;margin:0 8px;transition:all .2s}'
+        . '.line.done{background:#a855f7}'
+        . 'label{display:block;font-size:12px;color:#9ca3af;margin:12px 0 6px;letter-spacing:.02em}'
+        . 'input,select{width:100%;background:#1a1030;border:1px solid #2d1754;color:#e5e7eb;border-radius:8px;padding:10px 12px;font-size:14px;font-family:inherit;transition:border-color .15s}'
+        . 'input:focus,select:focus{outline:none;border-color:#a855f7}'
         . 'input[dir="ltr"]{text-align:left}'
-        . '.btn{display:inline-block;background:#d4af37;color:#0a0a0b;border:none;padding:11px 22px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;transition:opacity .15s;font-family:inherit}'
+        . '.btn{display:inline-block;background:linear-gradient(135deg,#7c3aed 0%,#ec4899 100%);color:#fff;border:none;padding:11px 22px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;transition:opacity .15s;font-family:inherit;text-align:center}'
         . '.btn:hover{opacity:.9}'
-        . '.btn.ghost{background:transparent;color:#d4af37;border:1px solid #d4af37}'
+        . '.btn.ghost{background:transparent;color:#a855f7;border:1px solid #a855f7}'
+        . '.btn.ghost:hover{background:rgba(168,85,247,.1)}'
         . '.row{display:flex;gap:12px;margin-top:24px;justify-content:space-between;align-items:center;flex-wrap:wrap}'
         . '.req{list-style:none;margin-top:8px}'
-        . '.req li{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #1e1e22;font-size:13px;gap:8px}'
+        . '.req li{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #2d1754;font-size:13px;gap:8px;color:#d1d5db}'
         . '.req li:last-child{border-bottom:none}'
-        . '.ok{color:#2e7d32;font-weight:600}'
-        . '.fail{color:#dc2626;font-weight:600}'
+        . '.ok{color:#a855f7;font-weight:600}'
+        . '.fail{color:#ef4444;font-weight:600}'
         . '.langs{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:16px}'
-        . '.lang-btn{background:#0a0a0b;border:1px solid #26262a;color:#e5e7eb;padding:12px;border-radius:8px;cursor:pointer;font-size:14px;transition:.15s;text-align:start;font-family:inherit}'
-        . '.lang-btn:hover{border-color:#d4af37}'
-        . '.lang-btn.active{border-color:#d4af37;background:rgba(212,175,55,.08)}'
-        . '.alert{background:rgba(220,38,38,.1);border:1px solid rgba(220,38,38,.4);color:#fca5a5;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;word-break:break-word}'
-        . '.alert-ok{background:rgba(46,125,50,.1);border:1px solid rgba(46,125,50,.4);color:#86efac}'
-        . '.log{background:#0a0a0b;border:1px solid #1e1e22;border-radius:8px;padding:14px;font-family:ui-monospace,monospace;font-size:12px;color:#a1a1aa;max-height:200px;overflow:auto;margin-top:12px;white-space:pre-wrap;word-break:break-all}'
-        . 'code{background:#1f1f23;padding:2px 6px;border-radius:4px;font-size:.9em}'
+        . '.lang-btn{background:#1a1030;border:1px solid #2d1754;color:#e5e7eb;padding:12px;border-radius:8px;cursor:pointer;font-size:14px;transition:.15s;text-align:start;font-family:inherit}'
+        . '.lang-btn:hover{border-color:#a855f7}'
+        . '.lang-btn.active{border-color:#a855f7;background:rgba(168,85,247,.15);color:#fff}'
+        . '.alert{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.4);color:#fca5a5;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;word-break:break-word}'
+        . '.alert-ok{background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.4);color:#d8b4fe}'
+        . '.log{background:#1a1030;border:1px solid #2d1754;border-radius:8px;padding:14px;font-family:ui-monospace,monospace;font-size:12px;color:#9ca3af;max-height:200px;overflow:auto;margin-top:12px;white-space:pre-wrap;word-break:break-all}'
+        . 'code{background:#2d1754;padding:2px 6px;border-radius:4px;font-size:.9em;color:#e5e7eb}'
         . '@media (max-width:520px){.langs{grid-template-columns:1fr}.card{padding:24px}.row{flex-direction:column-reverse}.row .btn{width:100%;text-align:center}}';
     echo '<!DOCTYPE html><html lang="' . rj_esc($lang) . '" dir="' . $dir . '"><head>'
         . '<meta charset="utf-8">'
@@ -276,15 +277,15 @@ if ($step === 'finish') {
         exit;
     }
     $body = '<div class="alert alert-ok">' . rj_esc($t['ins_done']) . '</div>';
-    $body .= '<p style="color:#8a8a92;margin-top:16px;font-size:14px;line-height:1.6">' . rj_esc($t['fin_sub']) . '</p>';
-    $body .= '<p style="color:#8a8a92;margin-top:12px;font-size:13px">For your security, delete <code>public/install.php</code> and the <code>installer/</code> folder after setup.</p>';
+    $body .= '<p style="color:#9ca3af;margin-top:16px;font-size:14px;line-height:1.6">' . rj_esc($t['fin_sub']) . '</p>';
+    $body .= '<p style="color:#9ca3af;margin-top:12px;font-size:13px">For your security, delete <code>public/install.php</code> and the <code>installer/</code> folder after setup.</p>';
     $body .= '<form method="post" style="margin-top:24px"><button type="submit" name="delete_installer" class="btn">' . rj_esc($t['delete_installer']) . '</button></form>';
     rj_render('finish', $body);
     exit;
 }
 
 $selectedLang = $state['lang'] ?? 'en';
-$body = '<p style="font-size:14px;color:#8a8a92;margin-bottom:8px">' . rj_esc($t['lang']) . '</p><form method="post" class="langs">';
+$body = '<p style="font-size:14px;color:#9ca3af;margin-bottom:8px">' . rj_esc($t['lang']) . '</p><form method="post" class="langs">';
 foreach (rj_languages() as $code => $label) {
     $active = $code === $selectedLang ? ' active' : '';
     $body .= '<button type="submit" name="rj_lang" value="' . rj_esc($code) . '" class="lang-btn' . $active . '">' . rj_esc($label) . '</button>';
