@@ -1,7 +1,5 @@
 <?php
 if (!defined('RJ_INSTALLER')) { http_response_code(403); exit; }
-
-$isAz = ($state['lang'] ?? 'en') === 'az';
 ?>
 
 <div style="display:flex; flex-direction:column; align-items:center; justify-content:center;">
@@ -12,12 +10,10 @@ $isAz = ($state['lang'] ?? 'en') === 'az';
     </div>
 
     <h2 style="font-size:28px; font-weight:800; color:#fff; margin-bottom:12px;">
-        <?= $isAz ? 'Xoş Gəlmisiniz!' : 'Welcome to RJ Nexus!' ?>
+        <?= rj_esc($t['intro_s1_title']) ?>
     </h2>
 
     <p style="font-size:15px; color:#9ca3af; line-height:1.6; max-width:400px; margin:0 auto;">
-        <?= $isAz
-            ? 'Müasir, sürətli və tam nəzarət imkanı verən self-hosted CMS sisteminə xoş gəlmisiniz. Gəlin saytınızı birlikdə quraq.'
-            : 'Welcome to the modern, fast, and fully self-hosted CMS that gives you complete control. Let\'s set up your site together.' ?>
+        <?= rj_esc($t['intro_s1_desc']) ?>
     </p>
 </div>
