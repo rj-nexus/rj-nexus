@@ -39,10 +39,11 @@ function rj_render(string $step, string $body, string $extra = ''): void
             $nav .= '<span class="line ' . ($n < $stepIdx ? 'done' : '') . '"></span>';
         }
     }
+    $logoUrl = 'https://raw.githubusercontent.com/mr-ruhid/rare-logos-vault/main/logo/cms/rj-nexus/logo_header.png';
     $css = '*{box-sizing:border-box;margin:0;padding:0}'
         . 'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;background:#1a1030;color:#e5e7eb;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;line-height:1.5}'
         . '.card{width:100%;max-width:560px;background:#231243;border:1px solid #2d1754;border-radius:16px;padding:32px;box-shadow:0 10px 25px -5px rgba(0,0,0,0.5)}'
-        . '.brand{font-size:13px;letter-spacing:.3em;text-transform:uppercase;font-weight:700;margin-bottom:6px;background:linear-gradient(135deg,#7c3aed 0%,#ec4899 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:inline-block}'
+        . '.brand-logo{height:32px;margin-bottom:12px;display:block}'
         . 'h1{font-size:24px;font-weight:700;margin-bottom:4px;color:#fff}'
         . 'p.sub{color:#9ca3af;font-size:14px;margin-bottom:24px}'
         . '.steps{display:flex;align-items:center;margin:20px 0 28px}'
@@ -80,18 +81,12 @@ function rj_render(string $step, string $body, string $extra = ''): void
         . '<meta name="robots" content="noindex,nofollow">'
         . '<title>' . rj_esc($t['title']) . '</title>'
         . '<style>' . $css . '</style>' . $extra . '</head><body>'
-        . '<div class="card"><div class="brand">RJ NEXUS</div>'
+        . '<div class="card"><img src="' . $logoUrl . '" alt="RJ Nexus" class="brand-logo">'
         . '<h1>' . rj_esc($t['title']) . '</h1>'
         . '<p class="sub">' . rj_esc($t['sub']) . '</p>'
         . '<div class="steps">' . $nav . '</div>'
         . $body
         . '</div></body></html>';
-}
-
-if (isset($_POST['rj_lang']) && isset(rj_languages()[$_POST['rj_lang']])) {
-    rj_set_state(array_merge(rj_state(), ['lang' => $_POST['rj_lang']]));
-    header('Location: ' . rj_installer_url('step=requirements'));
-    exit;
 }
 
 $step = $_GET['step'] ?? 'language';
@@ -104,192 +99,9 @@ if (file_exists(RJ_LOCK) && $step !== 'finish') {
     exit;
 }
 
-if ($step === 'requirements') {
-    if (empty($state['lang'])) {
-        header('Location: ' . rj_installer_url('step=language'));
-        exit;
-    }
-    $reqs = rj_requirements();
-    $allOk = rj_requirements_ok();
-    $body = '<ul class="req">';
-    foreach ($reqs as $k => $r) {
-        $label = $t['req_' . $k] ?? $k;
-        $body .= '<li><span>' . rj_esc($label) . '</span><span class="' . ($r['ok'] ? 'ok' : 'fail') . '">' . ($r['ok'] ? rj_esc($t['ok']) : rj_esc($t['fail'])) . '</span></li>';
-    }
-    $body .= '</ul>';
-    if (!$allOk) {
-        $body .= '<div class="alert" style="margin-top:16px">' . rj_esc($t['err_req']) . '</div>';
-    }
-    $body .= '<div class="row">'
-        . '<a href="' . rj_installer_url('step=language') . '" class="btn ghost">' . rj_esc($t['back']) . '</a>';
-    if ($allOk) {
-        $body .= '<a href="' . rj_installer_url('step=database') . '" class="btn">' . rj_esc($t['req_btn']) . '</a>';
-    }
-    $body .= '</div>';
-    rj_render('requirements', $body);
-    exit;
+$validSteps = ['language', 'requirements', 'database', 'admin', 'install', 'finish'];
+if (!in_array($step, $validSteps, true)) {
+    $step = 'language';
 }
 
-if ($step === 'database') {
-    if (empty($state['lang']) || !rj_requirements_ok()) {
-        header('Location: ' . rj_installer_url('step=requirements'));
-        exit;
-    }
-    $err = '';
-    $submitted = $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['db_host']);
-
-    if ($submitted) {
-        $cfg = [
-            'host' => trim($_POST['db_host'] ?? '127.0.0.1'),
-            'port' => (int) ($_POST['db_port'] ?? 3306),
-            'name' => trim($_POST['db_name'] ?? ''),
-            'user' => trim($_POST['db_user'] ?? ''),
-            'pass' => (string) ($_POST['db_pass'] ?? ''),
-        ];
-        $siteName = trim($_POST['site_name'] ?? '');
-        $siteUrl = trim($_POST['site_url'] ?? '');
-
-        if ($cfg['name'] === '' || $cfg['user'] === '' || $siteName === '' || $siteUrl === '') {
-            $err = $t['err_db'];
-        } else {
-            $dbTest = rj_db_test($cfg);
-            if ($dbTest['ok']) {
-                $state['db'] = $cfg;
-                $state['site_name'] = $siteName;
-                $state['site_url'] = $siteUrl;
-                rj_set_state($state);
-                header('Location: ' . rj_installer_url('step=admin'));
-                exit;
-            }
-            $err = $t['err_db'] . ': ' . $dbTest['msg'];
-        }
-    }
-
-    $db = $state['db'] ?? [];
-    if ($submitted) {
-        $db = [
-            'host' => trim($_POST['db_host'] ?? '127.0.0.1'),
-            'port' => (int) ($_POST['db_port'] ?? 3306),
-            'name' => trim($_POST['db_name'] ?? ''),
-            'user' => trim($_POST['db_user'] ?? ''),
-            'pass' => (string) ($_POST['db_pass'] ?? ''),
-        ];
-    } elseif (empty($db)) {
-        $db = ['host' => '127.0.0.1', 'port' => '3306', 'name' => '', 'user' => '', 'pass' => ''];
-    }
-
-    $body = $err ? '<div class="alert">' . rj_esc($err) . '</div>' : '';
-    $body .= '<form method="post">';
-    $body .= '<label>' . rj_esc($t['db_host']) . '</label><input name="db_host" dir="ltr" value="' . rj_esc($db['host']) . '" required>';
-    $body .= '<label>' . rj_esc($t['db_port']) . '</label><input name="db_port" type="number" dir="ltr" value="' . rj_esc((string) $db['port']) . '" required>';
-    $body .= '<label>' . rj_esc($t['db_name']) . '</label><input name="db_name" dir="ltr" value="' . rj_esc($db['name']) . '" required>';
-    $body .= '<label>' . rj_esc($t['db_user']) . '</label><input name="db_user" dir="ltr" value="' . rj_esc($db['user']) . '" required>';
-    $body .= '<label>' . rj_esc($t['db_pass']) . '</label><input name="db_pass" type="password" dir="ltr" value="">';
-    $body .= '<label>' . rj_esc($t['site_name']) . '</label><input name="site_name" value="' . rj_esc($state['site_name'] ?? 'RJ Nexus') . '" required>';
-    $body .= '<label>' . rj_esc($t['site_url']) . '</label><input name="site_url" type="url" dir="ltr" value="' . rj_esc($state['site_url'] ?? rj_http_host()) . '" required>';
-    $body .= '<div class="row">'
-        . '<a href="' . rj_installer_url('step=requirements') . '" class="btn ghost">' . rj_esc($t['back']) . '</a>'
-        . '<button class="btn" type="submit">' . rj_esc($t['db_test']) . '</button>'
-        . '</div></form>';
-    rj_render('database', $body);
-    exit;
-}
-
-if ($step === 'admin') {
-    if (empty($state['db'])) {
-        header('Location: ' . rj_installer_url('step=database'));
-        exit;
-    }
-    $err = '';
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['adm_email'])) {
-        $name = trim($_POST['adm_name'] ?? '');
-        $email = trim($_POST['adm_email'] ?? '');
-        $pass = (string) ($_POST['adm_pass'] ?? '');
-        $pass2 = (string) ($_POST['adm_pass2'] ?? '');
-
-        if ($name === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($pass) < 8) {
-            $err = $t['err_admin'];
-        } elseif ($pass !== $pass2) {
-            $err = $t['adm_mismatch'];
-        } else {
-            $state['admin'] = ['name' => $name, 'email' => $email, 'pass' => $pass];
-            rj_set_state($state);
-            header('Location: ' . rj_installer_url('step=install'));
-            exit;
-        }
-    }
-    $body = $err ? '<div class="alert">' . rj_esc($err) . '</div>' : '';
-    $body .= '<form method="post">';
-    $body .= '<label>' . rj_esc($t['adm_name']) . '</label><input name="adm_name" value="' . rj_esc($_POST['adm_name'] ?? '') . '" required>';
-    $body .= '<label>' . rj_esc($t['adm_email']) . '</label><input name="adm_email" type="email" dir="ltr" value="' . rj_esc($_POST['adm_email'] ?? '') . '" required>';
-    $body .= '<label>' . rj_esc($t['adm_pass']) . '</label><input name="adm_pass" type="password" dir="ltr" minlength="8" required>';
-    $body .= '<label>' . rj_esc($t['adm_pass2']) . '</label><input name="adm_pass2" type="password" dir="ltr" minlength="8" required>';
-    $body .= '<div class="row">'
-        . '<a href="' . rj_installer_url('step=database') . '" class="btn ghost">' . rj_esc($t['back']) . '</a>'
-        . '<button class="btn" type="submit">' . rj_esc($t['adm_continue']) . '</button>'
-        . '</div></form>';
-    rj_render('admin', $body);
-    exit;
-}
-
-if ($step === 'install') {
-    if (empty($state['admin'])) {
-        header('Location: ' . rj_installer_url('step=admin'));
-        exit;
-    }
-    @set_time_limit(300);
-    @ini_set('memory_limit', '256M');
-    $result = rj_install_run();
-    if (!empty($result['ok'])) {
-        header('Location: ' . rj_installer_url('step=finish'));
-        exit;
-    }
-    $body = '<div class="alert">' . rj_esc($t['err_inst']) . '</div>';
-    $body .= '<div class="log">' . rj_esc($result['error'] ?? '') . '</div>';
-    $body .= '<div class="row">'
-        . '<a href="' . rj_installer_url('step=admin') . '" class="btn ghost">' . rj_esc($t['back']) . '</a>'
-        . '<a href="' . rj_installer_url('step=install') . '" class="btn">' . rj_esc($t['retry']) . '</a>'
-        . '</div>';
-    rj_render('install', $body);
-    exit;
-}
-
-if ($step === 'finish') {
-    if (!file_exists(RJ_LOCK)) {
-        header('Location: ' . rj_installer_url('step=install'));
-        exit;
-    }
-    if (isset($_POST['delete_installer'])) {
-        $files = [
-            __DIR__ . '/../public/install.php',
-            __FILE__,
-            __DIR__ . '/helpers.php',
-        ];
-        foreach (glob(__DIR__ . '/lang/*.php') as $f) {
-            $files[] = $f;
-        }
-        foreach ($files as $f) {
-            @unlink($f);
-        }
-        @rmdir(__DIR__ . '/lang');
-        @rmdir(__DIR__);
-        header('Location: /admin');
-        exit;
-    }
-    $body = '<div class="alert alert-ok">' . rj_esc($t['ins_done']) . '</div>';
-    $body .= '<p style="color:#9ca3af;margin-top:16px;font-size:14px;line-height:1.6">' . rj_esc($t['fin_sub']) . '</p>';
-    $body .= '<p style="color:#9ca3af;margin-top:12px;font-size:13px">For your security, delete <code>public/install.php</code> and the <code>installer/</code> folder after setup.</p>';
-    $body .= '<form method="post" style="margin-top:24px"><button type="submit" name="delete_installer" class="btn">' . rj_esc($t['delete_installer']) . '</button></form>';
-    rj_render('finish', $body);
-    exit;
-}
-
-$selectedLang = $state['lang'] ?? 'en';
-$body = '<p style="font-size:14px;color:#9ca3af;margin-bottom:8px">' . rj_esc($t['lang']) . '</p><form method="post" class="langs">';
-foreach (rj_languages() as $code => $label) {
-    $active = $code === $selectedLang ? ' active' : '';
-    $body .= '<button type="submit" name="rj_lang" value="' . rj_esc($code) . '" class="lang-btn' . $active . '">' . rj_esc($label) . '</button>';
-}
-$body .= '</form>';
-rj_render('language', $body);
-exit;
+require __DIR__ . '/steps/' . $step . '.php';
