@@ -235,26 +235,35 @@ function rj_artisan(array $args): array
     return ['code' => $code, 'out' => $output];
 }
 
-
 function rj_install_run(?string $sqlContent = null): array
 {
-    $cfg = $_SESSION['rj_install'];
+    $cfg = $_SESSION['rj_install'] ?? [];
     $log = [];
     $lang = $cfg['lang'] ?? 'en';
 
+    // Sığorta (Fallback) dəyərləri
+    $siteName = $cfg['site_name'] ?? 'RJ Nexus';
+    $siteUrl = $cfg['site_url'] ?? rj_http_host();
+    $db = $cfg['db'] ?? [];
+    $dbHost = $db['host'] ?? '127.0.0.1';
+    $dbPort = $db['port'] ?? '3306';
+    $dbName = $db['name'] ?? '';
+    $dbUser = $db['user'] ?? '';
+    $dbPass = $db['pass'] ?? '';
+
     try {
         rj_env_write([
-            'APP_NAME' => $cfg['site_name'],
-            'APP_URL' => rtrim($cfg['site_url'], '/'),
+            'APP_NAME' => $siteName,
+            'APP_URL' => rtrim($siteUrl, '/'),
             'APP_ENV' => 'production',
             'APP_DEBUG' => 'false',
             'APP_LOCALE' => $lang,
             'APP_KEY' => 'base64:' . base64_encode(random_bytes(32)),
-            'DB_HOST' => $cfg['db']['host'],
-            'DB_PORT' => $cfg['db']['port'],
-            'DB_DATABASE' => $cfg['db']['name'],
-            'DB_USERNAME' => $cfg['db']['user'],
-            'DB_PASSWORD' => $cfg['db']['pass'],
+            'DB_HOST' => $dbHost,
+            'DB_PORT' => $dbPort,
+            'DB_DATABASE' => $dbName,
+            'DB_USERNAME' => $dbUser,
+            'DB_PASSWORD' => $dbPass,
         ]);
         $log[] = '.env written with app key';
 
@@ -262,9 +271,9 @@ function rj_install_run(?string $sqlContent = null): array
         rj_artisan(['cache:clear']);
 
         $pdo = new PDO(
-            sprintf('mysql:host=%s;port=%d;dbname=%s;charset=utf8mb4', $cfg['db']['host'], (int) $cfg['db']['port'], $cfg['db']['name']),
-            $cfg['db']['user'],
-            $cfg['db']['pass'],
+            sprintf('mysql:host=%s;port=%d;dbname=%s;charset=utf8mb4', $dbHost, (int) $dbPort, $dbName),
+            $dbUser,
+            $dbPass,
             [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
         );
 
@@ -382,7 +391,7 @@ function rj_install_run(?string $sqlContent = null): array
 
         file_put_contents(RJ_LOCK, json_encode([
             'installed_at' => date('c'),
-            'version' => '1.5.0',
+            'version' => '1.6.0',
             'lang' => $lang,
         ], JSON_PRETTY_PRINT));
 
