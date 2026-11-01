@@ -3,7 +3,7 @@ if (!defined('RJ_INSTALLER')) { http_response_code(403); exit; }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['rj_lang']) && isset(rj_languages()[$_POST['rj_lang']])) {
     rj_set_state(array_merge(rj_state(), ['lang' => $_POST['rj_lang']]));
-    header('Location: ' . rj_installer_url('step=welcome'));
+    header('Location: ' . rj_installer_url('step=ecosystem'));
     exit;
 }
 
