@@ -31,9 +31,9 @@ function rj_render(string $step, string $body, string $extra = ''): void
     $lang = $_SESSION['rj_install']['lang'] ?? 'en';
     $dir = rj_is_rtl($lang) ? 'rtl' : 'ltr';
 
-    $stepsMap = ['language' => 1, 'intro' => 2, 'requirements' => 3, 'database' => 4, 'admin' => 5, 'install' => 6];
+    $stepsMap = ['language' => 1, 'ecosystem' => 2, 'intro' => 3, 'requirements' => 4, 'database' => 5, 'admin' => 6, 'install' => 7];
     $stepIdx = $stepsMap[$step] ?? 0;
-    $totalSteps = 6;
+    $totalSteps = 7;
 
     $nav = '';
     if ($stepIdx > 0) {
@@ -113,7 +113,7 @@ if (file_exists(RJ_LOCK) && $step !== 'finish') {
     exit;
 }
 
-$validSteps = ['language', 'intro', 'requirements', 'database', 'admin', 'install', 'finish'];
+$validSteps = ['language', 'ecosystem', 'intro', 'requirements', 'database', 'admin', 'install', 'finish'];
 if (!in_array($step, $validSteps, true)) {
     $step = 'language';
 }
