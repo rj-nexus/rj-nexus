@@ -1,7 +1,7 @@
 [
     {
-        "id": 1,
-        "post_id": 1,
+        "id": 8,
+        "post_id": 8,
         "locale": "az",
         "title": "Home",
         "content": "",
@@ -24,8 +24,8 @@
         "updated_at": "2026-11-01 04:45:25"
     },
     {
-        "id": 2,
-        "post_id": 2,
+        "id": 9,
+        "post_id": 9,
         "locale": "az",
         "title": "About",
         "content": "<h2>About Us</h2><p>This is the About page. Edit this content from the admin panel.</p><p>You can also switch to RJBuilder mode to design this page visually.</p>",
@@ -48,8 +48,8 @@
         "updated_at": "2026-11-01 04:45:25"
     },
     {
-        "id": 3,
-        "post_id": 3,
+        "id": 10,
+        "post_id": 10,
         "locale": "az",
         "title": "Contact",
         "content": "",
@@ -72,8 +72,8 @@
         "updated_at": "2026-11-01 04:45:26"
     },
     {
-        "id": 4,
-        "post_id": 4,
+        "id": 11,
+        "post_id": 11,
         "locale": "az",
         "title": "Privacy Policy",
         "content": "<h2>Privacy Policy</h2><p>This is a placeholder for your privacy policy. Replace it with your own content that describes how you collect, use, and protect personal data.</p><h3>Data Collection</h3><p>Explain what data you collect from visitors.</p><h3>Cookies</h3><p>Explain your cookie usage.</p><h3>Third Parties</h3><p>Explain if you share data with third parties.</p>",
@@ -96,8 +96,8 @@
         "updated_at": "2026-11-01 04:45:26"
     },
     {
-        "id": 5,
-        "post_id": 5,
+        "id": 12,
+        "post_id": 12,
         "locale": "az",
         "title": "Sample Page",
         "content": "<h2>Sample Page</h2><p>This is an example page. It's different from a blog post because it will stay in one place and will show up in your site navigation (in most themes).</p><p>Most people start with an About page that introduces them to potential site visitors. It might say something like this:</p><blockquote>Hi there! I'm a bike messenger by day, aspiring actor by night, and this is my website. I live in Los Angeles, have a great dog named Jack, and I like piña coladas.</blockquote>",
@@ -120,8 +120,8 @@
         "updated_at": "2026-11-01 04:45:26"
     },
     {
-        "id": 6,
-        "post_id": 6,
+        "id": 13,
+        "post_id": 13,
         "locale": "az",
         "title": "Hello World",
         "content": "<p>Welcome to RJ CMS! This is your first blog post. Edit or delete it, then start writing.</p><h2>What is RJ CMS?</h2><p>RJ CMS is a modern self-hosted CMS built on Laravel 12, featuring RJBuilder — a drag-and-drop visual page builder.</p><h2>Getting Started</h2><p>Visit the admin panel to create new posts, pages, menus, and more. You can switch any post or page to RJBuilder mode to design it visually.</p><p>Happy building!</p>",
@@ -144,8 +144,8 @@
         "updated_at": "2026-11-01 04:45:26"
     },
     {
-        "id": 7,
-        "post_id": 7,
+        "id": 14,
+        "post_id": 14,
         "locale": "az",
         "title": "Getting Started with RJBuilder",
         "content": "<p>RJBuilder is the visual page builder included with RJ CMS. It provides a modern drag-and-drop interface for designing pages, headers, footers, and popups.</p><h2>Key Features</h2><ul><li>Drag-and-drop blocks</li><li>Responsive breakpoints (Desktop / Tablet / Mobile)</li><li>Custom CSS and animations</li><li>Dynamic tags for content</li><li>AI assistant integration</li></ul><h2>How to Use</h2><p>Open any post or page in edit mode, select \"RJBuilder\" as the edit mode, and click \"Open Builder\". You can then start adding blocks and customizing styles.</p>",
@@ -168,8 +168,8 @@
         "updated_at": "2026-11-01 04:45:26"
     },
     {
-        "id": 9,
-        "post_id": 3,
+        "id": 15,
+        "post_id": 10,
         "locale": "en",
         "title": "Contact",
         "content": "",

@@ -1,6 +1,6 @@
 [
     {
-        "id": 1,
+        "id": 3,
         "name": "Posts",
         "slug": "post",
         "singular_name": "Post",
@@ -22,7 +22,7 @@
         "updated_at": "2026-11-01 04:45:25"
     },
     {
-        "id": 2,
+        "id": 4,
         "name": "Pages",
         "slug": "page",
         "singular_name": "Page",

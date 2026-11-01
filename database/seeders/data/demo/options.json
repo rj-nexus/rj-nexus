@@ -72,7 +72,7 @@
     {
         "id": 8,
         "option_name": "language",
-        "option_value": "en",
+        "option_value": "es",
         "option_group": "general",
         "option_type": "text",
         "autoload": 1,
@@ -256,8 +256,8 @@
         "option_group": "ai",
         "option_type": "number",
         "autoload": 1,
-        "created_at": "2026-11-01 04:45:25",
-        "updated_at": "2026-11-01 04:45:25"
+        "created_at": "2026-11-01 07:25:55",
+        "updated_at": "2026-11-01 07:25:55"
     },
     {
         "id": 27,
@@ -372,12 +372,12 @@
     {
         "id": 38,
         "option_name": "rj_installed_at",
-        "option_value": "2026-11-01 04:45:25",
+        "option_value": "2026-11-01 07:25:55",
         "option_group": "system",
         "option_type": "text",
         "autoload": 1,
-        "created_at": "2026-11-01 04:45:25",
-        "updated_at": "2026-11-01 04:45:25"
+        "created_at": "2026-11-01 07:25:55",
+        "updated_at": "2026-11-01 07:25:55"
     },
     {
         "id": 39,
@@ -432,7 +432,7 @@
     {
         "id": 44,
         "option_name": "frontend_locales",
-        "option_value": "[\"az\",\"de\",\"en\"]",
+        "option_value": "[\"az\",\"de\",\"en\",\"es\"]",
         "option_group": "general",
         "option_type": "text",
         "autoload": 1,
@@ -452,7 +452,7 @@
     {
         "id": 46,
         "option_name": "frontend_locale",
-        "option_value": "en",
+        "option_value": "es",
         "option_group": "language",
         "option_type": "text",
         "autoload": 1,

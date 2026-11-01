@@ -1,6 +1,6 @@
 [
     {
-        "id": 1,
+        "id": 3,
         "name": "Categories",
         "slug": "category",
         "singular_name": "Category",
@@ -18,7 +18,7 @@
         "updated_at": "2026-11-01 04:45:25"
     },
     {
-        "id": 2,
+        "id": 4,
         "name": "Tags",
         "slug": "tag",
         "singular_name": "Tag",
