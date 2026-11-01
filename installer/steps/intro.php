@@ -90,6 +90,11 @@ transition:transform .8s cubic-bezier(.2,.8,.2,1),opacity .5s ease,filter .6s ea
 .sl-in h1,.sl-in h2,.sl-in h3{margin:0 0 16px;font-size:clamp(26px,5vw,46px);line-height:1.15;font-weight:800;letter-spacing:-.01em;color:#fff;background:linear-gradient(90deg,#fff 0%,#e9d5ff 45%,#f9a8d4 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 24px rgba(167,139,250,.45))}
 .sl-in p{max-width:640px;margin-left:auto;margin-right:auto;color:#cbd0e6;line-height:1.75;font-size:clamp(15px,2vw,18px);text-shadow:0 2px 18px rgba(5,4,15,.9)}
 .sl-in svg,.sl-in img{max-width:100%}
+.sl-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center}
+.sl-ic{position:relative;width:96px;height:96px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 26px;background:transparent;border:2px solid rgba(233,213,255,.85);color:#f9a8d4;box-shadow:0 0 28px rgba(167,139,250,.5),inset 0 0 18px rgba(167,139,250,.25)}
+.sl-ic svg{width:42px;height:42px;filter:drop-shadow(0 0 8px rgba(244,114,182,.7))}
+.sl-ic::after{content:"";position:absolute;inset:-2px;border-radius:50%;border:1.5px solid rgba(244,114,182,.7);opacity:0;animation:sl-ring 2.8s ease-out infinite;pointer-events:none}
+@keyframes sl-ring{0%{opacity:.9;transform:scale(1)}100%{opacity:0;transform:scale(1.55)}}
 .slide.active .st{animation:in-up .75s calc(.3s + var(--k,0)*.09s) cubic-bezier(.2,.8,.2,1) backwards}
 .intro.boot .slide.active .st{animation-delay:calc(1.9s + var(--k,0)*.1s)}
 
