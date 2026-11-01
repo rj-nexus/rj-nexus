@@ -1,6 +1,6 @@
 {
     "name": "RJ Nexus Starter Demo",
-    "exported_at": "2026-11-01T05:53:56+00:00",
+    "exported_at": "2026-11-01T05:59:32+00:00",
     "tables": {
         "options": 50,
         "post_types": 2,
@@ -22,6 +22,7 @@
         "form_fields": 0,
         "themes": 1,
         "theme_customizations": 0,
+        "templates": 2,
         "widgets": 0,
         "global_widgets": 0,
         "media": 2,
@@ -29,5 +30,5 @@
         "custom_fonts": 0,
         "custom_icons": 0
     },
-    "total_rows": 77
+    "total_rows": 79
 }
