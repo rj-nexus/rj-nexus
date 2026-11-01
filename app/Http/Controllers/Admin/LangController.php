@@ -8,7 +8,7 @@ class LangController extends Controller
 {
     public function switch(string $locale)
     {
-        if (preg_match('/^[a-z]{2}(_[A-Z]{2})?$/', $locale)) {
+        if (preg_match('/^[a-z]{2}(_[A-Z]{2})?$/', $locale) && in_array($locale, rj_available_locales(), true)) {
             session(['locale' => $locale]);
             app()->setLocale($locale);
         }
