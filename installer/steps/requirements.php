@@ -35,12 +35,10 @@ $body .= '<div id="req-error" class="alert" style="' . ($allOk ? 'display:none;'
 
 $body .= '<div class="row">';
 $body .= '<a href="' . rj_installer_url('step=intro&slide=5') . '" class="btn ghost">' . rj_esc($t['back']) . '</a>';
-
-$body .= '<div class="row-r">';
 $body .= '<button type="button" id="check-btn" class="btn ghost" data-text="' . rj_esc($t['check'] ?? 'Check') . '">' . rj_esc($t['check'] ?? 'Check') . '</button>';
-$body .= '<a href="' . rj_installer_url('step=database') . '" class="btn" id="next-btn" style="' . ($allOk ? '' : 'display:none;') . '">' . rj_esc($t['req_btn']) . '</a>';
 $body .= '</div>';
-$body .= '</div>';
+
+$body .= '<a href="' . rj_installer_url('step=database') . '" class="btn next" id="next-btn" style="' . ($allOk ? '' : 'display:none;') . '">' . rj_esc($t['req_btn']) . '</a>';
 
 $js = <<<'HTML'
 <style>
@@ -72,20 +70,20 @@ body::after{content:"";position:fixed;inset:-20%;z-index:0;pointer-events:none;f
 .card .alert{margin-top:18px;padding:14px 18px;border-radius:16px;background:rgba(251,113,133,.06)!important;border:1px solid rgba(251,113,133,.4)!important;color:#fda4af!important;line-height:1.6}
 
 .card .row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:30px}
-.card .row-r{display:flex;align-items:center;gap:12px}
+.card .row .btn{flex:1}
 .card .btn{position:relative;display:inline-flex;align-items:center;justify-content:center;padding:13px 28px;border-radius:9999px;border:0;color:#fff;font-weight:800;letter-spacing:.03em;text-decoration:none;cursor:pointer;overflow:hidden;background:linear-gradient(110deg,#7c3aed,#ec4899,#f59e0b,#7c3aed);background-size:300% 100%;box-shadow:0 0 0 1px rgba(255,255,255,.25) inset,0 16px 40px -14px rgba(236,72,153,.85),0 0 46px -10px rgba(124,58,237,.7);animation:rq-flow 6s linear infinite;transition:transform .3s cubic-bezier(.2,.9,.3,1.3),box-shadow .3s,border-color .25s,color .25s}
 @keyframes rq-flow{to{background-position:-300% 0}}
-.card .btn:hover{transform:scale(1.06)}
-.card .btn:active{transform:scale(.96)}
+.card .btn:hover{transform:scale(1.04)}
+.card .btn:active{transform:scale(.97)}
 .card .btn.ghost{background:transparent;color:#d8b4fe;border:1.5px solid rgba(168,85,247,.5);box-shadow:none;animation:none;font-weight:600}
 .card .btn.ghost:hover{color:#fff;border-color:#ec4899;box-shadow:0 0 26px -4px rgba(236,72,153,.8)}
+.card .btn.next{display:flex;width:100%;margin-top:14px;padding:16px 28px;font-size:16px;text-align:center}
 .card .btn:disabled{opacity:.6;cursor:wait}
 .card .btn:focus-visible{outline:2px solid #fff;outline-offset:4px}
 
 @media (max-width:520px){
-.card .row{flex-direction:column-reverse;align-items:stretch}
-.card .row-r{flex-direction:column-reverse;align-items:stretch}
-.card .btn{width:100%}
+.card .btn{padding:13px 18px}
+.card .btn.next{padding:15px 18px;font-size:15px}
 }
 </style>
 <script>
@@ -110,7 +108,7 @@ document.getElementById("check-btn").addEventListener("click", function() {
             const errDiv = document.getElementById("req-error");
 
             if (data.all_ok) {
-                nextBtn.style.display = "inline-block";
+                nextBtn.style.display = "flex";
                 errDiv.style.display = "none";
             } else {
                 nextBtn.style.display = "none";
