@@ -45,7 +45,7 @@ $body = '<div class="intro boot" id="inStage" data-i="' . ($startSlide - 1) . '"
     . '<a href="' . rj_esc($skipUrl) . '" class="in-skip">' . rj_esc($t['skip'] ?? 'Skip') . ' ' . $arrow . '</a>'
     . '<div class="in-fit" id="inFit">'
     . '<div class="slides" id="inSlides">' . $slidesHtml . '</div>'
-    . '<nav class="tl" id="inTl"><i class="tl-bar"><i class="tl-fill" id="inFill"></i></i>' . $timelineHtml . '</nav>'
+    . '<nav class="tl" id="inTl">' . $timelineHtml . '</nav>'
     . '<div class="ctrls">'
     . '<a href="' . rj_esc($prevUrl) . '" id="inBack" class="bk' . ($startSlide > 1 ? '' : ' off') . '">' . $arrowBack . '<span>' . rj_esc($t['back'] ?? 'Back') . '</span></a>'
     . '<div class="go-wrap" id="inWrap"><b class="ring r1"></b><b class="ring r2"></b>'
@@ -95,16 +95,15 @@ transition:transform .8s cubic-bezier(.2,.8,.2,1),opacity .5s ease,filter .6s ea
 .slide.active .st{animation:in-up .75s calc(.3s + var(--k,0)*.09s) cubic-bezier(.2,.8,.2,1) backwards}
 .intro.boot .slide.active .st{animation-delay:calc(1.9s + var(--k,0)*.1s)}
 
-/* ---- timeline ---- */
-.tl{position:relative;display:flex;justify-content:space-between;width:min(84vw,360px);margin:34px auto 0;animation:in-up .9s 2s backwards}
-.tl-bar{position:absolute;left:14px;right:14px;top:50%;height:2px;margin-top:-1px;border-radius:2px;background:rgba(168,85,247,.25)}
-.tl-fill{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:2px;background:linear-gradient(90deg,#7c3aed,#ec4899);box-shadow:0 0 12px rgba(236,72,153,.8);transition:width .85s cubic-bezier(.7,0,.2,1)}
-.tl-fill::after{content:"";position:absolute;right:-5px;top:50%;width:10px;height:10px;margin-top:-5px;border-radius:50%;background:#fff;box-shadow:0 0 16px 4px rgba(244,114,182,.9)}
-.tl-n{position:relative;z-index:1;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#8b8fa8;background:#150d33;border:1px solid rgba(168,85,247,.32);text-decoration:none;transition:transform .4s cubic-bezier(.2,.9,.3,1.4),background .4s,color .4s,border-color .4s}
+/* ---- timeline (fonsuz, dairevi haşiye) ---- */
+.tl{position:relative;display:flex;justify-content:center;gap:34px;margin:34px auto 0;animation:in-up .9s 2s backwards}
+.tl-n{position:relative;z-index:1;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#8b8fa8;background:transparent;border:1.5px solid rgba(168,85,247,.45);text-decoration:none;transition:transform .4s cubic-bezier(.2,.9,.3,1.4),color .4s,border-color .4s,box-shadow .4s}
+.tl-n:not(:first-child)::before{content:"";position:absolute;right:100%;top:50%;width:34px;height:2px;margin-top:-1px;background:rgba(168,85,247,.25);transition:background .5s}
+.tl-n.done::before,.tl-n.cur::before{background:linear-gradient(90deg,#7c3aed,#ec4899)!important}
 .tl-n:hover{border-color:#ec4899;color:#fff}
-.tl-n.done{color:#fff;background:linear-gradient(135deg,#7c3aed,#ec4899);border-color:transparent}
-.tl-n.cur{color:#fff;transform:scale(1.28);background:linear-gradient(135deg,#7c3aed,#ec4899);border-color:transparent;animation:in-pulse 2s ease-out infinite}
-@keyframes in-pulse{0%{box-shadow:0 0 0 0 rgba(236,72,153,.6)}100%{box-shadow:0 0 0 14px rgba(236,72,153,0)}}
+.tl-n.done{color:#f9a8d4;border-color:#ec4899}
+.tl-n.cur{color:#fff;transform:scale(1.25);border-color:#f472b6;box-shadow:0 0 14px rgba(244,114,182,.7),inset 0 0 10px rgba(244,114,182,.35);animation:in-pulse 2s ease-out infinite}
+@keyframes in-pulse{0%{box-shadow:0 0 0 0 rgba(236,72,153,.6),inset 0 0 10px rgba(244,114,182,.35)}100%{box-shadow:0 0 0 14px rgba(236,72,153,0),inset 0 0 10px rgba(244,114,182,.35)}}
 
 /* ---- duymeler ---- */
 .ctrls{display:flex;align-items:center;justify-content:center;gap:18px;margin-top:26px;animation:in-up .9s 2.2s backwards}
@@ -116,7 +115,7 @@ transition:transform .8s cubic-bezier(.2,.8,.2,1),opacity .5s ease,filter .6s ea
 @keyframes in-flow{to{background-position:-300% 0}}
 .go::after{content:"";position:absolute;top:0;bottom:0;left:-40%;width:30%;transform:skewX(-22deg);background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);animation:in-shine 3s 2.6s ease-in-out infinite}
 @keyframes in-shine{0%{left:-40%}55%,100%{left:130%}}
-.go .arr{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.95);color:#7c3aed;box-shadow:0 6px 16px -4px rgba(0,0,0,.45);animation:in-nudge 1.6s ease-in-out infinite}
+.go .arr{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:transparent;border:2px solid rgba(255,255,255,.95);color:#fff;animation:in-nudge 1.6s ease-in-out infinite}
 @keyframes in-nudge{50%{transform:translateX(5px)}}
 .go:hover{transform:scale(1.07);box-shadow:0 0 0 1px rgba(255,255,255,.4) inset,0 24px 58px -12px rgba(236,72,153,1),0 0 84px -4px rgba(168,85,247,.95)}
 .go:active{transform:scale(.96)}
@@ -136,6 +135,8 @@ transition:transform .8s cubic-bezier(.2,.8,.2,1),opacity .5s ease,filter .6s ea
 .go{font-size:15px;padding:12px 14px 12px 26px}
 .bk{padding:12px 16px}
 .ctrls{gap:12px}
+.tl{gap:28px}
+.tl-n:not(:first-child)::before{width:28px}
 }
 @media (max-height:520px){.slides{min-height:0}.tl{margin-top:16px}.ctrls{margin-top:14px}}
 </style>
@@ -151,7 +152,6 @@ var card=document.querySelector('.card');
 var fit=document.getElementById('inFit');
 var slides=[].slice.call(stage.querySelectorAll('.slide'));
 var nodes=[].slice.call(stage.querySelectorAll('.tl-n'));
-var fill=document.getElementById('inFill');
 var back=document.getElementById('inBack'),next=document.getElementById('inNext'),wrap=document.getElementById('inWrap');
 var N=slides.length,idx=parseInt(stage.getAttribute('data-i'),10)||0;
 var finalUrl=stage.getAttribute('data-final');
@@ -242,7 +242,7 @@ ctx.beginPath();ctx.arc(X,Y,s.r,0,6.283);ctx.fill()
 }
 ctx.globalAlpha=1;
 
-/* surət zamani parlaq iz */
+/* sürət zamanı parlaq iz */
 if(b>.08){
 ctx.globalCompositeOperation='lighter';
 var fg=ctx.createRadialGradient(W/2,H*.5,0,W/2,H*.5,Math.max(W,H)*.6);
@@ -298,7 +298,6 @@ var lock=false;
 function urlOf(i){return slides[i].getAttribute('data-url')}
 function ui(){
 nodes.forEach(function(n,i){n.classList.toggle('done',i<idx);n.classList.toggle('cur',i===idx)});
-fill.style.width=(N>1?idx/(N-1)*100:0)+'%';
 back.classList.toggle('off',idx===0);
 back.setAttribute('href',idx>0?urlOf(idx-1):'#');
 var last=idx===N-1;
