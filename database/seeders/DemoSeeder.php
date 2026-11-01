@@ -85,7 +85,6 @@ class DemoSeeder extends Seeder
                 $this->copyMediaFiles();
             });
 
-            // Cache-i təmizləyirik ki, yeni dillər və ayarlar dərhal oxunsun
             Option::flush();
             $this->command?->info('Options cache flushed.');
 
@@ -385,10 +384,24 @@ class DemoSeeder extends Seeder
                 $content[$key] = $this->remapTemplateContent($value);
             } elseif (is_scalar($value)) {
                 $keyLower = strtolower((string) $key);
-                foreach ($this->idMap as $table => $map) {
-                    if (str_contains($keyLower, str_replace('rj_', '', $table)) && isset($map[$value])) {
-                        $content[$key] = $map[$value];
-                    }
+
+                if (str_contains($keyLower, 'menu') && isset($this->idMap['rj_menus'][$value])) {
+                    $content[$key] = $this->idMap['rj_menus'][$value];
+                }
+                if (str_contains($keyLower, 'post') && isset($this->idMap['rj_posts'][$value])) {
+                    $content[$key] = $this->idMap['rj_posts'][$value];
+                }
+                if (str_contains($keyLower, 'category') && isset($this->idMap['rj_categories'][$value])) {
+                    $content[$key] = $this->idMap['rj_categories'][$value];
+                }
+                if (str_contains($keyLower, 'tag') && isset($this->idMap['rj_tags'][$value])) {
+                    $content[$key] = $this->idMap['rj_tags'][$value];
+                }
+                if (str_contains($keyLower, 'form') && isset($this->idMap['rj_forms'][$value])) {
+                    $content[$key] = $this->idMap['rj_forms'][$value];
+                }
+                if (str_contains($keyLower, 'media') && isset($this->idMap['rj_media'][$value])) {
+                    $content[$key] = $this->idMap['rj_media'][$value];
                 }
             }
         }
