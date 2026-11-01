@@ -243,20 +243,14 @@ function rj_install_run(?string $sqlContent = null): array
             'APP_ENV' => 'production',
             'APP_DEBUG' => 'false',
             'APP_LOCALE' => $cfg['lang'] ?? 'en',
-            'APP_KEY' => '',
+            'APP_KEY' => 'base64:' . base64_encode(random_bytes(32)),
             'DB_HOST' => $cfg['db']['host'],
             'DB_PORT' => $cfg['db']['port'],
             'DB_DATABASE' => $cfg['db']['name'],
             'DB_USERNAME' => $cfg['db']['user'],
             'DB_PASSWORD' => $cfg['db']['pass'],
         ]);
-        $log[] = '.env written';
-
-        $kg = rj_artisan(['key:generate', '--force']);
-        if ($kg['code'] !== 0) {
-            throw new RuntimeException('key:generate failed: ' . $kg['out']);
-        }
-        $log[] = 'app key generated';
+        $log[] = '.env written with app key';
 
         rj_artisan(['config:clear']);
         rj_artisan(['cache:clear']);
