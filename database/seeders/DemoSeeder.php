@@ -38,7 +38,6 @@ class DemoSeeder extends Seeder
                     'post_type_id' => 'rj_post_types',
                 ]);
                 $this->importTruncate('themes.json', 'rj_themes');
-                $this->importTruncate('templates.json', 'rj_templates');
 
                 $this->importTruncate('categories.json', 'rj_categories');
                 $this->importTruncate('tags.json', 'rj_tags');
@@ -69,6 +68,7 @@ class DemoSeeder extends Seeder
                 $this->importPivot('post_term.json', 'rj_post_term', 'post_id', 'rj_posts', 'term_id', 'rj_terms');
 
                 $this->importMenuItems('menu_items.json');
+                $this->importTemplates('templates.json');
 
                 $this->importTruncate('form_fields.json', 'rj_form_fields', [
                     'form_id' => 'rj_forms',
@@ -333,6 +333,61 @@ class DemoSeeder extends Seeder
         }
 
         $this->command?->line("Imported rj_menu_items: " . count($rows));
+    }
+
+    private function importTemplates(string $file): void
+    {
+        if (!Schema::hasTable('rj_templates')) {
+            return;
+        }
+
+        $rows = $this->load($file);
+
+        DB::table('rj_templates')->delete();
+        $this->idMap['rj_templates'] = [];
+
+        if (empty($rows)) {
+            return;
+        }
+
+        foreach ($rows as $row) {
+            $oldId = $row['id'] ?? null;
+            unset($row['id']);
+
+            if (isset($row['content'])) {
+                $content = json_decode($row['content'], true);
+                if (is_array($content)) {
+                    $content = $this->remapTemplateContent($content);
+                    $row['content'] = json_encode($content, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                }
+            }
+
+            $newId = DB::table('rj_templates')->insertGetId($row);
+
+            if ($oldId !== null) {
+                $this->idMap['rj_templates'][$oldId] = $newId;
+            }
+        }
+
+        $this->command?->line("Imported rj_templates: " . count($rows));
+    }
+
+    private function remapTemplateContent(array $content): array
+    {
+        foreach ($content as $key => $value) {
+            if (is_array($value)) {
+                $content[$key] = $this->remapTemplateContent($value);
+            } elseif (is_scalar($value)) {
+                $keyLower = strtolower((string) $key);
+                foreach ($this->idMap as $table => $map) {
+                    if (str_contains($keyLower, str_replace('rj_', '', $table)) && isset($map[$value])) {
+                        $content[$key] = $map[$value];
+                    }
+                }
+            }
+        }
+
+        return $content;
     }
 
     private function copyMediaFiles(): void
