@@ -63,6 +63,7 @@ body::after{content:"";position:fixed;inset:-20%;z-index:0;pointer-events:none;f
 .rj-cp.r{right:0;box-shadow:inset 3px 0 46px rgba(244,114,182,.5),-12px 0 60px rgba(120,90,255,.5);animation:rj-cr 1.6s .75s cubic-bezier(.75,0,.2,1) forwards}
 @keyframes rj-cl{to{transform:translateX(-104%)}}
 @keyframes rj-cr{to{transform:translateX(104%)}}
+body:not(.rj-run) *{animation-play-state:paused!important}
 .rj-leave .card h1,.rj-leave .card p.sub,.rj-leave .steps,.rj-leave .rj-lead,.rj-leave .brand-logo,.rj-leave .rj-cap{opacity:0!important;transition:opacity .5s;animation:none}
 @media (max-width:699px){.chip{padding:5px}.chip .nm{display:none}.chip .cd{min-width:30px;height:24px}.rj-lead{font-size:11px}}
 @media (prefers-reduced-motion:reduce){body::before,body::after,.rj-flash,.rj-curtain,.brand-logo,.card h1,.card p.sub,.steps,.rj-lead,.rj-cap{animation:none!important}.brand-logo,.card h1,.card p.sub,.steps,.rj-lead,.rj-cap{opacity:1}}
@@ -83,22 +84,32 @@ document.body.insertBefore(cv,document.body.firstChild);
 var fl=document.createElement('div');
 fl.className='rj-flash';
 document.body.appendChild(fl);
-if(!reduce){
-var cu=document.createElement('div');
+var cu=null,born=false,curT=0,INTRO=4.8;
+function startIntro(){
+document.body.classList.add('rj-run');
+if(reduce)return;
+cu=document.createElement('div');
 cu.className='rj-curtain';
 cu.innerHTML='<div class="rj-seam"></div><div class="rj-cp l"></div><div class="rj-cp r"></div>';
 document.body.appendChild(cu);
-setTimeout(function(){if(cu.parentNode)cu.parentNode.removeChild(cu)},3300)
+setTimeout(function(){if(cu&&cu.parentNode){cu.parentNode.removeChild(cu);cu=null}},3300)
+}
+function skipIntro(){
+if(curT>=INTRO||reduce)return;
+t0-=(INTRO-curT)*1000;
+speed=.0014;
+if(cu&&cu.parentNode){cu.parentNode.removeChild(cu);cu=null}
+if(fl&&fl.parentNode){fl.parentNode.removeChild(fl)}
 }
 var ctx=cv.getContext('2d');
 var planets=[].slice.call(stage.querySelectorAll('.planet'));
 var N=planets.length;
-var W=0,H=0,dpr=1,F=0,cx=0,cy=0,R=200,Rs=40,cam=700;
+var W=0,H=0,dpr=1,F=0,cx=0,cy=0,R=200,AX=1,Rs=40,cam=700;
 var mx=0,my=0,tx=0,ty=0;
 var yaw=0,pitch=.25,cyw=0,cpt=.25,vy=0,vp=0,autoF=1,drag=false,moved=0,lx=0,ly=0;
 var hov=-1,go=false,chosen=-1,goT0=0,beamA=0,spin=0,capName='';
 var speed=reduce?0:.1,target=reduce?0:.0014,ease=.028;
-var t0=performance.now(),running=true;
+var t0=0,lastT=0,running=true;
 var sx=[],sy=[];
 var base=[],pts=[],dust=[],stars=[],shocks=[],rings=[];
 var cols=['#ffffff','#ffffff','#c4b5fd','#93c5fd','#f9a8d4'];
@@ -135,8 +146,9 @@ cv.width=W*dpr;cv.height=H*dpr;
 ctx.setTransform(dpr,0,0,dpr,0,0);
 var hdr=card?card.getBoundingClientRect().bottom+6:120;
 var avail=H-hdr-76;
-R=clamp(Math.min(W*.37,avail*.5-18),100,440);
-Rs=R*.17;cam=R*3.4;cx=W/2;cy=hdr+avail/2+4;
+R=clamp(avail*.5-14,100,460);
+AX=clamp(clamp(W*.43,110,860)/R,.45,3);
+Rs=R*.3;cam=R*3.4;cx=W/2;cy=hdr+avail/2+4;
 var n=Math.round(Math.min(460,Math.max(200,W*H/3800)));
 stars=[];
 for(var j=0;j<n;j++){var s={};mk(s,true);stars.push(s)}
@@ -169,7 +181,7 @@ var arr=rings[q],prev=null;
 for(var j=0;j<=arr.length;j++){
 var v=arr[j%arr.length];
 var p=rot(v[0]*R*rm,v[1]*R*rm,v[2]*R*rm,cyw,cpt);
-var s=cam/(cam-p[2]),X=cx+p[0]*s,Y=cy+p[1]*s;
+var s=cam/(cam-p[2]),X=cx+p[0]*AX*s,Y=cy+p[1]*s;
 if(prev){
 var d=(p[2]/R+1)/2;
 ctx.strokeStyle='rgba('+ringCol[q]+','+((.05+.3*d)*vis).toFixed(3)+')';
@@ -186,7 +198,7 @@ for(var j=0;j<dust.length;j++){
 var d=dust[j],p=rot(d[0]*R*d[3]*rm,d[1]*R*d[3]*rm,d[2]*R*d[3]*rm,cyw,cpt);
 var s=cam/(cam-p[2]),dd=(p[2]/R+1)/2;
 ctx.globalAlpha=(.1+.55*dd)*vis;
-ctx.beginPath();ctx.arc(cx+p[0]*s,cy+p[1]*s,d[4]*s*(.6+dd*.6),0,6.283);ctx.fill()
+ctx.beginPath();ctx.arc(cx+p[0]*AX*s,cy+p[1]*s,d[4]*s*(.6+dd*.6),0,6.283);ctx.fill()
 }
 ctx.globalAlpha=1
 }
@@ -239,27 +251,32 @@ ctx.fillStyle='rgba(255,255,255,'+beamA+')';
 ctx.beginPath();ctx.arc(cx+(ex-cx)*u,cy+(ey-cy)*u,3.2,0,6.283);ctx.fill();
 ctx.globalCompositeOperation='source-over'
 }
-function drawShocks(){
+function drawShocks(now){
 ctx.globalCompositeOperation='lighter';
 for(var j=shocks.length-1;j>=0;j--){
-var s=shocks[j];s.r+=s.sp;s.sp*=.985;
-var a=1-s.r/s.max;
-if(a<=0){shocks.splice(j,1);continue}
-ctx.strokeStyle='rgba('+s.c+','+(a*.85)+')';ctx.lineWidth=1.5+a*4;
-ctx.beginPath();ctx.arc(cx,cy,s.r,0,6.283);ctx.stroke()
+var sh=shocks[j],p=Math.max(0,(now-sh.t)/sh.d);
+if(p>=1){shocks.splice(j,1);continue}
+var e=1-Math.pow(1-p,3),r=Rs+(sh.max-Rs)*e,a=1-p;
+ctx.strokeStyle='rgba('+sh.c+','+(a*.8).toFixed(3)+')';ctx.lineWidth=1.5+a*4;
+ctx.beginPath();ctx.arc(cx,cy,r,0,6.283);ctx.stroke()
 }
 ctx.globalCompositeOperation='source-over'
 }
 function blast(){
-var mxr=Math.max(W,H)*.75;
-shocks.push({r:Rs,max:mxr,sp:10,c:'255,255,255'});
-shocks.push({r:Rs,max:mxr*.8,sp:7,c:'167,139,250'});
-shocks.push({r:Rs,max:mxr*.6,sp:5,c:'244,114,182'})
+var mxr=Math.max(W,H)*.7,n=performance.now();
+shocks.push({t:n,d:1500,max:mxr,c:'255,255,255'});
+shocks.push({t:n,d:1900,max:mxr*.8,c:'167,139,250'});
+shocks.push({t:n,d:2300,max:mxr*.6,c:'244,114,182'})
 }
 function frame(now){
 if(!running)return;
+if(!t0){t0=now;startIntro()}
 var t=(now-t0)/1000;
-if(!reduce&&!go&&t<1.6){speed=.12}else{speed+=(target-speed)*ease}
+curT=t;
+if(!born&&!reduce&&t>1.2){born=true;blast()}
+var dt=Math.min(.1,Math.max(.001,(now-lastT)/1000));
+lastT=now;
+if(!reduce&&!go&&t<1.6){speed=.12}else{speed+=(target-speed)*(1-Math.pow(1-ease,dt*60))}
 mx+=(tx-mx)*.05;my+=(ty-my)*.05;
 spin*=.96;
 autoF+=((hov>=0&&!go?.1:1)-autoF)*.08;
@@ -280,13 +297,13 @@ drawRings(rm,vis);
 drawDust(rm,vis);
 drawStar(t,sS*(1+e*1.6),(reduce?1:clamp((t-1.1)/.9,0,1))*(1-e*.7));
 drawBeam(t);
-drawShocks();
+drawShocks(now);
 var best=-1,bz=-1e9;
 for(var j=0;j<N;j++){
 var b=base[j],p=rot(b[0]*R*rm,b[1]*R*rm,b[2]*R*rm,cyw,cpt);
-var s=cam/(cam-p[2]),X=cx+p[0]*s,Y=cy+p[1]*s;
+var s=cam/(cam-p[2]),X=cx+p[0]*AX*s,Y=cy+p[1]*s;
 var d=(clamp(p[2]/R,-1,1)+1)/2;
-var sc=.62*s*(hov===j&&!go?1.28:1);
+var sc=(W<700?.9:1.12)*s*(hov===j&&!go?1.25:1);
 var op=(.28+.72*d)*(reduce?1:clamp((t-2.1-j*.08)/.5,0,1));
 if(go){
 if(j===chosen){X+=(cx-X)*e;Y+=(cy-Y)*e;sc*=1+e*1.4;op=1-clamp((e-.65)/.35,0,1)}
@@ -340,6 +357,7 @@ vp=clamp(vp+e.deltaY*.0003,-.09,.09);
 vy=clamp(vy+e.deltaX*.0003,-.09,.09)
 },{passive:false});
 window.addEventListener('keydown',function(e){
+if(e.key==='Escape'||e.key==='Enter'||e.key===' '){skipIntro()}
 if(go)return;
 var kk=e.key;
 if(kk==='ArrowUp')vp+=.03;
