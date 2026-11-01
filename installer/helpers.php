@@ -227,7 +227,7 @@ function rj_artisan(array $args): array
     return ['code' => $code, 'out' => implode("\n", $out)];
 }
 
-function rj_install_run(): array
+function rj_install_run(?string $sqlContent = null): array
 {
     $cfg = $_SESSION['rj_install'];
     $log = [];
@@ -257,80 +257,75 @@ function rj_install_run(): array
         rj_artisan(['config:clear']);
         rj_artisan(['cache:clear']);
 
-        $mg = rj_artisan(['migrate', '--force', '--no-interaction']);
-        if ($mg['code'] !== 0) {
-            throw new RuntimeException('migrate failed: ' . $mg['out']);
-        }
-        $log[] = 'migrations run';
-
-        $sd = rj_artisan(['db:seed', '--class=DatabaseSeeder', '--force', '--no-interaction']);
-        if ($sd['code'] !== 0) {
-            $log[] = 'seeder warning: ' . substr($sd['out'], 0, 500);
-        } else {
-            $log[] = 'base seeders run';
-        }
-
-        if (file_exists(RJ_ROOT . '/database/seeders/data/demo/manifest.json')) {
-            $dm = rj_artisan(['db:seed', '--class=DemoSeeder', '--force', '--no-interaction']);
-            $log[] = $dm['code'] === 0
-                ? 'demo imported'
-                : 'demo warning: ' . substr($dm['out'], 0, 300);
-        }
-
         $pdo = new PDO(
-            sprintf(
-                'mysql:host=%s;port=%d;dbname=%s;charset=utf8mb4',
-                $cfg['db']['host'],
-                (int) $cfg['db']['port'],
-                $cfg['db']['name']
-            ),
+            sprintf('mysql:host=%s;port=%d;dbname=%s;charset=utf8mb4', $cfg['db']['host'], (int) $cfg['db']['port'], $cfg['db']['name']),
             $cfg['db']['user'],
             $cfg['db']['pass'],
             [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
         );
 
-        $hash = password_hash($cfg['admin']['pass'], PASSWORD_BCRYPT, ['cost' => 12]);
-
-        $existing = (int) $pdo->query("SELECT id FROM users ORDER BY id LIMIT 1")->fetchColumn();
-
-        if ($existing > 0) {
-            $pdo->prepare(
-                "UPDATE users SET name=?, email=?, password=?, email_verified_at=NOW(), updated_at=NOW() WHERE id=?"
-            )->execute([
-                $cfg['admin']['name'],
-                $cfg['admin']['email'],
-                $hash,
-                $existing,
-            ]);
-            $log[] = 'admin user updated';
+        if (!empty($sqlContent)) {
+            $log[] = 'importing uploaded sql file';
+            $pdo->exec("SET FOREIGN_KEY_CHECKS=0;");
+            $pdo->exec($sqlContent);
+            $pdo->exec("SET FOREIGN_KEY_CHECKS=1;");
+            $log[] = 'sql file imported';
+        } elseif (!empty($cfg['db_imported'])) {
+            $log[] = 'skipping migrations (database imported manually)';
         } else {
-            $hasRole = $pdo->query("SHOW COLUMNS FROM users LIKE 'role'")->fetch();
-
-            if ($hasRole) {
-                $pdo->prepare(
-                    "INSERT INTO users (name, email, password, role, email_verified_at, created_at, updated_at) VALUES (?,?,?,?,NOW(),NOW(),NOW())"
-                )->execute([
-                    $cfg['admin']['name'],
-                    $cfg['admin']['email'],
-                    $hash,
-                    'admin',
-                ]);
-            } else {
-                $pdo->prepare(
-                    "INSERT INTO users (name, email, password, email_verified_at, created_at, updated_at) VALUES (?,?,?,NOW(),NOW(),NOW())"
-                )->execute([
-                    $cfg['admin']['name'],
-                    $cfg['admin']['email'],
-                    $hash,
-                ]);
+            $mg = rj_artisan(['migrate', '--force', '--no-interaction']);
+            if ($mg['code'] !== 0) {
+                throw new RuntimeException('migrate failed: ' . $mg['out']);
             }
-            $log[] = 'admin user created';
+            $log[] = 'migrations run';
+
+            $sd = rj_artisan(['db:seed', '--class=DatabaseSeeder', '--force', '--no-interaction']);
+            if ($sd['code'] !== 0) {
+                $log[] = 'seeder warning: ' . substr($sd['out'], 0, 500);
+            } else {
+                $log[] = 'base seeders run';
+            }
+
+            if (file_exists(RJ_ROOT . '/database/seeders/data/demo/manifest.json')) {
+                $dm = rj_artisan(['db:seed', '--class=DemoSeeder', '--force', '--no-interaction']);
+                $log[] = $dm['code'] === 0 ? 'demo imported' : 'demo warning: ' . substr($dm['out'], 0, 300);
+            }
+        }
+
+        if (empty($cfg['skip_admin']) && !empty($cfg['admin'])) {
+            $hash = password_hash($cfg['admin']['pass'], PASSWORD_BCRYPT, ['cost' => 12]);
+            $existing = 0;
+
+            try {
+                $existing = (int) $pdo->query("SELECT id FROM users ORDER BY id LIMIT 1")->fetchColumn();
+            } catch (Throwable $e) {
+                $log[] = 'users table check failed, skipping admin creation';
+            }
+
+            if ($existing > 0) {
+                $pdo->prepare("UPDATE users SET name=?, email=?, password=?, email_verified_at=NOW(), updated_at=NOW() WHERE id=?")
+                    ->execute([$cfg['admin']['name'], $cfg['admin']['email'], $hash, $existing]);
+                $log[] = 'admin user updated';
+            } else {
+                try {
+                    $hasRole = $pdo->query("SHOW COLUMNS FROM users LIKE 'role'")->fetch();
+                } catch (Throwable $e) {
+                    $hasRole = false;
+                }
+
+                if ($hasRole) {
+                    $pdo->prepare("INSERT INTO users (name, email, password, role, email_verified_at, created_at, updated_at) VALUES (?,?,?,?,NOW(),NOW(),NOW())")
+                        ->execute([$cfg['admin']['name'], $cfg['admin']['email'], $hash, 'admin']);
+                } else {
+                    $pdo->prepare("INSERT INTO users (name, email, password, email_verified_at, created_at, updated_at) VALUES (?,?,?,NOW(),NOW(),NOW())")
+                        ->execute([$cfg['admin']['name'], $cfg['admin']['email'], $hash]);
+                }
+                $log[] = 'admin user created';
+            }
         }
 
         $sl = rj_artisan(['storage:link']);
-        $log[] = $sl['code'] === 0
-            ? 'storage linked'
-            : 'storage link warning: ' . substr($sl['out'], 0, 200);
+        $log[] = $sl['code'] === 0 ? 'storage linked' : 'storage link warning: ' . substr($sl['out'], 0, 200);
 
         $lockDir = dirname(RJ_LOCK);
         if (!is_dir($lockDir)) {
