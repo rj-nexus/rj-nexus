@@ -33,13 +33,11 @@ foreach (range(1, $totalSlides) as $slideNo) {
 }
 $currentSlide = $startSlide;
 
-$prevUrl = $startSlide > 1 ? $urls[$startSlide - 1] : '#';
 $nextUrl = $startSlide < $totalSlides ? $urls[$startSlide + 1] : $finalUrl;
 $labelNext = $t['next'] ?? 'Next';
-$labelLast = $t['req_btn'] ?? 'Continue';
 
 $arrow = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-$arrowBack = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+$chev = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
 $body = '<div class="intro boot" id="inStage" data-i="' . ($startSlide - 1) . '" data-final="' . rj_esc($finalUrl) . '">'
     . '<a href="' . rj_esc($skipUrl) . '" class="in-skip">' . rj_esc($t['skip'] ?? 'Skip') . ' ' . $arrow . '</a>'
@@ -47,10 +45,10 @@ $body = '<div class="intro boot" id="inStage" data-i="' . ($startSlide - 1) . '"
     . '<div class="slides" id="inSlides">' . $slidesHtml . '</div>'
     . '<nav class="tl" id="inTl">' . $timelineHtml . '</nav>'
     . '<div class="ctrls">'
-    . '<a href="' . rj_esc($prevUrl) . '" id="inBack" class="bk' . ($startSlide > 1 ? '' : ' off') . '">' . $arrowBack . '<span>' . rj_esc($t['back'] ?? 'Back') . '</span></a>'
-    . '<div class="go-wrap" id="inWrap"><b class="ring r1"></b><b class="ring r2"></b>'
-    . '<a href="' . rj_esc($nextUrl) . '" id="inNext" class="go" data-next="' . rj_esc($labelNext) . '" data-last="' . rj_esc($labelLast) . '">'
-    . '<span class="go-t">' . rj_esc($startSlide === $totalSlides ? $labelLast : $labelNext) . '</span><span class="arr">' . $arrow . '</span></a></div>'
+    . '<a href="' . rj_esc($nextUrl) . '" id="inNext" class="scroll" aria-label="' . rj_esc($labelNext) . '">'
+    . '<span class="mouse"></span>'
+    . '<span class="chev">' . $chev . $chev . '</span>'
+    . '</a>'
     . '</div>'
     . '</div></div>';
 
@@ -105,40 +103,33 @@ transition:transform .8s cubic-bezier(.2,.8,.2,1),opacity .5s ease,filter .6s ea
 .tl-n.cur{color:#fff;transform:scale(1.25);border-color:#f472b6;box-shadow:0 0 14px rgba(244,114,182,.7),inset 0 0 10px rgba(244,114,182,.35);animation:in-pulse 2s ease-out infinite}
 @keyframes in-pulse{0%{box-shadow:0 0 0 0 rgba(236,72,153,.6),inset 0 0 10px rgba(244,114,182,.35)}100%{box-shadow:0 0 0 14px rgba(236,72,153,0),inset 0 0 10px rgba(244,114,182,.35)}}
 
-/* ---- duymeler ---- */
-.ctrls{display:flex;align-items:center;justify-content:center;gap:18px;margin-top:26px;animation:in-up .9s 2.2s backwards}
-.bk{display:inline-flex;align-items:center;gap:8px;padding:14px 22px;border-radius:9999px;color:#d8b4fe;font-size:14px;font-weight:600;text-decoration:none;background:rgba(24,16,58,.5);border:1px solid rgba(168,85,247,.45);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);transition:opacity .4s,transform .4s,box-shadow .25s,color .25s,border-color .25s}
-.bk:hover{color:#fff;border-color:#ec4899;box-shadow:0 0 26px -4px rgba(236,72,153,.8)}
-.bk.off{opacity:0;pointer-events:none;transform:translateX(14px)}
-.go-wrap{position:relative;display:inline-block;transform:translate(var(--mx,0px),var(--my,0px));transition:transform .25s ease-out}
-.go{position:relative;display:inline-flex;align-items:center;gap:16px;padding:14px 18px 14px 32px;border-radius:9999px;overflow:hidden;color:#fff;text-decoration:none;font-size:17px;font-weight:800;letter-spacing:.04em;background:linear-gradient(110deg,#7c3aed,#ec4899,#f59e0b,#7c3aed);background-size:300% 100%;box-shadow:0 0 0 1px rgba(255,255,255,.25) inset,0 18px 44px -14px rgba(236,72,153,.85),0 0 54px -8px rgba(124,58,237,.7);animation:in-flow 6s linear infinite;transition:transform .3s cubic-bezier(.2,.9,.3,1.3),box-shadow .3s}
-@keyframes in-flow{to{background-position:-300% 0}}
-.go::after{content:"";position:absolute;top:0;bottom:0;left:-40%;width:30%;transform:skewX(-22deg);background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);animation:in-shine 3s 2.6s ease-in-out infinite}
-@keyframes in-shine{0%{left:-40%}55%,100%{left:130%}}
-.go .arr{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:transparent;border:2px solid rgba(255,255,255,.95);color:#fff;animation:in-nudge 1.6s ease-in-out infinite}
-@keyframes in-nudge{50%{transform:translateX(5px)}}
-.go:hover{transform:scale(1.07);box-shadow:0 0 0 1px rgba(255,255,255,.4) inset,0 24px 58px -12px rgba(236,72,153,1),0 0 84px -4px rgba(168,85,247,.95)}
-.go:active{transform:scale(.96)}
-.go:focus-visible,.bk:focus-visible{outline:2px solid #fff;outline-offset:4px}
-.ring{position:absolute;inset:0;border-radius:9999px;border:1.5px solid rgba(244,114,182,.7);pointer-events:none;opacity:0;animation:in-expand 2.6s ease-out infinite}
-.r2{animation-delay:1.3s;border-color:rgba(167,139,250,.7)}
-@keyframes in-expand{0%{opacity:.9;transform:scale(1)}100%{opacity:0;transform:scale(1.5,1.9)}}
+/* ---- scroll isaresi ---- */
+.ctrls{display:flex;align-items:center;justify-content:center;margin-top:26px;animation:in-up .9s 2.2s backwards}
+.scroll{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 14px;color:#d8b4fe;text-decoration:none;transition:transform .3s,color .3s}
+.scroll:hover{color:#fff;transform:scale(1.1)}
+.scroll:focus-visible{outline:2px solid #fff;outline-offset:4px;border-radius:12px}
+.mouse{position:relative;display:block;width:28px;height:46px;border-radius:16px;border:2px solid rgba(233,213,255,.9);background:transparent;box-shadow:0 0 18px rgba(167,139,250,.55),inset 0 0 10px rgba(167,139,250,.25)}
+.mouse::before{content:"";position:absolute;left:50%;top:9px;width:4px;height:9px;margin-left:-2px;border-radius:3px;background:#f9a8d4;box-shadow:0 0 8px rgba(244,114,182,.9);animation:sc-wheel 1.9s cubic-bezier(.5,0,.3,1) infinite}
+@keyframes sc-wheel{0%{opacity:0;transform:translateY(-3px)}25%{opacity:1}75%{opacity:1}100%{opacity:0;transform:translateY(15px)}}
+.chev{display:flex;flex-direction:column;align-items:center;line-height:0;margin-top:2px}
+.chev svg{display:block;width:18px;height:18px;margin-top:-8px;opacity:0;animation:sc-chev 1.9s ease-in-out infinite}
+.chev svg:nth-child(1){margin-top:0;animation-delay:0s}
+.chev svg:nth-child(2){animation-delay:.25s}
+@keyframes sc-chev{0%{opacity:0;transform:translateY(-4px)}40%{opacity:.95}100%{opacity:0;transform:translateY(5px)}}
 
 .rj-wipe{position:fixed;inset:0;z-index:30;pointer-events:none;background:radial-gradient(circle at var(--wx,50%) var(--wy,50%),#fff 0%,#fbcfe8 28%,#ec4899 60%,#7c3aed 100%);clip-path:circle(0% at var(--wx,50%) var(--wy,50%));transition:clip-path .8s cubic-bezier(.65,0,.25,1)}
 .rj-wipe.on{clip-path:circle(150% at var(--wx,50%) var(--wy,50%))}
 
 .rj-fb *{animation:none!important}
 .rj-fb .brand-logo,.rj-fb .tl,.rj-fb .ctrls{opacity:1!important}
+.rj-fb .chev svg{opacity:.8!important}
 .rj-fb #rjSky{display:none}
 
 @media (max-width:560px){
-.go{font-size:15px;padding:12px 14px 12px 26px}
-.bk{padding:12px 16px}
-.ctrls{gap:12px}
 .tl{gap:28px}
 .tl-n:not(:first-child)::before{width:28px}
 }
-@media (max-height:520px){.slides{min-height:0}.tl{margin-top:16px}.ctrls{margin-top:14px}}
+@media (max-height:520px){.slides{min-height:0}.tl{margin-top:16px}.ctrls{margin-top:10px}.chev{display:none}}
 </style>
 <script>
 document.addEventListener('DOMContentLoaded',function(){
@@ -152,7 +143,7 @@ var card=document.querySelector('.card');
 var fit=document.getElementById('inFit');
 var slides=[].slice.call(stage.querySelectorAll('.slide'));
 var nodes=[].slice.call(stage.querySelectorAll('.tl-n'));
-var back=document.getElementById('inBack'),next=document.getElementById('inNext'),wrap=document.getElementById('inWrap');
+var next=document.getElementById('inNext');
 var N=slides.length,idx=parseInt(stage.getAttribute('data-i'),10)||0;
 var finalUrl=stage.getAttribute('data-final');
 idx=Math.max(0,Math.min(N-1,idx));
@@ -294,20 +285,16 @@ requestAnimationFrame(frame)
 }
 
 /* ---------- slaydlar ---------- */
-var lock=false;
+var lock=false,leaving=false,lastNav=0;
 function urlOf(i){return slides[i].getAttribute('data-url')}
 function ui(){
 nodes.forEach(function(n,i){n.classList.toggle('done',i<idx);n.classList.toggle('cur',i===idx)});
-back.classList.toggle('off',idx===0);
-back.setAttribute('href',idx>0?urlOf(idx-1):'#');
-var last=idx===N-1;
-next.querySelector('.go-t').textContent=last?next.getAttribute('data-last'):next.getAttribute('data-next');
-next.setAttribute('href',last?finalUrl:urlOf(idx+1))
+next.setAttribute('href',idx===N-1?finalUrl:urlOf(idx+1))
 }
 function show(n){
 n=clamp(n,0,N-1);
 if(n===idx||lock)return;
-idx=n;lock=true;
+idx=n;lock=true;lastNav=performance.now();
 stage.setAttribute('data-i',String(n));
 stage.classList.remove('boot');
 slides.forEach(function(s,i){
@@ -321,6 +308,8 @@ try{history.replaceState(null,'',urlOf(idx))}catch(e){}
 setTimeout(function(){lock=false},750)
 }
 function leave(){
+if(leaving)return;
+leaving=true;
 var r=next.getBoundingClientRect(),w=document.createElement('div');
 w.className='rj-wipe';
 w.style.setProperty('--wx',(r.left+r.width/2)+'px');
@@ -330,28 +319,34 @@ burst=1.6;
 requestAnimationFrame(function(){requestAnimationFrame(function(){w.classList.add('on')})});
 setTimeout(function(){window.location.href=finalUrl},820)
 }
+/* d>0: ireli (son slaydda cixis), d<0: geri */
+function go(d){
+if(leaving)return;
+if(d>0){
+if(idx<N-1)show(idx+1);
+else if(!lock&&performance.now()-lastNav>1100)leave()
+}else show(idx-1)
+}
 next.addEventListener('click',function(e){
 if(e.metaKey||e.ctrlKey||e.shiftKey||e.button!==0)return;
 e.preventDefault();
 if(idx<N-1)show(idx+1);else leave()
 });
-back.addEventListener('click',function(e){e.preventDefault();if(idx>0)show(idx-1)});
 nodes.forEach(function(n){n.addEventListener('click',function(e){e.preventDefault();show(parseInt(n.getAttribute('data-i'),10))})});
 window.addEventListener('keydown',function(e){
 var k=e.key;
 if(tNow()<INTRO){if(k==='Escape'||k==='Enter'||k===' '||k.indexOf('Arrow')===0){skip();return}}
 var el=document.activeElement,onCtl=el&&(el.tagName==='A'||el.tagName==='BUTTON');
 if(k==='ArrowRight'||k==='ArrowDown'||k==='PageDown'||((k===' '||k==='Enter')&&!onCtl)){
-e.preventDefault();
-if(idx<N-1)show(idx+1);else if(k==='Enter'||k===' ')leave()
-}else if(k==='ArrowLeft'||k==='ArrowUp'||k==='PageUp'){e.preventDefault();show(idx-1)}
+e.preventDefault();go(1)
+}else if(k==='ArrowLeft'||k==='ArrowUp'||k==='PageUp'){e.preventDefault();go(-1)}
 });
 window.addEventListener('wheel',function(e){
 e.preventDefault();
 var v=Math.abs(e.deltaY)>=Math.abs(e.deltaX)?e.deltaY:e.deltaX;
 if(Math.abs(v)<14)return;
 if(tNow()<INTRO){skip();return}
-show(idx+(v>0?1:-1))
+go(v>0?1:-1)
 },{passive:false});
 var ts=null;
 window.addEventListener('touchstart',function(e){var t=e.touches[0];ts=[t.clientX,t.clientY]},{passive:true});
@@ -362,18 +357,14 @@ ts=null;
 if(Math.abs(dx)<44&&Math.abs(dy)<44)return;
 var v=Math.abs(dx)>=Math.abs(dy)?dx:dy;
 if(tNow()<INTRO){skip();return}
-show(idx+(v>0?1:-1))
+go(v>0?1:-1)
 },{passive:true});
 window.addEventListener('pointerdown',function(e){
 if(e.target.closest&&e.target.closest('a,button'))return;
 skip()
 });
 window.addEventListener('pointermove',function(e){
-tmx=(e.clientX/W-.5)*2;tmy=(e.clientY/H-.5)*2;
-var r=wrap.getBoundingClientRect(),cx=r.left+r.width/2-(parseFloat(wrap.style.getPropertyValue('--mx'))||0),cy=r.top+r.height/2-(parseFloat(wrap.style.getPropertyValue('--my'))||0);
-var dx=e.clientX-cx,dy=e.clientY-cy,d=Math.sqrt(dx*dx+dy*dy);
-if(d<240){wrap.style.setProperty('--mx',clamp(dx*.16,-14,14).toFixed(1)+'px');wrap.style.setProperty('--my',clamp(dy*.22,-10,10).toFixed(1)+'px')}
-else{wrap.style.setProperty('--mx','0px');wrap.style.setProperty('--my','0px')}
+tmx=(e.clientX/W-.5)*2;tmy=(e.clientY/H-.5)*2
 });
 
 var rt=0;
