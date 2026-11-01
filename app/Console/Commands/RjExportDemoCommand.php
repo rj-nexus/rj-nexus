@@ -34,6 +34,7 @@ class RjExportDemoCommand extends Command
         'form_fields' => 'rj_form_fields',
         'themes' => 'rj_themes',
         'theme_customizations' => 'rj_theme_customizations',
+        'templates' => 'rj_templates',
         'widgets' => 'rj_widgets',
         'global_widgets' => 'rj_global_widgets',
         'media' => 'rj_media',
