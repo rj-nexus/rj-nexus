@@ -6,6 +6,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
+use App\Models\Option;
 
 class DemoSeeder extends Seeder
 {
@@ -83,6 +84,11 @@ class DemoSeeder extends Seeder
 
                 $this->copyMediaFiles();
             });
+
+            // Cache-i təmizləyirik ki, yeni dillər və ayarlar dərhal oxunsun
+            Option::flush();
+            $this->command?->info('Options cache flushed.');
+
         } finally {
             DB::statement('SET FOREIGN_KEY_CHECKS=1');
         }
