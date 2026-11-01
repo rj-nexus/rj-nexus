@@ -43,6 +43,10 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        if (!file_exists(storage_path('installed.lock'))) {
+            return;
+        }
+
         $themeManager = $this->app->make(ThemeManager::class);
         $themeManager->registerViews();
 
@@ -52,7 +56,6 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->make(PluginManager::class)->boot();
 
-        // --- Activity Log Observers ---
         Post::observe(ActivityLogObserver::class);
         Media::observe(ActivityLogObserver::class);
         User::observe(ActivityLogObserver::class);
@@ -62,7 +65,6 @@ class AppServiceProvider extends ServiceProvider
         Menu::observe(ActivityLogObserver::class);
         Role::observe(ActivityLogObserver::class);
 
-        // --- Auth Events Logging ---
         Event::listen(Login::class, function ($event) {
             ActivityLog::record([
                 'log_name' => 'auth',
@@ -92,7 +94,6 @@ class AppServiceProvider extends ServiceProvider
                 'event' => 'login_failed',
             ]);
         });
-        // -----------------------------
 
         if (Schema::hasTable('rj_options')) {
             $mailHost = rj_get_option('smtp_host');
