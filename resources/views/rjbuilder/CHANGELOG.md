@@ -2,6 +2,16 @@
 
 All notable changes to the RJ Builder core and built-in widgets will be documented in this file.
 
+## [v1.5.1] - 2026-11-02
+
+This is a hotfix update resolving header logo visibility and sizing issues.
+
+### Fixed (Bug Fixes)
+- **Header Logo Blank Area:** Fixed an issue where the header logo section appeared empty or blank under certain configurations.
+- **Header Logo Size:** Increased the standard height of the header logo to ensure it renders larger and more prominent by default.
+
+---
+
 ## [v1.5.0] - 2026-10-29
 
 This is a massive stability and architecture update focusing on the Live Preview system, rendering performance, custom error handling, and deep plugin integrations.
