@@ -213,18 +213,22 @@ function rj_artisan(array $args): array
         return ['code' => -1, 'out' => 'exec() disabled on server'];
     }
 
+    $outFile = tempnam(sys_get_temp_dir(), 'rj_art_');
+
     $cmd = escapeshellarg(PHP_BINARY)
         . ' '
         . escapeshellarg(RJ_ROOT . '/artisan')
         . ' '
         . implode(' ', array_map('escapeshellarg', $args))
-        . ' 2>&1';
+        . ' > ' . escapeshellarg($outFile) . ' 2>&1';
 
-    $out = [];
     $code = 0;
-    @exec($cmd, $out, $code);
+    @exec($cmd, $dummy, $code);
 
-    return ['code' => $code, 'out' => implode("\n", $out)];
+    $output = file_exists($outFile) ? file_get_contents($outFile) : '';
+    @unlink($outFile);
+
+    return ['code' => $code, 'out' => $output];
 }
 
 function rj_install_run(?string $sqlContent = null): array
