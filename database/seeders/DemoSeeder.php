@@ -157,7 +157,7 @@ class DemoSeeder extends Seeder
 
         $count = 0;
         foreach ($rows as $row) {
-            $name = $row['name'] ?? null;
+            $name = $row['option_name'] ?? $row['name'] ?? null;
             if (!$name) {
                 continue;
             }
@@ -175,9 +175,20 @@ class DemoSeeder extends Seeder
 
             unset($row['id']);
 
+            $insertData = $row;
+            if (isset($row['option_name'])) {
+                $insertData['option_name'] = $row['option_name'];
+                $insertData['option_value'] = $row['option_value'] ?? '';
+                $insertData['option_group'] = $row['option_group'] ?? 'general';
+                $insertData['option_type'] = $row['option_type'] ?? 'text';
+                $insertData['autoload'] = $row['autoload'] ?? 1;
+            }
+
+            $keyColumn = isset($row['option_name']) ? 'option_name' : 'name';
+
             DB::table('rj_options')->updateOrInsert(
-                ['name' => $name],
-                $row
+                [$keyColumn => $name],
+                $insertData
             );
             $count++;
         }
@@ -338,6 +349,20 @@ class DemoSeeder extends Seeder
                 }
                 if (!empty($parentOld)) {
                     $row['parent_id'] = $this->idMap['rj_menu_items'][$parentOld];
+                }
+
+                // Səhifə və ya yazı ID-lərini yeniləyirik
+                if (!empty($row['object_id']) && !empty($row['object_type'])) {
+                    $type = $row['object_type'];
+                    if (in_array($type, ['page', 'post'])) {
+                        if (isset($this->idMap['rj_posts'][$row['object_id']])) {
+                            $row['object_id'] = $this->idMap['rj_posts'][$row['object_id']];
+                        }
+                    } elseif ($type === 'category') {
+                        if (isset($this->idMap['rj_categories'][$row['object_id']])) {
+                            $row['object_id'] = $this->idMap['rj_categories'][$row['object_id']];
+                        }
+                    }
                 }
 
                 $newId = DB::table('rj_menu_items')->insertGetId($row);

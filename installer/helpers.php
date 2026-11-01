@@ -296,31 +296,42 @@ function rj_install_run(?string $sqlContent = null): array
         }
 
         try {
-            $stmt = $pdo->prepare("SELECT COUNT(*) FROM rj_options WHERE name = 'site_language'");
+            // 1. "language" parametrini yeniləyirik
+            $stmt = $pdo->prepare("SELECT COUNT(*) FROM rj_options WHERE option_name = 'language'");
             $stmt->execute();
             if ($stmt->fetchColumn() > 0) {
-                $pdo->prepare("UPDATE rj_options SET value = ? WHERE name = 'site_language'")->execute([$lang]);
+                $pdo->prepare("UPDATE rj_options SET option_value = ? WHERE option_name = 'language'")->execute([$lang]);
             } else {
-                $pdo->prepare("INSERT INTO rj_options (name, value, created_at, updated_at) VALUES ('site_language', ?, NOW(), NOW())")->execute([$lang]);
+                $pdo->prepare("INSERT INTO rj_options (option_name, option_value, option_group, option_type, autoload, created_at, updated_at) VALUES ('language', ?, 'general', 'text', 1, NOW(), NOW())")->execute([$lang]);
             }
 
-            $stmt = $pdo->prepare("SELECT value FROM rj_options WHERE name = 'frontend_locales'");
+            // 2. "frontend_locale" parametrini yeniləyirik
+            $stmt = $pdo->prepare("SELECT COUNT(*) FROM rj_options WHERE option_name = 'frontend_locale'");
+            $stmt->execute();
+            if ($stmt->fetchColumn() > 0) {
+                $pdo->prepare("UPDATE rj_options SET option_value = ? WHERE option_name = 'frontend_locale'")->execute([$lang]);
+            } else {
+                $pdo->prepare("INSERT INTO rj_options (option_name, option_value, option_group, option_type, autoload, created_at, updated_at) VALUES ('frontend_locale', ?, 'language', 'text', 1, NOW(), NOW())")->execute([$lang]);
+            }
+
+            // 3. "frontend_locales" (array) parametrini yoxlayıb, seçilən dili əlavə edirik
+            $stmt = $pdo->prepare("SELECT option_value FROM rj_options WHERE option_name = 'frontend_locales'");
             $stmt->execute();
             $flRow = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($flRow) {
-                $fl = json_decode($flRow['value'], true);
+                $fl = json_decode($flRow['option_value'], true);
                 if (is_array($fl) && !in_array($lang, $fl)) {
                     $fl[] = $lang;
-                    $pdo->prepare("UPDATE rj_options SET value = ? WHERE name = 'frontend_locales'")->execute([json_encode(array_values($fl))]);
-                    $log[] = 'selected language added to frontend locales';
+                    $pdo->prepare("UPDATE rj_options SET option_value = ? WHERE option_name = 'frontend_locales'")->execute([json_encode(array_values($fl))]);
+                    $log[] = 'selected language added to frontend locales array';
                 }
             } else {
-                $pdo->prepare("INSERT INTO rj_options (name, value, created_at, updated_at) VALUES ('frontend_locales', ?, NOW(), NOW())")->execute([json_encode([$lang])]);
+                $pdo->prepare("INSERT INTO rj_options (option_name, option_value, option_group, option_type, autoload, created_at, updated_at) VALUES ('frontend_locales', ?, 'general', 'text', 1, NOW(), NOW())")->execute([json_encode([$lang])]);
                 $log[] = 'frontend locales created with selected language';
             }
 
-            $log[] = 'site language updated in db';
+            $log[] = 'site languages updated in db successfully';
         } catch (Throwable $e) {
             $log[] = 'site language db update failed: ' . $e->getMessage();
         }
@@ -371,7 +382,6 @@ function rj_install_run(?string $sqlContent = null): array
             'lang' => $lang,
         ], JSON_PRETTY_PRINT));
 
-        // BÜTÜN PDO DƏYİŞİKLİKLƏRİNDƏN SONRA KEŞİ TƏMİZLƏYİRİK Kİ, SAYT YENİ DİLLƏRİ GÖRSÜN
         rj_artisan(['config:clear']);
         rj_artisan(['cache:clear']);
         rj_artisan(['optimize:clear']);
