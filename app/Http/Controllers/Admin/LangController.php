@@ -1,18 +1,24 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Middleware;
 
-use App\Http\Controllers\Controller;
+use Closure;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
+use Symfony\Component\HttpFoundation\Response;
 
-class LangController extends Controller
+class SetLocale
 {
-    public function switch(string $locale)
+    public function handle(Request $request, Closure $next): Response
     {
-        if (preg_match('/^[a-z]{2}(_[A-Z]{2})?$/', $locale)) {
-            session(['locale' => $locale]);
+        $locale = session('locale', config('app.locale'));
+
+        $langPath = lang_path($locale);
+
+        if (File::isDirectory($langPath) || $locale === config('app.locale')) {
             app()->setLocale($locale);
         }
 
-        return back();
+        return $next($request);
     }
 }
