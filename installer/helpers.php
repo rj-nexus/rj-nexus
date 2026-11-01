@@ -235,6 +235,7 @@ function rj_install_run(?string $sqlContent = null): array
 {
     $cfg = $_SESSION['rj_install'];
     $log = [];
+    $lang = $cfg['lang'] ?? 'en';
 
     try {
         rj_env_write([
@@ -242,7 +243,7 @@ function rj_install_run(?string $sqlContent = null): array
             'APP_URL' => rtrim($cfg['site_url'], '/'),
             'APP_ENV' => 'production',
             'APP_DEBUG' => 'false',
-            'APP_LOCALE' => $cfg['lang'] ?? 'en',
+            'APP_LOCALE' => $lang,
             'APP_KEY' => 'base64:' . base64_encode(random_bytes(32)),
             'DB_HOST' => $cfg['db']['host'],
             'DB_PORT' => $cfg['db']['port'],
@@ -290,6 +291,20 @@ function rj_install_run(?string $sqlContent = null): array
             }
         }
 
+        // Seçilən dili bazaya da yazırıq ki, Admin Panel də bu dildə açılsın
+        try {
+            $stmt = $pdo->prepare("SELECT COUNT(*) FROM rj_options WHERE name = 'site_language'");
+            $stmt->execute();
+            if ($stmt->fetchColumn() > 0) {
+                $pdo->prepare("UPDATE rj_options SET value = ? WHERE name = 'site_language'")->execute([$lang]);
+            } else {
+                $pdo->prepare("INSERT INTO rj_options (name, value, created_at, updated_at) VALUES ('site_language', ?, NOW(), NOW())")->execute([$lang]);
+            }
+            $log[] = 'site language updated in db';
+        } catch (Throwable $e) {
+            $log[] = 'site language db update failed: ' . $e->getMessage();
+        }
+
         if (empty($cfg['skip_admin']) && !empty($cfg['admin'])) {
             $hash = password_hash($cfg['admin']['pass'], PASSWORD_BCRYPT, ['cost' => 12]);
             $existing = 0;
@@ -333,7 +348,7 @@ function rj_install_run(?string $sqlContent = null): array
         file_put_contents(RJ_LOCK, json_encode([
             'installed_at' => date('c'),
             'version' => '1.5.0',
-            'lang' => $cfg['lang'] ?? 'en',
+            'lang' => $lang,
         ], JSON_PRETTY_PRINT));
 
         rj_log(implode(' | ', $log));
