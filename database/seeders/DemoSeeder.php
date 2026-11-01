@@ -30,6 +30,7 @@ class DemoSeeder extends Seeder
             return;
         }
 
+        // options.json-dan köhnə linki götürürük
         $opts = $this->load('options.json');
         foreach ($opts as $opt) {
             $name = $opt['option_name'] ?? $opt['name'] ?? '';
@@ -40,6 +41,7 @@ class DemoSeeder extends Seeder
         }
 
         $this->command?->info("Replacing URLs: [{$this->oldUrl}] -> [{$this->newUrl}]");
+        $this->command?->info('Importing demo data...');
 
         DB::statement('SET FOREIGN_KEY_CHECKS=0');
 
@@ -49,9 +51,7 @@ class DemoSeeder extends Seeder
             $this->safeImport('taxonomies.json', 'rj_taxonomies', [
                 'post_type_id' => 'rj_post_types',
             ]);
-
-            // Tema cədvəlini silmirik, sadəcə update edirik
-            $this->importThemes('themes.json');
+            $this->safeImport('themes.json', 'rj_themes');
 
             $this->safeImport('categories.json', 'rj_categories');
             $this->safeImport('tags.json', 'rj_tags');
@@ -109,48 +109,20 @@ class DemoSeeder extends Seeder
         }
     }
 
+    // Təhlükəsiz URL dəyişdirici (JSON strukturunu pozmur, sadəcə mətnləri dəyişir)
     private function replaceUrls(array $row): array
     {
         if (empty($this->oldUrl) || empty($this->newUrl) || $this->oldUrl === $this->newUrl) {
             return $row;
         }
 
-        $json = json_encode($row, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        $json = str_replace($this->oldUrl, $this->newUrl, $json);
-        $json = str_replace(str_replace('/', '\/', $this->oldUrl), str_replace('/', '\/', $this->newUrl), $json);
-        $json = str_replace(addslashes($this->oldUrl), addslashes($this->newUrl), $json);
-
-        $decoded = json_decode($json, true);
-        return is_array($decoded) ? $decoded : $row;
-    }
-
-    private function importThemes(string $file): void
-    {
-        if (!Schema::hasTable('rj_themes')) {
-            return;
-        }
-
-        $rows = $this->load($file);
-        if (empty($rows)) {
-            return;
-        }
-
-        foreach ($rows as $row) {
-            $row = $this->replaceUrls($row);
-            unset($row['id']);
-
-            // Əgər slug varsa update et, yoxsa insert et
-            if (isset($row['slug'])) {
-                DB::table('rj_themes')->updateOrInsert(
-                    ['slug' => $row['slug']],
-                    $row
-                );
-            } else {
-                DB::table('rj_themes')->insert($row);
+        foreach ($row as $key => $value) {
+            if (is_string($value)) {
+                $row[$key] = str_replace($this->oldUrl, $this->newUrl, $value);
             }
         }
 
-        $this->command?->line("Imported rj_themes: " . count($rows));
+        return $row;
     }
 
     private function safeImport(string $file, string $table, array $remaps = []): void
@@ -209,6 +181,7 @@ class DemoSeeder extends Seeder
 
         $rows = $this->load($file);
         if (empty($rows)) {
+            $this->command?->warn("Skipping rj_options: JSON file is empty.");
             return;
         }
 
@@ -232,9 +205,12 @@ class DemoSeeder extends Seeder
 
             unset($row['id']);
 
+            // Site URL-i mütləq yeni URL ilə əvəz edirik
             if ($name === 'site_url' && !empty($this->newUrl)) {
                 $row['option_value'] = $this->newUrl;
-                $row['value'] = $this->newUrl;
+                if (isset($row['value'])) {
+                    $row['value'] = $this->newUrl;
+                }
             } else {
                 $row = $this->replaceUrls($row);
             }
@@ -263,6 +239,7 @@ class DemoSeeder extends Seeder
     private function importTruncate(string $file, string $table, array $remaps = []): void
     {
         if (!Schema::hasTable($table)) {
+            $this->command?->warn("Table {$table} not found, skipping {$file}");
             return;
         }
 
@@ -276,6 +253,7 @@ class DemoSeeder extends Seeder
         $rows = $this->load($file);
 
         if (empty($rows)) {
+            $this->command?->warn("Skipping {$table}: JSON file is empty.");
             return;
         }
 
@@ -314,6 +292,7 @@ class DemoSeeder extends Seeder
         $rows = $this->load($file);
 
         if (empty($rows)) {
+            $this->command?->warn("Skipping rj_posts: JSON file is empty.");
             return;
         }
 
@@ -383,6 +362,7 @@ class DemoSeeder extends Seeder
         $rows = $this->load($file);
 
         if (empty($rows)) {
+            $this->command?->warn("Skipping rj_menu_items: JSON file is empty.");
             return;
         }
 
@@ -452,6 +432,7 @@ class DemoSeeder extends Seeder
         $rows = $this->load($file);
 
         if (empty($rows)) {
+            $this->command?->warn("Skipping rj_templates: JSON file is empty.");
             return;
         }
 
