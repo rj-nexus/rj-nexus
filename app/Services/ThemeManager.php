@@ -63,6 +63,18 @@ class ThemeManager
             $count++;
         }
 
+        // --- ƏLAVƏ: Əgər heç bir tema aktiv deyilsə, rj-default-u avtomatik aktiv et ---
+        if (Theme::where('status', 'active')->count() === 0) {
+            $defaultTheme = Theme::where('slug', 'rj-default')->first() ?? Theme::first();
+            if ($defaultTheme) {
+                $defaultTheme->markAsActive();
+                // rj_options cədvəlini də sinxronlaşdıraq
+                if (function_exists('rj_update_option')) {
+                    rj_update_option('frontend_theme', $defaultTheme->slug);
+                }
+            }
+        }
+
         return $count;
     }
 
@@ -88,7 +100,6 @@ class ThemeManager
 
         try {
             $theme->markAsActive();
-
             $this->clearCache();
 
             return ['success' => true, 'message' => __('Theme activated.')];
@@ -103,6 +114,11 @@ class ThemeManager
     {
         if ($theme->isActive()) {
             return ['success' => false, 'message' => __('Cannot delete the active theme.')];
+        }
+
+        // --- ƏLAVƏ: Standart temanın silinməsinin qarşısını al ---
+        if ($theme->slug === 'rj-default') {
+            return ['success' => false, 'message' => __('Default system theme cannot be deleted.')];
         }
 
         try {
@@ -358,17 +374,30 @@ class ThemeManager
     {
         try {
             return Cache::remember('rj_active_theme', 3600, function () {
-                $slug = rj_get_option('active_theme', '');
+                // Bazada həm active_theme, həm də frontend_theme axtarılır
+                $slug = rj_get_option('frontend_theme', rj_get_option('active_theme', ''));
 
                 if ($slug) {
                     $theme = Theme::where('slug', $slug)->where('status', 'active')->first();
-
                     if ($theme) {
                         return $theme;
                     }
                 }
 
-                return Theme::where('status', 'active')->first();
+                // Əgər aktiv tapılmasa, hər hansı aktiv temanı götür
+                $active = Theme::where('status', 'active')->first();
+                if ($active) {
+                    return $active;
+                }
+
+                // --- ULTIMATE FALLBACK: rj-default-u məcburi aktiv et ---
+                $default = Theme::where('slug', 'rj-default')->first() ?? Theme::first();
+                if ($default) {
+                    $default->markAsActive();
+                    return $default;
+                }
+
+                return null;
             });
         } catch (\Throwable $e) {
             return null;
@@ -480,7 +509,22 @@ class ThemeManager
             }
         }
 
-        return view('frontend.' . $view, $data);
+        // --- Fallback 1: resources/views/frontend/... ---
+        if (view()->exists('frontend.' . $view)) {
+            return view('frontend.' . $view, $data);
+        }
+
+        // --- ULTIMATE FALLBACK: Xəta vermək yerinə sadə HTML qaytar ---
+        return response(
+            '<html><head><title>RJ Nexus</title></head><body style="font-family:sans-serif;padding:2rem;text-align:center;">'
+            . '<h1 style="color:#7c3aed;">RJ Nexus işləyir ✓</h1>'
+            . '<p>Tema faylları yoxdur və ya <code>frontend.' . e($view) . '</code> tapılmadı.</p>'
+            . '<p>Zəhmət olmasa admin panelindən <b>rj-default</b> temasını aktiv edin.</p>'
+            . '<a href="/admin">Admin Panelinə Keç</a>'
+            . '</body></html>',
+            200,
+            ['Content-Type' => 'text/html; charset=UTF-8']
+        );
     }
 
     public function renderPath(string $view = ''): string
