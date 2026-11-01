@@ -38,6 +38,7 @@ class DemoSeeder extends Seeder
                     'post_type_id' => 'rj_post_types',
                 ]);
                 $this->importTruncate('themes.json', 'rj_themes');
+                $this->importTruncate('templates.json', 'rj_templates');
 
                 $this->importTruncate('categories.json', 'rj_categories');
                 $this->importTruncate('tags.json', 'rj_tags');
