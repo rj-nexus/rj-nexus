@@ -1,3 +1,11 @@
+@php
+    // Admin paneldən loqo seçilməyibsə istifadə olunacaq standart loqo (Raw GitHub linki)
+    $defaultLogo = 'https://raw.githubusercontent.com/mr-ruhid/rare-logos-vault/main/logo/cms/rj-nexus/logo.png';
+
+    // Əgər $o['src'] boşdursa, standart loqonu istifadə et
+    $logoSrc = !empty($o['src']) ? $o['src'] : $defaultLogo;
+@endphp
+
 <style>
     #{{ $uid }} {
         display: flex;
@@ -53,19 +61,16 @@
 
 <div id="{{ $uid }}" class="rjl">
     <a class="rjl-link"
-       href="{{ $o['url'] }}"
-       aria-label="{{ $o['alt'] }}"
+       href="{{ $o['url'] ?: '/' }}"
+       aria-label="{{ $o['alt'] ?: 'Logo' }}"
        @if ($o['blank']) target="_blank" rel="noopener noreferrer" @endif>
 
-        @if ($o['src'] !== '')
-            <img src="{{ $o['src'] }}"
-                 alt="{{ $o['alt'] }}"
-                 decoding="async"
-                 style="display: block; width: {{ $o['width'] }}px !important; max-width: 100%; height: auto; max-height: {{ $o['max_h'] }}px; object-fit: contain; object-position: {{ $o['objpos'] }} center; filter: none !important;"
-                 onerror="this.hidden=true;var p=this.nextElementSibling;if(p){p.hidden=false;}">
-            <span class="rjl-ph rjl-err" hidden title="{{ $o['src'] }}">{{ __('Image not found') }}</span>
-        @else
-            <span class="rjl-ph">{{ __('LOGO') }}</span>
-        @endif
+        <img src="{{ $logoSrc }}"
+             alt="{{ $o['alt'] ?: 'Logo' }}"
+             decoding="async"
+             style="display: block; width: {{ $o['width'] }}px !important; max-width: 100%; height: auto; max-height: {{ $o['max_h'] }}px; object-fit: contain; object-position: {{ $o['objpos'] }} center; filter: none !important;"
+             onerror="this.hidden=true;var p=this.nextElementSibling;if(p){p.hidden=false;}">
+
+        <span class="rjl-ph rjl-err" hidden title="{{ $logoSrc }}">{{ __('Image not found') }}</span>
     </a>
 </div>
