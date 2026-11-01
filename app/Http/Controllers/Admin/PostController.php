@@ -84,7 +84,9 @@ class PostController extends Controller
         $categories = Category::with('translations')->ordered()->get()->sortBy('name')->values();
         $tags = Tag::with('translations')->ordered()->get()->sortBy('name')->values();
         $templates = Template::where('type', 'page')->published()->orderBy('name')->get();
-        $locales = rj_available_locales();
+
+        // BURADA DƏYİŞİKLİK: Bütün dillər yerinə yalnız frontend üçün aktiv dilləri götürürük
+        $locales = rj_frontend_locales();
         $baseLocale = config('app.locale');
         $themeTemplates = $this->resolveThemeTemplates();
 
@@ -126,7 +128,9 @@ class PostController extends Controller
         $categories = Category::with('translations')->ordered()->get()->sortBy('name')->values();
         $tags = Tag::with('translations')->ordered()->get()->sortBy('name')->values();
         $templates = Template::where('type', 'page')->published()->orderBy('name')->get();
-        $locales = rj_available_locales();
+
+        // BURADA DƏYİŞİKLİK
+        $locales = rj_frontend_locales();
         $baseLocale = config('app.locale');
         $themeTemplates = $this->resolveThemeTemplates();
 
@@ -257,7 +261,7 @@ class PostController extends Controller
             'viewUrl' => $viewUrl,
             'previewUrl' => route('frontend.preview.post', $post),
             'status' => $post->status,
-            'locales' => rj_available_locales(),
+            'locales' => rj_frontend_locales(),
             'baseLocale' => config('app.locale'),
         ];
 
@@ -557,7 +561,7 @@ class PostController extends Controller
             'settings' => 'nullable|array',
         ];
 
-        $locales = rj_available_locales();
+        $locales = rj_frontend_locales();
         $baseLocale = config('app.locale');
 
         foreach ($locales as $locale) {
