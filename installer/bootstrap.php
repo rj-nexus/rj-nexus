@@ -30,19 +30,27 @@ function rj_render(string $step, string $body, string $extra = ''): void
     $t = rj_t_current();
     $lang = $_SESSION['rj_install']['lang'] ?? 'en';
     $dir = rj_is_rtl($lang) ? 'rtl' : 'ltr';
-    $stepIdx = ['language' => 1, 'requirements' => 2, 'database' => 3, 'admin' => 4, 'install' => 5, 'finish' => 6][$step] ?? 1;
+
+    $stepsMap = ['language' => 1, 'intro' => 2, 'requirements' => 3, 'database' => 4, 'admin' => 5, 'install' => 6];
+    $stepIdx = $stepsMap[$step] ?? 0;
+    $totalSteps = 6;
+
     $nav = '';
-    for ($n = 1; $n <= 5; $n++) {
-        $cls = $n === $stepIdx ? 'active' : ($n < $stepIdx ? 'done' : '');
-        $nav .= '<span class="dot ' . $cls . '">' . $n . '</span>';
-        if ($n < 5) {
-            $nav .= '<span class="line ' . ($n < $stepIdx ? 'done' : '') . '"></span>';
+    if ($stepIdx > 0) {
+        for ($n = 1; $n <= $totalSteps; $n++) {
+            $cls = $n === $stepIdx ? 'active' : ($n < $stepIdx ? 'done' : '');
+            $nav .= '<span class="dot ' . $cls . '">' . $n . '</span>';
+            if ($n < $totalSteps) {
+                $nav .= '<span class="line ' . ($n < $stepIdx ? 'done' : '') . '"></span>';
+            }
         }
     }
+
     $logoUrl = 'https://raw.githubusercontent.com/mr-ruhid/rare-logos-vault/main/logo/cms/rj-nexus/logo_header.png';
+
     $css = '*{box-sizing:border-box;margin:0;padding:0}'
         . 'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;background:#1a1030;color:#e5e7eb;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;line-height:1.5}'
-        . '.card{width:100%;max-width:560px;background:#231243;border:1px solid #2d1754;border-radius:16px;padding:32px;box-shadow:0 10px 25px -5px rgba(0,0,0,0.5)}'
+        . '.card{width:100%;max-width:560px;background:#231243;border:1px solid #2d1754;border-radius:16px;padding:32px;box-shadow:0 10px 25px -5px rgba(0,0,0,0.5);position:relative}'
         . '.brand-logo{height:32px;margin-bottom:12px;display:block}'
         . 'h1{font-size:24px;font-weight:700;margin-bottom:4px;color:#fff}'
         . 'p.sub{color:#9ca3af;font-size:14px;margin-bottom:24px}'
@@ -74,7 +82,10 @@ function rj_render(string $step, string $body, string $extra = ''): void
         . '.alert-ok{background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.4);color:#d8b4fe}'
         . '.log{background:#1a1030;border:1px solid #2d1754;border-radius:8px;padding:14px;font-family:ui-monospace,monospace;font-size:12px;color:#9ca3af;max-height:200px;overflow:auto;margin-top:12px;white-space:pre-wrap;word-break:break-all}'
         . 'code{background:#2d1754;padding:2px 6px;border-radius:4px;font-size:.9em;color:#e5e7eb}'
+        . '.skip-link{position:absolute;top:24px;right:24px;font-size:13px;color:#9ca3af;text-decoration:none;transition:color .15s}'
+        . '.skip-link:hover{color:#a855f7}'
         . '@media (max-width:520px){.langs{grid-template-columns:1fr}.card{padding:24px}.row{flex-direction:column-reverse}.row .btn{width:100%;text-align:center}}';
+
     echo '<!DOCTYPE html><html lang="' . rj_esc($lang) . '" dir="' . $dir . '"><head>'
         . '<meta charset="utf-8">'
         . '<meta name="viewport" content="width=device-width,initial-scale=1">'
@@ -83,10 +94,13 @@ function rj_render(string $step, string $body, string $extra = ''): void
         . '<style>' . $css . '</style>' . $extra . '</head><body>'
         . '<div class="card"><img src="' . $logoUrl . '" alt="RJ Nexus" class="brand-logo">'
         . '<h1>' . rj_esc($t['title']) . '</h1>'
-        . '<p class="sub">' . rj_esc($t['sub']) . '</p>'
-        . '<div class="steps">' . $nav . '</div>'
-        . $body
-        . '</div></body></html>';
+        . '<p class="sub">' . rj_esc($t['sub']) . '</p>';
+
+    if (!in_array($step, ['finish', 'intro'], true)) {
+        echo '<div class="steps">' . $nav . '</div>';
+    }
+
+    echo $body . '</div></body></html>';
 }
 
 $step = $_GET['step'] ?? 'language';
@@ -99,7 +113,7 @@ if (file_exists(RJ_LOCK) && $step !== 'finish') {
     exit;
 }
 
-$validSteps = ['language', 'requirements', 'database', 'admin', 'install', 'finish'];
+$validSteps = ['language', 'intro', 'requirements', 'database', 'admin', 'install', 'finish'];
 if (!in_array($step, $validSteps, true)) {
     $step = 'language';
 }
