@@ -231,6 +231,7 @@ function rj_artisan(array $args): array
     return ['code' => $code, 'out' => $output];
 }
 
+
 function rj_install_run(?string $sqlContent = null): array
 {
     $cfg = $_SESSION['rj_install'];
@@ -287,11 +288,13 @@ function rj_install_run(?string $sqlContent = null): array
 
             if (file_exists(RJ_ROOT . '/database/seeders/data/demo/manifest.json')) {
                 $dm = rj_artisan(['db:seed', '--class=DemoSeeder', '--force', '--no-interaction']);
-                $log[] = $dm['code'] === 0 ? 'demo imported' : 'demo warning: ' . substr($dm['out'], 0, 300);
+                if ($dm['code'] !== 0) {
+                    throw new RuntimeException('Demo import failed: ' . $dm['out']);
+                }
+                $log[] = 'demo imported successfully';
             }
         }
 
-        // Seçilən dili bazaya da yazırıq ki, Admin Panel də bu dildə açılsın
         try {
             $stmt = $pdo->prepare("SELECT COUNT(*) FROM rj_options WHERE name = 'site_language'");
             $stmt->execute();
@@ -306,6 +309,7 @@ function rj_install_run(?string $sqlContent = null): array
         }
 
         if (empty($cfg['skip_admin']) && !empty($cfg['admin'])) {
+            // ... (admin yaradılması eyni qalır)
             $hash = password_hash($cfg['admin']['pass'], PASSWORD_BCRYPT, ['cost' => 12]);
             $existing = 0;
 
