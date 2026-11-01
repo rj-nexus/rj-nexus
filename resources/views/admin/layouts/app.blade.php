@@ -233,21 +233,21 @@
             transition: transform .2s cubic-bezier(.34, 1.56, .64, 1), background .15s, color .15s, border-color .15s;
         }
         .rj-sm-it.is-active .rj-sm-ic { border-color: #ddd6fe; background: #f5f3ff; color: #7c3aed; transform: scale(1.08) rotate(-4deg); }
-        
+
         /* AI Answer Specific Styles */
-        .rj-sm-it.is-ai-answer { 
+        .rj-sm-it.is-ai-answer {
             align-items: flex-start;
             border: 1px solid #ddd6fe;
             background: #f5f3ff;
         }
-        .rj-sm-it.is-ai-answer .rj-sm-ic { 
-            background: linear-gradient(135deg, #8b5cf6, #ec4899); 
-            color: #fff; 
-            border-color: transparent; 
+        .rj-sm-it.is-ai-answer .rj-sm-ic {
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            color: #fff;
+            border-color: transparent;
             margin-top: 2px;
         }
         .rj-sm-it.is-ai-answer .rj-sm-ic svg { animation: rj-spark 2s ease-in-out infinite; }
-        
+
         .rj-sm-tx { flex: 1; min-width: 0; }
         .rj-sm-tx b {
             display: block;
@@ -274,7 +274,7 @@
             font-size: 13.5px;
             color: #334155;
         }
-        
+
         .rj-sm mark { padding: 0 1px; border-radius: 3px; background: rgba(250, 204, 21, .4); color: inherit; }
         .rj-sm-url {
             max-width: 180px;
@@ -826,6 +826,24 @@
                                     <span class="uppercase">{{ $locale }}</span>
                                 </a>
                             @endforeach
+                        </div><div x-show="langMenu" x-cloak x-transition class="absolute end-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1 rj-fade-in z-20">
+                            @foreach (rj_available_locales() as $locale)
+                                <a href="{{ route('admin.lang.switch', $locale) }}" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 {{ app()->getLocale() === $locale ? 'bg-gray-50 font-medium' : '' }}">
+                                    @if (file_exists(public_path("images/flags/{$locale}.svg")))
+                                        <img src="{{ asset("images/flags/{$locale}.svg") }}" alt="{{ strtoupper($locale) }}" class="w-5 h-4 object-cover rounded-sm">
+                                    @endif
+                                    <span class="uppercase">{{ $locale }}</span>
+                                </a>
+                            @endforeach
+                        </div><div x-show="langMenu" x-cloak x-transition class="absolute end-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1 rj-fade-in z-20">
+                            @foreach (rj_available_locales() as $locale)
+                                <a href="{{ route('admin.lang.switch', $locale) }}" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 {{ app()->getLocale() === $locale ? 'bg-gray-50 font-medium' : '' }}">
+                                    @if (file_exists(public_path("images/flags/{$locale}.svg")))
+                                        <img src="{{ asset("images/flags/{$locale}.svg") }}" alt="{{ strtoupper($locale) }}" class="w-5 h-4 object-cover rounded-sm">
+                                    @endif
+                                    <span class="uppercase">{{ $locale }}</span>
+                                </a>
+                            @endforeach
                         </div>
                     </div>
 
@@ -1151,7 +1169,7 @@
                     .then(r => r.json())
                     .then(data => {
                         if (id !== this.reqId) return;
-                        
+
                         this.searchAnswer = data.answer || null;
                         this.serverResults = (data.menus || []).map(r => ({
                             title: r.title || '',
@@ -1201,13 +1219,13 @@
 
                         // 1. AI Answer (Ən üstdə göstərilir)
                         if (this.searchAnswer) {
-                            out.push({ 
-                                kind: 'ai-answer', 
-                                group: T.ai, 
-                                title: 'RJ AI Assistant', 
-                                path: '', 
-                                sub: this.searchAnswer, 
-                                url: '#' 
+                            out.push({
+                                kind: 'ai-answer',
+                                group: T.ai,
+                                title: 'RJ AI Assistant',
+                                path: '',
+                                sub: this.searchAnswer,
+                                url: '#'
                             });
                         }
 
