@@ -47,7 +47,12 @@ body::after{content:"";position:fixed;inset:-20%;z-index:0;pointer-events:none;f
 .rj-flash{position:fixed;inset:0;z-index:9;pointer-events:none;opacity:0;background:radial-gradient(circle at 50% 50%,#fff 0%,rgba(200,210,255,.85) 35%,rgba(120,100,255,.4) 70%);transition:opacity .9s ease-in}
 .rj-flash.on{opacity:1}
 .card{position:fixed;top:clamp(12px,2.6vh,26px);left:50%;transform:translateX(-50%);z-index:4;width:min(92vw,900px);max-width:none;background:none;border:0;box-shadow:none;padding:0;overflow:visible;pointer-events:none;text-align:center}
-.brand-logo{height:26px;margin:0 auto 4px;opacity:0;animation:rj-up 1.1s 1.2s both}
+.brand-logo{height:clamp(56px,10vh,92px);width:auto;margin:0 auto 6px;opacity:0;pointer-events:none;-webkit-user-drag:none;filter:drop-shadow(0 0 22px rgba(167,139,250,.55));animation:rj-logo 1.7s 1s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rj-logo{from{opacity:0;transform:translateY(10px) scale(.82);filter:blur(14px) drop-shadow(0 0 22px rgba(167,139,250,.55))}to{opacity:1;transform:none;filter:blur(0) drop-shadow(0 0 22px rgba(167,139,250,.55))}}
+.card h1{display:none}
+html,body,.card,.rj-stage,.planet{-webkit-user-select:none;-moz-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+::selection{background:transparent;color:inherit}
+img{-webkit-user-drag:none;user-drag:none}
 .card h1{text-align:center;font-size:clamp(26px,4.2vw,40px);font-weight:800;margin-bottom:0;background:linear-gradient(90deg,#e0e7ff,#fff,#fbcfe8,#c4b5fd,#e0e7ff);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 22px rgba(167,139,250,.5));opacity:0;animation:rj-title 1.8s 1s cubic-bezier(.2,.8,.2,1) both,rj-shine 8s 3s linear infinite}
 .card p.sub{text-align:center;margin-bottom:0;opacity:0;animation:rj-up 1.1s 1.8s both}
 .steps{justify-content:center;margin:10px 0 2px;opacity:0;animation:rj-up 1.1s 2s both}
@@ -72,7 +77,7 @@ body:not(.rj-run) *{animation-play-state:paused!important}
 /* neutralise base .lang-btn look so only the chip is visible */
 .planet.lang-btn,.planet.lang-btn:hover,.planet.lang-btn.active{background:none;border:0;padding:0;border-radius:0;color:inherit}
 /* short screens (phone landscape): compact header */
-@media (max-height:520px){.brand-logo,.card p.sub,.steps{display:none}.card{top:8px}.card h1{font-size:22px}.rj-lead{font-size:10px;margin-top:2px}.rj-cap{font-size:16px;bottom:8px}.chip{padding:4px 10px 4px 4px}.chip .cd{height:22px;min-width:28px}.chip .nm{font-size:12px}}
+@media (max-height:520px){.card p.sub,.steps{display:none}.card{top:8px}.brand-logo{height:36px;margin-bottom:2px}.rj-lead{font-size:10px;margin-top:2px}.rj-cap{font-size:16px;bottom:8px}.chip{padding:4px 10px 4px 4px}.chip .cd{height:22px;min-width:28px}.chip .nm{font-size:12px}}
 /* fallback if JS fails: plain visible grid */
 .rj-fb #rjSky{display:none}
 .rj-fb .rj-stage{display:grid!important;grid-template-columns:repeat(2,1fr);gap:10px;padding:170px 16px 24px;overflow:auto;pointer-events:auto}
@@ -87,6 +92,9 @@ var cap=document.createElement('div');
 cap.className='rj-cap';
 document.body.appendChild(cap);
 var card=document.querySelector('.card');
+document.addEventListener('selectstart',function(e){e.preventDefault()});
+document.addEventListener('dragstart',function(e){e.preventDefault()});
+document.addEventListener('contextmenu',function(e){if(!(e.target.closest&&e.target.closest('.planet')))e.preventDefault()});
 var force=/[?&]fx=1/.test(location.search);
 var soft=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)&&!force;
 var reduce=false;
