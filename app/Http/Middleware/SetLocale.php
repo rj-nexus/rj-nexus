@@ -11,9 +11,22 @@ class SetLocale
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $routeLocale = $request->route('locale');
-        $available = rj_frontend_locales();
+        $isAdmin = $request->is('admin') || $request->is('admin/*');
+
+        $available = $isAdmin ? rj_available_locales() : rj_frontend_locales();
         $default = config('app.locale');
+
+        if ($isAdmin) {
+            $sessionLocale = session('locale');
+            $locale = ($sessionLocale && in_array($sessionLocale, $available, true))
+                ? $sessionLocale
+                : $default;
+
+            app()->setLocale($locale);
+            return $next($request);
+        }
+
+        $routeLocale = $request->route('locale');
 
         if (is_string($routeLocale) && $routeLocale !== '') {
             if (!in_array($routeLocale, $available, true)) {
