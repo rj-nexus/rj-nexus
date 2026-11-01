@@ -30,7 +30,6 @@ class DemoSeeder extends Seeder
             return;
         }
 
-        // Köhnə linki options.json-dan tapırıq
         $opts = $this->load('options.json');
         foreach ($opts as $opt) {
             $name = $opt['option_name'] ?? $opt['name'] ?? '';
@@ -50,7 +49,9 @@ class DemoSeeder extends Seeder
             $this->safeImport('taxonomies.json', 'rj_taxonomies', [
                 'post_type_id' => 'rj_post_types',
             ]);
-            $this->safeImport('themes.json', 'rj_themes');
+
+            // Tema cədvəlini silmirik, sadəcə update edirik
+            $this->importThemes('themes.json');
 
             $this->safeImport('categories.json', 'rj_categories');
             $this->safeImport('tags.json', 'rj_tags');
@@ -115,14 +116,41 @@ class DemoSeeder extends Seeder
         }
 
         $json = json_encode($row, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-
-        // Həm normal, həm də escape olunmuş linkləri dəyişirik
         $json = str_replace($this->oldUrl, $this->newUrl, $json);
         $json = str_replace(str_replace('/', '\/', $this->oldUrl), str_replace('/', '\/', $this->newUrl), $json);
         $json = str_replace(addslashes($this->oldUrl), addslashes($this->newUrl), $json);
 
         $decoded = json_decode($json, true);
         return is_array($decoded) ? $decoded : $row;
+    }
+
+    private function importThemes(string $file): void
+    {
+        if (!Schema::hasTable('rj_themes')) {
+            return;
+        }
+
+        $rows = $this->load($file);
+        if (empty($rows)) {
+            return;
+        }
+
+        foreach ($rows as $row) {
+            $row = $this->replaceUrls($row);
+            unset($row['id']);
+
+            // Əgər slug varsa update et, yoxsa insert et
+            if (isset($row['slug'])) {
+                DB::table('rj_themes')->updateOrInsert(
+                    ['slug' => $row['slug']],
+                    $row
+                );
+            } else {
+                DB::table('rj_themes')->insert($row);
+            }
+        }
+
+        $this->command?->line("Imported rj_themes: " . count($rows));
     }
 
     private function safeImport(string $file, string $table, array $remaps = []): void
@@ -204,7 +232,6 @@ class DemoSeeder extends Seeder
 
             unset($row['id']);
 
-            // Site URL-i mütləq yeni URL ilə əvəz edirik
             if ($name === 'site_url' && !empty($this->newUrl)) {
                 $row['option_value'] = $this->newUrl;
                 $row['value'] = $this->newUrl;
