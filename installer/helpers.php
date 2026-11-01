@@ -303,13 +303,26 @@ function rj_install_run(?string $sqlContent = null): array
             } else {
                 $pdo->prepare("INSERT INTO rj_options (name, value, created_at, updated_at) VALUES ('site_language', ?, NOW(), NOW())")->execute([$lang]);
             }
+
+            $stmt = $pdo->prepare("SELECT value FROM rj_options WHERE name = 'frontend_locales'");
+            $stmt->execute();
+            $flRow = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($flRow) {
+                $fl = json_decode($flRow['value'], true);
+                if (is_array($fl) && !in_array($lang, $fl)) {
+                    $fl[] = $lang;
+                    $pdo->prepare("UPDATE rj_options SET value = ? WHERE name = 'frontend_locales'")->execute([json_encode(array_values($fl))]);
+                    $log[] = 'selected language added to frontend locales';
+                }
+            }
+
             $log[] = 'site language updated in db';
         } catch (Throwable $e) {
             $log[] = 'site language db update failed: ' . $e->getMessage();
         }
 
         if (empty($cfg['skip_admin']) && !empty($cfg['admin'])) {
-            // ... (admin yaradılması eyni qalır)
             $hash = password_hash($cfg['admin']['pass'], PASSWORD_BCRYPT, ['cost' => 12]);
             $existing = 0;
 
