@@ -152,6 +152,11 @@ class PluginManager
 
             WidgetRegistry::reset();
 
+            // --- YENİ ƏLAVƏ: Route və View keşlərini təmizləyirik ---
+            \Illuminate\Support\Facades\Artisan::call('view:clear');
+            \Illuminate\Support\Facades\Artisan::call('route:clear');
+            \Illuminate\Support\Facades\Cache::forget('rj_active_plugins');
+
             return ['success' => true, 'message' => __('Plugin activated.')];
         } catch (\Throwable $e) {
             $plugin->markAsError($e->getMessage());
@@ -176,6 +181,11 @@ class PluginManager
             $plugin->markAsInactive();
 
             WidgetRegistry::reset();
+
+            // --- YENİ ƏLAVƏ: Deaktiv edərkən də keşi təmizləyirik ---
+            \Illuminate\Support\Facades\Artisan::call('view:clear');
+            \Illuminate\Support\Facades\Artisan::call('route:clear');
+            \Illuminate\Support\Facades\Cache::forget('rj_active_plugins');
 
             return ['success' => true, 'message' => __('Plugin deactivated.')];
         } catch (\Throwable $e) {
