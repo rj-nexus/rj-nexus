@@ -6,6 +6,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
+use App\Models\Option;
 
 class DemoSeeder extends Seeder
 {
@@ -31,63 +32,76 @@ class DemoSeeder extends Seeder
         DB::statement('SET FOREIGN_KEY_CHECKS=0');
 
         try {
-            DB::transaction(function () {
-                $this->importOptions('options.json');
-                $this->importTruncate('post_types.json', 'rj_post_types');
-                $this->importTruncate('taxonomies.json', 'rj_taxonomies', [
-                    'post_type_id' => 'rj_post_types',
-                ]);
-                $this->importTruncate('themes.json', 'rj_themes');
+            $this->importOptions('options.json');
+            $this->safeImport('post_types.json', 'rj_post_types');
+            $this->safeImport('taxonomies.json', 'rj_taxonomies', [
+                'post_type_id' => 'rj_post_types',
+            ]);
+            $this->safeImport('themes.json', 'rj_themes');
 
-                $this->importTruncate('categories.json', 'rj_categories');
-                $this->importTruncate('tags.json', 'rj_tags');
-                $this->importTruncate('terms.json', 'rj_terms');
-                $this->importTruncate('media.json', 'rj_media');
-                $this->importTruncate('custom_fields.json', 'rj_custom_fields');
-                $this->importTruncate('custom_fonts.json', 'rj_custom_fonts');
-                $this->importTruncate('custom_icons.json', 'rj_custom_icons');
-                $this->importTruncate('menus.json', 'rj_menus');
-                $this->importTruncate('forms.json', 'rj_forms');
-                $this->importPosts('posts.json');
+            $this->safeImport('categories.json', 'rj_categories');
+            $this->safeImport('tags.json', 'rj_tags');
+            $this->safeImport('terms.json', 'rj_terms');
+            $this->safeImport('media.json', 'rj_media');
+            $this->safeImport('custom_fields.json', 'rj_custom_fields');
+            $this->safeImport('custom_fonts.json', 'rj_custom_fonts');
+            $this->safeImport('custom_icons.json', 'rj_custom_icons');
+            $this->safeImport('menus.json', 'rj_menus');
+            $this->safeImport('forms.json', 'rj_forms');
 
-                $this->importTruncate('category_translations.json', 'rj_category_translations', [
-                    'category_id' => 'rj_categories',
-                ]);
-                $this->importTruncate('tag_translations.json', 'rj_tag_translations', [
-                    'tag_id' => 'rj_tags',
-                ]);
-                $this->importTruncate('term_translations.json', 'rj_term_translations', [
-                    'term_id' => 'rj_terms',
-                ]);
-                $this->importTruncate('post_translations.json', 'rj_post_translations', [
-                    'post_id' => 'rj_posts',
-                ]);
+            $this->importPosts('posts.json');
 
-                $this->importPivot('post_category.json', 'rj_post_category', 'post_id', 'rj_posts', 'category_id', 'rj_categories');
-                $this->importPivot('post_tag.json', 'rj_post_tag', 'post_id', 'rj_posts', 'tag_id', 'rj_tags');
-                $this->importPivot('post_term.json', 'rj_post_term', 'post_id', 'rj_posts', 'term_id', 'rj_terms');
+            $this->safeImport('category_translations.json', 'rj_category_translations', [
+                'category_id' => 'rj_categories',
+            ]);
+            $this->safeImport('tag_translations.json', 'rj_tag_translations', [
+                'tag_id' => 'rj_tags',
+            ]);
+            $this->safeImport('term_translations.json', 'rj_term_translations', [
+                'term_id' => 'rj_terms',
+            ]);
+            $this->safeImport('post_translations.json', 'rj_post_translations', [
+                'post_id' => 'rj_posts',
+            ]);
 
-                $this->importMenuItems('menu_items.json');
-                $this->importTemplates('templates.json');
+            $this->importPivot('post_category.json', 'rj_post_category', 'post_id', 'rj_posts', 'category_id', 'rj_categories');
+            $this->importPivot('post_tag.json', 'rj_post_tag', 'post_id', 'rj_posts', 'tag_id', 'rj_tags');
+            $this->importPivot('post_term.json', 'rj_post_term', 'post_id', 'rj_posts', 'term_id', 'rj_terms');
 
-                $this->importTruncate('form_fields.json', 'rj_form_fields', [
-                    'form_id' => 'rj_forms',
-                ]);
+            $this->importMenuItems('menu_items.json');
+            $this->importTemplates('templates.json');
 
-                $this->importTruncate('theme_customizations.json', 'rj_theme_customizations', [
-                    'theme_id' => 'rj_themes',
-                ]);
+            $this->safeImport('form_fields.json', 'rj_form_fields', [
+                'form_id' => 'rj_forms',
+            ]);
 
-                $this->importTruncate('widgets.json', 'rj_widgets', $this->autoDetectRemaps('rj_widgets'));
-                $this->importTruncate('global_widgets.json', 'rj_global_widgets', $this->autoDetectRemaps('rj_global_widgets'));
+            $this->safeImport('theme_customizations.json', 'rj_theme_customizations', [
+                'theme_id' => 'rj_themes',
+            ]);
 
-                $this->copyMediaFiles();
-            });
+            $this->safeImport('widgets.json', 'rj_widgets', $this->autoDetectRemaps('rj_widgets'));
+            $this->safeImport('global_widgets.json', 'rj_global_widgets', $this->autoDetectRemaps('rj_global_widgets'));
+
+            $this->copyMediaFiles();
+
+            $this->command?->info('Demo data imported successfully.');
+
+        } catch (\Throwable $e) {
+            $this->command?->error('Error during demo import: ' . $e->getMessage());
         } finally {
             DB::statement('SET FOREIGN_KEY_CHECKS=1');
+            try { Option::flush(); } catch (\Throwable $e) {}
+            $this->command?->info('Options cache flushed.');
         }
+    }
 
-        $this->command?->info('Demo data imported successfully.');
+    private function safeImport(string $file, string $table, array $remaps = []): void
+    {
+        try {
+            $this->importTruncate($file, $table, $remaps);
+        } catch (\Throwable $e) {
+            $this->command?->error("Failed to import {$table}: " . $e->getMessage());
+        }
     }
 
     private function autoDetectRemaps(string $table): array
@@ -137,6 +151,7 @@ class DemoSeeder extends Seeder
 
         $rows = $this->load($file);
         if (empty($rows)) {
+            $this->command?->warn("Skipping rj_options: JSON file is empty.");
             return;
         }
 
@@ -186,12 +201,13 @@ class DemoSeeder extends Seeder
 
         $rows = $this->load($file);
 
-        DB::table($table)->delete();
-        $this->idMap[$table] = [];
-
         if (empty($rows)) {
+            $this->command?->warn("Skipping {$table}: JSON file is empty.");
             return;
         }
+
+        DB::table($table)->delete();
+        $this->idMap[$table] = [];
 
         foreach ($rows as $row) {
             $oldId = $row['id'] ?? null;
@@ -222,12 +238,13 @@ class DemoSeeder extends Seeder
 
         $rows = $this->load($file);
 
-        DB::table('rj_posts')->delete();
-        $this->idMap['rj_posts'] = [];
-
         if (empty($rows)) {
+            $this->command?->warn("Skipping rj_posts: JSON file is empty.");
             return;
         }
+
+        DB::table('rj_posts')->delete();
+        $this->idMap['rj_posts'] = [];
 
         $fallbackAuthor = DB::table('users')->orderBy('id')->value('id');
 
@@ -262,11 +279,11 @@ class DemoSeeder extends Seeder
 
         $rows = $this->load($file);
 
-        DB::table($table)->delete();
-
         if (empty($rows)) {
             return;
         }
+
+        DB::table($table)->delete();
 
         foreach ($rows as $row) {
             if (isset($row[$col1])) {
@@ -289,12 +306,13 @@ class DemoSeeder extends Seeder
 
         $rows = $this->load($file);
 
-        DB::table('rj_menu_items')->delete();
-        $this->idMap['rj_menu_items'] = [];
-
         if (empty($rows)) {
+            $this->command?->warn("Skipping rj_menu_items: JSON file is empty.");
             return;
         }
+
+        DB::table('rj_menu_items')->delete();
+        $this->idMap['rj_menu_items'] = [];
 
         $pending = $rows;
         $maxIterations = count($rows) + 1;
@@ -343,12 +361,13 @@ class DemoSeeder extends Seeder
 
         $rows = $this->load($file);
 
-        DB::table('rj_templates')->delete();
-        $this->idMap['rj_templates'] = [];
-
         if (empty($rows)) {
+            $this->command?->warn("Skipping rj_templates: JSON file is empty.");
             return;
         }
+
+        DB::table('rj_templates')->delete();
+        $this->idMap['rj_templates'] = [];
 
         foreach ($rows as $row) {
             $oldId = $row['id'] ?? null;
@@ -375,15 +394,34 @@ class DemoSeeder extends Seeder
     private function remapTemplateContent(array $content): array
     {
         foreach ($content as $key => $value) {
-            if (is_array($value)) {
-                $content[$key] = $this->remapTemplateContent($value);
-            } elseif (is_scalar($value)) {
-                $keyLower = strtolower((string) $key);
-                foreach ($this->idMap as $table => $map) {
-                    if (str_contains($keyLower, str_replace('rj_', '', $table)) && isset($map[$value])) {
-                        $content[$key] = $map[$value];
+            try {
+                if (is_array($value)) {
+                    $content[$key] = $this->remapTemplateContent($value);
+                } elseif (is_scalar($value)) {
+                    $keyLower = strtolower((string) $key);
+                    $intVal = (int) $value;
+
+                    if (str_contains($keyLower, 'menu') && isset($this->idMap['rj_menus'][$intVal])) {
+                        $content[$key] = $this->idMap['rj_menus'][$intVal];
+                    }
+                    if (str_contains($keyLower, 'post') && isset($this->idMap['rj_posts'][$intVal])) {
+                        $content[$key] = $this->idMap['rj_posts'][$intVal];
+                    }
+                    if (str_contains($keyLower, 'category') && isset($this->idMap['rj_categories'][$intVal])) {
+                        $content[$key] = $this->idMap['rj_categories'][$intVal];
+                    }
+                    if (str_contains($keyLower, 'tag') && isset($this->idMap['rj_tags'][$intVal])) {
+                        $content[$key] = $this->idMap['rj_tags'][$intVal];
+                    }
+                    if (str_contains($keyLower, 'form') && isset($this->idMap['rj_forms'][$intVal])) {
+                        $content[$key] = $this->idMap['rj_forms'][$intVal];
+                    }
+                    if (str_contains($keyLower, 'media') && isset($this->idMap['rj_media'][$intVal])) {
+                        $content[$key] = $this->idMap['rj_media'][$intVal];
                     }
                 }
+            } catch (\Throwable $e) {
+                // Xəta olsa belə davam et
             }
         }
 
