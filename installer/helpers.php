@@ -315,6 +315,9 @@ function rj_install_run(?string $sqlContent = null): array
                     $pdo->prepare("UPDATE rj_options SET value = ? WHERE name = 'frontend_locales'")->execute([json_encode(array_values($fl))]);
                     $log[] = 'selected language added to frontend locales';
                 }
+            } else {
+                $pdo->prepare("INSERT INTO rj_options (name, value, created_at, updated_at) VALUES ('frontend_locales', ?, NOW(), NOW())")->execute([json_encode([$lang])]);
+                $log[] = 'frontend locales created with selected language';
             }
 
             $log[] = 'site language updated in db';
@@ -367,6 +370,11 @@ function rj_install_run(?string $sqlContent = null): array
             'version' => '1.5.0',
             'lang' => $lang,
         ], JSON_PRETTY_PRINT));
+
+        // BÜTÜN PDO DƏYİŞİKLİKLƏRİNDƏN SONRA KEŞİ TƏMİZLƏYİRİK Kİ, SAYT YENİ DİLLƏRİ GÖRSÜN
+        rj_artisan(['config:clear']);
+        rj_artisan(['cache:clear']);
+        rj_artisan(['optimize:clear']);
 
         rj_log(implode(' | ', $log));
 

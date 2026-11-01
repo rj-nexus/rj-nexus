@@ -6,7 +6,6 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
-use App\Models\Option;
 
 class DemoSeeder extends Seeder
 {
@@ -84,14 +83,11 @@ class DemoSeeder extends Seeder
 
                 $this->copyMediaFiles();
             });
-
-            $this->command?->info('Demo data imported successfully.');
-
         } finally {
             DB::statement('SET FOREIGN_KEY_CHECKS=1');
-            Option::flush(); // Hər halda keşi təmizləyirik
-            $this->command?->info('Options cache flushed.');
         }
+
+        $this->command?->info('Demo data imported successfully.');
     }
 
     private function autoDetectRemaps(string $table): array
@@ -379,34 +375,15 @@ class DemoSeeder extends Seeder
     private function remapTemplateContent(array $content): array
     {
         foreach ($content as $key => $value) {
-            try {
-                if (is_array($value)) {
-                    $content[$key] = $this->remapTemplateContent($value);
-                } elseif (is_scalar($value)) {
-                    $keyLower = strtolower((string) $key);
-                    $intVal = (int) $value;
-
-                    if (str_contains($keyLower, 'menu') && isset($this->idMap['rj_menus'][$intVal])) {
-                        $content[$key] = $this->idMap['rj_menus'][$intVal];
-                    }
-                    if (str_contains($keyLower, 'post') && isset($this->idMap['rj_posts'][$intVal])) {
-                        $content[$key] = $this->idMap['rj_posts'][$intVal];
-                    }
-                    if (str_contains($keyLower, 'category') && isset($this->idMap['rj_categories'][$intVal])) {
-                        $content[$key] = $this->idMap['rj_categories'][$intVal];
-                    }
-                    if (str_contains($keyLower, 'tag') && isset($this->idMap['rj_tags'][$intVal])) {
-                        $content[$key] = $this->idMap['rj_tags'][$intVal];
-                    }
-                    if (str_contains($keyLower, 'form') && isset($this->idMap['rj_forms'][$intVal])) {
-                        $content[$key] = $this->idMap['rj_forms'][$intVal];
-                    }
-                    if (str_contains($keyLower, 'media') && isset($this->idMap['rj_media'][$intVal])) {
-                        $content[$key] = $this->idMap['rj_media'][$intVal];
+            if (is_array($value)) {
+                $content[$key] = $this->remapTemplateContent($value);
+            } elseif (is_scalar($value)) {
+                $keyLower = strtolower((string) $key);
+                foreach ($this->idMap as $table => $map) {
+                    if (str_contains($keyLower, str_replace('rj_', '', $table)) && isset($map[$value])) {
+                        $content[$key] = $map[$value];
                     }
                 }
-            } catch (\Throwable $e) {
-                // Xəta olsa belə davam et ki, bütün tranzaksiya ləğv olunmasın
             }
         }
 
