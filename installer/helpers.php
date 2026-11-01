@@ -17,6 +17,10 @@ function rj_languages(): array
         'ja' => '日本語',
         'id' => 'Bahasa Indonesia',
         'ar' => 'العربية',
+        'it' => 'Italiano',
+        'nl' => 'Nederlands',
+        'hy' => 'Հայերեն',
+        'ka' => 'ქართული',
     ];
 }
 
