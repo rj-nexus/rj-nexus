@@ -30,8 +30,8 @@ class PostController extends Controller
 
         $post->incrementViews();
 
-        $related = Post::with('featured_image')
-            ->where('type', 'post')
+        // BURADA SƏHV VAR İDİ, 'featured_image' SİLİNDİ
+        $related = Post::where('type', 'post')
             ->published()
             ->where('id', '!=', $post->id)
             ->when($post->categories->isNotEmpty(), function ($q) use ($post) {
