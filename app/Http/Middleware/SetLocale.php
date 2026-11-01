@@ -17,14 +17,21 @@ class SetLocale
 
         if (is_string($routeLocale) && $routeLocale !== '') {
             if (!in_array($routeLocale, $available, true)) {
-                abort(404);
+                $path = $request->path();
+                $newPath = preg_replace('/^' . preg_quote($routeLocale, '/') . '\b/', $default, $path);
+
+                if ($newPath === $path) {
+                    $newPath = $default;
+                }
+
+                return redirect()->to('/' . ltrim($newPath, '/'));
             }
 
             $locale = $routeLocale;
             session(['locale' => $locale]);
         } else {
             $sessionLocale = session('locale');
-            $locale = ($sessionLocale && $this->isValidLocale($sessionLocale))
+            $locale = ($sessionLocale && in_array($sessionLocale, $available, true))
                 ? $sessionLocale
                 : $default;
         }
@@ -33,10 +40,5 @@ class SetLocale
         URL::defaults(['locale' => $locale]);
 
         return $next($request);
-    }
-
-    protected function isValidLocale(string $locale): bool
-    {
-        return (bool) preg_match('/^[a-z]{2}(_[A-Z]{2})?$/', $locale);
     }
 }
