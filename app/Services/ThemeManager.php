@@ -78,7 +78,7 @@ class ThemeManager
         return $count;
     }
 
-    public function activate(Theme $theme): array
+     public function activate(Theme $theme): array
     {
         if ($theme->isActive()) {
             return ['success' => false, 'message' => __('Theme is already active.')];
@@ -100,7 +100,22 @@ class ThemeManager
 
         try {
             $theme->markAsActive();
+
+            // --- YENİ ƏLAVƏ: Aktiv temanı rj_options cədvəlinə də yaz ---
+            if (function_exists('rj_update_option')) {
+                rj_update_option('frontend_theme', $theme->slug);
+            } else {
+                // Əgər helper funksiya yoxdursa birbaşa DB ilə yaz
+                \DB::table('rj_options')->updateOrInsert(
+                    ['option_name' => 'frontend_theme'],
+                    ['option_value' => $theme->slug, 'updated_at' => now()]
+                );
+            }
+
             $this->clearCache();
+
+            // Blade keşini də təmizləyək ki, dərhal tətbiq olunsun
+            \Illuminate\Support\Facades\Artisan::call('view:clear');
 
             return ['success' => true, 'message' => __('Theme activated.')];
         } catch (\Throwable $e) {
@@ -109,7 +124,6 @@ class ThemeManager
             return ['success' => false, 'message' => $e->getMessage()];
         }
     }
-
     public function delete(Theme $theme): array
     {
         if ($theme->isActive()) {
