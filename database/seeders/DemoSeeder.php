@@ -12,6 +12,8 @@ class DemoSeeder extends Seeder
 {
     private string $path;
     private array $idMap = [];
+    private string $oldUrl = '';
+    private string $newUrl = '';
 
     private array $skipOptionPatterns = [
         'api_key', 'secret', 'password', 'token', '_hash', 'installed',
@@ -21,13 +23,24 @@ class DemoSeeder extends Seeder
     public function run(): void
     {
         $this->path = database_path('seeders/data/demo');
+        $this->newUrl = rtrim(config('app.url', ''), '/');
 
         if (!File::isDirectory($this->path)) {
             $this->command?->error("Demo data not found: {$this->path}");
             return;
         }
 
-        $this->command?->info('Importing demo data...');
+        // Köhnə linki options.json-dan tapırıq
+        $opts = $this->load('options.json');
+        foreach ($opts as $opt) {
+            $name = $opt['option_name'] ?? $opt['name'] ?? '';
+            if ($name === 'site_url') {
+                $this->oldUrl = rtrim($opt['option_value'] ?? $opt['value'] ?? '', '/');
+                break;
+            }
+        }
+
+        $this->command?->info("Replacing URLs: [{$this->oldUrl}] -> [{$this->newUrl}]");
 
         DB::statement('SET FOREIGN_KEY_CHECKS=0');
 
@@ -95,6 +108,23 @@ class DemoSeeder extends Seeder
         }
     }
 
+    private function replaceUrls(array $row): array
+    {
+        if (empty($this->oldUrl) || empty($this->newUrl) || $this->oldUrl === $this->newUrl) {
+            return $row;
+        }
+
+        $json = json_encode($row, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+        // Həm normal, həm də escape olunmuş linkləri dəyişirik
+        $json = str_replace($this->oldUrl, $this->newUrl, $json);
+        $json = str_replace(str_replace('/', '\/', $this->oldUrl), str_replace('/', '\/', $this->newUrl), $json);
+        $json = str_replace(addslashes($this->oldUrl), addslashes($this->newUrl), $json);
+
+        $decoded = json_decode($json, true);
+        return is_array($decoded) ? $decoded : $row;
+    }
+
     private function safeImport(string $file, string $table, array $remaps = []): void
     {
         try {
@@ -151,7 +181,6 @@ class DemoSeeder extends Seeder
 
         $rows = $this->load($file);
         if (empty($rows)) {
-            $this->command?->warn("Skipping rj_options: JSON file is empty.");
             return;
         }
 
@@ -174,6 +203,14 @@ class DemoSeeder extends Seeder
             }
 
             unset($row['id']);
+
+            // Site URL-i mütləq yeni URL ilə əvəz edirik
+            if ($name === 'site_url' && !empty($this->newUrl)) {
+                $row['option_value'] = $this->newUrl;
+                $row['value'] = $this->newUrl;
+            } else {
+                $row = $this->replaceUrls($row);
+            }
 
             $insertData = $row;
             if (isset($row['option_name'])) {
@@ -199,7 +236,6 @@ class DemoSeeder extends Seeder
     private function importTruncate(string $file, string $table, array $remaps = []): void
     {
         if (!Schema::hasTable($table)) {
-            $this->command?->warn("Table {$table} not found, skipping {$file}");
             return;
         }
 
@@ -213,7 +249,6 @@ class DemoSeeder extends Seeder
         $rows = $this->load($file);
 
         if (empty($rows)) {
-            $this->command?->warn("Skipping {$table}: JSON file is empty.");
             return;
         }
 
@@ -221,6 +256,8 @@ class DemoSeeder extends Seeder
         $this->idMap[$table] = [];
 
         foreach ($rows as $row) {
+            $row = $this->replaceUrls($row);
+
             $oldId = $row['id'] ?? null;
             unset($row['id']);
 
@@ -250,7 +287,6 @@ class DemoSeeder extends Seeder
         $rows = $this->load($file);
 
         if (empty($rows)) {
-            $this->command?->warn("Skipping rj_posts: JSON file is empty.");
             return;
         }
 
@@ -260,6 +296,8 @@ class DemoSeeder extends Seeder
         $fallbackAuthor = DB::table('users')->orderBy('id')->value('id');
 
         foreach ($rows as $row) {
+            $row = $this->replaceUrls($row);
+
             $oldId = $row['id'] ?? null;
             unset($row['id']);
 
@@ -318,7 +356,6 @@ class DemoSeeder extends Seeder
         $rows = $this->load($file);
 
         if (empty($rows)) {
-            $this->command?->warn("Skipping rj_menu_items: JSON file is empty.");
             return;
         }
 
@@ -341,6 +378,8 @@ class DemoSeeder extends Seeder
                     continue;
                 }
 
+                $row = $this->replaceUrls($row);
+
                 $oldId = $row['id'] ?? null;
                 unset($row['id']);
 
@@ -351,7 +390,6 @@ class DemoSeeder extends Seeder
                     $row['parent_id'] = $this->idMap['rj_menu_items'][$parentOld];
                 }
 
-                // Səhifə və ya yazı ID-lərini yeniləyirik
                 if (!empty($row['object_id']) && !empty($row['object_type'])) {
                     $type = $row['object_type'];
                     if (in_array($type, ['page', 'post'])) {
@@ -387,7 +425,6 @@ class DemoSeeder extends Seeder
         $rows = $this->load($file);
 
         if (empty($rows)) {
-            $this->command?->warn("Skipping rj_templates: JSON file is empty.");
             return;
         }
 
@@ -395,6 +432,8 @@ class DemoSeeder extends Seeder
         $this->idMap['rj_templates'] = [];
 
         foreach ($rows as $row) {
+            $row = $this->replaceUrls($row);
+
             $oldId = $row['id'] ?? null;
             unset($row['id']);
 
