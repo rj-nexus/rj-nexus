@@ -252,16 +252,15 @@ class PostController extends Controller
         $baseLocale = config('app.base_locale');
         $activeLocale = $request->input('locale', $baseLocale);
 
+        $blocks = [];
         if ($activeLocale === $baseLocale) {
-            $rawBlocks = $post->getRawOriginal('blocks');
-            $blocks = is_string($rawBlocks) ? json_decode($rawBlocks, true) : ($rawBlocks ?? []);
+            $blocks = $post->blocks['blocks'] ?? [];
         } else {
             $translation = $post->translations()->where('locale', $activeLocale)->first();
-            $blocks = $translation && $translation->blocks ? $translation->blocks : [];
-
-            if (empty($blocks['blocks'])) {
-                $rawBlocks = $post->getRawOriginal('blocks');
-                $blocks = is_string($rawBlocks) ? json_decode($rawBlocks, true) : ($rawBlocks ?? []);
+            if ($translation && !empty($translation->blocks['blocks'])) {
+                $blocks = $translation->blocks['blocks'];
+            } else {
+                $blocks = $post->blocks['blocks'] ?? [];
             }
         }
 
