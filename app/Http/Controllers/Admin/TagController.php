@@ -21,7 +21,9 @@ class TagController extends Controller
         }
 
         $tags = $query->ordered()->get();
-        $locales = rj_available_locales();
+
+        // Yalnız frontend üçün aktiv dilləri götürürük
+        $locales = rj_frontend_locales();
 
         $stats = [
             'total' => Tag::count(),
@@ -35,7 +37,9 @@ class TagController extends Controller
     public function store(Request $request)
     {
         $baseLocale = config('app.locale');
-        $locales = rj_available_locales();
+
+        // Yalnız frontend üçün aktiv dilləri götürürük
+        $locales = rj_frontend_locales();
 
         $rules = [
             'translations' => ['required', 'array'],
@@ -78,7 +82,9 @@ class TagController extends Controller
     public function update(Request $request, Tag $tag)
     {
         $baseLocale = config('app.locale');
-        $locales = rj_available_locales();
+
+        // Yalnız frontend üçün aktiv dilləri götürürük
+        $locales = rj_frontend_locales();
 
         $rules = [
             'translations' => ['required', 'array'],
