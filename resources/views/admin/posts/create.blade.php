@@ -185,17 +185,25 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1.5">
                                         {{ __('Title') }}
-                                        @if ($locale === $baseLocale)
-                                            <span class="text-red-500">*</span>
-                                        @endif
                                     </label>
                                     <input type="text"
                                            name="{{ $locale === $baseLocale ? 'title' : "translations[{$locale}][title]" }}"
                                            value="{{ old($locale === $baseLocale ? 'title' : "translations.{$locale}.title") }}"
                                            placeholder="{{ __('Enter title...') }}"
-                                           class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-base font-medium"
-                                           {{ $locale === $baseLocale ? 'required' : '' }}>
+                                           class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-base font-medium">
                                     @error($locale === $baseLocale ? 'title' : "translations.{$locale}.title")
+                                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('Slug') }}</label>
+                                    <input type="text"
+                                           name="{{ $locale === $baseLocale ? 'slug' : "translations[{$locale}][slug]" }}"
+                                           value="{{ old($locale === $baseLocale ? 'slug' : "translations.{$locale}.slug") }}"
+                                           placeholder="{{ __('auto-generated from title') }}"
+                                           class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm font-mono lowercase">
+                                    @error($locale === $baseLocale ? 'slug' : "translations.{$locale}.slug")
                                         <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
                                     @enderror
                                 </div>
@@ -358,21 +366,6 @@
                                 </span>
                             </label>
                         </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-lg shadow-sm border border-gray-100">
-                    <div class="px-6 py-4 border-b border-gray-100">
-                        <h3 class="text-base font-semibold text-gray-900">{{ __('Permalink') }}</h3>
-                    </div>
-                    <div class="p-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('Slug') }}</label>
-                        <input type="text" name="slug" value="{{ old('slug') }}"
-                               placeholder="{{ __('auto-generated from title') }}"
-                               class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm font-mono lowercase">
-                        @error('slug')
-                            <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
-                        @enderror
                     </div>
                 </div>
 
