@@ -50,7 +50,7 @@ class Post extends Model
     public function localizedSlug(?string $locale = null): string
     {
         $locale = $locale ?: app()->getLocale();
-        $base = config('app.fallback_locale', 'en');
+        $base = config('app.base_locale');
 
         $loaded = $this->relationLoaded('translations');
         if (!$loaded && !$this->translations()->exists()) {
@@ -92,7 +92,7 @@ class Post extends Model
         if ($hasTranslations) {
             $translations = $this->relationLoaded('translations') ? $this->translations : $this->translations()->get();
             $locale = app()->getLocale();
-            $base = config('app.fallback_locale', 'en');
+            $base = config('app.base_locale');
 
             $translation = $translations->firstWhere('locale', $locale);
             if ($translation && !empty($translation->title)) return $translation->title;
@@ -112,7 +112,7 @@ class Post extends Model
         if ($hasTranslations) {
             $translations = $this->relationLoaded('translations') ? $this->translations : $this->translations()->get();
             $locale = app()->getLocale();
-            $base = config('app.fallback_locale', 'en');
+            $base = config('app.base_locale');
 
             $translation = $translations->firstWhere('locale', $locale);
             if ($translation && !empty($translation->content)) return $translation->content;
@@ -132,7 +132,7 @@ class Post extends Model
         if ($hasTranslations) {
             $translations = $this->relationLoaded('translations') ? $this->translations : $this->translations()->get();
             $locale = app()->getLocale();
-            $base = config('app.fallback_locale', 'en');
+            $base = config('app.base_locale');
 
             $translation = $translations->firstWhere('locale', $locale);
             if ($translation && !empty($translation->excerpt)) return $translation->excerpt;
@@ -151,7 +151,7 @@ class Post extends Model
     protected function translationValue(string $field, ?string $locale = null)
     {
         $locale = $locale ?: app()->getLocale();
-        $base = config('app.fallback_locale', 'en');
+        $base = config('app.base_locale');
 
         if (!$this->relationLoaded('translations') && !$this->translations()->exists()) return null;
 
@@ -211,7 +211,7 @@ class Post extends Model
         $slug = $this->localizedSlug($locale);
 
         if ($slug === '') {
-            $base = config('app.fallback_locale', 'en');
+            $base = config('app.base_locale');
             $slug = $this->localizedSlug($base);
             if ($slug === '') return null;
             $locale = $base;
