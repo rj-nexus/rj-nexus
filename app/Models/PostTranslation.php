@@ -14,6 +14,7 @@ class PostTranslation extends Model
         'slug',
         'title',
         'content',
+        'blocks',
         'excerpt',
         'seo_title',
         'seo_description',
@@ -29,6 +30,10 @@ class PostTranslation extends Model
         'twitter_image',
         'robots',
         'schema_type',
+    ];
+
+    protected $casts = [
+        'blocks' => 'array',
     ];
 
     public function post()
