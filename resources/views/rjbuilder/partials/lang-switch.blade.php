@@ -39,7 +39,6 @@
             if (l === activeLocale) { this.open = false; return; }
             if (!saved && !confirm(t('You have unsaved changes. Switching language will discard them. Continue?'))) { this.open = false; return; }
 
-            // SƏHİFƏNİ YENİLƏYİRİK (RELOAD)
             const url = new URL(window.location.href);
             url.searchParams.set('locale', l);
             window.location.href = url.toString();
