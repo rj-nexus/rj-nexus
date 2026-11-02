@@ -1,887 +1,302 @@
 <?php
 
-use App\Models\Option;
+use App\DynamicTags\TagRegistry;
+use App\Widgets\WidgetRegistry;
 
-if (!function_exists('rj_get_option')) {
-    function rj_get_option(string $name, $default = null)
+if (!function_exists('rj_localize_builder_settings')) {
+    function rj_localize_builder_settings(array $settings, string $locale, string $baseLocale): array
     {
-        return Option::get($name, $default);
-    }
-}
+        $localized = [];
 
-if (!function_exists('rj_set_option')) {
-    function rj_set_option(string $name, $value, string $group = 'general', string $type = 'text', bool $autoload = true): void
-    {
-        Option::set($name, $value, $group, $type, $autoload);
-    }
-}
+        foreach ($settings as $key => $value) {
+            if (is_string($key) && preg_match('/^(.+)__([a-z]{2})$/', $key, $matches)) {
+                continue;
+            }
 
-if (!function_exists('rj_delete_option')) {
-    function rj_delete_option(string $name): void
-    {
-        Option::forget($name);
-    }
-}
+            $localKey = $key . '__' . $locale;
 
-if (!function_exists('rj_flush_options')) {
-    function rj_flush_options(): void
-    {
-        Option::flush();
-    }
-}
-
-if (!function_exists('rj_available_locales')) {
-    function rj_available_locales(): array
-    {
-        $path = lang_path();
-        $locales = [];
-
-        if (is_dir($path)) {
-            foreach (scandir($path) as $item) {
-                if ($item === '.' || $item === '..') {
-                    continue;
-                }
-
-                if (is_dir($path . '/' . $item)) {
-                    $locales[] = $item;
-                } elseif (pathinfo($item, PATHINFO_EXTENSION) === 'json') {
-                    $locales[] = pathinfo($item, PATHINFO_FILENAME);
+            if ($locale !== $baseLocale && isset($settings[$localKey])) {
+                $localized[$key] = $settings[$localKey];
+            } else {
+                if (is_array($value)) {
+                    $localized[$key] = rj_localize_builder_settings($value, $locale, $baseLocale);
+                } else {
+                    $localized[$key] = $value;
                 }
             }
         }
 
-        if (empty($locales)) {
-            $locales = [config('app.locale', 'en')];
-        }
-
-        return array_values(array_unique($locales));
+        return $localized;
     }
 }
 
-if (!function_exists('rj_frontend_locales')) {
-    function rj_frontend_locales(): array
+if (!function_exists('rj_resolve_dynamic')) {
+    function rj_resolve_dynamic($value)
     {
-        $raw = rj_get_option('frontend_locales', '[]');
-
-        if (is_string($raw)) {
-            $decoded = json_decode($raw, true);
-            $locales = is_array($decoded) ? $decoded : [];
-        } else {
-            $locales = is_array($raw) ? $raw : [];
+        if (!is_array($value)) {
+            return $value;
         }
 
-        $locales = array_values(array_filter($locales, fn ($l) => is_string($l) && $l !== ''));
-
-        if (empty($locales)) {
-            return [config('app.locale', 'en')];
+        if (($value['source'] ?? '') !== 'dynamic') {
+            return $value;
         }
 
-        $available = rj_available_locales();
-        $locales = array_values(array_intersect($locales, $available));
+        $tag = $value['tag'] ?? '';
 
-        return $locales ?: [config('app.locale', 'en')];
+        if ($tag === '') {
+            return '';
+        }
+
+        $options = $value['options'] ?? [];
+
+        if (!is_array($options)) {
+            $options = [];
+        }
+
+        return TagRegistry::resolve($tag, $options);
     }
 }
 
-if (!function_exists('rj_set_frontend_locales')) {
-    function rj_set_frontend_locales(array $locales): void
+if (!function_exists('rj_resolve_dynamics')) {
+    function rj_resolve_dynamics(array $settings): array
     {
-        $available = rj_available_locales();
-
-        $locales = array_values(array_filter(
-            array_unique($locales),
-            fn ($l) => in_array($l, $available, true)
-        ));
-
-        rj_set_option('frontend_locales', json_encode($locales, JSON_UNESCAPED_UNICODE));
-        rj_flush_options();
-    }
-}
-
-if (!function_exists('rj_is_frontend_locale')) {
-    function rj_is_frontend_locale(string $locale): bool
-    {
-        return in_array($locale, rj_frontend_locales(), true);
-    }
-}
-
-if (!function_exists('rj_lang_name')) {
-    function rj_lang_name(string $locale): string
-    {
-        $custom = rj_get_option('lang_name_' . $locale);
-
-        if ($custom) {
-            return $custom;
-        }
-
-        if (class_exists(\Locale::class)) {
-            $display = \Locale::getDisplayLanguage($locale, 'en');
-
-            if ($display && $display !== $locale) {
-                return $display;
+        foreach ($settings as $key => $value) {
+            if (is_array($value) && ($value['source'] ?? '') === 'dynamic') {
+                $settings[$key] = rj_resolve_dynamic($value);
             }
         }
 
-        return strtoupper($locale);
+        return $settings;
     }
 }
 
-if (!function_exists('rj_lang_flag_url')) {
-    function rj_lang_flag_url(string $locale): ?string
+if (!function_exists('rj_render_block')) {
+    function rj_render_block(array $block): string
     {
-        $custom = rj_get_option('lang_flag_' . $locale);
+        $type = $block['type'] ?? '';
 
-        if ($custom && file_exists(public_path('images/flags/' . $custom))) {
-            return asset('images/flags/' . $custom);
+        if ($type === '') {
+            return '';
         }
 
-        foreach (['svg', 'png', 'jpg', 'jpeg', 'webp'] as $ext) {
-            if (file_exists(public_path("images/flags/{$locale}.{$ext}"))) {
-                return asset("images/flags/{$locale}.{$ext}");
+        if (!empty($block['global_id'])) {
+            $resolved = rj_resolve_global_widget((int) $block['global_id'], $block);
+            if ($resolved !== '') {
+                return $resolved;
             }
         }
 
-        return null;
-    }
-}
+        $widget = WidgetRegistry::get($type);
 
-if (!function_exists('rj_color_presets')) {
-    function rj_color_presets(): array
-    {
-        return [
-            'purple' => [
-                'label' => 'Purple',
-                'purple' => '124 58 237',
-                'purple-light' => '168 85 247',
-                'pink' => '236 72 153',
-                'dark-1' => '26 16 48',
-                'dark-2' => '35 18 67',
-                'dark-3' => '45 23 84',
-            ],
-            'blue' => [
-                'label' => 'Blue',
-                'purple' => '37 99 235',
-                'purple-light' => '96 165 250',
-                'pink' => '14 165 233',
-                'dark-1' => '15 23 42',
-                'dark-2' => '30 41 59',
-                'dark-3' => '51 65 85',
-            ],
-            'green' => [
-                'label' => 'Green',
-                'purple' => '16 185 129',
-                'purple-light' => '52 211 153',
-                'pink' => '132 204 22',
-                'dark-1' => '6 24 18',
-                'dark-2' => '15 42 32',
-                'dark-3' => '22 61 46',
-            ],
-            'rose' => [
-                'label' => 'Rose',
-                'purple' => '225 29 72',
-                'purple-light' => '251 113 133',
-                'pink' => '236 72 153',
-                'dark-1' => '41 15 22',
-                'dark-2' => '61 22 33',
-                'dark-3' => '82 30 44',
-            ],
-            'amber' => [
-                'label' => 'Amber',
-                'purple' => '217 119 6',
-                'purple-light' => '245 158 11',
-                'pink' => '239 68 68',
-                'dark-1' => '41 30 12',
-                'dark-2' => '60 43 17',
-                'dark-3' => '82 58 23',
-            ],
-            'slate' => [
-                'label' => 'Slate',
-                'purple' => '71 85 105',
-                'purple-light' => '100 116 139',
-                'pink' => '148 163 184',
-                'dark-1' => '15 23 42',
-                'dark-2' => '30 41 59',
-                'dark-3' => '51 65 85',
-            ],
-            'midnight' => [
-                'label' => 'Midnight',
-                'purple' => '99 102 241',
-                'purple-light' => '129 140 248',
-                'pink' => '168 85 247',
-                'dark-1' => '10 10 30',
-                'dark-2' => '20 18 50',
-                'dark-3' => '30 27 75',
-            ],
-            'ocean' => [
-                'label' => 'Ocean',
-                'purple' => '8 145 178',
-                'purple-light' => '34 211 238',
-                'pink' => '59 130 246',
-                'dark-1' => '7 30 41',
-                'dark-2' => '12 45 60',
-                'dark-3' => '17 62 82',
-            ],
-        ];
-    }
-}
-
-if (!function_exists('rj_active_preset')) {
-    function rj_active_preset(): array
-    {
-        $presets = rj_color_presets();
-        $key = rj_get_option('admin_color_preset', 'purple');
-
-        return $presets[$key] ?? $presets['purple'];
-    }
-}
-
-if (!function_exists('rj_active_preset_key')) {
-    function rj_active_preset_key(): string
-    {
-        $presets = rj_color_presets();
-        $key = rj_get_option('admin_color_preset', 'purple');
-
-        return isset($presets[$key]) ? $key : 'purple';
-    }
-}
-
-if (!function_exists('rj_css_variables')) {
-    function rj_css_variables(): string
-    {
-        $preset = rj_active_preset();
-
-        $vars = [];
-        $vars[] = '--rj-purple: ' . $preset['purple'] . ';';
-        $vars[] = '--rj-purple-light: ' . $preset['purple-light'] . ';';
-        $vars[] = '--rj-pink: ' . $preset['pink'] . ';';
-        $vars[] = '--rj-dark-1: ' . $preset['dark-1'] . ';';
-        $vars[] = '--rj-dark-2: ' . $preset['dark-2'] . ';';
-        $vars[] = '--rj-dark-3: ' . $preset['dark-3'] . ';';
-
-        return implode(' ', $vars);
-    }
-}
-
-if (!function_exists('rj_logo_mask_url')) {
-    function rj_logo_mask_url(): ?string
-    {
-        foreach (['svg', 'png', 'webp'] as $ext) {
-            $path = public_path("images/logo-white.{$ext}");
-
-            if (file_exists($path)) {
-                return asset("images/logo-white.{$ext}");
-            }
+        if (!$widget) {
+            return '';
         }
 
-        return null;
-    }
-}
+        $settings = $block['settings'] ?? [];
 
-if (!function_exists('rj_social_providers')) {
-    function rj_social_providers(): array
-    {
-        return [
-            'google' => [
-                'label' => 'Google', 'region' => 'global', 'color' => '#4285F4',
-                'docs' => 'https://console.cloud.google.com/apis/credentials',
-                'fields' => [
-                    'client_id' => ['label' => 'Client ID', 'type' => 'text'],
-                    'client_secret' => ['label' => 'Client Secret', 'type' => 'password'],
-                ],
-            ],
-            'facebook' => [
-                'label' => 'Facebook', 'region' => 'global', 'color' => '#1877F2',
-                'docs' => 'https://developers.facebook.com/apps',
-                'fields' => [
-                    'client_id' => ['label' => 'App ID', 'type' => 'text'],
-                    'client_secret' => ['label' => 'App Secret', 'type' => 'password'],
-                ],
-            ],
-            'apple' => [
-                'label' => 'Apple', 'region' => 'global', 'color' => '#000000',
-                'docs' => 'https://developer.apple.com/account/resources/identifiers',
-                'fields' => [
-                    'client_id' => ['label' => 'Service ID', 'type' => 'text'],
-                    'team_id' => ['label' => 'Team ID', 'type' => 'text'],
-                    'key_id' => ['label' => 'Key ID', 'type' => 'text'],
-                    'private_key' => ['label' => 'Private Key (.p8)', 'type' => 'textarea'],
-                ],
-            ],
-            'microsoft' => [
-                'label' => 'Microsoft', 'region' => 'global', 'color' => '#00A4EF',
-                'docs' => 'https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps',
-                'fields' => [
-                    'client_id' => ['label' => 'Application ID', 'type' => 'text'],
-                    'client_secret' => ['label' => 'Client Secret', 'type' => 'password'],
-                    'tenant' => ['label' => 'Tenant (common)', 'type' => 'text'],
-                ],
-            ],
-            'github' => [
-                'label' => 'GitHub', 'region' => 'global', 'color' => '#181717',
-                'docs' => 'https://github.com/settings/developers',
-                'fields' => [
-                    'client_id' => ['label' => 'Client ID', 'type' => 'text'],
-                    'client_secret' => ['label' => 'Client Secret', 'type' => 'password'],
-                ],
-            ],
-            'linkedin' => [
-                'label' => 'LinkedIn', 'region' => 'global', 'color' => '#0A66C2',
-                'docs' => 'https://www.linkedin.com/developers/apps',
-                'fields' => [
-                    'client_id' => ['label' => 'Client ID', 'type' => 'text'],
-                    'client_secret' => ['label' => 'Client Secret', 'type' => 'password'],
-                ],
-            ],
-            'x' => [
-                'label' => 'X (Twitter)', 'region' => 'global', 'color' => '#000000',
-                'docs' => 'https://developer.x.com/en/portal/dashboard',
-                'fields' => [
-                    'client_id' => ['label' => 'Client ID', 'type' => 'text'],
-                    'client_secret' => ['label' => 'Client Secret', 'type' => 'password'],
-                ],
-            ],
-            'discord' => [
-                'label' => 'Discord', 'region' => 'global', 'color' => '#5865F2',
-                'docs' => 'https://discord.com/developers/applications',
-                'fields' => [
-                    'client_id' => ['label' => 'Client ID', 'type' => 'text'],
-                    'client_secret' => ['label' => 'Client Secret', 'type' => 'password'],
-                ],
-            ],
-            'yandex' => [
-                'label' => 'Yandex ID', 'region' => 'russia', 'color' => '#FC3F1D',
-                'docs' => 'https://oauth.yandex.com/client/new',
-                'fields' => [
-                    'client_id' => ['label' => 'Client ID', 'type' => 'text'],
-                    'client_secret' => ['label' => 'Client Secret', 'type' => 'password'],
-                ],
-            ],
-            'vk' => [
-                'label' => 'VK ID', 'region' => 'russia', 'color' => '#0077FF',
-                'docs' => 'https://id.vk.com/about/business/go',
-                'fields' => [
-                    'client_id' => ['label' => 'Client ID', 'type' => 'text'],
-                    'client_secret' => ['label' => 'Client Secret', 'type' => 'password'],
-                ],
-            ],
-            'wechat' => [
-                'label' => 'WeChat', 'region' => 'china', 'color' => '#07C160',
-                'docs' => 'https://open.weixin.qq.com',
-                'fields' => [
-                    'client_id' => ['label' => 'App ID', 'type' => 'text'],
-                    'client_secret' => ['label' => 'App Secret', 'type' => 'password'],
-                ],
-            ],
-            'huawei' => [
-                'label' => 'Huawei ID', 'region' => 'china', 'color' => '#CF0A2C',
-                'docs' => 'https://developer.huawei.com/consumer/en/console',
-                'fields' => [
-                    'client_id' => ['label' => 'App ID', 'type' => 'text'],
-                    'client_secret' => ['label' => 'App Secret', 'type' => 'password'],
-                ],
-            ],
-            'alipay' => [
-                'label' => 'Alipay', 'region' => 'china', 'color' => '#1677FF',
-                'docs' => 'https://open.alipay.com',
-                'fields' => [
-                    'client_id' => ['label' => 'App ID', 'type' => 'text'],
-                    'client_secret' => ['label' => 'Private Key', 'type' => 'textarea'],
-                ],
-            ],
-            'kakao' => [
-                'label' => 'Kakao', 'region' => 'korea', 'color' => '#FEE500',
-                'docs' => 'https://developers.kakao.com/console/app',
-                'fields' => [
-                    'client_id' => ['label' => 'REST API Key', 'type' => 'text'],
-                    'client_secret' => ['label' => 'Client Secret', 'type' => 'password'],
-                ],
-            ],
-            'naver' => [
-                'label' => 'Naver', 'region' => 'korea', 'color' => '#03C75A',
-                'docs' => 'https://developers.naver.com/apps',
-                'fields' => [
-                    'client_id' => ['label' => 'Client ID', 'type' => 'text'],
-                    'client_secret' => ['label' => 'Client Secret', 'type' => 'password'],
-                ],
-            ],
-            'line' => [
-                'label' => 'LINE', 'region' => 'japan', 'color' => '#00C300',
-                'docs' => 'https://developers.line.biz/console',
-                'fields' => [
-                    'client_id' => ['label' => 'Channel ID', 'type' => 'text'],
-                    'client_secret' => ['label' => 'Channel Secret', 'type' => 'password'],
-                ],
-            ],
-            'yahoo_japan' => [
-                'label' => 'Yahoo! Japan', 'region' => 'japan', 'color' => '#FF0033',
-                'docs' => 'https://developer.yahoo.co.jp',
-                'fields' => [
-                    'client_id' => ['label' => 'Client ID', 'type' => 'text'],
-                    'client_secret' => ['label' => 'Client Secret', 'type' => 'password'],
-                ],
-            ],
-            'shad' => [
-                'label' => 'Shad', 'region' => 'iran', 'color' => '#00B5A5',
-                'docs' => 'https://shad.ir',
-                'fields' => [
-                    'client_id' => ['label' => 'Client ID', 'type' => 'text'],
-                    'client_secret' => ['label' => 'Client Secret', 'type' => 'password'],
-                ],
-            ],
-            'donbaler' => [
-                'label' => 'Donbaler', 'region' => 'iran', 'color' => '#6E3FFF',
-                'docs' => 'https://donbaler.ir',
-                'fields' => [
-                    'client_id' => ['label' => 'Client ID', 'type' => 'text'],
-                    'client_secret' => ['label' => 'Client Secret', 'type' => 'password'],
-                ],
-            ],
-        ];
-    }
-}
-
-if (!function_exists('rj_social_regions')) {
-    function rj_social_regions(): array
-    {
-        return [
-            'global' => ['label' => 'Global', 'flag' => '🌍'],
-            'russia' => ['label' => 'Russia & CIS', 'flag' => '🇷🇺'],
-            'china' => ['label' => 'China', 'flag' => '🇨🇳'],
-            'korea' => ['label' => 'South Korea', 'flag' => '🇰🇷'],
-            'japan' => ['label' => 'Japan', 'flag' => '🇯🇵'],
-            'iran' => ['label' => 'Iran', 'flag' => '🇮🇷'],
-        ];
-    }
-}
-
-if (!function_exists('rj_menu_options')) {
-    function rj_menu_options(): array
-    {
-        if (!class_exists(\App\Models\Menu::class)) {
-            return [];
-        }
-
-        return \App\Models\Menu::orderBy('name')
-            ->get()
-            ->mapWithKeys(function ($menu) {
-                $loc = $menu->location ? ' — ' . $menu->locationLabel() : '';
-                return [$menu->id => $menu->name . $loc];
-            })
-            ->toArray();
-    }
-}
-
-if (!function_exists('rj_menu_tree')) {
-    function rj_menu_tree(): array
-    {
-        if (!class_exists(\App\Models\Menu::class)) {
-            return [];
-        }
-
-        $menus = \App\Models\Menu::with('items.children')->get();
-        $result = [];
-
-        foreach ($menus as $menu) {
-            $roots = $menu->items->whereNull('parent_id')->sortBy('sort_order')->values();
-
-            $result[$menu->id] = [
-                'id' => $menu->id,
-                'name' => $menu->name,
-                'location' => $menu->location,
-                'items' => $roots->map(function ($item) {
-                    return [
-                        'id' => $item->id,
-                        'label' => $item->label,
-                        'url' => $item->resolvedUrl(),
-                        'target' => $item->target,
-                        'children' => $item->children->sortBy('sort_order')->values()->map(function ($child) {
-                            return [
-                                'id' => $child->id,
-                                'label' => $child->label,
-                                'url' => $child->resolvedUrl(),
-                                'target' => $child->target,
-                                'children' => [],
-                            ];
-                        })->toArray(),
-                    ];
-                })->toArray(),
-            ];
-        }
-
-        return $result;
-    }
-}
-if (!function_exists('rj_global_colors')) {
-    function rj_global_colors(): array
-    {
-        $raw = rj_get_option('global_colors', '[]');
-
-        if (is_string($raw)) {
-            $decoded = json_decode($raw, true);
-            return is_array($decoded) ? $decoded : [];
-        }
-
-        return is_array($raw) ? $raw : [];
-    }
-}
-
-if (!function_exists('rj_global_fonts')) {
-    function rj_global_fonts(): array
-    {
-        $raw = rj_get_option('global_fonts', '[]');
-
-        if (is_string($raw)) {
-            $decoded = json_decode($raw, true);
-            return is_array($decoded) ? $decoded : [];
-        }
-
-        return is_array($raw) ? $raw : [];
-    }
-}
-
-if (!function_exists('rj_global_spacing')) {
-    function rj_global_spacing(): array
-    {
-        $raw = rj_get_option('global_spacing', '[]');
-
-        if (is_string($raw)) {
-            $decoded = json_decode($raw, true);
-            return is_array($decoded) ? $decoded : [];
-        }
-
-        return is_array($raw) ? $raw : [];
-    }
-}
-
-if (!function_exists('rj_global_color_css')) {
-    function rj_global_color_css(): string
-    {
-        $vars = [];
-
-        foreach (rj_global_colors() as $c) {
-            if (empty($c['id']) || empty($c['color'])) {
-                continue;
-            }
-            $id = preg_replace('/[^a-z0-9_-]/i', '', $c['id']);
-            $color = preg_replace('/[^#\w(),.%\s-]/', '', $c['color']);
-            $vars[] = '--rj-gc-' . $id . ':' . $color . ';';
-        }
-
-        return $vars ? ':root{' . implode('', $vars) . '}' : '';
-    }
-}
-
-if (!function_exists('rj_default_global_colors')) {
-    function rj_default_global_colors(): array
-    {
-        return [
-            ['id' => 'primary', 'name' => 'Primary', 'color' => '#7c3aed'],
-            ['id' => 'secondary', 'name' => 'Secondary', 'color' => '#ec4899'],
-            ['id' => 'accent', 'name' => 'Accent', 'color' => '#06b6d4'],
-            ['id' => 'text', 'name' => 'Text', 'color' => '#111827'],
-            ['id' => 'muted', 'name' => 'Muted', 'color' => '#6b7280'],
-            ['id' => 'background', 'name' => 'Background', 'color' => '#ffffff'],
-            ['id' => 'success', 'name' => 'Success', 'color' => '#10b981'],
-            ['id' => 'danger', 'name' => 'Danger', 'color' => '#ef4444'],
-            ['id' => 'warning', 'name' => 'Warning', 'color' => '#f59e0b'],
-            ['id' => 'info', 'name' => 'Info', 'color' => '#3b82f6'],
-        ];
-    }
-}
-
-if (!function_exists('rj_save_global_colors')) {
-    function rj_save_global_colors(array $colors): void
-    {
-        $clean = [];
-
-        foreach ($colors as $c) {
-            $id = preg_replace('/[^a-z0-9_-]/i', '', (string) ($c['id'] ?? ''));
-            $name = trim((string) ($c['name'] ?? ''));
-            $color = trim((string) ($c['color'] ?? ''));
-
-            if ($id === '' || $name === '' || $color === '') {
-                continue;
-            }
-
-            $clean[] = ['id' => $id, 'name' => $name, 'color' => $color];
-        }
-
-        rj_set_option('global_colors', json_encode($clean, JSON_UNESCAPED_UNICODE));
-        rj_flush_options();
-    }
-}
-
-if (!function_exists('rj_reset_global_colors')) {
-    function rj_reset_global_colors(): void
-    {
-        rj_delete_option('global_colors');
-        rj_flush_options();
-    }
-}
-
-if (!function_exists('rj_site_options_defaults')) {
-    function rj_site_options_defaults(): array
-    {
-        return [
-            'logo_light' => '',
-            'logo_dark' => '',
-            'favicon' => '',
-            'og_image' => '',
-            'custom_css' => '',
-            'custom_js' => '',
-            'head_html' => '',
-            'body_start_html' => '',
-            'body_end_html' => '',
-            'ga4_id' => '',
-            'gtm_id' => '',
-            'fb_pixel_id' => '',
-            'tracking_script' => '',
-        ];
-    }
-}
-
-if (!function_exists('rj_site_option')) {
-    function rj_site_option(string $key, $default = '')
-    {
-        $defaults = rj_site_options_defaults();
-
-        $fallback = array_key_exists($key, $defaults) ? $defaults[$key] : $default;
-
-        $value = rj_get_option('site_opt_' . $key, $fallback);
-
-        return $value === null ? $fallback : $value;
-    }
-}
-
-if (!function_exists('rj_set_site_option')) {
-    function rj_set_site_option(string $key, $value): void
-    {
-        rj_set_option('site_opt_' . $key, $value);
-    }
-}
-
-if (!function_exists('rj_flush_site_options')) {
-    function rj_flush_site_options(): void
-    {
-        rj_flush_options();
-    }
-}
-
-if (!function_exists('rj_site_options_all')) {
-    function rj_site_options_all(): array
-    {
-        $out = [];
-
-        foreach (array_keys(rj_site_options_defaults()) as $key) {
-            $out[$key] = rj_site_option($key);
-        }
-
-        return $out;
-    }
-}
-
-if (!function_exists('rj_breakpoints')) {
-    function rj_breakpoints(): array
-    {
-        $raw = rj_get_option('rj_breakpoints', '[]');
-
-        if (is_string($raw)) {
-            $decoded = json_decode($raw, true);
-            return is_array($decoded) ? $decoded : [];
-        }
-
-        return is_array($raw) ? $raw : [];
-    }
-}
-
-if (!function_exists('rj_breakpoint_css')) {
-    function rj_breakpoint_css(): string
-    {
-        $bp = rj_breakpoints();
-
-        $mobile = (int) ($bp['mobile']['max'] ?? 560);
-        $tablet = (int) ($bp['tablet']['max'] ?? 860);
-
-        return ":root{--rj-bp-mobile:{$mobile};--rj-bp-tablet:{$tablet};}";
-    }
-}
-if (!function_exists('rj_widget_settings')) {
-    function rj_widget_settings(): array
-    {
-        $raw = rj_get_option('rj_widget_settings', '{}');
-
-        if (is_string($raw)) {
-            $decoded = json_decode($raw, true);
-            return is_array($decoded) ? $decoded : [];
-        }
-
-        return is_array($raw) ? $raw : [];
-    }
-}
-
-if (!function_exists('rj_widget_setting')) {
-    function rj_widget_setting(string $id, string $key, $default = null)
-    {
-        $settings = rj_widget_settings();
-        return $settings[$id][$key] ?? $default;
-    }
-}
-
-if (!function_exists('rj_widget_save_settings')) {
-    function rj_widget_save_settings(string $id, array $data): void
-    {
-        $settings = rj_widget_settings();
-        $settings[$id] = array_merge($settings[$id] ?? [], $data);
-
-        rj_set_option('rj_widget_settings', json_encode($settings, JSON_UNESCAPED_UNICODE));
-    }
-}
-
-if (!function_exists('rj_widget_reset_settings')) {
-    function rj_widget_reset_settings(string $id): void
-    {
-        $settings = rj_widget_settings();
-        unset($settings[$id]);
-
-        rj_set_option('rj_widget_settings', json_encode($settings, JSON_UNESCAPED_UNICODE));
-    }
-}
-
-if (!function_exists('rj_widget_enabled')) {
-    function rj_widget_enabled(string $id): bool
-    {
-        return (bool) rj_widget_setting($id, 'enabled', true);
-    }
-}
-
-if (!function_exists('rj_widget_category')) {
-    function rj_widget_category(string $id, string $fallback = 'custom'): string
-    {
-        $override = rj_widget_setting($id, 'category');
-        return $override ? (string) $override : $fallback;
-    }
-}
-
-if (!function_exists('rj_widget_contexts')) {
-    function rj_widget_contexts(string $id): array
-    {
-        $contexts = rj_widget_setting($id, 'contexts');
-
-        if (is_array($contexts) && !empty($contexts)) {
-            return array_values($contexts);
-        }
-
-        return array_keys(rj_widget_contexts_list());
-    }
-}
-
-if (!function_exists('rj_widget_contexts_list')) {
-    function rj_widget_contexts_list(): array
-    {
-        return [
-            'page' => ['label' => __('Page'), 'icon' => 'document'],
-            'header' => ['label' => __('Header'), 'icon' => 'top'],
-            'footer' => ['label' => __('Footer'), 'icon' => 'bottom'],
-            'popup' => ['label' => __('Popup'), 'icon' => 'window'],
-            'block' => ['label' => __('Block'), 'icon' => 'cube'],
-        ];
-    }
-}
-
-if (!function_exists('rj_widgets_for_context')) {
-    function rj_widgets_for_context(string $context): array
-    {
-        $result = [];
-
-        if (!class_exists(\App\Widgets\WidgetRegistry::class)) {
-            return [];
-        }
-
-        foreach (\App\Widgets\WidgetRegistry::discover() as $widget) {
-            $id = $widget->id();
-
-            if (!rj_widget_enabled($id)) {
-                continue;
-            }
-
-            if (!in_array($context, rj_widget_contexts($id), true)) {
-                continue;
-            }
-
-            $result[] = $widget;
-        }
-
-        return $result;
-    }
-}
-
-if (!function_exists('rj_is_rtl')) {
-    function rj_is_rtl(?string $locale = null): bool
-    {
-        $locale = $locale ?: app()->getLocale();
-        $rtlLocales = ['ar', 'fa', 'he', 'ur', 'yi'];
-
-        return in_array(strtolower(substr($locale, 0, 2)), $rtlLocales);
-    }
-}
-
-if (!function_exists('rj_dir')) {
-    function rj_dir(?string $locale = null): string
-    {
-        return rj_is_rtl($locale) ? 'rtl' : 'ltr';
-    }
-}
-
-if (!function_exists('rj_locale_url')) {
-    function rj_locale_url(string $path = ''): string
-    {
         $locale = app()->getLocale();
-        $path = '/' . ltrim($path, '/');
+        $baseLocale = config('app.base_locale', config('app.locale'));
 
-        if ($path === '/') {
-            return url('/' . $locale);
+        // ==========================================
+        // TEST KODU BAŞLANGICI
+        // ==========================================
+        if ($type === 'heading' || $type === 'text') {
+            dd([
+                'Widget' => $type,
+                'Laravel Cari Dil (Locale)' => $locale,
+                'Laravel Baza Dil (Base)' => $baseLocale,
+                'Bazadakı İngilis mətni (text)' => $settings['text'] ?? 'YOXDUR',
+                'Bazadakı Azərbaycan mətni (text__az)' => $settings['text__az'] ?? 'YOXDUR',
+            ]);
+        }
+        // ==========================================
+        // TEST KODU SONU
+        // ==========================================
+
+        $settings = rj_localize_builder_settings($settings, $locale, $baseLocale);
+
+        $settings = rj_resolve_dynamics($settings);
+
+        $children = $block['children'] ?? [];
+
+        if (in_array($type, ['container', 'structure-container', 'layout-container'], true)) {
+            return $widget->render($settings, $children);
         }
 
-        return url('/' . $locale . $path);
+        return $widget->render($settings);
     }
 }
-if (!function_exists('rj_set_env')) {
-    function rj_set_env(string $key, string $value): bool
-    {
-        $path = base_path('.env');
 
-        if (!file_exists($path)) {
-            return false;
+if (!function_exists('rj_resolve_global_widget')) {
+    function rj_resolve_global_widget(int $id, array $context = []): string
+    {
+        static $stack = [];
+
+        if (in_array($id, $stack, true)) {
+            return '';
         }
+
+        $widget = \App\Models\GlobalWidget::active()->find($id);
+
+        if (!$widget) {
+            return '';
+        }
+
+        $stack[] = $id;
 
         try {
-            $content = file_get_contents($path);
-            $pattern = "/^{$key}=.*/m";
+            $block = $widget->toBlock();
 
-            if (preg_match($pattern, $content)) {
-                $content = preg_replace($pattern, "{$key}={$value}", $content);
-            } else {
-                $content .= "\n{$key}={$value}";
+            if (!empty($context['settings']) && is_array($context['settings'])) {
+                $block['settings'] = array_merge($block['settings'] ?? [], $context['settings']);
             }
 
-            // Faylı təhlükəsiz yazmaq üçün müvəqqəti fayl
-            $tmpPath = $path . '.tmp_' . uniqid();
-            if (file_put_contents($tmpPath, $content) !== false) {
-                rename($tmpPath, $path);
-            } else {
-                file_put_contents($path, $content);
+            $html = rj_render_block($block);
+        } finally {
+            array_pop($stack);
+        }
+
+        return $html;
+    }
+}
+
+if (!function_exists('rj_render_blocks')) {
+    function rj_render_blocks(array $blocks): string
+    {
+        $html = '';
+
+        foreach ($blocks as $block) {
+            if (!is_array($block)) {
+                continue;
             }
 
-            // Əgər Laravel Octane və ya xüsusi bir mühitdirsə xəta verməsin deyə try-catch
-            if (function_exists('shell_exec')) {
-                @shell_exec('php artisan config:clear 2>&1');
-            } else {
-                \Illuminate\Support\Facades\Artisan::call('config:clear');
-            }
+            $html .= rj_render_block($block);
+        }
 
-            return true;
+        return $html;
+    }
+}
+
+if (!function_exists('rj_render_template')) {
+    function rj_render_template($template): string
+    {
+        if (is_numeric($template)) {
+            $template = \App\Models\Template::find($template);
+        }
+
+        if (!$template || !is_object($template)) {
+            return '';
+        }
+
+        $content = $template->content ?? [];
+
+        if (is_string($content)) {
+            $content = json_decode($content, true) ?: [];
+        }
+
+        $blocks = $content['blocks'] ?? [];
+
+        if (empty($blocks)) {
+            return '';
+        }
+
+        return rj_render_blocks($blocks);
+    }
+}
+
+if (!function_exists('rj_render_template_id')) {
+    function rj_render_template_id(?int $id): string
+    {
+        if (!$id) {
+            return '';
+        }
+
+        return rj_render_template($id);
+    }
+}
+
+if (!function_exists('rj_do_shortcode')) {
+    function rj_do_shortcode(string $code): string
+    {
+        return '';
+    }
+}
+
+if (!function_exists('rj_global_widgets_list')) {
+    function rj_global_widgets_list(): array
+    {
+        try {
+            return \App\Models\GlobalWidget::active()
+                ->orderBy('name')
+                ->get(['id', 'name', 'slug', 'type', 'description'])
+                ->map(fn($w) => [
+                    'id' => $w->id,
+                    'name' => $w->name,
+                    'slug' => $w->slug,
+                    'type' => $w->type,
+                    'description' => $w->description ?? '',
+                ])
+                ->toArray();
         } catch (\Throwable $e) {
-            return false;
+            return [];
+        }
+    }
+}
+
+if (!function_exists('rj_preview_posts')) {
+    function rj_preview_posts(): array
+    {
+        try {
+            if (!class_exists(\App\Models\Post::class)) {
+                return [];
+            }
+
+            $posts = \App\Models\Post::query()
+                ->with(['author', 'categories', 'tags'])
+                ->where('type', 'post')
+                ->published()
+                ->orderByDesc('published_at')
+                ->limit(30)
+                ->get();
+
+            return $posts->map(function ($post) {
+                $categories = [];
+
+                foreach ($post->categories->take(3) as $cat) {
+                    $categories[] = [
+                        'id' => $cat->id,
+                        'name' => $cat->name,
+                    ];
+                }
+
+                $tags = [];
+
+                foreach ($post->tags->take(5) as $tag) {
+                    $tags[] = [
+                        'id' => $tag->id,
+                        'name' => $tag->name,
+                    ];
+                }
+
+                return [
+                    'id' => $post->id,
+                    'title' => (string) $post->title,
+                    'slug' => (string) $post->slug,
+                    'url' => url('/blog/' . $post->slug),
+                    'excerpt' => \Illuminate\Support\Str::limit(strip_tags((string) $post->excerpt), 200),
+                    'image' => $post->featured_image ?? '',
+                    'published_at' => $post->published_at ? $post->published_at->format('M j, Y') : '',
+                    'published_at_ts' => $post->published_at ? $post->published_at->timestamp : 0,
+                    'author' => $post->author ? $post->author->name : '',
+                    'categories' => $categories,
+                    'tags' => $tags,
+                    'view_count' => (int) ($post->view_count ?? 0),
+                    'type' => (string) $post->type,
+                    'is_sticky' => (bool) $post->is_sticky,
+                ];
+            })->toArray();
+        } catch (\Throwable $e) {
+            return [];
         }
     }
 }
