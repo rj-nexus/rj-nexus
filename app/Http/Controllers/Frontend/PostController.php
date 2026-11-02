@@ -22,26 +22,35 @@ class PostController extends Controller
 
     public function show(string $locale, string $slug)
     {
-        $baseLocale = config('app.locale');
+        $baseLocale = config('app.base_locale', config('app.locale'));
 
-        $query = Post::with(['author', 'categories', 'tags', 'translations', 'template'])
+        // 1. Slug-ı istənilən dildə (base daxil olmaqla) tapırıq
+        $post = Post::with(['author', 'categories', 'tags', 'translations', 'template'])
             ->where('type', 'post')
-            ->published();
-
-        if ($locale === $baseLocale) {
-            $query->where(function ($q) use ($slug, $locale) {
+            ->published()
+            ->where(function ($q) use ($slug) {
                 $q->where('slug', $slug)
-                  ->orWhereHas('translations', function ($inner) use ($slug, $locale) {
-                      $inner->where('slug', $slug)->where('locale', $locale);
+                  ->orWhereHas('translations', function ($inner) use ($slug) {
+                      $inner->where('slug', $slug);
                   });
-            });
-        } else {
-            $query->whereHas('translations', function ($inner) use ($slug, $locale) {
-                $inner->where('slug', $slug)->where('locale', $locale);
-            });
+            })
+            ->firstOrFail();
+
+        // 2. Tapılan postun cari dildə düzgün slug-ını alırıq
+        $correctSlug = $post->localizedSlug($locale);
+
+        // 3. Əgər cari dildə tərcüməsi yoxdursa, 404 veririk
+        if ($correctSlug === '') {
+            abort(404);
         }
 
-        $post = $query->firstOrFail();
+        // 4. Əgər istifadəçi yanlış dildə slug yazıbsa (məs: /az/english-slug), düzgününə yönləndiririk
+        if ($slug !== $correctSlug) {
+            return redirect()->to('/' . $locale . '/blog/' . $correctSlug, 301);
+        }
+
+        // 5. Header (və dil dəyişdirici) işləməmişdən əvvəl postu paylaşırıq
+        view()->share('post', $post);
 
         $post->incrementViews();
 
@@ -60,8 +69,6 @@ class PostController extends Controller
         $header = $this->resolver->header();
         $footer = $this->resolver->footer();
 
-        view()->share('post', $post);
-
         return $this->themes->renderView('single-post', [
             'post' => $post,
             'related' => $related,
@@ -73,7 +80,7 @@ class PostController extends Controller
 
     public function archive(string $locale, Request $request)
     {
-        $baseLocale = config('app.locale');
+        $baseLocale = config('app.base_locale', config('app.locale'));
 
         $query = Post::with(['author', 'categories', 'tags', 'translations'])
             ->where('type', 'post')
