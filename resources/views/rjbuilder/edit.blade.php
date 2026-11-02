@@ -4,7 +4,7 @@
 
 @php
     $templateType = $builder['templateType'];
-    $blocksData = $builder['blocks'];
+    $blocksData = $builder['activeBlocks'] ?? $builder['baseBlocks'] ?? [];
 
     $widgetsData = collect(rj_widgets_for_context($templateType))->map(function ($w) {
         return [

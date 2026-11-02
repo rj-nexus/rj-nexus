@@ -98,7 +98,8 @@ class BuilderController extends Controller
         $activeLocale = $request->input('locale', $baseLocale);
         $defaultLocale = in_array($baseLocale, $locales) ? $baseLocale : ($locales[0] ?? $baseLocale);
 
-        $rawBlocks = $template->content['blocks'] ?? [];
+        $baseBlocks = $template->content['blocks'] ?? [];
+        $activeBlocks = $baseBlocks;
 
         $builder = [
             'entityType' => 'template',
@@ -108,7 +109,8 @@ class BuilderController extends Controller
             'name' => $template->name,
             'subtitle' => $template->typeLabel(),
             'templateType' => $template->type,
-            'blocks' => $rawBlocks,
+            'baseBlocks' => $baseBlocks,
+            'activeBlocks' => $activeBlocks,
             'updateUrl' => route('admin.rjbuilder.update', $template),
             'backUrl' => route('admin.rjbuilder.edit', $template),
             'previewUrl' => route('frontend.preview', $template),

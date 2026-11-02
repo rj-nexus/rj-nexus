@@ -5,7 +5,7 @@ function builderState() {
     return {
         widgets: L.widgets,
         categories: L.categories || {},
-        blocks: JSON.parse(JSON.stringify(L.baseBlocks || [])),
+        bblocks: JSON.parse(JSON.stringify(L.activeBlocks || L.baseBlocks || [])),
         translations: L.translations || {},
         _localeCache: {},
         selectedBlock: null,
