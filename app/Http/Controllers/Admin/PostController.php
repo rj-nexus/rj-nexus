@@ -86,7 +86,7 @@ class PostController extends Controller
         $templates = Template::where('type', 'page')->published()->orderBy('name')->get();
 
         $locales = rj_frontend_locales();
-        $baseLocale = config('app.base_locale', config('app.locale'));
+        $baseLocale = env('APP_LOCALE', 'en');
         $themeTemplates = $this->resolveThemeTemplates();
 
         return view('admin.posts.create', compact('post', 'type', 'categories', 'tags', 'templates', 'locales', 'baseLocale', 'themeTemplates'));
@@ -141,7 +141,7 @@ class PostController extends Controller
         $templates = Template::where('type', 'page')->published()->orderBy('name')->get();
 
         $locales = rj_frontend_locales();
-        $baseLocale = config('app.base_locale', config('app.locale'));
+        $baseLocale = env('APP_LOCALE', 'en');
         $themeTemplates = $this->resolveThemeTemplates();
 
         return view('admin.posts.edit', compact('post', 'categories', 'tags', 'templates', 'locales', 'baseLocale', 'themeTemplates'));
@@ -258,7 +258,7 @@ class PostController extends Controller
         }
 
         $locales = rj_frontend_locales();
-        $baseLocale = config('app.base_locale', config('app.locale'));
+        $baseLocale = env('APP_LOCALE', 'en');
         $defaultLocale = in_array($baseLocale, $locales) ? $baseLocale : ($locales[0] ?? $baseLocale);
 
         $builder = [
@@ -352,8 +352,8 @@ class PostController extends Controller
         $locale = $request->input('locale', app()->getLocale());
         $translation = $post->translations->firstWhere('locale', $locale);
 
-        $seoTitle = $translation?->seo_title ?? ($locale === config('app.base_locale', config('app.locale')) ? $post->getRawOriginal('title') : '');
-        $seoDescription = $translation?->seo_description ?? ($locale === config('app.base_locale', config('app.locale')) ? $post->getRawOriginal('excerpt') : '');
+        $seoTitle = $translation?->seo_title ?? ($locale === env('APP_LOCALE', 'en') ? $post->getRawOriginal('title') : '');
+        $seoDescription = $translation?->seo_description ?? ($locale === env('APP_LOCALE', 'en') ? $post->getRawOriginal('excerpt') : '');
         $focusKeyword = $translation?->focus_keyword;
         $content = $this->resolvePostContent($post, $locale);
 
@@ -456,7 +456,7 @@ class PostController extends Controller
         $locale = $request->input('locale', app()->getLocale());
         $translation = $post->translations->firstWhere('locale', $locale);
 
-        $title = $locale === config('app.base_locale', config('app.locale'))
+        $title = $locale === env('APP_LOCALE', 'en')
             ? $post->getRawOriginal('title')
             : ($translation?->title ?? '');
 
@@ -487,7 +487,7 @@ class PostController extends Controller
         $content = $this->resolvePostContent($post, $locale);
 
         $translation = $post->translations->firstWhere('locale', $locale);
-        $title = $locale === config('app.base_locale', config('app.locale'))
+        $title = $locale === env('APP_LOCALE', 'en')
             ? $post->getRawOriginal('title')
             : ($translation?->title ?? '');
 
@@ -502,7 +502,7 @@ class PostController extends Controller
         $content = $this->resolvePostContent($post, $locale);
 
         $translation = $post->translations->firstWhere('locale', $locale);
-        $title = $locale === config('app.base_locale', config('app.locale'))
+        $title = $locale === env('APP_LOCALE', 'en')
             ? $post->getRawOriginal('title')
             : ($translation?->title ?? '');
 
@@ -515,7 +515,7 @@ class PostController extends Controller
     {
         $translation = $post->translations->firstWhere('locale', $locale);
 
-        $content = $locale === config('app.base_locale', config('app.locale'))
+        $content = $locale === env('APP_LOCALE', 'en')
             ? (string) $post->getRawOriginal('content')
             : (string) ($translation?->content ?? '');
 
@@ -579,7 +579,7 @@ class PostController extends Controller
         ];
 
         $locales = rj_frontend_locales();
-        $baseLocale = config('app.base_locale', config('app.locale'));
+        $baseLocale = env('APP_LOCALE', 'en');
 
         foreach ($locales as $locale) {
             if ($locale !== $baseLocale) {
