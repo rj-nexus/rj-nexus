@@ -5,7 +5,9 @@ function builderState() {
     return {
         widgets: L.widgets,
         categories: L.categories || {},
-        blocks: L.blocks,
+        blocks: JSON.parse(JSON.stringify(L.baseBlocks || [])),
+        translations: L.translations || {},
+        _localeCache: {},
         selectedBlock: null,
         widgetSearch: '',
         catFilter: 'all',
@@ -42,7 +44,6 @@ function builderState() {
         baseLocale: L.baseLocale,
         locales: (function (l) { return Array.isArray(l) ? l : Object.keys(l || {}); })(L.locales),
         activeLocale: L.baseLocale,
-        translatableFields: ['text', 'alt', 'caption', 'title', 'subtitle', 'description', 'label', 'button_text', 'content', 'placeholder'],
 
         menuOptions: (function () {
             const m = L.menus || {};
@@ -312,6 +313,7 @@ function builderState() {
             if (this._inited) return;
             this._inited = true;
 
+            this._localeCache[this.baseLocale] = JSON.parse(JSON.stringify(this.blocks));
             this.savedSnap = JSON.stringify(this.blocks);
             this.pushHistory(this.t('Initial state'));
 
@@ -404,11 +406,6 @@ function builderState() {
             return /color|background|bg|padding|margin|gap|border|radius|rounded|size|align|width|height|font|weight|shadow|spacing|opacity/i.test(f.name);
         },
 
-        isTranslatableField(name) {
-            if (this.templateType !== 'page') return false;
-            return this.translatableFields.includes(name);
-        },
-
         isResponsiveField(field) {
             const types = ['text', 'number', 'range', 'dimensions'];
             if (types.includes(field.type)) return true;
@@ -435,25 +432,12 @@ function builderState() {
         },
 
         getBlockField(block, name) {
-            const s = block.settings || {};
-            if (!this.isTranslatableField(name) || this.activeLocale === this.baseLocale) return s[name];
-            const tr = (s.translations || {})[this.activeLocale] || {};
-            return tr[name] !== undefined ? tr[name] : s[name];
-        },
-
-        getBlockText(block) {
-            return this.getBlockField(block, 'text') || '';
+            return (block.settings || {})[name];
         },
 
         setBlockField(block, name, value) {
-            const s = block.settings = block.settings || {};
-            if (!this.isTranslatableField(name) || this.activeLocale === this.baseLocale) {
-                s[name] = value;
-                return;
-            }
-            if (!s.translations) s.translations = {};
-            if (!s.translations[this.activeLocale]) s.translations[this.activeLocale] = {};
-            s.translations[this.activeLocale][name] = value;
+            if (!block.settings) block.settings = {};
+            block.settings[name] = value;
         },
 
         fieldValue(field) {
@@ -496,15 +480,10 @@ function builderState() {
             const b = this.currentBlock;
             if (!b) return;
             const key = this.fieldKey(field.name);
+            const def = field.default !== undefined ? field.default : '';
+            const copy = (def && typeof def === 'object') ? JSON.parse(JSON.stringify(def)) : def;
 
-            if (this.isTranslatableField(key) && this.activeLocale !== this.baseLocale) {
-                const tr = (b.settings.translations || {})[this.activeLocale];
-                if (tr) delete tr[key];
-            } else {
-                const def = field.default !== undefined ? field.default : '';
-                const copy = (def && typeof def === 'object') ? JSON.parse(JSON.stringify(def)) : def;
-                this.setBlockField(b, key, copy);
-            }
+            this.setBlockField(b, key, copy);
             this.markDirty();
             this.commitSoon(this.t('Edited') + ' ' + this.blockLabel(b.type));
         },
