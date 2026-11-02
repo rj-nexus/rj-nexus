@@ -184,6 +184,7 @@
                                 $titleValue = $isBase ? $post->getRawOriginal('title') : ($t?->title);
                                 $excerptValue = $isBase ? $post->getRawOriginal('excerpt') : ($t?->excerpt);
                                 $contentValue = $isBase ? $post->getRawOriginal('content') : ($t?->content);
+                                $slugValue = $isBase ? $post->getRawOriginal('slug') : ($t?->slug);
                             @endphp
 
                             <div x-show="activeLocale === '{{ $locale }}'" x-cloak class="space-y-5">
@@ -191,14 +192,24 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1.5">
                                         {{ __('Title') }}
-                                        @if ($isBase) <span class="text-red-500">*</span> @endif
                                     </label>
                                     <input type="text"
                                            name="{{ $isBase ? 'title' : "translations[{$locale}][title]" }}"
                                            value="{{ old($isBase ? 'title' : "translations.{$locale}.title", $titleValue) }}"
-                                           class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-base font-medium"
-                                           {{ $isBase ? 'required' : '' }}>
+                                           class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-base font-medium">
                                     @error($isBase ? 'title' : "translations.{$locale}.title")
+                                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('Slug') }}</label>
+                                    <input type="text"
+                                           name="{{ $isBase ? 'slug' : "translations[{$locale}][slug]" }}"
+                                           value="{{ old($isBase ? 'slug' : "translations.{$locale}.slug", $slugValue) }}"
+                                           placeholder="{{ __('auto-generated from title') }}"
+                                           class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm font-mono lowercase">
+                                    @error($isBase ? 'slug' : "translations.{$locale}.slug")
                                         <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
                                     @enderror
                                 </div>
@@ -706,20 +717,6 @@
 
                 <div class="bg-white rounded-lg shadow-sm border border-gray-100">
                     <div class="px-6 py-4 border-b border-gray-100">
-                        <h3 class="text-base font-semibold text-gray-900">{{ __('Permalink') }}</h3>
-                    </div>
-                    <div class="p-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('Slug') }}</label>
-                        <input type="text" name="slug" value="{{ old('slug', $post->slug) }}"
-                               class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm font-mono lowercase">
-                        @error('slug')
-                            <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-lg shadow-sm border border-gray-100">
-                    <div class="px-6 py-4 border-b border-gray-100">
                         <h3 class="text-base font-semibold text-gray-900">{{ __('Featured Image') }}</h3>
                     </div>
                     <div class="p-6" x-data="{ imageUrl: '{{ old('featured_image', $post->featured_image) }}' }"
@@ -877,11 +874,11 @@ function postEditor() {
 
                     if (titleEl) {
                         titleEl.value = data.seo_title;
-                        titleEl.dispatchEvent(new Event('input')); // Length counter üçün
+                        titleEl.dispatchEvent(new Event('input'));
                     }
                     if (descEl) {
                         descEl.value = data.seo_description;
-                        descEl.dispatchEvent(new Event('input')); // Length counter üçün
+                        descEl.dispatchEvent(new Event('input'));
                     }
                     if (kwEl) {
                         kwEl.value = data.focus_keyword;
