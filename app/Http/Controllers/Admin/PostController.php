@@ -283,7 +283,7 @@ class PostController extends Controller
             'slug' => $post->slug,
             'name' => $post->title ?: __('Untitled'),
             'subtitle' => $post->typeLabel(),
-            'templateType' => $post->type,
+            'templateType' => 'page', // BURANI DÜZƏLTDİK ('page' olaraq qalır)
             'baseBlocks' => $baseBlocks,
             'activeBlocks' => $activeBlocks,
             'updateUrl' => route('admin.posts.blocks', $post),
