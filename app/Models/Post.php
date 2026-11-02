@@ -14,7 +14,7 @@ class Post extends Model
     ];
 
     protected $casts = [
-        'is_sticky' => 'boolean', 'allow_comments' => 'boolean', 'blocks' => 'array', 'settings' => 'array', 'meta' => 'array', 'published_at' => 'datetime',
+        'is_sticky' => 'boolean', 'allow_comments' => 'boolean', 'settings' => 'array', 'meta' => 'array', 'published_at' => 'datetime',
     ];
 
     public function author() { return $this->belongsTo(User::class, 'author_id'); }
@@ -45,6 +45,25 @@ class Post extends Model
         return static::query()->whereHas('translations', function ($inner) use ($value) {
             $inner->where('slug', $value);
         })->first();
+    }
+
+    public function getBlocksAttribute($value)
+    {
+        $locale = app()->getLocale();
+        $base = config('app.base_locale');
+
+        if ($locale !== $base) {
+            $translation = $this->translations->firstWhere('locale', $locale);
+            if ($translation && !empty($translation->blocks)) {
+                return is_string($translation->blocks) ? json_decode($translation->blocks, true) : $translation->blocks;
+            }
+        }
+
+        if (is_string($value)) {
+            return json_decode($value, true);
+        }
+
+        return $value;
     }
 
     public function localizedSlug(?string $locale = null): string
