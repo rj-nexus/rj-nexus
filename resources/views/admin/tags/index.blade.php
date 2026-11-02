@@ -36,13 +36,47 @@
         <form method="POST" action="{{ route('admin.posts.tags.store') }}" class="p-6 space-y-4" x-data="{ activeLocale: '{{ config('app.locale') }}' }">
             @csrf
 
-            <div class="border-b border-gray-100">
-                <nav class="flex gap-1 -mb-px overflow-x-auto rj-scrollbar">
+            <div class="border-b border-gray-100 relative flex items-center bg-white overflow-hidden group">
+
+                <button type="button" @click="$refs.tagLangTabs.scrollLeft -= 200" class="absolute left-1 z-10 w-6 h-6 flex items-center justify-center rounded-full bg-white shadow-sm border border-gray-200 text-gray-500 hover:text-rj-purple transition opacity-0 group-hover:opacity-100 focus:outline-none">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                </button>
+
+                <nav class="flex gap-1 overflow-x-auto rj-scrollbar scroll-smooth w-full px-8 pb-px"
+                     x-ref="tagLangTabs"
+                     x-data="{
+                         isDown: false,
+                         startX: 0,
+                         scrollLeft: 0,
+                         startDrag(e) {
+                             this.isDown = true;
+                             this.startX = e.pageX - this.$refs.tagLangTabs.offsetLeft;
+                             this.scrollLeft = this.$refs.tagLangTabs.scrollLeft;
+                             this.$refs.tagLangTabs.classList.add('cursor-grabbing', 'select-none');
+                         },
+                         stopDrag() {
+                             this.isDown = false;
+                             this.$refs.tagLangTabs.classList.remove('cursor-grabbing', 'select-none');
+                         },
+                         doDrag(e) {
+                             if (!this.isDown) return;
+                             e.preventDefault();
+                             const x = e.pageX - this.$refs.tagLangTabs.offsetLeft;
+                             const walk = (x - this.startX) * 2;
+                             this.$refs.tagLangTabs.scrollLeft = this.scrollLeft - walk;
+                         }
+                     }"
+                     @mousedown="startDrag($event)"
+                     @mouseleave="stopDrag()"
+                     @mouseup="stopDrag()"
+                     @mousemove="doDrag($event)"
+                     style="scrollbar-width: none; -ms-overflow-style: none; cursor: grab;"
+                >
                     @foreach ($locales as $locale)
                         <button type="button"
                                 @click="activeLocale = '{{ $locale }}'"
-                                :class="activeLocale === '{{ $locale }}' ? 'border-rj-purple text-rj-purple' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-                                class="px-4 py-2.5 border-b-2 text-sm font-medium transition flex items-center gap-2 whitespace-nowrap">
+                                :class="activeLocale === '{{ $locale }}' ? 'border-rj-purple text-rj-purple bg-rj-purple/5' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50'"
+                                class="px-4 py-2.5 border-b-2 text-sm font-medium transition flex items-center gap-2 whitespace-nowrap rounded-t-lg">
                             @if (file_exists(public_path("images/flags/{$locale}.svg")))
                                 <img src="{{ asset("images/flags/{$locale}.svg") }}" alt="{{ strtoupper($locale) }}" class="w-4 h-3 object-cover rounded-sm">
                             @endif
@@ -54,6 +88,11 @@
                         </button>
                     @endforeach
                 </nav>
+
+                <button type="button" @click="$refs.tagLangTabs.scrollLeft += 200" class="absolute right-1 z-10 w-6 h-6 flex items-center justify-center rounded-full bg-white shadow-sm border border-gray-200 text-gray-500 hover:text-rj-purple transition opacity-0 group-hover:opacity-100 focus:outline-none">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                </button>
+
             </div>
 
             @foreach ($locales as $locale)
@@ -168,15 +207,56 @@
                             @csrf
                             @method('PUT')
 
-                            <div class="flex gap-1 flex-wrap">
-                                @foreach ($locales as $locale)
-                                    <button type="button"
-                                            @click="activeLocale = '{{ $locale }}'"
-                                            :class="activeLocale === '{{ $locale }}' ? 'bg-rj-purple text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
-                                            class="px-2 py-1 rounded text-xs font-medium uppercase transition">
-                                        {{ $locale }}
-                                    </button>
-                                @endforeach
+                            <div class="relative flex items-center overflow-hidden group max-w-sm">
+
+                                <button type="button" @click="$refs.editLangTabs.scrollLeft -= 150" class="absolute left-0 z-10 w-5 h-5 flex items-center justify-center rounded-full bg-white shadow-sm border border-gray-200 text-gray-500 hover:text-rj-purple transition opacity-0 group-hover:opacity-100 focus:outline-none">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                                </button>
+
+                                <div class="flex gap-1 overflow-x-auto scroll-smooth w-full px-6 pb-px"
+                                     x-ref="editLangTabs"
+                                     x-data="{
+                                         isDown: false,
+                                         startX: 0,
+                                         scrollLeft: 0,
+                                         startDrag(e) {
+                                             this.isDown = true;
+                                             this.startX = e.pageX - this.$refs.editLangTabs.offsetLeft;
+                                             this.scrollLeft = this.$refs.editLangTabs.scrollLeft;
+                                             this.$refs.editLangTabs.classList.add('cursor-grabbing', 'select-none');
+                                         },
+                                         stopDrag() {
+                                             this.isDown = false;
+                                             this.$refs.editLangTabs.classList.remove('cursor-grabbing', 'select-none');
+                                         },
+                                         doDrag(e) {
+                                             if (!this.isDown) return;
+                                             e.preventDefault();
+                                             const x = e.pageX - this.$refs.editLangTabs.offsetLeft;
+                                             const walk = (x - this.startX) * 2;
+                                             this.$refs.editLangTabs.scrollLeft = this.scrollLeft - walk;
+                                         }
+                                     }"
+                                     @mousedown="startDrag($event)"
+                                     @mouseleave="stopDrag()"
+                                     @mouseup="stopDrag()"
+                                     @mousemove="doDrag($event)"
+                                     style="scrollbar-width: none; -ms-overflow-style: none; cursor: grab;"
+                                >
+                                    @foreach ($locales as $locale)
+                                        <button type="button"
+                                                @click="activeLocale = '{{ $locale }}'"
+                                                :class="activeLocale === '{{ $locale }}' ? 'bg-rj-purple text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+                                                class="px-3 py-1.5 rounded text-xs font-medium uppercase transition flex-shrink-0">
+                                            {{ $locale }}
+                                        </button>
+                                    @endforeach
+                                </div>
+
+                                <button type="button" @click="$refs.editLangTabs.scrollLeft += 150" class="absolute right-0 z-10 w-5 h-5 flex items-center justify-center rounded-full bg-white shadow-sm border border-gray-200 text-gray-500 hover:text-rj-purple transition opacity-0 group-hover:opacity-100 focus:outline-none">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                                </button>
+
                             </div>
 
                             @foreach ($locales as $locale)
