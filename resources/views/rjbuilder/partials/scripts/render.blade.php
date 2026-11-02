@@ -716,9 +716,6 @@ function builderRender() {
                 </div>`;
             }
 
-            // ==========================================
-            // BURADAN ASAGI HISSE DÜZƏLDİLDİ (DİL DƏSTƏYİ)
-            // ==========================================
             const w = this.widgets.find(x => x.id === block.type);
             if (this.preview) return '';
 
@@ -734,7 +731,6 @@ function builderRender() {
                 hash |= 0;
             }
 
-            // Keş açarına aktiv dili də əlavə edirik ki, dil dəyişəndə yeni versiya çəkilsin
             const cacheKey = block.type + '_' + (this.activeLocale || 'en') + '_' + hash;
 
             if (window.RJ_WIDGET_CACHE && window.RJ_WIDGET_CACHE[cacheKey]) {
@@ -747,10 +743,10 @@ function builderRender() {
                 controller: null,
                 init() {
                     this.loadHtml();
-                    this.$watch(() => this.activeLocale, () => this.loadHtml());
+                    this.$watch(() => this.$root.activeLocale, () => this.loadHtml());
                 },
                 loadHtml() {
-                    const loc = this.activeLocale || 'en';
+                    const loc = this.$root.activeLocale || 'en';
                     const ck = '${block.type}_' + loc + '_' + ${hash};
 
                     if (window.RJ_WIDGET_CACHE && window.RJ_WIDGET_CACHE[ck]) {
