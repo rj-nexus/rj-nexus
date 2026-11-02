@@ -580,6 +580,10 @@ class PostController extends Controller
         $baseLocale = config('app.locale');
 
         foreach ($locales as $locale) {
+            if ($locale !== $baseLocale) {
+                $rules["translations.{$locale}.slug"] = 'nullable|string|max:255';
+            }
+
             $prefix = $locale === $baseLocale ? '' : "translations.{$locale}.";
 
             $rules["{$prefix}seo_title"] = 'nullable|string|max:255';
