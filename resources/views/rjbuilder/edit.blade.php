@@ -83,6 +83,7 @@
         'No taxonomies yet.', 'No post types found.',
         'Responsive Order', 'Desktop Order', 'Tablet Order', 'Mobile Order', 'Lower numbers appear first.', 'Lower numbers appear first on tablet.', 'Lower numbers appear first on mobile.',
         'Leave empty to use the desktop order.', 'Leave empty to use the tablet order. In a 5-column container, empty hides this element on mobile.',
+        'You have unsaved changes. Switching language will discard them. Continue?', 'Save first!'
     ])->unique()->mapWithKeys(fn ($s) => [$s => __($s)])->toArray();
 @endphp
 
@@ -138,10 +139,17 @@
         </div>
 
         <div class="rj-grp" style="flex:1; justify-content:flex-end; gap:6px;">
-            <div x-show="templateType === 'page' && locales.length > 1" x-cloak class="rj-seg">
-                <template x-for="loc in locales" :key="loc">
-                    <button type="button" class="rj-lc" :data-active="activeLocale === loc" @click="activeLocale = loc" x-text="loc" :title="t('Edit content in') + ' ' + loc"></button>
-                </template>
+
+            <div x-show="templateType === 'page' && locales.length > 1" x-cloak style="display:flex; align-items:center; gap:8px; margin-right:10px;">
+                <select class="rj-sel" style="background:#1c1d22; color:#fff; border:1px solid #383a43; border-radius:6px; padding:6px 10px; font-size:13px; outline:none; font-weight:600; text-transform:uppercase; cursor:pointer;" x-model="activeLocale" @change="if (!saved && activeLocale !== $event.target.value) { if(!confirm(t('You have unsaved changes. Switching language will discard them. Continue?'))) { $event.target.value = activeLocale; return; } } activeLocale = $event.target.value;">
+                    <template x-for="loc in locales" :key="loc">
+                        <option :value="loc" x-text="loc"></option>
+                    </template>
+                </select>
+                <span x-show="!saved" style="font-size:11px; color:#fbbf24; display:flex; align-items:center; gap:4px; font-weight:600;" title="Unsaved changes">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    <span x-text="t('Save first!')"></span>
+                </span>
             </div>
 
             <button type="button" class="rj-ib" @click="undo()" :disabled="!canUndo" :title="t('Undo') + ' (Ctrl+Z)'">
@@ -193,10 +201,12 @@
             <span class="rj-badge" x-text="deviceWidthLabel"></span>
         </div>
         <div class="rj-grp" style="flex:1; justify-content:flex-end; gap:8px;">
-            <div x-show="templateType === 'page' && locales.length > 1" class="rj-seg">
-                <template x-for="loc in locales" :key="'p' + loc">
-                    <button type="button" class="rj-lc" :data-active="activeLocale === loc" @click="activeLocale = loc" x-text="loc"></button>
-                </template>
+            <div x-show="templateType === 'page' && locales.length > 1" style="display:flex; align-items:center;">
+                <select class="rj-sel" style="background:#1c1d22; color:#fff; border:1px solid #383a43; border-radius:6px; padding:6px 10px; font-size:13px; outline:none; font-weight:600; text-transform:uppercase; cursor:pointer;" x-model="activeLocale" @change="if (!saved && activeLocale !== $event.target.value) { if(!confirm(t('You have unsaved changes. Switching language will discard them. Continue?'))) { $event.target.value = activeLocale; return; } } activeLocale = $event.target.value;">
+                    <template x-for="loc in locales" :key="'p' + loc">
+                        <option :value="loc" x-text="loc"></option>
+                    </template>
+                </select>
             </div>
             <button type="button" class="rj-btn" @click="replayPreview()">
                 <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v6h6M20 20v-6h-6M20 10A8 8 0 006.3 6.3L4 10m16 4l-2.3 3.7A8 8 0 014 14"/></svg>
