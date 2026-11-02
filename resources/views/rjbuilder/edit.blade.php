@@ -91,7 +91,7 @@
 
 @include('rjbuilder.partials.styles')
 
-<div x-data="builder()" x-init="init()" x-cloak class="rj-app"
+<div x-data="builder()" x-init="init()" class="rj-app"
      @dragend.window="endDrag()"
      @keydown.window="onKey($event)"
      @beforeunload.window="if (!saved) { $event.preventDefault(); $event.returnValue = ''; }">

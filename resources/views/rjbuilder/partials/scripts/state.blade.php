@@ -435,6 +435,10 @@ function builderState() {
             return (block.settings || {})[name];
         },
 
+        getLoc(s, key, fallback = '') {
+            return s[key] !== undefined ? s[key] : fallback;
+        },
+
         setBlockField(block, name, value) {
             if (!block.settings) block.settings = {};
             block.settings[name] = value;
