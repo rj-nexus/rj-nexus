@@ -103,6 +103,46 @@ class Post extends Model
         return 'slug';
     }
 
+    public function getRouteKey()
+    {
+        return $this->localizedSlug();
+    }
+
+    public function resolveRouteBinding($value, $field = null)
+    {
+        $post = static::whereHas('translations', function ($q) use ($value) {
+            $q->where('slug', $value)->where('locale', app()->getLocale());
+        })->first();
+
+        if ($post) {
+            return $post;
+        }
+
+        return parent::resolveRouteBinding($value, $field);
+    }
+
+    public function localizedSlug(?string $locale = null): string
+    {
+        $locale = $locale ?: app()->getLocale();
+        $base = config('app.locale');
+
+        if ($this->relationLoaded('translations') || $this->translations()->exists()) {
+            $translation = $this->translations->firstWhere('locale', $locale);
+            if ($translation && !empty($translation->slug)) {
+                return $translation->slug;
+            }
+
+            if ($locale !== $base) {
+                $baseTranslation = $this->translations->firstWhere('locale', $base);
+                if ($baseTranslation && !empty($baseTranslation->slug)) {
+                    return $baseTranslation->slug;
+                }
+            }
+        }
+
+        return (string) ($this->attributes['slug'] ?? '');
+    }
+
     public function getTitleAttribute($value): string
     {
         if ($this->relationLoaded('translations') || $this->translations()->exists()) {
@@ -294,7 +334,7 @@ class Post extends Model
             return $canonical;
         }
 
-        if ($this->status !== 'published' || !$this->slug) {
+        if ($this->status !== 'published' || !$this->localizedSlug()) {
             return null;
         }
 
@@ -336,15 +376,17 @@ class Post extends Model
 
     public function getPublicUrlAttribute(): string
     {
+        $slug = $this->localizedSlug();
+
         if ($this->type === 'page') {
             if ($this->isFrontPage()) {
                 return url('/');
             }
 
-            return url('/' . $this->slug);
+            return url('/' . $slug);
         }
 
-        return url('/blog/' . $this->slug);
+        return url('/blog/' . $slug);
     }
 
     public function getTranslation(string $locale): ?PostTranslation
@@ -389,7 +431,7 @@ class Post extends Model
         };
     }
 
-    public static function uniqueSlug(string $title, ?int $ignoreId = null): string
+    public static function uniqueSlug(string $title, ?int $ignoreId = null, string $locale = 'en'): string
     {
         $base = Str::slug($title);
         $slug = $base;
@@ -399,6 +441,10 @@ class Post extends Model
             static::query()
                 ->where('slug', $slug)
                 ->when($ignoreId, fn($q) => $q->where('id', '!=', $ignoreId))
+                ->exists() ||
+            PostTranslation::where('slug', $slug)
+                ->where('locale', $locale)
+                ->when($ignoreId, fn($q) => $q->where('post_id', '!=', $ignoreId))
                 ->exists()
         ) {
             $slug = $base . '-' . $i;
