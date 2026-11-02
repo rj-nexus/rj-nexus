@@ -97,22 +97,6 @@ if (!function_exists('rj_render_block')) {
         $locale = app()->getLocale();
         $baseLocale = config('app.base_locale', config('app.locale'));
 
-        // ==========================================
-        // TEST KODU BAŞLANGICI
-        // ==========================================
-        if ($type === 'heading' || $type === 'text') {
-            dd([
-                'Widget' => $type,
-                'Laravel Cari Dil (Locale)' => $locale,
-                'Laravel Baza Dil (Base)' => $baseLocale,
-                'Bazadakı İngilis mətni (text)' => $settings['text'] ?? 'YOXDUR',
-                'Bazadakı Azərbaycan mətni (text__az)' => $settings['text__az'] ?? 'YOXDUR',
-            ]);
-        }
-        // ==========================================
-        // TEST KODU SONU
-        // ==========================================
-
         $settings = rj_localize_builder_settings($settings, $locale, $baseLocale);
 
         $settings = rj_resolve_dynamics($settings);
