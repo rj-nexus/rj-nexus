@@ -140,39 +140,34 @@
             </div>
         </div>
 
-        <div class="rj-grp" style="flex:1; justify-content:flex-end; gap:6px;">
+<div class="rj-grp" style="flex:1; justify-content:flex-end; gap:6px;">
 
-            <button type="button" class="rj-ib" @click="undo()" :disabled="!canUndo" :title="t('Undo') + ' (Ctrl+Z)'">
-                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
-            </button>
-            <button type="button" class="rj-ib" @click="redo()" :disabled="!canRedo" :title="t('Redo') + ' (Ctrl+Shift+Z)'">
-                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6"/></svg>
-            </button>
-            <div class="rj-sep"></div>
+    <button type="button" class="rj-ib" @click="undo()" :disabled="!canUndo" :title="t('Undo') + ' (Ctrl+Z)'">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
+    </button>
+    <button type="button" class="rj-ib" @click="redo()" :disabled="!canRedo" :title="t('Redo') + ' (Ctrl+Shift+Z)'">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6"/></svg>
+    </button>
+    <div class="rj-sep"></div>
 
-            <span class="rj-badge" :data-saved="saved"><i></i><span x-text="saved ? t('Saved') : t('Unsaved')"></span></span>
+    <span class="rj-badge" :data-saved="saved"><i></i><span x-text="saved ? t('Saved') : t('Unsaved')"></span></span>
 
-            @if(!empty($builder['viewUrl']))
-                <a href="{{ $builder['viewUrl'] }}" target="_blank" class="rj-btn" title="{{ __('View Live Page') }}">
-                    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                    <span>{{ __('View Page') }}</span>
-                </a>
-            @endif
+    @if(!empty($builder['viewUrl']))
+        <a href="{{ $builder['viewUrl'] }}" target="_blank" class="rj-btn" title="{{ __('View Live Page') }}">
+            <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+            <span>{{ __('View Page') }}</span>
+        </a>
+    @endif
 
-            @if(!empty($builder['previewUrl']))
-                <a href="{{ $builder['previewUrl'] }}" target="_blank" class="rj-btn" title="{{ __('Real Preview') }}">
-                    <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.46 12C3.73 7.94 7.52 5 12 5s8.27 2.94 9.54 7c-1.27 4.06-5.06 7-9.54 7S3.73 16.06 2.46 12z"/></svg>
-                    <span>{{ __('Live Preview') }}</span>
-                </a>
-            @endif
+    @if(!empty($builder['previewUrl']))
+        <a href="{{ $builder['previewUrl'] }}" target="_blank" class="rj-btn" title="{{ __('Real Preview') }}">
+            <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.46 12C3.73 7.94 7.52 5 12 5s8.27 2.94 9.54 7c-1.27 4.06-5.06 7-9.54 7S3.73 16.06 2.46 12z"/></svg>
+            <span>{{ __('Live Preview') }}</span>
+        </a>
+    @endif
 
-            <button type="button" class="rj-btn" @click="togglePreview()" :title="t('Preview') + ' (P)'">
-                <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.46 12C3.73 7.94 7.52 5 12 5s8.27 2.94 9.54 7c-1.27 4.06-5.06 7-9.54 7S3.73 16.06 2.46 12z"/></svg>
-                <span x-text="t('Canvas')"></span>
-            </button>
-            <button type="button" class="rj-btn rj-save" @click="save()" :disabled="saving" :title="t('Save (Ctrl+S)')" x-text="saving ? t('Saving...') : t('Save')"></button>
-        </div>
-    </header>
+    <button type="button" class="rj-btn rj-save" @click="save()" :disabled="saving" :title="t('Save (Ctrl+S)')" x-text="saving ? t('Saving...') : t('Save')"></button>
+</div>
 
     <header class="rj-prevbar" x-show="preview" x-cloak>
         <div class="rj-grp" style="flex:1;">
