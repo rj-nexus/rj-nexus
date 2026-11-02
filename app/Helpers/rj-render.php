@@ -30,46 +30,6 @@ if (!function_exists('rj_localize_builder_settings')) {
     }
 }
 
-if (!function_exists('rj_resolve_dynamic')) {
-    function rj_resolve_dynamic($value)
-    {
-        if (!is_array($value)) {
-            return $value;
-        }
-
-        if (($value['source'] ?? '') !== 'dynamic') {
-            return $value;
-        }
-
-        $tag = $value['tag'] ?? '';
-
-        if ($tag === '') {
-            return '';
-        }
-
-        $options = $value['options'] ?? [];
-
-        if (!is_array($options)) {
-            $options = [];
-        }
-
-        return TagRegistry::resolve($tag, $options);
-    }
-}
-
-if (!function_exists('rj_resolve_dynamics')) {
-    function rj_resolve_dynamics(array $settings): array
-    {
-        foreach ($settings as $key => $value) {
-            if (is_array($value) && ($value['source'] ?? '') === 'dynamic') {
-                $settings[$key] = rj_resolve_dynamic($value);
-            }
-        }
-
-        return $settings;
-    }
-}
-
 if (!function_exists('rj_render_block')) {
     function rj_render_block(array $block): string
     {
@@ -95,7 +55,8 @@ if (!function_exists('rj_render_block')) {
         $settings = $block['settings'] ?? [];
 
         $locale = app()->getLocale();
-        $baseLocale = config('app.base_locale', config('app.locale'));
+        // BURANI DƏYİŞDİK: Həmişə EN olaraq qalır
+        $baseLocale = config('app.fallback_locale', 'en');
 
         $settings = rj_localize_builder_settings($settings, $locale, $baseLocale);
 
@@ -111,157 +72,91 @@ if (!function_exists('rj_render_block')) {
     }
 }
 
-if (!function_exists('rj_resolve_global_widget')) {
-    function rj_resolve_global_widget(int $id, array $context = []): string
-    {
-        static $stack = [];
+if (!function_exists('rj_resolve_dynamic')) {
+    function rj_resolve_dynamic($value) {
+        if (!is_array($value) || ($value['source'] ?? '') !== 'dynamic') return $value;
+        return TagRegistry::resolve($value['tag'] ?? '', $value['options'] ?? []);
+    }
+}
 
-        if (in_array($id, $stack, true)) {
-            return '';
-        }
-
-        $widget = \App\Models\GlobalWidget::active()->find($id);
-
-        if (!$widget) {
-            return '';
-        }
-
-        $stack[] = $id;
-
-        try {
-            $block = $widget->toBlock();
-
-            if (!empty($context['settings']) && is_array($context['settings'])) {
-                $block['settings'] = array_merge($block['settings'] ?? [], $context['settings']);
+if (!function_exists('rj_resolve_dynamics')) {
+    function rj_resolve_dynamics(array $settings): array {
+        foreach ($settings as $key => $value) {
+            if (is_array($value) && ($value['source'] ?? '') === 'dynamic') {
+                $settings[$key] = rj_resolve_dynamic($value);
             }
-
-            $html = rj_render_block($block);
-        } finally {
-            array_pop($stack);
         }
-
-        return $html;
+        return $settings;
     }
 }
 
 if (!function_exists('rj_render_blocks')) {
-    function rj_render_blocks(array $blocks): string
-    {
+    function rj_render_blocks(array $blocks): string {
         $html = '';
-
         foreach ($blocks as $block) {
-            if (!is_array($block)) {
-                continue;
-            }
-
-            $html .= rj_render_block($block);
+            if (is_array($block)) $html .= rj_render_block($block);
         }
-
         return $html;
     }
 }
 
 if (!function_exists('rj_render_template')) {
-    function rj_render_template($template): string
-    {
-        if (is_numeric($template)) {
-            $template = \App\Models\Template::find($template);
-        }
-
-        if (!$template || !is_object($template)) {
-            return '';
-        }
-
+    function rj_render_template($template): string {
+        if (is_numeric($template)) $template = \App\Models\Template::find($template);
+        if (!$template || !is_object($template)) return '';
         $content = $template->content ?? [];
+        if (is_string($content)) $content = json_decode($content, true) ?: [];
+        return rj_render_blocks($content['blocks'] ?? []);
+    }
+}
 
-        if (is_string($content)) {
-            $content = json_decode($content, true) ?: [];
+if (!function_exists('rj_resolve_global_widget')) {
+    function rj_resolve_global_widget(int $id, array $context = []): string {
+        static $stack = [];
+        if (in_array($id, $stack, true)) return '';
+        $widget = \App\Models\GlobalWidget::active()->find($id);
+        if (!$widget) return '';
+        $stack[] = $id;
+        try {
+            $block = $widget->toBlock();
+            if (!empty($context['settings']) && is_array($context['settings'])) {
+                $block['settings'] = array_merge($block['settings'] ?? [], $context['settings']);
+            }
+            $html = rj_render_block($block);
+        } finally {
+            array_pop($stack);
         }
-
-        $blocks = $content['blocks'] ?? [];
-
-        if (empty($blocks)) {
-            return '';
-        }
-
-        return rj_render_blocks($blocks);
+        return $html;
     }
 }
 
 if (!function_exists('rj_render_template_id')) {
-    function rj_render_template_id(?int $id): string
-    {
-        if (!$id) {
-            return '';
-        }
-
+    function rj_render_template_id(?int $id): string {
+        if (!$id) return '';
         return rj_render_template($id);
     }
 }
 
 if (!function_exists('rj_do_shortcode')) {
-    function rj_do_shortcode(string $code): string
-    {
-        return '';
-    }
+    function rj_do_shortcode(string $code): string { return ''; }
 }
 
 if (!function_exists('rj_global_widgets_list')) {
-    function rj_global_widgets_list(): array
-    {
+    function rj_global_widgets_list(): array {
         try {
-            return \App\Models\GlobalWidget::active()
-                ->orderBy('name')
-                ->get(['id', 'name', 'slug', 'type', 'description'])
-                ->map(fn($w) => [
-                    'id' => $w->id,
-                    'name' => $w->name,
-                    'slug' => $w->slug,
-                    'type' => $w->type,
-                    'description' => $w->description ?? '',
-                ])
-                ->toArray();
-        } catch (\Throwable $e) {
-            return [];
-        }
+            return \App\Models\GlobalWidget::active()->orderBy('name')->get(['id', 'name', 'slug', 'type', 'description'])->map(fn($w) => [
+                'id' => $w->id, 'name' => $w->name, 'slug' => $w->slug, 'type' => $w->type, 'description' => $w->description ?? '',
+            ])->toArray();
+        } catch (\Throwable $e) { return []; }
     }
 }
 
 if (!function_exists('rj_preview_posts')) {
-    function rj_preview_posts(): array
-    {
+    function rj_preview_posts(): array {
         try {
-            if (!class_exists(\App\Models\Post::class)) {
-                return [];
-            }
-
-            $posts = \App\Models\Post::query()
-                ->with(['author', 'categories', 'tags'])
-                ->where('type', 'post')
-                ->published()
-                ->orderByDesc('published_at')
-                ->limit(30)
-                ->get();
-
+            if (!class_exists(\App\Models\Post::class)) return [];
+            $posts = \App\Models\Post::query()->with(['author', 'categories', 'tags'])->where('type', 'post')->published()->orderByDesc('published_at')->limit(30)->get();
             return $posts->map(function ($post) {
-                $categories = [];
-
-                foreach ($post->categories->take(3) as $cat) {
-                    $categories[] = [
-                        'id' => $cat->id,
-                        'name' => $cat->name,
-                    ];
-                }
-
-                $tags = [];
-
-                foreach ($post->tags->take(5) as $tag) {
-                    $tags[] = [
-                        'id' => $tag->id,
-                        'name' => $tag->name,
-                    ];
-                }
-
                 return [
                     'id' => $post->id,
                     'title' => (string) $post->title,
@@ -272,15 +167,13 @@ if (!function_exists('rj_preview_posts')) {
                     'published_at' => $post->published_at ? $post->published_at->format('M j, Y') : '',
                     'published_at_ts' => $post->published_at ? $post->published_at->timestamp : 0,
                     'author' => $post->author ? $post->author->name : '',
-                    'categories' => $categories,
-                    'tags' => $tags,
+                    'categories' => $post->categories->map(fn($c) => ['id' => $c->id, 'name' => $c->name])->toArray(),
+                    'tags' => $post->tags->map(fn($t) => ['id' => $t->id, 'name' => $t->name])->toArray(),
                     'view_count' => (int) ($post->view_count ?? 0),
                     'type' => (string) $post->type,
                     'is_sticky' => (bool) $post->is_sticky,
                 ];
             })->toArray();
-        } catch (\Throwable $e) {
-            return [];
-        }
+        } catch (\Throwable $e) { return []; }
     }
 }
