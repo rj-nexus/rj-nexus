@@ -24,13 +24,17 @@ class PostController extends Controller
     {
         $post = Post::with(['author', 'categories', 'tags', 'translations', 'template'])
             ->where('type', 'post')
-            ->where('slug', $slug)
             ->published()
+            ->where(function ($q) use ($slug) {
+                $q->where('slug', $slug)
+                  ->orWhereHas('translations', function ($inner) use ($slug) {
+                      $inner->where('slug', $slug)->where('locale', app()->getLocale());
+                  });
+            })
             ->firstOrFail();
 
         $post->incrementViews();
 
-        // BURADA SƏHV VAR İDİ, 'featured_image' SİLİNDİ
         $related = Post::where('type', 'post')
             ->published()
             ->where('id', '!=', $post->id)
