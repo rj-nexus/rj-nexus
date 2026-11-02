@@ -38,7 +38,9 @@ class CategoryController extends Controller
     public function create()
     {
         $categories = Category::with('translations')->ordered()->get();
-        $locales = rj_available_locales();
+
+        // Yalnız frontend üçün aktiv dilləri götürürük
+        $locales = rj_frontend_locales();
 
         return view('admin.categories.create', compact('categories', 'locales'));
     }
@@ -46,7 +48,9 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $baseLocale = config('app.locale');
-        $locales = rj_available_locales();
+
+        // Yalnız frontend üçün aktiv dilləri götürürük
+        $locales = rj_frontend_locales();
 
         $rules = [
             'slug' => ['nullable', 'string', 'max:200', 'regex:/^[a-z0-9\-]+$/', 'unique:rj_categories,slug'],
@@ -121,7 +125,8 @@ class CategoryController extends Controller
         $excludeIds = $this->getDescendantIds($category);
         $categories = $categories->whereNotIn('id', $excludeIds);
 
-        $locales = rj_available_locales();
+        // Yalnız frontend üçün aktiv dilləri götürürük
+        $locales = rj_frontend_locales();
 
         return view('admin.categories.edit', compact('category', 'categories', 'locales'));
     }
@@ -129,7 +134,9 @@ class CategoryController extends Controller
     public function update(Request $request, Category $category)
     {
         $baseLocale = config('app.locale');
-        $locales = rj_available_locales();
+
+        // Yalnız frontend üçün aktiv dilləri götürürük
+        $locales = rj_frontend_locales();
 
         $rules = [
             'slug' => ['nullable', 'string', 'max:200', 'regex:/^[a-z0-9\-]+$/', Rule::unique('rj_categories', 'slug')->ignore($category->id)],
