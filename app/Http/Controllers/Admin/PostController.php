@@ -247,29 +247,33 @@ class PostController extends Controller
         return back()->with('success', __(':n item(s) updated.', ['n' => $count]));
     }
 
-    public function build(Post $post)
+    public function build(Request $request, Post $post)
     {
-        $viewUrl = null;
-
-        if ($post->status === 'published' && $post->slug) {
-            $viewUrl = $post->type === 'page'
-                ? url('/' . $post->slug)
-                : url('/blog/' . $post->slug);
-        }
-
-        $locales = rj_frontend_locales();
         $baseLocale = config('app.base_locale');
-        $defaultLocale = in_array($baseLocale, $locales) ? $baseLocale : ($locales[0] ?? $baseLocale);
+        $activeLocale = $request->input('locale', $baseLocale);
 
-        $translatedBlocks = [];
-        foreach ($post->translations as $t) {
-            if (!empty($t->blocks)) {
-                $translatedBlocks[$t->locale] = $t->blocks;
+        if ($activeLocale === $baseLocale) {
+            $rawBlocks = $post->getRawOriginal('blocks');
+            $blocks = is_string($rawBlocks) ? json_decode($rawBlocks, true) : ($rawBlocks ?? []);
+        } else {
+            $translation = $post->translations()->where('locale', $activeLocale)->first();
+            $blocks = $translation && $translation->blocks ? $translation->blocks : [];
+
+            if (empty($blocks['blocks'])) {
+                $rawBlocks = $post->getRawOriginal('blocks');
+                $blocks = is_string($rawBlocks) ? json_decode($rawBlocks, true) : ($rawBlocks ?? []);
             }
         }
 
-        $rawBlocks = $post->getRawOriginal('blocks');
-        $baseBlocks = is_string($rawBlocks) ? json_decode($rawBlocks, true) : ($rawBlocks ?? []);
+        $viewUrl = null;
+        if ($post->status === 'published' && $post->slug) {
+            $viewUrl = $post->type === 'page'
+                ? url('/' . $activeLocale . '/' . $post->slug)
+                : url('/' . $activeLocale . '/blog/' . $post->slug);
+        }
+
+        $locales = rj_frontend_locales();
+        $defaultLocale = in_array($baseLocale, $locales) ? $baseLocale : ($locales[0] ?? $baseLocale);
 
         $builder = [
             'entityType' => 'post',
@@ -278,9 +282,8 @@ class PostController extends Controller
             'slug' => $post->slug,
             'name' => $post->title ?: __('Untitled'),
             'subtitle' => $post->typeLabel(),
-            'templateType' => 'page',
-            'blocks' => $baseBlocks,
-            'translations' => $translatedBlocks,
+            'templateType' => $post->type,
+            'blocks' => $blocks,
             'updateUrl' => route('admin.posts.blocks', $post),
             'backUrl' => route('admin.posts.edit', $post),
             'viewUrl' => $viewUrl,
@@ -288,6 +291,7 @@ class PostController extends Controller
             'status' => $post->status,
             'locales' => $locales,
             'baseLocale' => $baseLocale,
+            'activeLocale' => $activeLocale,
             'defaultLocale' => $defaultLocale,
         ];
 
