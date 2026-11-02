@@ -9,9 +9,12 @@
 .rj-lang-btn[data-open="true"] .rj-lang-chev{transform:rotate(180deg)}
 .rj-lang-dot{width:7px;height:7px;border-radius:50%;background:#fbbf24;animation:rjlangpulse 1.6s infinite}
 @keyframes rjlangpulse{0%{box-shadow:0 0 0 0 rgba(251,191,36,.6)}70%{box-shadow:0 0 0 7px rgba(251,191,36,0)}100%{box-shadow:0 0 0 0 rgba(251,191,36,0)}}
-.rj-lang-pop{position:absolute;top:calc(100% + 10px);right:0;min-width:230px;background:#1c1d22;border:1px solid #383a43;border-radius:14px;padding:6px;box-shadow:0 20px 44px rgba(0,0,0,.5);z-index:9999}
+.rj-lang-pop{position:absolute;top:calc(100% + 10px);right:0;min-width:230px;background:#1c1d22;border:1px solid #383a43;border-radius:14px;padding:6px;box-shadow:0 20px 44px rgba(0,0,0,.5);z-index:9999;max-height:min(380px,calc(100vh - 90px));overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#4b4e5a transparent}
+.rj-lang-pop::-webkit-scrollbar{width:6px}
+.rj-lang-pop::-webkit-scrollbar-thumb{background:#4b4e5a;border-radius:6px}
+.rj-lang-pop::-webkit-scrollbar-track{background:transparent}
 .rj-lang--left .rj-lang-pop{left:0;right:auto}
-.rj-lang-title{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#8e919d;padding:8px 10px 6px}
+.rj-lang-title{position:sticky;top:-6px;background:#1c1d22;z-index:1;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#8e919d;padding:8px 10px 6px}
 .rj-lang-item{width:100%;display:flex;align-items:center;gap:10px;padding:8px 10px;border:0;border-radius:10px;background:transparent;color:#d6d8e0;cursor:pointer;text-align:left;transition:background .15s}
 .rj-lang-item:hover{background:rgba(139,92,246,.14)}
 .rj-lang-item[data-active="true"]{background:linear-gradient(135deg,rgba(139,92,246,.22),rgba(236,72,153,.18));color:#fff}
