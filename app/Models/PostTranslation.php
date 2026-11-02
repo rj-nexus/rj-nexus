@@ -11,6 +11,7 @@ class PostTranslation extends Model
     protected $fillable = [
         'post_id',
         'locale',
+        'slug',
         'title',
         'content',
         'excerpt',
