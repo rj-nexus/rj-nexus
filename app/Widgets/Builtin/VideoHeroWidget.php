@@ -276,8 +276,22 @@ class VideoHeroWidget extends BaseWidget
         $none = ['kind' => 'none', 'url' => '', 'mime' => ''];
 
         $source = $this->pick($settings['video_source'] ?? 'local', ['local', 'youtube', 'vimeo', 'external'], 'local');
-        $file = trim((string) ($settings['video_file'] ?? ''));
+
+        $fileRaw = $settings['video_file'] ?? '';
+        if (is_array($fileRaw)) {
+            $fileRaw = $fileRaw['url'] ?? '';
+        }
+        $file = trim((string) $fileRaw);
+
         $url = trim((string) ($settings['video_url'] ?? ''));
+
+        // Əgər biri boşdursa, digərindən istifadə et
+        if ($source === 'local' && $file === '') {
+            $file = $url;
+        }
+        if ($source === 'external' && $url === '') {
+            $url = $file;
+        }
 
         if ($source === 'local' || $source === 'external') {
             $src = $this->safeMediaUrl($source === 'local' ? $file : $url);
@@ -286,7 +300,16 @@ class VideoHeroWidget extends BaseWidget
                 return $none;
             }
 
-            return ['kind' => 'file', 'url' => $src, 'mime' => $this->mime($src)];
+            // Əgər local/external seçilibsə, amma YouTube/Vimeo linki yapışdırılıbsa, avtomatik onu tani
+            if (preg_match('/(?:youtube\.com|youtu\.be)/i', $src)) {
+                $source = 'youtube';
+                $url = $src;
+            } elseif (preg_match('/vimeo\.com/i', $src)) {
+                $source = 'vimeo';
+                $url = $src;
+            } else {
+                return ['kind' => 'file', 'url' => $src, 'mime' => $this->mime($src)];
+            }
         }
 
         if ($url === '') {
