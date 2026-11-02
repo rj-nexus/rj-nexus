@@ -5,9 +5,7 @@ function builderState() {
     return {
         widgets: L.widgets,
         categories: L.categories || {},
-        bblocks: JSON.parse(JSON.stringify(L.activeBlocks || L.baseBlocks || [])),
-        translations: L.translations || {},
-        _localeCache: {},
+        blocks: JSON.parse(JSON.stringify(L.activeBlocks || L.baseBlocks || [])),
         selectedBlock: null,
         widgetSearch: '',
         catFilter: 'all',
@@ -43,7 +41,7 @@ function builderState() {
         templateType: L.templateType,
         baseLocale: L.baseLocale,
         locales: (function (l) { return Array.isArray(l) ? l : Object.keys(l || {}); })(L.locales),
-        activeLocale: L.baseLocale,
+        activeLocale: L.activeLocale || L.baseLocale,
 
         menuOptions: (function () {
             const m = L.menus || {};
@@ -313,7 +311,6 @@ function builderState() {
             if (this._inited) return;
             this._inited = true;
 
-            this._localeCache[this.baseLocale] = JSON.parse(JSON.stringify(this.blocks));
             this.savedSnap = JSON.stringify(this.blocks);
             this.pushHistory(this.t('Initial state'));
 
