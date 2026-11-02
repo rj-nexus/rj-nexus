@@ -21,6 +21,16 @@ function builderRender() {
             return `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0;" aria-hidden="true">${paths[name] || ''}</svg>`;
         },
 
+        getLoc(s, key, fallback = '') {
+            if (this.activeLocale !== this.baseLocale) {
+                const locKey = key + '__' + this.activeLocale;
+                if (s[locKey] !== undefined && s[locKey] !== '') {
+                    return s[locKey];
+                }
+            }
+            return s[key] !== undefined ? s[key] : fallback;
+        },
+
         resp(s, name, fallback) {
             const dev = this.device;
             if (dev === 'desktop') {
@@ -486,7 +496,8 @@ function builderRender() {
                 const align = this.resp(settings, 'align', 'left');
                 const pad = padAttr || 'padding:0.75rem 1rem;';
                 const sizeOverride = settings.font_size ? '' : `--fs:${sizes[level]}; --fsm:${mobileSizes[level]};`;
-                return `<${level} class="rj-hd${inlineCls}" ${inlineAttr} style="${sizeOverride} text-align:${aligns[align] || 'left'}; color:${this.cssv(settings.color || '#111827')}; ${pad} ${marAttr} ${bgCss} ${shadow} ${typo}">${esc(this.displayField(block, 'text') || 'Heading')}</${level}>`;
+                const textVal = this.getLoc(settings, 'text', 'Heading');
+                return `<${level} class="rj-hd${inlineCls}" ${inlineAttr} style="${sizeOverride} text-align:${aligns[align] || 'left'}; color:${this.cssv(settings.color || '#111827')}; ${pad} ${marAttr} ${bgCss} ${shadow} ${typo}">${esc(textVal)}</${level}>`;
             }
 
             if (block.type === 'text') {
@@ -495,11 +506,13 @@ function builderRender() {
                 const align = this.resp(settings, 'align', 'left');
                 const pad = padAttr || 'padding:0.75rem 1rem;';
                 const sizeOverride = settings.font_size ? '' : `font-size:${sizes[settings.size] || '1rem'};`;
-                return `<p class="${inlineCls.trim()}" ${inlineAttr} style="${sizeOverride} text-align:${aligns[align] || 'left'}; color:${this.cssv(settings.color || '#374151')}; ${pad} ${marAttr} ${bgCss} ${shadow} line-height:1.6; white-space:pre-wrap; margin:0; ${typo}">${esc(this.displayField(block, 'text') || 'Text')}</p>`;
+                const textVal = this.getLoc(settings, 'text', 'Text');
+                return `<p class="${inlineCls.trim()}" ${inlineAttr} style="${sizeOverride} text-align:${aligns[align] || 'left'}; color:${this.cssv(settings.color || '#374151')}; ${pad} ${marAttr} ${bgCss} ${shadow} line-height:1.6; white-space:pre-wrap; margin:0; ${typo}">${esc(textVal)}</p>`;
             }
 
             if (block.type === 'image') {
-                const urlRaw = settings.url || '';
+                const urlRaw = this.getLoc(settings, 'url');
+                const altText = this.getLoc(settings, 'alt');
                 const url = this.isDynamicValue(urlRaw) ? '' : urlRaw;
 
                 if (!url) {
@@ -532,9 +545,9 @@ function builderRender() {
                 if (shadow) imgStyle += shadow;
                 imgStyle += `margin:${aligns[align] || '0 auto'}; display:block;`;
 
-                let imgHtml = `<img src="${esc(url)}" alt="${esc(this.getBlockField(block, 'alt') || '')}" style="${imgStyle}">`;
+                let imgHtml = `<img src="${esc(url)}" alt="${esc(altText)}" style="${imgStyle}">`;
 
-                const link = settings.link || '';
+                const link = this.getLoc(settings, 'link');
                 if (link && !this.preview) {
                     imgHtml = `<a href="${esc(link)}" target="${esc(settings.target || '_self')}" ${noNav} style="display:inline-block; text-decoration:none;">${imgHtml}</a>`;
                 } else if (link) {
@@ -546,9 +559,9 @@ function builderRender() {
             }
 
             if (block.type === 'logo') {
-                const urlRaw = settings.image || '';
+                const urlRaw = this.getLoc(settings, 'image');
+                const altText = this.getLoc(settings, 'alt');
                 const url = this.isDynamicValue(urlRaw) ? '' : urlRaw;
-                const alt = this.getBlockField(block, 'alt') || '';
                 const link = settings.url || '/';
                 const target = settings.new_tab ? '_blank' : '_self';
                 const w = settings.width || 140;
@@ -569,7 +582,7 @@ function builderRender() {
 
                 let imgStyle = `display:block; max-width:100%; width:${w}px; max-height:${h}px; object-fit:contain;`;
 
-                let imgHtml = `<img src="${esc(url)}" alt="${esc(alt)}" style="${imgStyle}">`;
+                let imgHtml = `<img src="${esc(url)}" alt="${esc(altText)}" style="${imgStyle}">`;
                 if (link) {
                     imgHtml = `<a href="${esc(link)}" target="${esc(target)}" ${noNav} style="display:inline-block; text-decoration:none; max-width:100%;">${imgHtml}</a>`;
                 }
