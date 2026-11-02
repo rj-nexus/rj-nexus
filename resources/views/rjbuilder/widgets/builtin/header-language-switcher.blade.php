@@ -25,6 +25,28 @@
     $current   = app()->getLocale();
     $isCompact = !$showFlag && !$showName && $showCodeCompact;
 
+    $getLocaleRedirect = function (string $targetLoc) {
+        if (isset($post) && $post instanceof \App\Models\Post) {
+            $slug = $post->localizedSlug($targetLoc);
+            if ($slug) {
+                return $post->type === 'page' ? '/' . $slug : '/blog/' . $slug;
+            }
+        }
+
+        $currentPath = request()->path();
+        $currentLoc = app()->getLocale();
+
+        if ($currentPath === $currentLoc || $currentPath === $currentLoc . '/') {
+            return '/';
+        }
+
+        if (str_starts_with($currentPath, $currentLoc . '/')) {
+            $currentPath = substr($currentPath, strlen($currentLoc) + 1);
+        }
+
+        return '/' . ltrim($currentPath, '/');
+    };
+
     $getFlag = function (string $code): string {
         if (function_exists('rj_lang_flag_url')) {
             $url = rj_lang_flag_url($code);
@@ -488,7 +510,7 @@
 
         <div class="rj-hls-menu" data-menu>
             @foreach($available as $loc)
-                <a href="{{ route('rj.widget.locale', ['locale' => $loc, 'redirect' => request()->path() === '/' ? '/' : request()->path()]) }}"
+                <a href="{{ route('rj.widget.locale', ['locale' => $loc, 'redirect' => $getLocaleRedirect($loc)]) }}"
                    class="rj-hls-item {{ $loc === $current ? 'is-active' : '' }}"
                    data-locale="{{ $loc }}">
                     @if($showFlag)
@@ -503,7 +525,7 @@
     @else
         <div class="rj-hls-inline {{ $showFlag ? 'has-flag' : '' }}">
             @foreach($available as $loc)
-                <a href="{{ route('rj.widget.locale', ['locale' => $loc, 'redirect' => request()->path() === '/' ? '/' : request()->path()]) }}"
+                <a href="{{ route('rj.widget.locale', ['locale' => $loc, 'redirect' => $getLocaleRedirect($loc)]) }}"
                    class="rj-hls-inline-btn {{ $loc === $current ? 'is-active' : '' }}"
                    data-locale="{{ $loc }}"
                    aria-label="{{ $getFull($loc) }}">
