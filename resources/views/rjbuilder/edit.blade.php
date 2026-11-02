@@ -661,7 +661,7 @@
                 <div class="rj-devlabel" x-show="device !== 'desktop' && blocks.length > 0" x-text="t(deviceLabel) + ' · ' + deviceWidthLabel"></div>
 
                 <div x-show="blocks.length > 0" id="rj-canvas" class="rj-canvas" :class="(prefs.outlines ? 'rj-outlines ' : '') + (preview && device === 'desktop' ? '' : 'rj-page')" :style="canvasStyle">
-                    <template x-for="(block, index) in blocks" :key="block.id">
+                    <template x-for="(block, index) in blocks" :key="block.id + '_' + activeLocale">
                         <div>
                             <div x-show="!preview"
                                  @dragover.prevent="onDragOver($event, 'root', index)"

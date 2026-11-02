@@ -716,6 +716,9 @@ function builderRender() {
                 </div>`;
             }
 
+            // ==========================================
+            // BURADAN ASAGI HISSE DÜZƏLDİLDİ (DİL DƏSTƏYİ)
+            // ==========================================
             const w = this.widgets.find(x => x.id === block.type);
             if (this.preview) return '';
 
@@ -730,7 +733,9 @@ function builderRender() {
                 hash = ((hash << 5) - hash) + settingsJson.charCodeAt(i);
                 hash |= 0;
             }
-            const cacheKey = block.type + '_' + hash;
+
+            // Keş açarına aktiv dili də əlavə edirik ki, dil dəyişəndə yeni versiya çəkilsin
+            const cacheKey = block.type + '_' + (this.activeLocale || 'en') + '_' + hash;
 
             if (window.RJ_WIDGET_CACHE && window.RJ_WIDGET_CACHE[cacheKey]) {
                 return `<div class="rj-real-html" style="margin: 0.5rem 1rem;">${window.RJ_WIDGET_CACHE[cacheKey]}</div>`;
@@ -741,13 +746,20 @@ function builderRender() {
                 loading: true,
                 controller: null,
                 init() {
-                    const ck = '${cacheKey}';
+                    this.loadHtml();
+                    this.$watch(() => this.activeLocale, () => this.loadHtml());
+                },
+                loadHtml() {
+                    const loc = this.activeLocale || 'en';
+                    const ck = '${block.type}_' + loc + '_' + ${hash};
+
                     if (window.RJ_WIDGET_CACHE && window.RJ_WIDGET_CACHE[ck]) {
                         this.html = window.RJ_WIDGET_CACHE[ck];
                         this.loading = false;
                         return;
                     }
 
+                    this.loading = true;
                     if (this.controller) this.controller.abort();
                     this.controller = new AbortController();
 
@@ -761,6 +773,7 @@ function builderRender() {
                         },
                         body: JSON.stringify({
                             type: '${block.type}',
+                            locale: loc,
                             settings: JSON.parse(this.$el.dataset.settings)
                         })
                     })

@@ -106,7 +106,7 @@ class BuilderController extends Controller
             'backUrl' => route('admin.rjbuilder.edit', $template),
             'previewUrl' => route('frontend.preview', $template),
             'status' => $template->status,
-            'locales' => $template->type === 'page' ? rj_available_locales() : [],
+            'locales' => $template->type === 'page' ? rj_frontend_locales() : [],
             'baseLocale' => config('app.locale'),
         ];
 
@@ -147,6 +147,11 @@ class BuilderController extends Controller
 
     public function renderBlock(Request $request)
     {
+        // Dil dəstəyi əlavə edildi
+        if ($request->has('locale')) {
+            app()->setLocale($request->input('locale'));
+        }
+
         $block = [
             'id' => 'preview_' . uniqid(),
             'type' => $request->input('type'),
