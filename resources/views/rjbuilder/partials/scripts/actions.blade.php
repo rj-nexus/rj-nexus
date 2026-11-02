@@ -8,6 +8,78 @@ function builderActions() {
             return block;
         },
 
+        switchLocale(locale) {
+            if (this.activeLocale === locale) return;
+
+            if (!this._localeCache) this._localeCache = {};
+            this._localeCache[this.activeLocale] = JSON.parse(JSON.stringify(this.blocks));
+
+            this.activeLocale = locale;
+
+            if (this._localeCache[locale]) {
+                this.blocks = JSON.parse(JSON.stringify(this._localeCache[locale]));
+            } else if (window.RJ.translations && window.RJ.translations[locale]) {
+                this.blocks = JSON.parse(JSON.stringify(window.RJ.translations[locale]));
+                this._localeCache[locale] = JSON.parse(JSON.stringify(this.blocks));
+            } else if (locale === this.baseLocale) {
+                this.blocks = JSON.parse(JSON.stringify(window.RJ.baseBlocks));
+                this._localeCache[locale] = JSON.parse(JSON.stringify(this.blocks));
+            } else {
+                this.blocks = JSON.parse(JSON.stringify(window.RJ.baseBlocks));
+                this._localeCache[locale] = JSON.parse(JSON.stringify(this.blocks));
+            }
+
+            this.selectedBlock = null;
+            this.markDirty();
+            this.pushHistory('Language: ' + locale);
+        },
+
+        async save(silent) {
+            if (this.saving) return;
+            this.flushUpdates();
+            clearTimeout(this._historyTimer);
+            this.pushHistory(this._pendingLabel);
+            this.saving = true;
+            const snap = JSON.stringify(this.blocks);
+            try {
+                const isPost = window.RJ.saveMode === 'post';
+                const headers = {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': window.RJ.csrf,
+                };
+
+                if (!isPost) headers['X-HTTP-Method-Override'] = 'PUT';
+
+                const payload = isPost
+                    ? { content: { blocks: this.blocks }, locale: this.activeLocale }
+                    : { name: window.RJ.name, content: { blocks: this.blocks }, status: window.RJ.status };
+
+                const res = await fetch(window.RJ.updateUrl, {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify(payload),
+                });
+                if (res.ok || res.redirected) {
+                    this.savedSnap = snap;
+                    this.saved = JSON.stringify(this.blocks) === snap;
+                    if (window.RJ.translations) {
+                        window.RJ.translations[this.activeLocale] = JSON.parse(snap);
+                    }
+                    this.showToast(silent === true ? this.t('Auto-saved') : this.t('Saved'));
+                } else if (res.status === 419) {
+                    this.showToast(this.t('Session expired — reload the page and try again'), 'error');
+                } else {
+                    this.showToast(this.t('Save failed') + ' (' + res.status + ')', 'error');
+                }
+            } catch (e) {
+                console.error(e);
+                this.showToast(this.t('Network error — not saved'), 'error');
+            } finally {
+                this.saving = false;
+            }
+        },
+
         addLayout(preset) {
             const presets = {
                 '1col': { cols: 1 },
@@ -387,8 +459,7 @@ function builderActions() {
         updateSetting(name, value) {
             if (!this.currentBlock) return;
             const block = this.currentBlock;
-            const isBase = this.activeLocale === this.baseLocale;
-            const key = isBase ? this.fieldKey(name) : this.fieldKey(name) + '__' + this.activeLocale;
+            const key = this.fieldKey(name);
 
             if (!this._pendingUpdates) this._pendingUpdates = {};
             this._pendingUpdates[key] = { block, value };
@@ -469,50 +540,7 @@ function builderActions() {
             this.pushHistory(this._pendingLabel);
             if (i === this.historyIndex || !this.history[i]) return;
             this.restoreHistory(i);
-        },
-
-        async save(silent) {
-            if (this.saving) return;
-            this.flushUpdates();
-            clearTimeout(this._historyTimer);
-            this.pushHistory(this._pendingLabel);
-            this.saving = true;
-            const snap = JSON.stringify(this.blocks);
-            try {
-                const isPost = window.RJ.saveMode === 'post';
-                const headers = {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': window.RJ.csrf,
-                };
-
-                if (!isPost) headers['X-HTTP-Method-Override'] = 'PUT';
-
-                const payload = isPost
-                    ? { content: { blocks: this.blocks } }
-                    : { name: window.RJ.name, content: { blocks: this.blocks }, status: window.RJ.status };
-
-                const res = await fetch(window.RJ.updateUrl, {
-                    method: 'POST',
-                    headers,
-                    body: JSON.stringify(payload),
-                });
-                if (res.ok || res.redirected) {
-                    this.savedSnap = snap;
-                    this.saved = JSON.stringify(this.blocks) === snap;
-                    this.showToast(silent === true ? this.t('Auto-saved') : this.t('Saved'));
-                } else if (res.status === 419) {
-                    this.showToast(this.t('Session expired — reload the page and try again'), 'error');
-                } else {
-                    this.showToast(this.t('Save failed') + ' (' + res.status + ')', 'error');
-                }
-            } catch (e) {
-                console.error(e);
-                this.showToast(this.t('Network error — not saved'), 'error');
-            } finally {
-                this.saving = false;
-            }
-        },
+        }
     };
 }
 </script>
