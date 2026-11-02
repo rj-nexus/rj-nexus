@@ -43,7 +43,6 @@ class PostController extends Controller
             return redirect()->to('/' . $locale . '/blog/' . $correctSlug, 301);
         }
 
-        // BU SƏTİR MÜTLƏQ BURADA OLMALIDIR (HEADER-DƏN ƏVVƏL)
         view()->share('post', $post);
 
         $post->incrementViews();
@@ -74,7 +73,7 @@ class PostController extends Controller
 
     public function archive(string $locale, Request $request)
     {
-        $baseLocale = config('app.base_locale', config('app.locale'));
+        $baseLocale = config('app.fallback_locale', 'en');
 
         $query = Post::with(['author', 'categories', 'tags', 'translations'])
             ->where('type', 'post')

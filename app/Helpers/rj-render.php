@@ -9,15 +9,18 @@ if (!function_exists('rj_localize_builder_settings')) {
         $localized = [];
 
         foreach ($settings as $key => $value) {
+            // Suffiksləri (text__az) ötürürük
             if (is_string($key) && preg_match('/^(.+)__([a-z]{2})$/', $key, $matches)) {
                 continue;
             }
 
             $localKey = $key . '__' . $locale;
 
-            if ($locale !== $baseLocale && isset($settings[$localKey])) {
+            // Əgər cari dil baza dil deyilsə və tərcümə varsa, onu götürürük
+            if ($locale !== $baseLocale && array_key_exists($localKey, $settings)) {
                 $localized[$key] = $settings[$localKey];
             } else {
+                // Yoxdursa, baza dəyərini (və ya iç-içə array-i) götürürük
                 if (is_array($value)) {
                     $localized[$key] = rj_localize_builder_settings($value, $locale, $baseLocale);
                 } else {
@@ -34,32 +37,22 @@ if (!function_exists('rj_render_block')) {
     function rj_render_block(array $block): string
     {
         $type = $block['type'] ?? '';
-
-        if ($type === '') {
-            return '';
-        }
+        if ($type === '') return '';
 
         if (!empty($block['global_id'])) {
             $resolved = rj_resolve_global_widget((int) $block['global_id'], $block);
-            if ($resolved !== '') {
-                return $resolved;
-            }
+            if ($resolved !== '') return $resolved;
         }
 
         $widget = WidgetRegistry::get($type);
-
-        if (!$widget) {
-            return '';
-        }
+        if (!$widget) return '';
 
         $settings = $block['settings'] ?? [];
 
         $locale = app()->getLocale();
-        // BURANI DƏYİŞDİK: Həmişə EN olaraq qalır
-        $baseLocale = config('app.fallback_locale', 'en');
+        $baseLocale = config('app.fallback_locale', 'en'); // HƏMİŞƏ EN QALIR
 
         $settings = rj_localize_builder_settings($settings, $locale, $baseLocale);
-
         $settings = rj_resolve_dynamics($settings);
 
         $children = $block['children'] ?? [];
