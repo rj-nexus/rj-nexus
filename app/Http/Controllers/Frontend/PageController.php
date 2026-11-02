@@ -22,24 +22,30 @@ class PageController extends Controller
     {
         $baseLocale = config('app.locale');
 
-        $query = Post::with(['author', 'translations', 'template'])
+        // 1. Slug-ı istənilən dildə (base daxil olmaqla) tapırıq
+        $page = Post::with(['author', 'translations', 'template'])
             ->where('type', 'page')
-            ->published();
-
-        if ($locale === $baseLocale) {
-            $query->where(function ($q) use ($slug, $locale) {
+            ->published()
+            ->where(function ($q) use ($slug) {
                 $q->where('slug', $slug)
-                  ->orWhereHas('translations', function ($inner) use ($slug, $locale) {
-                      $inner->where('slug', $slug)->where('locale', $locale);
+                  ->orWhereHas('translations', function ($inner) use ($slug) {
+                      $inner->where('slug', $slug);
                   });
-            });
-        } else {
-            $query->whereHas('translations', function ($inner) use ($slug, $locale) {
-                $inner->where('slug', $slug)->where('locale', $locale);
-            });
+            })
+            ->firstOrFail();
+
+        // 2. Tapılan səhifənin cari dildə düzgün slug-ını alırıq
+        $correctSlug = $page->localizedSlug($locale);
+
+        // 3. Əgər cari dildə tərcüməsi yoxdursa, 404 veririk
+        if ($correctSlug === '') {
+            abort(404);
         }
 
-        $page = $query->firstOrFail();
+        // 4. Əgər istifadəçi yanlış dildə slug yazıbsa (məs: /az/test-en), düzgününə yönləndiririk
+        if ($slug !== $correctSlug) {
+            return redirect()->to('/' . $locale . '/' . $correctSlug, 301);
+        }
 
         view()->share('post', $page);
 
