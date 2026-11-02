@@ -94,7 +94,7 @@ class BuilderController extends Controller
     public function build(Template $template)
     {
         $locales = $template->type === 'page' ? rj_frontend_locales() : [];
-        $baseLocale = config('app.locale');
+        $baseLocale = config('app.base_locale', config('app.locale'));
         $defaultLocale = in_array($baseLocale, $locales) ? $baseLocale : ($locales[0] ?? $baseLocale);
 
         $builder = [
@@ -152,7 +152,6 @@ class BuilderController extends Controller
 
     public function renderBlock(Request $request)
     {
-        // Dil dəstəyi əlavə edildi
         if ($request->has('locale')) {
             app()->setLocale($request->input('locale'));
         }
