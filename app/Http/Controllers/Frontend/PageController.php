@@ -41,6 +41,8 @@ class PageController extends Controller
 
         $page = $query->firstOrFail();
 
+        view()->share('post', $page);
+
         if ($page->isFrontPage()) {
             return redirect()->to(url('/' . $locale), 301);
         }
@@ -49,8 +51,6 @@ class PageController extends Controller
 
         $header = $this->resolver->header();
         $footer = $this->resolver->footer();
-
-        view()->share('post', $page);
 
         if ($page->isThemeMode() && $page->theme_template) {
             $themeView = 'theme::templates.' . $page->theme_template;
