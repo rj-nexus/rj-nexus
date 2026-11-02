@@ -13,8 +13,6 @@
         :root { {!! rj_css_variables() !!} }
         html, body { height: 100%; overflow: hidden; margin: 0; }
         [x-cloak] { display: none !important; }
-        body { visibility: hidden; opacity: 0; transition: opacity 0.2s ease; }
-        body.alpine-ready { visibility: visible; opacity: 1; }
         .rj-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
         .rj-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .rj-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 3px; }
@@ -23,11 +21,5 @@
 </head>
 <body class="font-sans bg-gray-100 text-gray-900 antialiased h-screen overflow-hidden">
     @yield('content')
-    <script>
-        document.addEventListener('alpine:init', () => {
-            setTimeout(() => document.body.classList.add('alpine-ready'), 50);
-        });
-        setTimeout(() => document.body.classList.add('alpine-ready'), 300);
-    </script>
 </body>
 </html>
