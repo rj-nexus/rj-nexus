@@ -387,7 +387,8 @@ function builderActions() {
         updateSetting(name, value) {
             if (!this.currentBlock) return;
             const block = this.currentBlock;
-            const key = this.fieldKey(name);
+            const isBase = this.activeLocale === this.baseLocale;
+            const key = isBase ? this.fieldKey(name) : this.fieldKey(name) + '__' + this.activeLocale;
 
             if (!this._pendingUpdates) this._pendingUpdates = {};
             this._pendingUpdates[key] = { block, value };
