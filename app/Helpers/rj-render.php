@@ -95,7 +95,7 @@ if (!function_exists('rj_render_block')) {
         $settings = $block['settings'] ?? [];
 
         $locale = app()->getLocale();
-        $baseLocale = config('app.base_locale');
+        $baseLocale = env('APP_LOCALE', 'en');
 
         $settings = rj_localize_builder_settings($settings, $locale, $baseLocale);
 
