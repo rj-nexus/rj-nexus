@@ -556,9 +556,11 @@ class PostController extends Controller
 
     protected function rules(?Post $post = null): array
     {
+        $slugPattern = '/^[\p{L}\p{N}\-_]+$/u';
+
         $rules = [
             'title' => 'nullable|string|max:255',
-            'slug' => 'nullable|string|max:255',
+            'slug' => ['nullable', 'string', 'max:255', 'regex:' . $slugPattern],
             'content' => 'nullable|string',
             'excerpt' => 'nullable|string',
             'featured_image' => 'nullable|string|max:500',
@@ -584,7 +586,7 @@ class PostController extends Controller
                 $rules["translations.{$locale}.title"] = 'nullable|string|max:255';
                 $rules["translations.{$locale}.excerpt"] = 'nullable|string';
                 $rules["translations.{$locale}.content"] = 'nullable|string';
-                $rules["translations.{$locale}.slug"] = 'nullable|string|max:255';
+                $rules["translations.{$locale}.slug"] = ['nullable', 'string', 'max:255', 'regex:' . $slugPattern];
             }
 
             $prefix = $locale === $baseLocale ? '' : "translations.{$locale}.";
@@ -593,7 +595,7 @@ class PostController extends Controller
             $rules["{$prefix}seo_description"] = 'nullable|string|max:500';
             $rules["{$prefix}seo_image"] = 'nullable|string|max:500';
             $rules["{$prefix}focus_keyword"] = 'nullable|string|max:100';
-            $rules["{$prefix}canonical_url"] = 'nullable|url|max:500';
+            $rules["{$prefix}canonical_url"] = 'nullable|string|max:500';
             $rules["{$prefix}og_title"] = 'nullable|string|max:255';
             $rules["{$prefix}og_description"] = 'nullable|string|max:500';
             $rules["{$prefix}og_image"] = 'nullable|string|max:500';
