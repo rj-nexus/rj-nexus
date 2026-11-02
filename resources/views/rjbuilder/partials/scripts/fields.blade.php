@@ -64,7 +64,8 @@ function builderFields() {
         dimGet(field) {
             const b = this.currentBlock;
             if (!b) return this.dimDefaults();
-            const v = this.getBlockField(b, field.name);
+            const key = this.getLocalizedKey(field.name);
+            const v = this.getBlockField(b, key);
             if (v && typeof v === 'object') {
                 return Object.assign(this.dimDefaults(), v);
             }
@@ -89,8 +90,7 @@ function builderFields() {
                     next.left = v;
                 }
             }
-            this.setBlockField(b, field.name, next);
-            this.markDirty();
+            this.updateSetting(field.name, next);
             this.commitSoon(this.t('Edited') + ' ' + this.blockLabel(b.type));
         },
 
