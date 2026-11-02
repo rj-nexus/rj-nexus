@@ -38,7 +38,10 @@
         pick(l) {
             if (l === activeLocale) { this.open = false; return; }
             if (!saved && !confirm(t('You have unsaved changes. Switching language will discard them. Continue?'))) { this.open = false; return; }
-            activeLocale = l;
+
+            // BURADA switchLocale FUNKSİYASINI ÇAĞIRIRIQ
+            switchLocale(l);
+
             this.open = false;
         }
      }"
