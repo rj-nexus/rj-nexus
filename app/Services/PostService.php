@@ -38,7 +38,7 @@ class PostService
         $baseSlug = $this->uniqueSlugForLocale(
             $this->pickSlugInput($data['slug'] ?? null, $title),
             $type,
-            config('app.base_locale', config('app.locale'))
+            config('app.base_locale')
         );
 
         $post = Post::create([
@@ -75,7 +75,7 @@ class PostService
         $baseSlug = $this->uniqueSlugForLocale(
             $this->pickSlugInput($data['slug'] ?? null, $title),
             $post->type,
-            config('app.base_locale', config('app.locale')),
+            config('app.base_locale'),
             $post->id
         );
 
@@ -129,7 +129,7 @@ class PostService
     {
         $copy = $post->replicate(['slug', 'view_count']);
         $copy->title = $post->title . ' (Copy)';
-        $copy->slug = $this->uniqueSlugForLocale($copy->title, $post->type, config('app.base_locale', config('app.locale')));
+        $copy->slug = $this->uniqueSlugForLocale($copy->title, $post->type, config('app.base_locale'));
         $copy->status = 'draft';
         $copy->published_at = null;
         $copy->view_count = 0;
@@ -151,6 +151,7 @@ class PostService
                     'locale',
                     'title',
                     'content',
+                    'blocks',
                     'excerpt',
                     'seo_title',
                     'seo_description',
@@ -226,7 +227,7 @@ class PostService
         $candidate = $base;
         $i = 1;
 
-        $isBase = $locale === config('app.base_locale', config('app.locale'));
+        $isBase = $locale === config('app.base_locale');
 
         while (
             ($isBase && Post::query()
@@ -339,7 +340,7 @@ class PostService
 
     protected function collectTranslations(array $data): array
     {
-        $base = config('app.base_locale', config('app.locale'));
+        $base = config('app.base_locale');
         $locales = rj_frontend_locales();
 
         $translations = $data['translations'] ?? [];
@@ -382,7 +383,7 @@ class PostService
 
     protected function syncTranslations(Post $post, array $translations, ?string $previousBaseSlug = null): void
     {
-        $base = config('app.base_locale', config('app.locale'));
+        $base = config('app.base_locale');
         $baseEntry = $translations[$base] ?? [];
 
         if ($previousBaseSlug === null) {
@@ -399,70 +400,59 @@ class PostService
             foreach (array_merge(['title', 'content', 'excerpt'], $this->seoFields) as $field) {
                 if (array_key_exists($field, $data)) {
                     $value = $data[$field];
-
                     if (is_string($value)) {
                         $value = trim($value);
                     }
-
                     $payload[$field] = $value === '' ? null : $value;
                 }
             }
 
             if ($locale !== $base) {
+                // Başlıq, məzmun və SEO sahələrini Baza dildən kopyalayırıq
                 foreach (array_merge(['title', 'content', 'excerpt'], $this->seoFields) as $field) {
                     if (empty($payload[$field] ?? null) && !empty($baseEntry[$field])) {
                         $payload[$field] = $baseEntry[$field];
                     }
                 }
-            }
 
-            $rawSlug = trim((string) ($data['slug'] ?? ''));
-
-            if ($rawSlug === '' && !empty($data['title'])) {
-                $rawSlug = $this->makeSlug($data['title'], $locale);
-            }
-
-            if ($locale === $base) {
-                if ($rawSlug !== '') {
-                    $payload['slug'] = $this->uniqueSlugForLocale(
-                        $rawSlug,
-                        $post->type,
-                        $locale,
-                        $post->id
-                    );
-                } else {
-                    $payload['slug'] = $previousBaseSlug;
-                }
-
-                if (empty($payload['title']) && !empty($post->getRawOriginal('title'))) {
-                    $payload['title'] = $post->getRawOriginal('title');
-                }
-
-                if (empty($payload['content']) && !empty($post->getRawOriginal('content'))) {
-                    $payload['content'] = $post->getRawOriginal('content');
-                }
-            } else {
+                $rawSlug = trim((string) ($data['slug'] ?? ''));
                 $existingTranslation = $post->translations->firstWhere('locale', $locale);
                 $existingSlug = $existingTranslation?->slug;
 
+                // Slug boşdursa, Baza dilin slug-ını kopyalayırıq
+                if ($rawSlug === '') {
+                    if (!empty($baseEntry['slug'])) {
+                        $rawSlug = $baseEntry['slug'];
+                    } elseif ($existingSlug !== null && $existingSlug !== '') {
+                        $rawSlug = $existingSlug;
+                    } elseif (!empty($payload['title'])) {
+                        $rawSlug = $this->makeSlug($payload['title'], $locale);
+                    }
+                }
+
                 if ($rawSlug !== '') {
-                    $payload['slug'] = $this->uniqueSlugForLocale(
-                        $rawSlug,
-                        $post->type,
-                        $locale,
-                        $post->id
-                    );
-                } elseif ($existingSlug !== null && $existingSlug !== '') {
-                    $payload['slug'] = $existingSlug;
-                } elseif (!empty($payload['title'])) {
-                    $payload['slug'] = $this->uniqueSlugForLocale(
-                        $payload['title'],
-                        $post->type,
-                        $locale,
-                        $post->id
-                    );
+                    $payload['slug'] = $this->uniqueSlugForLocale($rawSlug, $post->type, $locale, $post->id);
                 } else {
                     $payload['slug'] = null;
+                }
+            } else {
+                // Baza dil üçün
+                if (empty($payload['title']) && !empty($post->getRawOriginal('title'))) {
+                    $payload['title'] = $post->getRawOriginal('title');
+                }
+                if (empty($payload['content']) && !empty($post->getRawOriginal('content'))) {
+                    $payload['content'] = $post->getRawOriginal('content');
+                }
+
+                $rawSlug = trim((string) ($data['slug'] ?? ''));
+                if ($rawSlug === '' && !empty($payload['title'])) {
+                    $rawSlug = $this->makeSlug($payload['title'], $locale);
+                }
+
+                if ($rawSlug !== '') {
+                    $payload['slug'] = $this->uniqueSlugForLocale($rawSlug, $post->type, $locale, $post->id);
+                } else {
+                    $payload['slug'] = $previousBaseSlug;
                 }
             }
 
@@ -494,11 +484,8 @@ class PostService
     {
         foreach ($ids as $id) {
             $term = $modelClass::find($id);
-
             if (!$term) continue;
-
             $count = $term->posts()->count();
-
             $term->update(['post_count' => $count]);
         }
     }
