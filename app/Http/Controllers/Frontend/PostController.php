@@ -73,7 +73,7 @@ class PostController extends Controller
 
     public function archive(string $locale, Request $request)
     {
-        $baseLocale = config('app.fallback_locale', 'en');
+        $baseLocale = config('app.base_locale');
 
         $query = Post::with(['author', 'categories', 'tags', 'translations'])
             ->where('type', 'post')
