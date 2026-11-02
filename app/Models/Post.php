@@ -103,11 +103,6 @@ class Post extends Model
         return 'slug';
     }
 
-        public function getRouteKeyName(): string
-    {
-        return 'slug';
-    }
-
     public function resolveRouteBinding($value, $field = null)
     {
         $base = static::query()->where('slug', $value)->first();
