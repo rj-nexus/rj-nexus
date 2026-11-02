@@ -94,6 +94,18 @@ class PostController extends Controller
 
     public function store(Request $request)
     {
+        if (empty($request->title) && $request->has('translations')) {
+            $translations = $request->input('translations');
+            if (is_array($translations)) {
+                foreach ($translations as $loc => $data) {
+                    if (!empty($data['title'])) {
+                        $request->merge(['title' => $data['title']]);
+                        break;
+                    }
+                }
+            }
+        }
+
         $validated = $request->validate($this->rules());
 
         $post = $this->service->create($validated, $request);
@@ -545,7 +557,7 @@ class PostController extends Controller
     protected function rules(?Post $post = null): array
     {
         $rules = [
-            'title' => 'required|string|max:255',
+            'title' => 'nullable|string|max:255',
             'slug' => 'nullable|string|max:255',
             'content' => 'nullable|string',
             'excerpt' => 'nullable|string',
