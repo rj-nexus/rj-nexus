@@ -17,12 +17,13 @@ class SetLocale
         $default = config('app.locale');
 
         if ($isAdmin) {
-            $sessionLocale = session('locale');
+            $sessionLocale = session('admin_locale');
             $locale = ($sessionLocale && in_array($sessionLocale, $available, true))
                 ? $sessionLocale
                 : $default;
 
             app()->setLocale($locale);
+
             return $next($request);
         }
 
@@ -47,6 +48,14 @@ class SetLocale
             $locale = ($sessionLocale && in_array($sessionLocale, $available, true))
                 ? $sessionLocale
                 : $default;
+
+            if (!$sessionLocale && rj_get_option('auto_detect_language')) {
+                $preferred = $request->getPreferredLanguage($available);
+                if ($preferred && in_array($preferred, $available, true)) {
+                    $locale = $preferred;
+                    session(['locale' => $preferred]);
+                }
+            }
         }
 
         app()->setLocale($locale);
