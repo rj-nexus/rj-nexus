@@ -85,7 +85,6 @@ class PostController extends Controller
         $tags = Tag::with('translations')->ordered()->get()->sortBy('name')->values();
         $templates = Template::where('type', 'page')->published()->orderBy('name')->get();
 
-        // BURADA DƏYİŞİKLİK: Bütün dillər yerinə yalnız frontend üçün aktiv dilləri götürürük
         $locales = rj_frontend_locales();
         $baseLocale = config('app.locale');
         $themeTemplates = $this->resolveThemeTemplates();
@@ -129,7 +128,6 @@ class PostController extends Controller
         $tags = Tag::with('translations')->ordered()->get()->sortBy('name')->values();
         $templates = Template::where('type', 'page')->published()->orderBy('name')->get();
 
-        // BURADA DƏYİŞİKLİK
         $locales = rj_frontend_locales();
         $baseLocale = config('app.locale');
         $themeTemplates = $this->resolveThemeTemplates();
@@ -247,6 +245,10 @@ class PostController extends Controller
                 : url('/blog/' . $post->slug);
         }
 
+        $locales = rj_frontend_locales();
+        $baseLocale = config('app.locale');
+        $defaultLocale = in_array($baseLocale, $locales) ? $baseLocale : ($locales[0] ?? $baseLocale);
+
         $builder = [
             'entityType' => 'post',
             'entityId' => $post->id,
@@ -261,8 +263,9 @@ class PostController extends Controller
             'viewUrl' => $viewUrl,
             'previewUrl' => route('frontend.preview.post', $post),
             'status' => $post->status,
-            'locales' => rj_frontend_locales(),
-            'baseLocale' => config('app.locale'),
+            'locales' => $locales,
+            'baseLocale' => $baseLocale,
+            'defaultLocale' => $defaultLocale,
         ];
 
         return view('rjbuilder.edit', compact('builder'));
