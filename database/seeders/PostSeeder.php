@@ -12,7 +12,7 @@ class PostSeeder extends Seeder
     public function run(): void
     {
         $authorId = User::query()->value('id') ?? 1;
-        $baseLocale = config('app.locale', 'en');
+        $baseLocale = config('app.base_locale', config('app.locale', 'en'));
 
         $posts = [
             [
@@ -61,8 +61,10 @@ class PostSeeder extends Seeder
             PostTranslation::create([
                 'post_id' => $post->id,
                 'locale' => $baseLocale,
+                'slug' => $data['slug'],
                 'title' => $data['title'],
                 'content' => $data['content'] ?? '',
+                'blocks' => $data['blocks'] ?? null,
                 'excerpt' => $data['excerpt'] ?? null,
             ]);
         }
