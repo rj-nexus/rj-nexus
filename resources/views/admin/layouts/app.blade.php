@@ -19,6 +19,35 @@
             initial-value: 0deg;
         }
 
+        .rj-aside { transition: transform .25s ease; }
+        .rj-aside-back {
+            position: fixed;
+            inset: 0;
+            z-index: 45;
+            background: rgba(15, 23, 42, .55);
+            -webkit-backdrop-filter: blur(3px);
+            backdrop-filter: blur(3px);
+        }
+        @media (max-width: 1023px) {
+            .rj-aside {
+                position: fixed;
+                top: 0;
+                bottom: 0;
+                inset-inline-start: 0;
+                transform: translateX(-100%);
+            }
+            [dir="rtl"] .rj-aside { transform: translateX(100%); }
+            .rj-aside.is-open { transform: none; }
+        }
+
+        .rj-lang-list { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
+        .rj-lang-list::-webkit-scrollbar { width: 6px; }
+        .rj-lang-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; }
+        .rj-lang-list::-webkit-scrollbar-track { background: transparent; }
+        .rj-lang-it { transition: background .12s, padding .15s; }
+        .rj-lang-it:hover { background: #f8fafc; }
+        .rj-lang-it.is-on { background: linear-gradient(90deg, rgba(139, 92, 246, .1), rgba(236, 72, 153, .04)); }
+
         .rj-sb {
             position: relative;
             isolation: isolate;
@@ -234,7 +263,6 @@
         }
         .rj-sm-it.is-active .rj-sm-ic { border-color: #ddd6fe; background: #f5f3ff; color: #7c3aed; transform: scale(1.08) rotate(-4deg); }
 
-        /* AI Answer Specific Styles */
         .rj-sm-it.is-ai-answer {
             align-items: flex-start;
             border: 1px solid #ddd6fe;
@@ -295,7 +323,7 @@
             transition: opacity .15s, transform .15s;
         }
         .rj-sm-it.is-active .rj-sm-go { opacity: 1; transform: none; }
-        .rj-sm-it.is-ai-answer .rj-sm-go { display: none; } /* Hide arrow for AI answer */
+        .rj-sm-it.is-ai-answer .rj-sm-go { display: none; }
         .rj-sm-empty { padding: 30px 16px 18px; color: #64748b; font-size: 14px; text-align: center; }
         .rj-sm-empty svg { display: block; width: 38px; height: 38px; margin: 0 auto 10px; color: #cbd5e1; animation: rj-float 3s ease-in-out infinite; }
         .rj-sm-foot {
@@ -356,6 +384,7 @@
         @media (prefers-reduced-motion: reduce) {
             .rj-sb::before, .rj-sm-box::before, .rj-sm-box::after, .rj-sb-ic svg, .rj-sm-it, .rj-sm-load i, .rj-sm-empty svg { animation: none !important; }
             .rj-sm-it { opacity: 1; }
+            .rj-aside { transition: none; }
         }
 
         @keyframes rj-ang { to { --rj-a: 360deg; } }
@@ -622,12 +651,41 @@
             'results' => __('Results'),
             'ai'      => __('RJ AI Answer'),
         ];
+
+        $currentLocale = app()->getLocale();
+        $langList = [];
+        foreach (array_values((array) rj_available_locales()) as $loc) {
+            $loc = (string) $loc;
+            $name = class_exists('Locale') ? (string) \Locale::getDisplayName($loc, $loc) : '';
+            if ($name === '' || $name === $loc) {
+                $name = strtoupper($loc);
+            } else {
+                $name = \Illuminate\Support\Str::ucfirst($name);
+            }
+            $langList[] = [
+                'code' => $loc,
+                'name' => $name,
+                'url' => route('admin.lang.switch', $loc),
+                'flag' => file_exists(public_path("images/flags/{$loc}.svg")) ? asset("images/flags/{$loc}.svg") : null,
+                'active' => $currentLocale === $loc,
+            ];
+        }
+        $currentFlag = file_exists(public_path("images/flags/{$currentLocale}.svg")) ? asset("images/flags/{$currentLocale}.svg") : null;
+
+        $langTexts = [
+            'search' => __('Search language...'),
+            'none'   => __('No languages found'),
+        ];
     @endphp
 
-    <div class="flex min-h-screen" x-data="rjAdminShell()" @keydown.window.prevent.cmd.k="openSearch()" @keydown.window.prevent.ctrl.k="openSearch()" @keydown.window="onKey($event)" @keydown.escape.window="searchOpen = false; notifMenu = false; langMenu = false; userMenu = false">
+    <div class="flex min-h-screen" x-data="rjAdminShell()" @keydown.window.prevent.cmd.k="openSearch()" @keydown.window.prevent.ctrl.k="openSearch()" @keydown.window="onKey($event)" @keydown.escape.window="searchOpen = false; notifMenu = false; langMenu = false; userMenu = false; sidebarOpen = false">
 
-        <aside class="w-64 h-screen sticky top-0 self-start z-50 bg-gradient-to-b from-rj-dark-1 via-rj-dark-2 to-rj-dark-1 text-gray-300 flex-shrink-0 flex flex-col">
-            <div class="h-20 flex items-center justify-center px-5 border-b border-white/5 flex-shrink-0">
+        <div class="rj-aside-back lg:hidden" x-show="sidebarOpen" x-cloak @click="sidebarOpen = false"
+             x-transition:enter="rj-o-e" x-transition:enter-start="rj-o-0" x-transition:enter-end="rj-o-1"
+             x-transition:leave="rj-o-l" x-transition:leave-start="rj-o-1" x-transition:leave-end="rj-o-0"></div>
+
+        <aside class="rj-aside w-64 h-screen sticky top-0 self-start z-50 bg-gradient-to-b from-rj-dark-1 via-rj-dark-2 to-rj-dark-1 text-gray-300 flex-shrink-0 flex flex-col" :class="{ 'is-open': sidebarOpen }">
+            <div class="h-20 flex items-center justify-center px-5 border-b border-white/5 flex-shrink-0 relative">
                 <a href="{{ route('admin.dashboard') }}" class="hover:opacity-90 transition inline-flex items-center">
                     @php $logoMask = rj_logo_mask_url(); @endphp
                     @if ($logoMask)
@@ -636,6 +694,9 @@
                         <img src="{{ asset('images/logo.svg') }}" alt="Logo" class="h-12 w-auto">
                     @endif
                 </a>
+                <button type="button" class="lg:hidden absolute top-3 end-3 p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition" @click="sidebarOpen = false" aria-label="{{ __('Close') }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6L6 18"/></svg>
+                </button>
             </div>
 
             <nav class="rj-scrollbar flex-1 overflow-y-auto p-3 space-y-0.5 text-sm">
@@ -758,12 +819,15 @@
         </aside>
 
         <div class="flex-1 flex flex-col min-w-0 relative z-10">
-            <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-40">
-                <div>
-                    <h1 class="text-lg font-semibold text-gray-900">@yield('title', __('Dashboard'))</h1>
+            <header class="h-16 bg-white/90 backdrop-blur border-b border-gray-200 flex items-center justify-between px-4 sm:px-6 sticky top-0 z-40">
+                <div class="flex items-center gap-3 min-w-0">
+                    <button type="button" class="lg:hidden p-2 -ms-2 text-gray-500 hover:text-gray-800 rounded-lg hover:bg-gray-100 transition" @click="sidebarOpen = true" aria-label="{{ __('Menu') }}">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                    </button>
+                    <h1 class="text-lg font-semibold text-gray-900 truncate">@yield('title', __('Dashboard'))</h1>
                 </div>
 
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-1 sm:gap-3">
 
                     <button type="button" class="rj-sb" @click="openSearch()" aria-label="{{ __('Search') }}">
                         <span class="rj-sb-ic">
@@ -774,12 +838,12 @@
                     </button>
 
                     <div class="relative" @click.away="notifMenu = false">
-                        <button @click="notifMenu = !notifMenu" class="relative p-2 text-gray-400 hover:text-gray-600 transition rounded-full hover:bg-gray-100">
+                        <button @click="notifMenu = !notifMenu; if (notifMenu) { langMenu = false; userMenu = false; }" class="relative p-2 text-gray-400 hover:text-gray-600 transition rounded-full hover:bg-gray-100">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
                             <span x-show="unreadCount > 0" x-cloak class="absolute top-1.5 right-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white ring-2 ring-white" x-text="unreadCount"></span>
                         </button>
 
-                        <div x-show="notifMenu" x-cloak x-transition class="absolute end-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50">
+                        <div x-show="notifMenu" x-cloak x-transition class="absolute end-0 mt-2 w-80 max-w-[calc(100vw-1.5rem)] bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50">
                             <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-gray-50">
                                 <h3 class="text-sm font-bold text-gray-900">{{ __('Notifications') }}</h3>
                                 <button type="button" @click="markAllRead()" class="text-xs font-medium text-rj-purple hover:underline">{{ __('Mark all read') }}</button>
@@ -812,25 +876,57 @@
                     </div>
 
                     <div class="relative" @click.away="langMenu = false">
-                        <button @click="langMenu = !langMenu" class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition text-sm text-gray-600">
-                            <span class="uppercase text-xs font-medium">{{ app()->getLocale() }}</span>
-                            <svg class="w-3.5 h-3.5 opacity-60" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                        <button @click="toggleLang()" class="flex items-center gap-2 px-2.5 py-2 rounded-lg hover:bg-gray-100 transition text-sm text-gray-600" :class="langMenu ? 'bg-gray-100' : ''" aria-haspopup="listbox" :aria-expanded="langMenu">
+                            @if ($currentFlag)
+                                <img src="{{ $currentFlag }}" alt="{{ strtoupper($currentLocale) }}" class="w-5 h-4 object-cover rounded-sm">
+                            @else
+                                <svg class="w-4 h-4 opacity-60" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/></svg>
+                            @endif
+                            <span class="uppercase text-xs font-semibold">{{ $currentLocale }}</span>
+                            <svg class="w-3.5 h-3.5 opacity-60 transition-transform" :class="langMenu ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                         </button>
 
-                        <div x-show="langMenu" x-cloak x-transition class="absolute end-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-1 rj-fade-in z-20">
-                            @foreach (rj_available_locales() as $locale)
-                                <a href="{{ route('admin.lang.switch', $locale) }}" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 {{ app()->getLocale() === $locale ? 'bg-gray-50 font-medium' : '' }}">
-                                    @if (file_exists(public_path("images/flags/{$locale}.svg")))
-                                        <img src="{{ asset("images/flags/{$locale}.svg") }}" alt="{{ strtoupper($locale) }}" class="w-5 h-4 object-cover rounded-sm">
-                                    @endif
-                                    <span class="uppercase">{{ $locale }}</span>
-                                </a>
-                            @endforeach
+                        <div x-show="langMenu" x-cloak x-transition class="absolute end-0 mt-2 w-72 max-w-[calc(100vw-1.5rem)] bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-20">
+                            <div class="p-2 border-b border-gray-100 bg-gray-50/60">
+                                <div class="relative">
+                                    <svg class="w-4 h-4 text-gray-400 absolute top-1/2 -translate-y-1/2 start-3 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.3-4.3"/></svg>
+                                    <input type="text"
+                                           x-ref="langInput"
+                                           x-model="langQuery"
+                                           @keydown.enter.prevent="pickLang()"
+                                           class="w-full ps-9 pe-8 py-2 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-rj-purple/30 focus:border-rj-purple"
+                                           placeholder="{{ $langTexts['search'] }}"
+                                           autocomplete="off"
+                                           spellcheck="false">
+                                    <button type="button" x-show="langQuery.length > 0" x-cloak @click="langQuery = ''; $refs.langInput.focus()" class="absolute top-1/2 -translate-y-1/2 end-2 p-1 text-gray-400 hover:text-gray-600" aria-label="{{ __('Clear') }}">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="rj-lang-list max-h-72 overflow-y-auto overscroll-contain py-1" role="listbox">
+                                <template x-for="l in filteredLangs" :key="l.code">
+                                    <a :href="l.url" class="rj-lang-it flex items-center gap-3 px-4 py-2 text-sm" :class="l.active ? 'is-on font-semibold text-gray-900' : 'text-gray-700'" role="option" :aria-selected="l.active">
+                                        <template x-if="l.flag">
+                                            <img :src="l.flag" :alt="l.code" class="w-5 h-4 object-cover rounded-sm flex-shrink-0">
+                                        </template>
+                                        <template x-if="!l.flag">
+                                            <span class="w-5 h-4 rounded-sm bg-gray-200 flex-shrink-0"></span>
+                                        </template>
+                                        <span class="flex-1 truncate" x-text="l.name"></span>
+                                        <span class="uppercase text-[11px] font-medium text-gray-400" x-text="l.code"></span>
+                                        <svg x-show="l.active" class="w-4 h-4 text-rj-purple flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                    </a>
+                                </template>
+                                <div x-show="filteredLangs.length === 0" x-cloak class="px-4 py-6 text-center text-sm text-gray-500">{{ $langTexts['none'] }}</div>
+                            </div>
+
+                            <div class="px-4 py-2 border-t border-gray-100 bg-gray-50 text-[11px] text-gray-400 text-center" x-text="filteredLangs.length + ' / ' + langs.length"></div>
                         </div>
                     </div>
 
                     <div class="relative" @click.away="userMenu = false">
-                        <button @click="userMenu = !userMenu" class="flex items-center gap-3 px-2 py-1.5 rounded-lg hover:bg-gray-100 transition">
+                        <button @click="userMenu = !userMenu; if (userMenu) { langMenu = false; notifMenu = false; }" class="flex items-center gap-3 px-2 py-1.5 rounded-lg hover:bg-gray-100 transition">
                             <div class="h-9 w-9 rounded-full bg-gradient-to-br from-rj-purple to-rj-pink flex items-center justify-center text-white text-sm font-semibold">
                                 {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                             </div>
@@ -838,7 +934,7 @@
                                 <div class="text-sm font-medium text-gray-900">{{ auth()->user()->name }}</div>
                                 <div class="text-xs text-gray-500">{{ ucfirst(auth()->user()->role) }}</div>
                             </div>
-                            <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                            <svg class="w-3.5 h-3.5 text-gray-400 hidden sm:block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                         </button>
 
                         <div x-show="userMenu" x-cloak x-transition class="absolute end-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-100 py-1 rj-fade-in z-20">
@@ -872,7 +968,7 @@
                 </div>
             </header>
 
-            <main class="p-6 flex-1">
+            <main class="p-4 sm:p-6 flex-1">
                 @if ($errors->any())
                     <div class="mb-4 bg-red-50 border-s-4 border-red-500 text-red-800 px-4 py-3 rounded-e-lg rj-fade-in">
                         <ul class="text-sm space-y-1">
@@ -1015,8 +1111,12 @@
                 userMenu: false,
                 langMenu: false,
                 notifMenu: false,
+                sidebarOpen: false,
                 notifications: [],
                 unreadCount: 0,
+
+                langs: @js($langList),
+                langQuery: '',
 
                 searchOpen: false,
                 searchQuery: '',
@@ -1065,6 +1165,40 @@
                             this.searchLoading = false;
                         }
                     });
+
+                    this.$watch('langMenu', (v) => {
+                        if (v) {
+                            this.langQuery = '';
+                            this.$nextTick(() => {
+                                if (this.$refs.langInput) this.$refs.langInput.focus();
+                                const el = this.$root.querySelector('.rj-lang-it.is-on');
+                                if (el) el.scrollIntoView({ block: 'center' });
+                            });
+                        }
+                    });
+
+                    this.$watch('sidebarOpen', (v) => {
+                        if (window.innerWidth < 1024) document.body.style.overflow = v ? 'hidden' : '';
+                    });
+                },
+
+                toggleLang() {
+                    this.langMenu = !this.langMenu;
+                    if (this.langMenu) {
+                        this.notifMenu = false;
+                        this.userMenu = false;
+                    }
+                },
+
+                get filteredLangs() {
+                    const q = norm(this.langQuery).trim();
+                    if (!q) return this.langs;
+                    return this.langs.filter(l => norm(l.name).indexOf(q) > -1 || norm(l.code).indexOf(q) > -1);
+                },
+
+                pickLang() {
+                    const first = this.filteredLangs[0];
+                    if (first) window.location.href = first.url;
                 },
 
                 fetchNotifications() {
@@ -1122,6 +1256,7 @@
                     this.notifMenu = false;
                     this.langMenu = false;
                     this.userMenu = false;
+                    this.sidebarOpen = false;
                     this.searchOpen = true;
                     this.$nextTick(() => { if (this.$refs.searchInput) this.$refs.searchInput.focus(); });
                 },
@@ -1199,7 +1334,6 @@
                     } else {
                         const seen = {};
 
-                        // 1. AI Answer (Ən üstdə göstərilir)
                         if (this.searchAnswer) {
                             out.push({
                                 kind: 'ai-answer',
@@ -1211,13 +1345,11 @@
                             });
                         }
 
-                        // 2. Yerli Menyu Nəticələri
                         this.localMatches(q).forEach((m) => {
                             seen[m.url] = true;
                             out.push({ kind: 'menu', group: T.menu, title: m.title, path: m.path, sub: m.path, url: m.url });
                         });
 
-                        // 3. Serverdən Gələn Menyu Nəticələri
                         this.serverResults.forEach((r) => {
                             if (seen[r.url]) return;
                             seen[r.url] = true;
@@ -1251,7 +1383,7 @@
                 openActive() {
                     const it = this.items[this.activeIndex];
                     if (!it) return;
-                    if (it.kind === 'ai-answer') return; // AI cavabına Enter basanda heç nə etmirik
+                    if (it.kind === 'ai-answer') return;
                     this.remember(it);
                     window.location.href = it.url;
                 },
