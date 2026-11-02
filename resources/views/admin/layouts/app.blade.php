@@ -40,11 +40,52 @@
             .rj-aside.is-open { transform: none; }
         }
 
-        .rj-lang-list { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
+        .rj-lang-menu {
+            position: absolute;
+            inset-inline-end: 0;
+            z-index: 60;
+            display: flex;
+            flex-direction: column;
+            width: 288px;
+            max-width: calc(100vw - 24px);
+            margin-top: 8px;
+            overflow: hidden;
+            border: 1px solid #f1f5f9;
+            border-radius: 12px;
+            background: #fff;
+            box-shadow: 0 20px 45px -12px rgba(15, 23, 42, .3);
+        }
+        .rj-lang-search {
+            flex-shrink: 0;
+            padding: 8px;
+            border-bottom: 1px solid #f1f5f9;
+            background: #f8fafc;
+        }
+        .rj-lang-list {
+            flex: 1 1 auto;
+            min-height: 0;
+            max-height: min(300px, 55vh) !important;
+            padding: 4px 0;
+            overflow-x: hidden !important;
+            overflow-y: auto !important;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 transparent;
+        }
         .rj-lang-list::-webkit-scrollbar { width: 6px; }
         .rj-lang-list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; }
         .rj-lang-list::-webkit-scrollbar-track { background: transparent; }
-        .rj-lang-it { transition: background .12s, padding .15s; }
+        .rj-lang-foot {
+            flex-shrink: 0;
+            padding: 8px 16px;
+            border-top: 1px solid #f1f5f9;
+            background: #f8fafc;
+            color: #94a3b8;
+            font-size: 11px;
+            text-align: center;
+        }
+        .rj-lang-it { transition: background .12s; }
         .rj-lang-it:hover { background: #f8fafc; }
         .rj-lang-it.is-on { background: linear-gradient(90deg, rgba(139, 92, 246, .1), rgba(236, 72, 153, .04)); }
 
@@ -53,7 +94,9 @@
             isolation: isolate;
             display: inline-flex;
             align-items: center;
+            flex-shrink: 0;
             gap: 9px;
+            width: 300px;
             height: 38px;
             padding: 0 10px 0 11px;
             border: 0;
@@ -91,12 +134,15 @@
             color: #334155;
         }
         .rj-sb:active { transform: scale(.96); }
-        .rj-sb-ic { display: grid; place-items: center; color: #8b5cf6; }
+        .rj-sb-ic { display: grid; flex-shrink: 0; place-items: center; color: #8b5cf6; }
         .rj-sb-ic svg { width: 17px; height: 17px; animation: rj-spark 2.4s ease-in-out infinite; }
         .rj-sb-t {
-            display: inline-block;
-            min-width: 170px;
+            display: block;
+            flex: 1 1 0;
+            min-width: 0;
+            overflow: hidden;
             text-align: start;
+            text-overflow: ellipsis;
             white-space: nowrap;
             opacity: 0;
             transform: translateY(5px);
@@ -104,6 +150,7 @@
         }
         .rj-sb-t.is-on { opacity: 1; transform: none; }
         .rj-sb kbd {
+            flex-shrink: 0;
             padding: 3px 6px;
             border: 1px solid #e2e8f0;
             border-radius: 6px;
@@ -361,9 +408,12 @@
         .rj-b-0 { opacity: 0; transform: translateY(-18px) scale(.94); }
         .rj-b-1 { opacity: 1; transform: none; }
 
+        @media (max-width: 1279px) {
+            .rj-sb { width: 230px; }
+        }
         @media (max-width: 1023px) {
+            .rj-sb { width: 190px; }
             .rj-sb kbd { display: none; }
-            .rj-sb-t { min-width: 0; max-width: 130px; overflow: hidden; text-overflow: ellipsis; }
         }
         @media (max-width: 767px) {
             .rj-sb { width: 38px; padding: 0; gap: 0; justify-content: center; }
@@ -886,8 +936,8 @@
                             <svg class="w-3.5 h-3.5 opacity-60 transition-transform" :class="langMenu ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                         </button>
 
-                        <div x-show="langMenu" x-cloak x-transition class="absolute end-0 mt-2 w-72 max-w-[calc(100vw-1.5rem)] bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-20">
-                            <div class="p-2 border-b border-gray-100 bg-gray-50/60">
+                        <div x-show="langMenu" x-cloak x-transition class="rj-lang-menu">
+                            <div class="rj-lang-search">
                                 <div class="relative">
                                     <svg class="w-4 h-4 text-gray-400 absolute top-1/2 -translate-y-1/2 start-3 pointer-events-none" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.3-4.3"/></svg>
                                     <input type="text"
@@ -904,7 +954,7 @@
                                 </div>
                             </div>
 
-                            <div class="rj-lang-list max-h-72 overflow-y-auto overscroll-contain py-1" role="listbox">
+                            <div class="rj-lang-list" role="listbox" @wheel.stop>
                                 <template x-for="l in filteredLangs" :key="l.code">
                                     <a :href="l.url" class="rj-lang-it flex items-center gap-3 px-4 py-2 text-sm" :class="l.active ? 'is-on font-semibold text-gray-900' : 'text-gray-700'" role="option" :aria-selected="l.active">
                                         <template x-if="l.flag">
@@ -921,7 +971,7 @@
                                 <div x-show="filteredLangs.length === 0" x-cloak class="px-4 py-6 text-center text-sm text-gray-500">{{ $langTexts['none'] }}</div>
                             </div>
 
-                            <div class="px-4 py-2 border-t border-gray-100 bg-gray-50 text-[11px] text-gray-400 text-center" x-text="filteredLangs.length + ' / ' + langs.length"></div>
+                            <div class="rj-lang-foot" x-text="filteredLangs.length + ' / ' + langs.length"></div>
                         </div>
                     </div>
 
@@ -1171,8 +1221,9 @@
                             this.langQuery = '';
                             this.$nextTick(() => {
                                 if (this.$refs.langInput) this.$refs.langInput.focus();
+                                const list = this.$root.querySelector('.rj-lang-list');
                                 const el = this.$root.querySelector('.rj-lang-it.is-on');
-                                if (el) el.scrollIntoView({ block: 'center' });
+                                if (list && el) list.scrollTop = Math.max(0, el.offsetTop - list.clientHeight / 2 + el.offsetHeight / 2);
                             });
                         }
                     });
