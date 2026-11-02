@@ -2,9 +2,26 @@
 
 All notable changes to RJ Nexus (formerly RJ CMS) will be documented in this file.
 
+## [v1.6.2] - 2026-11-02 (Altair Series)
+
+This is a hotfix and UX polish update. We resolved critical frontend errors, improved the multi-language UI in the admin panel, and fixed various data import issues during the setup process.
+
+### Fixed (Bug Fixes)
+- **Frontend Post 500 Error:** Fixed `RelationNotFoundException` for `featured_image` on the frontend single post view.
+- **Language Sync & 404s:** Fixed a major bug where changing the admin language caused a 404 redirect on the frontend. Admin and frontend locales are now strictly isolated via middleware.
+- **Demo Data Remapping:** Fixed menu item `object_id` and builder template ID remapping so menus and widgets don't lose their links after a fresh install.
+- **Demo URLs:** Added automatic URL replacement in `DemoSeeder` so localhost links (`127.0.0.1`) are replaced with the actual live domain.
+- **Setup Wizard Errors:** Fixed PHP warnings (`Undefined array key`) and `ERR_CONNECTION_RESET` issues during the installation process.
+- **Category & Tag Controllers:** Restricted admin category and tag management to only show *active frontend locales* instead of all 17 installed languages.
+
+### Improved (Enhancements)
+- **Language Tabs UI:** Added custom drag-to-scroll functionality and floating navigation arrows to the language tabs in Posts, Categories, and Tags views. This makes navigating through 17 languages smooth and intuitive.
+
+---
+
 ## [v1.6.0] - 2026-11-02 (Altair Series)
 
-This is the major stable release update. We completely overhauled the installation process, introduced a keyless Dual AI engine, expanded language support to 17, and fixed critical localization and UI bugs.
+This is a major stable release update. We completely overhauled the installation process, introduced a keyless Dual AI engine, expanded language support to 17, and added a global AI-powered search palette.
 
 ### Added (New Features & Systems)
 - **Setup Wizard (Visual Installer):** A brand new, standalone `install.php` with a premium UI, multi-language support, requirement checks, manual SQL import, and automated demo data loading.
@@ -13,13 +30,6 @@ This is the major stable release update. We completely overhauled the installati
 - **Global AI Search (Ctrl+K):** Added a command palette search with AI-powered answers and dynamic menu navigation.
 - **Notifications & Activity Log:** Added real-time notifications (Bell icon) and comprehensive activity logging for all system events.
 - **New Languages:** Added Italian (`it`), Dutch (`nl`), Armenian (`hy`), and Georgian (`ka`). Total supported languages increased to 17.
-
-### Fixed (Bug Fixes)
-- **Language Sync:** Fixed a major bug where changing the admin language caused a 404 redirect on the frontend. Admin and frontend locales are now strictly isolated.
-- **Demo Data Remapping:** Fixed menu item `object_id` and template IDs remapping so builder widgets and menus don't break after a fresh install.
-- **AI Dashboard UI:** Redesigned the AI overview widgets on the admin dashboard.
-- **Missing Blade Files:** Added 4 critical missing Blade views resolving multiple 500 errors.
-- **Installer Memory Limits:** Fixed `ERR_CONNECTION_RESET` during installation by writing CLI output to temp files.
 
 ---
 
