@@ -20,14 +20,29 @@ class PageController extends Controller
 
     public function show(string $locale, string $slug)
     {
-        $page = Post::with(['author', 'translations', 'template'])
+        $baseLocale = config('app.locale');
+
+        $query = Post::with(['author', 'translations', 'template'])
             ->where('type', 'page')
-            ->where('slug', $slug)
-            ->published()
-            ->firstOrFail();
+            ->published();
+
+        if ($locale === $baseLocale) {
+            $query->where(function ($q) use ($slug, $locale) {
+                $q->where('slug', $slug)
+                  ->orWhereHas('translations', function ($inner) use ($slug, $locale) {
+                      $inner->where('slug', $slug)->where('locale', $locale);
+                  });
+            });
+        } else {
+            $query->whereHas('translations', function ($inner) use ($slug, $locale) {
+                $inner->where('slug', $slug)->where('locale', $locale);
+            });
+        }
+
+        $page = $query->firstOrFail();
 
         if ($page->isFrontPage()) {
-            return redirect()->to(url('/'), 301);
+            return redirect()->to(url('/' . $locale), 301);
         }
 
         $page->incrementViews();
