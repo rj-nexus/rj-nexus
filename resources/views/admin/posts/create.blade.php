@@ -120,13 +120,18 @@
             <div class="lg:col-span-2 space-y-6">
 
                 <div class="bg-white rounded-lg shadow-sm border border-gray-100">
-                    <div class="border-b border-gray-100 px-6">
-                        <nav class="flex gap-1 -mb-px overflow-x-auto rj-scrollbar">
+                    <div class="border-b border-gray-100 relative flex items-center bg-white rounded-t-lg overflow-hidden">
+
+                        <button type="button" @click="$refs.langTabs.scrollLeft -= 200" class="absolute left-0 top-0 bottom-0 z-10 px-2 bg-gradient-to-r from-white via-white to-transparent text-gray-500 hover:text-rj-purple transition focus:outline-none">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                        </button>
+
+                        <nav class="flex gap-1 overflow-x-auto rj-scrollbar scroll-smooth w-full px-8 pb-px" x-ref="langTabs" style="scrollbar-width: none; -ms-overflow-style: none;">
                             @foreach ($locales as $locale)
                                 <button type="button"
                                         @click="activeLocale = '{{ $locale }}'"
-                                        :class="activeLocale === '{{ $locale }}' ? 'border-rj-purple text-rj-purple' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-                                        class="px-4 py-3 border-b-2 text-sm font-medium transition flex items-center gap-2 whitespace-nowrap">
+                                        :class="activeLocale === '{{ $locale }}' ? 'border-rj-purple text-rj-purple bg-rj-purple/5' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50'"
+                                        class="px-4 py-3 border-b-2 text-sm font-medium transition flex items-center gap-2 whitespace-nowrap rounded-t-lg">
                                     @if (file_exists(public_path("images/flags/{$locale}.svg")))
                                         <img src="{{ asset("images/flags/{$locale}.svg") }}" alt="{{ strtoupper($locale) }}" class="w-4 h-3 object-cover rounded-sm">
                                     @endif
@@ -138,6 +143,11 @@
                                 </button>
                             @endforeach
                         </nav>
+
+                        <button type="button" @click="$refs.langTabs.scrollLeft += 200" class="absolute right-0 top-0 bottom-0 z-10 px-2 bg-gradient-to-l from-white via-white to-transparent text-gray-500 hover:text-rj-purple transition focus:outline-none">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                        </button>
+
                     </div>
 
                     <div class="p-6 space-y-5">
