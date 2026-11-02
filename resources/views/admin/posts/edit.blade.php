@@ -109,13 +109,42 @@
                     </div>
 
                     <template x-if="activeTab !== 'advanced'">
-                        <div class="border-b border-gray-100 relative flex items-center bg-white overflow-hidden">
+                        <div class="border-b border-gray-100 relative flex items-center bg-white overflow-hidden group">
 
-                            <button type="button" @click="$refs.langTabs.scrollLeft -= 200" class="absolute left-0 top-0 bottom-0 z-10 px-2 bg-gradient-to-r from-white via-white to-transparent text-gray-500 hover:text-rj-purple transition focus:outline-none">
+                            <button type="button" @click="$refs.langTabs.scrollLeft -= 200" class="absolute left-1 z-10 w-6 h-6 flex items-center justify-center rounded-full bg-white shadow-sm border border-gray-200 text-gray-500 hover:text-rj-purple transition opacity-0 group-hover:opacity-100 focus:outline-none">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
                             </button>
 
-                            <nav class="flex gap-1 overflow-x-auto rj-scrollbar scroll-smooth w-full px-8 pb-px" x-ref="langTabs" style="scrollbar-width: none; -ms-overflow-style: none;">
+                            <nav class="flex gap-1 overflow-x-auto rj-scrollbar scroll-smooth w-full px-8 pb-px"
+                                 x-ref="langTabs"
+                                 x-data="{
+                                     isDown: false,
+                                     startX: 0,
+                                     scrollLeft: 0,
+                                     startDrag(e) {
+                                         this.isDown = true;
+                                         this.startX = e.pageX - this.$refs.langTabs.offsetLeft;
+                                         this.scrollLeft = this.$refs.langTabs.scrollLeft;
+                                         this.$refs.langTabs.classList.add('cursor-grabbing', 'select-none');
+                                     },
+                                     stopDrag() {
+                                         this.isDown = false;
+                                         this.$refs.langTabs.classList.remove('cursor-grabbing', 'select-none');
+                                     },
+                                     doDrag(e) {
+                                         if (!this.isDown) return;
+                                         e.preventDefault();
+                                         const x = e.pageX - this.$refs.langTabs.offsetLeft;
+                                         const walk = (x - this.startX) * 2;
+                                         this.$refs.langTabs.scrollLeft = this.scrollLeft - walk;
+                                     }
+                                 }"
+                                 @mousedown="startDrag($event)"
+                                 @mouseleave="stopDrag()"
+                                 @mouseup="stopDrag()"
+                                 @mousemove="doDrag($event)"
+                                 style="scrollbar-width: none; -ms-overflow-style: none; cursor: grab;"
+                            >
                                 @foreach ($locales as $locale)
                                     @php
                                         $translation = $post->translations->firstWhere('locale', $locale);
@@ -139,7 +168,7 @@
                                 @endforeach
                             </nav>
 
-                            <button type="button" @click="$refs.langTabs.scrollLeft += 200" class="absolute right-0 top-0 bottom-0 z-10 px-2 bg-gradient-to-l from-white via-white to-transparent text-gray-500 hover:text-rj-purple transition focus:outline-none">
+                            <button type="button" @click="$refs.langTabs.scrollLeft += 200" class="absolute right-1 z-10 w-6 h-6 flex items-center justify-center rounded-full bg-white shadow-sm border border-gray-200 text-gray-500 hover:text-rj-purple transition opacity-0 group-hover:opacity-100 focus:outline-none">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                             </button>
 
