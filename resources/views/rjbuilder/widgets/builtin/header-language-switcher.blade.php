@@ -29,7 +29,7 @@
         if (isset($post) && $post instanceof \App\Models\Post) {
             $slug = $post->localizedSlug($targetLoc);
             if ($slug) {
-                return $post->type === 'page' ? '/' . $slug : '/blog/' . $slug;
+                return $post->type === 'page' ? '/' . $targetLoc . '/' . $slug : '/' . $targetLoc . '/blog/' . $slug;
             }
         }
 
@@ -37,14 +37,14 @@
         $currentLoc = app()->getLocale();
 
         if ($currentPath === $currentLoc || $currentPath === $currentLoc . '/') {
-            return '/';
+            return '/' . $targetLoc;
         }
 
         if (str_starts_with($currentPath, $currentLoc . '/')) {
             $currentPath = substr($currentPath, strlen($currentLoc) + 1);
         }
 
-        return '/' . ltrim($currentPath, '/');
+        return '/' . $targetLoc . '/' . ltrim($currentPath, '/');
     };
 
     $getFlag = function (string $code): string {
