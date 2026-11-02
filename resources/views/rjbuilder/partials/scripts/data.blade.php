@@ -8,6 +8,7 @@ window.RJ = {
     viewUrl: @json($builder['viewUrl'] ?? null),
     templateType: @json($builder['templateType']),
     baseLocale: @json($builder['baseLocale']),
+    activeLocale: @json($builder['activeLocale'] ?? $builder['baseLocale']),
     locales: @json($builder['locales']),
     widgets: @json($widgetsData),
     categories: @json($categoriesData),
