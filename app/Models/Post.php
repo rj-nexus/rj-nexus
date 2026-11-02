@@ -103,6 +103,26 @@ class Post extends Model
         return 'slug';
     }
 
+        public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
+    public function resolveRouteBinding($value, $field = null)
+    {
+        $base = static::query()->where('slug', $value)->first();
+
+        if ($base) {
+            return $base;
+        }
+
+        return static::query()
+            ->whereHas('translations', function ($inner) use ($value) {
+                $inner->where('slug', $value);
+            })
+            ->first();
+    }
+
     public function localizedSlug(?string $locale = null): string
     {
         $locale = $locale ?: app()->getLocale();
