@@ -3,6 +3,37 @@
 use App\DynamicTags\TagRegistry;
 use App\Widgets\WidgetRegistry;
 
+if (!function_exists('rj_localize_builder_settings')) {
+    function rj_localize_builder_settings(array $settings, string $locale, string $baseLocale): array
+    {
+        $localized = [];
+
+        foreach ($settings as $key => $value) {
+            // Əgər açar sözün sonunda __az, __ru kimi dil kodu varsa, onu əsas massivə əlavə etmirik
+            // Çünki onun dəyərini əsas açarın içinə yazacağıq
+            if (is_string($key) && preg_match('/^(.+)__([a-z]{2})$/', $key, $matches)) {
+                continue;
+            }
+
+            if (is_array($value)) {
+                $localized[$key] = rj_localize_builder_settings($value, $locale, $baseLocale);
+            } else {
+                $localKey = $key . '__' . $locale;
+
+                // Əgər cari dil əsas dil deyilsə və həmin dil üçün tərcümə varsa, onu istifadə edirik
+                if ($locale !== $baseLocale && isset($settings[$localKey]) && $settings[$localKey] !== '') {
+                    $localized[$key] = $settings[$localKey];
+                } else {
+                    // Yoxdursa, default dildəki mətni göstəririk
+                    $localized[$key] = $value;
+                }
+            }
+        }
+
+        return $localized;
+    }
+}
+
 if (!function_exists('rj_resolve_dynamic')) {
     function rj_resolve_dynamic($value)
     {
@@ -66,6 +97,12 @@ if (!function_exists('rj_render_block')) {
         }
 
         $settings = $block['settings'] ?? [];
+
+        // BU HİSSƏ ƏLAVƏ EDİLDİ: Dilə görə məlumatları süzürük
+        $locale = app()->getLocale();
+        $baseLocale = config('app.locale');
+        $settings = rj_localize_builder_settings($settings, $locale, $baseLocale);
+
         $settings = rj_resolve_dynamics($settings);
 
         $children = $block['children'] ?? [];
@@ -172,6 +209,7 @@ if (!function_exists('rj_do_shortcode')) {
         return '';
     }
 }
+
 if (!function_exists('rj_global_widgets_list')) {
     function rj_global_widgets_list(): array
     {
@@ -192,6 +230,7 @@ if (!function_exists('rj_global_widgets_list')) {
         }
     }
 }
+
 if (!function_exists('rj_preview_posts')) {
     function rj_preview_posts(): array
     {
