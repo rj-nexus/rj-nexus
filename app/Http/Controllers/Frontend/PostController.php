@@ -22,16 +22,26 @@ class PostController extends Controller
 
     public function show(string $locale, string $slug)
     {
-        $post = Post::with(['author', 'categories', 'tags', 'translations', 'template'])
+        $baseLocale = config('app.locale');
+
+        $query = Post::with(['author', 'categories', 'tags', 'translations', 'template'])
             ->where('type', 'post')
-            ->published()
-            ->where(function ($q) use ($slug) {
+            ->published();
+
+        if ($locale === $baseLocale) {
+            $query->where(function ($q) use ($slug, $locale) {
                 $q->where('slug', $slug)
-                  ->orWhereHas('translations', function ($inner) use ($slug) {
-                      $inner->where('slug', $slug)->where('locale', app()->getLocale());
+                  ->orWhereHas('translations', function ($inner) use ($slug, $locale) {
+                      $inner->where('slug', $slug)->where('locale', $locale);
                   });
-            })
-            ->firstOrFail();
+            });
+        } else {
+            $query->whereHas('translations', function ($inner) use ($slug, $locale) {
+                $inner->where('slug', $slug)->where('locale', $locale);
+            });
+        }
+
+        $post = $query->firstOrFail();
 
         $post->incrementViews();
 
@@ -63,10 +73,18 @@ class PostController extends Controller
 
     public function archive(string $locale, Request $request)
     {
-        $query = Post::with(['author', 'categories', 'tags'])
+        $baseLocale = config('app.locale');
+
+        $query = Post::with(['author', 'categories', 'tags', 'translations'])
             ->where('type', 'post')
             ->published()
             ->orderByDesc('published_at');
+
+        if ($locale !== $baseLocale) {
+            $query->whereHas('translations', function ($q) use ($locale) {
+                $q->where('locale', $locale)->whereNotNull('title');
+            });
+        }
 
         $archiveTitle = __('Blog');
         $archiveDescription = '';
