@@ -36,7 +36,7 @@ class PostService
         $title = $data['title'] ?? '';
 
         $baseSlug = $this->uniqueSlugForLocale(
-            $data['slug'] ?? $title,
+            $this->pickSlugInput($data['slug'] ?? null, $title),
             $type,
             config('app.locale')
         );
@@ -62,17 +62,18 @@ class PostService
 
         $this->syncCategories($post, $data['categories'] ?? []);
         $this->syncTags($post, $data['tags'] ?? []);
-        $this->syncTranslations($post, $this->collectTranslations($data));
+        $this->syncTranslations($post, $this->collectTranslations($data), $post->slug);
 
         return $post->fresh();
     }
 
     public function update(Post $post, array $data, Request $request): Post
     {
+        $previousBaseSlug = $post->slug;
         $title = $data['title'] ?? $post->title;
 
         $baseSlug = $this->uniqueSlugForLocale(
-            $data['slug'] ?? $title,
+            $this->pickSlugInput($data['slug'] ?? null, $title),
             $post->type,
             config('app.locale'),
             $post->id
@@ -111,7 +112,7 @@ class PostService
             $this->syncTags($post, $data['tags']);
         }
 
-        $this->syncTranslations($post, $this->collectTranslations($data));
+        $this->syncTranslations($post, $this->collectTranslations($data), $previousBaseSlug);
 
         return $post->fresh();
     }
@@ -221,7 +222,7 @@ class PostService
 
     public function uniqueSlugForLocale(string $slug, string $type, string $locale, ?int $ignoreId = null): string
     {
-        $base = Str::slug($slug) ?: 'post';
+        $base = $this->makeSlug($slug, $locale);
         $candidate = $base;
         $i = 1;
 
@@ -245,6 +246,36 @@ class PostService
         }
 
         return $candidate;
+    }
+
+    protected function makeSlug(string $text, string $locale): string
+    {
+        $text = trim($text);
+
+        if ($text === '') {
+            return 'post';
+        }
+
+        $slug = Str::slug($text);
+
+        if ($slug === '') {
+            $slug = mb_strtolower($text, 'UTF-8');
+            $slug = preg_replace('/\s+/u', '-', $slug);
+            $slug = preg_replace('/[^\p{L}\p{N}\-]+/u', '', $slug);
+            $slug = preg_replace('/-+/', '-', $slug);
+            $slug = trim($slug, '-');
+        }
+
+        return $slug !== '' ? $slug : 'post';
+    }
+
+    protected function pickSlugInput(?string $slug, string $title): string
+    {
+        $slug = trim((string) $slug);
+        if ($slug !== '') {
+            return $slug;
+        }
+        return (string) $title;
     }
 
     protected function syncCategories(Post $post, array $categories): void
@@ -331,10 +362,16 @@ class PostService
                 $entry['content'] = $data['content'] ?? null;
                 $entry['excerpt'] = $data['excerpt'] ?? null;
                 $entry['slug'] = $data['slug'] ?? null;
+
+                foreach ($this->seoFields as $field) {
+                    if (array_key_exists($field, $data)) {
+                        $entry[$field] = $data[$field];
+                    }
+                }
             }
 
             if (empty($entry['slug']) && !empty($entry['title'])) {
-                $entry['slug'] = Str::slug($entry['title']);
+                $entry['slug'] = $this->makeSlug($entry['title'], $locale);
             }
 
             $out[$locale] = $entry;
@@ -343,15 +380,13 @@ class PostService
         return $out;
     }
 
-    protected function syncTranslations(Post $post, array $translations): void
+    protected function syncTranslations(Post $post, array $translations, ?string $previousBaseSlug = null): void
     {
         $base = config('app.locale');
-        $previousBaseSlug = $post->getOriginal('slug');
-
         $baseEntry = $translations[$base] ?? [];
 
-        if (empty($baseEntry['slug']) && !empty($baseEntry['title'])) {
-            $baseEntry['slug'] = Str::slug($baseEntry['title']);
+        if ($previousBaseSlug === null) {
+            $previousBaseSlug = $post->slug;
         }
 
         foreach ($translations as $locale => $data) {
@@ -384,7 +419,7 @@ class PostService
             $rawSlug = trim((string) ($data['slug'] ?? ''));
 
             if ($rawSlug === '' && !empty($data['title'])) {
-                $rawSlug = Str::slug($data['title']);
+                $rawSlug = $this->makeSlug($data['title'], $locale);
             }
 
             if ($locale === $base) {
@@ -417,11 +452,11 @@ class PostService
                         $locale,
                         $post->id
                     );
-                } elseif ($existingSlug !== null && $existingSlug !== '' && $existingSlug !== $previousBaseSlug) {
+                } elseif ($existingSlug !== null && $existingSlug !== '') {
                     $payload['slug'] = $existingSlug;
-                } elseif (!empty($baseEntry['slug'])) {
+                } elseif (!empty($payload['title'])) {
                     $payload['slug'] = $this->uniqueSlugForLocale(
-                        $baseEntry['slug'],
+                        $payload['title'],
                         $post->type,
                         $locale,
                         $post->id
