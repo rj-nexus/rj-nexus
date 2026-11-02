@@ -208,6 +208,7 @@
                                            name="{{ $isBase ? 'slug' : "translations[{$locale}][slug]" }}"
                                            value="{{ old($isBase ? 'slug' : "translations.{$locale}.slug", $slugValue) }}"
                                            placeholder="{{ __('auto-generated from title') }}"
+                                           onblur="this.value = this.value.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^\p{L}\p{N}\-_]+/gu, '').replace(/-+/g, '-').replace(/^-|-$/g, '')"
                                            class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm font-mono lowercase">
                                     @error($isBase ? 'slug' : "translations.{$locale}.slug")
                                         <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
@@ -289,7 +290,8 @@
                             @php
                                 $t = $post->translations->firstWhere('locale', $locale);
                                 $isBase = $locale === $baseLocale;
-                                $prefix = $isBase ? '' : "translations[{$locale}].";
+                                $fName = fn($f) => $isBase ? $f : "translations[{$locale}][{$f}]";
+                                $fOld  = fn($f) => $isBase ? $f : "translations.{$locale}.{$f}";
                             @endphp
 
                             <div x-show="activeLocale === '{{ $locale }}'" x-cloak class="space-y-5">
@@ -297,17 +299,17 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('Focus Keyword') }}</label>
                                     <input type="text"
-                                           name="{{ $prefix }}focus_keyword"
-                                           value="{{ old("{$prefix}focus_keyword", $t?->focus_keyword) }}"
+                                           name="{{ $fName('focus_keyword') }}"
+                                           value="{{ old($fOld('focus_keyword'), $t?->focus_keyword) }}"
                                            placeholder="{{ __('e.g. laravel tutorial') }}"
                                            class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">
                                 </div>
 
-                                <div x-data="{ len: {{ strlen(old("{$prefix}seo_title", $t?->seo_title ?? '')) }} }">
+                                <div x-data="{ len: {{ strlen(old($fOld('seo_title'), $t?->seo_title ?? '')) }} }">
                                     <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('SEO Title') }}</label>
                                     <input type="text"
-                                           name="{{ $prefix }}seo_title"
-                                           value="{{ old("{$prefix}seo_title", $t?->seo_title) }}"
+                                           name="{{ $fName('seo_title') }}"
+                                           value="{{ old($fOld('seo_title'), $t?->seo_title) }}"
                                            maxlength="255"
                                            @input="len = $event.target.value.length"
                                            placeholder="{{ $post->title }}"
@@ -320,14 +322,14 @@
                                     </div>
                                 </div>
 
-                                <div x-data="{ len: {{ strlen(old("{$prefix}seo_description", $t?->seo_description ?? '')) }} }">
+                                <div x-data="{ len: {{ strlen(old($fOld('seo_description'), $t?->seo_description ?? '')) }} }">
                                     <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('SEO Description') }}</label>
-                                    <textarea name="{{ $prefix }}seo_description"
+                                    <textarea name="{{ $fName('seo_description') }}"
                                               rows="3"
                                               maxlength="500"
                                               @input="len = $event.target.value.length"
                                               placeholder="{{ $post->excerpt }}"
-                                              class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">{{ old("{$prefix}seo_description", $t?->seo_description) }}</textarea>
+                                              class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">{{ old($fOld('seo_description'), $t?->seo_description) }}</textarea>
                                     <div class="flex items-center justify-between mt-1 text-xs">
                                         <span class="text-gray-500">{{ __('Recommended: 150-160 chars') }}</span>
                                         <span :class="len >= 140 && len <= 165 ? 'text-green-600 font-medium' : (len > 165 ? 'text-amber-600' : 'text-gray-400')">
@@ -336,7 +338,7 @@
                                     </div>
                                 </div>
 
-                                <div x-data="{ image: '{{ old("{$prefix}seo_image", $t?->seo_image) }}' }"
+                                <div x-data="{ image: '{{ old($fOld('seo_image'), $t?->seo_image) }}' }"
                                      @media-selected.window="if ($event.detail.target === $refs.imgInput) image = $event.detail.url">
                                     <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('SEO Image') }}</label>
                                     <p class="text-xs text-gray-500 mb-2">{{ __('Used for Open Graph and Twitter previews.') }}</p>
@@ -349,7 +351,7 @@
                                         </button>
                                     </div>
 
-                                    <input type="hidden" name="{{ $prefix }}seo_image" x-ref="imgInput" :value="image">
+                                    <input type="hidden" name="{{ $fName('seo_image') }}" x-ref="imgInput" :value="image">
 
                                     <button type="button"
                                             @click="$dispatch('open-media-picker', { value: $refs.imgInput })"
@@ -362,8 +364,8 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('Robots') }}</label>
-                                        <select name="{{ $prefix }}robots" class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">
-                                            @php $robots = old("{$prefix}robots", $t?->robots ?? 'index,follow'); @endphp
+                                        <select name="{{ $fName('robots') }}" class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">
+                                            @php $robots = old($fOld('robots'), $t?->robots ?? 'index,follow'); @endphp
                                             <option value="index,follow" {{ $robots === 'index,follow' ? 'selected' : '' }}>{{ __('Index, Follow') }}</option>
                                             <option value="noindex,follow" {{ $robots === 'noindex,follow' ? 'selected' : '' }}>{{ __('No Index, Follow') }}</option>
                                             <option value="index,nofollow" {{ $robots === 'index,nofollow' ? 'selected' : '' }}>{{ __('Index, No Follow') }}</option>
@@ -373,8 +375,8 @@
 
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('Schema Type') }}</label>
-                                        <select name="{{ $prefix }}schema_type" class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">
-                                            @php $schema = old("{$prefix}schema_type", $t?->schema_type ?? 'Article'); @endphp
+                                        <select name="{{ $fName('schema_type') }}" class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">
+                                            @php $schema = old($fOld('schema_type'), $t?->schema_type ?? 'Article'); @endphp
                                             <option value="Article" {{ $schema === 'Article' ? 'selected' : '' }}>Article</option>
                                             <option value="BlogPosting" {{ $schema === 'BlogPosting' ? 'selected' : '' }}>BlogPosting</option>
                                             <option value="WebPage" {{ $schema === 'WebPage' ? 'selected' : '' }}>WebPage</option>
@@ -389,9 +391,9 @@
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('Canonical URL') }}</label>
-                                    <input type="url"
-                                           name="{{ $prefix }}canonical_url"
-                                           value="{{ old("{$prefix}canonical_url", $t?->canonical_url) }}"
+                                    <input type="text"
+                                           name="{{ $fName('canonical_url') }}"
+                                           value="{{ old($fOld('canonical_url'), $t?->canonical_url) }}"
                                            placeholder="{{ __('Leave empty to use the default URL') }}"
                                            class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">
                                 </div>
@@ -413,7 +415,8 @@
                             @php
                                 $t = $post->translations->firstWhere('locale', $locale);
                                 $isBase = $locale === $baseLocale;
-                                $prefix = $isBase ? '' : "translations[{$locale}].";
+                                $fName = fn($f) => $isBase ? $f : "translations[{$locale}][{$f}]";
+                                $fOld  = fn($f) => $isBase ? $f : "translations.{$locale}.{$f}";
                             @endphp
 
                             <div x-show="activeLocale === '{{ $locale }}'" x-cloak class="space-y-5">
@@ -424,20 +427,20 @@
                                     <div class="space-y-4">
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('OG Title') }}</label>
-                                            <input type="text" name="{{ $prefix }}og_title"
-                                                   value="{{ old("{$prefix}og_title", $t?->og_title) }}"
+                                            <input type="text" name="{{ $fName('og_title') }}"
+                                                   value="{{ old($fOld('og_title'), $t?->og_title) }}"
                                                    placeholder="{{ $t?->seo_title ?? $post->title }}"
                                                    class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">
                                         </div>
 
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('OG Description') }}</label>
-                                            <textarea name="{{ $prefix }}og_description" rows="2"
+                                            <textarea name="{{ $fName('og_description') }}" rows="2"
                                                       placeholder="{{ $t?->seo_description }}"
-                                                      class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">{{ old("{$prefix}og_description", $t?->og_description) }}</textarea>
+                                                      class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">{{ old($fOld('og_description'), $t?->og_description) }}</textarea>
                                         </div>
 
-                                        <div x-data="{ image: '{{ old("{$prefix}og_image", $t?->og_image) }}' }"
+                                        <div x-data="{ image: '{{ old($fOld('og_image'), $t?->og_image) }}' }"
                                              @media-selected.window="if ($event.detail.target === $refs.ogInput) image = $event.detail.url">
                                             <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('OG Image') }}</label>
                                             <div x-show="image" class="rounded-lg overflow-hidden border border-gray-200 relative mb-2">
@@ -447,7 +450,7 @@
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                                                 </button>
                                             </div>
-                                            <input type="hidden" name="{{ $prefix }}og_image" x-ref="ogInput" :value="image">
+                                            <input type="hidden" name="{{ $fName('og_image') }}" x-ref="ogInput" :value="image">
                                             <button type="button" @click="$dispatch('open-media-picker', { value: $refs.ogInput })"
                                                     class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border-2 border-dashed border-gray-300 text-gray-700 text-xs font-medium hover:border-rj-purple hover:bg-rj-purple/5 transition">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
@@ -463,8 +466,8 @@
                                     <div class="space-y-4">
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('Card Type') }}</label>
-                                            <select name="{{ $prefix }}twitter_card" class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">
-                                                @php $card = old("{$prefix}twitter_card", $t?->twitter_card ?? 'summary_large_image'); @endphp
+                                            <select name="{{ $fName('twitter_card') }}" class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">
+                                                @php $card = old($fOld('twitter_card'), $t?->twitter_card ?? 'summary_large_image'); @endphp
                                                 <option value="summary" {{ $card === 'summary' ? 'selected' : '' }}>Summary</option>
                                                 <option value="summary_large_image" {{ $card === 'summary_large_image' ? 'selected' : '' }}>Summary with Large Image</option>
                                             </select>
@@ -472,20 +475,20 @@
 
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('Twitter Title') }}</label>
-                                            <input type="text" name="{{ $prefix }}twitter_title"
-                                                   value="{{ old("{$prefix}twitter_title", $t?->twitter_title) }}"
+                                            <input type="text" name="{{ $fName('twitter_title') }}"
+                                                   value="{{ old($fOld('twitter_title'), $t?->twitter_title) }}"
                                                    placeholder="{{ $t?->og_title ?? $t?->seo_title ?? $post->title }}"
                                                    class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">
                                         </div>
 
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('Twitter Description') }}</label>
-                                            <textarea name="{{ $prefix }}twitter_description" rows="2"
+                                            <textarea name="{{ $fName('twitter_description') }}" rows="2"
                                                       placeholder="{{ $t?->og_description ?? $t?->seo_description }}"
-                                                      class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">{{ old("{$prefix}twitter_description", $t?->twitter_description) }}</textarea>
+                                                      class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">{{ old($fOld('twitter_description'), $t?->twitter_description) }}</textarea>
                                         </div>
 
-                                        <div x-data="{ image: '{{ old("{$prefix}twitter_image", $t?->twitter_image) }}' }"
+                                        <div x-data="{ image: '{{ old($fOld('twitter_image'), $t?->twitter_image) }}' }"
                                              @media-selected.window="if ($event.detail.target === $refs.twInput) image = $event.detail.url">
                                             <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('Twitter Image') }}</label>
                                             <div x-show="image" class="rounded-lg overflow-hidden border border-gray-200 relative mb-2">
@@ -495,7 +498,7 @@
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                                                 </button>
                                             </div>
-                                            <input type="hidden" name="{{ $prefix }}twitter_image" x-ref="twInput" :value="image">
+                                            <input type="hidden" name="{{ $fName('twitter_image') }}" x-ref="twInput" :value="image">
                                             <button type="button" @click="$dispatch('open-media-picker', { value: $refs.twInput })"
                                                     class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border-2 border-dashed border-gray-300 text-gray-700 text-xs font-medium hover:border-rj-purple hover:bg-rj-purple/5 transition">
                                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
@@ -867,10 +870,14 @@ function postEditor() {
                 const data = await res.json();
 
                 if (data.success) {
-                    const prefix = this.activeLocale === '{{ $baseLocale }}' ? '' : `translations[${this.activeLocale}].`;
-                    const titleEl = document.querySelector(`[name="${prefix}seo_title"]`);
-                    const descEl = document.querySelector(`[name="${prefix}seo_description"]`);
-                    const kwEl = document.querySelector(`[name="${prefix}focus_keyword"]`);
+                    const isBase = this.activeLocale === '{{ $baseLocale }}';
+                    const titleName = isBase ? 'seo_title' : `translations[${this.activeLocale}][seo_title]`;
+                    const descName  = isBase ? 'seo_description' : `translations[${this.activeLocale}][seo_description]`;
+                    const kwName    = isBase ? 'focus_keyword' : `translations[${this.activeLocale}][focus_keyword]`;
+
+                    const titleEl = document.querySelector(`[name="${titleName}"]`);
+                    const descEl  = document.querySelector(`[name="${descName}"]`);
+                    const kwEl    = document.querySelector(`[name="${kwName}"]`);
 
                     if (titleEl) {
                         titleEl.value = data.seo_title;
