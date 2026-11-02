@@ -38,7 +38,7 @@ class PostService
         $baseSlug = $this->uniqueSlugForLocale(
             $this->pickSlugInput($data['slug'] ?? null, $title),
             $type,
-            config('app.locale')
+            config('app.base_locale', config('app.locale'))
         );
 
         $post = Post::create([
@@ -75,7 +75,7 @@ class PostService
         $baseSlug = $this->uniqueSlugForLocale(
             $this->pickSlugInput($data['slug'] ?? null, $title),
             $post->type,
-            config('app.locale'),
+            config('app.base_locale', config('app.locale')),
             $post->id
         );
 
@@ -129,7 +129,7 @@ class PostService
     {
         $copy = $post->replicate(['slug', 'view_count']);
         $copy->title = $post->title . ' (Copy)';
-        $copy->slug = $this->uniqueSlugForLocale($copy->title, $post->type, config('app.locale'));
+        $copy->slug = $this->uniqueSlugForLocale($copy->title, $post->type, config('app.base_locale', config('app.locale')));
         $copy->status = 'draft';
         $copy->published_at = null;
         $copy->view_count = 0;
@@ -226,7 +226,7 @@ class PostService
         $candidate = $base;
         $i = 1;
 
-        $isBase = $locale === config('app.locale');
+        $isBase = $locale === config('app.base_locale', config('app.locale'));
 
         while (
             ($isBase && Post::query()
@@ -339,7 +339,7 @@ class PostService
 
     protected function collectTranslations(array $data): array
     {
-        $base = config('app.locale');
+        $base = config('app.base_locale', config('app.locale'));
         $locales = rj_frontend_locales();
 
         $translations = $data['translations'] ?? [];
@@ -382,7 +382,7 @@ class PostService
 
     protected function syncTranslations(Post $post, array $translations, ?string $previousBaseSlug = null): void
     {
-        $base = config('app.locale');
+        $base = config('app.base_locale', config('app.locale'));
         $baseEntry = $translations[$base] ?? [];
 
         if ($previousBaseSlug === null) {
