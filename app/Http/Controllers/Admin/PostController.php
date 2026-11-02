@@ -86,7 +86,7 @@ class PostController extends Controller
         $templates = Template::where('type', 'page')->published()->orderBy('name')->get();
 
         $locales = rj_frontend_locales();
-        $baseLocale = env('APP_LOCALE', 'en');
+        $baseLocale = config('app.base_locale');
         $themeTemplates = $this->resolveThemeTemplates();
 
         return view('admin.posts.create', compact('post', 'type', 'categories', 'tags', 'templates', 'locales', 'baseLocale', 'themeTemplates'));
@@ -141,7 +141,7 @@ class PostController extends Controller
         $templates = Template::where('type', 'page')->published()->orderBy('name')->get();
 
         $locales = rj_frontend_locales();
-        $baseLocale = env('APP_LOCALE', 'en');
+        $baseLocale = config('app.base_locale');
         $themeTemplates = $this->resolveThemeTemplates();
 
         return view('admin.posts.edit', compact('post', 'categories', 'tags', 'templates', 'locales', 'baseLocale', 'themeTemplates'));
@@ -258,8 +258,18 @@ class PostController extends Controller
         }
 
         $locales = rj_frontend_locales();
-        $baseLocale = env('APP_LOCALE', 'en');
+        $baseLocale = config('app.base_locale');
         $defaultLocale = in_array($baseLocale, $locales) ? $baseLocale : ($locales[0] ?? $baseLocale);
+
+        $translatedBlocks = [];
+        foreach ($post->translations as $t) {
+            if (!empty($t->blocks)) {
+                $translatedBlocks[$t->locale] = $t->blocks;
+            }
+        }
+
+        $rawBlocks = $post->getRawOriginal('blocks');
+        $baseBlocks = is_string($rawBlocks) ? json_decode($rawBlocks, true) : ($rawBlocks ?? []);
 
         $builder = [
             'entityType' => 'post',
@@ -269,7 +279,8 @@ class PostController extends Controller
             'name' => $post->title ?: __('Untitled'),
             'subtitle' => $post->typeLabel(),
             'templateType' => 'page',
-            'blocks' => $post->blocks['blocks'] ?? [],
+            'blocks' => $baseBlocks,
+            'translations' => $translatedBlocks,
             'updateUrl' => route('admin.posts.blocks', $post),
             'backUrl' => route('admin.posts.edit', $post),
             'viewUrl' => $viewUrl,
@@ -288,12 +299,24 @@ class PostController extends Controller
         $validated = $request->validate([
             'content' => 'required|array',
             'content.blocks' => 'present|array',
+            'locale' => 'nullable|string'
         ]);
 
-        $post->update([
-            'blocks' => $validated['content'],
-            'edit_mode' => 'builder',
-        ]);
+        $locale = $request->input('locale', config('app.base_locale'));
+        $content = $validated['content'];
+
+        if ($locale === config('app.base_locale')) {
+            $post->update([
+                'blocks' => $content,
+                'edit_mode' => 'builder',
+            ]);
+        } else {
+            $translation = $post->translations()->firstOrNew(['locale' => $locale]);
+            $translation->blocks = $content;
+            $translation->save();
+
+            $post->update(['edit_mode' => 'builder']);
+        }
 
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([
@@ -352,8 +375,8 @@ class PostController extends Controller
         $locale = $request->input('locale', app()->getLocale());
         $translation = $post->translations->firstWhere('locale', $locale);
 
-        $seoTitle = $translation?->seo_title ?? ($locale === env('APP_LOCALE', 'en') ? $post->getRawOriginal('title') : '');
-        $seoDescription = $translation?->seo_description ?? ($locale === env('APP_LOCALE', 'en') ? $post->getRawOriginal('excerpt') : '');
+        $seoTitle = $translation?->seo_title ?? ($locale === config('app.base_locale') ? $post->getRawOriginal('title') : '');
+        $seoDescription = $translation?->seo_description ?? ($locale === config('app.base_locale') ? $post->getRawOriginal('excerpt') : '');
         $focusKeyword = $translation?->focus_keyword;
         $content = $this->resolvePostContent($post, $locale);
 
@@ -456,7 +479,7 @@ class PostController extends Controller
         $locale = $request->input('locale', app()->getLocale());
         $translation = $post->translations->firstWhere('locale', $locale);
 
-        $title = $locale === env('APP_LOCALE', 'en')
+        $title = $locale === config('app.base_locale')
             ? $post->getRawOriginal('title')
             : ($translation?->title ?? '');
 
@@ -487,7 +510,7 @@ class PostController extends Controller
         $content = $this->resolvePostContent($post, $locale);
 
         $translation = $post->translations->firstWhere('locale', $locale);
-        $title = $locale === env('APP_LOCALE', 'en')
+        $title = $locale === config('app.base_locale')
             ? $post->getRawOriginal('title')
             : ($translation?->title ?? '');
 
@@ -502,7 +525,7 @@ class PostController extends Controller
         $content = $this->resolvePostContent($post, $locale);
 
         $translation = $post->translations->firstWhere('locale', $locale);
-        $title = $locale === env('APP_LOCALE', 'en')
+        $title = $locale === config('app.base_locale')
             ? $post->getRawOriginal('title')
             : ($translation?->title ?? '');
 
@@ -515,7 +538,7 @@ class PostController extends Controller
     {
         $translation = $post->translations->firstWhere('locale', $locale);
 
-        $content = $locale === env('APP_LOCALE', 'en')
+        $content = $locale === config('app.base_locale')
             ? (string) $post->getRawOriginal('content')
             : (string) ($translation?->content ?? '');
 
@@ -579,7 +602,7 @@ class PostController extends Controller
         ];
 
         $locales = rj_frontend_locales();
-        $baseLocale = env('APP_LOCALE', 'en');
+        $baseLocale = config('app.base_locale');
 
         foreach ($locales as $locale) {
             if ($locale !== $baseLocale) {
