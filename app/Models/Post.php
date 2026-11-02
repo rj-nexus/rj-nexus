@@ -108,34 +108,67 @@ class Post extends Model
         $locale = $locale ?: app()->getLocale();
         $base = config('app.locale');
 
-        if ($this->relationLoaded('translations') || $this->translations()->exists()) {
-            $translation = $this->translations->firstWhere('locale', $locale);
-            if ($translation && !empty($translation->slug)) {
-                return $translation->slug;
-            }
+        $loaded = $this->relationLoaded('translations');
+        if (!$loaded && !$this->translations()->exists()) {
+            return $locale === $base ? (string) ($this->attributes['slug'] ?? '') : '';
+        }
 
-            if ($locale !== $base) {
-                $baseTranslation = $this->translations->firstWhere('locale', $base);
-                if ($baseTranslation && !empty($baseTranslation->slug)) {
-                    return $baseTranslation->slug;
-                }
+        $translations = $loaded ? $this->translations : $this->translations()->get();
+
+        $translation = $translations->firstWhere('locale', $locale);
+
+        if ($translation && !empty($translation->slug)) {
+            return $translation->slug;
+        }
+
+        if ($translation && !empty($translation->title)) {
+            $auto = Str::slug($translation->title);
+            if ($auto === '') {
+                $auto = $this->rawUnicodeSlug($translation->title);
+            }
+            if ($auto !== '') {
+                return $auto;
             }
         }
 
-        return (string) ($this->attributes['slug'] ?? '');
+        if ($locale === $base) {
+            $baseTranslation = $translations->firstWhere('locale', $base);
+            if ($baseTranslation && !empty($baseTranslation->slug)) {
+                return $baseTranslation->slug;
+            }
+            return (string) ($this->attributes['slug'] ?? '');
+        }
+
+        return '';
+    }
+
+    protected function rawUnicodeSlug(string $text): string
+    {
+        $text = mb_strtolower(trim($text), 'UTF-8');
+        $text = preg_replace('/\s+/u', '-', $text);
+        $text = preg_replace('/[^\p{L}\p{N}\-]+/u', '', $text);
+        $text = preg_replace('/-+/', '-', $text);
+        return trim($text, '-');
     }
 
     public function getTitleAttribute($value): string
     {
-        if ($this->relationLoaded('translations') || $this->translations()->exists()) {
+        $hasTranslations = $this->relationLoaded('translations') || $this->translations()->exists();
+
+        if ($hasTranslations) {
+            $translations = $this->relationLoaded('translations') ? $this->translations : $this->translations()->get();
             $locale = app()->getLocale();
             $base = config('app.locale');
 
-            if ($locale !== $base) {
-                $translation = $this->translations->firstWhere('locale', $locale);
+            $translation = $translations->firstWhere('locale', $locale);
+            if ($translation && !empty($translation->title)) {
+                return $translation->title;
+            }
 
-                if ($translation && !empty($translation->title)) {
-                    return $translation->title;
+            if ($locale !== $base) {
+                $baseTranslation = $translations->firstWhere('locale', $base);
+                if ($baseTranslation && !empty($baseTranslation->title)) {
+                    return $baseTranslation->title;
                 }
             }
         }
@@ -145,14 +178,23 @@ class Post extends Model
 
     public function getContentAttribute($value): ?string
     {
-        $locale = app()->getLocale();
-        $base = config('app.locale');
+        $hasTranslations = $this->relationLoaded('translations') || $this->translations()->exists();
 
-        if ($locale !== $base) {
-            $translation = $this->translations->firstWhere('locale', $locale);
+        if ($hasTranslations) {
+            $translations = $this->relationLoaded('translations') ? $this->translations : $this->translations()->get();
+            $locale = app()->getLocale();
+            $base = config('app.locale');
 
+            $translation = $translations->firstWhere('locale', $locale);
             if ($translation && !empty($translation->content)) {
                 return $translation->content;
+            }
+
+            if ($locale !== $base) {
+                $baseTranslation = $translations->firstWhere('locale', $base);
+                if ($baseTranslation && !empty($baseTranslation->content)) {
+                    return $baseTranslation->content;
+                }
             }
         }
 
@@ -161,14 +203,23 @@ class Post extends Model
 
     public function getExcerptAttribute($value): ?string
     {
-        $locale = app()->getLocale();
-        $base = config('app.locale');
+        $hasTranslations = $this->relationLoaded('translations') || $this->translations()->exists();
 
-        if ($locale !== $base) {
-            $translation = $this->translations->firstWhere('locale', $locale);
+        if ($hasTranslations) {
+            $translations = $this->relationLoaded('translations') ? $this->translations : $this->translations()->get();
+            $locale = app()->getLocale();
+            $base = config('app.locale');
 
+            $translation = $translations->firstWhere('locale', $locale);
             if ($translation && !empty($translation->excerpt)) {
                 return $translation->excerpt;
+            }
+
+            if ($locale !== $base) {
+                $baseTranslation = $translations->firstWhere('locale', $base);
+                if ($baseTranslation && !empty($baseTranslation->excerpt)) {
+                    return $baseTranslation->excerpt;
+                }
             }
         }
 
@@ -188,18 +239,27 @@ class Post extends Model
         $locale = $locale ?: app()->getLocale();
         $base = config('app.locale');
 
-        if ($locale !== $base) {
-            $translation = $this->translations->firstWhere('locale', $locale);
-
-            if ($translation && !empty($translation->{$field})) {
-                return $translation->{$field};
-            }
+        if (!$this->relationLoaded('translations') && !$this->translations()->exists()) {
+            return null;
         }
 
-        $baseTranslation = $this->translations->firstWhere('locale', $base);
+        $translations = $this->relationLoaded('translations') ? $this->translations : $this->translations()->get();
 
-        if ($baseTranslation && !empty($baseTranslation->{$field})) {
-            return $baseTranslation->{$field};
+        $translation = $translations->firstWhere('locale', $locale);
+        if ($translation && !empty($translation->{$field})) {
+            return $translation->{$field};
+        }
+
+        if ($locale !== $base) {
+            $baseTranslation = $translations->firstWhere('locale', $base);
+            if ($baseTranslation && !empty($baseTranslation->{$field})) {
+                return $baseTranslation->{$field};
+            }
+        } else {
+            $baseTranslation = $translations->firstWhere('locale', $base);
+            if ($baseTranslation && !empty($baseTranslation->{$field})) {
+                return $baseTranslation->{$field};
+            }
         }
 
         return null;
@@ -316,7 +376,7 @@ class Post extends Model
             return $canonical;
         }
 
-        if ($this->status !== 'published' || !$this->localizedSlug()) {
+        if ($this->status !== 'published') {
             return null;
         }
 
@@ -356,19 +416,29 @@ class Post extends Model
         return !empty($this->meta['is_front']);
     }
 
-    public function getPublicUrlAttribute(): string
+    public function getPublicUrlAttribute(): ?string
     {
-        $slug = $this->localizedSlug();
+        $locale = app()->getLocale();
+        $slug = $this->localizedSlug($locale);
+
+        if ($slug === '') {
+            $base = config('app.locale');
+            $slug = $this->localizedSlug($base);
+            if ($slug === '') {
+                return null;
+            }
+            $locale = $base;
+        }
 
         if ($this->type === 'page') {
             if ($this->isFrontPage()) {
-                return url('/');
+                return url('/' . $locale);
             }
 
-            return url('/' . $slug);
+            return url('/' . $locale . '/' . $slug);
         }
 
-        return url('/blog/' . $slug);
+        return url('/' . $locale . '/blog/' . $slug);
     }
 
     public function getTranslation(string $locale): ?PostTranslation
