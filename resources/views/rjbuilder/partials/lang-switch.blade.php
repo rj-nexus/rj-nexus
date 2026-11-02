@@ -1,7 +1,7 @@
 @once
 <style>
-.rj-lang{position:relative;display:inline-block}
-.rj-lang-btn{display:flex;align-items:center;gap:8px;height:34px;padding:0 10px 0 6px;border-radius:999px;border:1.5px solid transparent;background:linear-gradient(#1c1d22,#1c1d22) padding-box,linear-gradient(135deg,#8b5cf6,#ec4899) border-box;color:#fff;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:box-shadow .2s,transform .15s}
+.rj-lang{position:relative;display:flex;align-items:center;align-self:center;margin:0}
+.rj-lang-btn{box-sizing:border-box;margin:0;display:flex;align-items:center;gap:8px;height:34px;padding:0 10px 0 6px;border-radius:999px;border:1.5px solid transparent;background:linear-gradient(#1c1d22,#1c1d22) padding-box,linear-gradient(135deg,#8b5cf6,#ec4899) border-box;color:#fff;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:box-shadow .2s,transform .15s}
 .rj-lang-btn:hover{box-shadow:0 0 0 3px rgba(139,92,246,.28);transform:translateY(-1px)}
 .rj-lang-btn[data-open="true"]{box-shadow:0 0 0 3px rgba(139,92,246,.35)}
 .rj-lang-globe{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#8b5cf6,#ec4899);display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -23,7 +23,12 @@
 </style>
 @endonce
 
+@if(($align ?? 'right') === 'left')
+<div class="rj-sep" x-show="templateType === 'page' && locales.length > 1" x-cloak></div>
+@endif
+
 <div class="rj-lang {{ ($align ?? 'right') === 'left' ? 'rj-lang--left' : '' }}"
+     x-show="templateType === 'page' && locales.length > 1" x-cloak
      x-data="{
         open: false,
         name(l) { try { return new Intl.DisplayNames([l], { type: 'language' }).of(l); } catch (e) { return l; } },

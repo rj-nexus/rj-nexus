@@ -125,10 +125,7 @@
                 <svg fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 2l1.09 3.26L16 6.27l-2.91.97L12 10.5l-1.09-3.26L8 6.27l2.91-1.01L12 2z"/><path d="M19 15l.71 2.13L22 17.7l-2.29.71L19 20.5l-.71-2.09L16 17.7l2.29-.57L19 15z"/><path d="M5 14l.71 2.13L8 16.7l-2.29.71L5 19.5l-.71-2.09L2 16.7l2.29-.57L5 14z"/></svg>
             </button>
 
-            <div x-show="templateType === 'page' && locales.length > 1" x-cloak style="display:flex; align-items:center; gap:8px;">
-                <div class="rj-sep"></div>
-                @include('rjbuilder.partials.lang-switch', ['align' => 'left'])
-            </div>
+            @include('rjbuilder.partials.lang-switch', ['align' => 'left'])
         </div>
 
         <div class="rj-grp" style="justify-content:center; gap:14px;">
