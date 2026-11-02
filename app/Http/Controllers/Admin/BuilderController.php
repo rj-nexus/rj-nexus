@@ -93,6 +93,10 @@ class BuilderController extends Controller
 
     public function build(Template $template)
     {
+        $locales = $template->type === 'page' ? rj_frontend_locales() : [];
+        $baseLocale = config('app.locale');
+        $defaultLocale = in_array($baseLocale, $locales) ? $baseLocale : ($locales[0] ?? $baseLocale);
+
         $builder = [
             'entityType' => 'template',
             'entityId' => $template->id,
@@ -106,8 +110,9 @@ class BuilderController extends Controller
             'backUrl' => route('admin.rjbuilder.edit', $template),
             'previewUrl' => route('frontend.preview', $template),
             'status' => $template->status,
-            'locales' => $template->type === 'page' ? rj_frontend_locales() : [],
-            'baseLocale' => config('app.locale'),
+            'locales' => $locales,
+            'baseLocale' => $baseLocale,
+            'defaultLocale' => $defaultLocale,
         ];
 
         return view('rjbuilder.edit', compact('builder'));

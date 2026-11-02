@@ -17,6 +17,10 @@ function builderFields() {
             creatingNewCat: null
         },
 
+        getLocalizedKey(name) {
+            return this.activeLocale === this.baseLocale ? name : name + '__' + this.activeLocale;
+        },
+
         openIconPicker(fieldName) {
             this.iconTargetField = fieldName;
             this.iconSearch = '';
@@ -117,7 +121,8 @@ function builderFields() {
         },
 
         addRepeaterItem(field) {
-            const cur = [...(this.currentSettings[field.name] || [])];
+            const key = this.getLocalizedKey(field.name);
+            const cur = [...(this.currentSettings[key] || [])];
             const empty = {};
             (field.fields || []).forEach(f => { empty[f.name] = ''; });
             cur.push(empty);
@@ -134,7 +139,8 @@ function builderFields() {
         },
 
         openRepeaterItem(field, idx) {
-            const cur = this.currentSettings[field.name] || [];
+            const key = this.getLocalizedKey(field.name);
+            const cur = this.currentSettings[key] || this.currentSettings[field.name] || [];
             if (!cur[idx]) return;
             this.repeaterEdit = {
                 open: true,
@@ -148,7 +154,8 @@ function builderFields() {
         },
 
         removeRepeaterItem(field, idx) {
-            const cur = [...(this.currentSettings[field.name] || [])];
+            const key = this.getLocalizedKey(field.name);
+            const cur = [...(this.currentSettings[key] || this.currentSettings[field.name] || [])];
             cur.splice(idx, 1);
             this.updateSetting(field.name, cur);
             if (this.repeaterEdit.open && this.repeaterEdit.field && this.repeaterEdit.field.name === field.name && this.repeaterEdit.index === idx) {
@@ -159,7 +166,8 @@ function builderFields() {
         setRepeaterField(name, value) {
             if (!this.repeaterEdit.open || !this.repeaterEdit.field) return;
             const fieldName = this.repeaterEdit.field.name;
-            const cur = [...(this.currentSettings[fieldName] || [])];
+            const key = this.getLocalizedKey(fieldName);
+            const cur = [...(this.currentSettings[key] || this.currentSettings[fieldName] || [])];
             if (!cur[this.repeaterEdit.index]) return;
             cur[this.repeaterEdit.index] = Object.assign({}, cur[this.repeaterEdit.index], { [name]: value });
             this.repeaterEdit.item = cur[this.repeaterEdit.index];
@@ -178,7 +186,8 @@ function builderFields() {
             this.setRepeaterField(sub.name, val);
 
             if (sub.source) {
-                let currentList = (this.currentSettings[sub.source] || '')
+                const sourceKey = this.getLocalizedKey(sub.source);
+                let currentList = (this.currentSettings[sourceKey] || this.currentSettings[sub.source] || '')
                     .split(',')
                     .map(s => s.trim())
                     .filter(Boolean);
