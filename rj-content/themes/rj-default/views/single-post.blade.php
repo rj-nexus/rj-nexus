@@ -343,7 +343,7 @@
     @endif
 
     <article class="rj-post-body">
-        @if($post->hasBlocks())
+        @if($post->isBuilderMode() && $post->hasBlocks())
             {!! rj_render_blocks($post->blocks['blocks'] ?? []) !!}
         @elseif($post->content)
             {!! $post->content !!}
