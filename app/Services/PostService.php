@@ -4,10 +4,12 @@ namespace App\Services;
 
 use App\Models\Category;
 use App\Models\Post;
+use App\Models\PostTranslation;
 use App\Models\PostType;
 use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 
 class PostService
 {
@@ -33,9 +35,15 @@ class PostService
         $type = $data['type'] ?? 'post';
         $title = $data['title'] ?? '';
 
+        $baseSlug = $this->uniqueSlugForLocale(
+            $data['slug'] ?? $title,
+            $type,
+            config('app.locale')
+        );
+
         $post = Post::create([
             'title' => $title,
-            'slug' => $this->uniqueSlug($data['slug'] ?? $title, null, $type),
+            'slug' => $baseSlug,
             'content' => $data['content'] ?? '',
             'edit_mode' => $data['edit_mode'] ?? 'classic',
             'theme_template' => $data['theme_template'] ?? null,
@@ -63,9 +71,16 @@ class PostService
     {
         $title = $data['title'] ?? $post->title;
 
+        $baseSlug = $this->uniqueSlugForLocale(
+            $data['slug'] ?? $title,
+            $post->type,
+            config('app.locale'),
+            $post->id
+        );
+
         $payload = [
             'title' => $title,
-            'slug' => $this->uniqueSlug($data['slug'] ?? $title, $post->id, $post->type),
+            'slug' => $baseSlug,
             'content' => $data['content'] ?? $post->content,
             'excerpt' => $data['excerpt'] ?? null,
             'featured_image' => $data['featured_image'] ?? null,
@@ -113,7 +128,7 @@ class PostService
     {
         $copy = $post->replicate(['slug', 'view_count']);
         $copy->title = $post->title . ' (Copy)';
-        $copy->slug = $this->uniqueSlug($copy->title, null, $post->type);
+        $copy->slug = $this->uniqueSlugForLocale($copy->title, $post->type, config('app.locale'));
         $copy->status = 'draft';
         $copy->published_at = null;
         $copy->view_count = 0;
@@ -124,26 +139,35 @@ class PostService
         $copy->tags()->sync($post->tags()->pluck('id')->toArray());
 
         foreach ($post->translations as $t) {
-            $copy->translations()->create($t->only([
-                'locale',
-                'title',
-                'content',
-                'excerpt',
-                'seo_title',
-                'seo_description',
-                'seo_image',
-                'focus_keyword',
-                'canonical_url',
-                'og_title',
-                'og_description',
-                'og_image',
-                'twitter_card',
-                'twitter_title',
-                'twitter_description',
-                'twitter_image',
-                'robots',
-                'schema_type',
-            ]));
+            $newSlug = $this->uniqueSlugForLocale(
+                $t->slug ?: $copy->title,
+                $post->type,
+                $t->locale
+            );
+
+            $copy->translations()->create(array_merge(
+                $t->only([
+                    'locale',
+                    'title',
+                    'content',
+                    'excerpt',
+                    'seo_title',
+                    'seo_description',
+                    'seo_image',
+                    'focus_keyword',
+                    'canonical_url',
+                    'og_title',
+                    'og_description',
+                    'og_image',
+                    'twitter_card',
+                    'twitter_title',
+                    'twitter_description',
+                    'twitter_image',
+                    'robots',
+                    'schema_type',
+                ]),
+                ['slug' => $newSlug]
+            ));
         }
 
         return $copy;
@@ -195,17 +219,25 @@ class PostService
         };
     }
 
-    public function uniqueSlug(string $slug, ?int $ignoreId = null, string $type = 'post'): string
+    public function uniqueSlugForLocale(string $slug, string $type, string $locale, ?int $ignoreId = null): string
     {
-        $base = \Illuminate\Support\Str::slug($slug) ?: 'post';
+        $base = Str::slug($slug) ?: 'post';
         $candidate = $base;
         $i = 1;
 
+        $isBase = $locale === config('app.locale');
+
         while (
-            Post::query()
+            ($isBase && Post::query()
                 ->where('slug', $candidate)
                 ->where('type', $type)
                 ->when($ignoreId, fn($q) => $q->where('id', '!=', $ignoreId))
+                ->exists())
+            ||
+            PostTranslation::query()
+                ->where('slug', $candidate)
+                ->where('locale', $locale)
+                ->when($ignoreId, fn($q) => $q->where('post_id', '!=', $ignoreId))
                 ->exists()
         ) {
             $candidate = $base . '-' . $i;
@@ -258,7 +290,7 @@ class PostService
             }
 
             if (is_string($item) && $item !== '') {
-                $slug = \Illuminate\Support\Str::slug($item);
+                $slug = Str::slug($item);
                 $existing = $modelClass::query()->where('slug', $slug)->first();
 
                 if (!$existing && $modelClass === Tag::class) {
@@ -298,11 +330,16 @@ class PostService
                 $entry['title'] = $data['title'] ?? null;
                 $entry['content'] = $data['content'] ?? null;
                 $entry['excerpt'] = $data['excerpt'] ?? null;
+                $entry['slug'] = $data['slug'] ?? null;
+            }
+
+            if (empty($entry['slug']) && !empty($entry['title'])) {
+                $entry['slug'] = Str::slug($entry['title']);
             }
 
             $hasAny = false;
 
-            foreach (array_merge(['title', 'content', 'excerpt'], $this->seoFields) as $field) {
+            foreach (array_merge(['title', 'content', 'excerpt', 'slug'], $this->seoFields) as $field) {
                 if (!empty($entry[$field])) {
                     $hasAny = true;
                     break;
@@ -339,6 +376,24 @@ class PostService
                     }
 
                     $payload[$field] = $value === '' ? null : $value;
+                }
+            }
+
+            if (array_key_exists('slug', $data)) {
+                $rawSlug = trim((string) $data['slug']);
+                if ($rawSlug === '' && !empty($data['title'])) {
+                    $rawSlug = Str::slug($data['title']);
+                }
+
+                if ($rawSlug !== '') {
+                    $payload['slug'] = $this->uniqueSlugForLocale(
+                        $rawSlug,
+                        $post->type,
+                        $locale,
+                        $post->id
+                    );
+                } else {
+                    $payload['slug'] = null;
                 }
             }
 
