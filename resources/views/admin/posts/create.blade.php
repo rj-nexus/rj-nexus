@@ -202,6 +202,7 @@
                                            name="{{ $locale === $baseLocale ? 'slug' : "translations[{$locale}][slug]" }}"
                                            value="{{ old($locale === $baseLocale ? 'slug' : "translations.{$locale}.slug") }}"
                                            placeholder="{{ __('auto-generated from title') }}"
+                                           onblur="this.value = this.value.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^\p{L}\p{N}\-_]+/gu, '').replace(/-+/g, '-').replace(/^-|-$/g, '')"
                                            class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm font-mono lowercase">
                                     @error($locale === $baseLocale ? 'slug' : "translations.{$locale}.slug")
                                         <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
