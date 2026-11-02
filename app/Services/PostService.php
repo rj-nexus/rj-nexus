@@ -309,7 +309,7 @@ class PostService
     protected function collectTranslations(array $data): array
     {
         $base = config('app.locale');
-        $locales = rj_available_locales();
+        $locales = rj_frontend_locales();
 
         $translations = $data['translations'] ?? [];
 
@@ -337,19 +337,6 @@ class PostService
                 $entry['slug'] = Str::slug($entry['title']);
             }
 
-            $hasAny = false;
-
-            foreach (array_merge(['title', 'content', 'excerpt', 'slug'], $this->seoFields) as $field) {
-                if (!empty($entry[$field])) {
-                    $hasAny = true;
-                    break;
-                }
-            }
-
-            if (!$hasAny && $locale !== $base) {
-                continue;
-            }
-
             $out[$locale] = $entry;
         }
 
@@ -359,6 +346,13 @@ class PostService
     protected function syncTranslations(Post $post, array $translations): void
     {
         $base = config('app.locale');
+        $previousBaseSlug = $post->getOriginal('slug');
+
+        $baseEntry = $translations[$base] ?? [];
+
+        if (empty($baseEntry['slug']) && !empty($baseEntry['title'])) {
+            $baseEntry['slug'] = Str::slug($baseEntry['title']);
+        }
 
         foreach ($translations as $locale => $data) {
             if (!is_string($locale) || !is_array($data)) {
@@ -379,15 +373,55 @@ class PostService
                 }
             }
 
-            if (array_key_exists('slug', $data)) {
-                $rawSlug = trim((string) $data['slug']);
-                if ($rawSlug === '' && !empty($data['title'])) {
-                    $rawSlug = Str::slug($data['title']);
+            if ($locale !== $base) {
+                foreach (array_merge(['title', 'content', 'excerpt'], $this->seoFields) as $field) {
+                    if (empty($payload[$field] ?? null) && !empty($baseEntry[$field])) {
+                        $payload[$field] = $baseEntry[$field];
+                    }
                 }
+            }
+
+            $rawSlug = trim((string) ($data['slug'] ?? ''));
+
+            if ($rawSlug === '' && !empty($data['title'])) {
+                $rawSlug = Str::slug($data['title']);
+            }
+
+            if ($locale === $base) {
+                if ($rawSlug !== '') {
+                    $payload['slug'] = $this->uniqueSlugForLocale(
+                        $rawSlug,
+                        $post->type,
+                        $locale,
+                        $post->id
+                    );
+                } else {
+                    $payload['slug'] = $previousBaseSlug;
+                }
+
+                if (empty($payload['title']) && !empty($post->getRawOriginal('title'))) {
+                    $payload['title'] = $post->getRawOriginal('title');
+                }
+
+                if (empty($payload['content']) && !empty($post->getRawOriginal('content'))) {
+                    $payload['content'] = $post->getRawOriginal('content');
+                }
+            } else {
+                $existingTranslation = $post->translations->firstWhere('locale', $locale);
+                $existingSlug = $existingTranslation?->slug;
 
                 if ($rawSlug !== '') {
                     $payload['slug'] = $this->uniqueSlugForLocale(
                         $rawSlug,
+                        $post->type,
+                        $locale,
+                        $post->id
+                    );
+                } elseif ($existingSlug !== null && $existingSlug !== '' && $existingSlug !== $previousBaseSlug) {
+                    $payload['slug'] = $existingSlug;
+                } elseif (!empty($baseEntry['slug'])) {
+                    $payload['slug'] = $this->uniqueSlugForLocale(
+                        $baseEntry['slug'],
                         $post->type,
                         $locale,
                         $post->id
@@ -397,30 +431,7 @@ class PostService
                 }
             }
 
-            if ($locale === $base) {
-                if (array_key_exists('title', $data) && empty($data['title'])) {
-                    $payload['title'] = $post->getRawOriginal('title');
-                }
-
-                if (array_key_exists('content', $data) && empty($data['content'])) {
-                    $payload['content'] = $post->getRawOriginal('content');
-                }
-            }
-
             if (empty($payload)) {
-                continue;
-            }
-
-            $hasContent = false;
-
-            foreach (['title', 'content', 'excerpt'] as $field) {
-                if (!empty($payload[$field])) {
-                    $hasContent = true;
-                    break;
-                }
-            }
-
-            if (!$hasContent && $locale !== $base) {
                 continue;
             }
 
