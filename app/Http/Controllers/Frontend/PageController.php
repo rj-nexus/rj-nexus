@@ -22,7 +22,6 @@ class PageController extends Controller
     {
         $baseLocale = config('app.locale');
 
-        // 1. Slug-ı istənilən dildə (base daxil olmaqla) tapırıq
         $page = Post::with(['author', 'translations', 'template'])
             ->where('type', 'page')
             ->published()
@@ -34,15 +33,12 @@ class PageController extends Controller
             })
             ->firstOrFail();
 
-        // 2. Tapılan səhifənin cari dildə düzgün slug-ını alırıq
         $correctSlug = $page->localizedSlug($locale);
 
-        // 3. Əgər cari dildə tərcüməsi yoxdursa, 404 veririk
         if ($correctSlug === '') {
             abort(404);
         }
 
-        // 4. Əgər istifadəçi yanlış dildə slug yazıbsa (məs: /az/test-en), düzgününə yönləndiririk
         if ($slug !== $correctSlug) {
             return redirect()->to('/' . $locale . '/' . $correctSlug, 301);
         }
