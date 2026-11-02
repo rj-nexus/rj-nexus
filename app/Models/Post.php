@@ -14,7 +14,11 @@ class Post extends Model
     ];
 
     protected $casts = [
-        'is_sticky' => 'boolean', 'allow_comments' => 'boolean', 'settings' => 'array', 'meta' => 'array', 'published_at' => 'datetime',
+        'is_sticky' => 'boolean',
+        'allow_comments' => 'boolean',
+        'settings' => 'array',
+        'meta' => 'array',
+        'published_at' => 'datetime',
     ];
 
     public function author() { return $this->belongsTo(User::class, 'author_id'); }
@@ -53,9 +57,12 @@ class Post extends Model
         $base = config('app.base_locale');
 
         if ($locale !== $base) {
-            $translation = $this->translations->firstWhere('locale', $locale);
+            $translation = $this->relationLoaded('translations')
+                ? $this->translations->firstWhere('locale', $locale)
+                : $this->translations()->where('locale', $locale)->first();
+
             if ($translation && !empty($translation->blocks)) {
-                return is_string($translation->blocks) ? json_decode($translation->blocks, true) : $translation->blocks;
+                return $translation->blocks;
             }
         }
 
