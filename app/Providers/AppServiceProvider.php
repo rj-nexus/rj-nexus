@@ -43,6 +43,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        config(['app.base_locale' => config('app.locale')]);
+
         if (!file_exists(storage_path('installed.lock'))) {
             return;
         }
