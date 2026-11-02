@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Auth\AuthenticationException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -33,11 +34,20 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->render(function (\Throwable $e, $request) {
+
+            // BURANI ƏLAVƏ ETDİK: Sessiya bitəndə avtomatik Login-ə yönləndirir
+            if ($e instanceof AuthenticationException) {
+                if ($request->expectsJson()) {
+                    return response()->json(['message' => 'Unauthenticated.'], 401);
+                }
+                return redirect()->guest(route('login'));
+            }
+
+            // Sənin əvvəlki RJ Debug məntiqin
             if (config('app.debug') && !$request->expectsJson()) {
                 $isHttpException = $e instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
                 $statusCode = $isHttpException ? $e->getStatusCode() : 500;
 
-                // Yalnız və yalnız 500 xətası və ya HTTP olmayan daxili xətalar üçün RJ Debug ekranı
                 if (!$isHttpException || $statusCode === 500) {
                     return response()->view('errors.rj-debug', [
                         'exception' => $e,
