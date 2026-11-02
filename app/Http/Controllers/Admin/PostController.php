@@ -581,6 +581,9 @@ class PostController extends Controller
 
         foreach ($locales as $locale) {
             if ($locale !== $baseLocale) {
+                $rules["translations.{$locale}.title"] = 'nullable|string|max:255';
+                $rules["translations.{$locale}.excerpt"] = 'nullable|string';
+                $rules["translations.{$locale}.content"] = 'nullable|string';
                 $rules["translations.{$locale}.slug"] = 'nullable|string|max:255';
             }
 
