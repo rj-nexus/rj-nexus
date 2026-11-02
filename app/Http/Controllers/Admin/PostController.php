@@ -252,15 +252,13 @@ class PostController extends Controller
         $baseLocale = config('app.base_locale');
         $activeLocale = $request->input('locale', $baseLocale);
 
-        $blocks = [];
-        if ($activeLocale === $baseLocale) {
-            $blocks = $post->blocks['blocks'] ?? [];
-        } else {
+        $baseBlocks = $post->blocks['blocks'] ?? [];
+        $activeBlocks = $baseBlocks;
+
+        if ($activeLocale !== $baseLocale) {
             $translation = $post->translations()->where('locale', $activeLocale)->first();
             if ($translation && !empty($translation->blocks['blocks'])) {
-                $blocks = $translation->blocks['blocks'];
-            } else {
-                $blocks = $post->blocks['blocks'] ?? [];
+                $activeBlocks = $translation->blocks['blocks'];
             }
         }
 
@@ -282,7 +280,8 @@ class PostController extends Controller
             'name' => $post->title ?: __('Untitled'),
             'subtitle' => $post->typeLabel(),
             'templateType' => $post->type,
-            'blocks' => $blocks,
+            'baseBlocks' => $baseBlocks,
+            'activeBlocks' => $activeBlocks,
             'updateUrl' => route('admin.posts.blocks', $post),
             'backUrl' => route('admin.posts.edit', $post),
             'viewUrl' => $viewUrl,
