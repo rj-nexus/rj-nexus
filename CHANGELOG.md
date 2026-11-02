@@ -2,6 +2,33 @@
 
 All notable changes to RJ Nexus (formerly RJ CMS) will be documented in this file.
 
+## [v1.7.0] - 2026-11-02 (Altair Series)
+
+This is a major multilingual system overhaul. We introduced per-language slugs for posts and pages, rewrote the translation sync logic to auto-fill missing fields from the base locale, and improved the language UI across the admin panel.
+
+### Added
+- **Per-Language Slugs:** Added `slug` column to `rj_post_translations`. Each language now has its own unique slug (e.g., `/en/about` and `/az/haqqimizda`).
+- **Language-Specific URLs:** Frontend now resolves posts by the translated slug, so URLs are natural in every language.
+- **Localized Language Switcher:** Theme language switcher redirects to the translated post slug when available, instead of prefixing the current URL.
+- **Admin Slug Fields Per Language:** Post create/edit forms now have a dedicated slug input inside each language tab.
+
+### Improved
+- **Auto-Fill from Base Locale (B1):** If a translation is missing `title`, `excerpt`, `content`, or any SEO field, it is automatically populated from the base locale on save. This makes it impossible to end up with empty translations.
+- **Base Slug Sync (B2):** If the base locale slug changes and the translation slug was never manually edited (it matches the old base slug), it is updated automatically. Manual overrides are preserved.
+- **Translation Validation:** Added missing validation rules for `translations.{locale}.title`, `.excerpt`, `.content`, and `.slug`. Previously these fields were stripped by Laravel's `validate()` and never saved.
+- **Locale Consistency:** `PostService::collectTranslations()` now uses `rj_frontend_locales()` instead of `rj_available_locales()`, matching the admin UI and preventing phantom entries for inactive languages.
+
+### Fixed
+- **Post Route Key:** Reverted `getRouteKey()` override to always use the base `slug` in admin routes. Frontend localization is handled in the controller, not the route model binding.
+- **PostService Slug Fallback:** Changed `$data['slug'] ?? $title` to `$data['slug'] ?: $title` so that an empty string submitted by the form correctly falls back to the title.
+- **Language Validation Stripping:** Laravel's `$request->validate()` was silently removing any field not present in the `rules()` array. This caused slugs, translated titles, and translated content to disappear before reaching the database.
+
+### Known Issues
+- **RJBuilder Locale Sync:** Switching the language inside RJBuilder does not re-render the canvas with translated block settings. The JSON `__{locale}` suffix system is partially implemented but not yet consistent across all blocks.
+- **Widget Locale Caching:** Some widget renders (`RJ_WIDGET_CACHE`) may return stale translations until a manual cache clear.
+
+---
+
 ## [v1.6.2] - 2026-11-02 (Altair Series)
 
 This is a hotfix and UX polish update. We resolved critical frontend errors, improved the multi-language UI in the admin panel, and fixed various data import issues during the setup process.
