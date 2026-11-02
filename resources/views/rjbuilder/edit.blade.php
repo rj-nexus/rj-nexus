@@ -124,6 +124,11 @@
             <button type="button" class="rj-ib rj-ai-btn" @click="openAiPanel('generate')" :title="t('AI Assistant')" :disabled="!ai.enabled">
                 <svg fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 2l1.09 3.26L16 6.27l-2.91.97L12 10.5l-1.09-3.26L8 6.27l2.91-1.01L12 2z"/><path d="M19 15l.71 2.13L22 17.7l-2.29.71L19 20.5l-.71-2.09L16 17.7l2.29-.57L19 15z"/><path d="M5 14l.71 2.13L8 16.7l-2.29.71L5 19.5l-.71-2.09L2 16.7l2.29-.57L5 14z"/></svg>
             </button>
+
+            <div x-show="templateType === 'page' && locales.length > 1" x-cloak style="display:flex; align-items:center; gap:8px;">
+                <div class="rj-sep"></div>
+                @include('rjbuilder.partials.lang-switch', ['align' => 'left'])
+            </div>
         </div>
 
         <div class="rj-grp" style="justify-content:center; gap:14px;">
@@ -139,10 +144,6 @@
         </div>
 
         <div class="rj-grp" style="flex:1; justify-content:flex-end; gap:6px;">
-
-            <div x-show="templateType === 'page' && locales.length > 1" x-cloak style="display:flex; align-items:center; margin-right:10px;">
-                @include('rjbuilder.partials.lang-switch')
-            </div>
 
             <button type="button" class="rj-ib" @click="undo()" :disabled="!canUndo" :title="t('Undo') + ' (Ctrl+Z)'">
                 <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>

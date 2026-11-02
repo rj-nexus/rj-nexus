@@ -10,6 +10,7 @@
 .rj-lang-dot{width:7px;height:7px;border-radius:50%;background:#fbbf24;animation:rjlangpulse 1.6s infinite}
 @keyframes rjlangpulse{0%{box-shadow:0 0 0 0 rgba(251,191,36,.6)}70%{box-shadow:0 0 0 7px rgba(251,191,36,0)}100%{box-shadow:0 0 0 0 rgba(251,191,36,0)}}
 .rj-lang-pop{position:absolute;top:calc(100% + 10px);right:0;min-width:230px;background:#1c1d22;border:1px solid #383a43;border-radius:14px;padding:6px;box-shadow:0 20px 44px rgba(0,0,0,.5);z-index:9999}
+.rj-lang--left .rj-lang-pop{left:0;right:auto}
 .rj-lang-title{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#8e919d;padding:8px 10px 6px}
 .rj-lang-item{width:100%;display:flex;align-items:center;gap:10px;padding:8px 10px;border:0;border-radius:10px;background:transparent;color:#d6d8e0;cursor:pointer;text-align:left;transition:background .15s}
 .rj-lang-item:hover{background:rgba(139,92,246,.14)}
@@ -22,7 +23,7 @@
 </style>
 @endonce
 
-<div class="rj-lang"
+<div class="rj-lang {{ ($align ?? 'right') === 'left' ? 'rj-lang--left' : '' }}"
      x-data="{
         open: false,
         name(l) { try { return new Intl.DisplayNames([l], { type: 'language' }).of(l); } catch (e) { return l; } },
@@ -45,7 +46,7 @@
         <svg class="rj-lang-chev" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
     </button>
 
-    <div class="rj-lang-pop" x-show="open" x-cloak x-transition.scale.origin.top.right.duration.150ms>
+    <div class="rj-lang-pop" x-show="open" x-cloak x-transition.scale.origin.top.duration.150ms>
         <div class="rj-lang-title" x-text="t('Edit content in')"></div>
         <template x-for="loc in locales" :key="loc">
             <button type="button" class="rj-lang-item" :data-active="loc === activeLocale" @click="pick(loc)">
