@@ -40,6 +40,18 @@
             .rj-aside.is-open { transform: none; }
         }
 
+        .rj-flag {
+            display: inline-block;
+            flex-shrink: 0;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #e2e8f0;
+            box-shadow: 0 0 0 1px rgba(15, 23, 42, .08), 0 2px 6px -1px rgba(15, 23, 42, .18);
+        }
+        .rj-flag-sm { width: 26px; height: 26px; }
+
         .rj-lang-menu {
             position: absolute;
             inset-inline-end: 0;
@@ -928,9 +940,9 @@
                     <div class="relative" @click.away="langMenu = false">
                         <button @click="toggleLang()" class="flex items-center gap-2 px-2.5 py-2 rounded-lg hover:bg-gray-100 transition text-sm text-gray-600" :class="langMenu ? 'bg-gray-100' : ''" aria-haspopup="listbox" :aria-expanded="langMenu">
                             @if ($currentFlag)
-                                <img src="{{ $currentFlag }}" alt="{{ strtoupper($currentLocale) }}" class="w-5 h-4 object-cover rounded-sm">
+                                <img src="{{ $currentFlag }}" alt="{{ strtoupper($currentLocale) }}" class="rj-flag rj-flag-sm">
                             @else
-                                <svg class="w-4 h-4 opacity-60" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/></svg>
+                                <svg class="w-5 h-5 opacity-60" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/></svg>
                             @endif
                             <span class="uppercase text-xs font-semibold">{{ $currentLocale }}</span>
                             <svg class="w-3.5 h-3.5 opacity-60 transition-transform" :class="langMenu ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
@@ -958,10 +970,10 @@
                                 <template x-for="l in filteredLangs" :key="l.code">
                                     <a :href="l.url" class="rj-lang-it flex items-center gap-3 px-4 py-2 text-sm" :class="l.active ? 'is-on font-semibold text-gray-900' : 'text-gray-700'" role="option" :aria-selected="l.active">
                                         <template x-if="l.flag">
-                                            <img :src="l.flag" :alt="l.code" class="w-5 h-4 object-cover rounded-sm flex-shrink-0">
+                                            <img :src="l.flag" :alt="l.code" class="rj-flag">
                                         </template>
                                         <template x-if="!l.flag">
-                                            <span class="w-5 h-4 rounded-sm bg-gray-200 flex-shrink-0"></span>
+                                            <span class="rj-flag"></span>
                                         </template>
                                         <span class="flex-1 truncate" x-text="l.name"></span>
                                         <span class="uppercase text-[11px] font-medium text-gray-400" x-text="l.code"></span>
