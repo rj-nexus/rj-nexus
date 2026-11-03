@@ -714,6 +714,23 @@
             'ai'      => __('RJ AI Answer'),
         ];
 
+        $flagUrl = function (string $code) {
+            $names = array_values(array_unique(array_filter([
+                $code,
+                strtolower($code),
+                str_replace('_', '-', strtolower($code)),
+                strtolower(preg_split('/[-_]/', $code)[0] ?? ''),
+            ])));
+            foreach ($names as $n) {
+                foreach (['svg', 'webp', 'png', 'jpg', 'jpeg', 'gif', 'avif'] as $e) {
+                    if (file_exists(public_path("images/flags/{$n}.{$e}"))) {
+                        return asset("images/flags/{$n}.{$e}");
+                    }
+                }
+            }
+            return null;
+        };
+
         $currentLocale = app()->getLocale();
         $langList = [];
         foreach (array_values((array) rj_available_locales()) as $loc) {
@@ -728,11 +745,11 @@
                 'code' => $loc,
                 'name' => $name,
                 'url' => route('admin.lang.switch', $loc),
-                'flag' => file_exists(public_path("images/flags/{$loc}.svg")) ? asset("images/flags/{$loc}.svg") : null,
+                'flag' => $flagUrl($loc),
                 'active' => $currentLocale === $loc,
             ];
         }
-        $currentFlag = file_exists(public_path("images/flags/{$currentLocale}.svg")) ? asset("images/flags/{$currentLocale}.svg") : null;
+        $currentFlag = $flagUrl($currentLocale);
 
         $langTexts = [
             'search' => __('Search language...'),
