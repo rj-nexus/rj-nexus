@@ -1,8 +1,13 @@
 @php
-    $cardImage = $post->featured_image ?? $post->thumbnail ?? null;
-    $cardUrl = route('frontend.posts.show', $post->slug ?? $post->id);
+    $cardImage = $post->featured_image ?? null;
+    $cardUrl = $post->public_url ?? '#';
     $cardCategory = $post->categories->first() ?? null;
-    $cardExcerpt = $post->excerpt ?? \Illuminate\Support\Str::limit(strip_tags($post->content ?? ''), 140);
+    $cardExcerpt = $post->excerpt ?? null;
+    $locale = app()->getLocale();
+
+    $catUrl = $cardCategory
+        ? route('frontend.posts.index', ['locale' => $locale, 'term' => $cardCategory->slug, 'taxonomy' => 'category'])
+        : null;
 @endphp
 
 <article class="rj-card">
@@ -15,7 +20,7 @@
             </div>
         @endif
 
-        @if($cardCategory)
+        @if($cardCategory && $catUrl)
             <span class="rj-card-cat">{{ $cardCategory->name ?? '' }}</span>
         @endif
     </a>
@@ -34,9 +39,9 @@
                 </time>
             @endif
 
-            @if($post->reading_time ?? false)
+            @if(optional($post->author)->name)
                 <span class="rj-card-meta-dot"></span>
-                <span>{{ $post->reading_time }} {{ __('min read') }}</span>
+                <span>{{ $post->author->name }}</span>
             @endif
         </div>
     </div>
