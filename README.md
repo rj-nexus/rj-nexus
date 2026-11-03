@@ -201,17 +201,17 @@ RJ CMS installs on any shared hosting or VPS without touching a single line of c
   <tr>
     <td width="50%" align="center">
       <b>Dashboard</b><br/><br/>
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/dashboard.png" alt="Dashboard" width="100%"/>
+      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/dashboard.png" alt="Dashboard" width="100%"/>
     </td>
     <td width="50%" align="center">
       <b>AI Global Search (Ctrl+K)</b><br/><br/>
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/ai-search.png" alt="AI Search" width="100%"/>
+      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/ai-search.png" alt="AI Search" width="100%"/>
     </td>
   </tr>
   <tr>
     <td width="50%" align="center">
       <b>AI Center</b><br/><br/>
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/ai-center.png" alt="AI Center" width="100%"/>
+      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/ai-center.png" alt="AI Center" width="100%"/>
     </td>
     <td width="50%" align="center">
       <b>Settings &rarr; AI</b><br/><br/>
@@ -236,7 +236,7 @@ RJ CMS installs on any shared hosting or VPS without touching a single line of c
   <tr>
     <td width="50%" align="center">
       <b>Media Library</b><br/><br/>
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/media-library-page.png" alt="Media Library" width="100%"/>
+      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/media-library-page.png" alt="Media Library" width="100%"/>
     </td>
     <td width="50%" align="center">
       <b>Theme Selection</b><br/><br/>
@@ -246,21 +246,21 @@ RJ CMS installs on any shared hosting or VPS without touching a single line of c
   <tr>
     <td width="50%" align="center">
       <b>KYC Management</b><br/><br/>
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/kyc-management-page.png" alt="KYC Management" width="100%"/>
+      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/kyc-management-page.png" alt="KYC Management" width="100%"/>
     </td>
     <td width="50%" align="center">
       <b>Backup</b><br/><br/>
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/backup-page.png" alt="Backup" width="100%"/>
+      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/backup-page.png" alt="Backup" width="100%"/>
     </td>
   </tr>
   <tr>
     <td width="50%" align="center">
       <b>Updates</b><br/><br/>
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/update-page.png" alt="Updates" width="100%"/>
+      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/update-page.png" alt="Updates" width="100%"/>
     </td>
     <td width="50%" align="center">
       <b>Account</b><br/><br/>
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/accout-page.png" alt="Account" width="100%"/>
+      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/accout-page.png" alt="Account" width="100%"/>
     </td>
   </tr>
 </table>
@@ -269,15 +269,15 @@ RJ CMS installs on any shared hosting or VPS without touching a single line of c
 
 <table>
   <tr>
-    <td width="50%" align="center"><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/front1.png" alt="Frontend 1" width="100%"/></td>
-    <td width="50%" align="center"><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/front2.png" alt="Frontend 2" width="100%"/></td>
+    <td width="50%" align="center"><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/front1.png" alt="Frontend 1" width="100%"/></td>
+    <td width="50%" align="center"><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/front2.png" alt="Frontend 2" width="100%"/></td>
   </tr>
   <tr>
-    <td width="50%" align="center"><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/front3.png" alt="Frontend 3" width="100%"/></td>
-    <td width="50%" align="center"><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/front4.png" alt="Frontend 4" width="100%"/></td>
+    <td width="50%" align="center"><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/front3.png" alt="Frontend 3" width="100%"/></td>
+    <td width="50%" align="center"><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/front4.png" alt="Frontend 4" width="100%"/></td>
   </tr>
   <tr>
-    <td width="100%" colspan="2" align="center"><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/front5.png" alt="Frontend 5" width="70%"/></td>
+    <td width="100%" colspan="2" align="center"><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/front5.png" alt="Frontend 5" width="70%"/></td>
   </tr>
 </table>
 
@@ -300,7 +300,7 @@ RJ CMS installs on any shared hosting or VPS without touching a single line of c
 
 <table>
   <tr>
-    <td width="33%" align="center"><b>400 Bad Request</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/400-error.png" alt="400" width="100%"/></td>
+    <td width="33%" align="center"><b>400 Bad Request</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/400-error.png" alt="400" width="100%"/></td>
     <td width="33%" align="center"><b>401 Authentication Required</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/12.png" alt="401" width="100%"/></td>
     <td width="33%" align="center"><b>403 Forbidden</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/09.png" alt="403" width="100%"/></td>
   </tr>
@@ -310,7 +310,7 @@ RJ CMS installs on any shared hosting or VPS without touching a single line of c
     <td width="33%" align="center"><b>429 Rate Limit Exceeded</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/13.png" alt="429" width="100%"/></td>
   </tr>
   <tr>
-    <td width="100%" colspan="3" align="center"><b>500 Server Error (Debug Mode)</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/500-error-debug.png" alt="500 Debug" width="60%"/></td>
+    <td width="100%" colspan="3" align="center"><b>500 Server Error (Debug Mode)</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/500-error-debug.png" alt="500 Debug" width="60%"/></td>
   </tr>
 </table>
 
