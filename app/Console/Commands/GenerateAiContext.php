@@ -18,6 +18,8 @@ class GenerateAiContext extends Command
         $sections = [
             'Project Overview' => $this->projectOverview(),
             'Tech Stack' => $this->techStack(),
+            'AI Architecture' => $this->aiArchitecture(),
+            'Languages & Localization' => $this->languages(),
             'Directory Structure' => $this->directoryStructure(),
             'Database Tables' => $this->databaseTables(),
             'Models' => $this->models(),
@@ -31,7 +33,7 @@ class GenerateAiContext extends Command
             'Conventions' => $this->conventions(),
         ];
 
-        $output = "# RJ CMS — AI Context\n";
+        $output = "# RJ Nexus — AI Context\n";
         $output .= "_Generated: " . now()->format('Y-m-d H:i:s') . "_\n\n";
 
         foreach ($sections as $title => $content) {
@@ -57,10 +59,10 @@ class GenerateAiContext extends Command
     protected function projectOverview(): string
     {
         $name = rj_get_option('site_name', config('app.name'));
-        $version = rj_get_option('rj_version', '1.0.0');
+        $version = rj_get_option('rj_version', '1.8.2');
 
-        return "- **Name:** RJ CMS\n"
-            . "- **Version:** {$version}\n"
+        return "- **Name:** RJ Nexus (RJ CMS)\n"
+            . "- **Version:** {$version} (RJ CORE 1 / Altair Series)\n"
             . "- **Type:** Self-hosted CMS (WordPress alternative)\n"
             . "- **Site Name:** {$name}\n"
             . "- **Admin URL:** " . url('/admin') . "\n"
@@ -73,11 +75,31 @@ class GenerateAiContext extends Command
         return "- **Backend:** Laravel " . app()->version() . " (PHP " . PHP_VERSION . ")\n"
             . "- **Frontend:** Blade + Tailwind CSS v3\n"
             . "- **JS:** Alpine.js\n"
+            . "- **Build Tool:** Vite\n"
             . "- **Database:** " . config('database.default') . " (" . config('database.connections.mysql.database') . ")\n"
-            . "- **Auth:** Laravel Breeze (Blade)\n"
+            . "- **Auth:** Laravel Breeze (Blade) + 2FA\n"
             . "- **Prefix:** `rj_` (tables, functions, routes, constants)\n"
             . "- **Timezone:** " . config('app.timezone') . "\n"
             . "- **Locale:** " . config('app.locale') . "\n";
+    }
+
+    protected function aiArchitecture(): string
+    {
+        return "- **Free AI (Dashboard & Search):** Keyless, uses Cloudflare Proxy (Groq, Mistral, Pollinations, LLM7). Used for Ctrl+K search and AI support.\n"
+            . "- **OpenRouter AI (SEO, Code, Translation):** Requires user API key from Admin Settings.\n"
+            . "- **RAG System:** Reads `resources/docs/` for answers.\n";
+    }
+
+    protected function languages(): string
+    {
+        $locales = function_exists('rj_available_locales') ? rj_available_locales() : [];
+        $frontend = function_exists('rj_frontend_locales') ? rj_frontend_locales() : [];
+
+        $out = "- **Available Languages (17):** " . implode(', ', $locales) . "\n";
+        $out .= "- **Active Frontend Languages:** " . implode(', ', $frontend) . "\n";
+        $out .= "- **Per-Language Slugs:** Implemented in `rj_post_translations` table.\n";
+
+        return $out;
     }
 
     protected function directoryStructure(): string
@@ -87,21 +109,30 @@ class GenerateAiContext extends Command
             'app/Http/Controllers/Admin',
             'app/Http/Controllers/Admin/Settings',
             'app/Http/Controllers/Auth',
+            'app/Http/Controllers/Frontend',
             'app/Models',
             'app/Services',
             'app/Mail',
             'app/Helpers',
+            'app/Widgets',
+            'app/DynamicTags',
+            'app/Observers',
+            'app/Console/Commands',
+            'installer',
             'database/migrations',
             'database/seeders',
             'resources/views/admin',
             'resources/views/admin/settings',
-            'resources/views/admin/users',
-            'resources/views/admin/profile',
             'resources/views/auth',
+            'resources/views/frontend',
+            'resources/views/errors',
+            'resources/views/rjbuilder',
             'resources/css',
             'resources/js',
             'routes',
             'lang',
+            'rj-content/themes',
+            'rj-content/plugins',
             'public/images',
         ];
 
@@ -197,6 +228,7 @@ class GenerateAiContext extends Command
             'Admin' => $base . '/Admin',
             'Admin/Settings' => $base . '/Admin/Settings',
             'Auth' => $base . '/Auth',
+            'Frontend' => $base . '/Frontend',
             'Root' => $base,
         ];
 
@@ -259,12 +291,22 @@ class GenerateAiContext extends Command
 
     protected function views(): string
     {
-        $base = resource_path('views/admin');
-
         $out = "";
 
         $out .= "### Admin Views\n\n";
-        $out .= $this->scanViews($base, 'admin');
+        $out .= $this->scanViews(resource_path('views/admin'), 'admin');
+
+        $out .= "### Frontend Views\n\n";
+        $out .= $this->scanViews(resource_path('views/frontend'), 'frontend');
+
+        $out .= "### Auth Views\n\n";
+        $out .= $this->scanViews(resource_path('views/auth'), 'auth');
+
+        $out .= "### Error Views\n\n";
+        $out .= $this->scanViews(resource_path('views/errors'), 'errors');
+
+        $out .= "### RJBuilder Views\n\n";
+        $out .= $this->scanViews(resource_path('views/rjbuilder'), 'rjbuilder');
 
         return $out;
     }
@@ -466,7 +508,9 @@ class GenerateAiContext extends Command
             . "- **Color palette:** via `rj_color_presets()` helper\n"
             . "- **Options:** stored in `rj_options` table, accessed via `rj_get_option()`\n"
             . "- **Cache:** `Cache::rememberForever('rj_options', ...)`\n"
-            . "- **AI Provider:** OpenRouter (`OpenRouterService`)\n"
-            . "- **Views:** `admin.layouts.app` base, settings use `admin.settings.layout`\n";
+            . "- **AI Provider:** OpenRouter (`OpenRouterService`) + Free AI Proxy\n"
+            . "- **Views:** `admin.layouts.app` base, settings use `admin.settings.layout`\n"
+            . "- **Installer:** `public/install.php` & `installer/` folder (standalone)\n"
+            . "- **Demo Import:** `php artisan rj:export-demo` -> JSON -> `DemoSeeder`\n";
     }
 }
