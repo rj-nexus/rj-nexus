@@ -2,6 +2,26 @@
 
 All notable changes to the RJ Builder core and built-in widgets will be documented in this file.
 
+## [v1.7.0] - 2026-11-03
+
+This is a major multilingual and UI overhaul update. We improved how Builder handles languages, redesigned the language switcher, and introduced locale-aware widget rendering.
+
+### Added (New Features & Systems)
+- **Language Dropdown UI:** Replaced the old cramped language tabs with a clean, floating dropdown menu in the top right header, making navigation across 17 languages much smoother.
+- **Server-Side Localization:** Implemented `rj_localize_builder_settings()` on the server. Block settings (e.g., `title__az`) are now automatically translated before being sent to the widget.
+- **Locale-Aware Caching:** The `RJ_WIDGET_CACHE` now includes the active locale in its cache key. Widgets will no longer show stale English content when switching to another language.
+
+### Fixed (Bug Fixes)
+- **Canvas Locale Reactivity:** Fixed a major reactivity bug where the canvas (`x-for`) would not re-render when the active language was changed. It now listens to `activeLocale` and refreshes blocks automatically.
+- **Missing Translation Inputs:** Fixed an issue where localized settings inputs were being stripped before saving. Fields now properly save with locale suffixes (`__{locale}`).
+- **Widget Cache Collisions:** Resolved the issue where changing a widget's language didn't fetch a new version because the cache hash was identical.
+
+### Improved (Enhancements)
+- **Language Tab Dragging:** Added drag-to-scroll and navigation arrows to language tabs in the post edit/create views.
+- **Header Permissions:** Restructured the Builder top bar to pass the correct `defaultLocale` and `baseLocale` variables to Alpine.js for accurate rendering.
+
+---
+
 ## [v1.6.0] - 2026-11-02
 
 This is a major multilingual and UI overhaul update. We improved how Builder handles languages, redesigned the language switcher, and introduced locale-aware widget rendering.
