@@ -72,7 +72,7 @@
     {
         "id": 8,
         "option_name": "language",
-        "option_value": "es",
+        "option_value": "en",
         "option_group": "general",
         "option_type": "text",
         "autoload": 1,
@@ -256,8 +256,8 @@
         "option_group": "ai",
         "option_type": "number",
         "autoload": 1,
-        "created_at": "2026-11-01 07:25:55",
-        "updated_at": "2026-11-01 07:25:55"
+        "created_at": "2026-11-01 23:36:37",
+        "updated_at": "2026-11-01 23:36:37"
     },
     {
         "id": 27,
@@ -362,22 +362,22 @@
     {
         "id": 37,
         "option_name": "rj_version",
-        "option_value": "1.0.0",
-        "option_group": "system",
+        "option_value": "1.5.0",
+        "option_group": "general",
         "option_type": "text",
         "autoload": 1,
         "created_at": "2026-11-01 04:45:25",
-        "updated_at": "2026-11-01 04:45:25"
+        "updated_at": "2026-11-03 00:13:54"
     },
     {
         "id": 38,
         "option_name": "rj_installed_at",
-        "option_value": "2026-11-01 07:25:55",
+        "option_value": "2026-11-01 23:36:37",
         "option_group": "system",
         "option_type": "text",
         "autoload": 1,
-        "created_at": "2026-11-01 07:25:55",
-        "updated_at": "2026-11-01 07:25:55"
+        "created_at": "2026-11-01 23:36:37",
+        "updated_at": "2026-11-01 23:36:37"
     },
     {
         "id": 39,
@@ -432,12 +432,12 @@
     {
         "id": 44,
         "option_name": "frontend_locales",
-        "option_value": "[\"az\",\"de\",\"en\",\"es\"]",
+        "option_value": "[\"ar\",\"az\",\"de\",\"en\"]",
         "option_group": "general",
         "option_type": "text",
         "autoload": 1,
         "created_at": "2026-11-01 05:09:54",
-        "updated_at": "2026-11-01 05:10:00"
+        "updated_at": "2026-11-02 00:46:31"
     },
     {
         "id": 45,
@@ -452,7 +452,7 @@
     {
         "id": 46,
         "option_name": "frontend_locale",
-        "option_value": "es",
+        "option_value": "en",
         "option_group": "language",
         "option_type": "text",
         "autoload": 1,
@@ -498,5 +498,165 @@
         "autoload": 1,
         "created_at": "2026-11-01 05:10:08",
         "updated_at": "2026-11-01 05:10:08"
+    },
+    {
+        "id": 51,
+        "option_name": "lang_flag_ar",
+        "option_value": "ar.webp",
+        "option_group": "language",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-11-02 23:57:58",
+        "updated_at": "2026-11-02 23:57:58"
+    },
+    {
+        "id": 52,
+        "option_name": "lang_flag_de",
+        "option_value": "de.webp",
+        "option_group": "language",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-11-02 23:58:06",
+        "updated_at": "2026-11-02 23:58:06"
+    },
+    {
+        "id": 53,
+        "option_name": "lang_flag_en",
+        "option_value": "en.webp",
+        "option_group": "language",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-11-02 23:58:16",
+        "updated_at": "2026-11-02 23:58:16"
+    },
+    {
+        "id": 54,
+        "option_name": "lang_flag_es",
+        "option_value": "es.webp",
+        "option_group": "language",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-11-02 23:58:26",
+        "updated_at": "2026-11-02 23:58:26"
+    },
+    {
+        "id": 55,
+        "option_name": "lang_flag_fr",
+        "option_value": "fr.webp",
+        "option_group": "language",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-11-02 23:58:36",
+        "updated_at": "2026-11-02 23:58:36"
+    },
+    {
+        "id": 56,
+        "option_name": "lang_flag_hi",
+        "option_value": "hi.webp",
+        "option_group": "language",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-11-02 23:58:48",
+        "updated_at": "2026-11-02 23:58:48"
+    },
+    {
+        "id": 57,
+        "option_name": "lang_flag_hy",
+        "option_value": "hy.webp",
+        "option_group": "language",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-11-02 23:58:55",
+        "updated_at": "2026-11-02 23:58:55"
+    },
+    {
+        "id": 58,
+        "option_name": "lang_flag_id",
+        "option_value": "id.webp",
+        "option_group": "language",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-11-02 23:59:05",
+        "updated_at": "2026-11-02 23:59:05"
+    },
+    {
+        "id": 59,
+        "option_name": "lang_flag_it",
+        "option_value": "it.webp",
+        "option_group": "language",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-11-02 23:59:18",
+        "updated_at": "2026-11-02 23:59:18"
+    },
+    {
+        "id": 60,
+        "option_name": "lang_flag_ja",
+        "option_value": "ja.webp",
+        "option_group": "language",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-11-02 23:59:27",
+        "updated_at": "2026-11-02 23:59:27"
+    },
+    {
+        "id": 61,
+        "option_name": "lang_flag_ka",
+        "option_value": "ka.svg",
+        "option_group": "language",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-11-02 23:59:34",
+        "updated_at": "2026-11-02 23:59:34"
+    },
+    {
+        "id": 62,
+        "option_name": "lang_flag_nl",
+        "option_value": "nl.webp",
+        "option_group": "language",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-11-02 23:59:44",
+        "updated_at": "2026-11-02 23:59:44"
+    },
+    {
+        "id": 63,
+        "option_name": "lang_flag_pt",
+        "option_value": "pt.webp",
+        "option_group": "language",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-11-03 00:00:02",
+        "updated_at": "2026-11-03 00:00:02"
+    },
+    {
+        "id": 64,
+        "option_name": "lang_flag_ru",
+        "option_value": "ru.svg",
+        "option_group": "language",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-11-03 00:00:20",
+        "updated_at": "2026-11-03 00:00:20"
+    },
+    {
+        "id": 65,
+        "option_name": "lang_flag_tr",
+        "option_value": "tr.svg",
+        "option_group": "language",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-11-03 00:00:45",
+        "updated_at": "2026-11-03 00:00:45"
+    },
+    {
+        "id": 66,
+        "option_name": "lang_flag_zh",
+        "option_value": "zh.webp",
+        "option_group": "language",
+        "option_type": "text",
+        "autoload": 1,
+        "created_at": "2026-11-03 00:01:17",
+        "updated_at": "2026-11-03 00:01:17"
     }
 ]

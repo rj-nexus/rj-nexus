@@ -1,18 +1,18 @@
 {
     "name": "RJ Nexus Starter Demo",
-    "exported_at": "2026-11-01T22:05:45+00:00",
+    "exported_at": "2026-11-03T00:24:56+00:00",
     "tables": {
-        "options": 50,
+        "options": 66,
         "post_types": 2,
         "taxonomies": 2,
-        "categories": 0,
-        "category_translations": 0,
-        "tags": 0,
-        "tag_translations": 0,
+        "categories": 1,
+        "category_translations": 1,
+        "tags": 1,
+        "tag_translations": 1,
         "terms": 0,
         "term_translations": 0,
-        "posts": 7,
-        "post_translations": 8,
+        "posts": 11,
+        "post_translations": 44,
         "post_category": 0,
         "post_tag": 0,
         "post_term": 0,
@@ -25,10 +25,10 @@
         "templates": 2,
         "widgets": 0,
         "global_widgets": 0,
-        "media": 2,
+        "media": 3,
         "custom_fields": 0,
         "custom_fonts": 0,
         "custom_icons": 0
     },
-    "total_rows": 79
+    "total_rows": 140
 }
