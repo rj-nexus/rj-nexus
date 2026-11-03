@@ -1,9 +1,68 @@
 @php
     $activeHeaderTemplate = app(\App\Services\ThemeResolver::class)->header();
+
     if ($activeHeaderTemplate) {
         $isSticky = ($activeHeaderTemplate->settings['sticky_header'] ?? '1') === '1';
     } else {
-        $isSticky = rj_get_option('header_sticky', '1') === '1';
+        $themeSticky = rj_theme_mod('sticky_header', null, 'layout');
+        $isSticky = $themeSticky !== null ? (bool) $themeSticky : (rj_get_option('header_sticky', '1') === '1');
+    }
+
+    $sanitizeColor = function ($value, $default) {
+        $value = is_string($value) ? trim($value) : '';
+        return preg_match('/^#[0-9a-fA-F]{3,8}$/', $value) ? $value : $default;
+    };
+
+    $cPrimary = $sanitizeColor(rj_theme_mod('primary_color', null, 'colors'), '#a78bfa');
+    $cSecondary = $sanitizeColor(rj_theme_mod('secondary_color', null, 'colors'), '#f472b6');
+    $cAccent = $sanitizeColor(rj_theme_mod('accent_color', null, 'colors'), '#22d3ee');
+    $cText = $sanitizeColor(rj_theme_mod('text_color', null, 'colors'), '#e5e7eb');
+    $cMuted = $sanitizeColor(rj_theme_mod('muted_color', null, 'colors'), '#94a3b8');
+    $cBg = $sanitizeColor(rj_theme_mod('background_color', null, 'colors'), '#0a0a0f');
+    $cSurface = $sanitizeColor(rj_theme_mod('surface_color', null, 'colors'), '#14141c');
+    $cBorder = $sanitizeColor(rj_theme_mod('border_color', null, 'colors'), '#262632');
+    $cLink = $sanitizeColor(rj_theme_mod('link_color', null, 'colors'), '#a78bfa');
+    $cHeaderBg = $sanitizeColor(rj_theme_mod('header_bg', null, 'header'), '#0a0a0f');
+    $cHeaderText = $sanitizeColor(rj_theme_mod('header_text_color', null, 'header'), '#f1f5f9');
+    $cFooterBg = $sanitizeColor(rj_theme_mod('footer_bg', null, 'footer'), '#050508');
+    $cFooterText = $sanitizeColor(rj_theme_mod('footer_text_color', null, 'footer'), '#94a3b8');
+
+    $allowedFonts = ['Inter', 'Figtree', 'Roboto', 'Open Sans', 'Lato', 'Poppins', 'system-ui'];
+
+    $fontBody = rj_theme_mod('font_body', 'Inter', 'typography');
+    if (!in_array($fontBody, $allowedFonts, true)) $fontBody = 'Inter';
+
+    $fontHeading = rj_theme_mod('font_heading', 'Inter', 'typography');
+    if (!in_array($fontHeading, $allowedFonts, true)) $fontHeading = 'Inter';
+
+    $fontSizeBase = (int) rj_theme_mod('font_size_base', 16, 'typography');
+    $fontSizeBase = max(12, min(24, $fontSizeBase));
+
+    $lineHeight = (float) rj_theme_mod('line_height', 1.65, 'typography');
+    $lineHeight = max(1.2, min(2.2, $lineHeight));
+
+    $containerWidth = (int) rj_theme_mod('container_width', 1200, 'layout');
+    $containerWidth = max(960, min(1600, $containerWidth));
+
+    $fontBodyFamily = $fontBody === 'system-ui'
+        ? 'system-ui, -apple-system, sans-serif'
+        : "'{$fontBody}', system-ui, -apple-system, sans-serif";
+
+    $fontHeadingFamily = $fontHeading === 'system-ui'
+        ? 'system-ui, -apple-system, sans-serif'
+        : "'{$fontHeading}', system-ui, -apple-system, sans-serif";
+
+    $googleFamilies = [];
+    foreach ([$fontBody, $fontHeading] as $f) {
+        if ($f !== 'system-ui' && !in_array($f, $googleFamilies, true)) {
+            $googleFamilies[] = $f;
+        }
+    }
+
+    $googleFontsUrl = '';
+    if (!empty($googleFamilies)) {
+        $families = array_map(fn($f) => 'family=' . urlencode($f) . ':wght@400;500;600;700;800', $googleFamilies);
+        $googleFontsUrl = 'https://fonts.googleapis.com/css2?' . implode('&', $families) . '&display=swap';
     }
 @endphp
 <!DOCTYPE html>
@@ -12,7 +71,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="theme-color" content="#0a0a0f">
+    <meta name="theme-color" content="{{ $cBg }}">
 
     <title>{{ $title ?? rj_get_option('site_name', config('app.name')) }}</title>
 
@@ -26,26 +85,32 @@
 
     <link rel="stylesheet" href="{{ route('frontend.fonts.css') }}">
 
+    @if($googleFontsUrl)
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="{{ $googleFontsUrl }}">
+    @endif
+
     <style>
         :root {
-            --rj-primary: #a78bfa;
-            --rj-secondary: #f472b6;
-            --rj-accent: #22d3ee;
-            --rj-text: #e5e7eb;
-            --rj-muted: #94a3b8;
-            --rj-bg: #0a0a0f;
-            --rj-surface: #14141c;
-            --rj-border: #262632;
-            --rj-link: #a78bfa;
-            --rj-header-bg: #0a0a0f;
-            --rj-header-text: #f1f5f9;
-            --rj-footer-bg: #050508;
-            --rj-footer-text: #94a3b8;
-            --rj-container: 1200px;
-            --rj-font-body: 'Inter', system-ui, -apple-system, sans-serif;
-            --rj-font-heading: 'Inter', system-ui, -apple-system, sans-serif;
-            --rj-font-size: 16px;
-            --rj-line-height: 1.65;
+            --rj-primary: {{ $cPrimary }};
+            --rj-secondary: {{ $cSecondary }};
+            --rj-accent: {{ $cAccent }};
+            --rj-text: {{ $cText }};
+            --rj-muted: {{ $cMuted }};
+            --rj-bg: {{ $cBg }};
+            --rj-surface: {{ $cSurface }};
+            --rj-border: {{ $cBorder }};
+            --rj-link: {{ $cLink }};
+            --rj-header-bg: {{ $cHeaderBg }};
+            --rj-header-text: {{ $cHeaderText }};
+            --rj-footer-bg: {{ $cFooterBg }};
+            --rj-footer-text: {{ $cFooterText }};
+            --rj-container: {{ $containerWidth }}px;
+            --rj-font-body: {{ $fontBodyFamily }};
+            --rj-font-heading: {{ $fontHeadingFamily }};
+            --rj-font-size: {{ $fontSizeBase }}px;
+            --rj-line-height: {{ $lineHeight }};
             --rj-radius: 12px;
             --rj-radius-sm: 8px;
             --rj-radius-lg: 20px;
@@ -76,7 +141,7 @@
         }
         a { color: var(--rj-link); text-decoration: none; }
         a:hover { color: var(--rj-secondary); }
-        ::selection { background: var(--rj-primary); color: #0a0a0f; }
+        ::selection { background: var(--rj-primary); color: var(--rj-bg); }
 
         .rj-frontend {
             min-height: 100vh;
@@ -218,7 +283,7 @@
             padding: 12px 28px;
             font-size: 14px;
             font-weight: 600;
-            color: #0a0a0f;
+            color: var(--rj-bg);
             background: var(--rj-primary);
             border: 0;
             border-radius: var(--rj-radius-sm);
@@ -273,7 +338,9 @@
         @yield('content')
     </div>
 
-    @include('theme::partials.popup')
+    @if(view()->exists('theme::partials.popup'))
+        @include('theme::partials.popup')
+    @endif
 
     <script>
     (function () {
