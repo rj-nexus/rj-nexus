@@ -285,13 +285,13 @@ RJ CMS installs on any shared hosting or VPS without touching a single line of c
 
 <table>
   <tr>
-    <td width="33%" align="center"><b>Login</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/gif/auth/01.gif" alt="Login" width="100%"/></td>
-    <td width="33%" align="center"><b>Register</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/gif/auth/02.gif" alt="Register" width="100%"/></td>
+    <td width="33%" align="center"><b>Login & Register</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/gif/auth/01.gif" alt="Login" width="100%"/></td>
+    <td width="33%" align="center"><b>Reset Password</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/gif/auth/02.gif" alt="Register" width="100%"/></td>
     <td width="33%" align="center"><b>Email Verification</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/gif/auth/03.gif" alt="Email Verification" width="100%"/></td>
   </tr>
   <tr>
     <td width="33%" align="center"><b>Forgot Password</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/gif/auth/04.gif" alt="Forgot Password" width="100%"/></td>
-    <td width="33%" align="center"><b>Reset Password</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/gif/auth/05.gif" alt="Reset Password" width="100%"/></td>
+    <td width="33%" align="center"><b>Confirm Password</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/gif/auth/05.gif" alt="Reset Password" width="100%"/></td>
     <td width="33%" align="center"></td>
   </tr>
 </table>
