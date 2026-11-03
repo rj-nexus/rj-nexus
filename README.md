@@ -18,6 +18,10 @@
 
 <img src="https://raw.githubusercontent.com/rj-nexus/.github/main/assets/divider.svg" alt="" width="100%"/>
 
+## Install guide Youtube
+
+https://www.youtube.com/watch?v=BU4UXY2D3FU
+
 ## About RJ Nexus
 
 RJ Nexus is the home of **RJ CMS** and its growing ecosystem. This organization hosts the CMS core and publishes the plugins, themes, widgets, and tools that extend it.
