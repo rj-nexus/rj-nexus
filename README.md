@@ -13,7 +13,7 @@
 
 <br/>
 
-[Website](https://rjnexus.org) &nbsp;&bull;&nbsp; [Changelog](https://github.com/rj-nexus/rj-nexus/blob/main/CHANGELOG.md) &nbsp;&bull;&nbsp; [RJBuilder Changelog](https://github.com/rj-nexus/rj-nexus/blob/main/resources/views/rjbuilder/CHANGELOG.md) &nbsp;&bull;&nbsp; [Themes & Plugins](https://github.com/rj-nexus/rj_cms_theme_and_plugin_list) &nbsp;&bull;&nbsp; [Source Code](https://github.com/rj-nexus/rj-nexus)
+[Website](https://rjnexus.org) &nbsp;&bull;&nbsp; [Changelog](https://github.com/rj-nexus/rj-nexus/blob/main/CHANGELOG.md) &nbsp;&bull;&nbsp; [RJBuilder Changelog](https://github.com/rj-nexus/rj-nexus/blob/main/resources/views/rjbuilder/CHANGELOG.md) &nbsp;&bull;&nbsp; [Themes & Plugins](https://github.com/rj-nexus/rj_cms_theme_and_plugin_list) &nbsp;&bull;&nbsp; [Discussions](https://github.com/orgs/rj-nexus/discussions) &nbsp;&bull;&nbsp; [Source Code](https://github.com/rj-nexus/rj-nexus)
 
 </div>
 
@@ -21,7 +21,7 @@
 
 ## About
 
-**RJ CMS** is a modern, self-hosted content management system built on **Laravel 12**. You install it on your own hosting, keep full ownership of your data, and extend it through an isolated plugin and theme system. It ships with a visual page builder (RJBuilder), a dual AI engine, 17 languages with per-language URLs, and a browser-based installer that works on any shared hosting or VPS.
+**RJ CMS** is a modern, self-hosted content management system built on **Laravel 12**. You install it on your own hosting, keep full ownership of your data, and extend it through an isolated plugin and theme system. It ships with a visual page builder (RJBuilder) with 60+ widgets, a dual AI engine, 17 languages with per-language URLs, and a browser-based installer that works on any shared hosting or VPS.
 
 **RJ Nexus** is the organization behind it. It hosts the CMS core and the ecosystem around it.
 
@@ -110,8 +110,8 @@ RJ CMS installs on any shared hosting or VPS without touching a single line of c
   <tr>
     <td width="33%" valign="top">
       <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/builder.svg" width="44" height="44" alt=""/><br/>
-      <b>RJBuilder</b><br/>
-      Elementor-like visual page builder with drag-and-drop, responsive controls and dynamic tags. See the <a href="https://github.com/rj-nexus/rj-nexus/blob/main/resources/views/rjbuilder/CHANGELOG.md">RJBuilder changelog</a>.
+      <b>RJBuilder &mdash; 60+ Widgets</b><br/>
+      Elementor-like visual page builder with <b>60+ ready-made widgets</b>, drag-and-drop, responsive controls and dynamic tags. See the <a href="https://github.com/rj-nexus/rj-nexus/blob/main/resources/views/rjbuilder/CHANGELOG.md">RJBuilder changelog</a>.
     </td>
     <td width="33%" valign="top">
       <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/ai.svg" width="44" height="44" alt=""/><br/>
@@ -195,7 +195,12 @@ RJ CMS installs on any shared hosting or VPS without touching a single line of c
 
 ## Screenshots
 
-### Dashboard & AI
+### Admin Panel
+
+<p align="center">
+  <b>AI Global Search (Ctrl+K)</b><br/><br/>
+  <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/ai-search.png" alt="AI Global Search" width="80%"/>
+</p>
 
 <table>
   <tr>
@@ -204,28 +209,13 @@ RJ CMS installs on any shared hosting or VPS without touching a single line of c
       <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/dashboard.png" alt="Dashboard" width="100%"/>
     </td>
     <td width="50%" align="center">
-      <b>AI Global Search (Ctrl+K)</b><br/><br/>
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/ai-search.png" alt="AI Search" width="100%"/>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" align="center">
       <b>AI Center</b><br/><br/>
       <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/ai-center.png" alt="AI Center" width="100%"/>
     </td>
-    <td width="50%" align="center">
-      <b>Settings &rarr; AI</b><br/><br/>
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/07.png" alt="AI Settings" width="100%"/>
-    </td>
   </tr>
-</table>
-
-### Admin Panel
-
-<table>
   <tr>
     <td width="50%" align="center">
-      <b>RJBuilder</b><br/><br/>
+      <b>RJBuilder (60+ Widgets)</b><br/><br/>
       <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/02.png" alt="RJBuilder" width="100%"/>
     </td>
     <td width="50%" align="center">
@@ -239,28 +229,33 @@ RJ CMS installs on any shared hosting or VPS without touching a single line of c
       <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/media-library-page.png" alt="Media Library" width="100%"/>
     </td>
     <td width="50%" align="center">
-      <b>Theme Selection</b><br/><br/>
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/06.png" alt="Theme Selection" width="100%"/>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" align="center">
       <b>KYC Management</b><br/><br/>
       <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/kyc-management-page.png" alt="KYC Management" width="100%"/>
     </td>
+  </tr>
+</table>
+
+#### Settings
+
+<table>
+  <tr>
     <td width="50%" align="center">
-      <b>Backup</b><br/><br/>
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/backup-page.png" alt="Backup" width="100%"/>
+      <b>Settings &rarr; AI</b><br/><br/>
+      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/07.png" alt="Settings - AI" width="100%"/>
+    </td>
+    <td width="50%" align="center">
+      <b>Settings &rarr; Theme</b><br/><br/>
+      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/06.png" alt="Settings - Theme" width="100%"/>
     </td>
   </tr>
   <tr>
     <td width="50%" align="center">
-      <b>Updates</b><br/><br/>
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/update-page.png" alt="Updates" width="100%"/>
+      <b>Settings &rarr; Backup</b><br/><br/>
+      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/backup-page.png" alt="Settings - Backup" width="100%"/>
     </td>
     <td width="50%" align="center">
-      <b>Account</b><br/><br/>
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/accout-page.png" alt="Account" width="100%"/>
+      <b>Settings &rarr; Updates</b><br/><br/>
+      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/update-page.png" alt="Settings - Updates" width="100%"/>
     </td>
   </tr>
 </table>
@@ -277,24 +272,40 @@ RJ CMS installs on any shared hosting or VPS without touching a single line of c
     <td width="50%" align="center"><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/front4.png" alt="Frontend 4" width="100%"/></td>
   </tr>
   <tr>
-    <td width="100%" colspan="2" align="center"><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/front5.png" alt="Frontend 5" width="70%"/></td>
+    <td width="50%" align="center"><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/front5.png" alt="Frontend 5" width="100%"/></td>
+    <td width="50%" align="center">
+      <b>User Account</b><br/><br/>
+      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/accout-page.png" alt="User Account" width="100%"/>
+    </td>
   </tr>
 </table>
 
 ### Authentication Pages
 
-<table>
-  <tr>
-    <td width="33%" align="center"><b>Login & Register</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/gif/auth/01.gif" alt="Login" width="100%"/></td>
-    <td width="33%" align="center"><b>Reset Password</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/gif/auth/02.gif" alt="Register" width="100%"/></td>
-    <td width="33%" align="center"><b>Email Verification</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/gif/auth/03.gif" alt="Email Verification" width="100%"/></td>
-  </tr>
-  <tr>
-    <td width="33%" align="center"><b>Forgot Password</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/gif/auth/04.gif" alt="Forgot Password" width="100%"/></td>
-    <td width="33%" align="center"><b>Confirm Password</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/gif/auth/05.gif" alt="Reset Password" width="100%"/></td>
-    <td width="33%" align="center"></td>
-  </tr>
-</table>
+<p align="center">
+  <b>Login & Register</b><br/><br/>
+  <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/gif/auth/01.gif" alt="Login & Register" width="100%"/>
+</p>
+
+<p align="center">
+  <b>Reset Password</b><br/><br/>
+  <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/gif/auth/02.gif" alt="Reset Password" width="100%"/>
+</p>
+
+<p align="center">
+  <b>Email Verification</b><br/><br/>
+  <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/gif/auth/03.gif" alt="Email Verification" width="100%"/>
+</p>
+
+<p align="center">
+  <b>Forgot Password</b><br/><br/>
+  <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/gif/auth/04.gif" alt="Forgot Password" width="100%"/>
+</p>
+
+<p align="center">
+  <b>Confirm Password</b><br/><br/>
+  <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/gif/auth/05.gif" alt="Confirm Password" width="100%"/>
+</p>
 
 ### Error Pages
 
@@ -336,8 +347,13 @@ RJ CMS installs on any shared hosting or VPS without touching a single line of c
 | <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/themes.svg" width="28" alt=""/> | [Themes & Plugins](https://github.com/rj-nexus/rj_cms_theme_and_plugin_list) | Catalog of available themes and plugins |
 | <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/video.svg" width="28" alt=""/> | [Installation Video](https://www.youtube.com/watch?v=BU4UXY2D3FU) | Step-by-step guide on YouTube |
 | <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/modular.svg" width="28" alt=""/> | [Source Code](https://github.com/rj-nexus/rj-nexus) | RJ CMS core repository |
+| <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/website.svg" width="28" alt=""/> | [Discussions](https://github.com/orgs/rj-nexus/discussions) | Questions, suggestions and complaints |
 
 <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/divider.svg" alt="" width="100%"/>
+
+## Community & Support
+
+Have a question, a suggestion or a complaint? Join the conversation in [GitHub Discussions](https://github.com/orgs/rj-nexus/discussions).
 
 ## Contributing
 
