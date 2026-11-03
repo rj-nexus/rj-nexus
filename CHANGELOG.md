@@ -2,7 +2,26 @@
 
 All notable changes to RJ Nexus (formerly RJ CMS) will be documented in this file.
 
-## [v1.7.0] - 2026-11-02 (Altair Series)
+## [v1.8.2] - 2026-11-03 (Altair Series)
+
+This is a UI polish update focusing on the language switcher, admin logo styling, and flag rendering consistency.
+
+### Added
+- **Horizontal Scroll for Languages:** The language switcher on the main header now supports horizontal scrolling. Users can drag or scroll to reach hidden languages, making all 17 locales accessible without truncation.
+
+### Improved
+- **Circular Logo Design:** Admin panel logos are now rendered as circles instead of the previous square design, matching the modern UI aesthetic of the sidebar and dashboard.
+- **Universal Flag Rendering:** Both frontend and admin language switchers now render flags for every installed language, not just those with bundled SVG files. Missing flags automatically fall back to a gradient badge with the 2-letter code (e.g., `AZ`, `EN`).
+
+---
+
+## [v1.8.1] - 2026-11-02 (Altair Series)
+
+### Added
+- **Language Logos:** Added dedicated logo assets for every installed language (AZ, DE, EN, ES, FR, PT, RU, TR, HI, ZH, JA, ID, AR, IT, NL, HY, KA), ensuring consistent visual identity across the admin panel and frontend.
+
+
+## [v1.7.0] - 2026-11-01 (Altair Series)
 
 This is a major multilingual system overhaul. We introduced per-language slugs for posts and pages, rewrote the translation sync logic to auto-fill missing fields from the base locale, and improved the language UI across the admin panel.
 
@@ -29,7 +48,7 @@ This is a major multilingual system overhaul. We introduced per-language slugs f
 
 ---
 
-## [v1.6.2] - 2026-11-02 (Altair Series)
+## [v1.6.2] - 2026-11-01 (Altair Series)
 
 This is a hotfix and UX polish update. We resolved critical frontend errors, improved the multi-language UI in the admin panel, and fixed various data import issues during the setup process.
 
@@ -46,7 +65,7 @@ This is a hotfix and UX polish update. We resolved critical frontend errors, imp
 
 ---
 
-## [v1.6.0] - 2026-11-02 (Altair Series)
+## [v1.6.0] - 2026-11-01 (Altair Series)
 
 This is a major stable release update. We completely overhauled the installation process, introduced a keyless Dual AI engine, expanded language support to 17, and added a global AI-powered search palette.
 
@@ -60,7 +79,7 @@ This is a major stable release update. We completely overhauled the installation
 
 ---
 
-## [v1.5.0] - 2026-10-29 (Altair Series)
+## [v1.5.0] - 2026-10-28 (Altair Series)
 
 This was a stability and architecture update focusing on the Live Preview system, rendering performance, custom error handling, and deep plugin integrations.
 
@@ -80,7 +99,7 @@ This was a stability and architecture update focusing on the Live Preview system
 
 ---
 
-## [v1.4.0] - 2026-10-15 (Altair Series)
+## [v1.4.0] - 2026-10-14 (Altair Series)
 
 ### Added
 - **RJ Commerce:** Full e-commerce plugin (Cart, Checkout, Stripe/PayPal/Crypto gateways).
@@ -95,7 +114,7 @@ This was a stability and architecture update focusing on the Live Preview system
 
 ---
 
-## [v1.3.0] - 2026-10-10 (Altair Series)
+## [v1.3.0] - 2026-10-09 (Altair Series)
 
 ### Added
 - **Admin Settings:** Completed UI for SEO, Security, Email/SMTP, Cache, Backup, and Social Login.
@@ -105,7 +124,7 @@ This was a stability and architecture update focusing on the Live Preview system
 
 ---
 
-## [v1.2.0] - 2026-10-05 (Altair Series)
+## [v1.2.0] - 2026-10-04 (Altair Series)
 
 ### Added
 - **Multi-language Support:** Initial support for AZ, EN, DE, ES, FR, PT.
@@ -124,7 +143,7 @@ This was a stability and architecture update focusing on the Live Preview system
 
 ---
 
-## [v1.0.0] - 2026-09-25 (Initial Release)
+## [v1.0.0] - 2026-09-24 (Initial Release)
 
 ### Added
 - Initial release of RJ CMS (now RJ Nexus) core.
