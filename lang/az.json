@@ -1844,7 +1844,7 @@
   "Run php artisan route:cache": "php sənətkar route:cache əmrini işə salın",
   "Run php artisan storage:link": "php sənətkar saxlama əmrini işə salın: link",
   "Run the seeder to populate the knowledge base.": "Bilik bazasını doldurmaq üçün toxum səpən cihazı işə salın.",
-  "SEO": "BU",
+  "SEO": "SEO",
   "SEO Audit Results": "SEO Audit Nəticələri",
   "SEO Auditor": "SEO Auditoru",
   "SEO Description": "SEO Təsviri",

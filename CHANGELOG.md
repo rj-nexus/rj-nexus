@@ -2,6 +2,14 @@
 
 All notable changes to RJ Nexus (formerly RJ CMS) will be documented in this file.
 
+## [v1.8.2] - RJ CORE 1 (Altair Series)
+
+This is the first official public release of RJ CORE 1 (Altair Series). We are excited to share this foundational version, focusing on localization stability.
+
+### Fixed
+- **Azerbaijani Translations:** Fixed incorrect Azerbaijani (`az`) translation strings across the system.
+
+
 ## [v1.8.2] - 2026-11-03 (Altair Series)
 
 This is a UI polish update focusing on the language switcher, admin logo styling, and flag rendering consistency.
