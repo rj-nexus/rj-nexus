@@ -114,11 +114,68 @@
         }
 
         .rj-contact-card .rj-form-input,
-        .rj-contact-card .rj-form textarea {
+        .rj-contact-card .rj-form textarea,
+        .rj-contact-card .rj-form select {
             background: var(--rj-bg);
         }
         .rj-contact-card .rj-form-submit {
             background: linear-gradient(135deg, var(--rj-primary), var(--rj-secondary));
+            color: var(--rj-bg);
+        }
+
+        .rj-contact-hint {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 48px 24px;
+            background: var(--rj-bg);
+            border: 1px dashed var(--rj-border);
+            border-radius: var(--rj-radius);
+            gap: 16px;
+        }
+        .rj-contact-hint-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: color-mix(in srgb, var(--rj-primary) 12%, transparent);
+            border: 1px solid color-mix(in srgb, var(--rj-primary) 30%, transparent);
+            color: var(--rj-primary);
+        }
+        .rj-contact-hint h3 {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--rj-text);
+            margin: 0;
+        }
+        .rj-contact-hint p {
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--rj-muted);
+            margin: 0;
+            max-width: 420px;
+        }
+        .rj-contact-hint a {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 18px;
+            border-radius: var(--rj-radius-sm);
+            background: var(--rj-surface);
+            border: 1px solid var(--rj-border);
+            color: var(--rj-text);
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all .15s;
+        }
+        .rj-contact-hint a:hover {
+            border-color: color-mix(in srgb, var(--rj-primary) 60%, var(--rj-border));
+            color: var(--rj-primary);
+            background: color-mix(in srgb, var(--rj-primary) 8%, var(--rj-surface));
         }
 
         .rj-contact-info {
@@ -226,13 +283,16 @@
 
 @php
     $socialLinks = array_filter([
-        'facebook' => rj_get_option('facebook', ''),
-        'twitter' => rj_get_option('twitter', ''),
-        'instagram' => rj_get_option('instagram', ''),
-        'youtube' => rj_get_option('youtube', ''),
-        'linkedin' => rj_get_option('linkedin', ''),
-        'github' => rj_get_option('github', ''),
+        'facebook' => rj_theme_mod('facebook', '', 'social'),
+        'twitter' => rj_theme_mod('twitter', '', 'social'),
+        'instagram' => rj_theme_mod('instagram', '', 'social'),
+        'youtube' => rj_theme_mod('youtube', '', 'social'),
+        'linkedin' => rj_theme_mod('linkedin', '', 'social'),
+        'github' => rj_theme_mod('github', '', 'social'),
     ]);
+
+    $hasBuilderContent = $page && $page->isBuilderMode() && $page->hasBlocks();
+    $hasClassicContent = $page && !$hasBuilderContent && !empty($page->content);
 @endphp
 
 @section('content')
@@ -265,44 +325,24 @@
                     <p>{{ __('Fill out the form below and we will get back to you as soon as possible.') }}</p>
                 </div>
 
-                @if($page && $page->isBuilderMode() && $page->hasBlocks())
+                @if($hasBuilderContent)
                     {!! rj_render_blocks($page->blocks['blocks'] ?? []) !!}
-                @elseif($page && $page->content)
-                    <div class="rj-page-content">
+                @elseif($hasClassicContent)
+                    <div class="rj-single-content">
                         {!! $page->content !!}
                     </div>
                 @else
-                    <form method="POST" action="{{ route('frontend.contact.submit') ?? '#' }}" class="rj-form">
-                        @csrf
-                        <input type="hidden" name="source" value="contact_template">
-
-                        <div class="rj-form-grid-2">
-                            <div class="rj-form-field">
-                                <label class="rj-form-label" for="rj-contact-name">{{ __('Name') }} <span class="rj-form-req">*</span></label>
-                                <input type="text" id="rj-contact-name" name="name" class="rj-form-input" required>
-                            </div>
-                            <div class="rj-form-field">
-                                <label class="rj-form-label" for="rj-contact-email">{{ __('Email') }} <span class="rj-form-req">*</span></label>
-                                <input type="email" id="rj-contact-email" name="email" class="rj-form-input" required>
-                            </div>
+                    <div class="rj-contact-hint">
+                        <div class="rj-contact-hint-icon">
+                            <svg style="width:26px;height:26px;" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
                         </div>
-
-                        <div class="rj-form-field">
-                            <label class="rj-form-label" for="rj-contact-subject">{{ __('Subject') }}</label>
-                            <input type="text" id="rj-contact-subject" name="subject" class="rj-form-input">
-                        </div>
-
-                        <div class="rj-form-field">
-                            <label class="rj-form-label" for="rj-contact-message">{{ __('Message') }} <span class="rj-form-req">*</span></label>
-                            <textarea id="rj-contact-message" name="message" rows="6" class="rj-form-input" required></textarea>
-                        </div>
-
-                        <div class="rj-form-message" style="display:none;"></div>
-
-                        <div class="rj-form-actions">
-                            <button type="submit" class="rj-form-submit">{{ __('Send message') }}</button>
-                        </div>
-                    </form>
+                        <h3>{{ __('No form added yet') }}</h3>
+                        <p>{{ __('Open the page in RJBuilder and add a Form widget to display your contact form here.') }}</p>
+                        <a href="{{ url('/admin/posts/' . ($page->id ?? 0) . '/edit') }}">
+                            <svg style="width:14px;height:14px;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            {{ __('Edit in Builder') }}
+                        </a>
+                    </div>
                 @endif
             </div>
 
