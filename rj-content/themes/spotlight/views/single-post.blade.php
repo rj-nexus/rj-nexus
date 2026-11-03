@@ -95,7 +95,7 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            color: #0a0a0f;
+            color: var(--rj-bg);
             font-size: 13px;
             font-weight: 800;
         }
@@ -310,6 +310,28 @@
     </style>
 @endpush
 
+@php
+    $locale = app()->getLocale();
+
+    $blogUrl = route('frontend.posts.index', ['locale' => $locale]);
+
+    $catUrl = function ($cat) use ($locale) {
+        $slug = $cat->slug ?? '';
+        if ($slug === '') return $blogUrl;
+        return route('frontend.posts.index', ['locale' => $locale, 'term' => $slug, 'taxonomy' => 'category']);
+    };
+
+    $tagUrl = function ($tag) use ($locale) {
+        $slug = $tag->slug ?? '';
+        if ($slug === '') return $blogUrl;
+        return route('frontend.posts.index', ['locale' => $locale, 'term' => $slug, 'taxonomy' => 'tag']);
+    };
+
+    $cardImage = $post->featured_image ?? null;
+    $prevUrl = isset($previousPost) && $previousPost ? ($previousPost->public_url ?? null) : null;
+    $nextUrl = isset($nextPost) && $nextPost ? ($nextPost->public_url ?? null) : null;
+@endphp
+
 @section('content')
 
 <header class="rj-frontend-header">
@@ -322,9 +344,9 @@
     <article class="rj-single-wrap">
 
         <nav class="rj-single-breadcrumb">
-            <a href="{{ url('/') }}">{{ __('Home') }}</a>
+            <a href="{{ url('/' . $locale) }}">{{ __('Home') }}</a>
             <span class="rj-single-breadcrumb-sep">/</span>
-            <a href="{{ route('frontend.posts.index') }}">{{ __('Blog') }}</a>
+            <a href="{{ $blogUrl }}">{{ __('Blog') }}</a>
             <span class="rj-single-breadcrumb-sep">/</span>
             <span>{{ \Illuminate\Support\Str::limit($post->title ?? '', 60) }}</span>
         </nav>
@@ -332,7 +354,7 @@
         @if($post->categories && $post->categories->isNotEmpty())
             <div class="rj-single-cats">
                 @foreach($post->categories as $cat)
-                    <a href="{{ route('frontend.categories.show', $cat->slug ?? $cat->id) }}" class="rj-single-cat">
+                    <a href="{{ $catUrl($cat) }}" class="rj-single-cat">
                         {{ $cat->name ?? '' }}
                     </a>
                 @endforeach
@@ -357,18 +379,11 @@
                     </time>
                 </div>
             @endif
-
-            @if($post->reading_time ?? false)
-                <div class="rj-single-meta-item">
-                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    <span>{{ $post->reading_time }} {{ __('min read') }}</span>
-                </div>
-            @endif
         </div>
 
-        @if($post->featured_image ?? $post->thumbnail ?? null)
+        @if($cardImage)
             <figure class="rj-single-hero">
-                <img src="{{ $post->featured_image ?? $post->thumbnail }}" alt="{{ $post->title ?? '' }}">
+                <img src="{{ $cardImage }}" alt="{{ $post->title ?? '' }}">
             </figure>
         @endif
 
@@ -387,17 +402,17 @@
         @if($post->tags && $post->tags->isNotEmpty())
             <div class="rj-single-tags">
                 @foreach($post->tags as $tag)
-                    <a href="{{ route('frontend.tags.show', $tag->slug ?? $tag->id) }}" class="rj-single-tag">
+                    <a href="{{ $tagUrl($tag) }}" class="rj-single-tag">
                         {{ $tag->name ?? '' }}
                     </a>
                 @endforeach
             </div>
         @endif
 
-        @if(($previousPost ?? null) || ($nextPost ?? null))
+        @if($prevUrl || $nextUrl)
             <nav class="rj-single-nav">
-                @if($previousPost ?? null)
-                    <a href="{{ route('frontend.posts.show', $previousPost->slug ?? $previousPost->id) }}" class="rj-single-nav-item rj-prev">
+                @if($prevUrl)
+                    <a href="{{ $prevUrl }}" class="rj-single-nav-item rj-prev">
                         <span class="rj-single-nav-label">← {{ __('Previous') }}</span>
                         <span class="rj-single-nav-title">{{ $previousPost->title ?? '' }}</span>
                     </a>
@@ -405,8 +420,8 @@
                     <span></span>
                 @endif
 
-                @if($nextPost ?? null)
-                    <a href="{{ route('frontend.posts.show', $nextPost->slug ?? $nextPost->id) }}" class="rj-single-nav-item rj-next">
+                @if($nextUrl)
+                    <a href="{{ $nextUrl }}" class="rj-single-nav-item rj-next">
                         <span class="rj-single-nav-label">{{ __('Next') }} →</span>
                         <span class="rj-single-nav-title">{{ $nextPost->title ?? '' }}</span>
                     </a>
