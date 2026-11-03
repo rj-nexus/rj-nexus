@@ -1,154 +1,121 @@
 @php
-    $cardImage = $post->featured_image ?? $post->thumbnail ?? null;
-    $cardUrl = route('frontend.posts.show', $post->slug ?? $post->id);
-    $cardCategory = $post->categories->first() ?? null;
-    $cardExcerpt = $post->excerpt ?? \Illuminate\Support\Str::limit(strip_tags($post->content ?? ''), 140);
+    $popup = null;
+    try {
+        $popup = app(\App\Services\PopupResolver::class)->resolve();
+    } catch (\Throwable $e) {
+        $popup = null;
+    }
 @endphp
 
-<article class="rj-card">
-    <a href="{{ $cardUrl }}" class="rj-card-media">
-        @if($cardImage)
-            <img src="{{ $cardImage }}" alt="{{ $post->title ?? '' }}" loading="lazy">
-        @else
-            <div class="rj-card-media-placeholder">
-                <svg style="width:40px;height:40px;" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+@if($popup)
+    @php
+        $popupId = 'rj-popup-' . ($popup->id ?? 'default');
+        $popupDelay = (int) ($popup->settings['delay'] ?? 1500);
+        $popupFrequency = $popup->settings['frequency'] ?? 'session';
+        $popupDismissible = ($popup->settings['dismissible'] ?? '1') === '1';
+        $popupBackdrop = ($popup->settings['backdrop_close'] ?? '1') === '1';
+    @endphp
+
+    <div
+        class="rj-popup"
+        id="{{ $popupId }}"
+        style="display: none; position: fixed; inset: 0; z-index: 1000; align-items: center; justify-content: center; padding: 24px;"
+        data-delay="{{ $popupDelay }}"
+        data-frequency="{{ $popupFrequency }}"
+        data-backdrop-close="{{ $popupBackdrop ? '1' : '0' }}"
+        role="dialog"
+        aria-modal="true"
+        aria-hidden="true"
+    >
+        <div class="rj-popup-backdrop" style="position: absolute; inset: 0; background: rgba(5,5,8,.82); backdrop-filter: blur(8px);"></div>
+
+        <div class="rj-popup-dialog" role="document" style="position: relative; z-index: 1; width: 100%; max-width: 560px; max-height: calc(100vh - 48px); overflow-y: auto; background: var(--rj-surface); border: 1px solid var(--rj-border); border-radius: var(--rj-radius-lg); box-shadow: 0 32px 80px -20px rgba(0,0,0,.8);">
+            @if($popupDismissible)
+                <button type="button" class="rj-popup-close" aria-label="{{ __('Close') }}" style="position: absolute; top: 14px; right: 14px; z-index: 2; display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; background: color-mix(in srgb, var(--rj-bg) 70%, transparent); border: 1px solid var(--rj-border); color: var(--rj-muted); cursor: pointer;">
+                    <svg style="width:18px;height:18px;" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            @endif
+
+            <div class="rj-popup-content">
+                {!! rj_render_template($popup) !!}
             </div>
-        @endif
-
-        @if($cardCategory)
-            <span class="rj-card-cat">{{ $cardCategory->name ?? '' }}</span>
-        @endif
-    </a>
-
-    <div class="rj-card-body">
-        <a href="{{ $cardUrl }}" class="rj-card-title">{{ $post->title ?? '' }}</a>
-
-        @if($cardExcerpt)
-            <p class="rj-card-excerpt">{{ $cardExcerpt }}</p>
-        @endif
-
-        <div class="rj-card-meta">
-            @if($post->published_at)
-                <time datetime="{{ $post->published_at->toIso8601String() }}">
-                    {{ $post->published_at->format('M d, Y') }}
-                </time>
-            @endif
-
-            @if($post->reading_time ?? false)
-                <span class="rj-card-meta-dot"></span>
-                <span>{{ $post->reading_time }} {{ __('min read') }}</span>
-            @endif
         </div>
     </div>
 
     <style>
-        .rj-card {
-            display: flex;
-            flex-direction: column;
-            background: var(--rj-surface);
-            border: 1px solid var(--rj-border);
-            border-radius: var(--rj-radius-lg);
-            overflow: hidden;
-            transition: transform .22s, border-color .22s, box-shadow .22s;
-        }
-        .rj-card:hover {
-            transform: translateY(-4px);
-            border-color: color-mix(in srgb, var(--rj-primary) 45%, var(--rj-border));
-            box-shadow: 0 20px 48px -20px color-mix(in srgb, var(--rj-primary) 35%, transparent);
-        }
-        .rj-card-media {
-            position: relative;
-            display: block;
-            aspect-ratio: 16 / 10;
-            overflow: hidden;
-            background: var(--rj-bg);
-        }
-        .rj-card-media img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform .4s;
-        }
-        .rj-card:hover .rj-card-media img {
-            transform: scale(1.06);
-        }
-        .rj-card-media-placeholder {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--rj-border);
-            background: linear-gradient(135deg, var(--rj-surface), var(--rj-bg));
-        }
-        .rj-card-cat {
-            position: absolute;
-            top: 14px;
-            left: 14px;
-            padding: 5px 12px;
-            border-radius: 999px;
-            background: color-mix(in srgb, var(--rj-bg) 80%, transparent);
-            border: 1px solid color-mix(in srgb, var(--rj-primary) 40%, transparent);
-            color: var(--rj-primary);
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: .04em;
-            text-transform: uppercase;
-            backdrop-filter: blur(8px);
-        }
-        .rj-card-body {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            padding: 24px;
-            flex: 1;
-        }
-        .rj-card-title {
-            font-size: 19px;
-            line-height: 1.35;
-            font-weight: 700;
-            letter-spacing: -.015em;
-            color: var(--rj-text);
-            text-decoration: none;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            transition: color .15s;
-        }
-        .rj-card-title:hover {
-            color: var(--rj-primary);
-        }
-        .rj-card-excerpt {
-            font-size: 14px;
-            line-height: 1.6;
-            color: var(--rj-muted);
-            margin: 0;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        .rj-card-meta {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: auto;
-            padding-top: 12px;
-            font-size: 12px;
-            font-weight: 500;
-            color: var(--rj-muted);
-        }
-        .rj-card-meta-dot {
-            width: 3px;
-            height: 3px;
-            border-radius: 50%;
-            background: currentColor;
-            opacity: .6;
-        }
-        @media (max-width: 480px) {
-            .rj-card-body { padding: 20px; }
-            .rj-card-title { font-size: 17px; }
+        .rj-popup.rj-popup-open { display: flex !important; }
+        .rj-popup-content { color: var(--rj-text); font-size: 15px; line-height: 1.65; }
+        .rj-popup-content > * { margin: 0; }
+        .rj-popup-content img { max-width: 100%; height: auto; border-radius: var(--rj-radius-sm); }
+        .rj-popup-content h2, .rj-popup-content h3 { color: var(--rj-text); margin: 0 0 12px; letter-spacing: -.02em; }
+        .rj-popup-content p { color: var(--rj-muted); margin: 0 0 16px; }
+        .rj-popup-content p:last-child { margin-bottom: 0; }
+        .rj-popup-content a { color: var(--rj-primary); text-decoration: underline; text-underline-offset: 3px; }
+        .rj-popup-content .rj-form { padding: 32px; }
+        .rj-popup-content > div:not([class]) { padding: 32px; }
+        @media (max-width: 640px) {
+            .rj-popup { padding: 16px; }
+            .rj-popup-dialog { max-height: calc(100vh - 32px); }
+            .rj-popup-content .rj-form, .rj-popup-content > div:not([class]) { padding: 24px; }
         }
     </style>
-</article>
+
+    <script>
+    (function () {
+        var popup = document.getElementById('{{ $popupId }}');
+        if (!popup) return;
+
+        var key = 'rj_popup_{{ $popup->id ?? 'default' }}';
+        var frequency = popup.dataset.frequency || 'session';
+        var delay = parseInt(popup.dataset.delay || '1500', 10);
+        var backdropClose = popup.dataset.backdropClose === '1';
+
+        function shouldShow() {
+            try {
+                if (frequency === 'once') return !localStorage.getItem(key);
+                if (frequency === 'session') return !sessionStorage.getItem(key);
+                if (frequency === 'always') return true;
+            } catch (e) {}
+            return true;
+        }
+
+        function markSeen() {
+            try {
+                if (frequency === 'once') localStorage.setItem(key, '1');
+                if (frequency === 'session') sessionStorage.setItem(key, '1');
+            } catch (e) {}
+        }
+
+        function open() {
+            popup.style.display = 'flex';
+            popup.classList.add('rj-popup-open');
+            popup.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+            markSeen();
+        }
+
+        function close() {
+            popup.style.display = 'none';
+            popup.classList.remove('rj-popup-open');
+            popup.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+        }
+
+        var closeBtn = popup.querySelector('.rj-popup-close');
+        if (closeBtn) closeBtn.addEventListener('click', close);
+
+        if (backdropClose) {
+            var backdrop = popup.querySelector('.rj-popup-backdrop');
+            if (backdrop) backdrop.addEventListener('click', close);
+        }
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && popup.classList.contains('rj-popup-open')) close();
+        });
+
+        if (shouldShow()) {
+            setTimeout(open, delay);
+        }
+    })();
+    </script>
+@endif
