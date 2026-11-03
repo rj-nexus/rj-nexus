@@ -109,11 +109,11 @@
         }
         .rj-home-cta-primary {
             background: linear-gradient(135deg, var(--rj-primary), var(--rj-secondary));
-            color: #0a0a0f;
+            color: var(--rj-bg);
             box-shadow: 0 12px 40px -12px color-mix(in srgb, var(--rj-primary) 60%, transparent);
         }
         .rj-home-cta-primary:hover {
-            color: #0a0a0f;
+            color: var(--rj-bg);
             transform: translateY(-2px);
             box-shadow: 0 18px 48px -12px color-mix(in srgb, var(--rj-primary) 75%, transparent);
         }
@@ -215,6 +215,11 @@
     </style>
 @endpush
 
+@php
+    $locale = app()->getLocale();
+    $blogUrl = route('frontend.posts.index', ['locale' => $locale]);
+@endphp
+
 @section('content')
 
 <header class="rj-frontend-header">
@@ -251,7 +256,7 @@
                 <p>{{ __('A modern, dark-first platform built to showcase your work, product, or story with clarity and style.') }}</p>
 
                 <div class="rj-home-cta">
-                    <a href="{{ route('frontend.posts.index') }}" class="rj-home-cta-primary">
+                    <a href="{{ $blogUrl }}" class="rj-home-cta-primary">
                         <svg style="width:16px;height:16px;" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                         {{ __('Get started') }}
                     </a>
@@ -263,14 +268,14 @@
             </div>
         </section>
 
-        @if($latestPosts->isNotEmpty())
+        @if(isset($latestPosts) && $latestPosts->isNotEmpty())
             <section class="rj-home-section">
                 <div class="rj-home-section-header">
                     <div class="rj-home-section-header-text">
                         <h2>{{ __('Latest stories') }}</h2>
                         <p>{{ __('Fresh from the Spotlight') }}</p>
                     </div>
-                    <a href="{{ route('frontend.posts.index') }}" class="rj-home-section-link">
+                    <a href="{{ $blogUrl }}" class="rj-home-section-link">
                         {{ __('View all') }}
                         <svg style="width:14px;height:14px;" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                     </a>
@@ -286,7 +291,7 @@
             <div class="rj-home-empty">
                 <h2>{{ rj_get_option('site_name', config('app.name')) }}</h2>
                 <p>{{ __('Your stage is ready. Publish your first post to step into the Spotlight.') }}</p>
-                <a href="{{ url('/admin/posts/create') }}" class="rj-home-cta-primary" style="display:inline-flex;align-items:center;gap:8px;padding:14px 28px;border-radius:var(--rj-radius);color:#0a0a0f;text-decoration:none;font-weight:600;background:linear-gradient(135deg,var(--rj-primary),var(--rj-secondary));">
+                <a href="{{ url('/admin/posts/create') }}" class="rj-home-cta-primary" style="display:inline-flex;align-items:center;gap:8px;padding:14px 28px;border-radius:var(--rj-radius);color:var(--rj-bg);text-decoration:none;font-weight:600;background:linear-gradient(135deg,var(--rj-primary),var(--rj-secondary));">
                     {{ __('Create your first post') }}
                 </a>
             </div>
