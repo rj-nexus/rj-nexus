@@ -511,6 +511,7 @@ if (!function_exists('rj_menu_tree')) {
         return $result;
     }
 }
+
 if (!function_exists('rj_global_colors')) {
     function rj_global_colors(): array
     {
@@ -705,6 +706,7 @@ if (!function_exists('rj_breakpoint_css')) {
         return ":root{--rj-bp-mobile:{$mobile};--rj-bp-tablet:{$tablet};}";
     }
 }
+
 if (!function_exists('rj_widget_settings')) {
     function rj_widget_settings(): array
     {
@@ -845,6 +847,7 @@ if (!function_exists('rj_locale_url')) {
         return url('/' . $locale . $path);
     }
 }
+
 if (!function_exists('rj_set_env')) {
     function rj_set_env(string $key, string $value): bool
     {
@@ -864,7 +867,6 @@ if (!function_exists('rj_set_env')) {
                 $content .= "\n{$key}={$value}";
             }
 
-            // Faylı təhlükəsiz yazmaq üçün müvəqqəti fayl
             $tmpPath = $path . '.tmp_' . uniqid();
             if (file_put_contents($tmpPath, $content) !== false) {
                 rename($tmpPath, $path);
@@ -872,7 +874,6 @@ if (!function_exists('rj_set_env')) {
                 file_put_contents($path, $content);
             }
 
-            // Əgər Laravel Octane və ya xüsusi bir mühitdirsə xəta verməsin deyə try-catch
             if (function_exists('shell_exec')) {
                 @shell_exec('php artisan config:clear 2>&1');
             } else {
@@ -883,5 +884,87 @@ if (!function_exists('rj_set_env')) {
         } catch (\Throwable $e) {
             return false;
         }
+    }
+}
+
+if (!function_exists('rj_theme_mods_all')) {
+    function rj_theme_mods_all(): array
+    {
+        return \Illuminate\Support\Facades\Cache::rememberForever('rj_theme_customizations', function () {
+            $out = [];
+
+            foreach (\App\Models\Theme::all() as $theme) {
+                foreach ($theme->customizations()->get() as $row) {
+                    $decoded = json_decode($row->value, true);
+                    $value = json_last_error() === JSON_ERROR_NONE ? $decoded : $row->value;
+                    $out[$theme->slug][$row->section][$row->key] = $value;
+                }
+            }
+
+            return $out;
+        });
+    }
+}
+
+if (!function_exists('rj_theme_mod')) {
+    function rj_theme_mod(string $key, $default = null, ?string $section = null)
+    {
+        $theme = \App\Models\Theme::active();
+
+        if (!$theme) {
+            return $default;
+        }
+
+        $all = rj_theme_mods_all();
+        $mods = $all[$theme->slug] ?? [];
+
+        if ($section !== null) {
+            return $mods[$section][$key] ?? $default;
+        }
+
+        foreach ($mods as $items) {
+            if (array_key_exists($key, $items)) {
+                return $items[$key];
+            }
+        }
+
+        return $default;
+    }
+}
+
+if (!function_exists('rj_theme_mod_section')) {
+    function rj_theme_mod_section(string $section): array
+    {
+        $theme = \App\Models\Theme::active();
+
+        if (!$theme) {
+            return [];
+        }
+
+        $all = rj_theme_mods_all();
+
+        return $all[$theme->slug][$section] ?? [];
+    }
+}
+
+if (!function_exists('rj_set_theme_mod')) {
+    function rj_set_theme_mod(string $section, string $key, $value): void
+    {
+        $theme = \App\Models\Theme::active();
+
+        if (!$theme) {
+            return;
+        }
+
+        $theme->setCustomization($section, $key, $value);
+
+        \Illuminate\Support\Facades\Cache::forget('rj_theme_customizations');
+    }
+}
+
+if (!function_exists('rj_flush_theme_mods')) {
+    function rj_flush_theme_mods(): void
+    {
+        \Illuminate\Support\Facades\Cache::forget('rj_theme_customizations');
     }
 }
