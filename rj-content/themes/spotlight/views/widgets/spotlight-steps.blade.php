@@ -58,17 +58,21 @@
 
         <div class="rj-steps-split">
 
+            {{-- Sol tərəf: Sticky wrapper --}}
             <div class="rj-steps-visual">
-                <div class="rj-steps-visual-glow"></div>
-                @foreach($steps as $index => $step)
-                    @php
-                        $img = $resolve($step['step_image_url'] ?? '', $step['step_image'] ?? '');
-                        if(empty($img)) $img = 'https://raw.githubusercontent.com/rj-nexus/spotlight/main/assets/demo_image/step' . ($index + 1) . '.png';
-                    @endphp
-                    <img src="{{ $img }}" alt="{{ $step['step_title'] ?? '' }}" class="rj-step-img {{ $index === 0 ? 'is-active' : '' }}" data-step="{{ $index }}" loading="lazy">
-                @endforeach
+                <div class="rj-steps-sticky">
+                    <div class="rj-steps-visual-glow"></div>
+                    @foreach($steps as $index => $step)
+                        @php
+                            $img = $resolve($step['step_image_url'] ?? '', $step['step_image'] ?? '');
+                            if(empty($img)) $img = 'https://raw.githubusercontent.com/rj-nexus/spotlight/main/assets/demo_image/step' . ($index + 1) . '.png';
+                        @endphp
+                        <img src="{{ $img }}" alt="{{ $step['step_title'] ?? '' }}" class="rj-step-img {{ $index === 0 ? 'is-active' : '' }}" data-step="{{ $index }}" loading="lazy">
+                    @endforeach
+                </div>
             </div>
 
+            {{-- Sağ tərəf: Mətnlər --}}
             <div class="rj-steps-content">
                 <div class="rj-steps-list">
                     @foreach($steps as $index => $step)
@@ -95,11 +99,11 @@
             width: 100%;
             background: transparent;
             padding: 140px 24px 120px;
-            /* Overflow hidden-i sildik ki, sticky işləsin və planet kəsilməsin */
-            overflow-x: clip;
+            /* overflow-x: clip; - Bunu sildik, çünki bəzən sticky-ni bloklayır */
+            overflow: visible;
         }
 
-        /* Planet (Arc) - Yuxarıya doğru düzəldildi */
+        /* Planet (Arc) */
         #{{ $uid }} .rj-steps-bg-arc {
             position: absolute;
             top: 0;
@@ -116,6 +120,7 @@
             -webkit-mask-image: linear-gradient(to bottom, #000 40%, transparent 100%);
         }
 
+        /* HUD və Xətlər */
         #{{ $uid }} .rj-steps-line {
             position: absolute; left: 0; right: 0; height: 1px;
             background: rgba(255, 255, 255, 0.14); z-index: 2;
@@ -145,9 +150,7 @@
             max-width: 1100px; width: 100%; margin: 0 auto;
         }
 
-        #{{ $uid }} .rj-steps-header {
-            text-align: center; margin-bottom: 80px;
-        }
+        #{{ $uid }} .rj-steps-header { text-align: center; margin-bottom: 80px; }
         #{{ $uid }} .rj-steps-badge { display: inline-flex; align-items: center; gap: 14px; margin-bottom: 24px; }
         #{{ $uid }} .rj-steps-bars { display: inline-flex; gap: 3px; height: 12px; align-items: center; }
         #{{ $uid }} .rj-steps-bars i { width: 2px; height: 100%; background: var(--rj-muted); opacity: 0.5; animation: rjStepBar 1.5s ease-in-out infinite alternate; }
@@ -160,35 +163,40 @@
         #{{ $uid }} .rj-steps-title { font-size: clamp(32px, 5vw, 56px); font-weight: 600; line-height: 1.1; letter-spacing: -0.03em; color: #fff; margin: 0 0 20px; }
         #{{ $uid }} .rj-steps-sub { font-size: clamp(16px, 2vw, 18px); line-height: 1.6; color: var(--rj-muted); margin: 0; max-width: 600px; margin: 0 auto; }
 
-        /* Düzəliş: Split konteyneri yuxarıya düzülür */
+        /* Split Layout */
         #{{ $uid }} .rj-steps-split {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 80px;
-            align-items: start; /* Vacibdir! */
+            align-items: stretch; /* Vacibdir! Sol tərəfin sağ tərəfin boyu uzanması üçün */
         }
 
-        /* Sol tərəf: Sticky */
+        /* Sol tərəf */
         #{{ $uid }} .rj-steps-visual {
+            position: relative;
+            /* Height vermirik ki, sağ tərəf boyu uzansın */
+        }
+
+        #{{ $uid }} .rj-steps-sticky {
             position: sticky;
-            top: 140px; /* Header-in altında qalması üçün */
-            height: 500px;
+            top: 140px; /* Ekranın yuxarısından məsafə */
+            height: 500px; /* Şəkillər üçün ayrılmış sahə */
             display: flex;
             justify-content: center;
             align-items: center;
         }
+
         #{{ $uid }} .rj-steps-visual-glow {
             position: absolute; width: 100%; height: 100%;
             background: radial-gradient(circle at center, rgba(59, 130, 246, 0.2) 0%, transparent 60%);
             filter: blur(40px); pointer-events: none; z-index: 0;
         }
 
-        /* Şəkillərin kəsilməməsi üçün max-height və object-fit */
         #{{ $uid }} .rj-step-img {
             position: absolute;
             width: 100%; max-width: 400px;
-            max-height: 100%; /* Kəsilməsin deyə */
-            object-fit: contain; /* Nisbəti qorusun deyə */
+            max-height: 100%;
+            object-fit: contain;
             opacity: 0; visibility: hidden;
             transform: scale(0.9) translateY(20px);
             transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -200,12 +208,13 @@
             transform: scale(1) translateY(0);
         }
 
-        /* Sağ tərəf: Mətnlər */
+        /* Sağ tərəf */
         #{{ $uid }} .rj-steps-content {
             padding-top: 40px;
+            padding-bottom: 40px;
         }
         #{{ $uid }} .rj-steps-list {
-            position: relative; display: flex; flex-direction: column; gap: 80px;
+            position: relative; display: flex; flex-direction: column; gap: 120px; /* Məsafəni çox etdik ki, scroll yaransın */
         }
         #{{ $uid }} .rj-steps-list::before {
             content: ''; position: absolute; top: 10px; bottom: 10px; left: 11px; width: 2px;
@@ -214,7 +223,7 @@
 
         #{{ $uid }} .rj-step-item {
             position: relative; display: flex; gap: 24px;
-            opacity: 0.4; transition: opacity 0.4s ease;
+            opacity: 0.3; transition: opacity 0.4s ease;
         }
         #{{ $uid }} .rj-step-item.is-active {
             opacity: 1;
@@ -254,14 +263,14 @@
                 grid-template-columns: 1fr;
                 gap: 40px;
             }
-            #{{ $uid }} .rj-steps-visual {
+            #{{ $uid }} .rj-steps-sticky {
                 position: relative; top: 0; height: 350px;
             }
             #{{ $uid }} .rj-steps-content {
                 padding-top: 0;
             }
             #{{ $uid }} .rj-steps-list {
-                gap: 48px;
+                gap: 60px;
             }
         }
         @media (max-width: 640px) {
@@ -270,7 +279,7 @@
             #{{ $uid }} .rj-line-top { top: 40px; }
             #{{ $uid }} .rj-line-bottom { bottom: 40px; }
             #{{ $uid }} .rj-steps-hud { top: 10px; }
-            #{{ $uid }} .rj-steps-visual { height: 250px; }
+            #{{ $uid }} .rj-steps-sticky { height: 250px; }
         }
     </style>
 
