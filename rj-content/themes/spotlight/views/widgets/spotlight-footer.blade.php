@@ -138,8 +138,13 @@
             position: relative;
             width: 100%;
             padding: 80px 0 40px;
-            overflow: hidden;
-            background-color: transparent; /* Öz fonumuzu JS ilə valideynə verəcəyik */
+            overflow: visible; /* Box shadow-un kənara çıxması üçün */
+            z-index: 10;
+            isolation: isolate;
+
+            /* BU HİYLƏ BÜTÜN BUİLDER DİV-LƏRİNİ VƏ ULDuzLARI ÖRTƏCƏK */
+            box-shadow: 0 0 0 100vmax #0a0a0f !important;
+            clip-path: inset(0 -100vmax);
         }
 
         #{{ $uid }} .rj-ft-inner {
@@ -333,21 +338,4 @@
             #{{ $uid }} .rj-g-c-bl, #{{ $uid }} .rj-g-c-br { bottom: 40px; }
         }
     </style>
-
-    {{-- JavaScript ilə Builder-in valideyn div-inə müdaxilə edirik --}}
-    <script>
-    (function() {
-        var footer = document.getElementById('{{ $uid }}');
-        if (footer && footer.parentElement) {
-            // Footer-in birbaşa valideynini (Builder wrapper) tapırıq
-            var wrapper = footer.parentElement;
-
-            // Ona məcburi olaraq qara fon, z-index və nisbi mövqe veririk
-            wrapper.style.setProperty('background-color', '#0a0a0f', 'important');
-            wrapper.style.setProperty('position', 'relative', 'important');
-            wrapper.style.setProperty('z-index', '10', 'important');
-            wrapper.style.setProperty('width', '100%', 'important');
-        }
-    })();
-    </script>
 </footer>
