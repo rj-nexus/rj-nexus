@@ -11,6 +11,7 @@ use Spotlight\Widgets\SpotlightShowcaseWidget;
 use Spotlight\Widgets\SpotlightTabsWidget;
 use Spotlight\Widgets\SpotlightFeaturesWidget;
 use Spotlight\Widgets\SpotlightStepsWidget;
+use Spotlight\Widgets\SpotlightPricingWidget;
 
 class SpotlightServiceProvider extends ServiceProvider
 {
@@ -36,6 +37,7 @@ class SpotlightServiceProvider extends ServiceProvider
                     new SpotlightTabsWidget(),
                     new SpotlightFeaturesWidget(),
                     new SpotlightStepsWidget(),
+                    new SpotlightPricingWidget(),
                 ];
                 return array_merge($existing, $widgets);
             });
