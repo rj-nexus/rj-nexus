@@ -136,15 +136,13 @@
     <style>
         #{{ $uid }}.rj-ft-section {
             position: relative;
-            width: 100%;
+            /* Tam ekran eni və mərkəzləşdirmə hiyləsi */
+            width: 100vw;
+            margin-left: calc(-50vw + 50%);
             padding: 80px 0 40px;
-            overflow: visible; /* Box shadow-un kənara çıxması üçün */
+            overflow: hidden;
             z-index: 10;
-            isolation: isolate;
-
-            /* BU HİYLƏ BÜTÜN BUİLDER DİV-LƏRİNİ VƏ ULDuzLARI ÖRTƏCƏK */
-            box-shadow: 0 0 0 100vmax #0a0a0f !important;
-            clip-path: inset(0 -100vmax);
+            background-color: #0a0a0f !important; /* Məcburi tünd fon */
         }
 
         #{{ $uid }} .rj-ft-inner {
