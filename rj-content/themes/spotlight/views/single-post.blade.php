@@ -6,7 +6,11 @@
             max-width: 800px;
             margin: 0 auto;
             padding: 64px 24px 96px;
+            transition: max-width 0.3s ease;
         }
+        .rj-single-wrap.is-wide { max-width: 1000px; }
+        .rj-single-wrap.is-full { max-width: 100%; }
+
         .rj-single-breadcrumb {
             display: flex;
             align-items: center;
@@ -131,23 +135,9 @@
         }
         .rj-single-content > * { margin: 0 0 24px; }
         .rj-single-content > *:last-child { margin-bottom: 0; }
-        .rj-single-content h2 {
-            font-size: 28px;
-            line-height: 1.25;
-            margin: 48px 0 20px;
-            letter-spacing: -.02em;
-        }
-        .rj-single-content h3 {
-            font-size: 22px;
-            line-height: 1.3;
-            margin: 36px 0 16px;
-            letter-spacing: -.015em;
-        }
-        .rj-single-content h4 {
-            font-size: 18px;
-            line-height: 1.4;
-            margin: 28px 0 12px;
-        }
+        .rj-single-content h2 { font-size: 28px; line-height: 1.25; margin: 48px 0 20px; letter-spacing: -.02em; }
+        .rj-single-content h3 { font-size: 22px; line-height: 1.3; margin: 36px 0 16px; letter-spacing: -.015em; }
+        .rj-single-content h4 { font-size: 18px; line-height: 1.4; margin: 28px 0 12px; }
         .rj-single-content p { color: var(--rj-text); }
         .rj-single-content a {
             color: var(--rj-link);
@@ -156,146 +146,58 @@
             text-underline-offset: 3px;
             transition: text-decoration-color .15s;
         }
-        .rj-single-content a:hover {
-            text-decoration-color: var(--rj-link);
-            color: var(--rj-secondary);
-        }
-        .rj-single-content ul,
-        .rj-single-content ol {
-            padding-left: 28px;
-            margin: 0 0 24px;
-        }
+        .rj-single-content a:hover { text-decoration-color: var(--rj-link); color: var(--rj-secondary); }
+        .rj-single-content ul, .rj-single-content ol { padding-left: 28px; margin: 0 0 24px; }
         .rj-single-content li { margin: 0 0 8px; }
         .rj-single-content blockquote {
-            margin: 32px 0;
-            padding: 20px 24px;
-            background: var(--rj-surface);
-            border-left: 3px solid var(--rj-primary);
-            border-radius: 0 var(--rj-radius-sm) var(--rj-radius-sm) 0;
-            color: var(--rj-muted);
-            font-style: italic;
-            font-size: 18px;
+            margin: 32px 0; padding: 20px 24px; background: var(--rj-surface);
+            border-left: 3px solid var(--rj-primary); border-radius: 0 var(--rj-radius-sm) var(--rj-radius-sm) 0;
+            color: var(--rj-muted); font-style: italic; font-size: 18px;
         }
         .rj-single-content blockquote p:last-child { margin-bottom: 0; }
         .rj-single-content code {
-            padding: 2px 8px;
-            background: var(--rj-surface);
-            border: 1px solid var(--rj-border);
-            border-radius: 6px;
-            font-size: .9em;
-            color: var(--rj-accent);
-            font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+            padding: 2px 8px; background: var(--rj-surface); border: 1px solid var(--rj-border);
+            border-radius: 6px; font-size: .9em; color: var(--rj-accent); font-family: ui-monospace, 'SF Mono', Menlo, monospace;
         }
         .rj-single-content pre {
-            padding: 20px;
-            background: var(--rj-surface);
-            border: 1px solid var(--rj-border);
-            border-radius: var(--rj-radius);
-            overflow-x: auto;
-            margin: 0 0 24px;
+            padding: 20px; background: var(--rj-surface); border: 1px solid var(--rj-border);
+            border-radius: var(--rj-radius); overflow-x: auto; margin: 0 0 24px;
         }
-        .rj-single-content pre code {
-            padding: 0;
-            background: none;
-            border: 0;
-            color: var(--rj-text);
-        }
-        .rj-single-content img {
-            border-radius: var(--rj-radius);
-            margin: 8px 0;
-        }
-        .rj-single-content hr {
-            border: 0;
-            border-top: 1px solid var(--rj-border);
-            margin: 48px 0;
-        }
-        .rj-single-content table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 0 0 24px;
-            font-size: 15px;
-        }
-        .rj-single-content th,
-        .rj-single-content td {
-            padding: 12px 16px;
-            border: 1px solid var(--rj-border);
-            text-align: left;
-        }
-        .rj-single-content th {
-            background: var(--rj-surface);
-            font-weight: 600;
-        }
+        .rj-single-content pre code { padding: 0; background: none; border: 0; color: var(--rj-text); }
+        .rj-single-content img { border-radius: var(--rj-radius); margin: 8px 0; }
+        .rj-single-content hr { border: 0; border-top: 1px solid var(--rj-border); margin: 48px 0; }
+        .rj-single-content table { width: 100%; border-collapse: collapse; margin: 0 0 24px; font-size: 15px; }
+        .rj-single-content th, .rj-single-content td { padding: 12px 16px; border: 1px solid var(--rj-border); text-align: left; }
+        .rj-single-content th { background: var(--rj-surface); font-weight: 600; }
 
         .rj-single-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 48px;
-            padding-top: 32px;
-            border-top: 1px solid var(--rj-border);
+            display: flex; flex-wrap: wrap; gap: 8px; margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--rj-border);
         }
         .rj-single-tag {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 14px;
-            border-radius: var(--rj-radius-sm);
-            background: var(--rj-surface);
-            border: 1px solid var(--rj-border);
-            color: var(--rj-text);
-            font-size: 13px;
-            font-weight: 500;
-            text-decoration: none;
-            transition: all .15s;
+            display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: var(--rj-radius-sm);
+            background: var(--rj-surface); border: 1px solid var(--rj-border); color: var(--rj-text);
+            font-size: 13px; font-weight: 500; text-decoration: none; transition: all .15s;
         }
-        .rj-single-tag::before {
-            content: '#';
-            color: var(--rj-muted);
-        }
+        .rj-single-tag::before { content: '#'; color: var(--rj-muted); }
         .rj-single-tag:hover {
             border-color: color-mix(in srgb, var(--rj-primary) 60%, var(--rj-border));
-            color: var(--rj-primary);
-            background: color-mix(in srgb, var(--rj-primary) 8%, var(--rj-surface));
+            color: var(--rj-primary); background: color-mix(in srgb, var(--rj-primary) 8%, var(--rj-surface));
         }
 
         .rj-single-nav {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-top: 64px;
-            padding-top: 48px;
-            border-top: 1px solid var(--rj-border);
+            display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 64px; padding-top: 48px; border-top: 1px solid var(--rj-border);
         }
         .rj-single-nav-item {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            padding: 24px;
-            background: var(--rj-surface);
-            border: 1px solid var(--rj-border);
-            border-radius: var(--rj-radius);
-            text-decoration: none;
-            transition: all .18s;
+            display: flex; flex-direction: column; gap: 8px; padding: 24px; background: var(--rj-surface);
+            border: 1px solid var(--rj-border); border-radius: var(--rj-radius); text-decoration: none; transition: all .18s;
         }
         .rj-single-nav-item:hover {
             border-color: color-mix(in srgb, var(--rj-primary) 50%, var(--rj-border));
-            transform: translateY(-2px);
-            background: color-mix(in srgb, var(--rj-primary) 5%, var(--rj-surface));
+            transform: translateY(-2px); background: color-mix(in srgb, var(--rj-primary) 5%, var(--rj-surface));
         }
         .rj-single-nav-item.rj-next { text-align: right; }
-        .rj-single-nav-label {
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: .08em;
-            color: var(--rj-muted);
-        }
-        .rj-single-nav-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--rj-text);
-            line-height: 1.4;
-        }
+        .rj-single-nav-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--rj-muted); }
+        .rj-single-nav-title { font-size: 16px; font-weight: 600; color: var(--rj-text); line-height: 1.4; }
 
         @media (max-width: 768px) {
             .rj-single-wrap { padding: 40px 20px 64px; }
@@ -312,7 +214,6 @@
 
 @php
     $locale = app()->getLocale();
-
     $blogUrl = route('frontend.posts.index', ['locale' => $locale]);
 
     $catUrl = function ($cat) use ($locale) {
@@ -330,6 +231,14 @@
     $cardImage = $post->featured_image ?? null;
     $prevUrl = isset($previousPost) && $previousPost ? ($previousPost->public_url ?? null) : null;
     $nextUrl = isset($nextPost) && $nextPost ? ($nextPost->public_url ?? null) : null;
+
+    $showImage = filter_var(rj_theme_mod('show_featured_image', true, 'blog_single'), FILTER_VALIDATE_BOOLEAN);
+    $showRelated = filter_var(rj_theme_mod('show_related_posts', true, 'blog_single'), FILTER_VALIDATE_BOOLEAN);
+    $contentWidth = rj_theme_mod('content_width', 'normal', 'blog_single');
+
+    $wrapClass = 'rj-single-wrap';
+    if ($contentWidth === 'wide') $wrapClass .= ' is-wide';
+    if ($contentWidth === 'full') $wrapClass .= ' is-full';
 @endphp
 
 @section('content')
@@ -341,7 +250,7 @@
 </header>
 
 <main class="rj-frontend-main">
-    <article class="rj-single-wrap">
+    <article class="{{ $wrapClass }}">
 
         <nav class="rj-single-breadcrumb">
             <a href="{{ url('/' . $locale) }}">{{ __('Home') }}</a>
@@ -381,7 +290,7 @@
             @endif
         </div>
 
-        @if($cardImage)
+        @if($showImage && $cardImage)
             <figure class="rj-single-hero">
                 <img src="{{ $cardImage }}" alt="{{ $post->title ?? '' }}">
             </figure>
@@ -427,6 +336,17 @@
                     </a>
                 @endif
             </nav>
+        @endif
+
+        @if($showRelated && isset($related) && $related->isNotEmpty())
+            <div style="margin-top: 80px; padding-top: 48px; border-top: 1px solid var(--rj-border);">
+                <h3 style="font-size: 24px; font-weight: 700; margin-bottom: 32px; color: var(--rj-text);">{{ __('Related Posts') }}</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px;">
+                    @foreach($related as $rPost)
+                        @include('theme::partials.loop-card', ['post' => $rPost, 'showExcerpt' => false])
+                    @endforeach
+                </div>
+            </div>
         @endif
 
     </article>
