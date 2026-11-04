@@ -7,15 +7,10 @@
     $badge    = $settings['badge_text'] ?? 'Real feedback from creators and power users.';
     $title    = $settings['title'] ?? 'What people say about RJ Nexus.';
     $subtitle = $settings['subtitle'] ?? '';
-    $speed    = max(3, (float) ($settings['speed'] ?? 9)); // seconds per card; bigger = slower
+    $speed    = max(3, (float) ($settings['speed'] ?? 9));
 
     $raw = $settings['testimonials'] ?? $settings['items'] ?? $settings['reviews'] ?? [];
 
-    /*
-     * Accepts either:
-     *  - an array of arrays (name / handle / text  — also author, username, quote, content, review)
-     *  - plain text, one testimonial per line:  Name | @handle | Text
-     */
     $items = [];
     if (is_string($raw)) {
         foreach (preg_split('/\r\n|\r|\n/', trim($raw)) as $line) {
@@ -50,14 +45,12 @@
     }
 
     $clean = fn($s) => str_replace(['Qore', 'qore'], 'RJ Nexus', (string) $s);
-    // two rows: first half on top, second half on the bottom (6 cards = 3 + 3)
     $half = (int) ceil(count($items) / 2);
     $rows = count($items) > 1 ? [array_slice($items, 0, $half), array_slice($items, $half)] : [$items];
 @endphp
 
 <section class="rj-t" id="{{ $uid }}">
 
-    {{-- Planet + light: soft radial edges, no clipping anywhere --}}
     <div class="rj-t-bg" aria-hidden="true">
         <span class="rj-t-planet"></span>
     </div>
@@ -85,11 +78,12 @@
     <div class="rj-t-marquee">
         @foreach($rows as $ri => $row)
             @php
-                $copies = 4;                                     // 4 repeats fill wide screens; the loop shifts exactly one group (-25%)
+                $copies = 4;
                 $dur = max(45, round(count($row) * $speed));
+                // Klassları HTML-də birbaşa veririk ki, CSS-də qarışıqlıq olmasın
+                $rowClass = $ri === 0 ? 'is-ltr' : 'is-rtl';
             @endphp
-            {{-- top row: left → right, bottom row: right → left --}}
-            <div class="rj-t-row {{ $ri === 0 ? 'is-ltr' : 'is-rtl' }}">
+            <div class="rj-t-row {{ $rowClass }}">
                 <div class="rj-t-track" style="animation-duration: {{ $dur }}s;">
                     @for($c = 0; $c < $copies; $c++)
                         <div class="rj-t-group" @if($c) aria-hidden="true" @endif>
@@ -121,16 +115,12 @@
         #{{ $uid }}.rj-t {
             position: relative; width: 100%; background: transparent; color: #fff;
             padding: 150px 0 130px;
-            overflow-x: clip;      /* only sideways: nothing is ever cut at the top or bottom */
-            overflow-y: visible;
+            overflow-x: clip; overflow-y: visible;
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "Segoe UI", system-ui, sans-serif;
             -webkit-font-smoothing: antialiased;
         }
 
-        /* ===== Planet + light (every edge is feathered to transparent) ===== */
-        #{{ $uid }} .rj-t-bg {
-            position: absolute; left: 0; right: 0; top: 0; height: 100%; z-index: 0; pointer-events: none;
-        }
+        #{{ $uid }} .rj-t-bg { position: absolute; left: 0; right: 0; top: 0; height: 100%; z-index: 0; pointer-events: none; }
         #{{ $uid }} .rj-t-planet {
             position: absolute; left: 50%; top: 34%;
             width: min(920px, 92vw); aspect-ratio: 1 / 1; translate: -50% -50%; border-radius: 50%;
@@ -138,12 +128,10 @@
                 repeating-linear-gradient(45deg, rgba(150,180,255,.07) 0 1px, transparent 1px 46px),
                 repeating-linear-gradient(-45deg, rgba(150,180,255,.07) 0 1px, transparent 1px 46px),
                 radial-gradient(circle at 50% 40%, rgba(70,115,200,.34) 0%, rgba(40,75,150,.22) 45%, rgba(30,60,120,.0) 100%);
-            /* soft radial fade: the circle dissolves, so there is no hard rim and nothing to clip */
             -webkit-mask-image: radial-gradient(circle, #000 38%, rgba(0,0,0,.55) 54%, transparent 71%);
                     mask-image: radial-gradient(circle, #000 38%, rgba(0,0,0,.55) 54%, transparent 71%);
         }
 
-        /* ===== HUD ===== */
         #{{ $uid }} .rj-t-line { position: absolute; left: 0; right: 0; top: 60px; height: 1px; background: rgba(255,255,255,.14); z-index: 2; }
         #{{ $uid }} .rj-t-line i { position: absolute; top: -6px; width: 13px; height: 13px; }
         #{{ $uid }} .rj-t-line i::before, #{{ $uid }} .rj-t-line i::after { content: ""; position: absolute; background: #fff; }
@@ -158,7 +146,6 @@
         #{{ $uid }} .rj-hl { left: 24px; } #{{ $uid }} .rj-hr { right: 24px; }
         #{{ $uid }} .rj-t-hud b { display: block; width: 3px; height: 30px; background: #fff; }
 
-        /* ===== Header ===== */
         #{{ $uid }} .rj-t-inner { position: relative; z-index: 1; max-width: 1000px; margin: 0 auto; padding: 0 24px; }
         #{{ $uid }} .rj-t-header { display: flex; flex-direction: column; align-items: center; text-align: center; }
         #{{ $uid }} .rj-t-badge {
@@ -176,30 +163,45 @@
         #{{ $uid }} .rj-t-title { margin: 0; font-size: clamp(34px, 5.4vw, 64px); font-weight: 600; line-height: 1.06; letter-spacing: -.042em; color: #fff; }
         #{{ $uid }} .rj-t-sub { margin: 20px 0 0; max-width: 560px; font-size: clamp(16px, 1.8vw, 19px); line-height: 1.6; color: rgba(255,255,255,.6); }
 
-        /* ===== Marquee ===== */
+        /* === MARQUEE LENTLERI === */
         #{{ $uid }} .rj-t-marquee {
             position: relative; z-index: 1; margin-top: 84px; overflow-x: clip; display: flex; flex-direction: column; gap: 20px;
             -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 9%, #000 91%, transparent 100%);
                     mask-image: linear-gradient(90deg, transparent 0, #000 9%, #000 91%, transparent 100%);
         }
-        #{{ $uid }} .rj-t-track { display: flex; width: max-content; will-change: transform; animation-timing-function: linear; animation-iteration-count: infinite; animation-duration: 60s; }
-        #{{ $uid }} .rj-t-row.is-rtl .rj-t-track { animation-name: rjTRtl; }   /* bottom row: right → left */
-        #{{ $uid }} .rj-t-row.is-ltr .rj-t-track { animation-name: rjTLtr; }   /* top row: left → right */
+
+        #{{ $uid }} .rj-t-track {
+            display: flex; width: max-content;
+            will-change: transform;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+        }
+
+        /* Animasiya adlarını birbaşa row klassına bağlayırıq */
+        #{{ $uid }} .rj-t-row.is-ltr .rj-t-track { animation-name: rjTLtr; }
+        #{{ $uid }} .rj-t-row.is-rtl .rj-t-track { animation-name: rjTRtl; }
+
         #{{ $uid }} .rj-t-group { display: flex; gap: 20px; padding-right: 20px; }
+
         @keyframes rjTRtl { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(-25%, 0, 0); } }
         @keyframes rjTLtr { from { transform: translate3d(-25%, 0, 0); } to { transform: translate3d(0, 0, 0); } }
-        #{{ $uid }} .rj-t-row:hover .rj-t-track { animation-play-state: paused; }
-        #{{ $uid }}.rj-idle .rj-t-track { animation-play-state: paused; }
 
-        /* ===== Glass card (no backdrop-filter on moving cards: keeps scrolling smooth) ===== */
+        /* Hover edəndə dayansın */
+        #{{ $uid }} .rj-t-row:hover .rj-t-track { animation-play-state: paused; }
+
         #{{ $uid }} .rj-t-card {
             flex: none; width: 400px; display: flex; flex-direction: column; gap: 18px; padding: 28px;
             border-radius: 24px;
-            background: linear-gradient(180deg, rgba(255,255,255,.085) 0%, rgba(255,255,255,.04) 100%);
-            box-shadow: inset 0 0 0 .5px rgba(255,255,255,.15), inset 0 1px 0 rgba(255,255,255,.22);
-            transition: background .4s ease;
+            background: linear-gradient(180deg, rgba(20, 20, 28, 0.85) 0%, rgba(10, 10, 15, 0.95) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 0 0 .5px rgba(255,255,255,.1), 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+            transition: background .4s ease, border-color .4s ease;
         }
-        #{{ $uid }} .rj-t-card:hover { background: linear-gradient(180deg, rgba(255,255,255,.115) 0%, rgba(255,255,255,.055) 100%); }
+        #{{ $uid }} .rj-t-card:hover {
+            background: linear-gradient(180deg, rgba(30, 32, 45, 0.95) 0%, rgba(15, 15, 22, 1) 100%);
+            border-color: rgba(59, 130, 246, 0.4);
+        }
+
         #{{ $uid }} .rj-t-who { display: flex; align-items: center; gap: 14px; }
         #{{ $uid }} .rj-t-avatar {
             flex: none; width: 46px; height: 46px; display: flex; align-items: center; justify-content: center; border-radius: 50%;
@@ -210,10 +212,9 @@
         #{{ $uid }} .rj-t-id { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
         #{{ $uid }} .rj-t-id strong { font-size: 16px; font-weight: 600; letter-spacing: -.01em; color: #fff; }
         #{{ $uid }} .rj-t-id small { font-size: 14px; color: rgba(255,255,255,.5); }
-        #{{ $uid }} .rj-t-text { margin: 0; font-size: 16px; line-height: 1.6; letter-spacing: -.005em; color: rgba(255,255,255,.72); }
+        #{{ $uid }} .rj-t-text { margin: 0; font-size: 16px; line-height: 1.6; letter-spacing: -.005em; color: rgba(255,255,255,.7); }
         #{{ $uid }} .rj-t-m { color: rgba(255,255,255,.95); font-weight: 500; }
 
-        /* ===== Mobile / motion ===== */
         @media (max-width: 720px) {
             #{{ $uid }}.rj-t { padding: 110px 0 90px; }
             #{{ $uid }} .rj-t-bars { display: none; }
@@ -223,23 +224,5 @@
             #{{ $uid }} .rj-t-card { width: 300px; padding: 22px; }
             #{{ $uid }} .rj-t-text { font-size: 15px; }
         }
-        @media (prefers-reduced-motion: reduce) {
-            #{{ $uid }} .rj-t-track { animation: none !important; }
-            #{{ $uid }} .rj-t-marquee { overflow-x: auto; }
-            #{{ $uid }} .rj-t-group[aria-hidden="true"] { display: none; }
-        }
     </style>
-
-    <script>
-    (function () {
-        var root = document.getElementById(@js($uid));
-        if (!root) return;
-        // pause the marquee while the section is off-screen
-        if ('IntersectionObserver' in window) {
-            new IntersectionObserver(function (e) {
-                root.classList.toggle('rj-idle', !e[0].isIntersecting);
-            }, { threshold: 0.02 }).observe(root);
-        }
-    })();
-    </script>
 </section>
