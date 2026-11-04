@@ -10,6 +10,7 @@ use Spotlight\Widgets\SpotlightDividerWidget;
 use Spotlight\Widgets\SpotlightShowcaseWidget;
 use Spotlight\Widgets\SpotlightTabsWidget;
 use Spotlight\Widgets\SpotlightFeaturesWidget;
+use Spotlight\Widgets\SpotlightStepsWidget;
 
 class SpotlightServiceProvider extends ServiceProvider
 {
