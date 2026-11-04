@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use Spotlight\Widgets\SpotlightHeroWidget;
 use Spotlight\Widgets\SpotlightHeaderWidget;
 use Spotlight\Widgets\SpotlightLogosWidget;
+use Spotlight\Widgets\SpotlightDividerWidget;
 
 class SpotlightServiceProvider extends ServiceProvider
 {
@@ -26,6 +27,7 @@ class SpotlightServiceProvider extends ServiceProvider
                     new SpotlightHeroWidget(),
                     new SpotlightHeaderWidget(),
                     new SpotlightLogosWidget(),
+                    new SpotlightDividerWidget(),
                 ];
                 return array_merge($existing, $widgets);
             });
