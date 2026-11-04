@@ -39,12 +39,8 @@
     $authUser = auth()->user();
     $initialUser = null;
     if ($authUser) {
-        $name = trim((string) $authUser->name);
-        $parts = preg_split('/\s+/u', $name) ?: [];
-
         $initialUser = [
             'name'    => $authUser->name,
-            'first'   => $parts[0] ?? $name,
             'account' => route('frontend.account.index', absolute: false),
         ];
     }
@@ -63,21 +59,8 @@
         return '/' . $targetLoc . '/' . ltrim($currentPath, '/');
     };
 
-    $getFlag = function (string $code): string {
-        if (function_exists('rj_lang_flag_url')) {
-            $url = rj_lang_flag_url($code);
-            if ($url) return '<img src="' . e($url) . '" alt="">';
-        }
-        $label = $code === 'en' ? 'GB' : strtoupper(mb_substr($code, 0, 2));
-        return '<b>' . e($label) . '</b>';
-    };
-
-    $flagAttrs = function (string $code): string {
-        $hasImg = function_exists('rj_lang_flag_url') && rj_lang_flag_url($code);
-        if ($hasImg) return 'class="rj-glass-flag"';
-        $h  = crc32($code) % 360;
-        $h2 = ($h + 50) % 360;
-        return 'class="rj-glass-flag is-badge" style="background:linear-gradient(135deg,hsl(' . $h . ' 75% 62%),hsl(' . $h2 . ' 72% 48%));"';
+    $langName = function (string $code): string {
+        return function_exists('rj_lang_name') ? rj_lang_name($code) : strtoupper($code);
     };
 @endphp
 
@@ -120,15 +103,13 @@
             @if($showLang && count($locales) > 1)
                 <div class="rj-glass-nav-item" id="{{ $uid }}_lang">
                     <button type="button" class="rj-glass-lang-btn" data-toggle>
-                        <span {!! $flagAttrs($currentLocale) !!}>{!! $getFlag($currentLocale) !!}</span>
-                        <span>{{ strtoupper($currentLocale) }}</span>
+                        <span>{{ $langName($currentLocale) }}</span>
                         <svg class="rj-glass-chevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                     </button>
                     <div class="rj-glass-dropdown rj-dropdown-right" data-menu>
                         @foreach($locales as $loc)
                             <a href="{{ route('rj.widget.locale', ['locale' => $loc, 'redirect' => $getLocaleRedirect($loc)]) }}" class="rj-glass-dropdown-link {{ $loc === $currentLocale ? 'active' : '' }}">
-                                <span {!! $flagAttrs($loc) !!}>{!! $getFlag($loc) !!}</span>
-                                <span>{{ function_exists('rj_lang_name') ? rj_lang_name($loc) : strtoupper($loc) }}</span>
+                                <span>{{ $langName($loc) }}</span>
                             </a>
                         @endforeach
                     </div>
@@ -138,23 +119,11 @@
             @if($showLogin)
                 <div id="{{ $uid }}_login" class="rj-glass-login-wrap">
                     <div data-logged-out @if($initialUser) style="display:none;" @endif>
-                        <button type="button" class="rj-glass-login-btn" data-login-btn>
-                            <span class="rj-glass-login-ico">
-                                <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M15 3h3a3 3 0 013 3v12a3 3 0 01-3 3h-3"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg>
-                            </span>
-                            <span class="rj-glass-login-label">{{ $loginLabel }}</span>
-                        </button>
+                        <button type="button" class="rj-glass-login-btn" data-login-btn>{{ $loginLabel }}</button>
                     </div>
                     <div data-logged-in @if(!$initialUser) style="display:none;" @endif>
-                        <a href="{{ $initialUser['account'] ?? '#' }}" class="rj-glass-account" data-user-link title="{{ $initialUser['name'] ?? '' }}">
-                            <span class="rj-glass-account-ico">
-                                <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
-                                <i class="rj-glass-online"></i>
-                            </span>
-                            <span class="rj-glass-account-text">
-                                <small>{{ __('Account') }}</small>
-                                <b data-user-name>{{ $initialUser['first'] ?? '' }}</b>
-                            </span>
+                        <a href="{{ $initialUser['account'] ?? '#' }}" class="rj-glass-user-btn" data-user-link title="{{ $initialUser['name'] ?? '' }}">
+                            <svg fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0116 0v1"/></svg>
                         </a>
                     </div>
 
@@ -183,10 +152,7 @@
             @endif
 
             @if($ctaText)
-                <a href="{{ $ctaUrl }}" class="rj-glass-cta">
-                    <span>{{ $ctaText }}</span>
-                    <svg fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>
-                </a>
+                <a href="{{ $ctaUrl }}" class="rj-glass-cta">{{ $ctaText }}</a>
             @endif
 
             <button class="rj-glass-mobile-toggle" onclick="document.getElementById('rj-header').classList.toggle('rj-mobile-open')">
@@ -205,6 +171,7 @@
         --rjg-hover-bg: rgba(255, 255, 255, 0.09);
         --rjg-line: rgba(255, 255, 255, 0.14);
         --rjg-panel: rgba(12, 14, 22, 0.96);
+        --rjg-glass: rgba(255, 255, 255, 0.06);
         position: sticky; top: 0; left: 0; width: 100%; z-index: 1000;
         background: linear-gradient(180deg, rgba(5, 7, 12, 0.55) 0%, rgba(5, 7, 12, 0) 100%);
         border-bottom: 1px solid transparent;
@@ -239,7 +206,7 @@
     .rj-glass-nav-item:hover .rj-glass-chevron { transform: rotate(180deg); }
 
     .rj-glass-dropdown {
-        position: absolute; top: 100%; left: 0; min-width: 190px; padding: 8px; margin-top: 8px;
+        position: absolute; top: 100%; left: 0; min-width: 160px; padding: 8px; margin-top: 8px;
         background: var(--rjg-panel); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
         border: 1px solid var(--rjg-line); border-radius: 14px;
         box-shadow: 0 18px 50px -10px rgba(0, 0, 0, 0.7);
@@ -253,71 +220,44 @@
     .rj-glass-dropdown-link:hover, .rj-glass-dropdown-link.active { color: #fff; background: var(--rjg-hover-bg); }
     .rj-glass-dropdown-link.active { color: var(--rj-primary); font-weight: 600; }
 
-    .rj-glass-flag { width: 20px; height: 20px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: #1e293b; box-shadow: 0 0 0 1px rgba(255,255,255,0.12); }
-    .rj-glass-flag img { width: 100%; height: 100%; object-fit: cover; }
-    .rj-glass-flag.is-badge b { color: #fff; font-size: 9px; font-weight: 800; text-shadow: 0 1px 2px rgba(0,0,0,.18); }
+    .rj-glass-actions { display: flex; align-items: center; gap: 10px; }
 
-    .rj-glass-actions { display: flex; align-items: center; gap: 12px; }
     .rj-glass-lang-btn {
         display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px;
-        background: rgba(255, 255, 255, 0.04); border: 1px solid var(--rjg-line); border-radius: 10px;
-        color: rgba(255, 255, 255, 0.88); font-size: 13px; font-weight: 600; cursor: pointer;
+        background: var(--rjg-glass); border: 1px solid var(--rjg-line); border-radius: 10px;
+        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        color: rgba(255, 255, 255, 0.88); font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer;
         transition: background 0.2s, color 0.2s, border-color 0.2s;
     }
-    .rj-glass-lang-btn:hover { background: rgba(255, 255, 255, 0.1); color: #fff; border-color: rgba(255, 255, 255, 0.28); }
+    .rj-glass-lang-btn:hover { background: rgba(255, 255, 255, 0.12); color: #fff; border-color: rgba(255, 255, 255, 0.28); }
 
     .rj-glass-login-btn {
-        position: relative; display: inline-flex; align-items: center; gap: 10px; padding: 5px 16px 5px 5px;
-        border: 1px solid transparent; border-radius: 999px; cursor: pointer;
-        background:
-            linear-gradient(rgba(14, 17, 27, 0.92), rgba(14, 17, 27, 0.92)) padding-box,
-            linear-gradient(135deg, color-mix(in srgb, var(--rj-primary) 85%, #fff), var(--rj-secondary)) border-box;
-        color: #fff; font-size: 13px; font-weight: 600; font-family: inherit;
-        box-shadow: 0 6px 20px -10px color-mix(in srgb, var(--rj-primary) 80%, transparent);
-        transition: transform 0.2s, box-shadow 0.25s, filter 0.2s;
+        display: inline-flex; align-items: center; padding: 9px 18px;
+        background: var(--rjg-glass); border: 1px solid var(--rjg-line); border-radius: 10px;
+        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        color: rgba(255, 255, 255, 0.9); font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer;
+        transition: background 0.2s, color 0.2s, border-color 0.2s;
     }
-    .rj-glass-login-btn:hover { transform: translateY(-1px); filter: brightness(1.12); box-shadow: 0 10px 28px -8px color-mix(in srgb, var(--rj-primary) 90%, transparent); }
-    .rj-glass-login-ico {
-        width: 30px; height: 30px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
-        background: linear-gradient(135deg, var(--rj-primary), var(--rj-secondary)); color: #fff;
-        transition: transform 0.25s ease;
-    }
-    .rj-glass-login-ico svg { width: 15px; height: 15px; }
-    .rj-glass-login-btn:hover .rj-glass-login-ico { transform: translateX(2px) scale(1.06); }
+    .rj-glass-login-btn:hover { background: rgba(255, 255, 255, 0.12); color: #fff; border-color: rgba(255, 255, 255, 0.28); }
 
-    .rj-glass-account {
-        display: inline-flex; align-items: center; gap: 10px; padding: 5px 16px 5px 5px; text-decoration: none;
-        border: 1px solid var(--rjg-line); border-radius: 999px; background: rgba(255, 255, 255, 0.05);
-        transition: transform 0.2s, background 0.2s, border-color 0.2s, box-shadow 0.25s;
+    .rj-glass-user-btn {
+        width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center;
+        background: var(--rjg-glass); border: 1px solid var(--rjg-line); border-radius: 50%;
+        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        color: rgba(255, 255, 255, 0.9); text-decoration: none;
+        transition: background 0.2s, color 0.2s, border-color 0.2s;
     }
-    .rj-glass-account:hover { transform: translateY(-1px); background: rgba(255, 255, 255, 0.1); border-color: color-mix(in srgb, var(--rj-primary) 60%, transparent); box-shadow: 0 10px 26px -10px color-mix(in srgb, var(--rj-primary) 70%, transparent); }
-    .rj-glass-account-ico {
-        position: relative; width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
-        background: linear-gradient(135deg, var(--rj-primary), var(--rj-secondary)); color: #fff;
-    }
-    .rj-glass-account-ico svg { width: 15px; height: 15px; }
-    .rj-glass-online { position: absolute; right: -1px; bottom: -1px; width: 10px; height: 10px; border-radius: 50%; background: #22c55e; border: 2px solid #0b0d14; box-shadow: 0 0 8px rgba(34, 197, 94, 0.8); }
-    .rj-glass-account-text { display: flex; flex-direction: column; line-height: 1.15; }
-    .rj-glass-account-text small { font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(255, 255, 255, 0.5); }
-    .rj-glass-account-text b { font-size: 13px; font-weight: 700; color: #fff; max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .rj-glass-user-btn svg { width: 18px; height: 18px; }
+    .rj-glass-user-btn:hover { background: rgba(255, 255, 255, 0.14); color: #fff; border-color: rgba(255, 255, 255, 0.3); }
 
     .rj-glass-cta {
-        position: relative; overflow: hidden; display: inline-flex; align-items: center; gap: 8px; padding: 11px 22px;
-        background: linear-gradient(135deg, var(--rj-primary), color-mix(in srgb, var(--rj-primary) 70%, var(--rj-secondary)));
-        color: #fff; font-size: 14px; font-weight: 600; text-decoration: none;
-        border-radius: 10px; border: 1px solid color-mix(in srgb, var(--rj-primary) 60%, #fff);
-        box-shadow: 0 8px 26px -8px color-mix(in srgb, var(--rj-primary) 75%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.25);
-        transition: transform 0.2s, box-shadow 0.25s, filter 0.2s;
+        display: inline-flex; align-items: center; padding: 9px 20px;
+        background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 10px;
+        backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+        color: #fff; font-size: 13px; font-weight: 500; text-decoration: none;
+        transition: background 0.2s, border-color 0.2s;
     }
-    .rj-glass-cta::after {
-        content: ""; position: absolute; top: 0; left: -80%; width: 50%; height: 100%;
-        background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.35), transparent);
-        transform: skewX(-20deg); transition: left 0.6s ease;
-    }
-    .rj-glass-cta:hover { transform: translateY(-2px); filter: brightness(1.1); box-shadow: 0 14px 34px -8px color-mix(in srgb, var(--rj-primary) 85%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.3); }
-    .rj-glass-cta:hover::after { left: 130%; }
-    .rj-glass-cta svg { width: 16px; height: 16px; transition: transform 0.2s; }
-    .rj-glass-cta:hover svg { transform: translateX(3px); }
+    .rj-glass-cta:hover { background: rgba(255, 255, 255, 0.14); border-color: rgba(255, 255, 255, 0.4); }
 
     .rj-glass-mobile-toggle { display: none; background: transparent; border: none; color: #fff; cursor: pointer; padding: 8px; }
     .rj-glass-mobile-toggle svg { width: 24px; height: 24px; }
@@ -338,11 +278,6 @@
     .rj-glass-submit { width: 100%; padding: 12px; border-radius: 10px; background: linear-gradient(135deg, var(--rj-primary), var(--rj-secondary)); color: #fff; border: 0; font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity .2s; font-family: inherit; }
     .rj-glass-submit:hover { opacity: .9; }
 
-    @media (max-width: 1100px) {
-        .rj-glass-account-text, .rj-glass-login-label { display: none; }
-        .rj-glass-account, .rj-glass-login-btn { padding: 5px; }
-    }
-
     @media (max-width: 968px) {
         .rj-glass-nav { display: none; }
         .rj-glass-nav-item { width: 100%; }
@@ -351,8 +286,6 @@
         .rj-glass-dropdown::before { display: none; }
         .rj-glass-dropdown.is-open { display: block; }
         .rj-glass-mobile-toggle { display: block; }
-        .rj-glass-cta span { display: none; }
-        .rj-glass-cta { padding: 11px 13px; }
         .rj-glass-header.rj-mobile-open { height: 100vh; overflow-y: auto; background: rgba(7, 9, 15, 0.98); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
         .rj-glass-header.rj-mobile-open .rj-glass-header-inner { flex-wrap: wrap; align-items: flex-start; }
         .rj-glass-header.rj-mobile-open .rj-glass-nav { display: flex; flex-direction: column; width: 100%; order: 3; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; }
@@ -395,7 +328,6 @@
         var form = loginRoot.querySelector('[data-login-form]');
         var errorEl = loginRoot.querySelector('[data-login-error]');
         var submitBtn = loginRoot.querySelector('[data-login-submit]');
-        var initialUser = @json($initialUser);
 
         function openModal() { if (modal) { modal.classList.add('is-open'); var email = modal.querySelector('[data-login-email]'); if(email) setTimeout(() => email.focus(), 100); } }
         function closeModal() { if (modal) modal.classList.remove('is-open'); }
