@@ -20,7 +20,6 @@
     $text = $settings['text'] ?? 'loremipsum';
     $borderStyle = $settings['border_style'] ?? 'gradient';
 
-    // Generate a long string to ensure it fills the width
     $repeatedText = str_repeat(e($text) . ' ', 40);
 @endphp
 
@@ -44,7 +43,8 @@
         #{{ $uid }}.rj-divider-section {
             position: relative;
             width: 100%;
-            background: var(--rj-bg);
+            /* Arxa fonu şəffaf etdik */
+            background: transparent;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -52,7 +52,6 @@
             isolation: isolate;
         }
 
-        /* Glass Lines */
         #{{ $uid }} .rj-divider-border {
             position: absolute;
             left: 50%;
@@ -73,15 +72,13 @@
         #{{ $uid }} .rj-divider-border.gradient {
             background: linear-gradient(90deg,
                 transparent 0%,
-                var(--rj-border) 15%,
-                color-mix(in srgb, var(--rj-primary) 40%, var(--rj-border)) 50%,
-                var(--rj-border) 85%,
+                rgba(255, 255, 255, 0.1) 15%,
+                color-mix(in srgb, var(--rj-primary) 30%, transparent) 50%,
+                rgba(255, 255, 255, 0.1) 85%,
                 transparent 100%
             );
-            opacity: 0.6;
         }
 
-        /* Repeating Text */
         #{{ $uid }} .rj-divider-text-wrap {
             position: absolute;
             inset: 0;
@@ -101,7 +98,6 @@
             color: var(--rj-text);
             white-space: nowrap;
             letter-spacing: -0.02em;
-            /* Optional: adds a slight blur to make it look more like a background */
             filter: blur(1px);
         }
     </style>
