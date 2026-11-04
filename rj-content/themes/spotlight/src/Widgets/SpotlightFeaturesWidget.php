@@ -35,6 +35,30 @@ class SpotlightFeaturesWidget extends BaseWidget
     {
         return [
             [
+                'name' => 'show_hud',
+                'type' => 'toggle',
+                'label' => __('Show HUD and Lines'),
+                'default' => true,
+            ],
+            [
+                'name' => 'hud_left',
+                'type' => 'text',
+                'label' => __('HUD Left Text'),
+                'default' => '[ 03 / 09 ]',
+            ],
+            [
+                'name' => 'hud_right',
+                'type' => 'text',
+                'label' => __('HUD Right Text'),
+                'default' => '[ BENEFITS ]',
+            ],
+            [
+                'name' => 'badge_text',
+                'type' => 'text',
+                'label' => __('Top Badge Text'),
+                'default' => '||| WHY QORE WORKS SMARTER. |||',
+            ],
+            [
                 'name' => 'top_custom_code',
                 'type' => 'textarea',
                 'label' => __('Top Custom Visual (HTML/JSON)'),
