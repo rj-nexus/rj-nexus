@@ -10,9 +10,8 @@
 
     /**
      * GitHub raw/blob links are served as text/plain + nosniff, so browsers refuse to
-     * render SVGs from them. jsDelivr serves the right MIME type, but its format is
+     * render SVGs from them. jsDelivr serves the right MIME type:
      *   cdn.jsdelivr.net/gh/{user}/{repo}@{branch}/{path}
-     * (note the "@" before the branch).
      */
     $toCdn = function (string $url): string {
         if (preg_match('#^https?://raw\.githubusercontent\.com/([^/]+)/([^/]+)/([^/]+)/(.+)$#i', $url, $m)
@@ -35,15 +34,12 @@
 
     // Enough copies so the loop never shows a gap on wide screens
     $copies = $marquee && $logos ? max(2, (int) ceil(2600 / max(1, count($logos) * 220)) + 1) : 1;
+    $shift  = round(100 / $copies, 4);
 @endphp
 
 <section class="rj-lg" id="{{ $uid }}">
-    <span class="rj-lg-line rj-lg-top"><i></i><i></i></span>
-
-    @if($showHud)
-        <div class="rj-lg-hud rj-lg-hl"><b></b>{{ $hudLeft }}</div>
-        <div class="rj-lg-hud rj-lg-hr">{{ $hudRight }}<b></b></div>
-    @endif
+    {{-- Glass top edge: frosted band that melts the hero into this section --}}
+    <div class="rj-lg-glass" aria-hidden="true"></div>
 
     <div class="rj-lg-inner">
         @if($title)
@@ -74,31 +70,40 @@
         @endif
     </div>
 
-    <span class="rj-lg-line rj-lg-bottom"></span>
+    {{-- HUD + line + corner marks live ONLY at the bottom --}}
+    @if($showHud)
+        <div class="rj-lg-hud rj-lg-hl"><b></b>{{ $hudLeft }}</div>
+        <div class="rj-lg-hud rj-lg-hr">{{ $hudRight }}<b></b></div>
+    @endif
+    <span class="rj-lg-line"><i></i><i></i></span>
 
     <style>
-        /* No background anywhere: the section is fully transparent */
         #{{ $uid }}.rj-lg {
-            position: relative; width: 100%; padding: 90px 0 80px; overflow: hidden; background: none; color: #fff;
+            --ov: 48px; /* how far the glass overlaps the bottom of the hero */
+            position: relative; z-index: 3; width: 100%;
+            margin-top: calc(var(--ov) * -1);
+            padding: calc(var(--ov) + 64px) 0 96px;
+            overflow: hidden; background: none; color: #fff;
+            pointer-events: none; /* never block the hero's buttons under the overlap */
         }
-        #{{ $uid }} .rj-lg-line { position: absolute; left: 0; right: 0; height: 1px; background: rgba(255,255,255,.14); }
-        #{{ $uid }} .rj-lg-top { top: 0; }
-        #{{ $uid }} .rj-lg-bottom { bottom: 0; }
-        #{{ $uid }} .rj-lg-top i { position: absolute; top: -6px; width: 13px; height: 13px; }
-        #{{ $uid }} .rj-lg-top i::before, #{{ $uid }} .rj-lg-top i::after { content: ""; position: absolute; background: #fff; }
-        #{{ $uid }} .rj-lg-top i::before { left: 0; right: 0; top: 6px; height: 1px; }
-        #{{ $uid }} .rj-lg-top i::after { top: 0; bottom: 0; left: 6px; width: 1px; }
-        #{{ $uid }} .rj-lg-top i:first-child { left: 18px; }
-        #{{ $uid }} .rj-lg-top i:last-child { right: 18px; }
+        #{{ $uid }} .rj-lg-inner, #{{ $uid }} .rj-lg-hud { pointer-events: auto; }
 
-        #{{ $uid }} .rj-lg-hud {
-            position: absolute; top: 20px; display: flex; align-items: center; gap: 14px;
-            font: 700 12px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .08em; color: rgba(255,255,255,.75);
+        /* ---------- Glass top ---------- */
+        #{{ $uid }} .rj-lg-glass {
+            position: absolute; left: 0; right: 0; top: 0; height: 190px; z-index: 0;
+            background:
+                linear-gradient(to bottom, rgba(255,255,255,.12) 0%, rgba(255,255,255,.05) 45%, rgba(255,255,255,0) 100%);
+            -webkit-backdrop-filter: blur(16px) saturate(160%);
+                    backdrop-filter: blur(16px) saturate(160%);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.28);
+            -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 40%, transparent 100%);
+                    mask-image: linear-gradient(to bottom, #000 0%, #000 40%, transparent 100%);
         }
-        #{{ $uid }} .rj-lg-hl { left: 22px; } #{{ $uid }} .rj-lg-hr { right: 22px; }
-        #{{ $uid }} .rj-lg-hud b { display: block; width: 3px; height: 26px; background: #fff; }
 
-        #{{ $uid }} .rj-lg-inner { display: flex; flex-direction: column; align-items: center; gap: 52px; }
+        #{{ $uid }} .rj-lg-inner {
+            position: relative; z-index: 1;
+            display: flex; flex-direction: column; align-items: center; gap: 52px;
+        }
 
         #{{ $uid }} .rj-lg-badge { display: flex; align-items: center; gap: 14px; padding: 0 20px; text-align: center; }
         #{{ $uid }} .rj-lg-bars { display: inline-flex; gap: 3px; height: 15px; flex: none; }
@@ -117,7 +122,7 @@
         /* Logos are ALWAYS white, whatever color the source file is */
         #{{ $uid }} .rj-lg-item img {
             display: block; height: 30px; max-width: 150px; width: auto; object-fit: contain;
-            filter: brightness(0) invert(1); opacity: .55;
+            filter: brightness(0) invert(1); opacity: .6;
             transition: opacity .3s ease, transform .3s cubic-bezier(.2,.8,.2,1), filter .3s ease;
         }
         #{{ $uid }} .rj-lg-item:hover img {
@@ -129,31 +134,48 @@
             font: 700 12px/1 ui-monospace, Menlo, Consolas, monospace; letter-spacing: .1em; color: #fff; white-space: nowrap;
         }
 
-        /* Marquee */
+        /* ---------- Marquee: always runs, never pauses ---------- */
         #{{ $uid }} .is-marquee {
             overflow: hidden;
             -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
                     mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
         }
         #{{ $uid }} .is-marquee .rj-lg-track {
-            display: flex; width: max-content;
+            display: flex; width: max-content; will-change: transform;
             animation: rjLgScroll {{ $speed }}s linear infinite;
+            animation-play-state: running;
         }
-        #{{ $uid }} .is-marquee:hover .rj-lg-track { animation-play-state: paused; }
 
-        /* Static grid */
+        /* Static grid (only when marquee is switched off) */
         #{{ $uid }} .is-static .rj-lg-track { display: flex; justify-content: center; padding: 0 24px; }
         #{{ $uid }} .is-static .rj-lg-set { flex-wrap: wrap; justify-content: center; gap: 56px 80px; padding-right: 0; }
         #{{ $uid }} .is-static .rj-lg-item { opacity: 0; animation: rjLgIn .8s ease forwards; animation-delay: calc(var(--i) * .1s); }
 
-        @keyframes rjLgScroll { from { transform: translateX(0); } to { transform: translateX(-{{ round(100 / $copies, 4) }}%); } }
+        @keyframes rjLgScroll {
+            from { transform: translate3d(0, 0, 0); }
+            to   { transform: translate3d(-{{ $shift }}%, 0, 0); }
+        }
         @keyframes rjLgIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 
-        @media (prefers-reduced-motion: reduce) {
-            #{{ $uid }} .is-marquee .rj-lg-track { animation: none; }
+        /* ---------- Bottom line, + marks and HUD ---------- */
+        #{{ $uid }} .rj-lg-line { position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: rgba(255,255,255,.14); }
+        #{{ $uid }} .rj-lg-line i { position: absolute; top: -6px; width: 13px; height: 13px; }
+        #{{ $uid }} .rj-lg-line i::before, #{{ $uid }} .rj-lg-line i::after { content: ""; position: absolute; background: #fff; }
+        #{{ $uid }} .rj-lg-line i::before { left: 0; right: 0; top: 6px; height: 1px; }
+        #{{ $uid }} .rj-lg-line i::after { top: 0; bottom: 0; left: 6px; width: 1px; }
+        #{{ $uid }} .rj-lg-line i:first-child { left: 18px; }
+        #{{ $uid }} .rj-lg-line i:last-child { right: 18px; }
+
+        #{{ $uid }} .rj-lg-hud {
+            position: absolute; bottom: 22px; display: flex; align-items: center; gap: 14px;
+            font: 700 12px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .08em; color: rgba(255,255,255,.75);
         }
+        #{{ $uid }} .rj-lg-hl { left: 22px; } #{{ $uid }} .rj-lg-hr { right: 22px; }
+        #{{ $uid }} .rj-lg-hud b { display: block; width: 3px; height: 26px; background: #fff; }
+
         @media (max-width: 768px) {
-            #{{ $uid }}.rj-lg { padding: 80px 0 60px; }
+            #{{ $uid }}.rj-lg { --ov: 32px; padding: calc(var(--ov) + 48px) 0 80px; }
+            #{{ $uid }} .rj-lg-glass { height: 140px; }
             #{{ $uid }} .rj-lg-inner { gap: 36px; }
             #{{ $uid }} .rj-lg-bars { display: none; }
             #{{ $uid }} .rj-lg-set { gap: 56px; padding-right: 56px; }
