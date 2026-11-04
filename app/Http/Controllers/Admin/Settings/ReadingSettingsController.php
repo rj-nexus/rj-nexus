@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Settings;
 
 use Illuminate\Http\Request;
 use App\Models\Option;
+use App\Models\Post;
 
 class ReadingSettingsController extends BaseSettingsController
 {
@@ -17,7 +18,12 @@ class ReadingSettingsController extends BaseSettingsController
             'feedItems' => $this->feedItems(),
         ];
 
-        return view('admin.settings.reading', compact('options', 'data'));
+        $pages = Post::where('type', 'page')
+            ->where('status', 'published')
+            ->orderBy('title')
+            ->get();
+
+        return view('admin.settings.reading', compact('options', 'data', 'pages'));
     }
 
     public function update(Request $request)
