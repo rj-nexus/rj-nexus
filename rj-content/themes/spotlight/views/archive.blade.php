@@ -2,17 +2,59 @@
 
 @push('styles')
     <style>
+        .rj-frontend-main {
+            position: relative;
+            isolation: isolate;
+        }
+
+        .rj-bg-video {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
+            background: #020617;
+        }
+        .rj-bg-video-inner {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            isolation: isolate;
+        }
+        .rj-bg-video-inner video {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(1) contrast(1.1) brightness(.9);
+        }
+        .rj-bg-video-tint {
+            position: absolute;
+            inset: 0;
+            background: #1d4ed8;
+            mix-blend-mode: color;
+        }
+        .rj-bg-video-shade {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(2, 6, 23, .55), rgba(2, 6, 23, .75));
+        }
+
         .rj-archive-wrapper {
+            position: relative;
+            z-index: 1;
             max-width: var(--rj-container);
             margin: 0 auto;
             padding: 64px 24px 96px;
             display: grid;
-            grid-template-columns: 300px 1fr; /* Sol tərəf sidebar, sağ tərəf postlar */
+            grid-template-columns: 300px 1fr;
             gap: 48px;
             align-items: start;
         }
 
-        /* === SIDEBAR === */
         .rj-sidebar {
             position: sticky;
             top: 100px;
@@ -38,7 +80,6 @@
             letter-spacing: -0.02em;
         }
 
-        /* Axtarış */
         .rj-search-form {
             position: relative;
             display: flex;
@@ -76,7 +117,6 @@
             color: var(--rj-primary);
         }
 
-        /* Kateqoriyalar və Linklər */
         .rj-cat-list {
             list-style: none;
             padding: 0;
@@ -105,7 +145,6 @@
             border: 1px solid var(--rj-border);
         }
 
-        /* Son Yazılar */
         .rj-recent-list {
             list-style: none;
             padding: 0;
@@ -152,7 +191,6 @@
             color: var(--rj-muted);
         }
 
-        /* Teqlər */
         .rj-tag-cloud {
             display: flex;
             flex-wrap: wrap;
@@ -175,7 +213,6 @@
             background: color-mix(in srgb, var(--rj-primary) 8%, var(--rj-bg));
         }
 
-        /* === SAĞ TƏRƏF (POSTLAR) === */
         .rj-archive-main {
             display: flex;
             flex-direction: column;
@@ -251,10 +288,9 @@
             cursor: default;
         }
 
-        /* Mobil uyğunluq */
         @media (max-width: 968px) {
             .rj-archive-wrapper {
-                grid-template-columns: 1fr; /* Sidebar yuxarı keçir */
+                grid-template-columns: 1fr;
             }
             .rj-sidebar {
                 position: static;
@@ -275,11 +311,15 @@
 @php
     $locale = app()->getLocale();
 
-    // Customizer dəyərlərini oxuyuruq
     $showExcerpt = filter_var(rj_theme_mod('show_excerpt', true, 'blog_list'), FILTER_VALIDATE_BOOLEAN);
-    $gridColumns = rj_theme_mod('columns', '2', 'blog_list'); // Grid-i 2 sütuna saldıq ki, sidebar ilə yer olsun
+    $gridColumns = rj_theme_mod('columns', '2', 'blog_list');
 
-    // Sidebar üçün məlumatları bazadan çəkirik
+    $defaultBgVideo = 'https://raw.githubusercontent.com/rj-nexus/spotlight/main/assets/video/background.mp4';
+    $bgVideo = trim((string) rj_theme_mod('background_video', '', 'blog_list'));
+    if ($bgVideo === '') {
+        $bgVideo = $defaultBgVideo;
+    }
+
     try {
         $sidebarCategories = \App\Models\Category::take(10)->get();
         $sidebarRecent = \App\Models\Post::where('type', 'post')->where('status', 'published')->orderByDesc('published_at')->take(5)->get();
@@ -302,12 +342,18 @@
 </header>
 
 <main class="rj-frontend-main">
+    <div class="rj-bg-video" aria-hidden="true">
+        <div class="rj-bg-video-inner">
+            <video autoplay muted loop playsinline preload="auto" src="{{ $bgVideo }}"></video>
+            <div class="rj-bg-video-tint"></div>
+            <div class="rj-bg-video-shade"></div>
+        </div>
+    </div>
+
     <div class="rj-archive-wrapper">
 
-        {{-- SOL TƏRƏF: SIDEBAR --}}
         <aside class="rj-sidebar">
 
-            {{-- 1. Axtarış --}}
             <div class="rj-widget">
                 <h3 class="rj-widget-title">{{ __('Search') }}</h3>
                 <form method="GET" action="{{ $blogUrl }}" class="rj-search-form">
@@ -318,7 +364,6 @@
                 </form>
             </div>
 
-            {{-- 2. Kateqoriyalar --}}
             @if($sidebarCategories->isNotEmpty())
                 <div class="rj-widget">
                     <h3 class="rj-widget-title">{{ __('Categories') }}</h3>
@@ -335,7 +380,6 @@
                 </div>
             @endif
 
-            {{-- 3. Son Yazılar --}}
             @if($sidebarRecent->isNotEmpty())
                 <div class="rj-widget">
                     <h3 class="rj-widget-title">{{ __('Recent Posts') }}</h3>
@@ -357,7 +401,6 @@
                 </div>
             @endif
 
-            {{-- 4. Teqlər --}}
             @if($sidebarTags->isNotEmpty())
                 <div class="rj-widget">
                     <h3 class="rj-widget-title">{{ __('Tags') }}</h3>
@@ -373,7 +416,6 @@
 
         </aside>
 
-        {{-- SAĞ TƏRƏF: POSTLAR --}}
         <div class="rj-archive-main">
             @if($posts && $posts->isNotEmpty())
                 <div class="rj-archive-grid" data-cols="{{ $gridColumns }}">
