@@ -28,7 +28,7 @@ class SpotlightTestimonialsWidget extends BaseWidget
 
     public function description(): string
     {
-        return __('A 6-card testimonial grid with a rotating background globe and glowing effects.');
+        return __('A 6-card testimonial marquee with a rotating background globe.');
     }
 
     public function schema(): array
@@ -62,7 +62,7 @@ class SpotlightTestimonialsWidget extends BaseWidget
                 'name' => 'title',
                 'type' => 'text',
                 'label' => __('Main Title'),
-                'default' => 'What people say about Qore.',
+                'default' => 'What people say about RJ Nexus.',
             ],
             [
                 'name' => 'testimonials',
@@ -73,37 +73,37 @@ class SpotlightTestimonialsWidget extends BaseWidget
                     [
                         'name' => 'Ethan Moore',
                         'username' => '@ethanmoore',
-                        'text' => 'Started with the free plan on @qore and didn\'t expect much. But the speed, accuracy, and clean UI convinced me to upgrade in just a few days.',
+                        'text' => 'Started with the free plan on @rjnexus and didn\'t expect much. But the speed, accuracy, and clean UI convinced me to upgrade in just a few days.',
                         'image' => '',
                     ],
                     [
                         'name' => 'Sarah Chen',
                         'username' => '@sarahchen',
-                        'text' => '@qore helps me organize creative tasks way faster. The image prompt support is smooth and the AI responses feel human.',
+                        'text' => '@rjnexus helps me organize creative tasks way faster. The image prompt support is smooth and the AI responses feel human.',
                         'image' => '',
                     ],
                     [
                         'name' => 'Olivia Tran',
                         'username' => '@oliviatran',
-                        'text' => 'As a marketer, I rely on @qore daily. It cuts the noise and delivers clear, brand-friendly copy every time.',
+                        'text' => 'As a marketer, I rely on @rjnexus daily. It cuts the noise and delivers clear, brand-friendly copy every time.',
                         'image' => '',
                     ],
                     [
                         'name' => 'Lucas Bennett',
                         'username' => '@lucasbennett',
-                        'text' => '@qore helps me organize creative tasks way faster. The image prompt support is smooth and the AI responses feel human.',
+                        'text' => '@rjnexus helps me organize creative tasks way faster. The image prompt support is smooth and the AI responses feel human.',
                         'image' => '',
                     ],
                     [
                         'name' => 'James Wilson',
                         'username' => '@jameswilson',
-                        'text' => '@qore helps me organize creative tasks way faster. The image prompt support is smooth and the AI responses feel human.',
+                        'text' => '@rjnexus helps me organize creative tasks way faster. The image prompt support is smooth and the AI responses feel human.',
                         'image' => '',
                     ],
                     [
                         'name' => 'Elena Rossi',
                         'username' => '@elenarossi',
-                        'text' => 'I use @qore to generate ideas for my startup. The prompts are clean and the output is ready to use.',
+                        'text' => 'I use @rjnexus to generate ideas for my startup. The prompts are clean and the output is ready to use.',
                         'image' => '',
                     ],
                 ],
