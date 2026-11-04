@@ -262,7 +262,7 @@ class WidgetRegistry
             $namespace = $activeTheme->metadata()['namespace'] ?? '';
 
             if (!empty($namespace) && str_starts_with($class, $namespace . '\\')) {
-                return 'theme';
+                return 'plugin';
             }
         }
 
