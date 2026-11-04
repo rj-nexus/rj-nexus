@@ -5,6 +5,7 @@ namespace Spotlight;
 use Illuminate\Support\ServiceProvider;
 use Spotlight\Widgets\SpotlightHeroWidget;
 use Spotlight\Widgets\SpotlightHeaderWidget;
+use Spotlight\Widgets\SpotlightLogosWidget;
 
 class SpotlightServiceProvider extends ServiceProvider
 {
@@ -24,6 +25,7 @@ class SpotlightServiceProvider extends ServiceProvider
                 $widgets = [
                     new SpotlightHeroWidget(),
                     new SpotlightHeaderWidget(),
+                    new SpotlightLogosWidget(),
                 ];
                 return array_merge($existing, $widgets);
             });
