@@ -28,129 +28,91 @@ class SpotlightPricingWidget extends BaseWidget
 
     public function description(): string
     {
-        return __('A pricing section with 3 cards, highlighted popular plan, and animated features.');
+        return __('Glass pricing cards with cursor spotlight, border beam, lamp light, 3D tilt and a monthly/yearly toggle.');
     }
 
     public function schema(): array
     {
         return [
             [
+                'name' => 'badge_text',
+                'type' => 'text',
+                'label' => __('Badge Text'),
+                'default' => __('Simple, transparent pricing'),
+            ],
+            [
+                'name' => 'title',
+                'type' => 'text',
+                'label' => __('Title'),
+                'default' => __('Pick a plan. Start creating.'),
+            ],
+            [
+                'name' => 'subtitle',
+                'type' => 'textarea',
+                'label' => __('Subtitle'),
+                'default' => __('Start free and upgrade when you grow. No hidden fees, cancel anytime.'),
+            ],
+            [
+                'name' => 'plans',
+                'type' => 'textarea',
+                'label' => __('Plans (max 4, separate plans with a line containing ---)'),
+                'default' => "Name: Starter\nPrice: 0\nDesc: Everything you need to start creating.\nButton: Get started | /register\n- 50 AI generations / month\n- 1 workspace\n- Community support\n- ~Priority generation\n- ~Custom models\n---\nName: Pro\nBadge: Most popular\nFeatured: yes\nPrice: 29\nYearly: 24\nDesc: For creators and teams who ship every week.\nButton: Start free trial | /register\n- Unlimited generations\n- Multi-model engine\n- 10 workspaces\n- Priority support\n- Export in 4K\n---\nName: Business\nPrice: 99\nYearly: 79\nDesc: Advanced control for growing companies.\nButton: Contact sales | /contact\n- Everything in Pro\n- Unlimited seats\n- Custom model tuning\n- SSO and audit logs\n- Dedicated manager",
+                'help' => __('Keys: Name, Price, Yearly (monthly price when billed yearly), Period, Desc, Badge, Featured (yes), Hue (0-360), Button (Text | URL). Lines starting with "-" are features; use "- ~Text" for a feature that is not included. A non-numeric price such as "Custom" is shown as text.'),
+            ],
+            [
+                'name' => 'currency',
+                'type' => 'text',
+                'label' => __('Currency Symbol'),
+                'default' => '$',
+            ],
+            [
+                'name' => 'billing_toggle',
+                'type' => 'toggle',
+                'label' => __('Show Monthly / Yearly Toggle'),
+                'default' => true,
+                'help' => __('Only appears when at least one plan has a Yearly price.'),
+            ],
+            [
+                'name' => 'monthly_label',
+                'type' => 'text',
+                'label' => __('Monthly Label'),
+                'default' => __('Monthly'),
+            ],
+            [
+                'name' => 'yearly_label',
+                'type' => 'text',
+                'label' => __('Yearly Label'),
+                'default' => __('Yearly'),
+            ],
+            [
+                'name' => 'save_text',
+                'type' => 'text',
+                'label' => __('Yearly Savings Tag'),
+                'default' => __('Save 20%'),
+            ],
+            [
+                'name' => 'note',
+                'type' => 'text',
+                'label' => __('Footnote'),
+                'default' => __('No credit card required · Cancel anytime'),
+            ],
+            [
                 'name' => 'show_hud',
                 'type' => 'toggle',
-                'label' => __('Show HUD and Lines'),
+                'label' => __('Show HUD Labels'),
                 'default' => true,
             ],
             [
                 'name' => 'hud_left',
                 'type' => 'text',
                 'label' => __('HUD Left Text'),
-                'default' => '[ 06 / 09 ]',
+                'default' => '[ 05 / 09 ]',
             ],
             [
                 'name' => 'hud_right',
                 'type' => 'text',
                 'label' => __('HUD Right Text'),
                 'default' => '[ PRICING ]',
-            ],
-            [
-                'name' => 'badge_text',
-                'type' => 'text',
-                'label' => __('Top Badge Text'),
-                'default' => '||| PLANS FOR EVERY CREATOR. |||',
-            ],
-            [
-                'name' => 'title',
-                'type' => 'text',
-                'label' => __('Main Title'),
-                'default' => 'Flexible pricing that scales with you',
-            ],
-            [
-                'name' => 'plans',
-                'type' => 'repeater',
-                'label' => __('Pricing Plans'),
-                'max_items' => 3,
-                'default' => [
-                    [
-                        'is_popular' => false,
-                        'plan_name' => 'Free Plan',
-                        'price' => '$0',
-                        'period' => 'forever',
-                        'description' => 'Perfect for testing and light creative needs.',
-                        'button_text' => 'Start free trial',
-                        'button_url' => '/',
-                        'features' => "50 prompts / mo\n10 images / mo (up to 5MB)\n2 videos / mo (720p)\nBasic AI model",
-                    ],
-                    [
-                        'is_popular' => true,
-                        'plan_name' => 'Plus Plan',
-                        'price' => '$19',
-                        'period' => 'per user / mo',
-                        'description' => 'Unlock more power with advanced models and bigger limits.',
-                        'button_text' => 'Start free trial',
-                        'button_url' => '/',
-                        'features' => "500 prompts / mo\n100 images / mo (up to 10MB)\n20 videos / mo (1080p)\nWebsite builder (basic)\nBasic AI model",
-                    ],
-                    [
-                        'is_popular' => false,
-                        'plan_name' => 'Pro Plan',
-                        'price' => '$49',
-                        'period' => 'per user / mo',
-                        'description' => 'Everything unlimited. For pros, teams, and power creators.',
-                        'button_text' => 'Start free trial',
-                        'button_url' => '/',
-                        'features' => "Unlimited prompts\nUnlimited images (up to 25MB)\n100+ videos / mo (4K)\nWebsite builder (advanced)\nAPI access\nAdvanced AI model",
-                    ],
-                ],
-                'fields' => [
-                    [
-                        'name' => 'is_popular',
-                        'type' => 'toggle',
-                        'label' => __('Highlight this plan?'),
-                        'default' => false,
-                    ],
-                    [
-                        'name' => 'plan_name',
-                        'type' => 'text',
-                        'label' => __('Plan Name'),
-                        'default' => 'New Plan',
-                    ],
-                    [
-                        'name' => 'price',
-                        'type' => 'text',
-                        'label' => __('Price'),
-                        'default' => '$0',
-                    ],
-                    [
-                        'name' => 'period',
-                        'type' => 'text',
-                        'label' => __('Period'),
-                        'default' => 'per month',
-                    ],
-                    [
-                        'name' => 'description',
-                        'type' => 'textarea',
-                        'label' => __('Short Description'),
-                        'default' => 'Plan description goes here.',
-                    ],
-                    [
-                        'name' => 'button_text',
-                        'type' => 'text',
-                        'label' => __('Button Text'),
-                        'default' => 'Get Started',
-                    ],
-                    [
-                        'name' => 'button_url',
-                        'type' => 'text',
-                        'label' => __('Button URL'),
-                        'default' => '/',
-                    ],
-                    [
-                        'name' => 'features',
-                        'type' => 'textarea',
-                        'label' => __('Features (One per line)'),
-                        'default' => "Feature 1\nFeature 2\nFeature 3",
-                    ],
-                ],
             ],
         ];
     }
