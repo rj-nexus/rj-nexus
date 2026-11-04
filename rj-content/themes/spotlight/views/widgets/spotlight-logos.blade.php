@@ -8,8 +8,16 @@
         foreach ($lines as $line) {
             $line = trim($line);
             if ($line !== '') {
-                // GitHub raw linklərini jsDelivr CDN ilə əvəz et (MIME problemi üçün)
-                if (str_contains($line, 'raw.githubusercontent.com')) {
+                // GitHub blob linkini jsDelivr CDN linkinə çeviririk (MIME problemini həll edir)
+                if (str_contains($line, 'github.com') && str_contains($line, '/blob/')) {
+                    $line = str_replace(
+                        ['github.com/', '/blob/'],
+                        ['cdn.jsdelivr.net/gh/', '/'],
+                        $line
+                    );
+                }
+                // Əgər raw linkdirsə
+                elseif (str_contains($line, 'raw.githubusercontent.com')) {
                     $line = str_replace(
                         'raw.githubusercontent.com/',
                         'cdn.jsdelivr.net/gh/',
@@ -108,7 +116,7 @@
             font-weight: 700;
             letter-spacing: 0.2em;
             text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.85); /* Ağ rəng */
+            color: rgba(255, 255, 255, 0.85); /* Təmiz Ağ */
         }
 
         #{{ $uid }} .rj-logos-grid {
@@ -137,19 +145,18 @@
             max-width: 140px;
             width: auto;
             object-fit: contain;
-            /* Loqoları ağ və boz etmək üçün düzgün filtr */
-            filter: grayscale(100%) brightness(0) invert(1);
+            /* Loqoların təbii ağ rəngini saxlayırıq, sadəcə şəffaflıq veririk */
             opacity: 0.5;
             transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
-        /* Hover edəndə tam ağ olsun */
+        /* Hover edəndə parlaq ağ olsun */
         #{{ $uid }} .rj-logo-item:hover img {
             opacity: 1;
             transform: scale(1.05);
         }
 
-        /* Şəkil yüklənməzsə görünəcək mətn */
+        /* Şəkil yüklənməzsə görünəcək ehtiyat mətn */
         #{{ $uid }} .rj-logo-fallback {
             display: flex;
             align-items: center;
