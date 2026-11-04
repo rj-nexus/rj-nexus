@@ -1,9 +1,9 @@
 {
     "name": "Spotlight",
     "slug": "spotlight",
-    "version": "1.0.0",
-    "author": "RJ CMS",
-    "author_url": "https://github.com/mr-ruhid",
+    "version": "0.3.0",
+    "author": "RJ Nexus",
+    "author_url": "https://github.com/rj-nexus",
     "description": "Dark, modern product showcase theme with builder-first architecture.",
     "license": "MIT",
     "preview": "screenshot.png",
@@ -92,6 +92,23 @@
                     "container_width": { "type": "range", "label": "Container Width", "default": 1200, "min": 960, "max": 1600, "step": 20, "suffix": "px" },
                     "sidebar_position": { "type": "select", "label": "Sidebar Position", "default": "right", "options": { "right": "Right", "left": "Left", "none": "No Sidebar" } },
                     "sticky_header": { "type": "toggle", "label": "Sticky Header", "default": true }
+                }
+            },
+            "blog_list": {
+                "label": "Blog List (Archive)",
+                "icon": "list",
+                "controls": {
+                    "show_excerpt": { "type": "toggle", "label": "Show Excerpt in Cards", "default": true },
+                    "columns": { "type": "select", "label": "Grid Columns", "default": "3", "options": { "1": "1 Column", "2": "2 Columns", "3": "3 Columns" } }
+                }
+            },
+            "blog_single": {
+                "label": "Blog Details (Single)",
+                "icon": "document",
+                "controls": {
+                    "show_featured_image": { "type": "toggle", "label": "Show Featured Image", "default": true },
+                    "show_related_posts": { "type": "toggle", "label": "Show Related Posts", "default": true },
+                    "content_width": { "type": "select", "label": "Content Width", "default": "normal", "options": { "normal": "Normal (800px)", "wide": "Wide (1000px)", "full": "Full Width" } }
                 }
             },
             "header": {
