@@ -28,29 +28,47 @@ class SpotlightHeroWidget extends BaseWidget
 
     public function description(): string
     {
-        return __('A dark, modern hero section with a badge, gradient text, and dual CTA buttons.');
+        return __('A cinematic, full-screen hero section with background video/image support, large typography, and dual CTAs.');
     }
 
     public function schema(): array
     {
         return [
             [
+                'name' => 'bg_video',
+                'type' => 'media',
+                'label' => __('Background Video (MP4)'),
+                'default' => '',
+            ],
+            [
+                'name' => 'bg_image',
+                'type' => 'media',
+                'label' => __('Background Image (Fallback)'),
+                'default' => '',
+            ],
+            [
+                'name' => 'overlay_opacity',
+                'type' => 'number',
+                'label' => __('Overlay Opacity (0-100)'),
+                'default' => 60,
+            ],
+            [
                 'name' => 'badge_text',
                 'type' => 'text',
                 'label' => __('Badge Text'),
-                'default' => __('Now Live'),
+                'default' => __('Your All-In-One AI Creation Platform'),
             ],
             [
                 'name' => 'title',
                 'type' => 'text',
                 'label' => __('Main Title'),
-                'default' => __('Welcome to the Future'),
+                'default' => __('Create Smarter. Launch Faster.'),
             ],
             [
                 'name' => 'subtitle',
                 'type' => 'textarea',
                 'label' => __('Subtitle'),
-                'default' => __('A modern, dark-first platform built to showcase your work with clarity and style.'),
+                'default' => __('Design, generate, and build anything with a multi-model AI engine — one platform, endless possibilities.'),
             ],
             [
                 'name' => 'primary_btn_text',
