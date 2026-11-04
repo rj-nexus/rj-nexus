@@ -20,8 +20,7 @@
     $showBackToTop = filter_var($settings['show_back_to_top'] ?? true, FILTER_VALIDATE_BOOLEAN);
 @endphp
 
-{{-- BİRBAŞA HTML DAXİLİNDƏ FON RƏNGİ VERİRİK Kİ, HEÇ BİR CSS ONU POZA BİLMƏSİN --}}
-<footer class="rj-ft-section" id="{{ $uid }}" style="background-color: #0a0a0f; position: relative; z-index: 10; isolation: isolate; width: 100%;">
+<footer class="rj-ft-section" id="{{ $uid }}" style="background-color: #0a0a0f; position: relative; z-index: 50; width: 100vw; margin-left: calc(-50vw + 50%);">
 
     <div class="rj-ft-inner">
 
