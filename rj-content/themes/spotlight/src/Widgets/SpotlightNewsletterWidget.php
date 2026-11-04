@@ -28,7 +28,7 @@ class SpotlightNewsletterWidget extends BaseWidget
 
     public function description(): string
     {
-        return __('A stunning dark-mode newsletter signup with glowing effects and AJAX submission.');
+        return __('A premium glass newsletter signup with a black-hole button that swallows the form on success.');
     }
 
     public function schema(): array
@@ -39,6 +39,12 @@ class SpotlightNewsletterWidget extends BaseWidget
                 'type' => 'toggle',
                 'label' => __('Show HUD and Lines'),
                 'default' => true,
+            ],
+            [
+                'name' => 'show_bottom_line',
+                'type' => 'toggle',
+                'label' => __('Show Bottom Line'),
+                'default' => false,
             ],
             [
                 'name' => 'hud_left',
@@ -56,7 +62,7 @@ class SpotlightNewsletterWidget extends BaseWidget
                 'name' => 'badge_text',
                 'type' => 'text',
                 'label' => __('Badge Text'),
-                'default' => '||| STAY IN THE LOOP. |||',
+                'default' => 'STAY IN THE LOOP.',
             ],
             [
                 'name' => 'title',
@@ -91,8 +97,20 @@ class SpotlightNewsletterWidget extends BaseWidget
             [
                 'name' => 'glow_color',
                 'type' => 'color',
-                'label' => __('Glow Color'),
+                'label' => __('Black Hole Color (after sending)'),
                 'default' => '#3b82f6',
+            ],
+            [
+                'name' => 'success_title',
+                'type' => 'text',
+                'label' => __('Success Title'),
+                'default' => "You're on the list!",
+            ],
+            [
+                'name' => 'success_text',
+                'type' => 'text',
+                'label' => __('Success Text'),
+                'default' => 'Thanks for subscribing. Keep an eye on your inbox.',
             ],
         ];
     }
