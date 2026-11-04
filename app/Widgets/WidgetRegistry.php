@@ -256,7 +256,17 @@ class WidgetRegistry
     {
         $class = get_class($widget);
 
-        if (str_starts_with($class, 'RjPlugins\\') || str_starts_with($class, 'RjCommerce\\') || str_starts_with($class, 'VelvetAura\\')) {
+        $activeTheme = \App\Models\Theme::active();
+
+        if ($activeTheme) {
+            $namespace = $activeTheme->metadata()['namespace'] ?? '';
+
+            if (!empty($namespace) && str_starts_with($class, $namespace . '\\')) {
+                return 'theme';
+            }
+        }
+
+        if (str_starts_with($class, 'RjPlugins\\') || str_starts_with($class, 'RjCommerce\\')) {
             return 'plugin';
         }
 
