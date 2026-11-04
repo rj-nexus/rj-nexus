@@ -5,20 +5,20 @@
     $hudLeft = $settings['hud_left'] ?? '[ 07 / 09 ]';
     $hudRight = $settings['hud_right'] ?? '[ TESTIMONIALS ]';
     $badge = $settings['badge_text'] ?? '';
-    $title = $settings['title'] ?? '';
+    $title = $settings['title'] ?? 'What people say about RJ Nexus.';
 
     $testimonials = $settings['testimonials'] ?? [];
     if (!is_array($testimonials)) $testimonials = [];
 
-    // Fallback əgər məlumat yoxdursa
+    // Fallback əgər məlumat yoxdursa (RJ Nexus olaraq dəyişdirildi)
     if (count($testimonials) < 6) {
         $fallback = [
-            ['name' => 'Ethan Moore', 'username' => '@ethanmoore', 'text' => 'Started with the free plan on @qore and didn\'t expect much.', 'image' => ''],
-            ['name' => 'Sarah Chen', 'username' => '@sarahchen', 'text' => '@qore helps me organize creative tasks way faster.', 'image' => ''],
-            ['name' => 'Olivia Tran', 'username' => '@oliviatran', 'text' => 'As a marketer, I rely on @qore daily.', 'image' => ''],
+            ['name' => 'Ethan Moore', 'username' => '@ethanmoore', 'text' => 'Started with the free plan on @rjnexus and didn\'t expect much.', 'image' => ''],
+            ['name' => 'Sarah Chen', 'username' => '@sarahchen', 'text' => '@rjnexus helps me organize creative tasks way faster.', 'image' => ''],
+            ['name' => 'Olivia Tran', 'username' => '@oliviatran', 'text' => 'As a marketer, I rely on @rjnexus daily.', 'image' => ''],
             ['name' => 'Lucas Bennett', 'username' => '@lucasbennett', 'text' => 'The image prompt support is smooth and the AI responses feel human.', 'image' => ''],
-            ['name' => 'James Wilson', 'username' => '@jameswilson', 'text' => '@qore helps me organize creative tasks way faster.', 'image' => ''],
-            ['name' => 'Elena Rossi', 'username' => '@elenarossi', 'text' => 'I use @qore to generate ideas for my startup.', 'image' => ''],
+            ['name' => 'James Wilson', 'username' => '@jameswilson', 'text' => '@rjnexus helps me organize creative tasks way faster.', 'image' => ''],
+            ['name' => 'Elena Rossi', 'username' => '@elenarossi', 'text' => 'I use @rjnexus to generate ideas for my startup.', 'image' => ''],
         ];
         $testimonials = array_merge($testimonials, array_slice($fallback, count($testimonials)));
     }
@@ -128,7 +128,7 @@
             position: relative;
             width: 100%;
             background: transparent;
-            padding: 140px 0 120px; /* Yanlardan padding sildik ki, lent kənara çıxsın */
+            padding: 140px 0 120px;
             overflow: hidden;
             display: flex;
             justify-content: center;
@@ -209,7 +209,6 @@
             width: 100vw;
             left: 50%;
             transform: translateX(-50%);
-            /* Kənarları yumşaq itirmək üçün mask */
             mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
             -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
         }
@@ -235,7 +234,6 @@
             animation: scrollRTL 40s linear infinite;
         }
 
-        /* Üzərinə gələndə dayansın ki, oxumaq mümkün olsun */
         #{{ $uid }} .rj-testi-row:hover .rj-testi-track {
             animation-play-state: paused;
         }
