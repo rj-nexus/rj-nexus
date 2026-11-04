@@ -35,6 +35,19 @@ class SpotlightTabsWidget extends BaseWidget
     {
         return [
             [
+                'name' => 'hud_left',
+                'type' => 'text',
+                'label' => __('Left HUD Text'),
+                'default' => '[ 03 / 09 ]',
+            ],
+            [
+                'name' => 'hud_right_format',
+                'type' => 'text',
+                'label' => __('Right HUD Format'),
+                'default' => '[ {current} / {total} ]',
+                'help' => __('Use {current} for active tab number and {total} for total tabs.'),
+            ],
+            [
                 'name' => 'tabs',
                 'type' => 'repeater',
                 'label' => __('Tabs (Max 9)'),

@@ -13,14 +13,15 @@
         ];
     }
 
-    // One planet, one hue per tab (max 9): only the colors change, never the shape
     $hues    = [262, 195, 330, 155, 32, 220, 290, 95, 355];
     $hueList = array_slice($hues, 0, count($tabs));
     $total   = str_pad((string) count($tabs), 2, '0', STR_PAD_LEFT);
-    $hudLeft = $settings['hud_left'] ?? '[ 03 / 09 ]';
+
+    $hudLeft  = $settings['hud_left'] ?? '[ 03 / 09 ]';
+    $hudRight = $settings['hud_right_format'] ?? '[ {current} / {total} ]';
 @endphp
 
-<section class="rj-tabs-section" id="{{ $uid }}" data-side="left">
+<section class="rj-tabs-section" id="{{ $uid }}" data-side="left" data-hud-right="{{ $hudRight }}">
     <div class="rj-pl-wrap" aria-hidden="true">
         <div class="rj-pl"><div class="rj-pl-sphere"></div></div>
     </div>
@@ -49,7 +50,6 @@
         </div>
     </div>
 
-    {{-- Line, + marks and HUD only at the bottom --}}
     <div class="rj-tabs-hud rj-hl"><b></b>{{ $hudLeft }}</div>
     <div class="rj-tabs-hud rj-hr"><span class="rj-tabs-count">[ 01 / {{ $total }} ]</span><b></b></div>
     <span class="rj-tabs-line"><i></i><i></i></span>
@@ -65,7 +65,6 @@
             transition: --rj-h 1s ease;
         }
 
-        /* ---------- Planet (pure CSS) ---------- */
         #{{ $uid }} .rj-pl-wrap {
             position: absolute; top: 50%; left: 13%; width: var(--pl); aspect-ratio: 1; translate: -50% -50%;
             z-index: 0; pointer-events: none; transition: left 1.1s cubic-bezier(.65, 0, .25, 1);
@@ -74,7 +73,6 @@
         #{{ $uid }} .rj-pl-wrap.is-switching { animation: rjPlIn .9s cubic-bezier(.2, .8, .2, 1) both; }
         #{{ $uid }} .rj-pl { position: absolute; inset: 0; animation: rjPlFloat 10s ease-in-out infinite; }
 
-        /* rings: back half behind the sphere, front half (clipped) in front of it */
         #{{ $uid }} .rj-pl::before, #{{ $uid }} .rj-pl::after {
             content: ''; position: absolute; inset: -45%; border-radius: 50%;
             border: calc(var(--pl) * .03) solid hsl(var(--rj-h) 70% 75% / .5);
@@ -89,7 +87,6 @@
             background: hsl(var(--rj-h) 55% 16%);
             box-shadow: 0 0 90px hsl(var(--rj-h) 90% 55% / .35), inset -28px -18px 60px rgba(0,0,0,.85);
         }
-        /* surface bands + storms, twice as wide as the sphere so it can scroll seamlessly (= rotation) */
         #{{ $uid }} .rj-pl-sphere::before {
             content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 200%; background-size: 50% 100%;
             background:
@@ -104,7 +101,6 @@
             background-size: 50% 100%;
             animation: rjPlSpin 48s linear infinite;
         }
-        /* light from top-left, night side bottom-right, dark limb */
         #{{ $uid }} .rj-pl-sphere::after {
             content: ''; position: absolute; inset: 0; border-radius: 50%;
             background:
@@ -117,7 +113,6 @@
         @keyframes rjPlFloat { 0%, 100% { transform: translateY(-10px) rotate(-3deg); } 50% { transform: translateY(10px) rotate(3deg); } }
         @keyframes rjPlIn { from { scale: .7; opacity: .2; } to { scale: 1; opacity: 1; } }
 
-        /* ---------- Tabs ---------- */
         #{{ $uid }} .rj-tabs-inner { position: relative; z-index: 1; max-width: 1000px; width: 100%; display: flex; flex-direction: column; align-items: center; }
 
         #{{ $uid }} .rj-tabs-nav {
@@ -172,7 +167,6 @@
         }
         #{{ $uid }} .rj-tabs-desc { margin: 0; max-width: 680px; font-size: clamp(16px, 1.8vw, 20px); line-height: 1.6; color: rgba(255,255,255,.68); }
 
-        /* ---------- Bottom line + HUD ---------- */
         #{{ $uid }} .rj-tabs-line { position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: rgba(255,255,255,.14); }
         #{{ $uid }} .rj-tabs-line i { position: absolute; top: -6px; width: 13px; height: 13px; }
         #{{ $uid }} .rj-tabs-line i::before, #{{ $uid }} .rj-tabs-line i::after { content: ''; position: absolute; background: #fff; }
@@ -210,6 +204,7 @@
         var count = root.querySelector('.rj-tabs-count');
         var planet = root.querySelector('.rj-pl-wrap');
         var hues = @js($hueList);
+        var hudRightFormat = root.getAttribute('data-hud-right') || '[ {current} / {total} ]';
         var cur = 0;
 
         function pad(n) { return (n < 10 ? '0' : '') + n; }
@@ -231,9 +226,13 @@
                 b.tabIndex = on ? 0 : -1;
                 panels[k].classList.toggle('is-active', on);
             });
-            root.style.setProperty('--rj-h', hues[i]);                      // colors morph smoothly
-            root.setAttribute('data-side', i % 2 ? 'right' : 'left');       // planet flies to the other side
-            count.textContent = '[ ' + pad(i + 1) + ' / ' + pad(btns.length) + ' ]';
+            root.style.setProperty('--rj-h', hues[i]);
+            root.setAttribute('data-side', i % 2 ? 'right' : 'left');
+
+            // HUD mətnini formatla əvəz edirik
+            var txt = hudRightFormat.replace('{current}', pad(i + 1)).replace('{total}', pad(btns.length));
+            count.textContent = txt;
+
             planet.classList.remove('is-switching'); void planet.offsetWidth; planet.classList.add('is-switching');
             moveInd();
             if (focus) btns[i].focus();
