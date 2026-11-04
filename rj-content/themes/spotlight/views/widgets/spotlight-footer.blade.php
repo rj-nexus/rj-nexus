@@ -136,22 +136,10 @@
     <style>
         #{{ $uid }}.rj-ft-section {
             position: relative;
-            width: 100vw;
-            margin-left: calc(-50vw + 50%); /* Ekranın kənarlarına tam otursun */
+            width: 100%;
             padding: 80px 0 40px;
             overflow: hidden;
-            z-index: 50;
-            isolation: isolate; /* Builder-in z-index-i ilə qarışmasın */
-        }
-
-        /* BU HİSSƏ ARXA FONU MƏCBURİ QARA EDİR */
-        #{{ $uid }}.rj-ft-section::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background-color: #0a0a0f !important; /* Saytın əsas tünd rəngi */
-            z-index: -1; /* Məzmunun və xətlərin arxasına keçir */
-            pointer-events: none;
+            background-color: transparent; /* Öz fonumuzu JS ilə valideynə verəcəyik */
         }
 
         #{{ $uid }} .rj-ft-inner {
@@ -345,4 +333,21 @@
             #{{ $uid }} .rj-g-c-bl, #{{ $uid }} .rj-g-c-br { bottom: 40px; }
         }
     </style>
+
+    {{-- JavaScript ilə Builder-in valideyn div-inə müdaxilə edirik --}}
+    <script>
+    (function() {
+        var footer = document.getElementById('{{ $uid }}');
+        if (footer && footer.parentElement) {
+            // Footer-in birbaşa valideynini (Builder wrapper) tapırıq
+            var wrapper = footer.parentElement;
+
+            // Ona məcburi olaraq qara fon, z-index və nisbi mövqe veririk
+            wrapper.style.setProperty('background-color', '#0a0a0f', 'important');
+            wrapper.style.setProperty('position', 'relative', 'important');
+            wrapper.style.setProperty('z-index', '10', 'important');
+            wrapper.style.setProperty('width', '100%', 'important');
+        }
+    })();
+    </script>
 </footer>
