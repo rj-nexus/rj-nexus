@@ -51,9 +51,9 @@
                         <span class="rj-nl-btn-text" data-sink data-btn-text>{{ $btnText }}</span>
                         <span class="rj-nl-hole" data-hole aria-hidden="true">
                             <i class="rj-nl-halo"></i>
-                            <i class="rj-nl-ring rj-nl-ring-w"></i>
-                            <i class="rj-nl-ring rj-nl-ring-c"></i>
+                            <i class="rj-nl-disk rj-nl-disk-back"></i>
                             <i class="rj-nl-core"></i>
+                            <i class="rj-nl-disk rj-nl-disk-front"></i>
                         </span>
                     </button>
                 </form>
@@ -79,6 +79,8 @@
     </div>
 
     <style>
+        @property --rjA { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+
         #{{ $uid }}.rj-nl-section {
             position: relative; width: 100%; background: transparent;
             padding: 140px 24px 120px; display: flex; justify-content: center;
@@ -142,7 +144,7 @@
         #{{ $uid }} .rj-nl-title { margin: 0 0 16px; font-size: clamp(30px, 4.4vw, 46px); font-weight: 600; line-height: 1.1; letter-spacing: -.04em; color: #fff; }
         #{{ $uid }} .rj-nl-sub { margin: 0 auto 38px; max-width: 480px; font-size: 16px; line-height: 1.6; color: rgba(255,255,255,.6); }
 
-        #{{ $uid }} .rj-nl-form { display: flex; gap: 12px; max-width: 520px; margin: 0 auto 22px; }
+        #{{ $uid }} .rj-nl-form { display: flex; gap: 12px; max-width: 540px; margin: 0 auto 22px; }
         #{{ $uid }} .rj-nl-input-wrap { flex: 1; min-width: 0; }
         #{{ $uid }} .rj-nl-input {
             width: 100%; height: 54px; padding: 0 20px; border: 0; outline: 0; border-radius: 16px;
@@ -155,8 +157,8 @@
         #{{ $uid }} .rj-nl-input:focus { background: rgba(255,255,255,.09); box-shadow: inset 0 0 0 1px rgba(255,255,255,.42), inset 0 1px 0 rgba(255,255,255,.16); }
 
         #{{ $uid }} .rj-nl-btn {
-            position: relative; flex: none; height: 54px; padding: 0 20px 0 26px; border: 0; border-radius: 16px; cursor: pointer;
-            display: inline-flex; align-items: center; justify-content: center; gap: 14px;
+            position: relative; flex: none; height: 54px; padding: 0 30px 0 26px; border: 0; border-radius: 16px; cursor: pointer;
+            display: inline-flex; align-items: center; justify-content: center; gap: 22px;
             font: inherit; font-size: 16px; font-weight: 600; letter-spacing: -.01em; color: #fff; white-space: nowrap;
             background: linear-gradient(180deg, rgba(255,255,255,.2), rgba(255,255,255,.1));
             box-shadow: inset 0 0 0 .5px rgba(255,255,255,.3), inset 0 1px 0 rgba(255,255,255,.38);
@@ -168,35 +170,42 @@
         #{{ $uid }} .rj-nl-btn:disabled { cursor: progress; }
         #{{ $uid }} .rj-nl-btn:focus-visible { outline: 2px solid rgba(255,255,255,.7); outline-offset: 3px; }
 
-        #{{ $uid }} .rj-nl-hole { position: relative; z-index: 3; flex: none; width: 28px; height: 28px; transition: transform .6s cubic-bezier(.32,.72,0,1); }
+        #{{ $uid }} .rj-nl-hole {
+            --hc: #ffffff; --hc2: #ffd9a8;
+            position: relative; z-index: 3; flex: none; width: 30px; height: 30px; transition: transform .6s cubic-bezier(.32,.72,0,1);
+        }
         #{{ $uid }} .rj-nl-btn:hover .rj-nl-hole { transform: scale(1.12); }
-        #{{ $uid }} .rj-nl-hole i { position: absolute; display: block; border-radius: 50%; }
-        #{{ $uid }} .rj-nl-ring {
-            inset: 0; will-change: transform; animation: rjNlSpin 2.6s linear infinite;
-            -webkit-mask: radial-gradient(circle, transparent 26%, #000 33%, #000 70%, transparent 76%);
-                    mask: radial-gradient(circle, transparent 26%, #000 33%, #000 70%, transparent 76%);
-            transition: opacity .5s ease;
-        }
-        #{{ $uid }} .rj-nl-ring-w {
-            background: conic-gradient(from 0deg, #fff 0deg, rgba(255,255,255,.18) 110deg, rgba(255,255,255,.9) 210deg, rgba(255,255,255,.12) 300deg, #fff 360deg);
-            filter: drop-shadow(0 0 4px rgba(255,255,255,.55));
-        }
-        #{{ $uid }} .rj-nl-ring-c {
-            opacity: 0;
-            background: conic-gradient(from 0deg, var(--glow) 0deg, color-mix(in srgb, var(--glow) 28%, #fff) 70deg, rgba(0,0,0,0) 150deg, var(--glow) 230deg, color-mix(in srgb, var(--glow) 45%, #fff) 310deg, var(--glow) 360deg);
-        }
-        #{{ $uid }} .rj-nl-core { inset: 34%; background: #000; box-shadow: 0 0 0 1px rgba(255,255,255,.28); }
-        #{{ $uid }} .rj-nl-halo {
-            inset: -30%; opacity: 0; transition: opacity .5s ease;
-            background: radial-gradient(circle, color-mix(in srgb, var(--glow) 65%, transparent) 0%, rgba(0,0,0,0) 66%);
-        }
-        @keyframes rjNlSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        #{{ $uid }} .rj-nl-btn.is-live .rj-nl-hole { --hc: color-mix(in srgb, var(--glow) 35%, #fff); --hc2: var(--glow); }
+        #{{ $uid }} .rj-nl-hole i { position: absolute; display: block; }
 
-        #{{ $uid }} .rj-nl-btn.is-live .rj-nl-ring { animation-duration: .6s; }
-        #{{ $uid }} .rj-nl-btn.is-live .rj-nl-ring-w { opacity: 0; }
-        #{{ $uid }} .rj-nl-btn.is-live .rj-nl-ring-c { opacity: 1; }
+        #{{ $uid }} .rj-nl-halo {
+            inset: -70%; border-radius: 50%; pointer-events: none;
+            background: radial-gradient(circle, color-mix(in srgb, var(--hc2) 45%, transparent) 0%, rgba(0,0,0,0) 62%);
+            opacity: .55; transition: opacity .4s ease;
+        }
         #{{ $uid }} .rj-nl-btn.is-live .rj-nl-halo { opacity: 1; }
-        #{{ $uid }}.rj-idle .rj-nl-ring { animation-play-state: paused; }
+
+        #{{ $uid }} .rj-nl-disk {
+            left: -52%; top: 29%; width: 204%; height: 42%; border-radius: 50%;
+            transform: rotate(-18deg);
+            background: conic-gradient(from var(--rjA), var(--hc), rgba(255,255,255,.1), var(--hc2), rgba(255,255,255,.08), var(--hc));
+            -webkit-mask: radial-gradient(closest-side, transparent 36%, #000 46%, rgba(0,0,0,.6) 70%, transparent 100%);
+                    mask: radial-gradient(closest-side, transparent 36%, #000 46%, rgba(0,0,0,.6) 70%, transparent 100%);
+            animation: rjNlDisk 2.4s linear infinite;
+            filter: drop-shadow(0 0 3px var(--hc2));
+        }
+        #{{ $uid }} .rj-nl-disk-back { z-index: 1; }
+        #{{ $uid }} .rj-nl-disk-front { z-index: 3; clip-path: inset(52% 0 0 0); }
+
+        #{{ $uid }} .rj-nl-core {
+            z-index: 2; inset: 18%; border-radius: 50%; background: #000;
+            box-shadow: 0 0 0 1.5px var(--hc), 0 0 8px 1px var(--hc2), 0 0 18px 2px color-mix(in srgb, var(--hc2) 55%, transparent);
+        }
+
+        @keyframes rjNlDisk { from { --rjA: 0deg; } to { --rjA: 360deg; } }
+
+        #{{ $uid }} .rj-nl-btn.is-live .rj-nl-disk { animation-duration: .55s; }
+        #{{ $uid }}.rj-idle .rj-nl-disk { animation-play-state: paused; }
 
         #{{ $uid }} .rj-nl-privacy {
             display: flex; align-items: flex-start; justify-content: center; gap: 10px; max-width: 470px; margin: 0 auto;
@@ -254,11 +263,6 @@
             #{{ $uid }} .rj-line-bottom { bottom: 40px; }
             #{{ $uid }} .rj-nl-hud { top: 10px; }
         }
-        @media (prefers-reduced-motion: reduce) {
-            #{{ $uid }} .rj-nl-ring { animation: none !important; }
-            #{{ $uid }} .rj-nl-card, #{{ $uid }} .rj-nl-hole { transition: none !important; }
-            #{{ $uid }}.rj-ready .rj-nl-card { opacity: 1; transform: none; }
-        }
     </style>
 
     <script>
@@ -276,7 +280,6 @@
         var privacy = root.querySelector('[data-privacy]');
         var success = root.querySelector('[data-success]');
         var privacyRequired = {{ $privacyRequired ? 'true' : 'false' }};
-        var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
         root.classList.add('rj-ready');
         if ('IntersectionObserver' in window) {
@@ -300,18 +303,21 @@
         }
         function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
 
+        function showSuccess() {
+            success.classList.add('is-on');
+            if (success.animate) {
+                success.animate([
+                    { opacity: 0, transform: 'scale(.9)', filter: 'blur(10px)' },
+                    { opacity: 1, transform: 'scale(1)', filter: 'blur(0px)' }
+                ], { duration: 900, easing: 'cubic-bezier(.32,.72,0,1)', fill: 'forwards' });
+            } else {
+                success.style.opacity = '1';
+            }
+        }
+
         async function swallow() {
             var sinks = Array.prototype.slice.call(root.querySelectorAll('[data-sink]'))
                 .filter(function (el) { return el.getClientRects().length > 0; });
-
-            if (reduce || !card.animate) {
-                sinks.forEach(function (el) { el.style.transition = 'opacity .4s'; el.style.opacity = '0'; });
-                card.style.transition = 'opacity .4s';
-                card.style.opacity = '0';
-                await wait(450);
-                showSuccess();
-                return;
-            }
 
             var hr = hole.getBoundingClientRect();
             var hx = hr.left + hr.width / 2, hy = hr.top + hr.height / 2;
@@ -377,18 +383,6 @@
             showSuccess();
         }
 
-        function showSuccess() {
-            success.classList.add('is-on');
-            if (success.animate && !reduce) {
-                success.animate([
-                    { opacity: 0, transform: 'scale(.9)', filter: 'blur(10px)' },
-                    { opacity: 1, transform: 'scale(1)', filter: 'blur(0px)' }
-                ], { duration: 900, easing: 'cubic-bezier(.32,.72,0,1)', fill: 'forwards' });
-            } else {
-                success.style.opacity = '1';
-            }
-        }
-
         form.addEventListener('submit', async function (e) {
             e.preventDefault();
             msg.style.display = 'none';
@@ -422,7 +416,7 @@
 
                 if (res.ok && data.ok) {
                     await wait(Math.max(0, 900 - (Date.now() - started)));
-                    await swallow();
+                    try { await swallow(); } catch (err) { showSuccess(); }
                 } else {
                     showError(data.message || 'Subscription failed. Please try again.');
                     setBusy(false);
