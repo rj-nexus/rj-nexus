@@ -13,6 +13,9 @@
 
 <section class="rj-faq-section" id="{{ $uid }}">
 
+    {{-- Arxadakı işıq (Glow) effekti --}}
+    <div class="rj-faq-glow" aria-hidden="true"></div>
+
     @if($showHud)
         <span class="rj-faq-line rj-line-top"><i></i><i></i></span>
         <span class="rj-faq-line rj-line-bottom"><i></i><i></i></span>
@@ -38,16 +41,26 @@
         @if(!empty($faqs))
             <div class="rj-faq-list">
                 @foreach($faqs as $index => $faq)
+                    @php
+                        $q = str_replace(['Qore', 'qore'], 'RJ Nexus', $faq['question'] ?? '');
+                        $a = str_replace(['Qore', 'qore'], 'RJ Nexus', $faq['answer'] ?? '');
+                    @endphp
                     <div class="rj-faq-item" style="--i: {{ $index }};">
+                        {{-- Aktiv olanda üst hissədə yaranan işıq xətti --}}
+                        <div class="rj-faq-item-glow"></div>
+
                         <button class="rj-faq-q" aria-expanded="false">
-                            <span class="rj-faq-q-text">{{ str_replace(['Qore', 'qore'], 'RJ Nexus', $faq['question'] ?? '') }}</span>
-                            <span class="rj-faq-icon">
-                                <span class="rj-faq-icon-line"></span>
+                            <span class="rj-faq-q-text">{{ $q }}</span>
+                            <span class="rj-faq-icon-wrap">
+                                <span class="rj-faq-icon">
+                                    <span class="rj-line-h"></span>
+                                    <span class="rj-line-v"></span>
+                                </span>
                             </span>
                         </button>
                         <div class="rj-faq-a">
                             <div class="rj-faq-a-inner">
-                                <p>{{ str_replace(['Qore', 'qore'], 'RJ Nexus', $faq['answer'] ?? '') }}</p>
+                                <p>{{ $a }}</p>
                             </div>
                         </div>
                     </div>
@@ -65,6 +78,20 @@
             overflow: hidden;
             display: flex;
             justify-content: center;
+        }
+
+        /* Mərkəzdən yuxarıya yayılan əsas işıq */
+        #{{ $uid }} .rj-faq-glow {
+            position: absolute;
+            top: -20%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 600px;
+            background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.15) 0%, transparent 60%);
+            filter: blur(60px);
+            pointer-events: none;
+            z-index: 0;
         }
 
         /* HUD və Xətlər */
@@ -91,7 +118,7 @@
         #{{ $uid }} .rj-hr { right: 24px; }
         #{{ $uid }} .rj-faq-hud b { display: block; width: 3px; height: 30px; background: #fff; }
 
-        /* Inner */
+        /* Inner Layout */
         #{{ $uid }} .rj-faq-inner {
             position: relative; z-index: 1;
             max-width: 900px; width: 100%; margin: 0 auto;
@@ -107,25 +134,25 @@
         @keyframes rjFaqBar { 0% { transform: scaleY(0.3); opacity: 0.2; } 100% { transform: scaleY(1); opacity: 0.8; } }
         #{{ $uid }} .rj-faq-badge-t { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.15em; color: var(--rj-muted); text-transform: uppercase; }
 
-        #{{ $uid }} .rj-faq-title { font-size: clamp(32px, 5vw, 48px); font-weight: 600; line-height: 1.15; letter-spacing: -0.03em; color: #fff; margin: 0; }
+        #{{ $uid }} .rj-faq-title { font-size: clamp(32px, 5vw, 48px); font-weight: 600; line-height: 1.15; letter-spacing: -0.03em; color: #fff; margin: 0; text-shadow: 0 0 30px rgba(59, 130, 246, 0.3); }
 
         /* FAQ List */
         #{{ $uid }} .rj-faq-list {
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 12px;
         }
 
-        /* FAQ Item */
+        /* FAQ Item (Şüşə effektli) */
         #{{ $uid }} .rj-faq-item {
             position: relative;
             background: rgba(15, 15, 22, 0.6);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
+            border-radius: 8px;
             overflow: hidden;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
         #{{ $uid }} .rj-faq-item:hover {
@@ -133,14 +160,34 @@
             background: rgba(20, 20, 28, 0.8);
         }
 
+        /* Aktiv olanda arxa fon və kənarlıq */
         #{{ $uid }} .rj-faq-item.is-active {
-            border-color: rgba(59, 130, 246, 0.3);
-            background: linear-gradient(180deg, rgba(20, 25, 35, 0.9) 0%, rgba(10, 10, 15, 0.95) 100%);
-            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5), 0 0 20px rgba(59, 130, 246, 0.05) inset;
+            border-color: rgba(59, 130, 246, 0.4);
+            background: linear-gradient(180deg, rgba(20, 30, 50, 0.8) 0%, rgba(10, 10, 15, 0.9) 100%);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.7);
         }
 
-        /* Button (Question) */
+        /* Aktiv olanda yuxarıda görünən mavi işıq */
+        #{{ $uid }} .rj-faq-item-glow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 60%);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+            z-index: 0;
+        }
+        #{{ $uid }} .rj-faq-item.is-active .rj-faq-item-glow {
+            opacity: 1;
+        }
+
+        /* Button */
         #{{ $uid }} .rj-faq-q {
+            position: relative;
+            z-index: 1;
             width: 100%;
             display: flex;
             align-items: center;
@@ -153,8 +200,12 @@
             font-family: inherit;
             font-size: 16px;
             font-weight: 500;
-            color: #fff;
+            color: rgba(255, 255, 255, 0.85);
             transition: color 0.3s ease;
+        }
+        #{{ $uid }} .rj-faq-item.is-active .rj-faq-q,
+        #{{ $uid }} .rj-faq-q:hover {
+            color: #fff;
         }
 
         #{{ $uid }} .rj-faq-q-text {
@@ -163,46 +214,62 @@
             line-height: 1.4;
         }
 
-        /* Parlaq İşıq (Icon) */
-        #{{ $uid }} .rj-faq-icon {
-            position: relative;
+        /* Sağ tərəfdəki işıqlı düymə (İkon) */
+        #{{ $uid }} .rj-faq-icon-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: center;
             width: 32px;
             height: 32px;
             flex-shrink: 0;
+        }
+
+        #{{ $uid }} .rj-faq-icon {
+            position: relative;
+            width: 24px;
+            height: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.4s ease;
         }
 
-        #{{ $uid }} .rj-faq-icon-line {
-            display: block;
-            width: 12px;
-            height: 2px;
-            background: rgba(255, 255, 255, 0.5);
+        /* Xətlər (Artı və Çıx işarəsi üçün) */
+        #{{ $uid }} .rj-line-h,
+        #{{ $uid }} .rj-line-v {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.6);
             border-radius: 2px;
-            position: relative;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 0 10px transparent;
         }
+        #{{ $uid }} .rj-line-h { width: 12px; height: 1.5px; }
+        #{{ $uid }} .rj-line-v { width: 1.5px; height: 12px; }
 
-        /* Aktiv olanda işıq yanır */
+        /* Aktiv olanda ikonun rəngi və işığı dəyişir */
         #{{ $uid }} .rj-faq-item.is-active .rj-faq-icon {
             background: rgba(59, 130, 246, 0.15);
-            border-color: rgba(59, 130, 246, 0.4);
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
         }
 
-        #{{ $uid }} .rj-faq-item.is-active .rj-faq-icon-line {
+        /* Şaquli xətti fırladırıq ki, çıx (-) işarəsi olsun */
+        #{{ $uid }} .rj-faq-item.is-active .rj-line-v {
+            transform: rotate(90deg) scaleX(0);
+            opacity: 0;
+        }
+
+        #{{ $uid }} .rj-faq-item.is-active .rj-line-h {
             background: #fff;
-            box-shadow: 0 0 12px #3b82f6, 0 0 24px #3b82f6;
+            box-shadow: 0 0 10px #3b82f6;
         }
 
         /* Cavab Hissəsi */
         #{{ $uid }} .rj-faq-a {
+            position: relative;
+            z-index: 1;
             display: grid;
             grid-template-rows: 0fr;
             transition: grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -228,7 +295,7 @@
         #{{ $uid }} .rj-faq-a-inner p {
             margin: 0;
             padding: 0 28px 24px 28px;
-            font-size: 15px;
+            font-size: 14.5px;
             line-height: 1.6;
             color: var(--rj-muted);
         }
@@ -241,6 +308,7 @@
             #{{ $uid }} .rj-faq-hud { top: 10px; }
             #{{ $uid }} .rj-faq-q { padding: 20px; font-size: 15px; }
             #{{ $uid }} .rj-faq-a-inner p { padding: 0 20px 20px 20px; font-size: 14px; }
+            #{{ $uid }} .rj-faq-glow { width: 400px; height: 400px; }
         }
     </style>
 
@@ -256,7 +324,7 @@
                 var item = this.parentElement;
                 var isActive = item.classList.contains('is-active');
 
-                // Bütün digər açıq olanları bağla
+                // Bütün digər açıq olanları bağla (akkordeon prinsipi)
                 root.querySelectorAll('.rj-faq-item').forEach(function(el) {
                     el.classList.remove('is-active');
                     var b = el.querySelector('.rj-faq-q');
