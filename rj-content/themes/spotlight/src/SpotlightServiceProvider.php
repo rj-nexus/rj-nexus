@@ -15,6 +15,7 @@ use Spotlight\Widgets\SpotlightPricingWidget;
 use Spotlight\Widgets\SpotlightTestimonialsWidget;
 use Spotlight\Widgets\SpotlightFaqWidget;
 use Spotlight\Widgets\SpotlightNewsletterWidget;
+use Spotlight\Widgets\SpotlightFooterWidget; // Yeni əlavə
 
 class SpotlightServiceProvider extends ServiceProvider
 {
@@ -44,6 +45,7 @@ class SpotlightServiceProvider extends ServiceProvider
                     new SpotlightTestimonialsWidget(),
                     new SpotlightFaqWidget(),
                     new SpotlightNewsletterWidget(),
+                    new SpotlightFooterWidget(), // Yeni əlavə
                 ];
                 return array_merge($existing, $widgets);
             });
