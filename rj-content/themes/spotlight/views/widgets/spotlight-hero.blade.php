@@ -15,309 +15,248 @@
     $bgImage = $resolve($settings['bg_image_url'] ?? '', $settings['bg_image'] ?? '');
 
     // ---- Settings -------------------------------------------------------
-    $pingPong = filter_var($settings['ping_pong'] ?? false, FILTER_VALIDATE_BOOLEAN);
-    $showHud  = filter_var($settings['show_hud'] ?? true, FILTER_VALIDATE_BOOLEAN);
-
-    $overlayColor = $settings['overlay_color'] ?? '#05070d';
-    $overlay      = max(0, min(100, (int) ($settings['overlay_opacity'] ?? 45)));
-
-    // Video color grading (this is what actually recolors the video)
-    $tintColor   = $settings['tint_color'] ?? '';            // e.g. #1d4ed8
-    $tintOpacity = max(0, min(100, (int) ($settings['tint_opacity'] ?? 60)));
-    $tintBlend   = $settings['tint_blend'] ?? 'color';       // color | hue | multiply | overlay | soft-light
-    $hueRotate   = (int) ($settings['hue_rotate'] ?? 0);     // degrees
-    $saturate    = (int) ($settings['saturate'] ?? 100);     // %
-    $brightness  = (int) ($settings['brightness'] ?? 100);   // %
-    $contrast    = (int) ($settings['contrast'] ?? 100);     // %
-
-    $mediaFilter = "hue-rotate({$hueRotate}deg) saturate({$saturate}%) brightness({$brightness}%) contrast({$contrast}%)";
+    $tintColor    = !empty($settings['tint_color']) ? $settings['tint_color'] : '#3f6fbe';
+    $tintStrength = max(0, min(100, (int) ($settings['tint_strength'] ?? 100)));
+    $overlay      = max(0, min(100, (int) ($settings['overlay_opacity'] ?? 35)));
+    $showHud      = filter_var($settings['show_hud'] ?? true, FILTER_VALIDATE_BOOLEAN);
+    $showTop      = filter_var($settings['show_top_btn'] ?? true, FILTER_VALIDATE_BOOLEAN);
+    $interval     = max(2, (int) ($settings['interval'] ?? 5)) * 1000;
 
     $badge    = $settings['badge_text'] ?? '';
-    $title    = $settings['title'] ?? '';
-    $subtitle = $settings['subtitle'] ?? '';
     $hudLeft  = $settings['hud_left'] ?? '[ 01 / 09 ]';
     $hudRight = $settings['hud_right'] ?? '[ HERO ]';
 
-    $btn1Text = $settings['primary_btn_text'] ?? '';
-    $btn1Url  = $settings['primary_btn_url'] ?? '#';
-    $btn2Text = $settings['secondary_btn_text'] ?? '';
-    $btn2Url  = $settings['secondary_btn_url'] ?? '#';
+    // ---- Rotating texts: one per line "Title | Subtitle" -----------------
+    $slides = [];
+    foreach (preg_split('/\r\n|\r|\n/', (string) ($settings['texts'] ?? '')) as $line) {
+        $line = trim($line);
+        if ($line === '') continue;
+        [$t, $s] = array_pad(explode('|', $line, 2), 2, '');
+        $slides[] = ['title' => trim($t), 'sub' => trim($s)];
+    }
+    if (!$slides) {
+        $slides[] = [
+            'title' => $settings['title'] ?? 'Create Smarter. Launch Faster.',
+            'sub'   => $settings['subtitle'] ?? '',
+        ];
+    }
+
+    // Split a title into animated words; "✦" becomes an inline sparkle icon
+    $sparkle = '<svg class="rj-sp" viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M12 0c.6 6.6 5.4 11.4 12 12-6.6.6-11.4 5.4-12 12-.6-6.6-5.4-11.4-12-12C6.6 11.4 11.4 6.6 12 0z"/></svg>';
+    $words = function ($text) use ($sparkle) {
+        $i = 0; $out = '';
+        foreach (preg_split('/\s+/u', trim($text)) as $w) {
+            if ($w === '') continue;
+            $inner = $w === '✦' ? $sparkle : e($w);
+            $out .= '<span class="w" style="--i:' . $i++ . '"><span>' . $inner . '</span></span> ';
+        }
+        return $out;
+    };
 @endphp
 
-<section class="rj-cine-hero" id="{{ $uid }}">
-    <div class="rj-cine-bg">
+<section class="rj-hero" id="{{ $uid }}">
+    <div class="rj-bg">
         @if($bgVideo)
-            <video id="{{ $uid }}_video" src="{{ $bgVideo }}" autoplay loop muted playsinline preload="auto"
-                   class="rj-cine-media" style="filter: {{ $mediaFilter }};"
-                   @if($bgImage) poster="{{ $bgImage }}" @endif
-                   data-ping-pong="{{ $pingPong ? 'true' : 'false' }}"></video>
+            <video id="{{ $uid }}_v" class="rj-media" src="{{ $bgVideo }}" autoplay loop muted playsinline preload="auto"
+                   @if($bgImage) poster="{{ $bgImage }}" @endif></video>
         @elseif($bgImage)
-            <img src="{{ $bgImage }}" alt="{{ $title }}" class="rj-cine-media" style="filter: {{ $mediaFilter }};">
-        @else
-            <div class="rj-cine-media rj-cine-fallback"></div>
+            <img class="rj-media" src="{{ $bgImage }}" alt="">
         @endif
-
-        @if($tintColor)
-            <div class="rj-cine-tint" style="background: {{ $tintColor }}; mix-blend-mode: {{ $tintBlend }}; opacity: {{ $tintOpacity / 100 }};"></div>
-        @endif
-
-        <div class="rj-cine-overlay" style="background-color: {{ $overlayColor }}; opacity: {{ $overlay / 100 }};"></div>
-        <div class="rj-cine-vignette"></div>
-        <div class="rj-cine-dots"></div>
+        {{-- Everything below forces ANY video into a blue monochrome look --}}
+        <div class="rj-tint" style="background: {{ $tintColor }}; opacity: {{ $tintStrength / 100 }};"></div>
+        <div class="rj-depth"></div>
+        <div class="rj-dim" style="opacity: {{ $overlay / 100 }};"></div>
+        <div class="rj-vignette"></div>
+        <div class="rj-dots"></div>
     </div>
 
-    {{-- Fine grid lines + corner marks --}}
-    <div class="rj-cine-grid-lines" aria-hidden="true">
-        <span class="rj-cine-line-h rj-line-top"><i></i><i></i></span>
-        <span class="rj-cine-line-h rj-line-bottom"><i></i><i></i></span>
-    </div>
+    <span class="rj-line rj-l1"></span>
+    <span class="rj-line rj-l2"><i></i><i></i></span>
 
     @if($showHud)
-        <div class="rj-cine-hud rj-hud-left" aria-hidden="true"><span class="rj-hud-bar"></span>{{ $hudLeft }}</div>
-        <div class="rj-cine-hud rj-hud-right" aria-hidden="true">{{ $hudRight }}<span class="rj-hud-bar"></span></div>
+        <div class="rj-hud rj-hl"><b></b>{{ $hudLeft }}</div>
+        <div class="rj-hud rj-hr">{{ $hudRight }}<b></b></div>
     @endif
 
-    <div class="rj-cine-content">
-        @if($badge)
-            <div class="rj-cine-badge-wrap">
-                <span class="rj-cine-bars"><i></i><i></i><i></i></span>
-                <span class="rj-cine-badge-text">{{ $badge }}</span>
-                <span class="rj-cine-bars"><i></i><i></i><i></i></span>
-            </div>
-        @endif
+    {{-- FIXED top text --}}
+    @if($badge)
+        <div class="rj-badge">
+            <span class="rj-bars"><i></i><i></i><i></i></span>
+            <span class="rj-badge-t">{{ $badge }}</span>
+            <span class="rj-bars"><i></i><i></i><i></i></span>
+        </div>
+    @endif
 
-        @if($title)
-            <h1 class="rj-cine-title">{{ $title }}</h1>
-        @endif
-
-        @if($subtitle)
-            <p class="rj-cine-subtitle">{{ $subtitle }}</p>
-        @endif
-
-        @if($btn1Text || $btn2Text)
-            <div class="rj-cine-actions">
-                @if($btn1Text)
-                    <a href="{{ $btn1Url }}" class="rj-cine-btn rj-cine-btn-primary">
-                        {{ $btn1Text }}
-                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                    </a>
-                @endif
-                @if($btn2Text)
-                    <a href="{{ $btn2Url }}" class="rj-cine-btn rj-cine-btn-secondary">{{ $btn2Text }}</a>
+    {{-- CHANGING bottom text --}}
+    <div class="rj-stage" id="{{ $uid }}_stage">
+        @foreach($slides as $n => $s)
+            <div class="rj-slide {{ $n === 0 ? 'is-active' : '' }}">
+                <h1 class="rj-title">{!! $words($s['title']) !!}</h1>
+                @if($s['sub'])
+                    <p class="rj-sub">{{ $s['sub'] }}</p>
                 @endif
             </div>
-        @endif
+        @endforeach
     </div>
 
-    <div class="rj-cine-scroll" aria-hidden="true">
-        <span class="rj-cine-scroll-text">SCROLL</span>
-        <span class="rj-cine-scroll-line"></span>
-    </div>
+    @if($showTop)
+        <a href="#" class="rj-top" aria-label="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5m0 0l-6 6m6-6l6 6"/></svg>
+        </a>
+    @endif
 
     <script>
     (function () {
-        var video = document.getElementById(@js($uid) + '_video');
-        if (!video) return;
+        var root = document.getElementById(@js($uid));
+        var video = document.getElementById(@js($uid) + '_v');
 
-        // Respect reduced motion
-        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-            video.removeAttribute('autoplay');
-            video.pause();
-            return;
-        }
-
-        // Pause when off-screen (saves CPU/GPU)
-        if ('IntersectionObserver' in window) {
-            new IntersectionObserver(function (entries) {
-                entries.forEach(function (e) {
+        // Pause video off-screen
+        if (video && 'IntersectionObserver' in window) {
+            new IntersectionObserver(function (es) {
+                es.forEach(function (e) {
                     if (e.isIntersecting) { var p = video.play(); if (p) p.catch(function () {}); }
                     else video.pause();
                 });
-            }, { threshold: 0.05 }).observe(video);
+            }, { threshold: 0.05 }).observe(root);
         }
 
-        if (video.getAttribute('data-ping-pong') !== 'true') return;
-
-        // Ping-pong (reverse playback via seeking; heavier, off by default)
-        video.removeAttribute('loop');
-        var reversing = false, last = 0;
-
-        function step(ts) {
-            if (!reversing) return;
-            if (!last) last = ts;
-            var d = (ts - last) / 1000; last = ts;
-            if (video.currentTime - d > 0.05) {
-                video.currentTime -= d;
-                requestAnimationFrame(step);
-            } else {
-                video.currentTime = 0; reversing = false; video.play();
-            }
-        }
-        video.addEventListener('ended', function () {
-            if (reversing) return;
-            reversing = true; video.pause(); last = 0;
-            requestAnimationFrame(step);
-        });
+        // Rotate bottom texts
+        var slides = root.querySelectorAll('.rj-slide');
+        if (slides.length < 2) return;
+        var cur = 0;
+        setInterval(function () {
+            if (document.hidden) return;
+            var old = slides[cur];
+            cur = (cur + 1) % slides.length;
+            old.classList.remove('is-active');
+            old.classList.add('is-leaving');
+            setTimeout(function () {
+                old.classList.remove('is-leaving');
+                slides[cur].classList.add('is-active');
+            }, 550);
+        }, {{ $interval }});
     })();
     </script>
 
     <style>
-        #{{ $uid }}.rj-cine-hero {
-            position: relative;
-            width: 100%;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--rj-bg, #05070d);
-            overflow: hidden;
-            isolation: isolate;
+        #{{ $uid }}.rj-hero {
+            position: relative; width: 100%; min-height: 100vh; overflow: hidden; isolation: isolate;
+            display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
+            padding: 140px 24px 110px; background: #04070f; color: #fff;
         }
-        #{{ $uid }} .rj-cine-bg { position: absolute; inset: 0; z-index: 0; isolation: isolate; }
-        #{{ $uid }} .rj-cine-media {
+        #{{ $uid }} .rj-bg { position: absolute; inset: 0; z-index: 0; isolation: isolate; }
+        #{{ $uid }} .rj-media {
+            position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+            filter: grayscale(1) contrast(1.12) brightness(.95);
+        }
+        #{{ $uid }} .rj-tint { position: absolute; inset: 0; mix-blend-mode: color; }
+        #{{ $uid }} .rj-depth {
+            position: absolute; inset: 0; mix-blend-mode: multiply;
+            background: radial-gradient(ellipse at 65% 45%, #fff 0%, #8aa3d6 55%, #1b2f66 100%);
+        }
+        #{{ $uid }} .rj-dim { position: absolute; inset: 0; background: #030712; }
+        #{{ $uid }} .rj-vignette {
             position: absolute; inset: 0;
-            width: 100%; height: 100%;
-            object-fit: cover; object-position: center;
-            transform: translateZ(0);
-        }
-        #{{ $uid }} .rj-cine-fallback {
-            background: radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--rj-primary, #3b82f6) 25%, var(--rj-bg, #05070d)) 0%, var(--rj-bg, #05070d) 70%);
-        }
-        #{{ $uid }} .rj-cine-tint,
-        #{{ $uid }} .rj-cine-overlay { position: absolute; inset: 0; pointer-events: none; }
-        #{{ $uid }} .rj-cine-vignette {
-            position: absolute; inset: 0; pointer-events: none;
             background:
-                radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,.55) 100%),
-                linear-gradient(to bottom, rgba(0,0,0,.55) 0%, transparent 22%, transparent 70%, rgba(0,0,0,.65) 100%);
+                radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,.6) 100%),
+                linear-gradient(to bottom, rgba(0,0,0,.7) 0%, transparent 26%, transparent 68%, rgba(0,0,0,.55) 100%);
         }
-        #{{ $uid }} .rj-cine-dots {
-            position: absolute; inset: 0; pointer-events: none; opacity: .35;
-            background-image: radial-gradient(rgba(255,255,255,.18) 1px, transparent 1px);
-            background-size: 4px 4px;
-            mix-blend-mode: overlay;
+        #{{ $uid }} .rj-dots {
+            position: absolute; inset: 0; opacity: .3; mix-blend-mode: overlay;
+            background-image: radial-gradient(rgba(255,255,255,.2) 1px, transparent 1px); background-size: 4px 4px;
         }
 
-        /* Grid lines */
-        #{{ $uid }} .rj-cine-grid-lines { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
-        #{{ $uid }} .rj-cine-line-h {
-            position: absolute; left: 0; right: 0; height: 1px;
-            background: rgba(255,255,255,.12);
-        }
-        #{{ $uid }} .rj-line-top { top: 190px; }
-        #{{ $uid }} .rj-line-bottom { bottom: 120px; }
-        #{{ $uid }} .rj-cine-line-h i {
-            position: absolute; top: -5px; width: 11px; height: 11px;
-        }
-        #{{ $uid }} .rj-cine-line-h i::before,
-        #{{ $uid }} .rj-cine-line-h i::after { content: ""; position: absolute; background: rgba(255,255,255,.85); }
-        #{{ $uid }} .rj-cine-line-h i::before { left: 0; right: 0; top: 5px; height: 1px; }
-        #{{ $uid }} .rj-cine-line-h i::after  { top: 0; bottom: 0; left: 5px; width: 1px; }
-        #{{ $uid }} .rj-cine-line-h i:first-child { left: 16px; }
-        #{{ $uid }} .rj-cine-line-h i:last-child  { right: 16px; }
+        /* Lines */
+        #{{ $uid }} .rj-line { position: absolute; left: 0; right: 0; height: 1px; background: rgba(255,255,255,.14); z-index: 1; }
+        #{{ $uid }} .rj-l1 { top: 58px; }
+        #{{ $uid }} .rj-l2 { top: 180px; }
+        #{{ $uid }} .rj-l2 i { position: absolute; top: -6px; width: 13px; height: 13px; }
+        #{{ $uid }} .rj-l2 i::before, #{{ $uid }} .rj-l2 i::after { content: ""; position: absolute; background: #fff; }
+        #{{ $uid }} .rj-l2 i::before { left: 0; right: 0; top: 6px; height: 1px; }
+        #{{ $uid }} .rj-l2 i::after { top: 0; bottom: 0; left: 6px; width: 1px; }
+        #{{ $uid }} .rj-l2 i:first-child { left: 18px; }
+        #{{ $uid }} .rj-l2 i:last-child { right: 18px; }
 
         /* HUD */
-        #{{ $uid }} .rj-cine-hud {
-            position: absolute; top: 20px; z-index: 2;
-            display: flex; align-items: center; gap: 14px;
-            font: 600 12px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-            letter-spacing: .08em; color: rgba(255,255,255,.85);
+        #{{ $uid }} .rj-hud {
+            position: absolute; top: 14px; z-index: 2; display: flex; align-items: center; gap: 14px;
+            font: 700 12px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .08em; color: rgba(255,255,255,.9);
         }
-        #{{ $uid }} .rj-hud-left { left: 24px; }
-        #{{ $uid }} .rj-hud-right { right: 24px; }
-        #{{ $uid }} .rj-hud-bar { display: block; width: 2px; height: 28px; background: #fff; }
+        #{{ $uid }} .rj-hl { left: 22px; } #{{ $uid }} .rj-hr { right: 22px; }
+        #{{ $uid }} .rj-hud b { display: block; width: 3px; height: 30px; background: #fff; }
 
-        /* Content */
-        #{{ $uid }} .rj-cine-content {
-            position: relative; z-index: 2;
-            text-align: center; max-width: 1080px;
-            padding: 140px 24px 120px;
-            display: flex; flex-direction: column; align-items: center;
+        /* Fixed badge */
+        #{{ $uid }} .rj-badge {
+            position: absolute; top: 118px; left: 50%; transform: translateX(-50%); z-index: 2;
+            display: flex; align-items: center; gap: 14px; white-space: nowrap;
         }
-        #{{ $uid }} .rj-cine-badge-wrap {
-            display: inline-flex; align-items: center; gap: 14px; margin-bottom: 36px;
-            animation: rjCineIn .9s cubic-bezier(.2,.8,.2,1) .05s both;
+        #{{ $uid }} .rj-bars { display: inline-flex; gap: 3px; height: 15px; }
+        #{{ $uid }} .rj-bars i { width: 3px; background: #fff; }
+        #{{ $uid }} .rj-bars i:nth-child(3) { opacity: .35; }
+        #{{ $uid }} .rj-bars:last-child { flex-direction: row-reverse; }
+        #{{ $uid }} .rj-badge-t {
+            font: 700 12px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            letter-spacing: .1em; text-transform: uppercase; color: #fff;
         }
-        #{{ $uid }} .rj-cine-bars { display: inline-flex; gap: 3px; height: 14px; }
-        #{{ $uid }} .rj-cine-bars i { display: block; width: 2px; background: rgba(255,255,255,.9); }
-        #{{ $uid }} .rj-cine-bars i:nth-child(3) { opacity: .4; }
-        #{{ $uid }} .rj-cine-badge-wrap .rj-cine-bars:last-child { flex-direction: row-reverse; }
-        #{{ $uid }} .rj-cine-badge-text {
-            font: 600 12px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-            letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.92);
+
+        /* Rotating stage: slides stacked in one grid cell, so height never jumps */
+        #{{ $uid }} .rj-stage { position: relative; z-index: 2; display: grid; width: 100%; max-width: 1340px; text-align: center; }
+        #{{ $uid }} .rj-slide { grid-area: 1 / 1; visibility: hidden; display: flex; flex-direction: column; align-items: center; }
+        #{{ $uid }} .rj-slide.is-active, #{{ $uid }} .rj-slide.is-leaving { visibility: visible; }
+
+        #{{ $uid }} .rj-title {
+            margin: 0 0 26px; font-size: clamp(36px, 4.6vw, 88px); line-height: 1.08; font-weight: 500;
+            letter-spacing: -.035em; text-wrap: balance;
+            filter: drop-shadow(0 0 16px rgba(140,185,255,.35));
         }
-        #{{ $uid }} .rj-cine-title {
-            font-size: clamp(44px, 7vw, 92px);
-            line-height: 1.04; font-weight: 500; letter-spacing: -.04em;
-            margin: 0 0 24px; text-wrap: balance;
-            background: linear-gradient(180deg, #fff 0%, rgba(255,255,255,.82) 100%);
+        #{{ $uid }} .rj-slide.is-active .rj-title { animation: rjGlow 3.2s ease-in-out infinite; }
+        #{{ $uid }} .w { display: inline-block; opacity: 0; }
+        #{{ $uid }} .w > span {
+            display: inline-block;
+            background: linear-gradient(100deg, #fff 38%, #9cc3ff 50%, #fff 62%);
+            background-size: 300% 100%; background-position: 100% 0;
             -webkit-background-clip: text; background-clip: text; color: transparent;
-            animation: rjCineIn 1s cubic-bezier(.2,.8,.2,1) .15s both;
         }
-        #{{ $uid }} .rj-cine-subtitle {
-            font-size: clamp(16px, 1.8vw, 20px); line-height: 1.6;
-            color: rgba(255,255,255,.72); margin: 0 0 44px; max-width: 680px; text-wrap: pretty;
-            animation: rjCineIn 1s cubic-bezier(.2,.8,.2,1) .28s both;
-        }
-        #{{ $uid }} .rj-cine-actions {
-            display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap;
-            animation: rjCineIn 1s cubic-bezier(.2,.8,.2,1) .4s both;
-        }
-        #{{ $uid }} .rj-cine-btn {
-            display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-            padding: 15px 30px; font-size: 15px; font-weight: 500; text-decoration: none;
-            border-radius: 10px; transition: transform .25s, background .25s, border-color .25s, box-shadow .25s;
-        }
-        #{{ $uid }} .rj-cine-btn svg { width: 18px; height: 18px; transition: transform .25s; }
-        #{{ $uid }} .rj-cine-btn-primary { background: #fff; color: #000; border: 1px solid #fff; }
-        #{{ $uid }} .rj-cine-btn-primary:hover {
-            background: var(--rj-primary, #3b82f6); border-color: var(--rj-primary, #3b82f6); color: #fff;
-            transform: translateY(-2px);
-            box-shadow: 0 10px 28px color-mix(in srgb, var(--rj-primary, #3b82f6) 45%, transparent);
-        }
-        #{{ $uid }} .rj-cine-btn-primary:hover svg { transform: translateX(4px); }
-        #{{ $uid }} .rj-cine-btn-secondary {
-            background: rgba(255,255,255,.06); color: #fff;
-            border: 1px solid rgba(255,255,255,.18); backdrop-filter: blur(12px);
-        }
-        #{{ $uid }} .rj-cine-btn-secondary:hover {
-            background: rgba(255,255,255,.14); border-color: rgba(255,255,255,.35); transform: translateY(-2px);
-        }
+        #{{ $uid }} .rj-sp { display: inline-block; width: .78em; height: .78em; margin: 0 .04em; vertical-align: -.02em; }
 
-        #{{ $uid }} .rj-cine-scroll {
-            position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%); z-index: 2;
-            display: flex; flex-direction: column; align-items: center; gap: 10px; opacity: .55;
-        }
-        #{{ $uid }} .rj-cine-scroll-text {
-            font: 700 10px/1 ui-monospace, Menlo, Consolas, monospace; letter-spacing: .2em; color: #fff;
-        }
-        #{{ $uid }} .rj-cine-scroll-line {
-            display: block; width: 1px; height: 36px;
-            background: linear-gradient(to bottom, #fff, transparent);
-            animation: rjCineScroll 2s infinite;
-        }
+        #{{ $uid }} .is-active .w { animation: rjIn .9s cubic-bezier(.2,.8,.2,1) calc(var(--i) * .09s) both; }
+        #{{ $uid }} .is-active .w > span { animation: rjShine 1.8s ease-in-out calc(.5s + var(--i) * .12s) both; }
+        #{{ $uid }} .is-leaving .w { opacity: 1; animation: rjOut .5s ease both; }
 
-        @keyframes rjCineIn {
-            from { opacity: 0; transform: translateY(24px); filter: blur(8px); }
-            to   { opacity: 1; transform: none; filter: blur(0); }
+        #{{ $uid }} .rj-sub {
+            margin: 0; max-width: 860px; font-size: clamp(15px, 1.3vw, 24px); line-height: 1.55; color: rgba(255,255,255,.72);
+            opacity: 0; text-wrap: pretty;
         }
-        @keyframes rjCineScroll {
-            0%   { transform: scaleY(0); transform-origin: top; }
-            50%  { transform: scaleY(1); transform-origin: top; }
-            50.1%{ transform: scaleY(1); transform-origin: bottom; }
-            100% { transform: scaleY(0); transform-origin: bottom; }
+        #{{ $uid }} .is-active .rj-sub { animation: rjIn 1s cubic-bezier(.2,.8,.2,1) .45s both; }
+        #{{ $uid }} .is-leaving .rj-sub { opacity: 1; animation: rjOut .5s ease both; }
+
+        /* Back to top */
+        #{{ $uid }} .rj-top {
+            position: absolute; right: 66px; bottom: 56px; z-index: 3; width: 56px; height: 56px;
+            display: flex; align-items: center; justify-content: center; background: #000; color: #fff; transition: background .25s;
+        }
+        #{{ $uid }} .rj-top:hover { background: #1a1f2e; }
+        #{{ $uid }} .rj-top svg { width: 24px; height: 24px; }
+
+        @keyframes rjIn { from { opacity: 0; transform: translateY(.35em); filter: blur(12px); } to { opacity: 1; transform: none; filter: blur(0); } }
+        @keyframes rjOut { from { opacity: 1; filter: blur(0); } to { opacity: 0; transform: translateY(-.2em); filter: blur(10px); } }
+        @keyframes rjShine { from { background-position: 100% 0; } to { background-position: 0% 0; } }
+        @keyframes rjGlow {
+            0%, 100% { filter: drop-shadow(0 0 14px rgba(140,185,255,.30)); }
+            50% { filter: drop-shadow(0 0 30px rgba(160,200,255,.65)); }
         }
 
         @media (prefers-reduced-motion: reduce) {
-            #{{ $uid }} * { animation: none !important; }
+            #{{ $uid }} .w, #{{ $uid }} .rj-sub { animation: none !important; opacity: 1 !important; filter: none !important; }
+            #{{ $uid }} .rj-title { animation: none !important; }
         }
         @media (max-width: 768px) {
-            #{{ $uid }} .rj-line-top { top: 110px; }
-            #{{ $uid }} .rj-line-bottom { bottom: 80px; }
-            #{{ $uid }} .rj-cine-content { padding: 120px 20px 100px; }
-            #{{ $uid }} .rj-cine-actions { flex-direction: column; width: 100%; }
-            #{{ $uid }} .rj-cine-btn { width: 100%; }
-            #{{ $uid }} .rj-cine-scroll { display: none; }
+            #{{ $uid }}.rj-hero { padding: 120px 20px 90px; }
+            #{{ $uid }} .rj-l2 { top: 150px; }
+            #{{ $uid }} .rj-badge { top: 98px; gap: 8px; }
+            #{{ $uid }} .rj-badge-t { font-size: 9px; }
+            #{{ $uid }} .rj-bars { display: none; }
+            #{{ $uid }} .rj-top { right: 20px; bottom: 20px; width: 44px; height: 44px; }
         }
     </style>
 </section>

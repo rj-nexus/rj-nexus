@@ -28,12 +28,13 @@ class SpotlightHeroWidget extends BaseWidget
 
     public function description(): string
     {
-        return __('A cinematic, full-screen hero section with background video/image support, large typography, and dual CTAs.');
+        return __('A cinematic, full-screen hero with a blue-graded background video, fixed top label and rotating animated headline.');
     }
 
     public function schema(): array
     {
         return [
+            // ---- Background ----
             [
                 'name' => 'bg_video',
                 'type' => 'media',
@@ -47,77 +48,86 @@ class SpotlightHeroWidget extends BaseWidget
                 'default' => 'https://raw.githubusercontent.com/rj-nexus/spotlight/main/assets/video/background.mp4',
             ],
             [
-                'name' => 'ping_pong',
-                'type' => 'toggle',
-                'label' => __('Ping-Pong Effect (Play Reverse)'),
-                'default' => true,
-                'help' => __('Plays the video forward then backward smoothly without a jump.'),
-            ],
-            [
                 'name' => 'bg_image',
                 'type' => 'media',
-                'label' => __('Background Image (Local Upload)'),
+                'label' => __('Poster / Fallback Image (Local Upload)'),
                 'default' => '',
             ],
             [
                 'name' => 'bg_image_url',
                 'type' => 'text',
-                'label' => __('Background Image (External URL)'),
+                'label' => __('Poster / Fallback Image (External URL)'),
                 'default' => '',
             ],
+
+            // ---- Color grading ----
             [
-                'name' => 'overlay_color',
+                'name' => 'tint_color',
                 'type' => 'color',
-                'label' => __('Overlay Color'),
-                'default' => '#0a0a0f',
+                'label' => __('Video Tint Color'),
+                'default' => '#3f6fbe',
+                'help' => __('Any video is converted to monochrome and tinted with this color.'),
+            ],
+            [
+                'name' => 'tint_strength',
+                'type' => 'number',
+                'label' => __('Tint Strength (0-100)'),
+                'default' => 100,
             ],
             [
                 'name' => 'overlay_opacity',
                 'type' => 'number',
-                'label' => __('Overlay Opacity (0-100)'),
-                'default' => 60,
+                'label' => __('Darkness (0-100)'),
+                'default' => 35,
             ],
+
+            // ---- HUD ----
+            [
+                'name' => 'show_hud',
+                'type' => 'toggle',
+                'label' => __('Show HUD Labels'),
+                'default' => true,
+            ],
+            [
+                'name' => 'hud_left',
+                'type' => 'text',
+                'label' => __('HUD Left Text'),
+                'default' => '[ 01 / 09 ]',
+            ],
+            [
+                'name' => 'hud_right',
+                'type' => 'text',
+                'label' => __('HUD Right Text'),
+                'default' => '[ HERO ]',
+            ],
+            [
+                'name' => 'show_top_btn',
+                'type' => 'toggle',
+                'label' => __('Show Back-to-Top Button'),
+                'default' => true,
+            ],
+
+            // ---- Fixed text ----
             [
                 'name' => 'badge_text',
                 'type' => 'text',
-                'label' => __('Badge Text'),
+                'label' => __('Fixed Top Text'),
                 'default' => __('Your All-In-One AI Creation Platform'),
             ],
+
+            // ---- Rotating text ----
             [
-                'name' => 'title',
-                'type' => 'text',
-                'label' => __('Main Title'),
-                'default' => __('Create Smarter. Launch Faster.'),
-            ],
-            [
-                'name' => 'subtitle',
+                'name' => 'texts',
                 'type' => 'textarea',
-                'label' => __('Subtitle'),
-                'default' => __('Design, generate, and build anything with a multi-model AI engine — one platform, endless possibilities.'),
+                'label' => __('Rotating Text (one per line: Title | Subtitle)'),
+                'default' => "Create Smarter. Launch Faster. Built on ✦ Gemini | Design, generate, and build anything with a multi-model AI engine — one platform, endless possibilities.\nFrom Idea to Launch. In Minutes. | Describe what you need and let the engine draft, design and ship it for you.\nOne Platform. Every Model. | Switch between models without switching tools.",
+                'help' => __('Each line is one screen. Use "|" to separate title and subtitle. Type ✦ for the sparkle icon.'),
             ],
             [
-                'name' => 'primary_btn_text',
-                'type' => 'text',
-                'label' => __('Primary Button Text'),
-                'default' => __('Get Started'),
-            ],
-            [
-                'name' => 'primary_btn_url',
-                'type' => 'text',
-                'label' => __('Primary Button URL'),
-                'default' => '/',
-            ],
-            [
-                'name' => 'secondary_btn_text',
-                'type' => 'text',
-                'label' => __('Secondary Button Text'),
-                'default' => __('Learn More'),
-            ],
-            [
-                'name' => 'secondary_btn_url',
-                'type' => 'text',
-                'label' => __('Secondary Button URL'),
-                'default' => '#features',
+                'name' => 'interval',
+                'type' => 'number',
+                'label' => __('Seconds Between Changes'),
+                'default' => 5,
             ],
         ];
     }
