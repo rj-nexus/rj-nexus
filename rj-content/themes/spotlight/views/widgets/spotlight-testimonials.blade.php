@@ -50,7 +50,9 @@
     }
 
     $clean = fn($s) => str_replace(['Qore', 'qore'], 'RJ Nexus', (string) $s);
-    $dur = max(40, round(count($items) * $speed));
+    // two rows: first half on top, second half on the bottom (6 cards = 3 + 3)
+    $half = (int) ceil(count($items) / 2);
+    $rows = count($items) > 1 ? [array_slice($items, 0, $half), array_slice($items, $half)] : [$items];
 @endphp
 
 <section class="rj-t" id="{{ $uid }}">
@@ -81,29 +83,39 @@
     </div>
 
     <div class="rj-t-marquee">
-        <div class="rj-t-track" style="--dur: {{ $dur }}s;">
-            @foreach([0, 1] as $copy)
-                <div class="rj-t-group" @if($copy) aria-hidden="true" @endif>
-                    @foreach($items as $it)
-                        @php
-                            $safe = e($clean($it['text']));
-                            $safe = preg_replace('/@([\p{L}\p{N}_]+)/u', '<span class="rj-t-m">@$1</span>', $safe);
-                            $initial = mb_strtoupper(mb_substr(trim($it['name']), 0, 1));
-                        @endphp
-                        <article class="rj-t-card">
-                            <header class="rj-t-who">
-                                <span class="rj-t-avatar">{{ $initial }}</span>
-                                <span class="rj-t-id">
-                                    <strong>{{ $it['name'] }}</strong>
-                                    @if($it['handle'] !== '')<small>{{ $it['handle'] }}</small>@endif
-                                </span>
-                            </header>
-                            <p class="rj-t-text">{!! $safe !!}</p>
-                        </article>
-                    @endforeach
+        @foreach($rows as $ri => $row)
+            @php
+                $copies = count($row) >= 6 ? 2 : 4;              // enough repeats to fill wide screens, loop stays seamless
+                $dur = max(45, round(count($row) * $speed));
+                $shift = round(100 / $copies, 4);
+            @endphp
+            {{-- top row: left → right, bottom row: right → left --}}
+            <div class="rj-t-row {{ $ri === 0 ? 'is-ltr' : 'is-rtl' }}">
+                <div class="rj-t-track" style="--dur: {{ $dur }}s; --shift: -{{ $shift }}%;">
+                    @for($c = 0; $c < $copies; $c++)
+                        <div class="rj-t-group" @if($c) aria-hidden="true" @endif>
+                            @foreach($row as $it)
+                                @php
+                                    $safe = e($clean($it['text']));
+                                    $safe = preg_replace('/@([\p{L}\p{N}_]+)/u', '<span class="rj-t-m">@$1</span>', $safe);
+                                    $initial = mb_strtoupper(mb_substr(trim($it['name']), 0, 1));
+                                @endphp
+                                <article class="rj-t-card">
+                                    <header class="rj-t-who">
+                                        <span class="rj-t-avatar">{{ $initial }}</span>
+                                        <span class="rj-t-id">
+                                            <strong>{{ $it['name'] }}</strong>
+                                            @if($it['handle'] !== '')<small>{{ $it['handle'] }}</small>@endif
+                                        </span>
+                                    </header>
+                                    <p class="rj-t-text">{!! $safe !!}</p>
+                                </article>
+                            @endforeach
+                        </div>
+                    @endfor
                 </div>
-            @endforeach
-        </div>
+            </div>
+        @endforeach
     </div>
 
     <style>
@@ -167,14 +179,15 @@
 
         /* ===== Marquee ===== */
         #{{ $uid }} .rj-t-marquee {
-            position: relative; z-index: 1; margin-top: 84px; overflow-x: clip;
+            position: relative; z-index: 1; margin-top: 84px; overflow-x: clip; display: flex; flex-direction: column; gap: 20px;
             -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 9%, #000 91%, transparent 100%);
                     mask-image: linear-gradient(90deg, transparent 0, #000 9%, #000 91%, transparent 100%);
         }
         #{{ $uid }} .rj-t-track { display: flex; width: max-content; animation: rjTMarquee var(--dur, 60s) linear infinite; will-change: transform; }
         #{{ $uid }} .rj-t-group { display: flex; gap: 20px; padding-right: 20px; }
-        @keyframes rjTMarquee { to { transform: translateX(-50%); } }
-        #{{ $uid }} .rj-t-marquee:hover .rj-t-track { animation-play-state: paused; }
+        @keyframes rjTMarquee { to { transform: translateX(var(--shift, -50%)); } }
+        #{{ $uid }} .rj-t-row.is-ltr .rj-t-track { animation-direction: reverse; } /* top row moves left → right */
+        #{{ $uid }} .rj-t-row:hover .rj-t-track { animation-play-state: paused; }
         #{{ $uid }}.rj-idle .rj-t-track { animation-play-state: paused; }
 
         /* ===== Glass card (no backdrop-filter on moving cards: keeps scrolling smooth) ===== */
