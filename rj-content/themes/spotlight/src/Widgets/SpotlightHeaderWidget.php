@@ -38,7 +38,7 @@ class SpotlightHeaderWidget extends BaseWidget
                 'name' => 'logo_text',
                 'type' => 'text',
                 'label' => __('Logo Text'),
-                'default' => 'RJ CMS',
+                'default' => '',
             ],
             [
                 'name' => 'logo_image',
