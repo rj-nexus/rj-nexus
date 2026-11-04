@@ -1,6 +1,7 @@
 @php
     $videoUrl = $settings['bg_video_url'] ?? '';
     $videoMedia = $settings['bg_video'] ?? '';
+    $pingPong = $settings['ping_pong'] ?? true;
 
     $bgVideo = '';
     if (!empty($videoUrl)) {
@@ -33,6 +34,7 @@
         }
     }
 
+    $overlayColor = $settings['overlay_color'] ?? '#0a0a0f';
     $overlay = (int) ($settings['overlay_opacity'] ?? 60);
     $badge = $settings['badge_text'] ?? '';
     $title = $settings['title'] ?? '';
@@ -47,13 +49,13 @@
 
     <div class="rj-cine-bg">
         @if($bgVideo)
-            <video src="{{ $bgVideo }}" autoplay loop muted playsinline class="rj-cine-media" @if($bgImage) poster="{{ $bgImage }}" @endif></video>
+            <video src="{{ $bgVideo }}" autoplay loop muted playsinline class="rj-cine-media" @if($bgImage) poster="{{ $bgImage }}" @endif data-ping-pong="{{ $pingPong ? 'true' : 'false' }}"></video>
         @elseif($bgImage)
             <img src="{{ $bgImage }}" alt="{{ $title }}" class="rj-cine-media">
         @else
             <div class="rj-cine-media rj-cine-fallback"></div>
         @endif
-        <div class="rj-cine-overlay" style="opacity: {{ $overlay / 100 }};"></div>
+        <div class="rj-cine-overlay" style="background-color: {{ $overlayColor }}; opacity: {{ $overlay / 100 }};"></div>
     </div>
 
     <div class="rj-cine-grid-lines">
@@ -107,6 +109,52 @@
         <span class="rj-cine-scroll-line"></span>
     </div>
 
+    @if($bgVideo && $pingPong)
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const video = document.querySelector('.rj-cine-media');
+            if (!video || video.getAttribute('data-ping-pong') !== 'true') return;
+
+            video.removeAttribute('loop');
+
+            let isReversing = false;
+            let lastTimestamp = 0;
+            let isPlaying = false;
+
+            function reversePlay(timestamp) {
+                if (!isReversing) return;
+                if (!lastTimestamp) lastTimestamp = timestamp;
+                const delta = (timestamp - lastTimestamp) / 1000;
+                lastTimestamp = timestamp;
+
+                if (video.currentTime - delta > 0) {
+                    video.currentTime -= delta;
+                    requestAnimationFrame(reversePlay);
+                } else {
+                    video.currentTime = 0;
+                    isReversing = false;
+                    video.play();
+                }
+            }
+
+            video.addEventListener('ended', function() {
+                if (isReversing) return;
+                isReversing = true;
+                video.pause();
+                lastTimestamp = performance.now();
+                requestAnimationFrame(reversePlay);
+            });
+
+            const playPromise = video.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(function() {
+                    isPlaying = false;
+                });
+            }
+        });
+    </script>
+    @endif
+
     <style>
         .rj-cine-hero {
             position: relative;
@@ -130,6 +178,7 @@
             height: 100%;
             object-fit: cover;
             object-position: center;
+            will-change: transform;
         }
         .rj-cine-fallback {
             background: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--rj-primary) 15%, var(--rj-bg)) 0%, var(--rj-bg) 100%);
@@ -137,7 +186,6 @@
         .rj-cine-overlay {
             position: absolute;
             inset: 0;
-            background: #000;
             transition: opacity 0.3s;
         }
         .rj-cine-grid-lines {
