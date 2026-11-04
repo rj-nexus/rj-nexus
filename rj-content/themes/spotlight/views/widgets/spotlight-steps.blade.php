@@ -25,7 +25,6 @@
 
 <section class="rj-steps-section" id="{{ $uid }}">
 
-    {{-- Arxa fondakı böyük mavi qövs --}}
     <div class="rj-steps-bg-arc">
         <img src="{{ $bgArc }}" alt="Background Arc" aria-hidden="true">
     </div>
@@ -59,7 +58,6 @@
 
         <div class="rj-steps-split">
 
-            {{-- Sol tərəf: Şəkillər --}}
             <div class="rj-steps-visual">
                 <div class="rj-steps-visual-glow"></div>
                 @foreach($steps as $index => $step)
@@ -71,7 +69,6 @@
                 @endforeach
             </div>
 
-            {{-- Sağ tərəf: Mətnlər --}}
             <div class="rj-steps-content">
                 <div class="rj-steps-list">
                     @foreach($steps as $index => $step)
@@ -98,13 +95,15 @@
             width: 100%;
             background: transparent;
             padding: 140px 24px 120px;
-            overflow: hidden;
+            /* Overflow hidden-i sildik ki, sticky işləsin və planet kəsilməsin */
+            overflow-x: clip;
         }
 
-        /* Background Arc */
+        /* Planet (Arc) - Yuxarıya doğru düzəldildi */
         #{{ $uid }} .rj-steps-bg-arc {
             position: absolute;
-            top: -10%; left: 50%;
+            top: 0;
+            left: 50%;
             transform: translateX(-50%);
             width: 100%; max-width: 1400px;
             height: 80vh;
@@ -117,7 +116,6 @@
             -webkit-mask-image: linear-gradient(to bottom, #000 40%, transparent 100%);
         }
 
-        /* HUD və Xətlər */
         #{{ $uid }} .rj-steps-line {
             position: absolute; left: 0; right: 0; height: 1px;
             background: rgba(255, 255, 255, 0.14); z-index: 2;
@@ -142,7 +140,6 @@
         #{{ $uid }} .rj-hr { right: 24px; }
         #{{ $uid }} .rj-steps-hud b { display: block; width: 3px; height: 30px; background: #fff; }
 
-        /* Inner Layout */
         #{{ $uid }} .rj-steps-inner {
             position: relative; z-index: 1;
             max-width: 1100px; width: 100%; margin: 0 auto;
@@ -163,18 +160,18 @@
         #{{ $uid }} .rj-steps-title { font-size: clamp(32px, 5vw, 56px); font-weight: 600; line-height: 1.1; letter-spacing: -0.03em; color: #fff; margin: 0 0 20px; }
         #{{ $uid }} .rj-steps-sub { font-size: clamp(16px, 2vw, 18px); line-height: 1.6; color: var(--rj-muted); margin: 0; max-width: 600px; margin: 0 auto; }
 
-        /* Split */
+        /* Düzəliş: Split konteyneri yuxarıya düzülür */
         #{{ $uid }} .rj-steps-split {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 80px;
-            align-items: flex-start;
+            align-items: start; /* Vacibdir! */
         }
 
-        /* Sol tərəf: Şəkillər */
+        /* Sol tərəf: Sticky */
         #{{ $uid }} .rj-steps-visual {
             position: sticky;
-            top: 120px;
+            top: 140px; /* Header-in altında qalması üçün */
             height: 500px;
             display: flex;
             justify-content: center;
@@ -185,9 +182,13 @@
             background: radial-gradient(circle at center, rgba(59, 130, 246, 0.2) 0%, transparent 60%);
             filter: blur(40px); pointer-events: none; z-index: 0;
         }
+
+        /* Şəkillərin kəsilməməsi üçün max-height və object-fit */
         #{{ $uid }} .rj-step-img {
             position: absolute;
-            width: 100%; max-width: 400px; height: auto;
+            width: 100%; max-width: 400px;
+            max-height: 100%; /* Kəsilməsin deyə */
+            object-fit: contain; /* Nisbəti qorusun deyə */
             opacity: 0; visibility: hidden;
             transform: scale(0.9) translateY(20px);
             transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -299,7 +300,6 @@
 
             items.forEach(function (item) { observer.observe(item); });
         } else {
-            // Fallback for older browsers
             items.forEach(function (el) { el.classList.add('is-active'); el.style.opacity = '1'; });
             images.forEach(function (img) { img.classList.add('is-active'); img.style.opacity = '1'; img.style.position = 'relative'; img.style.marginBottom = '20px'; });
         }
