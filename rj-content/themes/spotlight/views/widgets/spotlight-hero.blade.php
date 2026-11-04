@@ -19,7 +19,6 @@
     $tintStrength = max(0, min(100, (int) ($settings['tint_strength'] ?? 100)));
     $overlay      = max(0, min(100, (int) ($settings['overlay_opacity'] ?? 35)));
     $showHud      = filter_var($settings['show_hud'] ?? true, FILTER_VALIDATE_BOOLEAN);
-    $showTop      = filter_var($settings['show_top_btn'] ?? true, FILTER_VALIDATE_BOOLEAN);
     $interval     = max(2, (int) ($settings['interval'] ?? 5)) * 1000;
 
     $badge    = $settings['badge_text'] ?? '';
@@ -98,12 +97,6 @@
             </div>
         @endforeach
     </div>
-
-    @if($showTop)
-        <a href="#" class="rj-top" aria-label="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5m0 0l-6 6m6-6l6 6"/></svg>
-        </a>
-    @endif
 
     <script>
     (function () {
@@ -230,14 +223,6 @@
         #{{ $uid }} .is-active .rj-sub { animation: rjIn 1s cubic-bezier(.2,.8,.2,1) .45s both; }
         #{{ $uid }} .is-leaving .rj-sub { opacity: 1; animation: rjOut .5s ease both; }
 
-        /* Back to top */
-        #{{ $uid }} .rj-top {
-            position: absolute; right: 66px; bottom: 56px; z-index: 3; width: 56px; height: 56px;
-            display: flex; align-items: center; justify-content: center; background: #000; color: #fff; transition: background .25s;
-        }
-        #{{ $uid }} .rj-top:hover { background: #1a1f2e; }
-        #{{ $uid }} .rj-top svg { width: 24px; height: 24px; }
-
         @keyframes rjIn { from { opacity: 0; transform: translateY(.35em); filter: blur(12px); } to { opacity: 1; transform: none; filter: blur(0); } }
         @keyframes rjOut { from { opacity: 1; filter: blur(0); } to { opacity: 0; transform: translateY(-.2em); filter: blur(10px); } }
         @keyframes rjShine { from { background-position: 100% 0; } to { background-position: 0% 0; } }
@@ -256,7 +241,6 @@
             #{{ $uid }} .rj-badge { top: 98px; gap: 8px; }
             #{{ $uid }} .rj-badge-t { font-size: 9px; }
             #{{ $uid }} .rj-bars { display: none; }
-            #{{ $uid }} .rj-top { right: 20px; bottom: 20px; width: 44px; height: 44px; }
         }
     </style>
 </section>
