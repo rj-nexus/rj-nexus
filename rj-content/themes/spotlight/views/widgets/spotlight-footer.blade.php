@@ -137,10 +137,11 @@
         #{{ $uid }}.rj-ft-section {
             position: relative;
             width: 100%;
-            background: var(--rj-bg); /* Arxa fon saytın əsas rəngi ilə eynidir */
+            /* Arxa fonu tünd rəngə bağlayırıq ki, ulduzlar burada görünməsin */
+            background: var(--rj-bg);
             padding: 80px 0 40px;
             overflow: hidden;
-            z-index: 1;
+            z-index: 2; /* Ulduzların (z-index: 0) üzərində olması üçün */
         }
 
         #{{ $uid }} .rj-ft-inner {
