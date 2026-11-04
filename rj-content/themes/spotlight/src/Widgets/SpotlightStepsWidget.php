@@ -28,7 +28,7 @@ class SpotlightStepsWidget extends BaseWidget
 
     public function description(): string
     {
-        return __('A split layout with a large visual on the left and animated numbered steps on the right.');
+        return __('A split layout with a sticky changing visual on the left and scrollable steps on the right.');
     }
 
     public function schema(): array
@@ -59,15 +59,9 @@ class SpotlightStepsWidget extends BaseWidget
                 'default' => '||| HOW TO USE QORE. |||',
             ],
             [
-                'name' => 'main_visual',
-                'type' => 'media',
-                'label' => __('Main Visual (Left Side)'),
-                'default' => '',
-            ],
-            [
-                'name' => 'main_visual_url',
+                'name' => 'bg_image_url',
                 'type' => 'text',
-                'label' => __('Main Visual URL (External)'),
+                'label' => __('Background Arc Image URL'),
                 'default' => 'https://raw.githubusercontent.com/rj-nexus/spotlight/main/assets/demo_image/gradient-planet.webp',
             ],
             [
@@ -92,21 +86,18 @@ class SpotlightStepsWidget extends BaseWidget
                         'step_num' => '01',
                         'step_title' => 'Pick a goal',
                         'step_text' => 'Choose the type of content you want to create: a tagline, description, image, video idea, and more.',
-                        'step_image' => '',
                         'step_image_url' => 'https://raw.githubusercontent.com/rj-nexus/spotlight/main/assets/demo_image/step1.png',
                     ],
                     [
                         'step_num' => '02',
                         'step_title' => 'Add a prompt',
                         'step_text' => 'Enter keywords, context, or any starting idea. Upload images or videos to guide the result.',
-                        'step_image' => '',
                         'step_image_url' => 'https://raw.githubusercontent.com/rj-nexus/spotlight/main/assets/demo_image/step2.png',
                     ],
                     [
                         'step_num' => '03',
                         'step_title' => 'Get results',
                         'step_text' => 'Qore returns multiple outputs. Choose your favorite, refine it, or keep exploring more options.',
-                        'step_image' => '',
                         'step_image_url' => 'https://raw.githubusercontent.com/rj-nexus/spotlight/main/assets/demo_image/step3.png',
                     ],
                 ],
