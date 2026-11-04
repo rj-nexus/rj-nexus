@@ -31,9 +31,10 @@ class FrontendController extends Controller
         if ($homepageType === 'static' && !empty($homepageSlug)) {
             $page = Post::with(['author', 'translations', 'template'])
                 ->where('type', 'page')
-                ->published()
+                ->where('status', '!=', 'trash')
                 ->where(function ($q) use ($homepageSlug) {
                     $q->where('slug', $homepageSlug)
+                      ->orWhere('id', $homepageSlug)
                       ->orWhereHas('translations', function ($inner) use ($homepageSlug) {
                           $inner->where('slug', $homepageSlug);
                       });
@@ -51,7 +52,7 @@ class FrontendController extends Controller
 
         $latestPosts = collect();
 
-        if (!$page) {
+        if (!$page || ($page && $page->type === 'post')) {
             $latestPosts = Post::with(['author', 'categories', 'tags'])
                 ->where('type', 'post')
                 ->published()
@@ -75,7 +76,7 @@ class FrontendController extends Controller
     {
         return Post::with(['author', 'translations', 'template'])
             ->where('type', 'page')
-            ->published()
+            ->where('status', '!=', 'trash')
             ->get()
             ->first(fn($p) => $p->isFrontPage());
     }
