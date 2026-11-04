@@ -36,7 +36,7 @@
         </div>
     </div>
 @else
-    <div x-data='themeCustomizer(@js($initValues))' class="space-y-6">
+    <div x-data="themeCustomizer(@js($initValues))" class="space-y-6">
 
         <div class="flex items-center justify-between gap-4 flex-wrap">
             <div>
@@ -92,7 +92,7 @@
                             class="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-sm font-medium hover:opacity-90 transition disabled:opacity-60 shadow-sm">
                         <svg x-show="!importing" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
                         <svg x-show="importing" x-cloak class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" opacity=".25"/><path fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z"/></svg>
-                        <span x-text="importing ? '{{ __('Importing...') }}' : '{{ __('Import Demo Content') }}'"></span>
+                        <span x-text="importing ? @js(__('Importing...')) : @js(__('Import Demo Content'))"></span>
                     </button>
 
                     <button type="button"
@@ -212,8 +212,8 @@
                                     :disabled="saving['{{ $sectionKey }}']"
                                     class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-rj-purple to-rj-pink text-white text-sm font-medium hover:opacity-90 transition disabled:opacity-60">
                                 <svg x-show="!saving['{{ $sectionKey }}']" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                                <svg x-show="saving['{{ $sectionKey }}']" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" opacity=".25"/><path fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z"/></svg>
-                                <span x-text="saving['{{ $sectionKey }}'] ? '{{ __('Saving...') }}' : '{{ __('Save Changes') }}'"></span>
+                                <svg x-show="saving['{{ $sectionKey }}']" x-cloak class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" opacity=".25"/><path fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z"/></svg>
+                                <span x-text="saving['{{ $sectionKey }}'] ? @js(__('Saving...')) : @js(__('Save Changes'))"></span>
                             </button>
                         </div>
                     </div>
@@ -247,7 +247,7 @@
             },
 
             async importDemo() {
-                if (!confirm('{{ __('Import demo content? This will overwrite pages with matching slugs and may set a new front page.') }}')) {
+                if (!confirm(@js(__('Import demo content? This will overwrite pages with matching slugs and may set a new front page.')))) {
                     return;
                 }
 
@@ -266,13 +266,13 @@
                     const data = await res.json().catch(() => ({}));
 
                     if (res.ok && data.success) {
-                        this.showToast(data.message || '{{ __('Import successful.') }}', 'success');
+                        this.showToast(data.message || @js(__('Import successful.')), 'success');
                         setTimeout(() => window.location.reload(), 1500);
                     } else {
-                        this.showToast(data.message || '{{ __('Import failed.') }}', 'error');
+                        this.showToast(data.message || @js(__('Import failed.')), 'error');
                     }
                 } catch (e) {
-                    this.showToast('{{ __('Network error.') }}', 'error');
+                    this.showToast(@js(__('Network error.')), 'error');
                 } finally {
                     this.importing = false;
                 }
@@ -299,19 +299,19 @@
                     const data = await res.json().catch(() => ({}));
 
                     if (res.ok && data.success) {
-                        this.showToast(data.message || '{{ __('Saved.') }}', 'success');
+                        this.showToast(data.message || @js(__('Saved.')), 'success');
                     } else {
-                        this.showToast(data.message || '{{ __('Save failed.') }}', 'error');
+                        this.showToast(data.message || @js(__('Save failed.')), 'error');
                     }
                 } catch (e) {
-                    this.showToast('{{ __('Network error.') }}', 'error');
+                    this.showToast(@js(__('Network error.')), 'error');
                 } finally {
                     this.saving[sectionKey] = false;
                 }
             },
 
             async resetSection(sectionKey) {
-                if (!confirm('{{ __('Reset this section to default values?') }}')) {
+                if (!confirm(@js(__('Reset this section to default values?')))) {
                     return;
                 }
 
@@ -332,20 +332,20 @@
                     const data = await res.json().catch(() => ({}));
 
                     if (res.ok && data.success) {
-                        this.showToast(data.message || '{{ __('Reset.') }}', 'success');
+                        this.showToast(data.message || @js(__('Reset.')), 'success');
                         setTimeout(() => window.location.reload(), 800);
                     } else {
-                        this.showToast(data.message || '{{ __('Reset failed.') }}', 'error');
+                        this.showToast(data.message || @js(__('Reset failed.')), 'error');
                     }
                 } catch (e) {
-                    this.showToast('{{ __('Network error.') }}', 'error');
+                    this.showToast(@js(__('Network error.')), 'error');
                 } finally {
                     this.saving[sectionKey] = false;
                 }
             },
 
             async resetAll() {
-                if (!confirm('{{ __('Reset ALL customizations for this theme? This cannot be undone.') }}')) {
+                if (!confirm(@js(__('Reset ALL customizations for this theme? This cannot be undone.')))) {
                     return;
                 }
 
@@ -366,13 +366,13 @@
                     const data = await res.json().catch(() => ({}));
 
                     if (res.ok && data.success) {
-                        this.showToast(data.message || '{{ __('All customizations reset.') }}', 'success');
+                        this.showToast(data.message || @js(__('All customizations reset.')), 'success');
                         setTimeout(() => window.location.reload(), 800);
                     } else {
-                        this.showToast(data.message || '{{ __('Reset failed.') }}', 'error');
+                        this.showToast(data.message || @js(__('Reset failed.')), 'error');
                     }
                 } catch (e) {
-                    this.showToast('{{ __('Network error.') }}', 'error');
+                    this.showToast(@js(__('Network error.')), 'error');
                 } finally {
                     this.saving['__all'] = false;
                 }
