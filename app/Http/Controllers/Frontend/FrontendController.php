@@ -24,7 +24,26 @@ class FrontendController extends Controller
         $header = $this->resolver->header();
         $footer = $this->resolver->footer();
 
-        $page = $this->findFrontPage();
+        $page = null;
+        $homepageType = rj_get_option('homepage_type', 'latest');
+        $homepageSlug = rj_get_option('homepage_page', '');
+
+        if ($homepageType === 'static' && !empty($homepageSlug)) {
+            $page = Post::with(['author', 'translations', 'template'])
+                ->where('type', 'page')
+                ->published()
+                ->where(function ($q) use ($homepageSlug) {
+                    $q->where('slug', $homepageSlug)
+                      ->orWhereHas('translations', function ($inner) use ($homepageSlug) {
+                          $inner->where('slug', $homepageSlug);
+                      });
+                })
+                ->first();
+        }
+
+        if (!$page) {
+            $page = $this->findFrontPage();
+        }
 
         if (!$page) {
             $page = $this->resolver->page();
