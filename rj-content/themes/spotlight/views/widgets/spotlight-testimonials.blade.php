@@ -85,13 +85,12 @@
     <div class="rj-t-marquee">
         @foreach($rows as $ri => $row)
             @php
-                $copies = count($row) >= 6 ? 2 : 4;              // enough repeats to fill wide screens, loop stays seamless
+                $copies = 4;                                     // 4 repeats fill wide screens; the loop shifts exactly one group (-25%)
                 $dur = max(45, round(count($row) * $speed));
-                $shift = round(100 / $copies, 4);
             @endphp
             {{-- top row: left → right, bottom row: right → left --}}
             <div class="rj-t-row {{ $ri === 0 ? 'is-ltr' : 'is-rtl' }}">
-                <div class="rj-t-track" style="--dur: {{ $dur }}s; --shift: -{{ $shift }}%;">
+                <div class="rj-t-track" style="animation-duration: {{ $dur }}s;">
                     @for($c = 0; $c < $copies; $c++)
                         <div class="rj-t-group" @if($c) aria-hidden="true" @endif>
                             @foreach($row as $it)
@@ -183,10 +182,12 @@
             -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 9%, #000 91%, transparent 100%);
                     mask-image: linear-gradient(90deg, transparent 0, #000 9%, #000 91%, transparent 100%);
         }
-        #{{ $uid }} .rj-t-track { display: flex; width: max-content; animation: rjTMarquee var(--dur, 60s) linear infinite; will-change: transform; }
+        #{{ $uid }} .rj-t-track { display: flex; width: max-content; will-change: transform; animation-timing-function: linear; animation-iteration-count: infinite; animation-duration: 60s; }
+        #{{ $uid }} .rj-t-row.is-rtl .rj-t-track { animation-name: rjTRtl; }   /* bottom row: right → left */
+        #{{ $uid }} .rj-t-row.is-ltr .rj-t-track { animation-name: rjTLtr; }   /* top row: left → right */
         #{{ $uid }} .rj-t-group { display: flex; gap: 20px; padding-right: 20px; }
-        @keyframes rjTMarquee { to { transform: translateX(var(--shift, -50%)); } }
-        #{{ $uid }} .rj-t-row.is-ltr .rj-t-track { animation-direction: reverse; } /* top row moves left → right */
+        @keyframes rjTRtl { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(-25%, 0, 0); } }
+        @keyframes rjTLtr { from { transform: translate3d(-25%, 0, 0); } to { transform: translate3d(0, 0, 0); } }
         #{{ $uid }} .rj-t-row:hover .rj-t-track { animation-play-state: paused; }
         #{{ $uid }}.rj-idle .rj-t-track { animation-play-state: paused; }
 
