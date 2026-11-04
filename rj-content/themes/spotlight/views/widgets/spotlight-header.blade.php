@@ -1,7 +1,25 @@
 @php
     $menuId = $settings['menu_id'] ?? '';
-    $menuTree = rj_menu_tree();
-    $menuItems = $menuTree[$menuId]['items'] ?? [];
+    $allMenus = function_exists('rj_menu_tree') ? rj_menu_tree() : [];
+    $menuItems = [];
+
+    if (!empty($menuId) && isset($allMenus[$menuId])) {
+        $menuItems = $allMenus[$menuId]['items'] ?? [];
+    }
+
+    if (empty($menuItems)) {
+        foreach ($allMenus as $menu) {
+            if (in_array(strtolower($menu['location'] ?? ''), ['header', 'main', 'primary'])) {
+                $menuItems = $menu['items'];
+                break;
+            }
+        }
+    }
+
+    if (empty($menuItems) && !empty($allMenus)) {
+        $menuItems = reset($allMenus)['items'] ?? [];
+    }
+
     $currentLocale = app()->getLocale();
     $locales = rj_frontend_locales();
     $logoImage = $settings['logo_image'] ?? '';
@@ -29,8 +47,8 @@
         <nav class="rj-glass-nav">
             @foreach($menuItems as $item)
                 <div class="rj-glass-nav-item">
-                    <a href="{{ $item['url'] }}" target="{{ $item['target'] }}" class="rj-glass-nav-link">
-                        {{ $item['label'] }}
+                    <a href="{{ $item['url'] ?? '#' }}" target="{{ $item['target'] ?? '_self' }}" class="rj-glass-nav-link">
+                        {{ $item['label'] ?? '' }}
                         @if(!empty($item['children']))
                             <svg class="rj-glass-chevron" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
                         @endif
@@ -38,8 +56,8 @@
                     @if(!empty($item['children']))
                         <div class="rj-glass-dropdown">
                             @foreach($item['children'] as $child)
-                                <a href="{{ $child['url'] }}" target="{{ $child['target'] }}" class="rj-glass-dropdown-link">
-                                    {{ $child['label'] }}
+                                <a href="{{ $child['url'] ?? '#' }}" target="{{ $child['target'] ?? '_self' }}" class="rj-glass-dropdown-link">
+                                    {{ $child['label'] ?? '' }}
                                 </a>
                             @endforeach
                         </div>
