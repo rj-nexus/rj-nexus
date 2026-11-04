@@ -85,13 +85,24 @@
                     </nav>
                 </div>
 
-                <button type="button"
-                        @click="resetAll()"
-                        :disabled="saving['__all']"
-                        class="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-white border border-red-200 text-red-600 text-sm font-medium hover:bg-red-50 transition disabled:opacity-60">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                    {{ __('Restore Defaults') }}
-                </button>
+                <div class="bg-white rounded-lg shadow-sm border border-gray-100 p-3 space-y-2">
+                    <button type="button"
+                            @click="importDemo()"
+                            :disabled="importing"
+                            class="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-sm font-medium hover:opacity-90 transition disabled:opacity-60 shadow-sm">
+                        <svg x-show="!importing" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                        <svg x-show="importing" x-cloak class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" opacity=".25"/><path fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z"/></svg>
+                        <span x-text="importing ? '{{ __('Importing...') }}' : '{{ __('Import Demo Content') }}'"></span>
+                    </button>
+
+                    <button type="button"
+                            @click="resetAll()"
+                            :disabled="saving['__all']"
+                            class="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-white border border-red-200 text-red-600 text-sm font-medium hover:bg-red-50 transition disabled:opacity-60">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        {{ __('Restore Defaults') }}
+                    </button>
+                </div>
             </div>
 
             <div class="lg:col-span-9">
@@ -223,6 +234,7 @@
             values: initial,
             activeSection: Object.keys(initial)[0] || '',
             saving: {},
+            importing: false,
             toast: { show: false, message: '', type: 'success' },
 
             csrf() {
@@ -232,6 +244,38 @@
             showToast(message, type) {
                 this.toast = { show: true, message, type: type || 'success' };
                 setTimeout(() => { this.toast.show = false; }, 3500);
+            },
+
+            async importDemo() {
+                if (!confirm('{{ __('Import demo content? This will overwrite pages with matching slugs and may set a new front page.') }}')) {
+                    return;
+                }
+
+                this.importing = true;
+
+                try {
+                    const res = await fetch('{{ route('admin.themes.customizer.import-demo', $theme) }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': this.csrf(),
+                        },
+                    });
+
+                    const data = await res.json().catch(() => ({}));
+
+                    if (res.ok && data.success) {
+                        this.showToast(data.message || '{{ __('Import successful.') }}', 'success');
+                        setTimeout(() => window.location.reload(), 1500);
+                    } else {
+                        this.showToast(data.message || '{{ __('Import failed.') }}', 'error');
+                    }
+                } catch (e) {
+                    this.showToast('{{ __('Network error.') }}', 'error');
+                } finally {
+                    this.importing = false;
+                }
             },
 
             async saveSection(sectionKey) {
