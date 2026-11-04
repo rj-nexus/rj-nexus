@@ -7,6 +7,8 @@
     "description": "Dark, modern product showcase theme with builder-first architecture.",
     "license": "MIT",
     "preview": "screenshot.png",
+    "namespace": "Spotlight",
+    "provider": "Spotlight\\SpotlightServiceProvider",
     "requires": {
         "rj_cms": ">=1.0.0",
         "php": ">=8.2"
@@ -62,215 +64,65 @@
                 "label": "Colors",
                 "icon": "palette",
                 "controls": {
-                    "primary_color": {
-                        "type": "color",
-                        "label": "Primary Color",
-                        "default": "#a78bfa"
-                    },
-                    "secondary_color": {
-                        "type": "color",
-                        "label": "Secondary Color",
-                        "default": "#f472b6"
-                    },
-                    "accent_color": {
-                        "type": "color",
-                        "label": "Accent Color",
-                        "default": "#22d3ee"
-                    },
-                    "text_color": {
-                        "type": "color",
-                        "label": "Text Color",
-                        "default": "#e5e7eb"
-                    },
-                    "muted_color": {
-                        "type": "color",
-                        "label": "Muted Text Color",
-                        "default": "#94a3b8"
-                    },
-                    "background_color": {
-                        "type": "color",
-                        "label": "Background Color",
-                        "default": "#0a0a0f"
-                    },
-                    "surface_color": {
-                        "type": "color",
-                        "label": "Surface Color",
-                        "default": "#14141c"
-                    },
-                    "border_color": {
-                        "type": "color",
-                        "label": "Border Color",
-                        "default": "#262632"
-                    },
-                    "link_color": {
-                        "type": "color",
-                        "label": "Link Color",
-                        "default": "#a78bfa"
-                    }
+                    "primary_color": { "type": "color", "label": "Primary Color", "default": "#a78bfa" },
+                    "secondary_color": { "type": "color", "label": "Secondary Color", "default": "#f472b6" },
+                    "accent_color": { "type": "color", "label": "Accent Color", "default": "#22d3ee" },
+                    "text_color": { "type": "color", "label": "Text Color", "default": "#e5e7eb" },
+                    "muted_color": { "type": "color", "label": "Muted Text Color", "default": "#94a3b8" },
+                    "background_color": { "type": "color", "label": "Background Color", "default": "#0a0a0f" },
+                    "surface_color": { "type": "color", "label": "Surface Color", "default": "#14141c" },
+                    "border_color": { "type": "color", "label": "Border Color", "default": "#262632" },
+                    "link_color": { "type": "color", "label": "Link Color", "default": "#a78bfa" }
                 }
             },
             "typography": {
                 "label": "Typography",
                 "icon": "type",
                 "controls": {
-                    "font_body": {
-                        "type": "select",
-                        "label": "Body Font",
-                        "default": "Inter",
-                        "options": {
-                            "Inter": "Inter",
-                            "Figtree": "Figtree",
-                            "Roboto": "Roboto",
-                            "Open Sans": "Open Sans",
-                            "Lato": "Lato",
-                            "Poppins": "Poppins",
-                            "system-ui": "System Default"
-                        }
-                    },
-                    "font_heading": {
-                        "type": "select",
-                        "label": "Heading Font",
-                        "default": "Inter",
-                        "options": {
-                            "Inter": "Inter",
-                            "Figtree": "Figtree",
-                            "Roboto": "Roboto",
-                            "Open Sans": "Open Sans",
-                            "Lato": "Lato",
-                            "Poppins": "Poppins",
-                            "system-ui": "System Default"
-                        }
-                    },
-                    "font_size_base": {
-                        "type": "range",
-                        "label": "Base Font Size",
-                        "default": 16,
-                        "min": 12,
-                        "max": 24,
-                        "step": 1,
-                        "suffix": "px"
-                    },
-                    "line_height": {
-                        "type": "range",
-                        "label": "Line Height",
-                        "default": 1.65,
-                        "min": 1.2,
-                        "max": 2.2,
-                        "step": 0.05
-                    }
+                    "font_body": { "type": "select", "label": "Body Font", "default": "Inter", "options": { "Inter": "Inter", "Figtree": "Figtree", "Roboto": "Roboto", "Open Sans": "Open Sans", "Lato": "Lato", "Poppins": "Poppins", "system-ui": "System Default" } },
+                    "font_heading": { "type": "select", "label": "Heading Font", "default": "Inter", "options": { "Inter": "Inter", "Figtree": "Figtree", "Roboto": "Roboto", "Open Sans": "Open Sans", "Lato": "Lato", "Poppins": "Poppins", "system-ui": "System Default" } },
+                    "font_size_base": { "type": "range", "label": "Base Font Size", "default": 16, "min": 12, "max": 24, "step": 1, "suffix": "px" },
+                    "line_height": { "type": "range", "label": "Line Height", "default": 1.65, "min": 1.2, "max": 2.2, "step": 0.05 }
                 }
             },
             "layout": {
                 "label": "Layout",
                 "icon": "layout",
                 "controls": {
-                    "container_width": {
-                        "type": "range",
-                        "label": "Container Width",
-                        "default": 1200,
-                        "min": 960,
-                        "max": 1600,
-                        "step": 20,
-                        "suffix": "px"
-                    },
-                    "sidebar_position": {
-                        "type": "select",
-                        "label": "Sidebar Position",
-                        "default": "right",
-                        "options": {
-                            "right": "Right",
-                            "left": "Left",
-                            "none": "No Sidebar"
-                        }
-                    },
-                    "sticky_header": {
-                        "type": "toggle",
-                        "label": "Sticky Header",
-                        "default": true
-                    }
+                    "container_width": { "type": "range", "label": "Container Width", "default": 1200, "min": 960, "max": 1600, "step": 20, "suffix": "px" },
+                    "sidebar_position": { "type": "select", "label": "Sidebar Position", "default": "right", "options": { "right": "Right", "left": "Left", "none": "No Sidebar" } },
+                    "sticky_header": { "type": "toggle", "label": "Sticky Header", "default": true }
                 }
             },
             "header": {
                 "label": "Header",
                 "icon": "header",
                 "controls": {
-                    "logo_text": {
-                        "type": "text",
-                        "label": "Logo Text",
-                        "default": "Spotlight"
-                    },
-                    "logo_image": {
-                        "type": "text",
-                        "label": "Logo Image URL",
-                        "default": ""
-                    },
-                    "header_bg": {
-                        "type": "color",
-                        "label": "Header Background",
-                        "default": "#0a0a0f"
-                    },
-                    "header_text_color": {
-                        "type": "color",
-                        "label": "Header Text Color",
-                        "default": "#f1f5f9"
-                    }
+                    "logo_text": { "type": "text", "label": "Logo Text", "default": "Spotlight" },
+                    "logo_image": { "type": "text", "label": "Logo Image URL", "default": "" },
+                    "header_bg": { "type": "color", "label": "Header Background", "default": "#0a0a0f" },
+                    "header_text_color": { "type": "color", "label": "Header Text Color", "default": "#f1f5f9" }
                 }
             },
             "footer": {
                 "label": "Footer",
                 "icon": "footer",
                 "controls": {
-                    "footer_text": {
-                        "type": "textarea",
-                        "label": "Footer Text",
-                        "default": "© 2026 Spotlight. All rights reserved."
-                    },
-                    "footer_bg": {
-                        "type": "color",
-                        "label": "Footer Background",
-                        "default": "#050508"
-                    },
-                    "footer_text_color": {
-                        "type": "color",
-                        "label": "Footer Text Color",
-                        "default": "#94a3b8"
-                    }
+                    "footer_text": { "type": "textarea", "label": "Footer Text", "default": "© 2026 Spotlight. All rights reserved." },
+                    "footer_bg": { "type": "color", "label": "Footer Background", "default": "#050508" },
+                    "footer_text_color": { "type": "color", "label": "Footer Text Color", "default": "#94a3b8" }
                 }
             },
             "social": {
                 "label": "Social Links",
                 "icon": "link",
                 "controls": {
-                    "facebook": {
-                        "type": "url",
-                        "label": "Facebook URL",
-                        "default": ""
-                    },
-                    "twitter": {
-                        "type": "url",
-                        "label": "Twitter / X URL",
-                        "default": ""
-                    },
-                    "instagram": {
-                        "type": "url",
-                        "label": "Instagram URL",
-                        "default": ""
-                    },
-                    "youtube": {
-                        "type": "url",
-                        "label": "YouTube URL",
-                        "default": ""
-                    },
-                    "linkedin": {
-                        "type": "url",
-                        "label": "LinkedIn URL",
-                        "default": ""
-                    },
-                    "github": {
-                        "type": "url",
-                        "label": "GitHub URL",
-                        "default": ""
-                    }
+                    "facebook": { "type": "url", "label": "Facebook URL", "default": "" },
+                    "twitter": { "type": "url", "label": "Twitter / X URL", "default": "" },
+                    "instagram": { "type": "url", "label": "Instagram URL", "default": "" },
+                    "youtube": { "type": "url", "label": "YouTube URL", "default": "" },
+                    "linkedin": { "type": "url", "label": "LinkedIn URL", "default": "" },
+                    "github": { "type": "url", "label": "GitHub URL", "default": "" }
                 }
             }
         }
