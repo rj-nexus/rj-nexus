@@ -464,5 +464,87 @@
     @endif
 
     @stack('scripts')
+
+        <button id="rj-back-to-top" class="rj-btt" aria-label="{{ __('Back to top') }}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5m0 0l-6 6m6-6l6 6"/></svg>
+    </button>
+
+    <style>
+        .rj-btt {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 999;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        .rj-btt.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .rj-btt:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+            color: var(--rj-primary);
+        }
+        .rj-btt svg {
+            width: 22px;
+            height: 22px;
+            transition: transform 0.2s;
+        }
+        .rj-btt:hover svg {
+            transform: translateY(-2px);
+        }
+        @media (max-width: 768px) {
+            .rj-btt {
+                bottom: 20px;
+                right: 20px;
+                width: 46px;
+                height: 46px;
+            }
+            .rj-btt svg {
+                width: 18px;
+                height: 18px;
+            }
+        }
+    </style>
+
+    <script>
+    (function() {
+        var btt = document.getElementById('rj-back-to-top');
+        if (!btt) return;
+
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 400) {
+                btt.classList.add('show');
+            } else {
+                btt.classList.remove('show');
+            }
+        }, { passive: true });
+
+        btt.addEventListener('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    })();
+    </script>
+
 </body>
 </html>
