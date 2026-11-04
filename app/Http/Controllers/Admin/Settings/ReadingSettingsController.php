@@ -19,7 +19,6 @@ class ReadingSettingsController extends BaseSettingsController
         ];
 
         $pages = Post::where('type', 'page')
-            ->where('status', 'published')
             ->orderBy('title')
             ->get();
 
@@ -72,6 +71,8 @@ class ReadingSettingsController extends BaseSettingsController
         foreach ($data as $name => $value) {
             Option::set($name, $value, 'reading', $typeMap[$name] ?? 'text');
         }
+
+        rj_flush_options();
 
         return back()->with('success', __('Reading settings saved.'));
     }
