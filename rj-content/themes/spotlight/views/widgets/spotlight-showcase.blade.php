@@ -11,7 +11,6 @@
 
     $bgImage = $resolve($settings['image_url'] ?? '', $settings['image'] ?? '');
 
-    // Əgər şəkil təyin edilməyibsə, default demo şəklini istifadə et
     if (empty($bgImage)) {
         $bgImage = 'https://raw.githubusercontent.com/rj-nexus/spotlight/main/assets/demo_image/demo_photo1.png';
     }
@@ -35,6 +34,9 @@
                 <span class="rj-showcase-badge-text">{{ $badge }}</span>
                 <span class="rj-showcase-bars"><i></i><i></i><i></i></span>
             </div>
+            <div class="rj-showcase-divider">
+                <span></span>
+            </div>
         @endif
 
         @if($title)
@@ -49,9 +51,7 @@
     @if($bgImage)
         <div class="rj-showcase-image-wrap">
             <img src="{{ $bgImage }}" alt="{{ $title }}" class="rj-showcase-img" loading="lazy">
-            <div class="rj-showcase-glass">
-                <span class="rj-showcase-glass-text">View Demo</span>
-            </div>
+            <div class="rj-showcase-shine"></div>
         </div>
     @endif
 
@@ -60,23 +60,23 @@
             position: relative;
             width: 100%;
             background: transparent;
-            padding: 100px 24px 60px;
+            padding: 100px 24px 80px;
             display: flex;
             flex-direction: column;
             align-items: center;
             overflow: hidden;
         }
 
-        /* Upward Glow Effect */
+        /* İşıq effekti mərkəzdən yuxarı doğru */
         #{{ $uid }} .rj-showcase-glow {
             position: absolute;
-            bottom: -10%;
+            top: 10%;
             left: 50%;
             transform: translateX(-50%);
             width: 80%;
-            height: 70%;
-            background: radial-gradient(ellipse at bottom, var(--glow-color) 0%, transparent 70%);
-            filter: blur(80px);
+            height: 60%;
+            background: radial-gradient(ellipse at center, var(--glow-color) 0%, transparent 60%);
+            filter: blur(100px);
             pointer-events: none;
             z-index: 0;
         }
@@ -92,29 +92,76 @@
             align-items: center;
         }
 
+        /* Badge ve animasiyali xetler */
         #{{ $uid }} .rj-showcase-badge {
             display: inline-flex;
             align-items: center;
-            gap: 14px;
-            margin-bottom: 24px;
+            gap: 16px;
         }
+
         #{{ $uid }} .rj-showcase-bars {
             display: inline-flex;
-            gap: 3px;
-            height: 12px;
+            gap: 4px;
+            height: 14px;
+            align-items: center;
         }
+
         #{{ $uid }} .rj-showcase-bars i {
+            display: block;
             width: 2px;
+            height: 100%;
             background: var(--rj-muted);
             opacity: 0.5;
+            transform-origin: center;
+            animation: rjBarPulse 1.5s ease-in-out infinite alternate;
         }
+
+        #{{ $uid }} .rj-showcase-bars i:nth-child(1) { animation-delay: 0s; }
+        #{{ $uid }} .rj-showcase-bars i:nth-child(2) { animation-delay: 0.2s; }
+        #{{ $uid }} .rj-showcase-bars i:nth-child(3) { animation-delay: 0.4s; }
+
+        #{{ $uid }} .rj-showcase-bars:last-child {
+            flex-direction: row-reverse;
+        }
+
+        @keyframes rjBarPulse {
+            0% { transform: scaleY(0.3); opacity: 0.2; }
+            100% { transform: scaleY(1); opacity: 0.8; }
+        }
+
         #{{ $uid }} .rj-showcase-badge-text {
             font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 700;
             letter-spacing: 0.15em;
             color: var(--rj-muted);
             text-transform: uppercase;
+        }
+
+        /* İncə ayırıcı xətt */
+        #{{ $uid }} .rj-showcase-divider {
+            width: 100%;
+            max-width: 400px;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.08);
+            margin: 28px 0 32px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #{{ $uid }} .rj-showcase-divider span {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, var(--rj-primary), transparent);
+            animation: rjDividerLight 4s infinite linear;
+        }
+
+        @keyframes rjDividerLight {
+            0% { left: -100%; }
+            100% { left: 100%; }
         }
 
         #{{ $uid }} .rj-showcase-title {
@@ -137,7 +184,7 @@
             max-width: 640px;
         }
 
-        /* Image Wrapper & Glass Hover */
+        /* Şəkil və üzərindən keçən parlaq xətt */
         #{{ $uid }} .rj-showcase-image-wrap {
             position: relative;
             z-index: 1;
@@ -160,46 +207,28 @@
         }
 
         #{{ $uid }} .rj-showcase-image-wrap:hover .rj-showcase-img {
-            transform: scale(1.02);
+            transform: scale(1.03);
         }
 
-        /* Glass Overlay */
-        #{{ $uid }} .rj-showcase-glass {
+        #{{ $uid }} .rj-showcase-shine {
             position: absolute;
-            inset: 0;
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(0px);
-            -webkit-backdrop-filter: blur(0px);
-            opacity: 0;
-            transition: all 0.4s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: inherit;
+            top: 0;
+            left: -100%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.25), transparent);
+            transform: skewX(-25deg);
+            pointer-events: none;
+            z-index: 2;
         }
 
-        #{{ $uid }} .rj-showcase-image-wrap:hover .rj-showcase-glass {
-            opacity: 1;
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+        #{{ $uid }} .rj-showcase-image-wrap:hover .rj-showcase-shine {
+            animation: rjImageShine 1.5s ease-out;
         }
 
-        #{{ $uid }} .rj-showcase-glass-text {
-            font-size: 14px;
-            font-weight: 600;
-            color: #fff;
-            padding: 12px 24px;
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 999px;
-            backdrop-filter: blur(12px);
-            transform: translateY(10px);
-            transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-        }
-
-        #{{ $uid }} .rj-showcase-image-wrap:hover .rj-showcase-glass-text {
-            transform: translateY(0);
+        @keyframes rjImageShine {
+            0% { left: -100%; }
+            100% { left: 200%; }
         }
 
         @media (max-width: 768px) {
@@ -211,6 +240,10 @@
             }
             #{{ $uid }} .rj-showcase-bars {
                 display: none;
+            }
+            #{{ $uid }} .rj-showcase-divider {
+                max-width: 100%;
+                margin: 20px 0;
             }
             #{{ $uid }} .rj-showcase-image-wrap {
                 border-radius: 12px;
