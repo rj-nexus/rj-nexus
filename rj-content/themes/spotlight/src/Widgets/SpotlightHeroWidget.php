@@ -44,7 +44,14 @@ class SpotlightHeroWidget extends BaseWidget
                 'name' => 'bg_video_url',
                 'type' => 'text',
                 'label' => __('Background Video (External URL)'),
-                'default' => '',
+                'default' => 'https://raw.githubusercontent.com/rj-nexus/spotlight/main/assets/video/background.mp4',
+            ],
+            [
+                'name' => 'ping_pong',
+                'type' => 'toggle',
+                'label' => __('Ping-Pong Effect (Play Reverse)'),
+                'default' => true,
+                'help' => __('Plays the video forward then backward smoothly without a jump.'),
             ],
             [
                 'name' => 'bg_image',
@@ -57,6 +64,12 @@ class SpotlightHeroWidget extends BaseWidget
                 'type' => 'text',
                 'label' => __('Background Image (External URL)'),
                 'default' => '',
+            ],
+            [
+                'name' => 'overlay_color',
+                'type' => 'color',
+                'label' => __('Overlay Color'),
+                'default' => '#0a0a0f',
             ],
             [
                 'name' => 'overlay_opacity',
