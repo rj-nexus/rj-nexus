@@ -196,11 +196,14 @@
             background: color-mix(in srgb, var(--rj-header-bg) 88%, transparent);
         }
 
+        /* BURADA FOOTER-İN FONUNU MƏCBURİ TÜND EDİRİK */
         .rj-frontend-footer {
             overflow-x: clip;
-            background: var(--rj-footer-bg);
+            background-color: #0a0a0f !important;
             color: var(--rj-footer-text);
             border-top: 1px solid var(--rj-border);
+            position: relative;
+            z-index: 20;
         }
 
         .rj-frontend-header > *,
