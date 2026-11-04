@@ -35,6 +35,24 @@ class SpotlightShowcaseWidget extends BaseWidget
     {
         return [
             [
+                'name' => 'hud_left',
+                'type' => 'text',
+                'label' => __('HUD Left Text'),
+                'default' => '[ 02 / 09 ]',
+            ],
+            [
+                'name' => 'hud_right',
+                'type' => 'text',
+                'label' => __('HUD Right Text'),
+                'default' => '[ FEATURES ]',
+            ],
+            [
+                'name' => 'show_hud',
+                'type' => 'toggle',
+                'label' => __('Show HUD and Lines'),
+                'default' => true,
+            ],
+            [
                 'name' => 'badge_text',
                 'type' => 'text',
                 'label' => __('Badge Text'),
