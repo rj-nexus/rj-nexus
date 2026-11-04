@@ -20,7 +20,8 @@
     $showBackToTop = filter_var($settings['show_back_to_top'] ?? true, FILTER_VALIDATE_BOOLEAN);
 @endphp
 
-<footer class="rj-ft-section" id="{{ $uid }}">
+{{-- BİRBAŞA HTML DAXİLİNDƏ FON RƏNGİ VERİRİK Kİ, HEÇ BİR CSS ONU POZA BİLMƏSİN --}}
+<footer class="rj-ft-section" id="{{ $uid }}" style="background-color: #0a0a0f; position: relative; z-index: 10; isolation: isolate; width: 100%;">
 
     <div class="rj-ft-inner">
 
@@ -135,14 +136,8 @@
 
     <style>
         #{{ $uid }}.rj-ft-section {
-            position: relative;
-            width: 100%;
-            /* Məcburi tünd fon təyin edirik ki, arxadakı ulduzlar görünməsin */
-            background-color: #0a0a0f !important;
             padding: 80px 0 40px;
             overflow: hidden;
-            z-index: 10; /* Ulduzların (z-index: 0) tam üzərində olması üçün */
-            isolation: isolate;
         }
 
         #{{ $uid }} .rj-ft-inner {
@@ -336,4 +331,4 @@
             #{{ $uid }} .rj-g-c-bl, #{{ $uid }} .rj-g-c-br { bottom: 40px; }
         }
     </style>
-</section>
+</footer>
