@@ -4,6 +4,7 @@ namespace Spotlight;
 
 use Illuminate\Support\ServiceProvider;
 use Spotlight\Widgets\SpotlightHeroWidget;
+use Spotlight\Widgets\SpotlightHeaderWidget;
 
 class SpotlightServiceProvider extends ServiceProvider
 {
@@ -22,6 +23,7 @@ class SpotlightServiceProvider extends ServiceProvider
             rj_add_filter('builder.widgets', function ($existing) {
                 $widgets = [
                     new SpotlightHeroWidget(),
+                    new SpotlightHeaderWidget(),
                 ];
                 return array_merge($existing, $widgets);
             });
