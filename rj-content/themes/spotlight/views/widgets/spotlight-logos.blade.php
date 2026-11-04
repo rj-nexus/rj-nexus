@@ -8,6 +8,14 @@
         foreach ($lines as $line) {
             $line = trim($line);
             if ($line !== '') {
+                // GitHub raw linklərini jsDelivr CDN ilə əvəz et (MIME problemi üçün)
+                if (str_contains($line, 'raw.githubusercontent.com')) {
+                    $line = str_replace(
+                        'raw.githubusercontent.com/',
+                        'cdn.jsdelivr.net/gh/',
+                        $line
+                    );
+                }
                 $logos[] = $line;
             }
         }
@@ -28,7 +36,12 @@
             <div class="rj-logos-grid">
                 @foreach($logos as $index => $logo)
                     <div class="rj-logo-item" style="--i: {{ $index }};">
-                        <img src="{{ $logo }}" alt="Trusted Partner" loading="lazy">
+                        <img src="{{ $logo }}"
+                             alt="Trusted Partner"
+                             loading="lazy"
+                             referrerpolicy="no-referrer"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <span class="rj-logo-fallback" style="display:none;">LOGO {{ $index + 1 }}</span>
                     </div>
                 @endforeach
             </div>
@@ -55,7 +68,7 @@
             transform: translate(-50%, -50%);
             width: 80%;
             height: 100%;
-            background: radial-gradient(ellipse at center, color-mix(in srgb, var(--rj-primary) 5%, transparent) 0%, transparent 70%);
+            background: radial-gradient(ellipse at center, rgba(255,255,255,0.03) 0%, transparent 70%);
             pointer-events: none;
             z-index: 0;
         }
@@ -79,7 +92,7 @@
             width: 100%;
             max-width: var(--rj-container);
             height: 1px;
-            background: linear-gradient(90deg, transparent, var(--rj-border) 15%, var(--rj-border) 85%, transparent);
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15) 15%, rgba(255,255,255,0.15) 85%, transparent);
         }
         #{{ $uid }} .rj-logos-lines-top { top: 0; }
         #{{ $uid }} .rj-logos-lines-bottom { bottom: 0; }
@@ -87,7 +100,7 @@
         #{{ $uid }} .rj-logos-badge {
             display: inline-block;
             padding: 6px 16px;
-            background: color-mix(in srgb, var(--rj-primary) 10%, transparent);
+            background: rgba(255, 255, 255, 0.08);
             border-radius: 4px;
         }
         #{{ $uid }} .rj-logos-badge-text {
@@ -95,7 +108,7 @@
             font-weight: 700;
             letter-spacing: 0.2em;
             text-transform: uppercase;
-            color: var(--rj-primary);
+            color: rgba(255, 255, 255, 0.85); /* Ağ rəng */
         }
 
         #{{ $uid }} .rj-logos-grid {
@@ -112,6 +125,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            min-width: 100px;
+            min-height: 30px;
             opacity: 0;
             animation: rjLogoFadeIn 0.8s ease forwards;
             animation-delay: calc(var(--i) * 0.1s);
@@ -122,52 +137,53 @@
             max-width: 140px;
             width: auto;
             object-fit: contain;
-            filter: grayscale(100%) opacity(0.4) brightness(2);
+            /* Loqoları ağ və boz etmək üçün düzgün filtr */
+            filter: grayscale(100%) brightness(0) invert(1);
+            opacity: 0.5;
             transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
+        /* Hover edəndə tam ağ olsun */
         #{{ $uid }} .rj-logo-item:hover img {
-            filter: grayscale(0%) opacity(1) brightness(1);
+            opacity: 1;
             transform: scale(1.05);
         }
 
+        /* Şəkil yüklənməzsə görünəcək mətn */
+        #{{ $uid }} .rj-logo-fallback {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px dashed rgba(255, 255, 255, 0.15);
+            border-radius: 6px;
+            padding: 8px 16px;
+            white-space: nowrap;
+        }
+
         @media (max-width: 968px) {
-            #{{ $uid }} .rj-logos-grid {
-                gap: 40px 50px;
-            }
-            #{{ $uid }} .rj-logo-item img {
-                height: 24px;
-                max-width: 110px;
-            }
+            #{{ $uid }} .rj-logos-grid { gap: 40px 50px; }
+            #{{ $uid }} .rj-logo-item img { height: 24px; max-width: 110px; }
         }
         @media (max-width: 640px) {
-            #{{ $uid }}.rj-logos-section {
-                padding: 40px 20px 60px;
-            }
-            #{{ $uid }} .rj-logos-inner {
-                gap: 32px;
-            }
+            #{{ $uid }}.rj-logos-section { padding: 40px 20px 60px; }
+            #{{ $uid }} .rj-logos-inner { gap: 32px; }
             #{{ $uid }} .rj-logos-grid {
                 display: grid;
                 grid-template-columns: repeat(2, 1fr);
                 gap: 32px 20px;
                 justify-items: center;
             }
-            #{{ $uid }} .rj-logo-item img {
-                height: 20px;
-                max-width: 90px;
-            }
+            #{{ $uid }} .rj-logo-item img { height: 20px; max-width: 90px; }
         }
 
         @keyframes rjLogoFadeIn {
-            0% {
-                opacity: 0;
-                transform: translateY(15px);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            0% { opacity: 0; transform: translateY(15px); }
+            100% { opacity: 1; transform: translateY(0); }
         }
     </style>
 </section>
