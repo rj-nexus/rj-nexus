@@ -28,7 +28,7 @@ class SpotlightTabsWidget extends BaseWidget
 
     public function description(): string
     {
-        return __('Interactive glassmorphism tabs with animated content switching.');
+        return __('Interactive glassmorphism tabs with animated text content.');
     }
 
     public function schema(): array
@@ -42,47 +42,38 @@ class SpotlightTabsWidget extends BaseWidget
                 'default' => [
                     [
                         'tab_title' => 'Image Creator',
-                        'content_title' => 'AI Image Generation',
-                        'content_text' => 'Create stunning visuals from text prompts in seconds.',
-                        'content_image' => 'https://raw.githubusercontent.com/rj-nexus/spotlight/main/assets/demo_image/demo_photo1.png'
+                        'content_title' => 'Generate stunning visuals in seconds.',
+                        'content_text' => 'Turn your imagination into high-resolution art with a single prompt. No design skills required.'
                     ],
                     [
                         'tab_title' => 'Code Composer',
-                        'content_title' => 'Smart Code Assistant',
-                        'content_text' => 'Write, refactor, and debug code with AI precision.',
-                        'content_image' => ''
+                        'content_title' => 'Write better code, faster.',
+                        'content_text' => 'From debugging to full-stack generation, let AI handle the heavy lifting.'
                     ],
                     [
                         'tab_title' => 'Website Builder',
-                        'content_title' => 'Launch in Minutes',
-                        'content_text' => 'Generate full landing pages and layouts effortlessly.',
-                        'content_image' => ''
+                        'content_title' => 'Launch your next big idea.',
+                        'content_text' => 'Create fully responsive landing pages with intelligent layout suggestions.'
                     ]
                 ],
                 'fields' => [
                     [
                         'name' => 'tab_title',
                         'type' => 'text',
-                        'label' => __('Tab Title'),
+                        'label' => __('Tab Button Text'),
                         'default' => 'New Tab',
                     ],
                     [
                         'name' => 'content_title',
                         'type' => 'text',
-                        'label' => __('Content Title'),
+                        'label' => __('Heading (Big Text)'),
                         'default' => 'Feature Title',
                     ],
                     [
                         'name' => 'content_text',
                         'type' => 'textarea',
-                        'label' => __('Content Text'),
+                        'label' => __('Description'),
                         'default' => 'Feature description goes here.',
-                    ],
-                    [
-                        'name' => 'content_image',
-                        'type' => 'media',
-                        'label' => __('Content Image (Optional)'),
-                        'default' => '',
                     ],
                 ],
             ],
