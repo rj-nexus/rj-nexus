@@ -2,6 +2,28 @@
 
 All notable changes to RJ Nexus will be documented in this file.
 
+## [v1.8.5] - RJ CORE 1
+
+This update focuses on stabilizing the core architecture, improving theme development workflows, and fixing critical bugs discovered during the creation of complex themes like Spotlight.
+
+### Added
+- **Theme Customizer Helpers:** Added `rj_theme_mod()`, `rj_theme_mod_section()`, `rj_set_theme_mod()`, and `rj_flush_theme_mods()` to `app/Helpers/rj.php`. Themes can now securely read and cache customizer values from the database.
+- **Dynamic Widget Namespace Registration:** Themes can now register their own widgets automatically via `theme.json` without hardcoding their namespaces in the core `WidgetRegistry`.
+
+### Fixed
+- **Hardcoded Widget Namespace:** Fixed `WidgetRegistry::widgetSource()` which was previously hardcoded to only recognize `VelvetAura`. It now dynamically reads the `namespace` key from the active theme's `theme.json`.
+- **Static Homepage Routing:** Fixed `FrontendController@home` to correctly resolve static pages by ID instead of slug, and allow draft/unpublished pages to be used as the front page without throwing a 404.
+- **Reading Settings Cache:** Added `rj_flush_options()` to `ReadingSettingsController@update` to ensure frontend routing picks up homepage changes immediately.
+- **Heading Widget Fatal Error:** Fixed `Undefined array key "level"` crash in `HeadingWidget.php` when rendering legacy or custom builder blocks.
+- **Customizer JavaScript Crash:** Replaced raw translation strings `{{ __('...') }}` with `@js()` in `customizer.blade.php` to prevent Alpine.js from breaking when translations contain single quotes.
+- **Missing Theme Service Provider Import:** Fixed a silent crash in `SpotlightServiceProvider` caused by a missing `use` statement for newly added widgets.
+
+### Improved
+- **Frontend Scroll Behavior:** Replaced `overflow-x: hidden` with `overflow-x: clip` in standard layouts to prevent unwanted secondary scrollbars on the Y-axis.
+- **Theme Integration:** Improved how core builder blocks (like Container and Heading) handle missing settings gracefully, preventing fatal 500 errors on the frontend.
+
+---
+
 ## [v1.8.4] - RJ CORE 1
 
 This update focuses on resolving core CMS bugs, stabilizing the Theme Customizer, fixing static homepage routing, and improving Builder integration with themes.
