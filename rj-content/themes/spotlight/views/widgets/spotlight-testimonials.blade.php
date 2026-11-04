@@ -9,9 +9,8 @@
 
     $testimonials = $settings['testimonials'] ?? [];
     if (!is_array($testimonials)) $testimonials = [];
-    $testimonials = array_slice(array_values($testimonials), 0, 6);
 
-    // Əgər 6-dan azdırsa, boş yerləri doldurmaq üçün default massiv
+    // Fallback əgər məlumat yoxdursa
     if (count($testimonials) < 6) {
         $fallback = [
             ['name' => 'Ethan Moore', 'username' => '@ethanmoore', 'text' => 'Started with the free plan on @qore and didn\'t expect much.', 'image' => ''],
@@ -23,6 +22,14 @@
         ];
         $testimonials = array_merge($testimonials, array_slice($fallback, count($testimonials)));
     }
+
+    // İlk 3 yuxarı, son 3 aşağı
+    $topRow = array_slice($testimonials, 0, 3);
+    $bottomRow = array_slice($testimonials, 3, 3);
+
+    // Sonsuz dövrə üçün kartları çoxaldırıq (təkrarlayırıq)
+    $topRowLoop = array_merge($topRow, $topRow, $topRow, $topRow);
+    $bottomRowLoop = array_merge($bottomRow, $bottomRow, $bottomRow, $bottomRow);
 @endphp
 
 <section class="rj-testi-section" id="{{ $uid }}">
@@ -55,33 +62,64 @@
             @endif
         </div>
 
-        <div class="rj-testi-grid">
-            @foreach($testimonials as $index => $t)
-                @php
-                    $initial = mb_substr($t['name'] ?? 'A', 0, 1);
-                    $text = $t['text'] ?? '';
-                    // @qore kimi tag-ləri rəngləndirmək üçün
-                    $text = preg_replace('/(@\w+)/', '<span class="rj-tag-mention">$1</span>', e($text));
-                @endphp
-                <div class="rj-testi-card" style="--i: {{ $index }};">
-                    <div class="rj-testi-card-inner">
-                        <div class="rj-testi-user">
-                            @if(!empty($t['image']))
-                                <img src="{{ $t['image'] }}" alt="{{ $t['name'] }}" class="rj-testi-avatar">
-                            @else
-                                <div class="rj-testi-avatar rj-avatar-fallback">{{ $initial }}</div>
-                            @endif
-                            <div class="rj-testi-user-info">
-                                <span class="rj-testi-name">{{ $t['name'] ?? '' }}</span>
-                                <span class="rj-testi-username">{{ $t['username'] ?? '' }}</span>
+        <div class="rj-testi-marquee-wrap">
+
+            {{-- Yuxarı sıra (Soldan Sağa) --}}
+            <div class="rj-testi-row">
+                <div class="rj-testi-track track-ltr">
+                    @foreach($topRowLoop as $index => $t)
+                        @php
+                            $initial = mb_substr($t['name'] ?? 'A', 0, 1);
+                            $text = preg_replace('/(@\w+)/', '<span class="rj-tag-mention">$1</span>', e($t['text'] ?? ''));
+                        @endphp
+                        <div class="rj-testi-card">
+                            <div class="rj-testi-card-inner">
+                                <div class="rj-testi-user">
+                                    @if(!empty($t['image']))
+                                        <img src="{{ $t['image'] }}" alt="{{ $t['name'] }}" class="rj-testi-avatar">
+                                    @else
+                                        <div class="rj-testi-avatar rj-avatar-fallback">{{ $initial }}</div>
+                                    @endif
+                                    <div class="rj-testi-user-info">
+                                        <span class="rj-testi-name">{{ $t['name'] ?? '' }}</span>
+                                        <span class="rj-testi-username">{{ $t['username'] ?? '' }}</span>
+                                    </div>
+                                </div>
+                                <div class="rj-testi-text">{!! $text !!}</div>
                             </div>
                         </div>
-                        <div class="rj-testi-text">
-                            {!! $text !!}
-                        </div>
-                    </div>
+                    @endforeach
                 </div>
-            @endforeach
+            </div>
+
+            {{-- Aşağı sıra (Sağdan Sola) --}}
+            <div class="rj-testi-row">
+                <div class="rj-testi-track track-rtl">
+                    @foreach($bottomRowLoop as $index => $t)
+                        @php
+                            $initial = mb_substr($t['name'] ?? 'A', 0, 1);
+                            $text = preg_replace('/(@\w+)/', '<span class="rj-tag-mention">$1</span>', e($t['text'] ?? ''));
+                        @endphp
+                        <div class="rj-testi-card">
+                            <div class="rj-testi-card-inner">
+                                <div class="rj-testi-user">
+                                    @if(!empty($t['image']))
+                                        <img src="{{ $t['image'] }}" alt="{{ $t['name'] }}" class="rj-testi-avatar">
+                                    @else
+                                        <div class="rj-testi-avatar rj-avatar-fallback">{{ $initial }}</div>
+                                    @endif
+                                    <div class="rj-testi-user-info">
+                                        <span class="rj-testi-name">{{ $t['name'] ?? '' }}</span>
+                                        <span class="rj-testi-username">{{ $t['username'] ?? '' }}</span>
+                                    </div>
+                                </div>
+                                <div class="rj-testi-text">{!! $text !!}</div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -90,7 +128,7 @@
             position: relative;
             width: 100%;
             background: transparent;
-            padding: 140px 24px 120px;
+            padding: 140px 0 120px; /* Yanlardan padding sildik ki, lent kənara çıxsın */
             overflow: hidden;
             display: flex;
             justify-content: center;
@@ -98,26 +136,16 @@
 
         /* Fırlanan Planet */
         #{{ $uid }} .rj-testi-globe-wrap {
-            position: absolute;
-            top: 30%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 600px;
-            height: 600px;
-            pointer-events: none;
-            z-index: 0;
+            position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%);
+            width: 600px; height: 600px; pointer-events: none; z-index: 0;
         }
         #{{ $uid }} .rj-testi-globe {
-            position: absolute;
-            inset: 0;
-            border-radius: 50%;
+            position: absolute; inset: 0; border-radius: 50%;
             background: radial-gradient(circle at 30% 30%, rgba(59,130,246,0.15), transparent 60%);
             border: 1px solid rgba(59,130,246,0.1);
             box-shadow: inset 0 0 80px rgba(59,130,246,0.1);
             animation: rotateGlobe 30s linear infinite;
-            transform-style: preserve-3d;
         }
-        /* Planetin üzərindəki tor (grid) xətləri */
         #{{ $uid }} .rj-testi-globe::before {
             content: ''; position: absolute; inset: 0; border-radius: 50%;
             background-image:
@@ -130,8 +158,7 @@
         #{{ $uid }} .rj-testi-globe-glow {
             position: absolute; inset: -20%;
             background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 60%);
-            filter: blur(40px);
-            animation: pulseGlow 4s ease-in-out infinite alternate;
+            filter: blur(40px); animation: pulseGlow 4s ease-in-out infinite alternate;
         }
         @keyframes rotateGlobe { 100% { transform: rotate(360deg); } }
         @keyframes pulseGlow { 0% { opacity: 0.5; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1.1); } }
@@ -148,8 +175,7 @@
         #{{ $uid }} .rj-testi-line i:last-child { right: 24px; }
 
         #{{ $uid }} .rj-testi-hud {
-            position: absolute; top: 20px; z-index: 3;
-            display: flex; align-items: center; gap: 14px;
+            position: absolute; top: 20px; z-index: 3; display: flex; align-items: center; gap: 14px;
             font: 700 12px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
             letter-spacing: 0.08em; color: rgba(255, 255, 255, 0.85);
         }
@@ -159,8 +185,7 @@
 
         /* Inner */
         #{{ $uid }} .rj-testi-inner {
-            position: relative; z-index: 1;
-            max-width: 1100px; width: 100%; margin: 0 auto;
+            position: relative; z-index: 1; max-width: 1200px; width: 100%; margin: 0 auto;
         }
 
         #{{ $uid }} .rj-testi-header { text-align: center; margin-bottom: 64px; }
@@ -175,30 +200,73 @@
 
         #{{ $uid }} .rj-testi-title { font-size: clamp(32px, 5vw, 52px); font-weight: 600; line-height: 1.1; letter-spacing: -0.03em; color: #fff; margin: 0; }
 
-        /* Grid */
-        #{{ $uid }} .rj-testi-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
+        /* Marquee Lentləri */
+        #{{ $uid }} .rj-testi-marquee-wrap {
+            position: relative;
+            display: flex;
+            flex-direction: column;
             gap: 24px;
+            width: 100vw;
+            left: 50%;
+            transform: translateX(-50%);
+            /* Kənarları yumşaq itirmək üçün mask */
+            mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+            -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
         }
 
-        /* Card */
+        #{{ $uid }} .rj-testi-row {
+            overflow: hidden;
+            display: flex;
+            width: 100%;
+        }
+
+        #{{ $uid }} .rj-testi-track {
+            display: flex;
+            gap: 24px;
+            width: max-content;
+            will-change: transform;
+        }
+
+        #{{ $uid }} .rj-testi-track.track-ltr {
+            animation: scrollLTR 40s linear infinite;
+        }
+
+        #{{ $uid }} .rj-testi-track.track-rtl {
+            animation: scrollRTL 40s linear infinite;
+        }
+
+        /* Üzərinə gələndə dayansın ki, oxumaq mümkün olsun */
+        #{{ $uid }} .rj-testi-row:hover .rj-testi-track {
+            animation-play-state: paused;
+        }
+
+        @keyframes scrollLTR {
+            0% { transform: translateX(-50%); }
+            100% { transform: translateX(0); }
+        }
+        @keyframes scrollRTL {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* Card - Tünd Fon */
         #{{ $uid }} .rj-testi-card {
-            background: rgba(255, 255, 255, 0.03);
+            position: relative;
+            width: 360px;
+            flex-shrink: 0;
+            background: linear-gradient(180deg, rgba(20, 20, 28, 0.85) 0%, rgba(10, 10, 15, 0.95) 100%);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 16px;
-            transition: transform 0.3s ease, border-color 0.3s ease, background 0.3s ease;
-            opacity: 0; transform: translateY(20px);
-            animation: rjTestiIn 0.6s ease forwards;
-            animation-delay: calc(var(--i) * 0.1s);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+            transition: border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
         }
-        @keyframes rjTestiIn { to { opacity: 1; transform: none; } }
 
         #{{ $uid }} .rj-testi-card:hover {
-            transform: translateY(-4px);
             border-color: rgba(59, 130, 246, 0.4);
-            background: rgba(255, 255, 255, 0.05);
-            box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(180deg, rgba(30, 32, 45, 0.95) 0%, rgba(15, 15, 22, 1) 100%);
+            box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.7), 0 0 20px rgba(59, 130, 246, 0.1);
         }
 
         #{{ $uid }} .rj-testi-card-inner { padding: 28px; display: flex; flex-direction: column; height: 100%; }
@@ -225,43 +293,20 @@
         #{{ $uid }} .rj-tag-mention { color: #3b82f6; font-weight: 600; }
 
         @media (max-width: 968px) {
-            #{{ $uid }} .rj-testi-grid { grid-template-columns: repeat(2, 1fr); }
             #{{ $uid }} .rj-testi-globe-wrap { width: 400px; height: 400px; }
+            #{{ $uid }} .rj-testi-card { width: 300px; }
         }
         @media (max-width: 640px) {
-            #{{ $uid }}.rj-testi-section { padding: 100px 20px 80px; }
-            #{{ $uid }} .rj-testi-grid { grid-template-columns: 1fr; gap: 16px; }
+            #{{ $uid }}.rj-testi-section { padding: 100px 0 80px; }
             #{{ $uid }} .rj-testi-bars { display: none; }
             #{{ $uid }} .rj-line-top { top: 40px; }
             #{{ $uid }} .rj-line-bottom { bottom: 40px; }
             #{{ $uid }} .rj-testi-hud { top: 10px; }
             #{{ $uid }} .rj-testi-globe-wrap { width: 300px; height: 300px; }
+            #{{ $uid }} .rj-testi-marquee-wrap { gap: 16px; }
+            #{{ $uid }} .rj-testi-card { width: 260px; }
+            #{{ $uid }} .rj-testi-track.track-ltr,
+            #{{ $uid }} .rj-testi-track.track-rtl { animation-duration: 30s; }
         }
     </style>
-
-    <script>
-    (function () {
-        var root = document.getElementById(@js($uid));
-        if (!root) return;
-
-        var cards = root.querySelectorAll('.rj-testi-card');
-        if ('IntersectionObserver' in window) {
-            var observer = new IntersectionObserver(function (entries) {
-                entries.forEach(function (entry) {
-                    if (entry.isIntersecting) {
-                        entry.target.style.animationPlayState = 'running';
-                        observer.unobserve(entry.target);
-                    }
-                });
-            }, { threshold: 0.1 });
-
-            cards.forEach(function (card) {
-                card.style.animationPlayState = 'paused';
-                observer.observe(card);
-            });
-        } else {
-            cards.forEach(function (card) { card.style.opacity = '1'; card.style.transform = 'none'; });
-        }
-    })();
-    </script>
 </section>
