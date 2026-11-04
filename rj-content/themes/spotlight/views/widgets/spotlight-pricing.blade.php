@@ -197,10 +197,12 @@
     <span class="rj-pr-line"><i></i><i></i></span>
 
     <style>
-        #{{ $uid }}.rj-pr { position: relative; width: 100%; overflow: hidden; background: transparent; color: #fff; padding: 120px 24px 150px; }
-        #{{ $uid }}.rj-pr::before { /* light falling from above */
-            content: ''; position: absolute; left: 50%; top: -10%; width: 90%; height: 70%; translate: -50% 0; pointer-events: none;
-            background: radial-gradient(ellipse at 50% 0%, hsl(217 90% 55% / .16), transparent 65%);
+        #{{ $uid }}.rj-pr { position: relative; width: 100%; overflow-x: clip; overflow-y: visible; background: transparent; color: #fff; padding: 120px 24px 150px; }
+        #{{ $uid }}.rj-pr::before { /* ambient light: starts and ends fully transparent, so there is no visible edge top or bottom */
+            content: ''; position: absolute; left: 0; right: 0; top: -200px; bottom: -200px; pointer-events: none; z-index: 0;
+            background: radial-gradient(ellipse 60% 42% at 50% 38%, hsl(217 90% 55% / .17), transparent 72%);
+            -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 30%, #000 70%, transparent 100%);
+                    mask-image: linear-gradient(180deg, transparent 0%, #000 30%, #000 70%, transparent 100%);
         }
         #{{ $uid }} .rj-pr-inner { position: relative; z-index: 1; max-width: var(--rj-container, 1200px); margin: 0 auto; }
 
