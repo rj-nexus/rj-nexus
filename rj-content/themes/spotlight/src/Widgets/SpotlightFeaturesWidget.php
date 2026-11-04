@@ -56,7 +56,7 @@ class SpotlightFeaturesWidget extends BaseWidget
                 'name' => 'badge_text',
                 'type' => 'text',
                 'label' => __('Top Badge Text'),
-                'default' => '||| WHY QORE WORKS SMARTER. |||',
+                'default' => '||| WHY RJ NEXUS WORKS SMARTER. |||',
             ],
             [
                 'name' => 'top_custom_code',
@@ -75,7 +75,7 @@ class SpotlightFeaturesWidget extends BaseWidget
                 'name' => 'subtitle',
                 'type' => 'textarea',
                 'label' => __('Subtitle'),
-                'default' => 'Qore combines powerful AI models with a unified creative workspace — built for speed, clarity, and control.',
+                'default' => 'RJ Nexus combines powerful AI models with a unified creative workspace — built for speed, clarity, and control.',
             ],
             [
                 'name' => 'features',
@@ -83,12 +83,12 @@ class SpotlightFeaturesWidget extends BaseWidget
                 'label' => __('Features (Max 9)'),
                 'max_items' => 9,
                 'default' => [
-                    ['icon' => 'ph:device-mobile', 'feature_title' => 'All-in-one platform', 'feature_text' => 'No more juggling tools. Qore unifies content, design, code, and video.'],
-                    ['icon' => 'ph:cpu', 'feature_title' => 'Multi-model AI core', 'feature_text' => 'ChatGPT, Claude, Gemini — Qore picks the smartest engine for every task.'],
+                    ['icon' => 'ph:device-mobile', 'feature_title' => 'All-in-one platform', 'feature_text' => 'No more juggling tools. RJ Nexus unifies content, design, code, and video.'],
+                    ['icon' => 'ph:cpu', 'feature_title' => 'Multi-model AI core', 'feature_text' => 'ChatGPT, Claude, Gemini — RJ Nexus picks the smartest engine for every task.'],
                     ['icon' => 'ph:desktop', 'feature_title' => 'Prompt-level control', 'feature_text' => 'Every feature is prompt-optimized, giving you control without overwhelm.'],
-                    ['icon' => 'ph:rocket-launch', 'feature_title' => 'Speed that scales', 'feature_text' => 'From solo to teams, Qore delivers fast outputs — even under heavy loads.'],
+                    ['icon' => 'ph:rocket-launch', 'feature_title' => 'Speed that scales', 'feature_text' => 'From solo to teams, RJ Nexus delivers fast outputs — even under heavy loads.'],
                     ['icon' => 'ph:shield-check', 'feature_title' => 'Secure by design', 'feature_text' => 'Your content and code stay private. We never store sensitive data.'],
-                    ['icon' => 'ph:arrows-clockwise', 'feature_title' => 'Always evolving', 'feature_text' => 'Qore improves weekly with better prompts, UI, and models — for free.'],
+                    ['icon' => 'ph:arrows-clockwise', 'feature_title' => 'Always evolving', 'feature_text' => 'RJ Nexus improves weekly with better prompts, UI, and models — for free.'],
                 ],
                 'fields' => [
                     [

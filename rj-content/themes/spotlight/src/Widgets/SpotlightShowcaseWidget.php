@@ -62,13 +62,13 @@ class SpotlightShowcaseWidget extends BaseWidget
                 'name' => 'title',
                 'type' => 'text',
                 'label' => __('Main Title'),
-                'default' => 'What You Can Do with Qore',
+                'default' => 'What You Can Do with RJ Nexus',
             ],
             [
                 'name' => 'subtitle',
                 'type' => 'textarea',
                 'label' => __('Subtitle'),
-                'default' => 'From visuals to code, Qore gives you a full creative suite powered by the latest multi-model AI — all in one place.',
+                'default' => 'From visuals to code, RJ Nexus gives you a full creative suite powered by the latest multi-model AI — all in one place.',
             ],
             [
                 'name' => 'image',

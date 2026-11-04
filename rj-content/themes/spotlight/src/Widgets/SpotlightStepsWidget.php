@@ -56,7 +56,7 @@ class SpotlightStepsWidget extends BaseWidget
                 'name' => 'badge_text',
                 'type' => 'text',
                 'label' => __('Top Badge Text'),
-                'default' => '||| HOW TO USE QORE. |||',
+                'default' => '||| HOW TO USE RJ Nexus. |||',
             ],
             [
                 'name' => 'bg_image_url',
@@ -74,7 +74,7 @@ class SpotlightStepsWidget extends BaseWidget
                 'name' => 'subtitle',
                 'type' => 'textarea',
                 'label' => __('Subtitle'),
-                'default' => 'Qore streamlines your creative workflow. No complex settings, just results.',
+                'default' => 'RJ Nexus streamlines your creative workflow. No complex settings, just results.',
             ],
             [
                 'name' => 'steps',
@@ -97,7 +97,7 @@ class SpotlightStepsWidget extends BaseWidget
                     [
                         'step_num' => '03',
                         'step_title' => 'Get results',
-                        'step_text' => 'Qore returns multiple outputs. Choose your favorite, refine it, or keep exploring more options.',
+                        'step_text' => 'RJ Nexus returns multiple outputs. Choose your favorite, refine it, or keep exploring more options.',
                         'step_image_url' => 'https://raw.githubusercontent.com/rj-nexus/spotlight/main/assets/demo_image/step3.png',
                     ],
                 ],
