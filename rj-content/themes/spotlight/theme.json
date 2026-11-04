@@ -99,7 +99,12 @@
                 "icon": "list",
                 "controls": {
                     "show_excerpt": { "type": "toggle", "label": "Show Excerpt in Cards", "default": true },
-                    "columns": { "type": "select", "label": "Grid Columns", "default": "3", "options": { "1": "1 Column", "2": "2 Columns", "3": "3 Columns" } }
+                    "columns": { "type": "select", "label": "Grid Columns", "default": "3", "options": { "1": "1 Column", "2": "2 Columns", "3": "3 Columns" } },
+                    "banner_video_url": { "type": "text", "label": "Banner Video URL (MP4)", "default": "https://raw.githubusercontent.com/rj-nexus/spotlight/main/assets/video/background.mp4" },
+                    "banner_image_url": { "type": "media", "label": "Banner Fallback Image", "default": "" },
+                    "banner_overlay_color": { "type": "color", "label": "Banner Overlay Color", "default": "#1d4ed8" },
+                    "banner_overlay_opacity": { "type": "range", "label": "Banner Overlay Opacity", "default": 60, "min": 0, "max": 100, "step": 5 },
+                    "banner_height": { "type": "select", "label": "Banner Height", "default": "md", "options": { "sm": "Small (300px)", "md": "Medium (400px)", "lg": "Large (500px)" } }
                 }
             },
             "blog_single": {
