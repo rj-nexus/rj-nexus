@@ -131,12 +131,15 @@
                     $fmt = fn($v) => number_format((float) $v, $dec);
                 @endphp
                 <article class="rj-pr-card {{ $p['featured'] ? 'is-featured' : '' }}" style="--h: {{ $hue }}; --i: {{ $i }};">
-                    <span class="rj-pr-glow"></span>
-                    <span class="rj-pr-cone"></span>
+                    <span class="rj-pr-fx">
+                        <span class="rj-pr-glow"></span>
+                        <span class="rj-pr-cone"></span>
+                        @for($s = 0; $s < 5; $s++)
+                            <span class="rj-pr-spark" style="--x: {{ ($s * 19 + 10) % 90 }}%; --d: {{ number_format($s * 0.6, 2) }}s; --t: {{ 3.8 + ($s % 3) * 0.9 }}s;"></span>
+                        @endfor
+                    </span>
                     <span class="rj-pr-lamp"></span>
-                    @for($s = 0; $s < 7; $s++)
-                        <span class="rj-pr-spark" style="--x: {{ ($s * 14 + 8) % 92 }}%; --d: {{ number_format($s * 0.35, 2) }}s; --t: {{ 2.6 + ($s % 3) * 0.7 }}s;"></span>
-                    @endfor
+                    @if($p['featured'])<span class="rj-pr-ring"></span>@endif
 
                     <div class="rj-pr-in">
                         @if($p['badge'])<span class="rj-pr-tag">{{ $p['badge'] }}</span>@endif
@@ -194,8 +197,6 @@
     <span class="rj-pr-line"><i></i><i></i></span>
 
     <style>
-        @property --rj-a { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
-
         #{{ $uid }}.rj-pr { position: relative; width: 100%; overflow: hidden; background: transparent; color: #fff; padding: 120px 24px 150px; }
         #{{ $uid }}.rj-pr::before { /* light falling from above */
             content: ''; position: absolute; left: 50%; top: -10%; width: 90%; height: 70%; translate: -50% 0; pointer-events: none;
@@ -203,11 +204,14 @@
         }
         #{{ $uid }} .rj-pr-inner { position: relative; z-index: 1; max-width: var(--rj-container, 1200px); margin: 0 auto; }
 
+        /* Section off-screen: pause every infinite animation (big CPU/GPU saver) */
+        #{{ $uid }}.rj-idle *, #{{ $uid }}.rj-idle *::before, #{{ $uid }}.rj-idle *::after { animation-play-state: paused !important; }
+
         /* ---------- Header ---------- */
         #{{ $uid }} .rj-pr-header { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 72px; }
         #{{ $uid }} .rj-pr-badge-top { display: inline-flex; align-items: center; gap: 14px; margin-bottom: 24px; }
         #{{ $uid }} .rj-pr-bars { display: inline-flex; align-items: center; gap: 3px; height: 15px; }
-        #{{ $uid }} .rj-pr-bars i { width: 3px; height: 100%; background: #fff; animation: rjPrBar 1.4s ease-in-out infinite; }
+        #{{ $uid }} .rj-pr-bars i { width: 3px; height: 100%; background: #fff; animation: rjPrBar 2.2s ease-in-out infinite; }
         #{{ $uid }} .rj-pr-bars i:nth-child(2) { animation-delay: .18s; }
         #{{ $uid }} .rj-pr-bars i:nth-child(3) { animation-delay: .36s; }
         #{{ $uid }} .rj-pr-bars:last-child { flex-direction: row-reverse; }
@@ -224,7 +228,7 @@
         #{{ $uid }} .rj-pr-toggle {
             position: relative; display: inline-flex; margin-top: 36px; padding: 5px; border-radius: 999px;
             background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12); box-shadow: inset 0 1px 0 rgba(255,255,255,.12);
-            -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
         }
         #{{ $uid }} .rj-pr-thumb {
             position: absolute; left: 0; top: 5px; bottom: 5px; width: 0; border-radius: 999px; pointer-events: none;
@@ -248,55 +252,72 @@
             position: relative; display: flex; flex-direction: column; border-radius: 26px; overflow: hidden; isolation: isolate;
             background: linear-gradient(160deg, rgba(255,255,255,.075), rgba(255,255,255,.015) 45%, rgba(255,255,255,.035));
             border: 1px solid rgba(255,255,255,.1);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,.13), 0 40px 70px -40px rgba(0,0,0,.8);
-            -webkit-backdrop-filter: blur(16px) saturate(140%); backdrop-filter: blur(16px) saturate(140%);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.13);
+            -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);   /* saturate() removed: it is the most expensive part */
             transform: perspective(1100px) rotateX(var(--rx)) rotateY(var(--ry));
-            transition: transform .3s cubic-bezier(.2,.8,.2,1), translate .5s cubic-bezier(.2,.8,.2,1), scale .5s cubic-bezier(.2,.8,.2,1), opacity .5s, filter .5s, box-shadow .5s;
+            contain: layout style;
+            transition: transform .35s cubic-bezier(.2,.8,.2,1), translate .5s cubic-bezier(.2,.8,.2,1), scale .5s cubic-bezier(.2,.8,.2,1), opacity .5s, box-shadow .5s;
         }
-        #{{ $uid }} .rj-pr-card.is-featured { translate: 0 -14px; box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 50px 90px -40px hsl(var(--h) 90% 50% / .5); }
-        #{{ $uid }} .rj-pr-card:hover { translate: 0 -8px; box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 50px 90px -35px hsl(var(--h) 90% 55% / .55); }
+        #{{ $uid }} .rj-pr-card.is-featured { translate: 0 -14px; box-shadow: inset 0 1px 0 rgba(255,255,255,.18), inset 0 0 90px -30px hsl(var(--h) 90% 55% / .28); }
+        #{{ $uid }} .rj-pr-card:hover { translate: 0 -8px; box-shadow: inset 0 1px 0 rgba(255,255,255,.2), inset 0 0 100px -30px hsl(var(--h) 90% 55% / .35); }
         #{{ $uid }} .rj-pr-card.is-featured:hover { translate: 0 -20px; }
-        /* when one card is hovered, the others step back */
-        #{{ $uid }} .rj-pr-grid:has(.rj-pr-card:hover) .rj-pr-card:not(:hover) { opacity: .55; scale: .985; filter: saturate(.7); }
+        /* when one card is hovered, the others step back (class set by JS instead of :has + filter) */
+        #{{ $uid }} .rj-pr-grid.is-dim .rj-pr-card:not(.is-hover) { opacity: .55; scale: .985; }
 
-        /* border light that follows the cursor (all cards) + rotating beam (featured card) */
-        #{{ $uid }} .rj-pr-card::before, #{{ $uid }} .rj-pr-card::after {
+        /* border light that follows the cursor */
+        #{{ $uid }} .rj-pr-card::before {
             content: ''; position: absolute; inset: 0; z-index: 4; border-radius: inherit; padding: 1px; pointer-events: none;
             -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
                     mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-        }
-        #{{ $uid }} .rj-pr-card::before {
             background: radial-gradient(260px circle at var(--mx) var(--my), hsl(var(--h) 100% 82%), hsl(var(--h) 95% 62% / .55) 40%, transparent 70%);
             opacity: 0; transition: opacity .4s;
         }
         #{{ $uid }} .rj-pr-card:hover::before { opacity: 1; }
-        #{{ $uid }} .rj-pr-card.is-featured::after {
-            background: conic-gradient(from var(--rj-a), transparent 0 62%, hsl(var(--h) 95% 60% / .9) 82%, #fff 92%, transparent 100%);
-            animation: rjPrBeam 5s linear infinite;
-        }
-        @keyframes rjPrBeam { to { --rj-a: 360deg; } }
 
-        /* light inside the card */
+        /* rotating beam (featured card): now a transform rotation, so it runs on the GPU instead of repainting every frame */
+        #{{ $uid }} .rj-pr-ring {
+            position: absolute; inset: 0; z-index: 4; border-radius: inherit; padding: 1px; overflow: hidden; pointer-events: none;
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+                    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+        }
+        #{{ $uid }} .rj-pr-ring::before {
+            content: ''; position: absolute; left: 50%; top: 50%; width: 240%; aspect-ratio: 1 / 1; translate: -50% -50%;
+            background: conic-gradient(transparent 0 62%, hsl(var(--h) 95% 60% / .9) 82%, #fff 92%, transparent 100%);
+            will-change: transform; animation: rjPrSpin 9s linear infinite; /* beam speed: change 9s */
+        }
+        @keyframes rjPrSpin { to { rotate: 360deg; } }
+
+        /* effects layer: clipped to the card and faded out near the edges, so nothing is cut sharply or leaves the card */
+        #{{ $uid }} .rj-pr-fx {
+            position: absolute; inset: 0; z-index: 0; pointer-events: none; border-radius: inherit; overflow: hidden;
+            -webkit-mask-image: linear-gradient(90deg, transparent, #000 48px, #000 calc(100% - 48px), transparent), linear-gradient(180deg, #000 calc(100% - 80px), transparent);
+            -webkit-mask-composite: source-in;
+                    mask-image: linear-gradient(90deg, transparent, #000 48px, #000 calc(100% - 48px), transparent), linear-gradient(180deg, #000 calc(100% - 80px), transparent);
+                    mask-composite: intersect;
+        }
+
+        /* light inside the card: a fixed-size glow moved with transform (no gradient repaint on mouse move) */
         #{{ $uid }} .rj-pr-glow {
-            position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0; transition: opacity .45s;
-            background: radial-gradient(420px circle at var(--mx) var(--my), hsl(var(--h) 90% 60% / .2), transparent 60%);
+            position: absolute; left: 0; top: 0; width: 520px; height: 520px; z-index: 0; pointer-events: none; opacity: 0; transition: opacity .45s;
+            translate: calc(var(--mx) - 260px) calc(var(--my) - 260px); will-change: translate, opacity;
+            background: radial-gradient(circle, hsl(var(--h) 90% 60% / .2), transparent 60%);
         }
         #{{ $uid }} .rj-pr-card:hover .rj-pr-glow { opacity: 1; }
         #{{ $uid }} .rj-pr-cone {
-            position: absolute; top: 0; left: 50%; width: 80%; height: 180px; translate: -50% 0; z-index: 0; pointer-events: none; opacity: .35; filter: blur(14px);
+            position: absolute; top: 0; left: 50%; width: 100%; height: 180px; translate: -50% 0; scale: .7 1; z-index: 0; pointer-events: none; opacity: .35; filter: blur(14px);
             background: linear-gradient(to bottom, hsl(var(--h) 95% 70% / .5), transparent); clip-path: polygon(42% 0, 58% 0, 100% 100%, 0 100%);
-            transition: opacity .5s, width .6s cubic-bezier(.2,.8,.2,1);
+            transition: opacity .5s, scale .6s cubic-bezier(.2,.8,.2,1);
         }
         #{{ $uid }} .rj-pr-card.is-featured .rj-pr-cone { opacity: .55; }
-        #{{ $uid }} .rj-pr-card:hover .rj-pr-cone { opacity: .95; width: 105%; }
+        #{{ $uid }} .rj-pr-card:hover .rj-pr-cone { opacity: .95; scale: .9 1; }
         #{{ $uid }} .rj-pr-lamp {
-            position: absolute; top: -1px; left: 50%; width: 30%; height: 2px; translate: -50% 0; z-index: 5; pointer-events: none;
+            position: absolute; top: -1px; left: 50%; width: 74%; height: 2px; translate: -50% 0; scale: .405 1; z-index: 5; pointer-events: none;
             background: linear-gradient(90deg, transparent, hsl(var(--h) 100% 88%), transparent); box-shadow: 0 0 22px 3px hsl(var(--h) 95% 65% / .85);
-            transition: width .6s cubic-bezier(.2,.8,.2,1);
+            transition: scale .6s cubic-bezier(.2,.8,.2,1);
         }
-        #{{ $uid }} .rj-pr-card:hover .rj-pr-lamp { width: 74%; }
+        #{{ $uid }} .rj-pr-card:hover .rj-pr-lamp { scale: 1 1; }
 
-        /* sparks that rise on hover */
+        /* sparks that rise on hover (only run while hovering) */
         #{{ $uid }} .rj-pr-spark { position: absolute; bottom: -6px; left: var(--x); width: 3px; height: 3px; border-radius: 50%; z-index: 1; opacity: 0; pointer-events: none; background: hsl(var(--h) 100% 85%); box-shadow: 0 0 8px 2px hsl(var(--h) 95% 65%); }
         #{{ $uid }} .rj-pr-card:hover .rj-pr-spark { animation: rjPrRise var(--t) ease-out var(--d) infinite; }
         @keyframes rjPrRise { 0% { transform: translateY(0) scale(.6); opacity: 0; } 15% { opacity: 1; } 100% { transform: translateY(-300px) scale(1.1); opacity: 0; } }
@@ -308,7 +329,7 @@
             font: 700 10px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .1em; text-transform: uppercase; color: #fff;
             background: linear-gradient(120deg, hsl(var(--h) 85% 48%), hsl(calc(var(--h) + 30) 85% 55%)); box-shadow: 0 0 20px hsl(var(--h) 90% 55% / .55);
         }
-        #{{ $uid }} .rj-pr-tag::after { content: ''; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,.55) 50%, transparent 70%); translate: -120% 0; animation: rjPrShine 3.2s ease-in-out infinite; }
+        #{{ $uid }} .rj-pr-tag::after { content: ''; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,.55) 50%, transparent 70%); translate: -120% 0; animation: rjPrShine 4.8s ease-in-out infinite; }
         @keyframes rjPrShine { 0%, 55% { translate: -120% 0; } 100% { translate: 120% 0; } }
 
         #{{ $uid }} .rj-pr-name { margin: 0 0 8px; font: 700 13px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .16em; text-transform: uppercase; color: hsl(var(--h) 90% 78%); }
@@ -319,7 +340,7 @@
         #{{ $uid }} .rj-pr-amount, #{{ $uid }} .rj-pr-amount-text {
             font-size: 60px; font-weight: 500; line-height: 1; letter-spacing: -.045em; font-variant-numeric: tabular-nums;
             background: linear-gradient(180deg, #fff 20%, hsl(var(--h) 80% 82%)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 16px hsl(var(--h) 90% 60% / .28)); transition: filter .4s;
+            filter: drop-shadow(0 0 16px hsl(var(--h) 90% 60% / .28));
         }
         #{{ $uid }} .rj-pr-price.is-text .rj-pr-amount-text { font-size: 44px; }
         #{{ $uid }} .rj-pr-card:hover .rj-pr-amount, #{{ $uid }} .rj-pr-card:hover .rj-pr-amount-text { filter: drop-shadow(0 0 26px hsl(var(--h) 95% 65% / .65)); }
@@ -381,9 +402,14 @@
         @media (max-width: 720px) {
             #{{ $uid }}.rj-pr { padding: 90px 20px 130px; }
             #{{ $uid }} .rj-pr-grid { grid-template-columns: 1fr; max-width: 460px; margin: 0 auto; }
+            #{{ $uid }} .rj-pr-card { -webkit-backdrop-filter: none; backdrop-filter: none; background: linear-gradient(160deg, rgba(255,255,255,.09), rgba(255,255,255,.03)); }
             #{{ $uid }} .rj-pr-card.is-featured { translate: 0 0; }
             #{{ $uid }} .rj-pr-bars { display: none; }
             #{{ $uid }} .rj-pr-desc { min-height: 0; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            #{{ $uid }} *, #{{ $uid }} *::before, #{{ $uid }} *::after { animation: none !important; transition: none !important; }
+            #{{ $uid }}.rj-js:not(.is-in) .rj-pr-card { opacity: 1; }
         }
     </style>
 
@@ -393,11 +419,13 @@
         if (!root) return;
         root.classList.add('rj-js');
 
-        // reveal when scrolled into view
+        // reveal once, and pause all infinite animations while the section is off-screen
         if ('IntersectionObserver' in window) {
-            new IntersectionObserver(function (e, o) {
-                if (e[0].isIntersecting) { root.classList.add('is-in'); o.disconnect(); }
-            }, { threshold: 0.12 }).observe(root);
+            new IntersectionObserver(function (e) {
+                var on = e[0].isIntersecting;
+                if (on) root.classList.add('is-in');
+                root.classList.toggle('rj-idle', !on);
+            }, { threshold: 0.05 }).observe(root);
         } else { root.classList.add('is-in'); }
 
         // monthly / yearly toggle with rolling numbers
@@ -436,17 +464,32 @@
             place();
         }
 
-        // cursor spotlight + 3D tilt (only on devices with a real hover)
+        // cursor spotlight + 3D tilt (only on devices with a real hover), throttled to one update per frame
         if (window.matchMedia && window.matchMedia('(hover: hover)').matches) {
+            var grid = root.querySelector('.rj-pr-grid');
             root.querySelectorAll('.rj-pr-card').forEach(function (c) {
-                c.addEventListener('pointermove', function (e) {
-                    var r = c.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
-                    c.style.setProperty('--mx', x + 'px');
-                    c.style.setProperty('--my', y + 'px');
+                var px = 0, py = 0, queued = false;
+
+                function frame() {
+                    queued = false;
+                    var r = c.getBoundingClientRect(), x = px - r.left, y = py - r.top;
+                    c.style.setProperty('--mx', x.toFixed(1) + 'px');
+                    c.style.setProperty('--my', y.toFixed(1) + 'px');
                     c.style.setProperty('--ry', ((x / r.width - 0.5) * 9).toFixed(2) + 'deg');
                     c.style.setProperty('--rx', ((0.5 - y / r.height) * 7).toFixed(2) + 'deg');
+                }
+
+                c.addEventListener('pointerenter', function () {
+                    c.classList.add('is-hover');
+                    if (grid) grid.classList.add('is-dim');
+                });
+                c.addEventListener('pointermove', function (e) {
+                    px = e.clientX; py = e.clientY;
+                    if (!queued) { queued = true; requestAnimationFrame(frame); }
                 });
                 c.addEventListener('pointerleave', function () {
+                    c.classList.remove('is-hover');
+                    if (grid) grid.classList.remove('is-dim');
                     c.style.setProperty('--rx', '0deg');
                     c.style.setProperty('--ry', '0deg');
                 });
