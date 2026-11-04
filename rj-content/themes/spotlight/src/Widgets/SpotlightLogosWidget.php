@@ -41,40 +41,11 @@ class SpotlightLogosWidget extends BaseWidget
                 'default' => 'Trusted by 6,000+ highly productive companies',
             ],
             [
-                'name' => 'logo_1',
-                'type' => 'text',
-                'label' => __('Logo 1 URL'),
-                'default' => 'https://raw.githubusercontent.com/rj-nexus/spotlight/main/assets/logos/logoipsum-1.svg',
-            ],
-            [
-                'name' => 'logo_2',
-                'type' => 'text',
-                'label' => __('Logo 2 URL'),
-                'default' => 'https://raw.githubusercontent.com/rj-nexus/spotlight/main/assets/logos/logoipsum-2.svg',
-            ],
-            [
-                'name' => 'logo_3',
-                'type' => 'text',
-                'label' => __('Logo 3 URL'),
-                'default' => 'https://raw.githubusercontent.com/rj-nexus/spotlight/main/assets/logos/logoipsum-3.svg',
-            ],
-            [
-                'name' => 'logo_4',
-                'type' => 'text',
-                'label' => __('Logo 4 URL'),
-                'default' => 'https://raw.githubusercontent.com/rj-nexus/spotlight/main/assets/logos/logoipsum-4.svg',
-            ],
-            [
-                'name' => 'logo_5',
-                'type' => 'text',
-                'label' => __('Logo 5 URL'),
-                'default' => 'https://raw.githubusercontent.com/rj-nexus/spotlight/main/assets/logos/logoipsum-5.svg',
-            ],
-            [
-                'name' => 'logo_6',
-                'type' => 'text',
-                'label' => __('Logo 6 URL'),
-                'default' => 'https://raw.githubusercontent.com/rj-nexus/spotlight/main/assets/logos/logoipsum-6.svg',
+                'name' => 'logos',
+                'type' => 'textarea',
+                'label' => __('Logo URLs (one per line)'),
+                'default' => "https://raw.githubusercontent.com/rj-nexus/spotlight/main/assets/logos/logoipsum-1.svg\nhttps://raw.githubusercontent.com/rj-nexus/spotlight/main/assets/logos/logoipsum-2.svg\nhttps://raw.githubusercontent.com/rj-nexus/spotlight/main/assets/logos/logoipsum-3.svg\nhttps://raw.githubusercontent.com/rj-nexus/spotlight/main/assets/logos/logoipsum-4.svg\nhttps://raw.githubusercontent.com/rj-nexus/spotlight/main/assets/logos/logoipsum-5.svg\nhttps://raw.githubusercontent.com/rj-nexus/spotlight/main/assets/logos/logoipsum-6.svg",
+                'help' => __('Paste image URLs here. Each line will be treated as a separate logo.'),
             ],
         ];
     }
