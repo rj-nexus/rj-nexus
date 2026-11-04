@@ -8,6 +8,7 @@ use Spotlight\Widgets\SpotlightHeaderWidget;
 use Spotlight\Widgets\SpotlightLogosWidget;
 use Spotlight\Widgets\SpotlightDividerWidget;
 use Spotlight\Widgets\SpotlightShowcaseWidget;
+use Spotlight\Widgets\SpotlightTabsWidget;
 
 class SpotlightServiceProvider extends ServiceProvider
 {
@@ -30,6 +31,7 @@ class SpotlightServiceProvider extends ServiceProvider
                     new SpotlightLogosWidget(),
                     new SpotlightDividerWidget(),
                     new SpotlightShowcaseWidget(),
+                    new SpotlightTabsWidget(),
                 ];
                 return array_merge($existing, $widgets);
             });
