@@ -1,6 +1,38 @@
 @php
-    $bgVideo = $settings['bg_video'] ?? '';
-    $bgImage = $settings['bg_image'] ?? '';
+    $videoUrl = $settings['bg_video_url'] ?? '';
+    $videoMedia = $settings['bg_video'] ?? '';
+
+    $bgVideo = '';
+    if (!empty($videoUrl)) {
+        $bgVideo = $videoUrl;
+    } elseif (!empty($videoMedia)) {
+        if (\Illuminate\Support\Str::startsWith($videoMedia, ['http://', 'https://'])) {
+            $bgVideo = $videoMedia;
+        } elseif (\Illuminate\Support\Str::startsWith($videoMedia, ['media/', '/media/'])) {
+            $bgVideo = asset(ltrim($videoMedia, '/'));
+        } else {
+            $bgVideo = \Illuminate\Support\Facades\Storage::url($videoMedia);
+        }
+    } else {
+        $bgVideo = 'https://raw.githubusercontent.com/rj-nexus/spotlight/main/assets/video/background.mp4';
+    }
+
+    $imageUrl = $settings['bg_image_url'] ?? '';
+    $imageMedia = $settings['bg_image'] ?? '';
+
+    $bgImage = '';
+    if (!empty($imageUrl)) {
+        $bgImage = $imageUrl;
+    } elseif (!empty($imageMedia)) {
+        if (\Illuminate\Support\Str::startsWith($imageMedia, ['http://', 'https://'])) {
+            $bgImage = $imageMedia;
+        } elseif (\Illuminate\Support\Str::startsWith($imageMedia, ['media/', '/media/'])) {
+            $bgImage = asset(ltrim($imageMedia, '/'));
+        } else {
+            $bgImage = \Illuminate\Support\Facades\Storage::url($imageMedia);
+        }
+    }
+
     $overlay = (int) ($settings['overlay_opacity'] ?? 60);
     $badge = $settings['badge_text'] ?? '';
     $title = $settings['title'] ?? '';
@@ -15,7 +47,7 @@
 
     <div class="rj-cine-bg">
         @if($bgVideo)
-            <video src="{{ $bgVideo }}" autoplay loop muted playsinline class="rj-cine-media"></video>
+            <video src="{{ $bgVideo }}" autoplay loop muted playsinline class="rj-cine-media" @if($bgImage) poster="{{ $bgImage }}" @endif></video>
         @elseif($bgImage)
             <img src="{{ $bgImage }}" alt="{{ $title }}" class="rj-cine-media">
         @else
