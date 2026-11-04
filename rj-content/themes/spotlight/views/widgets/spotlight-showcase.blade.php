@@ -19,6 +19,10 @@
     $title = $settings['title'] ?? '';
     $subtitle = $settings['subtitle'] ?? '';
 
+    $showHud = filter_var($settings['show_hud'] ?? true, FILTER_VALIDATE_BOOLEAN);
+    $hudLeft = $settings['hud_left'] ?? '[ 02 / 09 ]';
+    $hudRight = $settings['hud_right'] ?? '[ FEATURES ]';
+
     $glowColor = !empty($settings['glow_color']) ? $settings['glow_color'] : '#3f6fbe';
     $glowOpacity = max(0, min(100, (int) ($settings['glow_opacity'] ?? 50))) / 100;
 @endphp
@@ -26,6 +30,13 @@
 <section class="rj-showcase-section" id="{{ $uid }}">
 
     <div class="rj-showcase-glow" style="--glow-color: {{ $glowColor }}; opacity: {{ $glowOpacity }};"></div>
+
+    @if($showHud)
+        <span class="rj-showcase-line rj-line-top"><i></i><i></i></span>
+        <span class="rj-showcase-line rj-line-bottom"><i></i><i></i></span>
+        <div class="rj-showcase-hud rj-hl"><b></b>{{ $hudLeft }}</div>
+        <div class="rj-showcase-hud rj-hr">{{ $hudRight }}<b></b></div>
+    @endif
 
     <div class="rj-showcase-content">
         @if($badge)
@@ -60,7 +71,7 @@
             position: relative;
             width: 100%;
             background: transparent;
-            padding: 100px 24px 80px;
+            padding: 140px 24px 120px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -79,6 +90,65 @@
             filter: blur(100px);
             pointer-events: none;
             z-index: 0;
+        }
+
+        /* HUD və Xətlər */
+        #{{ $uid }} .rj-showcase-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.14);
+            z-index: 2;
+        }
+        #{{ $uid }} .rj-line-top { top: 60px; }
+        #{{ $uid }} .rj-line-bottom { bottom: 60px; }
+
+        #{{ $uid }} .rj-showcase-line i {
+            position: absolute;
+            top: -6px;
+            width: 13px;
+            height: 13px;
+        }
+        #{{ $uid }} .rj-showcase-line i::before,
+        #{{ $uid }} .rj-showcase-line i::after {
+            content: "";
+            position: absolute;
+            background: #fff;
+        }
+        #{{ $uid }} .rj-showcase-line i::before {
+            left: 0;
+            right: 0;
+            top: 6px;
+            height: 1px;
+        }
+        #{{ $uid }} .rj-showcase-line i::after {
+            top: 0;
+            bottom: 0;
+            left: 6px;
+            width: 1px;
+        }
+        #{{ $uid }} .rj-showcase-line i:first-child { left: 24px; }
+        #{{ $uid }} .rj-showcase-line i:last-child { right: 24px; }
+
+        #{{ $uid }} .rj-showcase-hud {
+            position: absolute;
+            top: 20px;
+            z-index: 3;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font: 700 12px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            letter-spacing: 0.08em;
+            color: rgba(255, 255, 255, 0.85);
+        }
+        #{{ $uid }} .rj-hl { left: 24px; }
+        #{{ $uid }} .rj-hr { right: 24px; }
+        #{{ $uid }} .rj-showcase-hud b {
+            display: block;
+            width: 3px;
+            height: 30px;
+            background: #fff;
         }
 
         #{{ $uid }} .rj-showcase-content {
@@ -233,8 +303,12 @@
 
         @media (max-width: 768px) {
             #{{ $uid }}.rj-showcase-section {
-                padding: 60px 20px 40px;
+                padding: 100px 20px 80px;
             }
+            #{{ $uid }} .rj-line-top { top: 40px; }
+            #{{ $uid }} .rj-line-bottom { bottom: 40px; }
+            #{{ $uid }} .rj-showcase-hud { top: 10px; }
+            #{{ $uid }} .rj-showcase-hud b { height: 20px; }
             #{{ $uid }} .rj-showcase-content {
                 margin-bottom: 40px;
             }
