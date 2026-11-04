@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Frontend;
 use App\Http\Controllers\Controller;
 use App\Models\Post;
 use App\Models\Template;
-use App\Models\Option;
 use App\Services\ThemeManager;
 use App\Services\ThemeResolver;
 
@@ -26,27 +25,21 @@ class FrontendController extends Controller
         $footer = $this->resolver->footer();
 
         $page = null;
-        $homepageType = Option::where('option_name', 'homepage_type')->value('option_value') ?? 'latest';
-        $homepageSlug = Option::where('option_name', 'homepage_page')->value('option_value') ?? '';
+        $homepageType = rj_get_option('homepage_type', 'latest');
+        $homepagePage = rj_get_option('homepage_page', '');
 
-        if ($homepageType === 'static' && !empty($homepageSlug)) {
+        if ($homepageType === 'static' && !empty($homepagePage)) {
             $page = Post::with(['author', 'translations', 'template'])
                 ->where('type', 'page')
                 ->where('status', '!=', 'trash')
-                ->where(function ($q) use ($homepageSlug) {
-                    $q->where('slug', $homepageSlug)
-                      ->orWhere('id', $homepageSlug)
-                      ->orWhereHas('translations', function ($inner) use ($homepageSlug) {
-                          $inner->where('slug', $homepageSlug);
+                ->where(function ($q) use ($homepagePage) {
+                    $q->where('id', $homepagePage)
+                      ->orWhere('slug', $homepagePage)
+                      ->orWhereHas('translations', function ($inner) use ($homepagePage) {
+                          $inner->where('slug', $homepagePage);
                       });
                 })
                 ->first();
-
-            if (!$page) {
-                $page = Template::where('type', 'page')
-                    ->where('slug', $homepageSlug)
-                    ->first();
-            }
         }
 
         if (!$page) {
@@ -59,7 +52,7 @@ class FrontendController extends Controller
 
         $latestPosts = collect();
 
-        if (!$page || ($page && isset($page->type) && $page->type === 'post')) {
+        if (!$page || ($page && $page->type === 'post')) {
             $latestPosts = Post::with(['author', 'categories', 'tags'])
                 ->where('type', 'post')
                 ->published()
@@ -91,8 +84,10 @@ class FrontendController extends Controller
     public function preview(Template $template)
     {
         $isPage = $template->type === 'page';
+
         $header = $isPage ? $this->resolver->header() : null;
         $footer = $isPage ? $this->resolver->footer() : null;
+
         $blocks = $template->content['blocks'] ?? [];
 
         return view('frontend.preview', [
@@ -108,14 +103,18 @@ class FrontendController extends Controller
     public function previewPost(Post $post)
     {
         $previewLocale = request()->query('locale');
+
         if (!$previewLocale || !in_array($previewLocale, rj_available_locales(), true)) {
             $previewLocale = config('app.locale');
         }
+
         app()->setLocale($previewLocale);
 
         $header = $this->resolver->header();
         $footer = $this->resolver->footer();
+
         $blocks = $post->blocks['blocks'] ?? [];
+
         $title = $post->title;
 
         if ($previewLocale !== config('app.locale')) {

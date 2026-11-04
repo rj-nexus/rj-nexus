@@ -43,7 +43,7 @@
                     <select name="homepage_page" class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">
                         <option value="">{{ __('— Select a page —') }}</option>
                         @foreach($pages as $page)
-                            <option value="{{ $page->slug }}" {{ ($options['homepage_page'] ?? '') === $page->slug ? 'selected' : '' }}>
+                            <option value="{{ $page->id }}" {{ ($options['homepage_page'] ?? '') == $page->id ? 'selected' : '' }}>
                                 {{ $page->title }}
                             </option>
                         @endforeach
@@ -56,7 +56,7 @@
                     <select name="posts_page" class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">
                         <option value="">{{ __('— Select a page —') }}</option>
                         @foreach($pages as $page)
-                            <option value="{{ $page->slug }}" {{ ($options['posts_page'] ?? '') === $page->slug ? 'selected' : '' }}>
+                            <option value="{{ $page->id }}" {{ ($options['posts_page'] ?? '') == $page->id ? 'selected' : '' }}>
                                 {{ $page->title }}
                             </option>
                         @endforeach
