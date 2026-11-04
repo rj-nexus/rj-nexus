@@ -106,10 +106,19 @@
         }
 
         #{{ $uid }} .rj-lg-badge { display: flex; align-items: center; gap: 14px; padding: 0 20px; text-align: center; }
-        #{{ $uid }} .rj-lg-bars { display: inline-flex; gap: 3px; height: 15px; flex: none; }
-        #{{ $uid }} .rj-lg-bars i { width: 3px; background: #fff; }
-        #{{ $uid }} .rj-lg-bars i:nth-child(3) { opacity: .35; }
+        #{{ $uid }} .rj-lg-bars { display: inline-flex; align-items: center; gap: 3px; height: 15px; flex: none; }
+        #{{ $uid }} .rj-lg-bars i {
+            width: 3px; height: 100%; background: #fff; transform-origin: center;
+            animation: rjLgBar 1.4s ease-in-out infinite;
+        }
+        #{{ $uid }} .rj-lg-bars i:nth-child(2) { animation-delay: .18s; }
+        #{{ $uid }} .rj-lg-bars i:nth-child(3) { animation-delay: .36s; }
+        /* right group is mirrored, so the wave flows inward toward the text on both sides */
         #{{ $uid }} .rj-lg-bars:last-child { flex-direction: row-reverse; }
+        @keyframes rjLgBar {
+            0%, 100% { transform: scaleY(.3); opacity: .45; }
+            50%      { transform: scaleY(1);  opacity: 1; }
+        }
         #{{ $uid }} .rj-lg-badge-t {
             font: 700 12px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
             letter-spacing: .1em; text-transform: uppercase; color: #fff;
