@@ -40,19 +40,27 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5 border-t border-gray-100 pt-5">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('Homepage Page') }}</label>
-                    <input type="text" name="homepage_page"
-                           value="{{ $options['homepage_page'] ?? '' }}"
-                           placeholder="{{ __('e.g. home, landing') }}"
-                           class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">
+                    <select name="homepage_page" class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">
+                        <option value="">{{ __('— Select a page —') }}</option>
+                        @foreach($pages as $page)
+                            <option value="{{ $page->slug }}" {{ ($options['homepage_page'] ?? '') === $page->slug ? 'selected' : '' }}>
+                                {{ $page->title }}
+                            </option>
+                        @endforeach
+                    </select>
                     <p class="text-xs text-gray-500 mt-1">{{ __('Only used when "A static page" is selected.') }}</p>
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('Posts Page') }}</label>
-                    <input type="text" name="posts_page"
-                           value="{{ $options['posts_page'] ?? '' }}"
-                           placeholder="{{ __('e.g. blog, news') }}"
-                           class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">
+                    <select name="posts_page" class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">
+                        <option value="">{{ __('— Select a page —') }}</option>
+                        @foreach($pages as $page)
+                            <option value="{{ $page->slug }}" {{ ($options['posts_page'] ?? '') === $page->slug ? 'selected' : '' }}>
+                                {{ $page->title }}
+                            </option>
+                        @endforeach
+                    </select>
                     <p class="text-xs text-gray-500 mt-1">{{ __('Page where all posts are listed.') }}</p>
                 </div>
             </div>
