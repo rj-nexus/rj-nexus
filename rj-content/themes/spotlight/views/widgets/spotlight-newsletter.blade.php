@@ -47,8 +47,8 @@
                         <input type="email" class="rj-nl-input" placeholder="Enter your email address" aria-label="Email address" autocomplete="email" required data-email>
                     </div>
 
-                    <button type="submit" class="rj-nl-btn" data-btn>
-                        <span class="rj-nl-btn-text" data-sink data-btn-text>{{ $btnText }}</span>
+                    <button type="submit" class="rj-nl-btn" data-btn data-sink>
+                        <span class="rj-nl-btn-text" data-btn-text>{{ $btnText }}</span>
                         <span class="rj-nl-hole" data-hole aria-hidden="true">
                             <i class="rj-nl-halo"></i>
                             <i class="rj-nl-disk rj-nl-disk-back"></i>
@@ -89,7 +89,7 @@
 
         #{{ $uid }} .rj-nl-bg {
             position: absolute; left: 0; right: 0; top: -200px; bottom: -200px; z-index: 0; pointer-events: none;
-            background: radial-gradient(ellipse 50% 36% at 50% 52%, rgba(255,255,255,.075), rgba(255,255,255,0) 72%);
+            background: radial-gradient(ellipse 50% 36% at 50% 52%, rgba(255,255,255,.06), rgba(255,255,255,0) 72%);
             -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 28%, #000 72%, transparent 100%);
                     mask-image: linear-gradient(180deg, transparent 0%, #000 28%, #000 72%, transparent 100%);
         }
@@ -115,17 +115,7 @@
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", "Segoe UI", system-ui, sans-serif;
             -webkit-font-smoothing: antialiased;
         }
-        #{{ $uid }} .rj-nl-card {
-            position: relative; overflow: hidden; isolation: isolate;
-            border-radius: 32px; padding: 60px 48px;
-            background: linear-gradient(180deg, rgba(255,255,255,.09) 0%, rgba(255,255,255,.05) 100%);
-            -webkit-backdrop-filter: blur(30px) saturate(180%); backdrop-filter: blur(30px) saturate(180%);
-            box-shadow: inset 0 0 0 .5px rgba(255,255,255,.16), inset 0 1px 0 rgba(255,255,255,.24);
-        }
-        #{{ $uid }} .rj-nl-card::before {
-            content: ""; position: absolute; left: 0; right: 0; top: 0; height: 180px; z-index: 0; pointer-events: none;
-            background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,0));
-        }
+        #{{ $uid }} .rj-nl-card { position: relative; padding: 0; background: none; }
         #{{ $uid }}.rj-ready .rj-nl-card { opacity: 0; transform: translateY(18px); transition: opacity .9s cubic-bezier(.32,.72,0,1), transform .9s cubic-bezier(.32,.72,0,1); }
         #{{ $uid }}.rj-ready.rj-in .rj-nl-card { opacity: 1; transform: none; }
 
@@ -150,6 +140,7 @@
             width: 100%; height: 54px; padding: 0 20px; border: 0; outline: 0; border-radius: 16px;
             font: inherit; font-size: 16px; color: #fff;
             background: rgba(255,255,255,.06);
+            -webkit-backdrop-filter: blur(20px) saturate(160%); backdrop-filter: blur(20px) saturate(160%);
             box-shadow: inset 0 0 0 .5px rgba(255,255,255,.18), inset 0 1px 0 rgba(255,255,255,.1);
             transition: background .3s ease, box-shadow .3s ease;
         }
@@ -161,6 +152,7 @@
             display: inline-flex; align-items: center; justify-content: center; gap: 22px;
             font: inherit; font-size: 16px; font-weight: 600; letter-spacing: -.01em; color: #fff; white-space: nowrap;
             background: linear-gradient(180deg, rgba(255,255,255,.2), rgba(255,255,255,.1));
+            -webkit-backdrop-filter: blur(20px) saturate(160%); backdrop-filter: blur(20px) saturate(160%);
             box-shadow: inset 0 0 0 .5px rgba(255,255,255,.3), inset 0 1px 0 rgba(255,255,255,.38);
             transition: background .3s ease, transform .25s cubic-bezier(.32,.72,0,1);
             -webkit-tap-highlight-color: transparent;
@@ -175,15 +167,17 @@
             position: relative; z-index: 3; flex: none; width: 30px; height: 30px; transition: transform .6s cubic-bezier(.32,.72,0,1);
         }
         #{{ $uid }} .rj-nl-btn:hover .rj-nl-hole { transform: scale(1.12); }
-        #{{ $uid }} .rj-nl-btn.is-live .rj-nl-hole { --hc: color-mix(in srgb, var(--glow) 35%, #fff); --hc2: var(--glow); }
+        #{{ $uid }} .rj-nl-btn.is-live .rj-nl-hole, #{{ $uid }} .rj-nl-hole.rj-nl-bh { --hc: color-mix(in srgb, var(--glow) 35%, #fff); --hc2: var(--glow); }
         #{{ $uid }} .rj-nl-hole i { position: absolute; display: block; }
+
+        #{{ $uid }} .rj-nl-hole.rj-nl-bh { position: absolute; z-index: 6; transition: none; pointer-events: none; }
 
         #{{ $uid }} .rj-nl-halo {
             inset: -70%; border-radius: 50%; pointer-events: none;
             background: radial-gradient(circle, color-mix(in srgb, var(--hc2) 45%, transparent) 0%, rgba(0,0,0,0) 62%);
             opacity: .55; transition: opacity .4s ease;
         }
-        #{{ $uid }} .rj-nl-btn.is-live .rj-nl-halo { opacity: 1; }
+        #{{ $uid }} .rj-nl-btn.is-live .rj-nl-halo, #{{ $uid }} .rj-nl-bh .rj-nl-halo { opacity: 1; }
 
         #{{ $uid }} .rj-nl-disk {
             left: -52%; top: 29%; width: 204%; height: 42%; border-radius: 50%;
@@ -204,7 +198,7 @@
 
         @keyframes rjNlDisk { from { --rjA: 0deg; } to { --rjA: 360deg; } }
 
-        #{{ $uid }} .rj-nl-btn.is-live .rj-nl-disk { animation-duration: .55s; }
+        #{{ $uid }} .rj-nl-btn.is-live .rj-nl-disk, #{{ $uid }} .rj-nl-bh .rj-nl-disk { animation-duration: .55s; }
         #{{ $uid }}.rj-idle .rj-nl-disk { animation-play-state: paused; }
 
         #{{ $uid }} .rj-nl-privacy {
@@ -225,12 +219,6 @@
         #{{ $uid }} .rj-nl-msg { max-width: 520px; margin: 18px auto 0; padding: 12px 16px; border-radius: 14px; font-size: 14px; font-weight: 500; line-height: 1.4; }
         #{{ $uid }} .rj-nl-msg.is-err { color: #ffb4ab; background: rgba(255,69,58,.12); box-shadow: inset 0 0 0 .5px rgba(255,120,110,.4); }
 
-        #{{ $uid }} .rj-nl-vortex {
-            position: absolute; z-index: 2; width: 60px; height: 60px; margin: -30px 0 0 -30px; border-radius: 50%; pointer-events: none;
-            background: #000;
-            box-shadow: 0 0 0 2px color-mix(in srgb, var(--glow) 70%, #fff), 0 0 40px 10px color-mix(in srgb, var(--glow) 60%, transparent);
-        }
-
         #{{ $uid }} .rj-nl-success {
             position: absolute; inset: 0; z-index: 3; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; opacity: 0; padding: 0 16px;
         }
@@ -248,14 +236,13 @@
         #{{ $uid }} .rj-nl-success p { margin: 0; max-width: 420px; font-size: 16px; line-height: 1.6; color: rgba(255,255,255,.62); }
 
         #{{ $uid }} .rj-nl-shock {
-            position: absolute; z-index: 2; width: 40px; height: 40px; margin: -20px 0 0 -20px; border-radius: 50%; pointer-events: none;
+            position: absolute; z-index: 5; width: 40px; height: 40px; margin: -20px 0 0 -20px; border-radius: 50%; pointer-events: none;
             border: 2px solid color-mix(in srgb, var(--glow) 70%, #fff);
             background: radial-gradient(circle, color-mix(in srgb, var(--glow) 35%, transparent), rgba(0,0,0,0) 70%);
         }
 
         @media (max-width: 640px) {
             #{{ $uid }}.rj-nl-section { padding: 100px 16px 80px; }
-            #{{ $uid }} .rj-nl-card { padding: 40px 22px; border-radius: 26px; }
             #{{ $uid }} .rj-nl-form { flex-direction: column; }
             #{{ $uid }} .rj-nl-btn { width: 100%; }
             #{{ $uid }} .rj-nl-bars { display: none; }
@@ -319,19 +306,37 @@
             var sinks = Array.prototype.slice.call(root.querySelectorAll('[data-sink]'))
                 .filter(function (el) { return el.getClientRects().length > 0; });
 
+            var ir = inner.getBoundingClientRect();
             var hr = hole.getBoundingClientRect();
             var hx = hr.left + hr.width / 2, hy = hr.top + hr.height / 2;
+            var cx = ir.left + ir.width / 2, cy = ir.top + ir.height / 2;
+
+            var bh = hole.cloneNode(true);
+            bh.removeAttribute('data-hole');
+            bh.classList.add('rj-nl-bh');
+            bh.style.left = (hx - ir.left - hr.width / 2) + 'px';
+            bh.style.top = (hy - ir.top - hr.height / 2) + 'px';
+            bh.style.width = hr.width + 'px';
+            bh.style.height = hr.height + 'px';
+            inner.appendChild(bh);
+            hole.style.visibility = 'hidden';
+
+            var tx = cx - hx, ty = cy - hy;
+            await bh.animate([
+                { transform: 'translate(0px,0px) scale(1)' },
+                { transform: 'translate(' + tx + 'px,' + ty + 'px) scale(2.4)' }
+            ], { duration: 850, easing: 'cubic-bezier(.5,0,.2,1)', fill: 'forwards' }).finished.catch(function () {});
 
             var info = sinks.map(function (el) {
                 var r = el.getBoundingClientRect();
-                var dx = hx - (r.left + r.width / 2), dy = hy - (r.top + r.height / 2);
+                var dx = cx - (r.left + r.width / 2), dy = cy - (r.top + r.height / 2);
                 return { el: el, dx: dx, dy: dy, d: Math.hypot(dx, dy) };
             }).sort(function (a, b) { return a.d - b.d; });
 
-            var STEP = 80, DUR = 900;
+            var STEP = 90, DUR = 950;
             var anims = info.map(function (o, i) {
                 var len = o.d || 1, nx = -o.dy / len, ny = o.dx / len;
-                var swirl = Math.min(70, len * 0.22) * (i % 2 ? 1 : -1);
+                var swirl = Math.min(80, len * 0.22) * (i % 2 ? 1 : -1);
                 var rot = (i % 2 ? 1 : -1) * (150 + i * 35);
                 return o.el.animate([
                     { transform: 'translate(0px,0px) rotate(0deg) scale(1)', opacity: 1, filter: 'blur(0px)', offset: 0 },
@@ -341,45 +346,32 @@
             });
 
             var total = DUR + Math.max(0, info.length - 1) * STEP;
-            var feed = hole.animate([{ transform: 'scale(1)' }, { transform: 'scale(2.4)' }], { duration: total, easing: 'ease-in', fill: 'forwards' });
+            var feed = bh.animate([
+                { transform: 'translate(' + tx + 'px,' + ty + 'px) scale(2.4)' },
+                { transform: 'translate(' + tx + 'px,' + ty + 'px) scale(4.2)' }
+            ], { duration: total, easing: 'ease-in', fill: 'forwards' });
 
             await Promise.all(anims.map(function (a) { return a.finished; }).concat([feed.finished])).catch(function () {});
 
-            var cr = card.getBoundingClientRect();
-            var vx = hx - cr.left, vy = hy - cr.top;
-            var vortex = document.createElement('span');
-            vortex.className = 'rj-nl-vortex';
-            vortex.style.left = vx + 'px';
-            vortex.style.top = vy + 'px';
-            card.appendChild(vortex);
+            await bh.animate([
+                { transform: 'translate(' + tx + 'px,' + ty + 'px) scale(4.2) rotate(0deg)', opacity: 1 },
+                { transform: 'translate(' + tx + 'px,' + ty + 'px) scale(.05) rotate(200deg)', opacity: 0 }
+            ], { duration: 650, easing: 'cubic-bezier(.6,0,.9,.5)', fill: 'forwards' }).finished.catch(function () {});
 
-            var radius = Math.hypot(Math.max(vx, cr.width - vx), Math.max(vy, cr.height - vy));
-            var big = (radius * 2.3) / 60;
-            await vortex.animate([
-                { transform: 'scale(.45)' },
-                { transform: 'scale(' + big + ')' }
-            ], { duration: 900, easing: 'cubic-bezier(.5,0,.2,1)', fill: 'forwards' }).finished.catch(function () {});
-
-            card.style.transformOrigin = vx + 'px ' + vy + 'px';
-            await card.animate([
-                { transform: 'scale(1) rotate(0deg)', opacity: 1 },
-                { transform: 'scale(.02) rotate(160deg)', opacity: 0 }
-            ], { duration: 720, easing: 'cubic-bezier(.6,0,.9,.5)', fill: 'forwards' }).finished.catch(function () {});
-
-            var ir = inner.getBoundingClientRect();
             var shock = document.createElement('span');
             shock.className = 'rj-nl-shock';
-            shock.style.left = (hx - ir.left) + 'px';
-            shock.style.top = (hy - ir.top) + 'px';
+            shock.style.left = (cx - ir.left) + 'px';
+            shock.style.top = (cy - ir.top) + 'px';
             inner.appendChild(shock);
-            var wave = Math.max(ir.width, ir.height) * 1.4 / 40;
+            var wave = Math.max(ir.width, ir.height) * 1.2 / 40;
             shock.animate([
                 { transform: 'scale(.2)', opacity: .9 },
                 { transform: 'scale(' + wave + ')', opacity: 0 }
             ], { duration: 1100, easing: 'cubic-bezier(.2,.7,.2,1)', fill: 'forwards' }).finished
                 .then(function () { shock.remove(); }).catch(function () { shock.remove(); });
 
-            await wait(220);
+            bh.remove();
+            await wait(180);
             showSuccess();
         }
 
