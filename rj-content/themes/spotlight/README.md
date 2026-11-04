@@ -4,7 +4,7 @@
 
 **A dark, modern, builder-first theme for [RJ CMS](https://rjnexus.org).**
 
-![Version](https://img.shields.io/badge/version-0.1.0--beta-orange)
+![Version](https://img.shields.io/badge/version-0.2.0--beta-orange)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![RJ CMS](https://img.shields.io/badge/RJ%20CMS-%E2%89%A5%201.0.0-8A2BE2)
 ![PHP](https://img.shields.io/badge/PHP-%E2%89%A5%208.2-777BB4)
