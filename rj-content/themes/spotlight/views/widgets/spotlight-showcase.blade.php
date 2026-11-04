@@ -11,6 +11,11 @@
 
     $bgImage = $resolve($settings['image_url'] ?? '', $settings['image'] ?? '');
 
+    // Əgər şəkil təyin edilməyibsə, default demo şəklini istifadə et
+    if (empty($bgImage)) {
+        $bgImage = 'https://raw.githubusercontent.com/rj-nexus/spotlight/main/assets/demo_image/demo_photo1.png';
+    }
+
     $badge = $settings['badge_text'] ?? '';
     $title = $settings['title'] ?? '';
     $subtitle = $settings['subtitle'] ?? '';
