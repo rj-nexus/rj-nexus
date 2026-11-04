@@ -483,6 +483,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/{theme}/customizer', [\App\Http\Controllers\Admin\ThemeController::class, 'customizer'])->name('customizer');
         Route::put('/{theme}/customizer', [\App\Http\Controllers\Admin\ThemeController::class, 'updateCustomizer'])->name('customizer.update');
         Route::delete('/{theme}/customizer', [\App\Http\Controllers\Admin\ThemeController::class, 'resetCustomizer'])->name('customizer.reset');
+        Route::post('/{theme}/customizer/import-demo', [\App\Http\Controllers\Admin\ThemeController::class, 'importDemo'])->name('customizer.import-demo');
     });
 
     Route::prefix('widgets')->name('widgets.')->group(function () {
