@@ -64,6 +64,8 @@
         $families = array_map(fn($f) => 'family=' . urlencode($f) . ':wght@400;500;600;700;800', $googleFamilies);
         $googleFontsUrl = 'https://fonts.googleapis.com/css2?' . implode('&', $families) . '&display=swap';
     }
+
+    $showStars = in_array(strtolower($cBg), ['#0a0a0f', '#000', '#000000', '#050508']);
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ rj_dir() }}">
@@ -118,7 +120,7 @@
         }
 
         *, *::before, *::after { box-sizing: border-box; }
-        html, body {
+        html {
             overflow-x: clip;
             max-width: 100%;
             margin: 0;
@@ -127,6 +129,12 @@
             color: var(--rj-text);
         }
         body {
+            overflow-x: clip;
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            color: var(--rj-text);
             font-family: var(--rj-font-body);
             font-size: var(--rj-font-size);
             line-height: var(--rj-line-height);
@@ -150,6 +158,8 @@
             overflow-x: clip;
             width: 100%;
             max-width: 100%;
+            position: relative;
+            z-index: 1;
         }
         .rj-frontend > main {
             flex: 1;
@@ -321,6 +331,47 @@
             .rj-form-grid-2 { grid-template-columns: 1fr; }
             .rj-form-inline { flex-direction: column; align-items: stretch; }
         }
+
+        /* === Starfield Background === */
+        .rj-starfield {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .rj-starfield::before,
+        .rj-starfield::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-repeat: repeat;
+        }
+        .rj-starfield::before {
+            background-image:
+                radial-gradient(1px 1px at 20px 30px, rgba(255,255,255,.7), transparent),
+                radial-gradient(1px 1px at 50px 80px, rgba(255,255,255,.5), transparent),
+                radial-gradient(1.5px 1.5px at 90px 40px, rgba(255,255,255,.6), transparent),
+                radial-gradient(1px 1px at 130px 100px, rgba(255,255,255,.8), transparent);
+            background-size: 150px 150px;
+            animation: rjStarsMoveUp 120s linear infinite;
+        }
+        .rj-starfield::after {
+            background-image:
+                radial-gradient(2px 2px at 30px 50px, rgba(255,255,255,.4), transparent),
+                radial-gradient(1.5px 1.5px at 80px 120px, rgba(255,255,255,.5), transparent),
+                radial-gradient(1px 1px at 140px 70px, rgba(255,255,255,.6), transparent);
+            background-size: 200px 200px;
+            animation: rjStarsMoveUpSlow 180s linear infinite;
+        }
+        @keyframes rjStarsMoveUp {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 -1500px; }
+        }
+        @keyframes rjStarsMoveUpSlow {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 -2000px; }
+        }
     </style>
 
     @php $activeTheme = \App\Models\Theme::active(); @endphp
@@ -334,6 +385,11 @@
     @stack('styles')
 </head>
 <body class="{{ $isSticky ? 'has-sticky-header' : '' }}">
+
+    @if($showStars)
+        <div class="rj-starfield" aria-hidden="true"></div>
+    @endif
+
     <div class="rj-frontend rj-frontend-wrapper">
         @yield('content')
     </div>
@@ -341,6 +397,87 @@
     @if(view()->exists('theme::partials.popup'))
         @include('theme::partials.popup')
     @endif
+
+    <button id="rj-back-to-top" class="rj-btt" aria-label="{{ __('Back to top') }}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5m0 0l-6 6m6-6l6 6"/></svg>
+    </button>
+
+    <style>
+        .rj-btt {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 999;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        .rj-btt.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .rj-btt:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+            color: var(--rj-primary);
+        }
+        .rj-btt svg {
+            width: 22px;
+            height: 22px;
+            transition: transform 0.2s;
+        }
+        .rj-btt:hover svg {
+            transform: translateY(-2px);
+        }
+        @media (max-width: 768px) {
+            .rj-btt {
+                bottom: 20px;
+                right: 20px;
+                width: 46px;
+                height: 46px;
+            }
+            .rj-btt svg {
+                width: 18px;
+                height: 18px;
+            }
+        }
+    </style>
+
+    <script>
+    (function() {
+        var btt = document.getElementById('rj-back-to-top');
+        if (!btt) return;
+
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 400) {
+                btt.classList.add('show');
+            } else {
+                btt.classList.remove('show');
+            }
+        }, { passive: true });
+
+        btt.addEventListener('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    })();
+    </script>
 
     <script>
     (function () {
@@ -464,87 +601,5 @@
     @endif
 
     @stack('scripts')
-
-        <button id="rj-back-to-top" class="rj-btt" aria-label="{{ __('Back to top') }}">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5m0 0l-6 6m6-6l6 6"/></svg>
-    </button>
-
-    <style>
-        .rj-btt {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            z-index: 999;
-            width: 52px;
-            height: 52px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: #fff;
-            cursor: pointer;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(20px);
-            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-        .rj-btt.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-        .rj-btt:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.3);
-            transform: translateY(-4px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
-            color: var(--rj-primary);
-        }
-        .rj-btt svg {
-            width: 22px;
-            height: 22px;
-            transition: transform 0.2s;
-        }
-        .rj-btt:hover svg {
-            transform: translateY(-2px);
-        }
-        @media (max-width: 768px) {
-            .rj-btt {
-                bottom: 20px;
-                right: 20px;
-                width: 46px;
-                height: 46px;
-            }
-            .rj-btt svg {
-                width: 18px;
-                height: 18px;
-            }
-        }
-    </style>
-
-    <script>
-    (function() {
-        var btt = document.getElementById('rj-back-to-top');
-        if (!btt) return;
-
-        window.addEventListener('scroll', function() {
-            if (window.scrollY > 400) {
-                btt.classList.add('show');
-            } else {
-                btt.classList.remove('show');
-            }
-        }, { passive: true });
-
-        btt.addEventListener('click', function() {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-    })();
-    </script>
-
 </body>
 </html>
