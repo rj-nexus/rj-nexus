@@ -34,9 +34,6 @@
     $showLogin = $settings['show_login'] ?? true;
     $loginLabel = $settings['login_label'] ?? __('Login');
 
-    $accent = 'var(--rj-primary)';
-    $accent2 = 'var(--rj-secondary)';
-
     $authUser = auth()->user();
     $initialUser = null;
     if ($authUser) {
@@ -194,59 +191,86 @@
 
 <style>
     .rj-glass-header {
+        --rjg-text: rgba(255, 255, 255, 0.78);
+        --rjg-text-hover: #fff;
+        --rjg-hover-bg: rgba(255, 255, 255, 0.09);
+        --rjg-line: rgba(255, 255, 255, 0.14);
+        --rjg-panel: rgba(12, 14, 22, 0.96);
         position: sticky; top: 0; left: 0; width: 100%; z-index: 1000;
-        background: rgba(10, 10, 15, 0.6);
-        backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        transition: all 0.3s ease;
+        background: linear-gradient(180deg, rgba(5, 7, 12, 0.55) 0%, rgba(5, 7, 12, 0) 100%);
+        border-bottom: 1px solid transparent;
+        transition: background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease, backdrop-filter 0.35s ease;
+    }
+    .rj-glass-header.is-stuck {
+        background: rgba(7, 9, 15, 0.82);
+        backdrop-filter: blur(20px) saturate(140%); -webkit-backdrop-filter: blur(20px) saturate(140%);
+        border-bottom-color: rgba(255, 255, 255, 0.08);
+        box-shadow: 0 8px 30px -12px rgba(0, 0, 0, 0.7);
     }
     .rj-glass-header-inner {
         max-width: var(--rj-container); margin: 0 auto; padding: 16px 24px;
         display: flex; align-items: center; justify-content: space-between; gap: 24px;
+        transition: padding 0.3s ease;
     }
+    .rj-glass-header.is-stuck .rj-glass-header-inner { padding-top: 12px; padding-bottom: 12px; }
+
     .rj-glass-logo { display: flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 800; color: #fff; text-decoration: none; letter-spacing: -0.02em; }
     .rj-glass-logo-icon { width: 32px; height: 32px; color: var(--rj-primary); }
-    .rj-glass-logo img { max-height: 36px; width: auto; }
+    .rj-glass-logo img { max-height: 36px; width: auto; transition: max-height 0.3s ease; }
+    .rj-glass-header.is-stuck .rj-glass-logo img { max-height: 32px; }
+
     .rj-glass-nav { display: flex; align-items: center; gap: 4px; }
     .rj-glass-nav-item { position: relative; }
-    .rj-glass-nav-link { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: 500; color: rgba(255, 255, 255, 0.7); text-decoration: none; transition: all 0.2s; }
-    .rj-glass-nav-link:hover { color: #fff; background: rgba(255, 255, 255, 0.08); }
-    .rj-glass-chevron { width: 14px; height: 14px; opacity: 0.5; transition: transform 0.2s; }
+    .rj-glass-nav-link {
+        display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; border-radius: 10px;
+        font-size: 14px; font-weight: 500; color: var(--rjg-text); text-decoration: none;
+        background: transparent; transition: color 0.2s, background 0.2s;
+    }
+    .rj-glass-nav-link:hover, .rj-glass-nav-item:hover > .rj-glass-nav-link { color: var(--rjg-text-hover); background: var(--rjg-hover-bg); }
+    .rj-glass-chevron { width: 14px; height: 14px; opacity: 0.6; transition: transform 0.2s; }
     .rj-glass-nav-item:hover .rj-glass-chevron { transform: rotate(180deg); }
 
     .rj-glass-dropdown {
-        position: absolute; top: 100%; left: 0; min-width: 180px; padding: 8px;
-        background: rgba(20, 20, 28, 0.95); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-        border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-        opacity: 0; visibility: hidden; transform: translateY(10px);
-        transition: all 0.2s cubic-bezier(0.2, 0.9, 0.3, 1); z-index: 10;
+        position: absolute; top: 100%; left: 0; min-width: 190px; padding: 8px; margin-top: 8px;
+        background: var(--rjg-panel); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--rjg-line); border-radius: 14px;
+        box-shadow: 0 18px 50px -10px rgba(0, 0, 0, 0.7);
+        opacity: 0; visibility: hidden; transform: translateY(8px);
+        transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.2, 0.9, 0.3, 1), visibility 0.2s; z-index: 10;
     }
+    .rj-glass-dropdown::before { content: ""; position: absolute; left: 0; right: 0; top: -10px; height: 10px; }
     .rj-glass-nav-item:hover .rj-glass-dropdown, .rj-glass-dropdown.is-open { opacity: 1; visibility: visible; transform: translateY(0); }
     .rj-dropdown-right { left: auto; right: 0; }
-    .rj-glass-dropdown-link { display: flex; align-items: center; gap: 10px; padding: 10px 14px; font-size: 14px; color: rgba(255, 255, 255, 0.7); text-decoration: none; border-radius: 6px; transition: all 0.15s; }
-    .rj-glass-dropdown-link:hover, .rj-glass-dropdown-link.active { color: #fff; background: rgba(255, 255, 255, 0.1); }
+    .rj-glass-dropdown-link { display: flex; align-items: center; gap: 10px; padding: 10px 14px; font-size: 14px; color: var(--rjg-text); text-decoration: none; border-radius: 8px; transition: color 0.15s, background 0.15s; }
+    .rj-glass-dropdown-link:hover, .rj-glass-dropdown-link.active { color: #fff; background: var(--rjg-hover-bg); }
     .rj-glass-dropdown-link.active { color: var(--rj-primary); font-weight: 600; }
 
-    .rj-glass-flag { width: 20px; height: 20px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: #1e293b; box-shadow: 0 0 0 1px rgba(255,255,255,0.1); }
+    .rj-glass-flag { width: 20px; height: 20px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: #1e293b; box-shadow: 0 0 0 1px rgba(255,255,255,0.12); }
     .rj-glass-flag img { width: 100%; height: 100%; object-fit: cover; }
     .rj-glass-flag.is-badge b { color: #fff; font-size: 9px; font-weight: 800; text-shadow: 0 1px 2px rgba(0,0,0,.18); }
 
     .rj-glass-actions { display: flex; align-items: center; gap: 12px; }
     .rj-glass-lang-btn, .rj-glass-login-btn {
-        display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px;
-        background: transparent; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px;
-        color: rgba(255, 255, 255, 0.8); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+        display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px;
+        background: rgba(255, 255, 255, 0.04); border: 1px solid var(--rjg-line); border-radius: 10px;
+        color: rgba(255, 255, 255, 0.88); font-size: 13px; font-weight: 600; cursor: pointer;
+        transition: background 0.2s, color 0.2s, border-color 0.2s;
     }
-    .rj-glass-lang-btn:hover, .rj-glass-login-btn:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
+    .rj-glass-lang-btn:hover, .rj-glass-login-btn:hover { background: rgba(255, 255, 255, 0.1); color: #fff; border-color: rgba(255, 255, 255, 0.28); }
     .rj-glass-login-btn svg { width: 16px; height: 16px; }
 
     .rj-glass-user-link { display: inline-flex; text-decoration: none; }
     .rj-glass-avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, var(--rj-primary), var(--rj-secondary)); color: #fff; font-size: 15px; font-weight: 800; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px -4px color-mix(in srgb, var(--rj-primary) 55%, transparent); transition: transform .2s; }
     .rj-glass-user-link:hover .rj-glass-avatar { transform: scale(1.05); }
 
-    .rj-glass-cta { display: inline-flex; align-items: center; padding: 10px 22px; background: #fff; color: #000; font-size: 14px; font-weight: 600; text-decoration: none; border-radius: 8px; transition: all 0.2s; }
-    .rj-glass-cta:hover { background: var(--rj-primary); color: #fff; transform: translateY(-1px); box-shadow: 0 4px 20px color-mix(in srgb, var(--rj-primary) 40%, transparent); }
+    .rj-glass-cta {
+        display: inline-flex; align-items: center; padding: 10px 22px;
+        background: var(--rj-primary); color: #fff; font-size: 14px; font-weight: 600; text-decoration: none;
+        border-radius: 10px; border: 1px solid color-mix(in srgb, var(--rj-primary) 70%, #fff);
+        box-shadow: 0 6px 22px -8px color-mix(in srgb, var(--rj-primary) 70%, transparent);
+        transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+    }
+    .rj-glass-cta:hover { filter: brightness(1.12); transform: translateY(-1px); box-shadow: 0 10px 28px -8px color-mix(in srgb, var(--rj-primary) 80%, transparent); }
 
     .rj-glass-mobile-toggle { display: none; background: transparent; border: none; color: #fff; cursor: pointer; padding: 8px; }
     .rj-glass-mobile-toggle svg { width: 24px; height: 24px; }
@@ -264,17 +288,18 @@
     .rj-glass-field { margin-bottom: 14px; }
     .rj-glass-input { width: 100%; padding: 12px 14px; font-size: 14px; border-radius: 10px; border: 1px solid var(--rj-border); background: var(--rj-bg); color: var(--rj-text); outline: 0; transition: border-color .2s; font-family: inherit; box-sizing: border-box; }
     .rj-glass-input:focus { border-color: var(--rj-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--rj-primary) 20%, transparent); }
-    .rj-glass-submit { width: 100%; padding: 12px; border-radius: 10px; background: linear-gradient(135deg, var(--rj-primary), var(--rj-secondary)); color: #0a0a0f; border: 0; font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity .2s; font-family: inherit; }
+    .rj-glass-submit { width: 100%; padding: 12px; border-radius: 10px; background: linear-gradient(135deg, var(--rj-primary), var(--rj-secondary)); color: #fff; border: 0; font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity .2s; font-family: inherit; }
     .rj-glass-submit:hover { opacity: .9; }
 
     @media (max-width: 968px) {
         .rj-glass-nav { display: none; }
         .rj-glass-nav-item { width: 100%; }
         .rj-glass-nav-link { width: 100%; justify-content: space-between; padding: 12px 16px; }
-        .rj-glass-dropdown { position: static; opacity: 1; visibility: visible; transform: none; box-shadow: none; background: transparent; border: none; padding: 0 0 0 16px; display: none; }
+        .rj-glass-dropdown { position: static; opacity: 1; visibility: visible; transform: none; box-shadow: none; background: transparent; border: none; padding: 0 0 0 16px; margin-top: 0; display: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
+        .rj-glass-dropdown::before { display: none; }
         .rj-glass-dropdown.is-open { display: block; }
         .rj-glass-mobile-toggle { display: block; }
-        .rj-glass-header.rj-mobile-open { height: 100vh; overflow-y: auto; background: rgba(10, 10, 15, 0.98); }
+        .rj-glass-header.rj-mobile-open { height: 100vh; overflow-y: auto; background: rgba(7, 9, 15, 0.98); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
         .rj-glass-header.rj-mobile-open .rj-glass-header-inner { flex-wrap: wrap; align-items: flex-start; }
         .rj-glass-header.rj-mobile-open .rj-glass-nav { display: flex; flex-direction: column; width: 100%; order: 3; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; }
         .rj-glass-header.rj-mobile-open .rj-glass-actions { margin-left: auto; }
@@ -285,6 +310,19 @@
 
 <script>
 (function () {
+    var header = document.getElementById('rj-header');
+    if (header) {
+        var ticking = false;
+        var update = function () {
+            header.classList.toggle('is-stuck', (window.pageYOffset || document.documentElement.scrollTop) > 24);
+            ticking = false;
+        };
+        window.addEventListener('scroll', function () {
+            if (!ticking) { ticking = true; requestAnimationFrame(update); }
+        }, { passive: true });
+        update();
+    }
+
     var root = document.getElementById(@js($uid) + '_lang');
     if (root) {
         var toggleBtn = root.querySelector('[data-toggle]');
