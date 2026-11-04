@@ -14,7 +14,37 @@
     $lblY     = $settings['yearly_label'] ?? 'Yearly';
     $saveText = $settings['save_text'] ?? 'Save 20%';
 
-    $raw = trim((string) ($settings['plans'] ?? ''));
+    $raw = $settings['plans'] ?? '';
+
+    // Əgər köhnə versiyadan qalan massiv (array) formasındadırsa, onu mətnə çeviririk
+    if (is_array($raw)) {
+        $built = [];
+        foreach ($raw as $item) {
+            if (is_array($item)) {
+                $b = "";
+                if (!empty($item['plan_name'])) $b .= "Name: " . $item['plan_name'] . "\n";
+                if (isset($item['price'])) $b .= "Price: " . str_replace('$', '', $item['price']) . "\n";
+                if (!empty($item['period'])) $b .= "Period: " . $item['period'] . "\n";
+                if (!empty($item['description'])) $b .= "Desc: " . $item['description'] . "\n";
+                if (!empty($item['is_popular'])) $b .= "Featured: yes\n";
+                if (!empty($item['button_text'])) $b .= "Button: " . $item['button_text'] . " | " . ($item['button_url'] ?? '#') . "\n";
+                if (!empty($item['features'])) {
+                    if (is_string($item['features'])) {
+                        $b .= "- " . str_replace("\n", "\n- ", trim($item['features'])) . "\n";
+                    } elseif (is_array($item['features'])) {
+                        $b .= "- " . implode("\n- ", $item['features']) . "\n";
+                    }
+                }
+                $built[] = trim($b);
+            } else {
+                $built[] = (string) $item;
+            }
+        }
+        $raw = implode("\n---\n", $built);
+    } else {
+        $raw = trim((string) $raw);
+    }
+
     if ($raw === '') {
         $raw = "Name: Starter\nPrice: 0\nDesc: Everything you need to start creating.\nButton: Get started | /register\n- 50 AI generations / month\n- 1 workspace\n- Community support\n- ~Priority generation\n- ~Custom models\n---\nName: Pro\nBadge: Most popular\nFeatured: yes\nPrice: 29\nYearly: 24\nDesc: For creators and teams who ship every week.\nButton: Start free trial | /register\n- Unlimited generations\n- Multi-model engine\n- 10 workspaces\n- Priority support\n- Export in 4K\n---\nName: Business\nPrice: 99\nYearly: 79\nDesc: Advanced control for growing companies.\nButton: Contact sales | /contact\n- Everything in Pro\n- Unlimited seats\n- Custom model tuning\n- SSO and audit logs\n- Dedicated manager";
     }
