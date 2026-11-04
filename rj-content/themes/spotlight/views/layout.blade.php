@@ -165,7 +165,7 @@
             flex: 1;
             width: 100%;
             max-width: 100%;
-            overflow-x: hidden;
+            overflow-x: clip;
         }
         .rj-frontend-wrapper {
             container-type: inline-size;
@@ -197,7 +197,7 @@
         }
 
         .rj-frontend-footer {
-            overflow-x: hidden;
+            overflow-x: clip;
             background: var(--rj-footer-bg);
             color: var(--rj-footer-text);
             border-top: 1px solid var(--rj-border);
