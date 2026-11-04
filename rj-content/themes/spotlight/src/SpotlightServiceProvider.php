@@ -34,6 +34,7 @@ class SpotlightServiceProvider extends ServiceProvider
                     new SpotlightShowcaseWidget(),
                     new SpotlightTabsWidget(),
                     new SpotlightFeaturesWidget(),
+                    new SpotlightStepsWidget(),
                 ];
                 return array_merge($existing, $widgets);
             });
