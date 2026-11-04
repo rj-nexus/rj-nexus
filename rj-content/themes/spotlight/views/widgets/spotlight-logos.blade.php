@@ -3,10 +3,13 @@
     $title = $settings['title_text'] ?? '';
 
     $logos = [];
-    for ($i = 1; $i <= 6; $i++) {
-        $url = $settings['logo_' . $i] ?? '';
-        if (!empty($url)) {
-            $logos[] = $url;
+    if (!empty($settings['logos'])) {
+        $lines = preg_split('/\r\n|\r|\n/', $settings['logos']);
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if ($line !== '') {
+                $logos[] = $line;
+            }
         }
     }
 @endphp
@@ -44,7 +47,6 @@
             border-bottom: 1px solid var(--rj-border);
         }
 
-        /* Background subtle glow */
         #{{ $uid }}::before {
             content: '';
             position: absolute;
@@ -69,7 +71,6 @@
             gap: 48px;
         }
 
-        /* Top / Bottom Lines */
         #{{ $uid }} .rj-logos-lines-top,
         #{{ $uid }} .rj-logos-lines-bottom {
             position: absolute;
@@ -83,7 +84,6 @@
         #{{ $uid }} .rj-logos-lines-top { top: 0; }
         #{{ $uid }} .rj-logos-lines-bottom { bottom: 0; }
 
-        /* Text Badge */
         #{{ $uid }} .rj-logos-badge {
             display: inline-block;
             padding: 6px 16px;
@@ -98,7 +98,6 @@
             color: var(--rj-primary);
         }
 
-        /* Logo Grid */
         #{{ $uid }} .rj-logos-grid {
             display: flex;
             flex-wrap: wrap;
@@ -127,13 +126,11 @@
             transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
-        /* Hover Effect */
         #{{ $uid }} .rj-logo-item:hover img {
             filter: grayscale(0%) opacity(1) brightness(1);
             transform: scale(1.05);
         }
 
-        /* Mobile Adjustments */
         @media (max-width: 968px) {
             #{{ $uid }} .rj-logos-grid {
                 gap: 40px 50px;
