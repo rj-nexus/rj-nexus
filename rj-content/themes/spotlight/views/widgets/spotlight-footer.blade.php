@@ -20,7 +20,7 @@
     $showBackToTop = filter_var($settings['show_back_to_top'] ?? true, FILTER_VALIDATE_BOOLEAN);
 @endphp
 
-<footer class="rj-ft-section" id="{{ $uid }}" style="background-color: #0a0a0f; position: relative; z-index: 50; width: 100vw; margin-left: calc(-50vw + 50%);">
+<footer class="rj-ft-section" id="{{ $uid }}">
 
     <div class="rj-ft-inner">
 
@@ -135,8 +135,23 @@
 
     <style>
         #{{ $uid }}.rj-ft-section {
+            position: relative;
+            width: 100vw;
+            margin-left: calc(-50vw + 50%); /* Ekranın kənarlarına tam otursun */
             padding: 80px 0 40px;
             overflow: hidden;
+            z-index: 50;
+            isolation: isolate; /* Builder-in z-index-i ilə qarışmasın */
+        }
+
+        /* BU HİSSƏ ARXA FONU MƏCBURİ QARA EDİR */
+        #{{ $uid }}.rj-ft-section::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-color: #0a0a0f !important; /* Saytın əsas tünd rəngi */
+            z-index: -1; /* Məzmunun və xətlərin arxasına keçir */
+            pointer-events: none;
         }
 
         #{{ $uid }} .rj-ft-inner {
