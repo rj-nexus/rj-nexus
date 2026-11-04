@@ -37,13 +37,25 @@ class SpotlightHeroWidget extends BaseWidget
             [
                 'name' => 'bg_video',
                 'type' => 'media',
-                'label' => __('Background Video (MP4)'),
+                'label' => __('Background Video (Local Upload)'),
+                'default' => '',
+            ],
+            [
+                'name' => 'bg_video_url',
+                'type' => 'text',
+                'label' => __('Background Video (External URL)'),
                 'default' => '',
             ],
             [
                 'name' => 'bg_image',
                 'type' => 'media',
-                'label' => __('Background Image (Fallback)'),
+                'label' => __('Background Image (Local Upload)'),
+                'default' => '',
+            ],
+            [
+                'name' => 'bg_image_url',
+                'type' => 'text',
+                'label' => __('Background Image (External URL)'),
                 'default' => '',
             ],
             [

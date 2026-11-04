@@ -2,7 +2,7 @@
 
 All notable changes to the Spotlight theme will be documented in this file.
 
-## [0.1.0-beta] - 2026-11-04
+## [0.2.0-beta]
 
 This is the initial beta release of the Spotlight theme. A dark-first, builder-focused theme designed for modern product showcases and content delivery.
 
