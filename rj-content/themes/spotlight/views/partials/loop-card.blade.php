@@ -5,6 +5,8 @@
     $cardExcerpt = $post->excerpt ?? null;
     $locale = app()->getLocale();
 
+    $showExcerpt = isset($showExcerpt) ? $showExcerpt : true;
+
     $catUrl = $cardCategory
         ? route('frontend.posts.index', ['locale' => $locale, 'term' => $cardCategory->slug, 'taxonomy' => 'category'])
         : null;
@@ -28,7 +30,7 @@
     <div class="rj-card-body">
         <a href="{{ $cardUrl }}" class="rj-card-title">{{ $post->title ?? '' }}</a>
 
-        @if($cardExcerpt)
+        @if($showExcerpt && $cardExcerpt)
             <p class="rj-card-excerpt">{{ $cardExcerpt }}</p>
         @endif
 
