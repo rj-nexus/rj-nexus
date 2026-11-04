@@ -1,4 +1,6 @@
 @php
+    $uid = 'hero_' . substr(md5(uniqid('', true)), 0, 8);
+
     $videoUrl = $settings['bg_video_url'] ?? '';
     $videoMedia = $settings['bg_video'] ?? '';
     $pingPong = $settings['ping_pong'] ?? true;
@@ -45,11 +47,10 @@
     $btn2Url = $settings['secondary_btn_url'] ?? '#';
 @endphp
 
-<section class="rj-cine-hero">
-
+<section class="rj-cine-hero" id="{{ $uid }}">
     <div class="rj-cine-bg">
         @if($bgVideo)
-            <video src="{{ $bgVideo }}" autoplay loop muted playsinline class="rj-cine-media" @if($bgImage) poster="{{ $bgImage }}" @endif data-ping-pong="{{ $pingPong ? 'true' : 'false' }}"></video>
+            <video id="{{ $uid }}_video" src="{{ $bgVideo }}" autoplay loop muted playsinline class="rj-cine-media" @if($bgImage) poster="{{ $bgImage }}" @endif data-ping-pong="{{ $pingPong ? 'true' : 'false' }}"></video>
         @elseif($bgImage)
             <img src="{{ $bgImage }}" alt="{{ $title }}" class="rj-cine-media">
         @else
@@ -75,15 +76,11 @@
         @endif
 
         @if($title)
-            <h1 class="rj-cine-title">
-                {{ $title }}
-            </h1>
+            <h1 class="rj-cine-title">{{ $title }}</h1>
         @endif
 
         @if($subtitle)
-            <p class="rj-cine-subtitle">
-                {{ $subtitle }}
-            </p>
+            <p class="rj-cine-subtitle">{{ $subtitle }}</p>
         @endif
 
         @if($btn1Text || $btn2Text)
@@ -111,47 +108,47 @@
 
     @if($bgVideo && $pingPong)
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const video = document.querySelector('.rj-cine-media');
-            if (!video || video.getAttribute('data-ping-pong') !== 'true') return;
+    (function () {
+        var video = document.getElementById(@js($uid) + '_video');
+        if (!video || video.getAttribute('data-ping-pong') !== 'true') return;
 
-            video.removeAttribute('loop');
+        video.removeAttribute('loop');
 
-            let isReversing = false;
-            let lastTimestamp = 0;
-            let isPlaying = false;
+        var isReversing = false;
+        var lastTimestamp = 0;
+        var reqId = null;
 
-            function reversePlay(timestamp) {
-                if (!isReversing) return;
-                if (!lastTimestamp) lastTimestamp = timestamp;
-                const delta = (timestamp - lastTimestamp) / 1000;
-                lastTimestamp = timestamp;
+        function reversePlay(timestamp) {
+            if (!isReversing) return;
+            if (!lastTimestamp) lastTimestamp = timestamp;
 
-                if (video.currentTime - delta > 0) {
-                    video.currentTime -= delta;
-                    requestAnimationFrame(reversePlay);
-                } else {
-                    video.currentTime = 0;
-                    isReversing = false;
-                    video.play();
-                }
+            var delta = (timestamp - lastTimestamp) / 1000;
+            lastTimestamp = timestamp;
+
+            if (video.currentTime - delta > 0.05) {
+                video.currentTime -= delta;
+                reqId = requestAnimationFrame(reversePlay);
+            } else {
+                video.currentTime = 0;
+                isReversing = false;
+                if (reqId) cancelAnimationFrame(reqId);
+                video.play();
             }
+        }
 
-            video.addEventListener('ended', function() {
-                if (isReversing) return;
-                isReversing = true;
-                video.pause();
-                lastTimestamp = performance.now();
-                requestAnimationFrame(reversePlay);
-            });
-
-            const playPromise = video.play();
-            if (playPromise !== undefined) {
-                playPromise.catch(function() {
-                    isPlaying = false;
-                });
-            }
+        video.addEventListener('ended', function () {
+            if (isReversing) return;
+            isReversing = true;
+            video.pause();
+            lastTimestamp = performance.now();
+            reqId = requestAnimationFrame(reversePlay);
         });
+
+        var playPromise = video.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(function () {});
+        }
+    })();
     </script>
     @endif
 
