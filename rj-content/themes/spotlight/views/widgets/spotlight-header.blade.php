@@ -190,9 +190,9 @@
     }
     .rj-glass-header.is-stuck .rj-glass-header-inner { padding-top: 12px; padding-bottom: 12px; }
 
-    .rj-glass-logo { display: flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 800; color: #fff; text-decoration: none; letter-spacing: -0.02em; }
-    .rj-glass-logo img { max-height: 36px; width: auto; transition: max-height 0.3s ease; }
-    .rj-glass-header.is-stuck .rj-glass-logo img { max-height: 32px; }
+    .rj-glass-logo { display: flex; align-items: center; gap: 8px; font-size: 18px; font-weight: 700; color: #fff; text-decoration: none; letter-spacing: -0.02em; flex-shrink: 0; }
+    .rj-glass-header .rj-glass-logo img { height: 26px; max-height: 26px; width: auto; max-width: 120px; object-fit: contain; display: block; transition: height 0.3s ease, max-height 0.3s ease; }
+    .rj-glass-header.is-stuck .rj-glass-logo img { height: 22px; max-height: 22px; }
 
     .rj-glass-nav { display: flex; align-items: center; gap: 4px; }
     .rj-glass-nav-item { position: relative; }
@@ -286,6 +286,7 @@
         .rj-glass-dropdown::before { display: none; }
         .rj-glass-dropdown.is-open { display: block; }
         .rj-glass-mobile-toggle { display: block; }
+        .rj-glass-header .rj-glass-logo img { height: 24px; max-height: 24px; }
         .rj-glass-header.rj-mobile-open { height: 100vh; overflow-y: auto; background: rgba(7, 9, 15, 0.98); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
         .rj-glass-header.rj-mobile-open .rj-glass-header-inner { flex-wrap: wrap; align-items: flex-start; }
         .rj-glass-header.rj-mobile-open .rj-glass-nav { display: flex; flex-direction: column; width: 100%; order: 3; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; }
