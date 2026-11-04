@@ -10,11 +10,15 @@
 
 <main class="rj-frontend-main">
     @if($page)
-        @if($page->isBuilderMode() && $page->hasBlocks())
+        @if(method_exists($page, 'isBuilderMode') && $page->isBuilderMode() && $page->hasBlocks())
             {!! rj_render_blocks($page->blocks['blocks'] ?? []) !!}
         @elseif($page->content)
             <div class="rj-container" style="padding-top:64px;padding-bottom:64px;">
-                {!! $page->content !!}
+                @if(is_string($page->content))
+                    {!! $page->content !!}
+                @elseif(is_array($page->content) && isset($page->content['blocks']))
+                    {!! rj_render_blocks($page->content['blocks']) !!}
+                @endif
             </div>
         @endif
     @else

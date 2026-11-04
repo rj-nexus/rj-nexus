@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Frontend;
 use App\Http\Controllers\Controller;
 use App\Models\Post;
 use App\Models\Template;
+use App\Models\Option;
 use App\Services\ThemeManager;
 use App\Services\ThemeResolver;
 
@@ -25,8 +26,8 @@ class FrontendController extends Controller
         $footer = $this->resolver->footer();
 
         $page = null;
-        $homepageType = rj_get_option('homepage_type', 'latest');
-        $homepageSlug = rj_get_option('homepage_page', '');
+        $homepageType = Option::where('option_name', 'homepage_type')->value('option_value') ?? 'latest';
+        $homepageSlug = Option::where('option_name', 'homepage_page')->value('option_value') ?? '';
 
         if ($homepageType === 'static' && !empty($homepageSlug)) {
             $page = Post::with(['author', 'translations', 'template'])
@@ -40,6 +41,12 @@ class FrontendController extends Controller
                       });
                 })
                 ->first();
+
+            if (!$page) {
+                $page = Template::where('type', 'page')
+                    ->where('slug', $homepageSlug)
+                    ->first();
+            }
         }
 
         if (!$page) {
@@ -52,7 +59,7 @@ class FrontendController extends Controller
 
         $latestPosts = collect();
 
-        if (!$page || ($page && $page->type === 'post')) {
+        if (!$page || ($page && isset($page->type) && $page->type === 'post')) {
             $latestPosts = Post::with(['author', 'categories', 'tags'])
                 ->where('type', 'post')
                 ->published()
@@ -84,10 +91,8 @@ class FrontendController extends Controller
     public function preview(Template $template)
     {
         $isPage = $template->type === 'page';
-
         $header = $isPage ? $this->resolver->header() : null;
         $footer = $isPage ? $this->resolver->footer() : null;
-
         $blocks = $template->content['blocks'] ?? [];
 
         return view('frontend.preview', [
@@ -103,18 +108,14 @@ class FrontendController extends Controller
     public function previewPost(Post $post)
     {
         $previewLocale = request()->query('locale');
-
         if (!$previewLocale || !in_array($previewLocale, rj_available_locales(), true)) {
             $previewLocale = config('app.locale');
         }
-
         app()->setLocale($previewLocale);
 
         $header = $this->resolver->header();
         $footer = $this->resolver->footer();
-
         $blocks = $post->blocks['blocks'] ?? [];
-
         $title = $post->title;
 
         if ($previewLocale !== config('app.locale')) {
