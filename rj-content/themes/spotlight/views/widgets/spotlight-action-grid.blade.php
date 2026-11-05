@@ -65,7 +65,7 @@
             position: absolute;
             width: 150%;
             height: 150%;
-            background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.08) 0%, transparent 60%);
+            background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 60%);
             top: -20%;
         }
 
@@ -74,10 +74,10 @@
             width: 1200px;
             height: 1200px;
             border-radius: 50%;
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow:
-                inset 0 0 100px rgba(255, 255, 255, 0.05),
-                0 0 80px rgba(255, 255, 255, 0.1);
+                inset 0 0 100px rgba(59, 130, 246, 0.05),
+                0 0 80px rgba(59, 130, 246, 0.1);
             top: 50%;
             left: 50%;
             transform: translate(-50%, -40%);
@@ -88,7 +88,7 @@
             position: absolute;
             inset: -2px;
             border-radius: 50%;
-            background: conic-gradient(from 180deg at 50% 50%, transparent 0deg, transparent 90deg, rgba(255,255,255,0.4) 180deg, transparent 270deg, transparent 360deg);
+            background: conic-gradient(from 180deg at 50% 50%, transparent 0deg, transparent 90deg, rgba(59, 130, 246, 0.4) 180deg, transparent 270deg, transparent 360deg);
             -webkit-mask: radial-gradient(circle, transparent 59%, #000 60%, #000 61%, transparent 62%);
             mask: radial-gradient(circle, transparent 59%, #000 60%, #000 61%, transparent 62%);
         }
@@ -144,7 +144,7 @@
             position: absolute;
             width: 8px;
             height: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             transition: all .3s;
         }
 
@@ -153,14 +153,14 @@
 
         #{{ $uid }} .rj-ag-card:hover .rj-ag-icon-wrap::before,
         #{{ $uid }} .rj-ag-card:hover .rj-ag-icon-wrap::after {
-            border-color: var(--rj-primary);
+            border-color: #3b82f6;
             width: 100%;
             height: 100%;
         }
 
         #{{ $uid }} .rj-ag-icon-inner {
-            color: var(--rj-primary);
-            filter: drop-shadow(0 0 12px color-mix(in srgb, var(--rj-primary) 50%, transparent));
+            color: #3b82f6;
+            filter: drop-shadow(0 0 12px rgba(59, 130, 246, 0.5));
             transition: transform .3s;
             display: flex;
             align-items: center;
@@ -189,7 +189,7 @@
         #{{ $uid }} .rj-ag-card-desc {
             font-size: 15px;
             line-height: 1.6;
-            color: rgba(255, 255, 255, 0.7);
+            color: rgba(255, 255, 255, 0.6);
             margin: 0 0 32px;
             max-width: 280px;
         }
@@ -201,7 +201,7 @@
             padding: 14px 32px;
             border-radius: 12px;
             background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             color: #fff;
             font-size: 15px;
             font-weight: 500;
@@ -213,10 +213,11 @@
         }
 
         #{{ $uid }} .rj-ag-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(59, 130, 246, 0.1);
+            border-color: #3b82f6;
+            color: #fff;
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 10px 20px -10px rgba(59, 130, 246, 0.4);
         }
 
         @media (max-width: 968px) {
