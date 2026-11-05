@@ -17,6 +17,7 @@ use Spotlight\Widgets\SpotlightFaqWidget;
 use Spotlight\Widgets\SpotlightNewsletterWidget;
 use Spotlight\Widgets\SpotlightFooterWidget;
 use Spotlight\Widgets\SpotlightTeamWidget;
+use Spotlight\Widgets\SpotlightFeaturesGridWidget;
 
 
 class SpotlightServiceProvider extends ServiceProvider
@@ -49,6 +50,7 @@ class SpotlightServiceProvider extends ServiceProvider
                     new SpotlightNewsletterWidget(),
                     new SpotlightFooterWidget(),
                     new SpotlightTeamWidget(),
+                    new SpotlightFeaturesGridWidget(),
                 ];
                 return array_merge($existing, $widgets);
             });
