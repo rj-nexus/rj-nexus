@@ -20,7 +20,11 @@
                 <div class="rj-ag-card">
                     <div class="rj-ag-icon-wrap">
                         <div class="rj-ag-icon-inner">
-                            <iconify-icon icon="{{ $item['icon'] ?? 'ph:star' }}"></iconify-icon>
+                            @if(function_exists('rj_icon'))
+                                {!! rj_icon($item['icon'] ?? 'ph:star') !!}
+                            @else
+                                <iconify-icon icon="{{ $item['icon'] ?? 'ph:star' }}"></iconify-icon>
+                            @endif
                         </div>
                     </div>
 
@@ -155,10 +159,19 @@
         }
 
         #{{ $uid }} .rj-ag-icon-inner {
-            font-size: 32px;
             color: var(--rj-primary);
             filter: drop-shadow(0 0 12px color-mix(in srgb, var(--rj-primary) 50%, transparent));
             transition: transform .3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #{{ $uid }} .rj-ag-icon-inner svg,
+        #{{ $uid }} .rj-ag-icon-inner iconify-icon {
+            width: 32px;
+            height: 32px;
+            stroke-width: 1.2;
         }
 
         #{{ $uid }} .rj-ag-card:hover .rj-ag-icon-inner {
