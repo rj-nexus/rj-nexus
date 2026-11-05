@@ -6,6 +6,43 @@ if (empty($state['admin'])) {
     exit;
 }
 
+function rj_activate_bundled_plugins(): void
+{
+    $bundled = ['form-builder'];
+
+    try {
+        if (!class_exists(\Illuminate\Foundation\Application::class)) {
+            require_once RJ_ROOT . '/vendor/autoload.php';
+        }
+
+        if (function_exists('app') && app() instanceof \Illuminate\Contracts\Foundation\Application) {
+            $app = app();
+        } else {
+            $app = require RJ_ROOT . '/bootstrap/app.php';
+            $kernel = $app->make(\Illuminate\Contracts\Console\Kernel::class);
+            $kernel->bootstrap();
+        }
+
+        $manager = $app->make(\App\Services\PluginManager::class);
+        $manager->discover();
+
+        foreach ($bundled as $slug) {
+            $plugin = \App\Models\Plugin::where('slug', $slug)->first();
+            if ($plugin && !$plugin->isActive()) {
+                $manager->activate($plugin);
+            }
+        }
+    } catch (\Throwable $e) {
+        if (defined('RJ_LOG')) {
+            @file_put_contents(
+                RJ_LOG,
+                '[' . date('Y-m-d H:i:s') . '] Bundled plugin activation failed: ' . $e->getMessage() . "\n",
+                FILE_APPEND
+            );
+        }
+    }
+}
+
 $err = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -37,6 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$err) {
         $result = rj_install_run($sqlContent);
         if (!empty($result['ok'])) {
+            rj_activate_bundled_plugins();
             header('Location: ' . rj_installer_url('step=finish'));
             exit;
         }
