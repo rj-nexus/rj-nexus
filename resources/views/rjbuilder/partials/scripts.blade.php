@@ -44,12 +44,19 @@ function builder() {
         historyIndex: -1,
         clipboard: null,
         mediaPickerTarget: null,
-        iconPickerTarget: null,
-        showIconPicker: false,
         dragging: null,
         dragTarget: null,
         showLayoutPicker: false,
         _inited: false,
+
+        // Icon Picker State
+        iconPickerOpen: false,
+        iconPickerTarget: null,
+        iconSearch: '',
+        iconsLoading: false,
+        iconError: false,
+        iconList: [],
+        manualIcon: '',
 
         // panels
         panel: 'add',
@@ -859,15 +866,61 @@ function builder() {
             el.addEventListener('keydown', onKey);
         },
 
+        openMediaPicker(fieldName) {
+            this.mediaPickerTarget = fieldName;
+            const mockInput = document.createElement('input');
+            mockInput.type = 'hidden';
+            const handler = (e) => {
+                this.updateSetting(this.mediaPickerTarget, e.detail.url);
+                window.removeEventListener('media-selected', handler);
+            };
+            window.addEventListener('media-selected', handler);
+            window.dispatchEvent(new CustomEvent('open-media-picker', { detail: { value: mockInput } }));
+        },
+
         openIconPicker(fieldName) {
             this.iconPickerTarget = fieldName;
-            this.showIconPicker = true;
-            window.dispatchEvent(new CustomEvent('open-icon-picker', { detail: { field: fieldName } }));
+            this.iconPickerOpen = true;
+            this.iconSearch = '';
+            this.iconList = [];
+            this.iconError = false;
+            this.fetchIcons('ph');
         },
 
         getIconSvg(icon) {
             if (!icon) return '';
-            return `<iconify-icon icon="${icon}" width="24" height="24"></iconify-icon>`;
+            return `<iconify-icon icon="${icon}"></iconify-icon>`;
+        },
+
+        async fetchIcons(query) {
+            if (!query) return;
+            this.iconsLoading = true;
+            this.iconError = false;
+            try {
+                const res = await fetch(`https://api.iconify.design/search?query=${encodeURIComponent(query)}&limit=48`);
+                if (!res.ok) throw new Error('API Error');
+                const data = await res.json();
+                this.iconList = data.icons || [];
+            } catch (e) {
+                this.iconError = true;
+            } finally {
+                this.iconsLoading = false;
+            }
+        },
+
+        searchIcons() {
+            this.fetchIcons(this.iconSearch);
+        },
+
+        selectIcon(icon) {
+            this.updateSetting(this.iconPickerTarget, icon);
+            this.iconPickerOpen = false;
+        },
+
+        useManualIcon() {
+            if (!this.manualIcon) return;
+            this.selectIcon(this.manualIcon);
+            this.manualIcon = '';
         },
 
         /* ───────── device + preview + animation playback ───────── */
