@@ -3,6 +3,7 @@
 namespace Spotlight\Widgets;
 
 use App\Widgets\BaseWidget;
+use RjPlugins\FormBuilder\Models\Form;
 
 class SpotlightContactWidget extends BaseWidget
 {
@@ -33,6 +34,13 @@ class SpotlightContactWidget extends BaseWidget
 
     public function schema(): array
     {
+        $forms = Form::active()->get();
+        $options = ['' => __('— Select Form —')];
+
+        foreach ($forms as $form) {
+            $options[$form->id] = $form->name;
+        }
+
         return [
             [
                 'name' => 'title',
@@ -78,15 +86,23 @@ class SpotlightContactWidget extends BaseWidget
             ],
             [
                 'name' => 'form_id',
-                'type' => 'form',
+                'type' => 'select',
                 'label' => __('Select RJ Form'),
                 'default' => '',
+                'options' => $options,
             ],
         ];
     }
 
     public function render(array $settings): string
     {
-        return view('theme::widgets.spotlight-contact', compact('settings'))->render();
+        $formId = $settings['form_id'] ?? null;
+        $form = null;
+
+        if ($formId && class_exists('\RjPlugins\FormBuilder\Models\Form')) {
+            $form = Form::with('fields')->find($formId);
+        }
+
+        return view('theme::widgets.spotlight-contact', compact('settings', 'form'))->render();
     }
 }
