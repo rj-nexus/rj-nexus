@@ -1,12 +1,21 @@
 @php
     $uid = 'anf_' . substr(md5(uniqid('', true)), 0, 8);
 
-    $badge = $settings['badge_text'] ?? '';
-    $title = $settings['title'] ?? '';
+    $badge = $settings['badge_text'] ?? 'Why RJ Nexus works smarter.';
+    $title = $settings['title'] ?? 'Built for modern teams. Backed by cutting-edge AI.';
     $subtitle = $settings['subtitle'] ?? '';
 
     $features = $settings['features'] ?? [];
-    if (!is_array($features)) $features = [];
+    if (!is_array($features) || empty($features)) {
+        $features = [
+            ['icon' => 'ph:device-mobile', 'title' => 'All-in-one platform', 'desc' => 'No more juggling tools. We unify content, design, code, and video.'],
+            ['icon' => 'ph:cpu', 'title' => 'Multi-model AI core', 'desc' => 'ChatGPT, Claude, Gemini — we pick the smartest engine for every task.'],
+            ['icon' => 'ph:desktop', 'title' => 'Prompt-level control', 'desc' => 'Every feature is prompt-optimized, giving you control without overwhelm.'],
+            ['icon' => 'ph:rocket-launch', 'title' => 'Speed that scales', 'desc' => 'From solo to teams, we deliver fast outputs — even under heavy loads.'],
+            ['icon' => 'ph:shield-check', 'title' => 'Secure by design', 'desc' => 'Your content and code stay private. We never store sensitive data.'],
+            ['icon' => 'ph:arrows-clockwise', 'title' => 'Always evolving', 'desc' => 'We improve weekly with better prompts, UI, and models — for free.'],
+        ];
+    }
     $features = array_slice(array_values($features), 0, 6);
 
     $orbits = [];
@@ -77,8 +86,11 @@
                 <div class="rj-anf-grid">
                     @foreach($features as $i => $item)
                         <article class="rj-anf-card rj-anf-reveal" style="--i: {{ $i + 2 }};">
-                            <h3 class="rj-anf-card-title">{{ $item['feature_title'] ?? '' }}</h3>
-                            <p class="rj-anf-card-desc">{{ $item['feature_text'] ?? '' }}</p>
+                            <div class="rj-anf-card-icon">
+                                <iconify-icon icon="{{ $item['icon'] ?? 'ph:sparkle' }}"></iconify-icon>
+                            </div>
+                            <h3 class="rj-anf-card-title">{{ $item['title'] ?? '' }}</h3>
+                            <p class="rj-anf-card-desc">{{ $item['desc'] ?? '' }}</p>
                         </article>
                     @endforeach
                 </div>
@@ -472,12 +484,24 @@
         #{{ $uid }} .rj-anf-card:hover::after { opacity: 1; }
 
         #{{ $uid }} .rj-anf-card-title,
-        #{{ $uid }} .rj-anf-card-desc { position: relative; z-index: 1; }
+        #{{ $uid }} .rj-anf-card-desc,
+        #{{ $uid }} .rj-anf-card-icon { position: relative; z-index: 1; }
 
-\1            display: flex;
+        #{{ $uid }} .rj-anf-card-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: flex-start;
+            margin-bottom: 4px;
+            font-size: 24px;
+            color: var(--a3);
+            filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.4));
+        }
+
+        #{{ $uid }} .rj-anf-card-title {
+            display: flex;
             align-items: center;
             gap: 10px;
-\2
+            font-size: 15px;
             font-weight: 600;
             letter-spacing: -.01em;
             color: #fff;
@@ -554,6 +578,7 @@
             #{{ $uid }} .rj-anf-content { align-items: center; text-align: center; }
             #{{ $uid }} .rj-anf-text { margin-left: auto; margin-right: auto; }
             #{{ $uid }} .rj-anf-card { text-align: left; }
+            #{{ $uid }} .rj-anf-card-icon { justify-content: center; }
         }
         @media (max-width: 560px) {
             #{{ $uid }} .rj-anf-grid { grid-template-columns: 1fr; }
@@ -621,4 +646,7 @@
             }
         })();
     </script>
+
+    {{-- İKONLARIN YÜKLƏNMƏSİ ÜÇÜN --}}
+    <script type="module" src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
 </section>

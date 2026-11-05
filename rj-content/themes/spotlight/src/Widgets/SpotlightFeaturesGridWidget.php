@@ -28,12 +28,18 @@ class SpotlightFeaturesGridWidget extends BaseWidget
 
     public function description(): string
     {
-        return __('A clean 3-column grid for showcasing product features with optional icons.');
+        return __('A compact split layout with an animated core and glass feature cards.');
     }
 
     public function schema(): array
     {
         return [
+            [
+                'name' => 'badge_text',
+                'type' => 'text',
+                'label' => __('Badge Text'),
+                'default' => 'Why RJ Nexus works smarter.',
+            ],
             [
                 'name' => 'title',
                 'type' => 'text',
