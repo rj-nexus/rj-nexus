@@ -118,7 +118,6 @@
             box-shadow: inset 0 0 90px rgba(59,130,246,.06), 0 0 70px rgba(59,130,246,.10);
         }
 
-        /* fırlanan işıq qövsü */
         #{{ $uid }} .rj-ag-ring::before {
             content: '';
             position: absolute;
@@ -189,61 +188,23 @@
             align-items: stretch;
         }
 
-        /* ---------- GLASS CARD ---------- */
+        /* ---------- CARD (şəffaf) ---------- */
         #{{ $uid }} .rj-ag-card {
             position: relative;
             min-width: 0;
-            overflow: hidden;
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
-            padding: 32px 24px 28px;
-            border-radius: 22px;
-            border: 1px solid rgba(255,255,255,.08);
-            background:
-                linear-gradient(160deg, rgba(255,255,255,.07), rgba(255,255,255,.015) 50%, rgba(59,130,246,.04));
-            backdrop-filter: blur(16px) saturate(140%);
-            -webkit-backdrop-filter: blur(16px) saturate(140%);
-            box-shadow: 0 20px 50px -25px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.08);
-            transition: transform .45s cubic-bezier(.2,.8,.2,1), border-color .4s, box-shadow .4s;
+            padding: 24px 16px;
+            background: transparent;
+            border: 0;
+            transition: transform .45s cubic-bezier(.2,.8,.2,1);
         }
 
-        /* parıltı zolağı */
-        #{{ $uid }} .rj-ag-card::before {
-            content: '';
-            position: absolute;
-            top: 0; bottom: 0;
-            left: -60%;
-            width: 40%;
-            background: linear-gradient(100deg, transparent, rgba(255,255,255,.14), transparent);
-            transform: skewX(-20deg);
-            transition: left .9s cubic-bezier(.2,.8,.2,1);
-            pointer-events: none;
-        }
+        #{{ $uid }} .rj-ag-card:hover { transform: translateY(-6px); }
 
-        /* yuxarıdan düşən yumşaq işıq */
-        #{{ $uid }} .rj-ag-card::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(120% 60% at 50% 0%, rgba(96,165,250,.18), transparent 60%);
-            opacity: 0;
-            transition: opacity .5s;
-            pointer-events: none;
-        }
-
-        #{{ $uid }} .rj-ag-card > * { position: relative; z-index: 1; }
-
-        #{{ $uid }} .rj-ag-card:hover {
-            transform: translateY(-8px);
-            border-color: rgba(96,165,250,.45);
-            box-shadow: 0 30px 60px -25px rgba(59,130,246,.45), inset 0 1px 0 rgba(255,255,255,.14);
-        }
-        #{{ $uid }} .rj-ag-card:hover::before { left: 130%; }
-        #{{ $uid }} .rj-ag-card:hover::after  { opacity: 1; }
-
-        /* ---------- ICON ---------- */
+        /* ---------- ICON (glass qutu) ---------- */
         #{{ $uid }} .rj-ag-icon-wrap {
             position: relative;
             width: 88px;
@@ -253,12 +214,13 @@
             justify-content: center;
             margin-bottom: 26px;
             border: 1px solid rgba(255,255,255,.14);
-            background: rgba(255,255,255,.03);
-            backdrop-filter: blur(6px);
-            -webkit-backdrop-filter: blur(6px);
+            background: linear-gradient(160deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.1);
             animation: rjAgFloat 5s ease-in-out infinite;
             animation-delay: calc(var(--i, 0) * -1.2s);
-            transition: border-color .3s, box-shadow .3s, border-radius .5s;
+            transition: border-color .3s, box-shadow .3s;
         }
 
         #{{ $uid }} .rj-ag-c {
@@ -289,7 +251,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform .9s cubic-bezier(.34,1.4,.64,1), color .3s, filter .3s;
+            will-change: transform;
+            transition: color .3s, filter .3s;
         }
 
         #{{ $uid }} .rj-ag-icon-inner svg,
@@ -299,11 +262,11 @@
             stroke-width: 1.2;
         }
 
-        /* hover-də fırlanır */
+        /* hover-də 3 dəfə tam fırlanır */
         #{{ $uid }} .rj-ag-card:hover .rj-ag-icon-inner {
-            transform: rotate(360deg) scale(1.15);
             color: #93c5fd;
             filter: drop-shadow(0 0 16px rgba(96,165,250,.9));
+            animation: rjAgSpin3 1.5s cubic-bezier(.45,.05,.25,1) 1;
         }
 
         /* ---------- TEXT ---------- */
@@ -318,7 +281,7 @@
         #{{ $uid }} .rj-ag-card-desc {
             font-size: 15px;
             line-height: 1.6;
-            color: rgba(255,255,255,.64);
+            color: rgba(255,255,255,.66);
             margin: 0 0 28px;
             max-width: 290px;
             overflow-wrap: anywhere;
@@ -337,15 +300,15 @@
             max-width: 240px;
             padding: 15px 28px;
             border-radius: 14px;
-            background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
-            border: 1px solid rgba(255,255,255,.12);
+            background: linear-gradient(180deg, rgba(255,255,255,.1), rgba(255,255,255,.02));
+            border: 1px solid rgba(255,255,255,.14);
             color: #fff;
             font-size: 16px;
             font-weight: 500;
             text-decoration: none;
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,.12);
+            backdrop-filter: blur(14px) saturate(140%);
+            -webkit-backdrop-filter: blur(14px) saturate(140%);
+            box-shadow: 0 10px 30px -15px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.14);
             transition: transform .3s, border-color .3s, box-shadow .3s, background .3s;
         }
 
@@ -363,7 +326,7 @@
         }
 
         #{{ $uid }} .rj-ag-btn:hover {
-            background: linear-gradient(180deg, rgba(96,165,250,.22), rgba(59,130,246,.06));
+            background: linear-gradient(180deg, rgba(96,165,250,.24), rgba(59,130,246,.06));
             border-color: rgba(96,165,250,.8);
             color: #fff;
             transform: translateY(-2px);
@@ -377,6 +340,11 @@
         @keyframes rjAgDrift   { from { transform: rotate(-12deg) translateX(-4%); } to { transform: rotate(-9deg) translateX(4%); } }
         @keyframes rjAgSpin    { to { transform: rotate(360deg); } }
         @keyframes rjAgFloat   { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+        @keyframes rjAgSpin3   {
+            0%   { transform: rotate(0deg) scale(1); }
+            50%  { transform: rotate(540deg) scale(1.25); }
+            100% { transform: rotate(1080deg) scale(1); }
+        }
 
         /* ---------- RESPONSIVE (blokun eninə görə) ---------- */
         @container (max-width: 860px) {
