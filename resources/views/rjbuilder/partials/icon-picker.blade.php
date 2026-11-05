@@ -1,4 +1,5 @@
-<div x-show="iconPickerOpen" x-cloak class="fixed inset-0 z-[99999] flex items-center justify-center p-4" @keydown.escape.window="iconPickerOpen = false">    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="iconPickerOpen = false"></div>
+<div x-show="iconPickerOpen" x-cloak class="fixed inset-0 z-[99999] flex items-center justify-center p-4" @keydown.escape.window="iconPickerOpen = false">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="iconPickerOpen = false"></div>
 
     <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-3xl flex flex-col h-[80vh]">
         <!-- Header -->
@@ -51,7 +52,7 @@
                             @click="selectIcon(icon)"
                             class="flex flex-col items-center justify-center p-3 bg-white rounded-xl border border-gray-200 hover:border-indigo-500 hover:shadow-md transition-all group"
                             :title="icon">
-                        <span x-html="getIconSvg(icon)" class="w-6 h-6 text-gray-600 group-hover:text-indigo-600"></span>
+                        <span x-html="getIconSvg(icon, 24, '#334155')" class="w-6 h-6 group-hover:opacity-70 transition-opacity"></span>
                         <span class="text-[9px] text-gray-400 mt-2 truncate w-full text-center" x-text="icon.split(':')[1]"></span>
                     </button>
                 </template>
