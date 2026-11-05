@@ -2,6 +2,19 @@
 
 All notable changes to RJ Nexus will be documented in this file.
 
+## [v1.8.6] - RJ CORE 1
+
+This update fixes plugin migration execution and automates bundled plugin activation during installation.
+
+### Fixed
+- **Plugin Migration Path:** `PluginManager::activate()` and `PluginManager::update()` no longer hardcode `database/migrations`. The migration path is now read from `plugin.json` via `provides.migrations`, so plugins with custom migration folders (like `src/Migrations`) run their migrations correctly on activation and update.
+- **Form Builder Schema:** The missing `is_required`, `options`, and `settings` columns on `rj_form_fields` are now created automatically when the plugin is activated, resolving `SQLSTATE[42S22]: Unknown column 'is_required'` errors during form save and submission.
+
+### Added
+- **Bundled Plugin Auto-Activation:** The installer now automatically activates bundled plugins (currently `form-builder`) after a successful installation, including running their migrations. No manual activation step is required for first-time installs.
+
+---
+
 ## [v1.8.5] - RJ CORE 1
 
 This update focuses on stabilizing the core architecture, improving theme development workflows, and fixing critical bugs discovered during the creation of complex themes like Spotlight.
