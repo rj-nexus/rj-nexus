@@ -138,7 +138,7 @@
     $showImage = filter_var(rj_theme_mod('show_featured_image', true, 'single_page'), FILTER_VALIDATE_BOOLEAN);
     $contentWidth = rj_theme_mod('content_width', 'normal', 'single_page');
 
-    // Arxa plan videosu (əgər xüsusi seçilməyibsə standart videonu götürür)
+    // Arxa plan videosu
     $defaultBgVideo = 'https://raw.githubusercontent.com/rj-nexus/spotlight/main/assets/video/background.mp4';
     $bgVideo = trim((string) rj_theme_mod('background_video', '', 'single_page'));
     if ($bgVideo === '') {
@@ -148,6 +148,12 @@
     $containerClass = 'rj-page-container';
     if ($contentWidth === 'wide') $containerClass .= ' is-wide';
     if ($contentWidth === 'full') $containerClass .= ' is-full';
+
+    // Yoxlayırıq ki, səhifədə göstəriləsi nəsə var?
+    $hasImage = $showImage && !empty($page->featured_image);
+    $hasBlocks = $page && $page->isBuilderMode() && $page->hasBlocks();
+    $hasContent = $page && !empty($page->content);
+    $hasAnything = $hasImage || $hasBlocks || $hasContent;
 @endphp
 
 @section('content')
@@ -176,22 +182,28 @@
                 <h1 class="rj-page-title">{{ $page->title ?? '' }}</h1>
             </header>
 
-            <article class="rj-page-card">
+            {{-- Yalnız məzmun varsa kartı göstəririk --}}
+            @if($hasAnything)
+                <article class="rj-page-card">
 
-                @if($showImage && $page->featured_image)
-                    <figure class="rj-page-hero">
-                        <img src="{{ $page->featured_image }}" alt="{{ $page->title ?? '' }}">
-                    </figure>
-                @endif
-
-                <div class="rj-page-content">
-                    @if($page->isBuilderMode() && $page->hasBlocks())
-                        {!! rj_render_blocks($page->blocks['blocks'] ?? []) !!}
-                    @else
-                        {!! $page->content ?? '' !!}
+                    @if($hasImage)
+                        <figure class="rj-page-hero">
+                            <img src="{{ $page->featured_image }}" alt="{{ $page->title ?? '' }}">
+                        </figure>
                     @endif
-                </div>
-            </article>
+
+                    @if($hasBlocks || $hasContent)
+                        <div class="rj-page-content">
+                            @if($hasBlocks)
+                                {!! rj_render_blocks($page->blocks['blocks'] ?? []) !!}
+                            @else
+                                {!! $page->content !!}
+                            @endif
+                        </div>
+                    @endif
+                </article>
+            @endif
+
         @else
             <div style="text-align: center; padding: 100px 20px; background: var(--q-card); border-radius: 32px; border: 1px solid var(--q-line);">
                 <h2 style="color: #fff; margin-bottom: 10px;">{{ __('Page not found') }}</h2>
