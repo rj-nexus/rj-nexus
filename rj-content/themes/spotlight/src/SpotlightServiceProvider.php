@@ -17,8 +17,10 @@ use Spotlight\Widgets\SpotlightFaqWidget;
 use Spotlight\Widgets\SpotlightNewsletterWidget;
 use Spotlight\Widgets\SpotlightFooterWidget;
 use Spotlight\Widgets\SpotlightTeamWidget;
-use Spotlight\Widgets\SpotlightFeaturesGridWidget;
-
+use Spotlight\Widgets\SpotlightAnimatedFeaturesWidget;
+use Spotlight\Widgets\SpotlightActionGridWidget;
+use Spotlight\Widgets\SpotlightTrustpilotWidget;
+use Spotlight\Widgets\SpotlightFeaturesGridWidget; // YENİ ƏLAVƏ OLUNDU
 
 class SpotlightServiceProvider extends ServiceProvider
 {
@@ -50,7 +52,10 @@ class SpotlightServiceProvider extends ServiceProvider
                     new SpotlightNewsletterWidget(),
                     new SpotlightFooterWidget(),
                     new SpotlightTeamWidget(),
-                    new SpotlightFeaturesGridWidget(),
+                    new SpotlightAnimatedFeaturesWidget(),
+                    new SpotlightActionGridWidget(),
+                    new SpotlightTrustpilotWidget(),
+                    new SpotlightFeaturesGridWidget(), // YENİ ƏLAVƏ OLUNDU
                 ];
                 return array_merge($existing, $widgets);
             });
