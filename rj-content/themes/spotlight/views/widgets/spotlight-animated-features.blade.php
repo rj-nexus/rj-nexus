@@ -35,9 +35,10 @@
         <div class="rj-anf-stage-wrap rj-anf-reveal" style="--i:0;">
             <div class="rj-anf-stage">
                 <span class="rj-anf-glow"></span>
-                <span class="rj-anf-ring" style="--sz:92%;"></span>
-                <span class="rj-anf-ring is-dash" style="--sz:60%;"></span>
-                <span class="rj-anf-ring is-faint" style="--sz:34%;"></span>
+                <span class="rj-anf-ticks"></span>
+                <span class="rj-anf-ring is-arc" style="--sz:92%; --spin:9s;"></span>
+                <span class="rj-anf-ring is-dash is-rev" style="--sz:60%;"></span>
+                <span class="rj-anf-ring is-arc is-violet is-rev" style="--sz:34%; --spin:5s;"></span>
                 <span class="rj-anf-sweep"></span>
 
                 @foreach($orbits as $o)
@@ -76,9 +77,6 @@
                 <div class="rj-anf-grid">
                     @foreach($features as $i => $item)
                         <article class="rj-anf-card rj-anf-reveal" style="--i: {{ $i + 2 }};">
-                            <div class="rj-anf-icon">
-                                <iconify-icon icon="{{ $item['icon'] ?? 'ph:sparkle' }}"></iconify-icon>
-                            </div>
                             <h3 class="rj-anf-card-title">{{ $item['feature_title'] ?? '' }}</h3>
                             <p class="rj-anf-card-desc">{{ $item['feature_text'] ?? '' }}</p>
                         </article>
@@ -266,12 +264,35 @@
             border: 1px solid rgba(255, 255, 255, .1);
         }
         #{{ $uid }} .rj-anf-ring.is-dash {
-            border: 1px dashed rgba(129, 140, 248, .28);
-            animation: rjAnfSpin 90s linear infinite;
+            border: 1px dashed rgba(129, 140, 248, .34);
+            animation: rjAnfSpin 26s linear infinite;
         }
-        #{{ $uid }} .rj-anf-ring.is-faint {
-            border-color: rgba(255, 255, 255, .06);
-            background: radial-gradient(circle, rgba(255, 255, 255, .03), transparent 70%);
+        #{{ $uid }} .rj-anf-ring.is-rev { animation-direction: reverse; }
+        #{{ $uid }} .rj-anf-ring.is-arc::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            padding: 2px;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, transparent 0deg, transparent 240deg, var(--a3) 335deg, transparent 360deg);
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            -webkit-mask-composite: xor;
+            mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            mask-composite: exclude;
+            animation: rjAnfSpin var(--spin) linear infinite;
+        }
+        #{{ $uid }} .rj-anf-ring.is-arc.is-violet::before {
+            background: conic-gradient(from 0deg, transparent 0deg, transparent 240deg, var(--a2) 335deg, transparent 360deg);
+            animation-direction: reverse;
+        }
+        #{{ $uid }} .rj-anf-ticks {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: repeating-conic-gradient(rgba(255, 255, 255, .38) 0deg .6deg, transparent .6deg 6deg);
+            -webkit-mask-image: radial-gradient(circle closest-side, transparent 95.5%, #000 96%);
+            mask-image: radial-gradient(circle closest-side, transparent 95.5%, #000 96%);
+            animation: rjAnfSpin 60s linear infinite;
         }
 
         #{{ $uid }} .rj-anf-sweep {
@@ -403,12 +424,10 @@
         #{{ $uid }} .rj-anf-card {
             position: relative;
             isolation: isolate;
-            display: grid;
-            grid-template-columns: 44px minmax(0, 1fr);
-            column-gap: 14px;
-            row-gap: 3px;
-            align-items: start;
-            padding: 15px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 16px 20px;
             border-radius: 18px;
             background: linear-gradient(160deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .015));
             border: 1px solid rgba(255, 255, 255, .09);
@@ -452,36 +471,27 @@
         }
         #{{ $uid }} .rj-anf-card:hover::after { opacity: 1; }
 
-        #{{ $uid }} .rj-anf-icon,
         #{{ $uid }} .rj-anf-card-title,
         #{{ $uid }} .rj-anf-card-desc { position: relative; z-index: 1; }
 
-        #{{ $uid }} .rj-anf-icon {
-            grid-row: 1 / span 2;
-            display: grid;
-            place-items: center;
-            width: 44px;
-            height: 44px;
-            border-radius: 14px;
-            font-size: 22px;
-            color: #93c5fd;
-            background: linear-gradient(145deg, rgba(59, 130, 246, .24), rgba(99, 102, 241, .06));
-            border: 1px solid rgba(129, 140, 248, .3);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14);
-            transition: box-shadow .4s, color .4s, transform .5s cubic-bezier(.2, .7, .2, 1);
-        }
-        #{{ $uid }} .rj-anf-card:hover .rj-anf-icon {
-            color: #fff;
-            transform: scale(1.06) rotate(-4deg);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .2), 0 0 26px rgba(59, 130, 246, .5);
-        }
-        #{{ $uid }} .rj-anf-card-title {
-            font-size: 15px;
+\1            display: flex;
+            align-items: center;
+            gap: 10px;
+\2
             font-weight: 600;
             letter-spacing: -.01em;
             color: #fff;
             margin: 0;
             line-height: 1.3;
+        }
+        #{{ $uid }} .rj-anf-card-title::before {
+            content: '';
+            flex-shrink: 0;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--a3);
+            box-shadow: 0 0 10px var(--a3);
         }
         #{{ $uid }} .rj-anf-card-desc {
             font-size: 13px;
@@ -560,8 +570,6 @@
             #{{ $uid }} .rj-anf-title { color: #fff; background: none; }
         }
     </style>
-
-    <script type="module" src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
 
     <script>
         (function () {
