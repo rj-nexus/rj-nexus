@@ -71,9 +71,23 @@ class SpotlightActionGridWidget extends BaseWidget
                 'fields' => [
                     [
                         'name' => 'icon',
-                        'type' => 'icon',
-                        'label' => __('Icon (Iconify)'),
-                        'default' => 'ph:star',
+                        'type' => 'select',
+                        'label' => __('Icon'),
+                        'default' => 'ph:gear-six',
+                        'options' => [
+                            'ph:gear-six' => 'Gear / Settings',
+                            'ph:chats' => 'Chats / Support',
+                            'ph:users-three' => 'Users / Team',
+                            'ph:phone' => 'Phone',
+                            'ph:envelope' => 'Email / Mail',
+                            'ph:map-pin' => 'Location / Map',
+                            'ph:rocket-launch' => 'Rocket / Launch',
+                            'ph:shield-check' => 'Shield / Security',
+                            'ph:chart-line-up' => 'Chart / Analytics',
+                            'ph:star' => 'Star',
+                            'ph:lightning' => 'Lightning / Speed',
+                            'ph:globe' => 'Globe / Web',
+                        ],
                     ],
                     [
                         'name' => 'title',
