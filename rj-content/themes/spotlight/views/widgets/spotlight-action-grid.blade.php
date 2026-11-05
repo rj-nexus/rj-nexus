@@ -245,12 +245,16 @@
             box-shadow: 0 0 10px #60a5fa;
         }
 
+        /* sabit ölçü: fırlanma düz mərkəzdən olsun */
         #{{ $uid }} .rj-ag-icon-inner {
+            width: 38px;
+            height: 38px;
             color: #6d8cff;
             filter: drop-shadow(0 0 10px rgba(99,102,241,.6));
             display: flex;
             align-items: center;
             justify-content: center;
+            transform-origin: 50% 50%;
             will-change: transform;
             transition: color .3s, filter .3s;
         }
@@ -259,14 +263,16 @@
         #{{ $uid }} .rj-ag-icon-inner iconify-icon {
             width: 38px;
             height: 38px;
+            display: block;
             stroke-width: 1.2;
+            transform-origin: 50% 50%;
         }
 
         /* hover-də 3 dəfə tam fırlanır */
         #{{ $uid }} .rj-ag-card:hover .rj-ag-icon-inner {
             color: #93c5fd;
             filter: drop-shadow(0 0 16px rgba(96,165,250,.9));
-            animation: rjAgSpin3 1.5s cubic-bezier(.45,.05,.25,1) 1;
+            animation: rjAgSpin3 1.5s cubic-bezier(.45,.05,.25,1) 1 both !important;
         }
 
         /* ---------- TEXT ---------- */
@@ -354,11 +360,13 @@
             #{{ $uid }} .rj-ag-ring { right: -40cqw; width: 150cqw; }
         }
 
+        /* yalnız fon animasiyaları söndürülür, ikon fırlanması işləyir */
         @media (prefers-reduced-motion: reduce) {
-            #{{ $uid }} *, #{{ $uid }} *::before, #{{ $uid }} *::after {
-                animation: none !important;
-                transition-duration: .01ms !important;
-            }
+            #{{ $uid }} .rj-ag-stars,
+            #{{ $uid }} .rj-ag-streak,
+            #{{ $uid }} .rj-ag-glow,
+            #{{ $uid }} .rj-ag-ring::before,
+            #{{ $uid }} .rj-ag-icon-wrap { animation: none !important; }
         }
     </style>
 </section>
