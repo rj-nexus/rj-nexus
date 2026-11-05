@@ -7,14 +7,11 @@
             isolation: isolate;
         }
 
-        /* 1. Düzəliş: Arxa fonu şəffaf etdik ki, ulduzlar görünsün */
         .rj-bg-video {
             position: absolute;
             inset: 0;
             z-index: 0;
-            overflow: hidden;
             pointer-events: none;
-            background: transparent;
         }
 
         .rj-bg-video-inner {
@@ -23,10 +20,6 @@
             width: 100%;
             height: 100vh;
             overflow: hidden;
-            isolation: isolate;
-            /* 2. Düzəliş: Videonun alt hissəsini yumşaq şəkildə şəffaflaşdırırıq (hard cut-u aradan qaldırır) */
-            -webkit-mask-image: linear-gradient(to bottom, #000 40%, transparent 100%);
-            mask-image: linear-gradient(to bottom, #000 40%, transparent 100%);
         }
 
         .rj-bg-video-inner video {
@@ -35,9 +28,10 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            filter: grayscale(1) contrast(1.1) brightness(.9) blur(6px);
-            /* 3. Düzəliş: Videonu bir az aşağı salırıq */
-            transform: scale(1.1) translateY(15px);
+            object-position: center center;
+            /* Yüngül blur və tündlük - video özünü göstərsin deyə */
+            filter: grayscale(0.8) brightness(0.7) blur(3px);
+            transform: scale(1.05);
         }
 
         .rj-bg-video-tint {
@@ -45,16 +39,21 @@
             inset: 0;
             background: #1d4ed8;
             mix-blend-mode: color;
-            /* Tint rənginin də alt hissədə yox olması üçün mask veririk */
-            -webkit-mask-image: linear-gradient(to bottom, #000 40%, transparent 100%);
-            mask-image: linear-gradient(to bottom, #000 40%, transparent 100%);
+            opacity: 0.85;
         }
 
-        .rj-bg-video-shade {
+        /* Kəskin xətti yox edən və saytın fon rənginə yumşaq keçid edən qradient */
+        .rj-bg-video-fade {
             position: absolute;
             inset: 0;
-            /* 4. Düzəliş: Qradienti tünd rəngdən şəffafa doğru dəyişirik */
-            background: linear-gradient(180deg, rgba(10, 10, 15, .65) 0%, rgba(10, 10, 15, .2) 50%, transparent 100%);
+            background: linear-gradient(
+                to bottom,
+                rgba(10, 10, 15, 0.3) 0%,
+                transparent 30%,
+                transparent 60%,
+                var(--rj-bg) 100%
+            );
+            z-index: 2;
         }
 
         .rj-archive-wrapper {
@@ -429,7 +428,7 @@
         <div class="rj-bg-video-inner">
             <video autoplay muted loop playsinline preload="auto" src="{{ $bgVideo }}"></video>
             <div class="rj-bg-video-tint"></div>
-            <div class="rj-bg-video-shade"></div>
+            <div class="rj-bg-video-fade"></div>
         </div>
     </div>
 
