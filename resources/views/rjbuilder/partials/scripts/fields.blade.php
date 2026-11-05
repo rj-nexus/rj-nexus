@@ -6,6 +6,14 @@ function builderFields() {
         iconSearch: '',
         iconsLoading: false,
         iconList: [],
+        iconError: false,
+        iconHost: 'https://api.iconify.design',
+        iconHosts: [
+            'https://api.iconify.design',
+            'https://api.simplesvg.com',
+            'https://api.unisvg.com'
+        ],
+        manualIcon: '',
 
         repeaterEdit: {
             open: false,
@@ -25,6 +33,7 @@ function builderFields() {
             this.iconTargetField = fieldName;
             this.iconSearch = '';
             this.iconList = [];
+            this.manualIcon = '';
             this.iconPickerOpen = true;
             this.searchIcons();
         },
@@ -36,25 +45,47 @@ function builderFields() {
             this.iconPickerOpen = false;
         },
 
+        useManualIcon() {
+            const v = (this.manualIcon || '').trim();
+            if (!v) return;
+            this.selectIcon(v);
+            this.manualIcon = '';
+        },
+
         getIconSvg(iconName) {
             if (!iconName) return '';
             let urlName = iconName.replace(':', '/');
-            return '<img src="https://api.iconify.design/' + urlName + '.svg?color=%2364748b" style="width:100%; height:100%; object-fit:contain;" />';
+            return '<img src="' + this.iconHost + '/' + urlName + '.svg?color=%2364748b" style="width:100%; height:100%; object-fit:contain;" onerror="this.style.visibility=\'hidden\'" />';
         },
 
         async searchIcons() {
             this.iconsLoading = true;
-            try {
-                const q = this.iconSearch || 'home';
-                const res = await fetch('https://api.iconify.design/search?query=' + encodeURIComponent(q) + '&limit=64');
-                const data = await res.json();
-                this.iconList = data.icons || [];
-            } catch (e) {
-                console.error(e);
-                this.iconList = [];
-            } finally {
-                this.iconsLoading = false;
+            this.iconError = false;
+            const q = (this.iconSearch || '').trim() || 'home';
+            let ok = false;
+
+            for (const host of this.iconHosts) {
+                try {
+                    const ctrl = new AbortController();
+                    const timer = setTimeout(() => ctrl.abort(), 6000);
+                    const res = await fetch(host + '/search?query=' + encodeURIComponent(q) + '&limit=64', { signal: ctrl.signal });
+                    clearTimeout(timer);
+                    if (!res.ok) continue;
+                    const data = await res.json();
+                    this.iconList = data.icons || [];
+                    this.iconHost = host;
+                    ok = true;
+                    break;
+                } catch (e) {
+                    console.error('Icon host failed:', host, e);
+                }
             }
+
+            if (!ok) {
+                this.iconList = [];
+                this.iconError = true;
+            }
+            this.iconsLoading = false;
         },
 
         dimDefaults() {

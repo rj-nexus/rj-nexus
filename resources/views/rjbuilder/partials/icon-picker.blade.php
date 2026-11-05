@@ -17,7 +17,7 @@
         <div class="p-4 border-b border-gray-100">
             <div class="relative">
                 <svg class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                <input type="text" x-model="iconSearch" @input="searchIcons()" placeholder="{{ __('Search icons (e.g. home, cart, user, arrow...)') }}" class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                <input type="text" x-model="iconSearch" @input.debounce.400ms="searchIcons()" placeholder="{{ __('Search icons (e.g. home, cart, user, arrow...)') }}" class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm">
             </div>
         </div>
 
@@ -28,11 +28,25 @@
                 {{ __('Loading icons...') }}
             </div>
 
-            <div x-show="!iconsLoading && iconList.length === 0" class="text-center py-10 text-gray-500">
+            <div x-show="!iconsLoading && !iconError && iconList.length === 0" class="text-center py-10 text-gray-500">
                 {{ __('No icons found.') }}
             </div>
 
-            <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3" x-show="!iconsLoading">
+            <div x-show="!iconsLoading && iconError" class="text-center py-10 px-4">
+                <p class="text-sm text-gray-700 mb-2">{{ __('Icons could not be loaded.') }}</p>
+                <p class="text-xs text-gray-500 mb-4">
+                    {{ __('Open the icon website, copy the icon name (e.g. mdi:home) and paste it below.') }}
+                </p>
+                <a href="https://icon-sets.iconify.design/" target="_blank" rel="noopener noreferrer"
+                   class="inline-flex items-center gap-1 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700">
+                    {{ __('Browse all icons') }} ↗
+                </a>
+                <button type="button" @click="searchIcons()" class="ml-2 px-4 py-2 bg-slate-100 rounded-lg text-sm hover:bg-slate-200">
+                    {{ __('Retry') }}
+                </button>
+            </div>
+
+            <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3" x-show="!iconsLoading && !iconError">
                 <template x-for="icon in iconList" :key="icon">
                     <button type="button"
                             @click="selectIcon(icon)"
@@ -46,9 +60,19 @@
         </div>
 
         <!-- Footer -->
-        <div class="px-6 py-4 border-t border-gray-100 bg-white rounded-b-2xl flex justify-between items-center text-xs text-gray-500">
-            <span>Powered by <a href="https://iconify.design" target="_blank" class="text-indigo-500 hover:underline">Iconify</a></span>
-            <button type="button" @click="iconPickerOpen = false" class="px-4 py-2 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors">{{ __('Cancel') }}</button>
+        <div class="px-6 py-4 border-t border-gray-100 bg-white rounded-b-2xl flex flex-wrap gap-3 justify-between items-center text-xs text-gray-500">
+            <div class="flex items-center gap-3">
+                <span>Powered by <a href="https://iconify.design" target="_blank" class="text-indigo-500 hover:underline">Iconify</a></span>
+                <a href="https://icon-sets.iconify.design/" target="_blank" rel="noopener noreferrer" class="text-indigo-500 hover:underline">{{ __('Browse all icons') }} ↗</a>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <input type="text" x-model="manualIcon" @keydown.enter.prevent="useManualIcon()"
+                       placeholder="mdi:home"
+                       class="w-36 px-3 py-2 rounded-lg border border-gray-300 text-xs focus:border-indigo-500 focus:ring-indigo-500">
+                <button type="button" @click="useManualIcon()" class="px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">{{ __('Use') }}</button>
+                <button type="button" @click="iconPickerOpen = false" class="px-4 py-2 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors">{{ __('Cancel') }}</button>
+            </div>
         </div>
     </div>
 </div>
