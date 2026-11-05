@@ -4,27 +4,21 @@
     $badge = $settings['badge_text'] ?? '';
     $title = $settings['title'] ?? '';
     $subtitle = $settings['subtitle'] ?? '';
-    $coreIcon = $settings['core_icon'] ?? 'ph:atom';
 
     $features = $settings['features'] ?? [];
     if (!is_array($features)) $features = [];
     $features = array_slice(array_values($features), 0, 6);
 
-    $count = count($features);
-    $ringCounts = [(int) ceil($count / 2), (int) floor($count / 2)];
     $orbits = [];
-    foreach ($features as $i => $item) {
+    for ($i = 0; $i < 6; $i++) {
         $ring = $i % 2;
         $idx = intdiv($i, 2);
         $dur = $ring === 0 ? 46 : 32;
-        $n = max(1, $ringCounts[$ring]);
-        $offset = $ring === 1 ? 0.5 / $n : 0;
+        $offset = $ring === 1 ? 0.5 / 3 : 0;
         $orbits[] = [
             'ring' => $ring,
             'dur' => $dur,
-            'delay' => -round($dur * ($idx / $n + $offset), 2),
-            'icon' => $item['icon'] ?? 'ph:sparkle',
-            'label' => $item['feature_title'] ?? '',
+            'delay' => -round($dur * ($idx / 3 + $offset), 2),
         ];
     }
 @endphp
@@ -48,18 +42,14 @@
 
                 @foreach($orbits as $o)
                     <div class="rj-anf-orbit {{ $o['ring'] ? 'is-rev' : '' }}" style="--sz: {{ $o['ring'] ? '60%' : '92%' }}; --dur: {{ $o['dur'] }}s; --dly: {{ $o['delay'] }}s;">
-                        <div class="rj-anf-node">
-                            <div class="rj-anf-node-i" data-label="{{ $o['label'] }}">
-                                <iconify-icon icon="{{ $o['icon'] }}"></iconify-icon>
-                            </div>
-                        </div>
+                        <span class="rj-anf-node"></span>
                     </div>
                 @endforeach
 
                 <div class="rj-anf-core">
                     <span class="rj-anf-pulse"></span>
                     <span class="rj-anf-pulse" style="animation-delay:-2s;"></span>
-                    <iconify-icon icon="{{ $coreIcon }}"></iconify-icon>
+                    <span class="rj-anf-orb"></span>
                 </div>
             </div>
         </div>
@@ -130,8 +120,10 @@
             z-index: 0;
             pointer-events: none;
             overflow: hidden;
-            -webkit-mask-image: radial-gradient(ellipse 85% 95% at 50% 50%, #000 35%, transparent 100%);
-            mask-image: radial-gradient(ellipse 85% 95% at 50% 50%, #000 35%, transparent 100%);
+            -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 24%, #000 76%, transparent 100%), linear-gradient(90deg, transparent 0%, #000 14%, #000 86%, transparent 100%);
+            -webkit-mask-composite: source-in;
+            mask-image: linear-gradient(180deg, transparent 0%, #000 24%, #000 76%, transparent 100%), linear-gradient(90deg, transparent 0%, #000 14%, #000 86%, transparent 100%);
+            mask-composite: intersect;
         }
         #{{ $uid }} .rj-anf-grid-bg {
             position: absolute;
@@ -313,62 +305,17 @@
             position: absolute;
             top: 0;
             left: 50%;
-            width: 42px;
-            height: 42px;
-            margin: -21px 0 0 -21px;
+            width: 10px;
+            height: 10px;
+            margin: -5px 0 0 -5px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 0 10px 2px rgba(34, 211, 238, .85), 0 0 26px rgba(59, 130, 246, .6);
         }
-        #{{ $uid }} .rj-anf-node-i {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            display: grid;
-            place-items: center;
-            border-radius: 14px;
-            font-size: 20px;
-            color: #bfdbfe;
-            background: linear-gradient(145deg, rgba(30, 41, 80, .85), rgba(10, 14, 30, .85));
-            border: 1px solid rgba(255, 255, 255, .16);
-            box-shadow: 0 8px 22px rgba(0, 0, 0, .45), 0 0 20px rgba(59, 130, 246, .28), inset 0 1px 0 rgba(255, 255, 255, .18);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            pointer-events: auto;
-            cursor: default;
-            animation: rjAnfSpinBack var(--dur) linear infinite;
-            animation-delay: var(--dly);
-            transition: color .3s, box-shadow .3s;
+        #{{ $uid }} .rj-anf-orbit.is-rev .rj-anf-node {
+            background: #e0e7ff;
+            box-shadow: 0 0 10px 2px rgba(129, 140, 248, .9), 0 0 26px rgba(99, 102, 241, .6);
         }
-        #{{ $uid }} .rj-anf-orbit.is-rev .rj-anf-node-i { animation-direction: reverse; }
-        #{{ $uid }} .rj-anf-node-i:hover {
-            color: #fff;
-            z-index: 6;
-            box-shadow: 0 8px 22px rgba(0, 0, 0, .45), 0 0 30px rgba(34, 211, 238, .55), inset 0 1px 0 rgba(255, 255, 255, .25);
-        }
-        #{{ $uid }} .rj-anf-node-i::after {
-            content: attr(data-label);
-            position: absolute;
-            top: calc(100% + 8px);
-            left: 50%;
-            transform: translate(-50%, 4px);
-            white-space: nowrap;
-            padding: 5px 10px;
-            border-radius: 8px;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-            font-size: 10.5px;
-            letter-spacing: .04em;
-            color: #e5e7eb;
-            background: rgba(8, 10, 22, .94);
-            border: 1px solid rgba(255, 255, 255, .14);
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity .25s, transform .25s;
-        }
-        #{{ $uid }} .rj-anf-node-i[data-label=""]::after { display: none; }
-        #{{ $uid }} .rj-anf-node-i:hover::after {
-            opacity: 1;
-            transform: translate(-50%, 0);
-        }
-        #{{ $uid }} .rj-anf-stage:hover .rj-anf-orbit,
-        #{{ $uid }} .rj-anf-stage:hover .rj-anf-node-i { animation-play-state: paused; }
 
         #{{ $uid }} .rj-anf-core {
             position: absolute;
@@ -380,8 +327,6 @@
             display: grid;
             place-items: center;
             border-radius: 28px;
-            font-size: 38px;
-            color: #fff;
             background: linear-gradient(145deg, rgba(255, 255, 255, .16), rgba(255, 255, 255, .03));
             border: 1px solid rgba(255, 255, 255, .16);
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), 0 0 60px rgba(59, 130, 246, .4), 0 20px 40px rgba(0, 0, 0, .5);
@@ -389,7 +334,16 @@
             -webkit-backdrop-filter: blur(16px);
             animation: rjAnfFloat 6s ease-in-out infinite;
         }
-        #{{ $uid }} .rj-anf-core iconify-icon { position: relative; z-index: 2; filter: drop-shadow(0 0 12px rgba(147, 197, 253, .8)); }
+        #{{ $uid }} .rj-anf-orb {
+            position: relative;
+            z-index: 2;
+            width: 34%;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 30%, #fff, #60a5fa 45%, #1d4ed8 100%);
+            box-shadow: 0 0 30px rgba(96, 165, 250, .9), 0 0 60px rgba(59, 130, 246, .5);
+            animation: rjAnfBreathe 3.5s ease-in-out infinite alternate;
+        }
         #{{ $uid }} .rj-anf-core::before {
             content: '';
             position: absolute;
@@ -545,7 +499,6 @@
             to { opacity: 1; transform: none; filter: blur(0); }
         }
         @keyframes rjAnfSpin { to { transform: rotate(360deg); } }
-        @keyframes rjAnfSpinBack { to { transform: rotate(-360deg); } }
         @keyframes rjAnfAngle { to { --rj-anf-angle: 360deg; } }
         @keyframes rjAnfFloat {
             0%, 100% { transform: translateY(0); }
@@ -595,9 +548,8 @@
         @media (max-width: 560px) {
             #{{ $uid }} .rj-anf-grid { grid-template-columns: 1fr; }
             #{{ $uid }} .rj-anf-stage-wrap { max-width: 240px; }
-            #{{ $uid }} .rj-anf-node { width: 36px; height: 36px; margin: -18px 0 0 -18px; }
-            #{{ $uid }} .rj-anf-node-i { font-size: 17px; border-radius: 12px; }
-            #{{ $uid }} .rj-anf-core { width: 72px; height: 72px; margin: -36px 0 0 -36px; font-size: 30px; border-radius: 22px; }
+            #{{ $uid }} .rj-anf-node { width: 8px; height: 8px; margin: -4px 0 0 -4px; }
+            #{{ $uid }} .rj-anf-core { width: 72px; height: 72px; margin: -36px 0 0 -36px; border-radius: 22px; }
             #{{ $uid }} .rj-anf-pulse { border-radius: 22px; }
         }
         @media (prefers-reduced-motion: reduce) {
