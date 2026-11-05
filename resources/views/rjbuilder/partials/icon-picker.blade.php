@@ -1,5 +1,4 @@
-<div x-show="iconPickerOpen" x-cloak class="fixed inset-0 z-[200] flex items-center justify-center p-4" @keydown.escape.window="iconPickerOpen = false">
-    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="iconPickerOpen = false"></div>
+<div x-show="iconPickerOpen" x-cloak class="fixed inset-0 z-[99999] flex items-center justify-center p-4" @keydown.escape.window="iconPickerOpen = false">    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="iconPickerOpen = false"></div>
 
     <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-3xl flex flex-col h-[80vh]">
         <!-- Header -->

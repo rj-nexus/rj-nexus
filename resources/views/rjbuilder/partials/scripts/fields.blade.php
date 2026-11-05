@@ -38,9 +38,13 @@ function builderFields() {
             this.searchIcons();
         },
 
-        selectIcon(iconName) {
-            if (this.iconTargetField) {
-                this.updateSetting(this.iconTargetField, iconName);
+        selectIcon(icon) {
+            if (this.isRepeaterIcon && this.repeaterEdit.item) {
+                this.repeaterEdit.item[this.iconPickerTarget] = icon;
+                this.setRepeaterField(this.iconPickerTarget, icon);
+                this.isRepeaterIcon = false;
+            } else {
+                this.updateSetting(this.iconPickerTarget, icon);
             }
             this.iconPickerOpen = false;
         },
@@ -182,6 +186,16 @@ function builderFields() {
                 dropdown: null,
                 creatingNewCat: null
             };
+        },
+
+        openRepeaterIconPicker(fieldName) {
+            this.iconPickerTarget = fieldName;
+            this.isRepeaterIcon = true;
+            this.iconPickerOpen = true;
+            this.iconSearch = '';
+            this.iconList = [];
+            this.iconError = false;
+            this.fetchIcons('ph');
         },
 
         removeRepeaterItem(field, idx) {
