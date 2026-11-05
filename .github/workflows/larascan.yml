@@ -1,0 +1,60 @@
+name: larascan security scan
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 3 * * *'
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  scan:
+    name: Security scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # required for repo.gitleaks-history
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+          coverage: none
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+        if: hashFiles('package.json') != ''
+
+      - name: Cache composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('composer.lock') }}
+
+      - name: Install composer dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Run larascan
+        # Very large apps may need more memory than the PHP CLI default; larascan
+        # raises a 512M floor itself, but for big monorepos prepend `-d memory_limit=-1`:
+        #   run: php -d memory_limit=-1 artisan larascan ...
+        run: php artisan larascan --fail-on=high --only-failed --format=sarif --output=larascan.sarif --no-interaction
+
+      - name: Upload SARIF to GitHub Code Scanning
+        # Requires GitHub Advanced Security on private repos; remove this step if unavailable.
+        uses: github/codeql-action/upload-sarif@v3
+        if: always() && hashFiles('larascan.sarif') != ''
+        continue-on-error: true
+        with:
+          sarif_file: larascan.sarif
+          category: larascan

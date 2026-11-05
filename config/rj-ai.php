@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'vault_url' => env('RJ_VAULT_URL', 'https://twilight-art-0b0e.ruhidjavadoff.workers.dev'),
+
     'providers' => [
         [
             'name' => 'groq',
