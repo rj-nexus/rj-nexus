@@ -98,10 +98,13 @@ class GitHubRegistry
         $installation = $entry['installation'] ?? [];
         $development = $entry['development'] ?? [];
 
+        $name = $entry['name'] ?? $repo;
+
         return [
             'repo' => $repo,
             'owner' => explode('/', $repo)[0],
-            'name' => $entry['name'] ?? ($repo),
+            'name' => $name,
+            'slug' => \Illuminate\Support\Str::slug($name),
             'author' => $entry['author'] ?? '',
             'version' => $entry['version'] ?? ($release['release_version'] ?? '0.0.0'),
             'description' => $details['description'] ?? ($entry['description'] ?? ''),
