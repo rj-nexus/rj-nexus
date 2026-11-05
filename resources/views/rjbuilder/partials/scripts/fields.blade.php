@@ -3,6 +3,7 @@ function builderFields() {
     return {
         iconPickerOpen: false,
         iconTargetField: null,
+        iconPickerRepeaterMode: false, // YENİ ƏLAVƏ
         iconSearch: '',
         iconsLoading: false,
         iconList: [],
@@ -23,6 +24,17 @@ function builderFields() {
 
         openIconPicker(fieldName) {
             this.iconTargetField = fieldName;
+            this.iconPickerRepeaterMode = false; // Normal rejim
+            this.iconSearch = '';
+            this.iconList = [];
+            this.iconPickerOpen = true;
+            this.searchIcons();
+        },
+
+        // YENİ FUNKSİYA
+        openRepeaterIconPicker(fieldName) {
+            this.iconTargetField = fieldName;
+            this.iconPickerRepeaterMode = true; // Repeater daxili rejim
             this.iconSearch = '';
             this.iconList = [];
             this.iconPickerOpen = true;
@@ -31,7 +43,11 @@ function builderFields() {
 
         selectIcon(iconName) {
             if (this.iconTargetField) {
-                this.updateSetting(this.iconTargetField, iconName);
+                if (this.iconPickerRepeaterMode) {
+                    this.setRepeaterField(this.iconTargetField, iconName);
+                } else {
+                    this.updateSetting(this.iconTargetField, iconName);
+                }
             }
             this.iconPickerOpen = false;
         },
