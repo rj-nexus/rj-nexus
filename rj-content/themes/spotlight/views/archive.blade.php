@@ -13,7 +13,7 @@
             z-index: 0;
             overflow: hidden;
             pointer-events: none;
-            background: #020617;
+            background: #000;
         }
         .rj-bg-video-inner {
             position: sticky;
@@ -29,7 +29,8 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            filter: grayscale(1) contrast(1.1) brightness(.9);
+            filter: grayscale(1) contrast(1.1) brightness(.9) blur(6px);
+            transform: scale(1.1);
         }
         .rj-bg-video-tint {
             position: absolute;
@@ -40,18 +41,22 @@
         .rj-bg-video-shade {
             position: absolute;
             inset: 0;
-            background: linear-gradient(180deg, rgba(2, 6, 23, .55), rgba(2, 6, 23, .75));
+            background: linear-gradient(180deg, rgba(0, 0, 0, .45), rgba(0, 0, 0, .72));
         }
 
         .rj-archive-wrapper {
+            --q-accent: #2f6bff;
+            --q-line: rgba(255, 255, 255, .16);
+            --q-card: linear-gradient(145deg, rgba(255, 255, 255, .12), rgba(255, 255, 255, .04));
+            --q-blur: blur(28px) saturate(150%);
             position: relative;
             z-index: 1;
             max-width: var(--rj-container);
             margin: 0 auto;
             padding: 64px 24px 96px;
             display: grid;
-            grid-template-columns: 300px 1fr;
-            gap: 48px;
+            grid-template-columns: 420px 1fr;
+            gap: 32px;
             align-items: start;
         }
 
@@ -64,20 +69,45 @@
         }
 
         .rj-widget {
-            background: var(--rj-surface);
-            border: 1px solid var(--rj-border);
-            border-radius: var(--rj-radius-lg);
-            padding: 24px;
+            background: var(--q-card);
+            border: 1px solid var(--q-line);
+            border-radius: 32px;
+            padding: 40px 40px 44px;
+            backdrop-filter: var(--q-blur);
+            -webkit-backdrop-filter: var(--q-blur);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22), 0 20px 50px rgba(0, 0, 0, .35);
         }
 
         .rj-widget-title {
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--rj-text);
-            margin: 0 0 20px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--rj-border);
-            letter-spacing: -0.02em;
+            position: relative;
+            font-size: 34px;
+            font-weight: 500;
+            color: #fff;
+            margin: 0 0 32px;
+            padding-bottom: 32px;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+        }
+        .rj-widget-title::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 1px;
+            background: rgba(255, 255, 255, .22);
+        }
+        .rj-widget-title::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: -1px;
+            height: 3px;
+            z-index: 1;
+            background:
+                radial-gradient(circle, #fff 1.5px, transparent 2px) left center / 3px 3px no-repeat,
+                radial-gradient(circle, #fff 1.5px, transparent 2px) right center / 3px 3px no-repeat;
         }
 
         .rj-search-form {
@@ -86,35 +116,34 @@
         }
         .rj-search-input {
             width: 100%;
-            padding: 12px 40px 12px 16px;
-            background: var(--rj-bg);
-            border: 1px solid var(--rj-border);
-            border-radius: var(--rj-radius-sm);
-            color: var(--rj-text);
-            font-size: 14px;
+            padding: 18px 56px 18px 24px;
+            background: rgba(0, 0, 0, .25);
+            border: 1px solid var(--q-line);
+            border-radius: 18px;
+            color: #fff;
+            font-size: 16px;
             outline: none;
             transition: border-color 0.2s;
         }
+        .rj-search-input::placeholder {
+            color: rgba(255, 255, 255, .5);
+        }
         .rj-search-input:focus {
-            border-color: var(--rj-primary);
+            border-color: var(--q-accent);
         }
         .rj-search-btn {
             position: absolute;
-            right: 8px;
+            right: 12px;
             top: 50%;
             transform: translateY(-50%);
             background: none;
             border: none;
-            color: var(--rj-muted);
+            color: var(--q-accent);
             cursor: pointer;
             padding: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: color 0.2s;
-        }
-        .rj-search-btn:hover {
-            color: var(--rj-primary);
         }
 
         .rj-cat-list {
@@ -129,20 +158,26 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            color: var(--rj-muted);
+            padding: 22px 26px;
+            background: rgba(255, 255, 255, .05);
+            border: 1px solid var(--q-line);
+            border-radius: 20px;
+            color: #fff;
             text-decoration: none;
-            font-size: 14px;
-            transition: color 0.2s;
+            font-size: 20px;
+            font-weight: 500;
+            letter-spacing: -0.01em;
+            transition: border-color .2s, background .2s;
         }
         .rj-cat-list a:hover {
-            color: var(--rj-primary);
+            border-color: var(--q-accent);
+            background: rgba(47, 107, 255, .08);
         }
-        .rj-cat-count {
-            font-size: 12px;
-            background: var(--rj-bg);
-            padding: 2px 8px;
-            border-radius: 999px;
-            border: 1px solid var(--rj-border);
+        .rj-cat-arrow {
+            width: 22px;
+            height: 22px;
+            flex-shrink: 0;
+            color: var(--q-accent);
         }
 
         .rj-recent-list {
@@ -151,66 +186,76 @@
             margin: 0;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 28px;
         }
         .rj-recent-item {
             display: flex;
-            gap: 12px;
+            gap: 20px;
             align-items: center;
         }
         .rj-recent-thumb {
-            width: 60px;
-            height: 60px;
-            border-radius: var(--rj-radius-sm);
-            background: var(--rj-bg);
+            width: 128px;
+            height: 128px;
+            border-radius: 22px;
+            background: rgba(255, 255, 255, .04);
             object-fit: cover;
             flex-shrink: 0;
         }
         .rj-recent-info {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 10px;
+            min-width: 0;
+        }
+        .rj-recent-date {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            color: rgba(255, 255, 255, .8);
+        }
+        .rj-recent-date svg {
+            width: 22px;
+            height: 22px;
+            flex-shrink: 0;
         }
         .rj-recent-title {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--rj-text);
+            font-size: 22px;
+            font-weight: 500;
+            color: #fff;
             text-decoration: none;
-            line-height: 1.4;
+            line-height: 1.3;
+            letter-spacing: -0.02em;
             display: -webkit-box;
-            -webkit-line-clamp: 2;
+            -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
             overflow: hidden;
             transition: color 0.2s;
         }
         .rj-recent-title:hover {
-            color: var(--rj-primary);
-        }
-        .rj-recent-date {
-            font-size: 11px;
-            color: var(--rj-muted);
+            color: var(--q-accent);
         }
 
         .rj-tag-cloud {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 10px;
         }
         .rj-tag-cloud a {
             display: inline-flex;
-            padding: 6px 12px;
-            background: var(--rj-bg);
-            border: 1px solid var(--rj-border);
-            border-radius: var(--rj-radius-sm);
-            color: var(--rj-muted);
-            font-size: 12px;
+            padding: 10px 18px;
+            background: rgba(255, 255, 255, .06);
+            border: 1px solid var(--q-line);
+            border-radius: 999px;
+            color: rgba(255, 255, 255, .8);
+            font-size: 15px;
             text-decoration: none;
             transition: all 0.2s;
         }
         .rj-tag-cloud a:hover {
-            border-color: var(--rj-primary);
-            color: var(--rj-primary);
-            background: color-mix(in srgb, var(--rj-primary) 8%, var(--rj-bg));
+            border-color: var(--q-accent);
+            color: #fff;
+            background: rgba(47, 107, 255, .12);
         }
 
         .rj-archive-main {
@@ -227,23 +272,34 @@
         .rj-archive-grid[data-cols="1"] { grid-template-columns: 1fr; }
         .rj-archive-grid[data-cols="2"] { grid-template-columns: repeat(2, 1fr); }
         .rj-archive-grid[data-cols="3"] { grid-template-columns: repeat(3, 1fr); }
+        .rj-archive-grid > * {
+            background: var(--q-card) !important;
+            border: 1px solid var(--q-line) !important;
+            border-radius: 28px !important;
+            backdrop-filter: var(--q-blur);
+            -webkit-backdrop-filter: var(--q-blur);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .22), 0 20px 50px rgba(0, 0, 0, .35) !important;
+            overflow: hidden;
+        }
 
         .rj-archive-empty {
             text-align: center;
             padding: 80px 24px;
-            background: var(--rj-surface);
-            border: 1px solid var(--rj-border);
-            border-radius: var(--rj-radius-lg);
+            background: var(--q-card);
+            border: 1px solid var(--q-line);
+            border-radius: 32px;
+            backdrop-filter: var(--q-blur);
+            -webkit-backdrop-filter: var(--q-blur);
         }
         .rj-archive-empty h2 {
-            font-size: 24px;
-            font-weight: 700;
+            font-size: 28px;
+            font-weight: 500;
             margin: 0 0 10px;
-            color: var(--rj-text);
+            color: #fff;
         }
         .rj-archive-empty p {
-            font-size: 15px;
-            color: var(--rj-muted);
+            font-size: 16px;
+            color: rgba(255, 255, 255, .6);
             margin: 0 0 24px;
         }
 
@@ -260,27 +316,28 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-width: 40px;
-            height: 40px;
-            padding: 0 12px;
-            border-radius: var(--rj-radius-sm);
-            background: var(--rj-surface);
-            border: 1px solid var(--rj-border);
-            color: var(--rj-text);
-            font-size: 14px;
+            min-width: 48px;
+            height: 48px;
+            padding: 0 14px;
+            border-radius: 16px;
+            background: var(--q-card);
+            backdrop-filter: var(--q-blur);
+            -webkit-backdrop-filter: var(--q-blur);
+            border: 1px solid var(--q-line);
+            color: #fff;
+            font-size: 15px;
             font-weight: 500;
             text-decoration: none;
             transition: all .15s;
         }
         .rj-archive-pagination a:hover {
-            border-color: color-mix(in srgb, var(--rj-primary) 60%, var(--rj-border));
-            color: var(--rj-primary);
-            background: color-mix(in srgb, var(--rj-primary) 8%, var(--rj-surface));
+            border-color: var(--q-accent);
+            background: rgba(47, 107, 255, .12);
         }
         .rj-archive-pagination .rj-current {
-            background: linear-gradient(135deg, var(--rj-primary), var(--rj-secondary));
+            background: var(--q-accent);
             border-color: transparent;
-            color: var(--rj-bg);
+            color: #fff;
             font-weight: 700;
         }
         .rj-archive-pagination .rj-disabled {
@@ -288,6 +345,18 @@
             cursor: default;
         }
 
+        @media (max-width: 1200px) {
+            .rj-archive-wrapper {
+                grid-template-columns: 360px 1fr;
+            }
+            .rj-widget {
+                padding: 32px 28px 36px;
+            }
+            .rj-recent-thumb {
+                width: 96px;
+                height: 96px;
+            }
+        }
         @media (max-width: 968px) {
             .rj-archive-wrapper {
                 grid-template-columns: 1fr;
@@ -300,6 +369,7 @@
         }
         @media (max-width: 640px) {
             .rj-archive-wrapper { padding: 40px 20px 64px; }
+            .rj-widget-title { font-size: 28px; }
             .rj-archive-grid,
             .rj-archive-grid[data-cols="3"],
             .rj-archive-grid[data-cols="2"],
@@ -358,8 +428,8 @@
                 <h3 class="rj-widget-title">{{ __('Search') }}</h3>
                 <form method="GET" action="{{ $blogUrl }}" class="rj-search-form">
                     <input type="text" name="s" class="rj-search-input" placeholder="{{ __('Search posts...') }}" value="{{ request('s') }}">
-                    <button type="submit" class="rj-search-btn">
-                        <svg style="width:18px;height:18px;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    <button type="submit" class="rj-search-btn" aria-label="{{ __('Search') }}">
+                        <svg style="width:22px;height:22px;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     </button>
                 </form>
             </div>
@@ -371,8 +441,8 @@
                         @foreach($sidebarCategories as $cat)
                             <li>
                                 <a href="{{ route('frontend.posts.index', ['locale' => $locale, 'term' => $cat->slug, 'taxonomy' => 'category']) }}">
-                                    {{ $cat->name }}
-                                    <span class="rj-cat-count">{{ $cat->posts()->count() ?? 0 }}</span>
+                                    <span>{{ $cat->name }}</span>
+                                    <svg class="rj-cat-arrow" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M9 7h8v8"/></svg>
                                 </a>
                             </li>
                         @endforeach
@@ -382,18 +452,23 @@
 
             @if($sidebarRecent->isNotEmpty())
                 <div class="rj-widget">
-                    <h3 class="rj-widget-title">{{ __('Recent Posts') }}</h3>
+                    <h3 class="rj-widget-title">{{ __('Recent posts') }}</h3>
                     <ul class="rj-recent-list">
                         @foreach($sidebarRecent as $rPost)
                             <li class="rj-recent-item">
                                 @if($rPost->featured_image)
                                     <img src="{{ $rPost->featured_image }}" alt="{{ $rPost->title }}" class="rj-recent-thumb">
                                 @else
-                                    <div class="rj-recent-thumb" style="display:flex;align-items:center;justify-content:center;background:var(--rj-surface);"><svg style="width:20px;height:20px;color:var(--rj-muted);" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></div>
+                                    <div class="rj-recent-thumb" style="display:flex;align-items:center;justify-content:center;"><svg style="width:28px;height:28px;color:rgba(255,255,255,.5);" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></div>
                                 @endif
                                 <div class="rj-recent-info">
+                                    @if($rPost->published_at)
+                                        <span class="rj-recent-date">
+                                            <svg fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 2"/></svg>
+                                            {{ $rPost->published_at->format('F j, Y') }}
+                                        </span>
+                                    @endif
                                     <a href="{{ $rPost->public_url }}" class="rj-recent-title">{{ $rPost->title }}</a>
-                                    <span class="rj-recent-date">{{ $rPost->published_at ? $rPost->published_at->format('M d, Y') : '' }}</span>
                                 </div>
                             </li>
                         @endforeach
@@ -451,7 +526,7 @@
                 <div class="rj-archive-empty">
                     <h2>{{ __('Nothing here yet') }}</h2>
                     <p>{{ __('No posts found. Try searching for something else.') }}</p>
-                    <a href="{{ $blogUrl }}" style="color:var(--rj-primary);text-decoration:underline;">{{ __('Clear Search') }}</a>
+                    <a href="{{ $blogUrl }}" style="color:#2f6bff;text-decoration:underline;">{{ __('Clear Search') }}</a>
                 </div>
             @endif
         </div>
