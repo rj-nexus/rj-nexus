@@ -38,7 +38,7 @@ class SpotlightActionGridWidget extends BaseWidget
                 'name' => 'main_title',
                 'type' => 'text',
                 'label' => __('Main Title'),
-                'default' => "Main Title",
+                'default' => "We'd love to hear from you.",
             ],
             [
                 'name' => 'items',
@@ -47,24 +47,24 @@ class SpotlightActionGridWidget extends BaseWidget
                 'max_items' => 4,
                 'default' => [
                     [
-                        'icon' => 'ph:star',
-                        'title' => 'Item 1',
-                        'desc' => 'Description goes here.',
-                        'btn_text' => 'Button 1',
+                        'icon' => 'ph:presentation-chart',
+                        'title' => 'Request a Demo',
+                        'desc' => 'Schedule a personalized walkthrough to see how our solution fits your needs.',
+                        'btn_text' => 'Book Demo',
                         'btn_url' => '#',
                     ],
                     [
-                        'icon' => 'ph:star',
-                        'title' => 'Item 2',
-                        'desc' => 'Description goes here.',
-                        'btn_text' => 'Button 2',
+                        'icon' => 'ph:chat-teardrop-dots',
+                        'title' => 'Customer Support',
+                        'desc' => 'Our dedicated team is available around the clock to assist you.',
+                        'btn_text' => 'Start Chat',
                         'btn_url' => '#',
                     ],
                     [
-                        'icon' => 'ph:star',
-                        'title' => 'Item 3',
-                        'desc' => 'Description goes here.',
-                        'btn_text' => 'Button 3',
+                        'icon' => 'ph:handshake',
+                        'title' => 'Partnership',
+                        'desc' => 'Interested in collaborating? Let us discuss how we can grow together.',
+                        'btn_text' => 'Contact Sales',
                         'btn_url' => '#',
                     ],
                 ],
@@ -76,7 +76,7 @@ class SpotlightActionGridWidget extends BaseWidget
                         'default' => 'ph:star',
                         'help' => 'e.g. ph:rocket-launch, ph:cpu.',
                         'help_link' => 'https://iconify.design/',
-                        'help_link_text' => __('Browse Icons on Iconify →')
+                        'help_link_text' => __('Browse Icons on Iconify ->')
                     ],
                     [
                         'name' => 'title',
