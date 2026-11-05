@@ -38,14 +38,7 @@
 
     <div class="rj-anf-inner">
 
-        @if($badge)
-            <div class="rj-anf-badge rj-anf-reveal" style="--i:0;">
-                <span class="rj-anf-dot"></span>
-                <span class="rj-anf-badge-t">{{ $badge }}</span>
-            </div>
-        @endif
-
-        <div class="rj-anf-stage-wrap rj-anf-reveal" style="--i:1;">
+        <div class="rj-anf-stage-wrap rj-anf-reveal" style="--i:0;">
             <div class="rj-anf-stage">
                 <span class="rj-anf-glow"></span>
                 <span class="rj-anf-ring" style="--sz:92%;"></span>
@@ -71,32 +64,39 @@
             </div>
         </div>
 
-        <span class="rj-anf-beam" aria-hidden="true"></span>
+        <div class="rj-anf-content">
 
-        <div class="rj-anf-text">
-            @if($title)
-                <h2 class="rj-anf-title rj-anf-reveal" style="--i:2;">{{ $title }}</h2>
+            @if($badge)
+                <div class="rj-anf-badge rj-anf-reveal" style="--i:1;">
+                    <span class="rj-anf-dot"></span>
+                    <span class="rj-anf-badge-t">{{ $badge }}</span>
+                </div>
             @endif
-            @if($subtitle)
-                <p class="rj-anf-sub rj-anf-reveal" style="--i:3;">{{ $subtitle }}</p>
-            @endif
-        </div>
 
-        @if(!empty($features))
-            <div class="rj-anf-grid">
-                @foreach($features as $i => $item)
-                    <article class="rj-anf-card rj-anf-reveal" style="--i: {{ $i }};">
-                        <span class="rj-anf-num">{{ sprintf('%02d', $i + 1) }}</span>
-                        <div class="rj-anf-icon">
-                            <iconify-icon icon="{{ $item['icon'] ?? 'ph:sparkle' }}"></iconify-icon>
-                        </div>
-                        <h3 class="rj-anf-card-title">{{ $item['feature_title'] ?? '' }}</h3>
-                        <p class="rj-anf-card-desc">{{ $item['feature_text'] ?? '' }}</p>
-                        <span class="rj-anf-card-line"></span>
-                    </article>
-                @endforeach
+            <div class="rj-anf-text">
+                @if($title)
+                    <h2 class="rj-anf-title rj-anf-reveal" style="--i:2;">{{ $title }}</h2>
+                @endif
+                @if($subtitle)
+                    <p class="rj-anf-sub rj-anf-reveal" style="--i:3;">{{ $subtitle }}</p>
+                @endif
             </div>
-        @endif
+
+            @if(!empty($features))
+                <div class="rj-anf-grid">
+                    @foreach($features as $i => $item)
+                        <article class="rj-anf-card rj-anf-reveal" style="--i: {{ $i + 2 }};">
+                            <div class="rj-anf-icon">
+                                <iconify-icon icon="{{ $item['icon'] ?? 'ph:sparkle' }}"></iconify-icon>
+                            </div>
+                            <h3 class="rj-anf-card-title">{{ $item['feature_title'] ?? '' }}</h3>
+                            <p class="rj-anf-card-desc">{{ $item['feature_text'] ?? '' }}</p>
+                        </article>
+                    @endforeach
+                </div>
+            @endif
+
+        </div>
 
     </div>
 
@@ -114,17 +114,24 @@
             position: relative;
             width: 100%;
             background: transparent;
-            padding: 140px 24px 150px;
+            padding: 48px 24px;
             overflow: hidden;
             isolation: isolate;
+            contain: paint;
         }
 
         #{{ $uid }} .rj-anf-bg {
             position: absolute;
-            inset: 0;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: min(100%, var(--rj-container));
+            transform: translateX(-50%);
             z-index: 0;
             pointer-events: none;
             overflow: hidden;
+            -webkit-mask-image: radial-gradient(ellipse 85% 95% at 50% 50%, #000 35%, transparent 100%);
+            mask-image: radial-gradient(ellipse 85% 95% at 50% 50%, #000 35%, transparent 100%);
         }
         #{{ $uid }} .rj-anf-grid-bg {
             position: absolute;
@@ -132,29 +139,27 @@
             background-image:
                 linear-gradient(rgba(255, 255, 255, .045) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(255, 255, 255, .045) 1px, transparent 1px);
-            background-size: 64px 64px;
-            -webkit-mask-image: radial-gradient(ellipse 75% 60% at 50% 30%, #000 15%, transparent 75%);
-            mask-image: radial-gradient(ellipse 75% 60% at 50% 30%, #000 15%, transparent 75%);
+            background-size: 48px 48px;
             animation: rjAnfGridDrift 14s linear infinite;
         }
         #{{ $uid }} .rj-anf-blob {
             position: absolute;
-            width: min(780px, 90vw);
+            width: min(380px, 55%);
             aspect-ratio: 1;
             border-radius: 50%;
             mix-blend-mode: screen;
         }
         #{{ $uid }} .rj-anf-blob-a {
-            top: -18%;
-            left: -14%;
+            top: 12%;
+            left: 6%;
             background: radial-gradient(circle, rgba(59, 130, 246, .26), transparent 65%);
-            animation: rjAnfDriftA 22s ease-in-out infinite alternate;
+            animation: rjAnfDriftA 18s ease-in-out infinite alternate;
         }
         #{{ $uid }} .rj-anf-blob-b {
-            bottom: -26%;
-            right: -16%;
+            bottom: 12%;
+            right: 6%;
             background: radial-gradient(circle, rgba(139, 92, 246, .22), transparent 65%);
-            animation: rjAnfDriftB 26s ease-in-out infinite alternate;
+            animation: rjAnfDriftB 22s ease-in-out infinite alternate;
         }
 
         #{{ $uid }} .rj-anf-inner {
@@ -162,24 +167,32 @@
             z-index: 1;
             max-width: var(--rj-container);
             margin: 0 auto;
-            display: flex;
-            flex-direction: column;
+            display: grid;
+            grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
+            gap: 56px;
             align-items: center;
         }
 
         #{{ $uid }}.rj-anf-ready .rj-anf-reveal:not(.is-in) { opacity: 0; }
         #{{ $uid }} .rj-anf-reveal.is-in {
-            animation: rjAnfReveal .9s cubic-bezier(.2, .7, .2, 1) backwards;
-            animation-delay: calc(var(--i, 0) * 90ms);
+            animation: rjAnfReveal .8s cubic-bezier(.2, .7, .2, 1) backwards;
+            animation-delay: calc(var(--i, 0) * 80ms);
+        }
+
+        #{{ $uid }} .rj-anf-content {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            min-width: 0;
         }
 
         #{{ $uid }} .rj-anf-badge {
             position: relative;
             display: inline-flex;
             align-items: center;
-            gap: 12px;
-            padding: 9px 18px 9px 14px;
-            margin-bottom: 40px;
+            gap: 10px;
+            padding: 7px 16px 7px 12px;
+            margin-bottom: 18px;
             border-radius: 999px;
             background: rgba(255, 255, 255, .05);
             border: 1px solid rgba(255, 255, 255, .12);
@@ -200,11 +213,11 @@
         }
         #{{ $uid }} .rj-anf-dot {
             position: relative;
-            width: 8px;
-            height: 8px;
+            width: 7px;
+            height: 7px;
             border-radius: 50%;
             background: var(--a3);
-            box-shadow: 0 0 12px var(--a3);
+            box-shadow: 0 0 10px var(--a3);
         }
         #{{ $uid }} .rj-anf-dot::after {
             content: '';
@@ -216,15 +229,17 @@
         }
         #{{ $uid }} .rj-anf-badge-t {
             font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-            font-size: 11px;
+            font-size: 10.5px;
             font-weight: 600;
-            letter-spacing: .18em;
+            letter-spacing: .16em;
             color: rgba(255, 255, 255, .78);
             text-transform: uppercase;
         }
 
         #{{ $uid }} .rj-anf-stage-wrap {
-            width: min(460px, 84vw);
+            width: 100%;
+            max-width: 340px;
+            justify-self: center;
             perspective: 1100px;
         }
         #{{ $uid }} .rj-anf-stage {
@@ -298,9 +313,9 @@
             position: absolute;
             top: 0;
             left: 50%;
-            width: 48px;
-            height: 48px;
-            margin: -24px 0 0 -24px;
+            width: 42px;
+            height: 42px;
+            margin: -21px 0 0 -21px;
         }
         #{{ $uid }} .rj-anf-node-i {
             position: relative;
@@ -308,12 +323,12 @@
             height: 100%;
             display: grid;
             place-items: center;
-            border-radius: 16px;
-            font-size: 22px;
+            border-radius: 14px;
+            font-size: 20px;
             color: #bfdbfe;
             background: linear-gradient(145deg, rgba(30, 41, 80, .85), rgba(10, 14, 30, .85));
             border: 1px solid rgba(255, 255, 255, .16);
-            box-shadow: 0 10px 28px rgba(0, 0, 0, .45), 0 0 24px rgba(59, 130, 246, .28), inset 0 1px 0 rgba(255, 255, 255, .18);
+            box-shadow: 0 8px 22px rgba(0, 0, 0, .45), 0 0 20px rgba(59, 130, 246, .28), inset 0 1px 0 rgba(255, 255, 255, .18);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             pointer-events: auto;
@@ -326,22 +341,22 @@
         #{{ $uid }} .rj-anf-node-i:hover {
             color: #fff;
             z-index: 6;
-            box-shadow: 0 10px 28px rgba(0, 0, 0, .45), 0 0 34px rgba(34, 211, 238, .55), inset 0 1px 0 rgba(255, 255, 255, .25);
+            box-shadow: 0 8px 22px rgba(0, 0, 0, .45), 0 0 30px rgba(34, 211, 238, .55), inset 0 1px 0 rgba(255, 255, 255, .25);
         }
         #{{ $uid }} .rj-anf-node-i::after {
             content: attr(data-label);
             position: absolute;
-            top: calc(100% + 10px);
+            top: calc(100% + 8px);
             left: 50%;
             transform: translate(-50%, 4px);
             white-space: nowrap;
-            padding: 6px 11px;
-            border-radius: 9px;
+            padding: 5px 10px;
+            border-radius: 8px;
             font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-            font-size: 11px;
+            font-size: 10.5px;
             letter-spacing: .04em;
             color: #e5e7eb;
-            background: rgba(8, 10, 22, .92);
+            background: rgba(8, 10, 22, .94);
             border: 1px solid rgba(255, 255, 255, .14);
             opacity: 0;
             pointer-events: none;
@@ -359,22 +374,22 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 112px;
-            height: 112px;
-            margin: -56px 0 0 -56px;
+            width: 92px;
+            height: 92px;
+            margin: -46px 0 0 -46px;
             display: grid;
             place-items: center;
-            border-radius: 34px;
-            font-size: 46px;
+            border-radius: 28px;
+            font-size: 38px;
             color: #fff;
             background: linear-gradient(145deg, rgba(255, 255, 255, .16), rgba(255, 255, 255, .03));
             border: 1px solid rgba(255, 255, 255, .16);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), 0 0 70px rgba(59, 130, 246, .4), 0 24px 50px rgba(0, 0, 0, .5);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), 0 0 60px rgba(59, 130, 246, .4), 0 20px 40px rgba(0, 0, 0, .5);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             animation: rjAnfFloat 6s ease-in-out infinite;
         }
-        #{{ $uid }} .rj-anf-core iconify-icon { position: relative; z-index: 2; filter: drop-shadow(0 0 14px rgba(147, 197, 253, .8)); }
+        #{{ $uid }} .rj-anf-core iconify-icon { position: relative; z-index: 2; filter: drop-shadow(0 0 12px rgba(147, 197, 253, .8)); }
         #{{ $uid }} .rj-anf-core::before {
             content: '';
             position: absolute;
@@ -391,42 +406,22 @@
         #{{ $uid }} .rj-anf-pulse {
             position: absolute;
             inset: 0;
-            border-radius: 34px;
+            border-radius: 28px;
             border: 1px solid rgba(96, 165, 250, .55);
             animation: rjAnfRipple 4s ease-out infinite;
             pointer-events: none;
         }
 
-        #{{ $uid }} .rj-anf-beam {
-            position: relative;
-            display: block;
-            width: 1px;
-            height: 84px;
-            margin: 6px 0 36px;
-            background: linear-gradient(180deg, rgba(59, 130, 246, 0), rgba(99, 102, 241, .45), rgba(34, 211, 238, 0));
-            overflow: hidden;
-        }
-        #{{ $uid }} .rj-anf-beam::after {
-            content: '';
-            position: absolute;
-            left: 0;
-            width: 100%;
-            height: 34px;
-            background: linear-gradient(180deg, transparent, #fff, transparent);
-            animation: rjAnfBeam 2.6s ease-in-out infinite;
-        }
-
         #{{ $uid }} .rj-anf-text {
-            text-align: center;
-            max-width: 780px;
-            margin-bottom: 80px;
+            max-width: 600px;
+            margin-bottom: 26px;
         }
         #{{ $uid }} .rj-anf-title {
-            font-size: clamp(34px, 5.2vw, 60px);
+            font-size: clamp(26px, 3.2vw, 40px);
             font-weight: 600;
-            line-height: 1.06;
-            letter-spacing: -.035em;
-            margin: 0 0 22px;
+            line-height: 1.1;
+            letter-spacing: -.03em;
+            margin: 0 0 12px;
             color: transparent;
             background: linear-gradient(110deg, #fff 25%, #93c5fd 40%, #c4b5fd 50%, #67e8f9 60%, #fff 75%);
             background-size: 250% 100%;
@@ -435,39 +430,43 @@
             animation: rjAnfTitle 9s ease-in-out infinite alternate;
         }
         #{{ $uid }} .rj-anf-title.is-in {
-            animation: rjAnfReveal .9s cubic-bezier(.2, .7, .2, 1) backwards, rjAnfTitle 9s ease-in-out .9s infinite alternate;
-            animation-delay: calc(var(--i, 0) * 90ms), 0s;
+            animation: rjAnfReveal .8s cubic-bezier(.2, .7, .2, 1) backwards, rjAnfTitle 9s ease-in-out .8s infinite alternate;
+            animation-delay: calc(var(--i, 0) * 80ms), 0s;
         }
         #{{ $uid }} .rj-anf-sub {
-            font-size: clamp(16px, 2vw, 19px);
-            line-height: 1.7;
+            font-size: 15px;
+            line-height: 1.65;
             color: var(--rj-muted);
-            margin: 0 auto;
-            max-width: 620px;
+            margin: 0;
         }
 
         #{{ $uid }} .rj-anf-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 22px;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
             width: 100%;
         }
         #{{ $uid }} .rj-anf-card {
             position: relative;
             isolation: isolate;
-            padding: 34px 30px 30px;
-            border-radius: 26px;
+            display: grid;
+            grid-template-columns: 44px minmax(0, 1fr);
+            column-gap: 14px;
+            row-gap: 3px;
+            align-items: start;
+            padding: 15px 18px;
+            border-radius: 18px;
             background: linear-gradient(160deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .015));
             border: 1px solid rgba(255, 255, 255, .09);
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1);
             backdrop-filter: blur(18px);
             -webkit-backdrop-filter: blur(18px);
-            transition: translate .45s cubic-bezier(.2, .7, .2, 1), background .4s, box-shadow .4s;
+            transition: translate .4s cubic-bezier(.2, .7, .2, 1), background .4s, box-shadow .4s;
         }
         #{{ $uid }} .rj-anf-card:hover {
-            translate: 0 -8px;
+            translate: 0 -3px;
             background: linear-gradient(160deg, rgba(255, 255, 255, .09), rgba(255, 255, 255, .025));
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16), 0 30px 60px rgba(0, 0, 0, .4), 0 0 50px rgba(59, 130, 246, .12);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16), 0 16px 34px rgba(0, 0, 0, .4), 0 0 36px rgba(59, 130, 246, .12);
         }
         #{{ $uid }} .rj-anf-card::before {
             content: '';
@@ -491,7 +490,7 @@
             position: absolute;
             inset: 0;
             border-radius: inherit;
-            background: radial-gradient(380px circle at var(--mx, 50%) var(--my, 0%), rgba(99, 102, 241, .18), transparent 62%);
+            background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 0%), rgba(99, 102, 241, .18), transparent 62%);
             opacity: 0;
             transition: opacity .4s;
             pointer-events: none;
@@ -499,31 +498,18 @@
         }
         #{{ $uid }} .rj-anf-card:hover::after { opacity: 1; }
 
-        #{{ $uid }} .rj-anf-num {
-            position: absolute;
-            top: 28px;
-            right: 30px;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-            font-size: 12px;
-            letter-spacing: .12em;
-            color: rgba(255, 255, 255, .28);
-            transition: color .3s;
-        }
-        #{{ $uid }} .rj-anf-card:hover .rj-anf-num { color: var(--a3); }
-
         #{{ $uid }} .rj-anf-icon,
         #{{ $uid }} .rj-anf-card-title,
-        #{{ $uid }} .rj-anf-card-desc,
-        #{{ $uid }} .rj-anf-card-line { position: relative; z-index: 1; }
+        #{{ $uid }} .rj-anf-card-desc { position: relative; z-index: 1; }
 
         #{{ $uid }} .rj-anf-icon {
+            grid-row: 1 / span 2;
             display: grid;
             place-items: center;
-            width: 56px;
-            height: 56px;
-            margin-bottom: 26px;
-            border-radius: 18px;
-            font-size: 28px;
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            font-size: 22px;
             color: #93c5fd;
             background: linear-gradient(145deg, rgba(59, 130, 246, .24), rgba(99, 102, 241, .06));
             border: 1px solid rgba(129, 140, 248, .3);
@@ -532,35 +518,30 @@
         }
         #{{ $uid }} .rj-anf-card:hover .rj-anf-icon {
             color: #fff;
-            transform: scale(1.08) rotate(-4deg);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .2), 0 0 32px rgba(59, 130, 246, .5);
+            transform: scale(1.06) rotate(-4deg);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .2), 0 0 26px rgba(59, 130, 246, .5);
         }
         #{{ $uid }} .rj-anf-card-title {
-            font-size: 19px;
+            font-size: 15px;
             font-weight: 600;
-            letter-spacing: -.015em;
+            letter-spacing: -.01em;
             color: #fff;
-            margin: 0 0 12px;
+            margin: 0;
+            line-height: 1.3;
         }
         #{{ $uid }} .rj-anf-card-desc {
-            font-size: 15px;
-            line-height: 1.7;
+            font-size: 13px;
+            line-height: 1.5;
             color: var(--rj-muted);
             margin: 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
-        #{{ $uid }} .rj-anf-card-line {
-            display: block;
-            width: 0;
-            height: 2px;
-            margin-top: 26px;
-            border-radius: 2px;
-            background: linear-gradient(90deg, var(--a1), var(--a3));
-            transition: width .5s cubic-bezier(.2, .7, .2, 1);
-        }
-        #{{ $uid }} .rj-anf-card:hover .rj-anf-card-line { width: 64px; }
 
         @keyframes rjAnfReveal {
-            from { opacity: 0; transform: translateY(28px); filter: blur(8px); }
+            from { opacity: 0; transform: translateY(18px); filter: blur(6px); }
             to { opacity: 1; transform: none; filter: blur(0); }
         }
         @keyframes rjAnfSpin { to { transform: rotate(360deg); } }
@@ -568,15 +549,15 @@
         @keyframes rjAnfAngle { to { --rj-anf-angle: 360deg; } }
         @keyframes rjAnfFloat {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+            50% { transform: translateY(-7px); }
         }
         @keyframes rjAnfBreathe {
-            from { transform: scale(.88); opacity: .6; }
-            to { transform: scale(1.12); opacity: 1; }
+            from { transform: scale(.9); opacity: .6; }
+            to { transform: scale(1.08); opacity: 1; }
         }
         @keyframes rjAnfRipple {
             from { transform: scale(1); opacity: .6; }
-            to { transform: scale(2.7); opacity: 0; }
+            to { transform: scale(2.4); opacity: 0; }
         }
         @keyframes rjAnfPing {
             from { transform: scale(1); opacity: .9; }
@@ -586,40 +567,38 @@
             0%, 55% { left: -60%; }
             100% { left: 130%; }
         }
-        @keyframes rjAnfBeam {
-            from { top: -40px; }
-            to { top: 100%; }
-        }
         @keyframes rjAnfTitle {
             from { background-position: 0% 50%; }
             to { background-position: 100% 50%; }
         }
         @keyframes rjAnfGridDrift {
             from { background-position: 0 0; }
-            to { background-position: 64px 64px; }
+            to { background-position: 48px 48px; }
         }
         @keyframes rjAnfDriftA {
             from { transform: translate(0, 0) scale(1); }
-            to { transform: translate(120px, 70px) scale(1.15); }
+            to { transform: translate(40px, 24px) scale(1.1); }
         }
         @keyframes rjAnfDriftB {
-            from { transform: translate(0, 0) scale(1.1); }
-            to { transform: translate(-110px, -60px) scale(.95); }
+            from { transform: translate(0, 0) scale(1.05); }
+            to { transform: translate(-36px, -20px) scale(.95); }
         }
 
-        @media (max-width: 968px) {
-            #{{ $uid }}.rj-anf-section { padding: 110px 24px 120px; }
-            #{{ $uid }} .rj-anf-grid { grid-template-columns: repeat(2, 1fr); }
+        @media (max-width: 860px) {
+            #{{ $uid }}.rj-anf-section { padding: 40px 20px; }
+            #{{ $uid }} .rj-anf-inner { grid-template-columns: 1fr; gap: 32px; }
+            #{{ $uid }} .rj-anf-stage-wrap { max-width: 280px; }
+            #{{ $uid }} .rj-anf-content { align-items: center; text-align: center; }
+            #{{ $uid }} .rj-anf-text { margin-left: auto; margin-right: auto; }
+            #{{ $uid }} .rj-anf-card { text-align: left; }
         }
-        @media (max-width: 640px) {
-            #{{ $uid }}.rj-anf-section { padding: 80px 20px 90px; }
-            #{{ $uid }} .rj-anf-grid { grid-template-columns: 1fr; gap: 18px; }
-            #{{ $uid }} .rj-anf-text { margin-bottom: 56px; }
-            #{{ $uid }} .rj-anf-node { width: 40px; height: 40px; margin: -20px 0 0 -20px; }
-            #{{ $uid }} .rj-anf-node-i { font-size: 19px; border-radius: 13px; }
-            #{{ $uid }} .rj-anf-core { width: 88px; height: 88px; margin: -44px 0 0 -44px; font-size: 36px; border-radius: 28px; }
-            #{{ $uid }} .rj-anf-pulse { border-radius: 28px; }
-            #{{ $uid }} .rj-anf-card { padding: 28px 24px 26px; }
+        @media (max-width: 560px) {
+            #{{ $uid }} .rj-anf-grid { grid-template-columns: 1fr; }
+            #{{ $uid }} .rj-anf-stage-wrap { max-width: 240px; }
+            #{{ $uid }} .rj-anf-node { width: 36px; height: 36px; margin: -18px 0 0 -18px; }
+            #{{ $uid }} .rj-anf-node-i { font-size: 17px; border-radius: 12px; }
+            #{{ $uid }} .rj-anf-core { width: 72px; height: 72px; margin: -36px 0 0 -36px; font-size: 30px; border-radius: 22px; }
+            #{{ $uid }} .rj-anf-pulse { border-radius: 22px; }
         }
         @media (prefers-reduced-motion: reduce) {
             #{{ $uid }} *,
@@ -649,7 +628,7 @@
                             io.unobserve(entry.target);
                         }
                     });
-                }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+                }, { threshold: 0.15 });
                 items.forEach(function (el) { io.observe(el); });
             }
 
@@ -671,8 +650,8 @@
                         var r = root.getBoundingClientRect();
                         var x = (e.clientX - r.left) / r.width - 0.5;
                         var y = (e.clientY - r.top) / r.height - 0.5;
-                        stage.style.setProperty('--rj-anf-rx', (x * 10).toFixed(2) + 'deg');
-                        stage.style.setProperty('--rj-anf-ry', (-y * 8).toFixed(2) + 'deg');
+                        stage.style.setProperty('--rj-anf-rx', (x * 6).toFixed(2) + 'deg');
+                        stage.style.setProperty('--rj-anf-ry', (-y * 5).toFixed(2) + 'deg');
                     });
                 });
                 root.addEventListener('pointerleave', function () {
