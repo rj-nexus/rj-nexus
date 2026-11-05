@@ -52,30 +52,19 @@ class SpotlightActionGridWidget extends BaseWidget
                         'title' => 'Request a Demo',
                         'desc' => 'Schedule a personalized walkthrough to see how our solution fits your needs.',
 =======
-<<<<<<< HEAD
-                        'icon' => 'ph:presentation-chart',
-                        'title' => 'Request a Demo',
-                        'desc' => 'Schedule a personalized walkthrough to see how our solution fits your needs.',
-=======
                         'icon' => 'ph:gear-six',
                         'title' => 'Request Demo',
                         'desc' => 'Schedule a personalized demo to see RJ Nexus in action.',
 >>>>>>> 88a78bbec7968caaa32e93f7ae4c4baa0f863c9d
->>>>>>> e24e31ee674847c9f1a29f3c3e8f3fa88c22d693
                         'btn_text' => 'Book Demo',
                         'btn_url' => '#',
                     ],
                     [
 <<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> e24e31ee674847c9f1a29f3c3e8f3fa88c22d693
                         'icon' => 'ph:chat-teardrop-dots',
                         'title' => 'Customer Support',
                         'desc' => 'Our dedicated team is available around the clock to assist you.',
                         'btn_text' => 'Start Chat',
-<<<<<<< HEAD
-=======
                         'btn_url' => '#',
                     ],
                     [
@@ -88,34 +77,20 @@ class SpotlightActionGridWidget extends BaseWidget
                         'title' => 'Online Support',
                         'desc' => 'Get help from our support team 24/7.',
                         'btn_text' => 'Chat Now',
->>>>>>> e24e31ee674847c9f1a29f3c3e8f3fa88c22d693
                         'btn_url' => '#',
                     ],
                     [
-                        'icon' => 'ph:handshake',
+                        'icon' => 'ph:users-three',
                         'title' => 'Partnership',
-<<<<<<< HEAD
-                        'desc' => 'Interested in collaborating? Let us discuss how we can grow together.',
-                        'btn_text' => 'Contact Sales',
-=======
                         'desc' => "Interested in partnering with us? Let's talk.",
                         'btn_text' => 'Contact Us',
 >>>>>>> 88a78bbec7968caaa32e93f7ae4c4baa0f863c9d
->>>>>>> e24e31ee674847c9f1a29f3c3e8f3fa88c22d693
                         'btn_url' => '#',
                     ],
                 ],
                 'fields' => [
                     [
                         'name' => 'icon',
-<<<<<<< HEAD
-                        'type' => 'icon',
-                        'label' => __('Icon'),
-                        'default' => 'ph:star',
-                        'help' => 'e.g. ph:rocket-launch, ph:cpu.',
-                        'help_link' => 'https://iconify.design/',
-                        'help_link_text' => __('Browse Icons on Iconify ->')
-=======
 <<<<<<< HEAD
                         'type' => 'icon',
                         'label' => __('Icon'),
@@ -142,7 +117,6 @@ class SpotlightActionGridWidget extends BaseWidget
                             'ph:globe' => 'Globe / Web',
                         ],
 >>>>>>> 88a78bbec7968caaa32e93f7ae4c4baa0f863c9d
->>>>>>> e24e31ee674847c9f1a29f3c3e8f3fa88c22d693
                     ],
                     [
                         'name' => 'title',
