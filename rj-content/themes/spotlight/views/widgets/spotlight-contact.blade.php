@@ -52,7 +52,7 @@
                                 @php
                                     $isTextarea = $field->type === 'textarea';
                                     $isCheckbox = $field->type === 'checkbox';
-                                    $isFull = $isTextarea || $isCheckbox; // Textarea və Checkbox həmişə tam en tutur
+                                    $isFull = $isTextarea || $isCheckbox;
 
                                     $fieldClass = $isFull ? 'rj-form-col-full' : 'rj-form-col-half';
                                     $inputType = in_array($field->type, ['text', 'email', 'tel', 'url', 'number']) ? $field->type : 'text';
@@ -136,10 +136,11 @@
     </div>
 
     <style>
+        /* Ümumi Bölmə */
         #{{ $uid }}.rj-contact-section {
             position: relative;
             z-index: 1;
-            padding: 100px 24px;
+            padding: 120px 24px;
             background: transparent;
         }
 
@@ -151,32 +152,32 @@
         #{{ $uid }} .rj-contact-grid {
             display: grid;
             grid-template-columns: 1fr 1.2fr;
-            gap: 80px;
+            gap: 100px;
             align-items: start;
         }
 
         /* Sol tərəf (Məlumatlar) */
         #{{ $uid }} .rj-contact-title {
-            font-size: clamp(36px, 4vw, 52px);
+            font-size: clamp(40px, 4vw, 56px);
             font-weight: 500;
             color: #fff;
-            margin: 0 0 56px;
-            letter-spacing: -0.03em;
+            margin: 0 0 64px;
+            letter-spacing: -0.04em;
             line-height: 1.1;
         }
 
         #{{ $uid }} .rj-contact-info-list {
             display: flex;
             flex-direction: column;
-            gap: 36px;
+            gap: 40px;
         }
 
         #{{ $uid }} .rj-contact-info-item {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 14px;
             padding-bottom: 32px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         #{{ $uid }} .rj-contact-info-item:last-child {
@@ -187,7 +188,8 @@
         #{{ $uid }} .rj-contact-label {
             font-size: 14px;
             color: rgba(255, 255, 255, 0.5);
-            font-weight: 500;
+            font-weight: 400;
+            letter-spacing: 0.02em;
         }
 
         #{{ $uid }} .rj-contact-value {
@@ -196,17 +198,18 @@
             font-weight: 500;
             line-height: 1.4;
             text-decoration: none;
+            letter-spacing: -0.02em;
         }
 
         #{{ $uid }} .rj-contact-link {
-            transition: color 0.2s;
+            transition: color 0.3s;
         }
 
         #{{ $uid }} .rj-contact-link:hover {
-            color: var(--rj-primary);
+            color: #3b82f6;
         }
 
-        /* Sağ tərəf (Form Dizaynı) */
+        /* Sağ tərəf (Glassmorphism Form) */
         #{{ $uid }} .rj-custom-form {
             display: flex;
             flex-direction: column;
@@ -216,7 +219,7 @@
         #{{ $uid }} .rj-form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            gap: 24px;
         }
 
         #{{ $uid }} .rj-form-col-half {
@@ -230,49 +233,61 @@
         #{{ $uid }} .rj-form-group {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
         }
 
         #{{ $uid }} .rj-form-label {
             font-size: 14px;
-            color: #fff;
+            color: rgba(255, 255, 255, 0.8);
             font-weight: 500;
+            margin-left: 2px;
         }
 
         #{{ $uid }} .rj-req {
-            color: #ef4444;
+            color: #3b82f6;
         }
 
+        /* Şüşə Effektli Inputlar */
         #{{ $uid }} .rj-form-input {
             width: 100%;
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 8px;
-            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 18px 20px;
             color: #fff;
             font-size: 15px;
-            transition: all 0.2s;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
         }
 
         #{{ $uid }} .rj-form-input::placeholder {
-            color: rgba(255, 255, 255, 0.3);
+            color: rgba(255, 255, 255, 0.25);
+        }
+
+        #{{ $uid }} .rj-form-input:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.2);
         }
 
         #{{ $uid }} .rj-form-input:focus {
             outline: none;
+            background: rgba(255, 255, 255, 0.05);
             border-color: #3b82f6;
-            background: rgba(255, 255, 255, 0.02);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15), inset 0 1px 0 rgba(255,255,255,0.05);
         }
 
         #{{ $uid }} .rj-form-textarea {
             resize: vertical;
-            min-height: 120px;
+            min-height: 140px;
         }
 
+        /* Checkbox */
         #{{ $uid }} .rj-form-checkbox-wrap {
             display: flex;
             align-items: flex-start;
-            gap: 10px;
+            gap: 12px;
             cursor: pointer;
             margin-top: 8px;
         }
@@ -280,85 +295,101 @@
         #{{ $uid }} .rj-form-checkbox-wrap input {
             margin-top: 4px;
             accent-color: #3b82f6;
-            width: 16px;
-            height: 16px;
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
         }
 
         #{{ $uid }} .rj-form-checkbox-text {
             font-size: 14px;
-            color: rgba(255, 255, 255, 0.7);
+            color: rgba(255, 255, 255, 0.6);
             line-height: 1.5;
         }
 
         #{{ $uid }} .rj-form-help {
             font-size: 12px;
-            color: rgba(255, 255, 255, 0.4);
+            color: rgba(255, 255, 255, 0.3);
+            margin-left: 2px;
         }
 
+        /* Düymə */
         #{{ $uid }} .rj-form-actions {
-            margin-top: 10px;
+            margin-top: 16px;
         }
 
         #{{ $uid }} .rj-form-submit {
             background: #3b82f6;
             color: #fff;
             border: none;
-            padding: 14px 32px;
-            border-radius: 8px;
-            font-size: 15px;
+            padding: 18px 40px;
+            border-radius: 12px;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.2s, transform 0.2s;
+            transition: all 0.3s ease;
             width: max-content;
+            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
         }
 
         #{{ $uid }} .rj-form-submit:hover {
             background: #2563eb;
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        #{{ $uid }} .rj-form-submit:active {
+            transform: translateY(0);
         }
 
         #{{ $uid }} .rj-form-alert {
-            padding: 12px 16px;
-            border-radius: 8px;
+            padding: 14px 18px;
+            border-radius: 12px;
             font-size: 14px;
             background: rgba(239, 68, 68, 0.1);
             border: 1px solid rgba(239, 68, 68, 0.3);
             color: #fca5a5;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+            backdrop-filter: blur(8px);
         }
 
         /* Fallback Box */
         #{{ $uid }} .rj-contact-fallback {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px dashed rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px dashed rgba(255, 255, 255, 0.15);
             border-radius: 24px;
-            padding: 48px;
+            padding: 56px;
             text-align: center;
             display: flex;
             flex-direction: column;
             align-items: center;
+            backdrop-filter: blur(12px);
         }
 
-        #{{ $uid }} .rj-fallback-icon { width: 48px; height: 48px; color: #f59e0b; margin-bottom: 24px; }
+        #{{ $uid }} .rj-fallback-icon { width: 48px; height: 48px; color: #3b82f6; margin-bottom: 24px; }
         #{{ $uid }} .rj-fallback-title { font-size: 20px; font-weight: 600; color: #fff; margin: 0 0 12px; }
-        #{{ $uid }} .rj-fallback-text { font-size: 15px; color: rgba(255, 255, 255, 0.6); line-height: 1.6; margin: 0 0 32px; max-width: 400px; }
+        #{{ $uid }} .rj-fallback-text { font-size: 15px; color: rgba(255, 255, 255, 0.5); line-height: 1.6; margin: 0 0 32px; max-width: 400px; }
         #{{ $uid }} .rj-fallback-links { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
-        #{{ $uid }} .rj-fallback-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 600; text-decoration: none; transition: all 0.2s; }
+        #{{ $uid }} .rj-fallback-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 28px; border-radius: 10px; font-size: 14px; font-weight: 600; text-decoration: none; transition: all 0.2s; }
         #{{ $uid }} .rj-fallback-btn.primary { background: #3b82f6; color: #fff; }
         #{{ $uid }} .rj-fallback-btn.primary:hover { background: #2563eb; }
         #{{ $uid }} .rj-fallback-support { margin-top: 32px; padding-top: 24px; border-top: 1px solid rgba(255, 255, 255, 0.1); font-size: 13px; color: rgba(255, 255, 255, 0.4); display: flex; flex-direction: column; gap: 8px; }
-        #{{ $uid }} .rj-fallback-support a { color: var(--rj-primary); text-decoration: none; }
+        #{{ $uid }} .rj-fallback-support a { color: #3b82f6; text-decoration: none; }
         #{{ $uid }} .rj-fallback-support a:hover { text-decoration: underline; }
 
+        @media (max-width: 1024px) {
+            #{{ $uid }} .rj-contact-grid { gap: 60px; }
+        }
+
         @media (max-width: 968px) {
-            #{{ $uid }}.rj-contact-section { padding: 64px 24px; }
-            #{{ $uid }} .rj-contact-grid { grid-template-columns: 1fr; gap: 60px; }
-            #{{ $uid }} .rj-contact-title { margin-bottom: 40px; }
+            #{{ $uid }}.rj-contact-section { padding: 80px 24px; }
+            #{{ $uid }} .rj-contact-grid { grid-template-columns: 1fr; gap: 64px; }
+            #{{ $uid }} .rj-contact-title { margin-bottom: 48px; }
         }
 
         @media (max-width: 640px) {
             #{{ $uid }} .rj-form-row { grid-template-columns: 1fr; }
             #{{ $uid }} .rj-form-submit { width: 100%; }
+            #{{ $uid }} .rj-form-input { padding: 16px 18px; }
         }
     </style>
 </section>
