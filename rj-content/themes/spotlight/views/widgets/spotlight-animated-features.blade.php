@@ -474,10 +474,11 @@
         #{{ $uid }} .rj-anf-card-title,
         #{{ $uid }} .rj-anf-card-desc { position: relative; z-index: 1; }
 
-\1            display: flex;
+        #{{ $uid }} .rj-anf-card-title {
+            display: flex;
             align-items: center;
             gap: 10px;
-\2
+            font-size: 15px;
             font-weight: 600;
             letter-spacing: -.01em;
             color: #fff;
