@@ -17,6 +17,7 @@ use Spotlight\Widgets\SpotlightFaqWidget;
 use Spotlight\Widgets\SpotlightNewsletterWidget;
 use Spotlight\Widgets\SpotlightFooterWidget;
 use Spotlight\Widgets\SpotlightTrustpilotWidget;
+use Spotlight\Widgets\SpotlightAnimatedFeaturesWidget;
 
 class SpotlightServiceProvider extends ServiceProvider
 {
@@ -48,6 +49,7 @@ class SpotlightServiceProvider extends ServiceProvider
                     new SpotlightNewsletterWidget(),
                     new SpotlightFooterWidget(),
                     new SpotlightTrustpilotWidget(),
+                    new SpotlightAnimatedFeaturesWidget(),
                 ];
                 return array_merge($existing, $widgets);
             });
