@@ -95,7 +95,9 @@ class SpotlightFeaturesGridWidget extends BaseWidget
                         'type' => 'text',
                         'label' => __('Icon (Iconify Name)'),
                         'default' => 'ph:sparkle',
-                        'help' => 'e.g. ph:rocket-launch, ph:cpu. Find more at iconify.design'
+                        'help' => 'e.g. ph:rocket-launch, ph:cpu.',
+                        'help_link' => 'https://iconify.design/',
+                        'help_link_text' => __('Browse Icons on Iconify →')
                     ],
                     [
                         'name' => 'title',
