@@ -7,18 +7,22 @@
             isolation: isolate;
         }
 
+        /* Video artıq sticky deyil, səhifə ilə birlikdə yuxarı sürüşür */
         .rj-bg-video {
             position: absolute;
-            inset: 0;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
             z-index: 0;
             pointer-events: none;
         }
 
         .rj-bg-video-inner {
-            position: sticky;
-            top: 0;
+            position: absolute;
+            inset: 0;
             width: 100%;
-            height: 100vh;
+            height: 100%;
             overflow: hidden;
         }
 
@@ -29,9 +33,8 @@
             height: 100%;
             object-fit: cover;
             object-position: center center;
-            /* Yüngül blur və tündlük - video özünü göstərsin deyə */
-            filter: grayscale(0.8) brightness(0.7) blur(3px);
-            transform: scale(1.05);
+            /* Video öz təbii gözəlliyini saxlasın deyə blur-u azaltdıq */
+            filter: grayscale(0.6) brightness(0.8) blur(2px);
         }
 
         .rj-bg-video-tint {
@@ -39,19 +42,18 @@
             inset: 0;
             background: #1d4ed8;
             mix-blend-mode: color;
-            opacity: 0.85;
+            opacity: 0.6;
         }
 
-        /* Kəskin xətti yox edən və saytın fon rənginə yumşaq keçid edən qradient */
+        /* Videonun altını tamamilə saytın fonuna çevirən qradient (kəskin xətti yox edir) */
         .rj-bg-video-fade {
             position: absolute;
             inset: 0;
             background: linear-gradient(
                 to bottom,
-                rgba(10, 10, 15, 0.3) 0%,
-                transparent 30%,
-                transparent 60%,
-                var(--rj-bg) 100%
+                rgba(10, 10, 15, 0.2) 0%,
+                transparent 40%,
+                var(--rj-bg) 95%
             );
             z-index: 2;
         }
@@ -73,8 +75,6 @@
         }
 
         .rj-sidebar {
-            position: sticky;
-            top: 100px;
             display: flex;
             flex-direction: column;
             gap: 32px;
@@ -372,9 +372,6 @@
         @media (max-width: 968px) {
             .rj-archive-wrapper {
                 grid-template-columns: 1fr;
-            }
-            .rj-sidebar {
-                position: static;
             }
             .rj-archive-grid[data-cols="3"],
             .rj-archive-grid[data-cols="2"] { grid-template-columns: repeat(2, 1fr); }
