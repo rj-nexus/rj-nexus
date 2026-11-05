@@ -887,9 +887,9 @@ function builder() {
             this.fetchIcons('ph');
         },
 
-        getIconSvg(icon) {
+        getIconSvg(icon, size = 24, color = 'currentColor') {
             if (!icon) return '';
-            return `<iconify-icon icon="${icon}"></iconify-icon>`;
+            return `<iconify-icon icon="${icon}" width="${size}" height="${size}" style="color: ${color};"></iconify-icon>`;
         },
 
         async fetchIcons(query) {
