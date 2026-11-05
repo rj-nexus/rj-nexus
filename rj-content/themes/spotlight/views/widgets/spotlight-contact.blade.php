@@ -77,7 +77,7 @@
                                                       class="rj-form-input rj-form-textarea"
                                                       placeholder="{{ __($field->placeholder) }}"
                                                       {{ $field->is_required ? 'required' : '' }}
-                                                      rows="3">{{ old($field->name) }}</textarea>
+                                                      rows="2">{{ old($field->name) }}</textarea>
                                             <span class="rj-form-bar"></span>
                                         </div>
 
@@ -155,7 +155,7 @@
             --a3: #22d3ee;
             position: relative;
             z-index: 1;
-            padding: 56px 24px;
+            padding: 32px 24px;
             background: transparent;
             overflow: hidden;
             isolation: isolate;
@@ -207,7 +207,7 @@
         #{{ $uid }} .rj-ct-grid {
             display: grid;
             grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
-            gap: 56px;
+            gap: 36px;
             align-items: center;
         }
 
@@ -218,11 +218,11 @@
         }
 
         #{{ $uid }} .rj-ct-title {
-            font-size: clamp(28px, 3.4vw, 44px);
+            font-size: clamp(24px, 2.6vw, 34px);
             font-weight: 600;
             line-height: 1.1;
             letter-spacing: -.035em;
-            margin: 0 0 28px;
+            margin: 0 0 16px;
             color: transparent;
             background: linear-gradient(110deg, #fff 25%, #93c5fd 40%, #c4b5fd 50%, #67e8f9 60%, #fff 75%);
             background-size: 250% 100%;
@@ -238,14 +238,14 @@
         #{{ $uid }} .rj-ct-list {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 8px;
         }
         #{{ $uid }} .rj-ct-item {
             display: flex;
             flex-direction: column;
-            gap: 6px;
-            padding: 16px 20px;
-            border-radius: 18px;
+            gap: 3px;
+            padding: 11px 16px;
+            border-radius: 16px;
             background: linear-gradient(160deg, rgba(255, 255, 255, .07), rgba(255, 255, 255, .02));
             border: 1px solid rgba(255, 255, 255, .09);
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12);
@@ -278,7 +278,7 @@
             animation: rjCtDot 2.4s ease-in-out infinite;
         }
         #{{ $uid }} .rj-ct-value {
-            font-size: clamp(16px, 1.6vw, 19px);
+            font-size: clamp(14px, 1.3vw, 16px);
             font-weight: 500;
             line-height: 1.45;
             letter-spacing: -.015em;
@@ -291,8 +291,8 @@
         #{{ $uid }} .rj-ct-panel {
             position: relative;
             isolation: isolate;
-            padding: 32px;
-            border-radius: 28px;
+            padding: 22px 26px;
+            border-radius: 24px;
             background: linear-gradient(160deg, rgba(255, 255, 255, .09), rgba(255, 255, 255, .025));
             border: 1px solid rgba(255, 255, 255, .09);
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, .16), 0 24px 56px rgba(0, 0, 0, .32);
@@ -335,12 +335,12 @@
             z-index: 1;
             display: flex;
             flex-direction: column;
-            gap: 22px;
+            gap: 14px;
         }
         #{{ $uid }} .rj-form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px 28px;
+            gap: 10px 22px;
         }
         #{{ $uid }} .rj-form-col-half { grid-column: span 1; }
         #{{ $uid }} .rj-form-col-full { grid-column: 1 / -1; }
@@ -348,7 +348,7 @@
         #{{ $uid }} .rj-form-group {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 0;
             min-width: 0;
         }
         #{{ $uid }} .rj-form-label {
@@ -370,9 +370,9 @@
             border: 0;
             border-bottom: 1px solid rgba(255, 255, 255, .15);
             border-radius: 0;
-            padding: 9px 0 11px;
+            padding: 5px 0 7px;
             color: #fff;
-            font-size: 16px;
+            font-size: 15px;
             outline: none;
             transition: border-color .3s;
         }
@@ -384,7 +384,7 @@
         }
         #{{ $uid }} .rj-form-textarea {
             resize: vertical;
-            min-height: 84px;
+            min-height: 48px;
         }
         #{{ $uid }} .rj-form-bar {
             position: absolute;
@@ -450,15 +450,15 @@
             color: rgba(255, 255, 255, .34);
         }
 
-        #{{ $uid }} .rj-form-actions { margin-top: 4px; }
+        #{{ $uid }} .rj-form-actions { margin-top: 0; }
         #{{ $uid }} .rj-form-submit {
             position: relative;
             overflow: hidden;
             width: max-content;
-            padding: 14px 34px;
+            padding: 10px 26px;
             border: 0;
             border-radius: 14px;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 600;
             letter-spacing: -.01em;
             color: #fff;
@@ -566,12 +566,12 @@
         }
 
         @media (max-width: 968px) {
-            #{{ $uid }}.rj-ct-section { padding: 44px 20px; }
-            #{{ $uid }} .rj-ct-grid { grid-template-columns: 1fr; gap: 32px; }
+            #{{ $uid }}.rj-ct-section { padding: 28px 20px; }
+            #{{ $uid }} .rj-ct-grid { grid-template-columns: 1fr; gap: 20px; }
         }
         @media (max-width: 640px) {
-            #{{ $uid }} .rj-ct-panel { padding: 24px 20px; border-radius: 24px; }
-            #{{ $uid }} .rj-form-row { grid-template-columns: 1fr; gap: 18px; }
+            #{{ $uid }} .rj-ct-panel { padding: 18px 16px; border-radius: 20px; }
+            #{{ $uid }} .rj-form-row { grid-template-columns: 1fr; gap: 10px; }
             #{{ $uid }} .rj-form-submit { width: 100%; }
         }
         @media (prefers-reduced-motion: reduce) {
