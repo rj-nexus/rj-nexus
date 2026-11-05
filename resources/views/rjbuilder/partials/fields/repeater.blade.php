@@ -61,21 +61,6 @@
                             </div>
                         </template>
 
-                        <template x-if="sub.type === 'icon'">
-                            <div>
-                                <div x-show="repeaterEdit.item && repeaterEdit.item[sub.name]" style="display:flex; align-items:center; gap:10px; margin-bottom:8px; padding:12px; border:1px solid var(--line); border-radius:6px; background:var(--bg2);">
-                                    <span x-html="getIconSvg(repeaterEdit.item ? repeaterEdit.item[sub.name] : '')" style="width:24px; height:24px; display:inline-block;"></span>
-                                    <span style="font-size:13px; color:var(--text); font-family:monospace;" x-text="repeaterEdit.item ? repeaterEdit.item[sub.name] : ''"></span>
-                                    <button type="button" @click="setRepeaterField(sub.name, '')" style="margin-left:auto; background:none; border:0; color:#dc2626; cursor:pointer; padding:0;">
-                                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                                    </button>
-                                </div>
-                                <button type="button" class="rj-btn" style="width:100%; justify-content:center; border-style:dashed;"
-                                        @click="openRepeaterIconPicker(sub.name)"
-                                        x-text="(repeaterEdit.item && repeaterEdit.item[sub.name]) ? t('Change Icon') : t('Select Icon')"></button>
-                            </div>
-                        </template>
-
                         <template x-if="sub.type === 'text' && sub.source">
                             <div style="position: relative;" @click.outside="repeaterEdit.dropdown = null">
 
