@@ -16,7 +16,7 @@
         return $url;
     };
 
-    // Demo şəkillərin bazası (Sənin githubuna uyğun)
+    // Demo şəkillərin bazası
     $demoBase = 'https://raw.githubusercontent.com/rj-nexus/spotlight/main/assets/demo_image/';
 @endphp
 
@@ -38,11 +38,10 @@
             <div class="rj-team-grid">
                 @foreach($members as $index => $member)
                     @php
-                        // Əgər istifadəçi şəkil yükləməyibsə, team1.webp - team6.webp arasından seçirik
                         $imgUrl = trim($member['image'] ?? '');
 
                         if ($imgUrl === '') {
-                            $demoIndex = ($index % 6) + 1; // 1-dən 6-ya kimi dövr edir
+                            $demoIndex = ($index % 6) + 1;
                             $imgUrl = $demoBase . 'team' . $demoIndex . '.webp';
                         } else {
                             $imgUrl = $toRaw($imgUrl);
@@ -106,21 +105,25 @@
             gap: 24px;
         }
 
-        /* Kart Dizaynı */
+        /* === KART DİZAYNI VƏ ANİMASİYALAR === */
         #{{ $uid }} .rj-team-card {
             position: relative;
-            border-radius: 20px;
+            border-radius: 24px;
             overflow: hidden;
             background: var(--rj-surface);
             border: 1px solid rgba(255, 255, 255, 0.08);
             aspect-ratio: 3 / 4;
             cursor: pointer;
-            transition: border-color 0.3s ease, transform 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transform: translateY(0);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
         }
 
+        /* Üzərinə gələndə kartın yuxarı qalxması və işıqlanması */
         #{{ $uid }} .rj-team-card:hover {
-            border-color: rgba(59, 130, 246, 0.4);
-            transform: translateY(-4px);
+            border-color: rgba(59, 130, 246, 0.5);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px -10px rgba(59, 130, 246, 0.3), inset 0 1px 0 rgba(255,255,255,0.1);
         }
 
         #{{ $uid }} .rj-team-image-wrap {
@@ -135,27 +138,36 @@
             height: 100%;
             object-fit: cover;
             object-position: top center;
-            transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+            /* Şəklin rəngi bir az solğun olsun ki, hover edəndə canlansın */
+            filter: grayscale(20%) brightness(0.9);
+            transition: all 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
+        /* Üzərinə gələndə şəklin böyüməsi və tam rənglənməsi */
         #{{ $uid }} .rj-team-card:hover .rj-team-image-wrap img {
-            transform: scale(1.05);
+            transform: scale(1.08);
+            filter: grayscale(0%) brightness(1);
         }
 
-        /* Qradient Örtük (Text oxunaqlı olsun deyə) */
+        /* Qradient Örtük */
         #{{ $uid }} .rj-team-overlay {
             position: absolute;
             inset: 0;
             background: linear-gradient(
                 to top,
                 rgba(10, 10, 15, 0.95) 0%,
-                rgba(10, 10, 15, 0.6) 30%,
-                transparent 60%
+                rgba(10, 10, 15, 0.5) 40%,
+                transparent 80%
             );
+            transition: opacity 0.4s ease;
             pointer-events: none;
         }
 
-        /* Ad və Vəzifə */
+        #{{ $uid }} .rj-team-card:hover .rj-team-overlay {
+            opacity: 0.85;
+        }
+
+        /* Ad və Vəzifə (Mətn Animasiyası) */
         #{{ $uid }} .rj-team-info {
             position: absolute;
             bottom: 0;
@@ -164,6 +176,15 @@
             padding: 24px;
             z-index: 2;
             text-align: left;
+            transform: translateY(10px);
+            opacity: 0.8;
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        /* Üzərinə gələndə mətnin yuxarı sürüşməsi və tam görünməsi */
+        #{{ $uid }} .rj-team-card:hover .rj-team-info {
+            transform: translateY(0);
+            opacity: 1;
         }
 
         #{{ $uid }} .rj-team-name {
@@ -172,6 +193,11 @@
             color: #fff;
             margin: 0 0 4px;
             letter-spacing: -0.01em;
+            transition: color 0.3s ease;
+        }
+
+        #{{ $uid }} .rj-team-card:hover .rj-team-name {
+            color: #60a5fa; /* Hover zamanı ad mavi olur */
         }
 
         #{{ $uid }} .rj-team-role {
