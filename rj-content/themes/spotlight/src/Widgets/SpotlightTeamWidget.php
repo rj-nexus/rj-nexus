@@ -52,12 +52,12 @@ class SpotlightTeamWidget extends BaseWidget
                 'label' => __('Team Members (Max 9)'),
                 'max_items' => 9,
                 'default' => [
-                    ['name' => 'Annette Black', 'role' => 'Creative Director', 'image' => ''],
-                    ['name' => 'Albert Flores', 'role' => 'Creative Director', 'image' => ''],
-                    ['name' => 'Cameron Williamson', 'role' => 'Creative Director', 'image' => ''],
-                    ['name' => 'Wade Warren', 'role' => 'Creative Director', 'image' => ''],
-                    ['name' => 'Annette Black', 'role' => 'Creative Director', 'image' => ''],
-                    ['name' => 'Arlene McCoy', 'role' => 'Creative Director', 'image' => ''],
+                    ['name' => 'Ethan Moore', 'role' => 'Creative Director', 'image' => ''], // team1 (Kişi)
+                    ['name' => 'Sarah Chen', 'role' => 'Lead Designer', 'image' => ''],     // team2 (Qadın)
+                    ['name' => 'Lucas Bennett', 'role' => 'Developer', 'image' => ''],      // team3 (Kişi)
+                    ['name' => 'James Wilson', 'role' => 'Marketing Head', 'image' => ''],  // team4 (Kişi)
+                    ['name' => 'Olivia Tran', 'role' => 'Product Manager', 'image' => ''],  // team5 (Qadın)
+                    ['name' => 'Elena Rossi', 'role' => 'UI/UX Designer', 'image' => ''],   // team6 (Qadın)
                 ],
                 'fields' => [
                     [
