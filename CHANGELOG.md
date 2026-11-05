@@ -2,6 +2,21 @@
 
 All notable changes to RJ Nexus will be documented in this file.
 
+## [v1.8.7] - RJ CORE 1
+
+This update focuses on fully restoring and stabilizing the visual Icon Picker within the RJ Builder, and adding icon support to Repeater fields.
+
+### Added
+- **Repeater Icon Support:** Added `sub.type === 'icon'` rendering logic to `repeater.blade.php`. Users can now open the visual Icon Picker directly inside repeater fields (e.g., Features, Action Grid) instead of typing raw text.
+- **Icon Picker JS Logic:** Implemented the missing JavaScript functions (`fetchIcons`, `selectIcon`, `getIconSvg`, `useManualIcon`) and state variables in `scripts.blade.php` to make the Icon Picker fully functional.
+- **Iconify Script:** Integrated `iconify-icon.min.js` into `edit.blade.php` to ensure icons render instantly as SVGs inside the admin panel.
+
+### Fixed
+- **Missing Icon Field:** Fixed the bug where the Icon field inside Repeaters was completely invisible due to missing Alpine.js rendering conditions.
+- **Icon Picker Z-Index:** Increased the modal's z-index (`z-[99999]`) so it appears above other overlays (like the Repeater modal).
+- **Unreadable Text:** Forced dark text and white background on the Icon Picker search inputs to fix the issue where text was invisible (white on white).
+- **Invisible Icons:** Forced a dark color (`#1e293b`) on the icons inside the picker so they are visible against the white modal background.
+
 ## [v1.8.6] - RJ CORE 1
 
 This update fixes plugin migration execution and automates bundled plugin activation during installation.
