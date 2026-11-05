@@ -20,7 +20,7 @@
 
         <div class="rj-ag-grid">
             @foreach($items as $item)
-                <div class="rj-ag-card">
+                <div class="rj-ag-card" style="--i: {{ $loop->index }}">
                     <div class="rj-ag-icon-wrap">
                         <i class="rj-ag-c tl"></i><i class="rj-ag-c tr"></i>
                         <i class="rj-ag-c bl"></i><i class="rj-ag-c br"></i>
@@ -37,7 +37,7 @@
                     <p class="rj-ag-card-desc">{{ $item['desc'] ?? '' }}</p>
 
                     @if(!empty($item['btn_text']) && !empty($item['btn_url']))
-                        <a href="{{ $item['btn_url'] }}" class="rj-ag-btn">{{ $item['btn_text'] }}</a>
+                        <a href="{{ $item['btn_url'] }}" class="rj-ag-btn"><span>{{ $item['btn_text'] }}</span></a>
                     @endif
                 </div>
             @endforeach
@@ -55,7 +55,7 @@
             isolation: isolate;
         }
 
-        /* ---------- BACKGROUND (bloku aşmır) ---------- */
+        /* ---------- BACKGROUND ---------- */
         #{{ $uid }} .rj-ag-bg {
             position: absolute;
             inset: 0;
@@ -64,11 +64,9 @@
             pointer-events: none;
         }
 
-        /* ulduzlar */
         #{{ $uid }} .rj-ag-stars {
             position: absolute;
             inset: 0;
-            opacity: .7;
             background-image:
                 radial-gradient(1px 1px at 8% 22%, rgba(255,255,255,.8), transparent),
                 radial-gradient(1px 1px at 18% 70%, rgba(255,255,255,.5), transparent),
@@ -80,13 +78,13 @@
                 radial-gradient(1px 1px at 86% 15%, rgba(255,255,255,.8), transparent),
                 radial-gradient(1.5px 1.5px at 93% 64%, rgba(255,255,255,.6), transparent),
                 radial-gradient(1px 1px at 46% 90%, rgba(255,255,255,.4), transparent);
+            animation: rjAgTwinkle 5s ease-in-out infinite alternate;
         }
 
-        /* qalaktika zolağı */
         #{{ $uid }} .rj-ag-streak {
             position: absolute;
             left: -20%;
-            top: 42%;
+            top: 38%;
             width: 140%;
             height: 34%;
             transform: rotate(-12deg);
@@ -95,49 +93,51 @@
             background: linear-gradient(90deg,
                 transparent 0%,
                 rgba(96,165,250,.12) 25%,
-                rgba(191,219,254,.30) 55%,
+                rgba(191,219,254,.32) 55%,
                 rgba(96,165,250,.14) 80%,
                 transparent 100%);
+            animation: rjAgDrift 14s ease-in-out infinite alternate;
         }
 
         #{{ $uid }} .rj-ag-glow {
             position: absolute;
             inset: -20% -10% auto -10%;
             height: 120%;
-            background: radial-gradient(ellipse at 50% 45%, rgba(59,130,246,.14) 0%, transparent 60%);
+            background: radial-gradient(ellipse at 50% 45%, rgba(59,130,246,.16) 0%, transparent 60%);
+            animation: rjAgPulse 8s ease-in-out infinite alternate;
         }
 
-        /* nazik dairə qövsü — sağda yarı görünür */
         #{{ $uid }} .rj-ag-ring {
             position: absolute;
             width: min(1000px, 120cqw);
             aspect-ratio: 1;
             right: -22cqw;
-            top: -12%;
+            top: -22%;
             border-radius: 50%;
             border: 1px solid rgba(255,255,255,.12);
             box-shadow: inset 0 0 90px rgba(59,130,246,.06), 0 0 70px rgba(59,130,246,.10);
         }
 
+        /* fırlanan işıq qövsü */
         #{{ $uid }} .rj-ag-ring::before {
             content: '';
             position: absolute;
             inset: -1px;
             padding: 1px;
             border-radius: 50%;
-            background: conic-gradient(from 200deg, transparent 0deg, rgba(147,197,253,.9) 70deg, transparent 140deg, transparent 360deg);
+            background: conic-gradient(from 0deg, transparent 0deg, rgba(147,197,253,.95) 60deg, transparent 130deg, transparent 360deg);
             -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
             -webkit-mask-composite: xor;
             mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+            animation: rjAgSpin 12s linear infinite;
         }
 
-        /* "+" işarəli üfüqi xətt */
         #{{ $uid }} .rj-ag-line {
             position: absolute;
             left: 0; right: 0;
-            top: 90px;
+            top: 24px;
             height: 1px;
-            background: linear-gradient(90deg, rgba(255,255,255,.05), rgba(255,255,255,.16) 15%, rgba(255,255,255,.16) 85%, rgba(255,255,255,.05));
+            background: linear-gradient(90deg, rgba(255,255,255,.05), rgba(255,255,255,.18) 15%, rgba(255,255,255,.18) 85%, rgba(255,255,255,.05));
         }
 
         #{{ $uid }} .rj-ag-line::before,
@@ -163,14 +163,14 @@
             max-width: var(--rj-container, 1200px);
             width: 100%;
             margin: 0 auto;
-            padding: 150px 24px 100px;
+            padding: 64px 24px 72px;
         }
 
         #{{ $uid }} .rj-ag-title {
             font-size: clamp(34px, 9cqw, 64px);
             font-weight: 500;
             text-align: center;
-            margin: 0 auto 90px;
+            margin: 0 auto 56px;
             letter-spacing: -0.035em;
             line-height: 1.1;
             max-width: 760px;
@@ -185,20 +185,65 @@
         #{{ $uid }} .rj-ag-grid {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 32px;
+            gap: 24px;
             align-items: stretch;
         }
 
+        /* ---------- GLASS CARD ---------- */
         #{{ $uid }} .rj-ag-card {
+            position: relative;
             min-width: 0;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
-            padding: 8px;
+            padding: 32px 24px 28px;
+            border-radius: 22px;
+            border: 1px solid rgba(255,255,255,.08);
+            background:
+                linear-gradient(160deg, rgba(255,255,255,.07), rgba(255,255,255,.015) 50%, rgba(59,130,246,.04));
+            backdrop-filter: blur(16px) saturate(140%);
+            -webkit-backdrop-filter: blur(16px) saturate(140%);
+            box-shadow: 0 20px 50px -25px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.08);
+            transition: transform .45s cubic-bezier(.2,.8,.2,1), border-color .4s, box-shadow .4s;
         }
 
-        /* ikon qutusu: çərçivə + 4 künc nöqtəsi */
+        /* parıltı zolağı */
+        #{{ $uid }} .rj-ag-card::before {
+            content: '';
+            position: absolute;
+            top: 0; bottom: 0;
+            left: -60%;
+            width: 40%;
+            background: linear-gradient(100deg, transparent, rgba(255,255,255,.14), transparent);
+            transform: skewX(-20deg);
+            transition: left .9s cubic-bezier(.2,.8,.2,1);
+            pointer-events: none;
+        }
+
+        /* yuxarıdan düşən yumşaq işıq */
+        #{{ $uid }} .rj-ag-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(120% 60% at 50% 0%, rgba(96,165,250,.18), transparent 60%);
+            opacity: 0;
+            transition: opacity .5s;
+            pointer-events: none;
+        }
+
+        #{{ $uid }} .rj-ag-card > * { position: relative; z-index: 1; }
+
+        #{{ $uid }} .rj-ag-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(96,165,250,.45);
+            box-shadow: 0 30px 60px -25px rgba(59,130,246,.45), inset 0 1px 0 rgba(255,255,255,.14);
+        }
+        #{{ $uid }} .rj-ag-card:hover::before { left: 130%; }
+        #{{ $uid }} .rj-ag-card:hover::after  { opacity: 1; }
+
+        /* ---------- ICON ---------- */
         #{{ $uid }} .rj-ag-icon-wrap {
             position: relative;
             width: 88px;
@@ -206,12 +251,14 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 30px;
-            border: 1px solid rgba(255,255,255,.12);
-            background: rgba(255,255,255,.02);
+            margin-bottom: 26px;
+            border: 1px solid rgba(255,255,255,.14);
+            background: rgba(255,255,255,.03);
             backdrop-filter: blur(6px);
             -webkit-backdrop-filter: blur(6px);
-            transition: border-color .3s, box-shadow .3s;
+            animation: rjAgFloat 5s ease-in-out infinite;
+            animation-delay: calc(var(--i, 0) * -1.2s);
+            transition: border-color .3s, box-shadow .3s, border-radius .5s;
         }
 
         #{{ $uid }} .rj-ag-c {
@@ -219,7 +266,7 @@
             width: 5px;
             height: 5px;
             background: #fff;
-            transition: background .3s, transform .3s;
+            transition: background .3s, transform .3s, box-shadow .3s;
         }
         #{{ $uid }} .rj-ag-c.tl { top: -3px;    left: -3px; }
         #{{ $uid }} .rj-ag-c.tr { top: -3px;    right: -3px; }
@@ -227,18 +274,22 @@
         #{{ $uid }} .rj-ag-c.br { bottom: -3px; right: -3px; }
 
         #{{ $uid }} .rj-ag-card:hover .rj-ag-icon-wrap {
-            border-color: rgba(59,130,246,.7);
-            box-shadow: 0 0 30px rgba(59,130,246,.25), inset 0 0 20px rgba(59,130,246,.08);
+            border-color: rgba(96,165,250,.8);
+            box-shadow: 0 0 36px rgba(59,130,246,.35), inset 0 0 22px rgba(59,130,246,.12);
         }
-        #{{ $uid }} .rj-ag-card:hover .rj-ag-c { background: #3b82f6; transform: scale(1.3); }
+        #{{ $uid }} .rj-ag-card:hover .rj-ag-c {
+            background: #60a5fa;
+            transform: scale(1.4);
+            box-shadow: 0 0 10px #60a5fa;
+        }
 
         #{{ $uid }} .rj-ag-icon-inner {
             color: #6d8cff;
-            filter: drop-shadow(0 0 10px rgba(99,102,241,.55));
-            transition: transform .3s;
+            filter: drop-shadow(0 0 10px rgba(99,102,241,.6));
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: transform .9s cubic-bezier(.34,1.4,.64,1), color .3s, filter .3s;
         }
 
         #{{ $uid }} .rj-ag-icon-inner svg,
@@ -248,8 +299,14 @@
             stroke-width: 1.2;
         }
 
-        #{{ $uid }} .rj-ag-card:hover .rj-ag-icon-inner { transform: scale(1.1); }
+        /* hover-də fırlanır */
+        #{{ $uid }} .rj-ag-card:hover .rj-ag-icon-inner {
+            transform: rotate(360deg) scale(1.15);
+            color: #93c5fd;
+            filter: drop-shadow(0 0 16px rgba(96,165,250,.9));
+        }
 
+        /* ---------- TEXT ---------- */
         #{{ $uid }} .rj-ag-card-title {
             font-size: 22px;
             font-weight: 500;
@@ -261,49 +318,79 @@
         #{{ $uid }} .rj-ag-card-desc {
             font-size: 15px;
             line-height: 1.6;
-            color: rgba(255,255,255,.62);
-            margin: 0 0 32px;
+            color: rgba(255,255,255,.64);
+            margin: 0 0 28px;
             max-width: 290px;
             overflow-wrap: anywhere;
         }
 
-        /* düymə həmişə kartın altında, eyni xətdə */
+        /* ---------- GLASS BUTTON ---------- */
         #{{ $uid }} .rj-ag-btn {
+            position: relative;
+            overflow: hidden;
             margin-top: auto;
             box-sizing: border-box;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             width: 100%;
-            max-width: 260px;
-            padding: 16px 28px;
-            border-radius: 12px;
-            background: rgba(10,10,16,.75);
-            border: 1px solid rgba(255,255,255,.08);
+            max-width: 240px;
+            padding: 15px 28px;
+            border-radius: 14px;
+            background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
+            border: 1px solid rgba(255,255,255,.12);
             color: #fff;
             font-size: 16px;
             font-weight: 500;
             text-decoration: none;
-            transition: all .25s;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.12);
+            transition: transform .3s, border-color .3s, box-shadow .3s, background .3s;
+        }
+
+        #{{ $uid }} .rj-ag-btn span { position: relative; z-index: 1; }
+
+        #{{ $uid }} .rj-ag-btn::before {
+            content: '';
+            position: absolute;
+            top: 0; bottom: 0;
+            left: -70%;
+            width: 50%;
+            background: linear-gradient(100deg, transparent, rgba(255,255,255,.35), transparent);
+            transform: skewX(-20deg);
+            transition: left .7s ease;
         }
 
         #{{ $uid }} .rj-ag-btn:hover {
-            background: rgba(59,130,246,.12);
-            border-color: #3b82f6;
+            background: linear-gradient(180deg, rgba(96,165,250,.22), rgba(59,130,246,.06));
+            border-color: rgba(96,165,250,.8);
             color: #fff;
             transform: translateY(-2px);
-            box-shadow: 0 10px 24px -10px rgba(59,130,246,.5);
+            box-shadow: 0 12px 28px -10px rgba(59,130,246,.6), inset 0 1px 0 rgba(255,255,255,.2);
+        }
+        #{{ $uid }} .rj-ag-btn:hover::before { left: 130%; }
+
+        /* ---------- KEYFRAMES ---------- */
+        @keyframes rjAgTwinkle { from { opacity: .45; } to { opacity: .95; } }
+        @keyframes rjAgPulse   { from { opacity: .65; transform: scale(1); } to { opacity: 1; transform: scale(1.06); } }
+        @keyframes rjAgDrift   { from { transform: rotate(-12deg) translateX(-4%); } to { transform: rotate(-9deg) translateX(4%); } }
+        @keyframes rjAgSpin    { to { transform: rotate(360deg); } }
+        @keyframes rjAgFloat   { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+
+        /* ---------- RESPONSIVE (blokun eninə görə) ---------- */
+        @container (max-width: 860px) {
+            #{{ $uid }} .rj-ag-inner { padding: 56px 20px 56px; }
+            #{{ $uid }} .rj-ag-grid { grid-template-columns: 1fr; gap: 20px; }
+            #{{ $uid }} .rj-ag-title { margin-bottom: 40px; }
+            #{{ $uid }} .rj-ag-ring { right: -40cqw; width: 150cqw; }
         }
 
-        /* blokun öz eninə görə (ekrana yox) */
-        @container (max-width: 860px) {
-            #{{ $uid }} .rj-ag-inner { padding: 120px 20px 70px; }
-            #{{ $uid }} .rj-ag-grid { grid-template-columns: 1fr; gap: 56px; }
-            #{{ $uid }} .rj-ag-title { margin-bottom: 56px; }
-            #{{ $uid }} .rj-ag-line { top: 70px; }
-            #{{ $uid }} .rj-ag-ring { right: -40cqw; width: 150cqw; }
+        @media (prefers-reduced-motion: reduce) {
+            #{{ $uid }} *, #{{ $uid }} *::before, #{{ $uid }} *::after {
+                animation: none !important;
+                transition-duration: .01ms !important;
+            }
         }
     </style>
 </section>
