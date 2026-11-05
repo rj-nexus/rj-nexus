@@ -54,6 +54,11 @@
             background: #1a1a1a;
         }
 
+        /* OSM xəritəsini dark moda gətirmək üçün CSS filter */
+        .rj-map-canvas .leaflet-tile-pane {
+            filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(1.1);
+        }
+
         /* Leaflet Dark Mode Xüsusi Düzəlişlər */
         .leaflet-container {
             background: #111 !important;
@@ -120,10 +125,10 @@
                     scrollWheelZoom: false
                 }).setView([{{ $lat }}, {{ $lng }}], {{ $zoom }});
 
-                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-                    subdomains: 'abcd',
-                    maxZoom: 20
+                // OpenStreetMap standart tile-ları (API açarı tələb etmir)
+                L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                    maxZoom: 19
                 }).addTo(map);
 
                 var customIcon = L.divIcon({
