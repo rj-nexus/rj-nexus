@@ -11,7 +11,7 @@ class GitHubService
 
     public function __construct()
     {
-        $this->proxyUrl = env('RJ_VAULT_URL', 'https://twilight-art-0b0e.ruhidjavadoff.workers.dev');
+        $this->proxyUrl = config('rj-ai.vault_url');
     }
 
     public function getReleases(string $owner, string $repo): array
