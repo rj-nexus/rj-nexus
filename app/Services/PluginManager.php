@@ -143,16 +143,12 @@ class PluginManager
             $this->registerPluginAutoloader($plugin);
             $this->bootPlugin($plugin);
 
-            \Illuminate\Support\Facades\Artisan::call('migrate', [
-                '--path' => 'rj-content/plugins/' . $plugin->folder . '/database/migrations',
-                '--force' => true,
-            ]);
+            $this->runPluginMigrations($plugin);
 
             $plugin->markAsActive();
 
             WidgetRegistry::reset();
 
-            // --- YENİ ƏLAVƏ: Route və View keşlərini təmizləyirik ---
             \Illuminate\Support\Facades\Artisan::call('view:clear');
             \Illuminate\Support\Facades\Artisan::call('route:clear');
             \Illuminate\Support\Facades\Cache::forget('rj_active_plugins');
@@ -163,6 +159,30 @@ class PluginManager
 
             return ['success' => false, 'message' => $e->getMessage()];
         }
+    }
+
+    protected function runPluginMigrations(Plugin $plugin): void
+    {
+        $manifest = $plugin->metadata();
+        $migrationsRel = $manifest['provides']['migrations'] ?? 'database/migrations';
+        $migrationsRel = trim($migrationsRel, '/');
+
+        if ($migrationsRel === '') {
+            return;
+        }
+
+        $migrationsFull = $plugin->path($migrationsRel);
+
+        if (!File::isDirectory($migrationsFull)) {
+            return;
+        }
+
+        $relativePath = 'rj-content/plugins/' . $plugin->folder . '/' . $migrationsRel;
+
+        \Illuminate\Support\Facades\Artisan::call('migrate', [
+            '--path' => $relativePath,
+            '--force' => true,
+        ]);
     }
 
     public function deactivate(Plugin $plugin): array
@@ -182,7 +202,6 @@ class PluginManager
 
             WidgetRegistry::reset();
 
-            // --- YENİ ƏLAVƏ: Deaktiv edərkən də keşi təmizləyirik ---
             \Illuminate\Support\Facades\Artisan::call('view:clear');
             \Illuminate\Support\Facades\Artisan::call('route:clear');
             \Illuminate\Support\Facades\Cache::forget('rj_active_plugins');
@@ -507,7 +526,8 @@ class PluginManager
                 'metadata' => $newMeta,
             ]);
 
-            Artisan::call('migrate', ['--force' => true]);
+            $plugin->refresh();
+            $this->runPluginMigrations($plugin);
 
             WidgetRegistry::reset();
 
