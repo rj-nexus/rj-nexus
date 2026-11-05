@@ -17,7 +17,7 @@
         <div class="p-4 border-b border-gray-100">
             <div class="relative">
                 <svg class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                <input type="text" x-model="iconSearch" @input.debounce.400ms="searchIcons()" placeholder="{{ __('Search icons (e.g. home, cart, user, arrow...)') }}" class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                <input type="text" x-model="iconSearch" @input.debounce.400ms="searchIcons()" placeholder="{{ __('Search icons (e.g. home, cart, user, arrow...)') }}" class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 text-gray-900 bg-white focus:border-indigo-500 focus:ring-indigo-500 text-sm placeholder-gray-400">
             </div>
         </div>
 
@@ -69,7 +69,7 @@
             <div class="flex items-center gap-2">
                 <input type="text" x-model="manualIcon" @keydown.enter.prevent="useManualIcon()"
                        placeholder="mdi:home"
-                       class="w-36 px-3 py-2 rounded-lg border border-gray-300 text-xs focus:border-indigo-500 focus:ring-indigo-500">
+                       class="w-36 px-3 py-2 rounded-lg border border-gray-300 text-gray-900 bg-white text-xs focus:border-indigo-500 focus:ring-indigo-500 placeholder-gray-400">
                 <button type="button" @click="useManualIcon()" class="px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">{{ __('Use') }}</button>
                 <button type="button" @click="iconPickerOpen = false" class="px-4 py-2 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors">{{ __('Cancel') }}</button>
             </div>
