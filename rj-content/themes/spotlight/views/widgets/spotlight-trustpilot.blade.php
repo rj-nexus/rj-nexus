@@ -12,10 +12,9 @@
     $data = null;
 
     if ($apiKey && $buid) {
-        // API məlumatını 1 saat (3600 saniyə) keşləyirik
         $data = Cache::remember("tp_rating_{$buid}", 3600, function () use ($apiKey, $buid) {
             try {
-                $res = Http::withHeaders([
+                $res = Http::timeout(10)->withHeaders([
                     'apikey' => $apiKey,
                 ])->get("https://api.trustpilot.com/v1/business-units/{$buid}");
 
@@ -29,7 +28,6 @@
         });
     }
 
-    // API-dən gələn məlumatlar
     $score = $data['score'] ?? 0;
     $stars = $data['stars'] ?? 0;
     $reviews = $data['numberOfReviews']['total'] ?? 0;
@@ -83,10 +81,10 @@
             height: 100%;
         }
         #{{ $uid }} .rj-tp-star.is-filled {
-            color: #00b67a; /* Trustpilot Yaşıl Rəngi */
+            color: #00b67a;
         }
         #{{ $uid }} .rj-tp-star.is-empty {
-            color: #dcdce6; /* Boş ulduz rəngi */
+            color: #dcdce6;
         }
         #{{ $uid }} .rj-tp-text {
             display: flex;
