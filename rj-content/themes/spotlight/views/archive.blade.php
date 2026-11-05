@@ -7,14 +7,16 @@
             isolation: isolate;
         }
 
+        /* 1. Düzəliş: Arxa fonu şəffaf etdik ki, ulduzlar görünsün */
         .rj-bg-video {
             position: absolute;
             inset: 0;
             z-index: 0;
             overflow: hidden;
             pointer-events: none;
-            background: #000;
+            background: transparent;
         }
+
         .rj-bg-video-inner {
             position: sticky;
             top: 0;
@@ -22,7 +24,11 @@
             height: 100vh;
             overflow: hidden;
             isolation: isolate;
+            /* 2. Düzəliş: Videonun alt hissəsini yumşaq şəkildə şəffaflaşdırırıq (hard cut-u aradan qaldırır) */
+            -webkit-mask-image: linear-gradient(to bottom, #000 40%, transparent 100%);
+            mask-image: linear-gradient(to bottom, #000 40%, transparent 100%);
         }
+
         .rj-bg-video-inner video {
             position: absolute;
             inset: 0;
@@ -30,18 +36,25 @@
             height: 100%;
             object-fit: cover;
             filter: grayscale(1) contrast(1.1) brightness(.9) blur(6px);
-            transform: scale(1.1);
+            /* 3. Düzəliş: Videonu bir az aşağı salırıq */
+            transform: scale(1.1) translateY(15px);
         }
+
         .rj-bg-video-tint {
             position: absolute;
             inset: 0;
             background: #1d4ed8;
             mix-blend-mode: color;
+            /* Tint rənginin də alt hissədə yox olması üçün mask veririk */
+            -webkit-mask-image: linear-gradient(to bottom, #000 40%, transparent 100%);
+            mask-image: linear-gradient(to bottom, #000 40%, transparent 100%);
         }
+
         .rj-bg-video-shade {
             position: absolute;
             inset: 0;
-            background: linear-gradient(180deg, rgba(0, 0, 0, .45), rgba(0, 0, 0, .72));
+            /* 4. Düzəliş: Qradienti tünd rəngdən şəffafa doğru dəyişirik */
+            background: linear-gradient(180deg, rgba(10, 10, 15, .65) 0%, rgba(10, 10, 15, .2) 50%, transparent 100%);
         }
 
         .rj-archive-wrapper {
