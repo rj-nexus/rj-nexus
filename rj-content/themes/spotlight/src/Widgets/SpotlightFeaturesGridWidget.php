@@ -55,32 +55,32 @@ class SpotlightFeaturesGridWidget extends BaseWidget
                     [
                         'icon' => 'ph:device-mobile',
                         'title' => 'All-in-one platform',
-                        'text' => 'No more juggling tools. We unify content, design, code, and video.',
+                        'desc' => 'No more juggling tools. We unify content, design, code, and video.',
                     ],
                     [
                         'icon' => 'ph:cpu',
                         'title' => 'Multi-model AI core',
-                        'text' => 'ChatGPT, Claude, Gemini — we pick the smartest engine for every task.',
+                        'desc' => 'ChatGPT, Claude, Gemini — we pick the smartest engine for every task.',
                     ],
                     [
                         'icon' => 'ph:desktop',
                         'title' => 'Prompt-level control',
-                        'text' => 'Every feature is prompt-optimized, giving you control without overwhelm.',
+                        'desc' => 'Every feature is prompt-optimized, giving you control without overwhelm.',
                     ],
                     [
                         'icon' => 'ph:rocket-launch',
                         'title' => 'Speed that scales',
-                        'text' => 'From solo to teams, we deliver fast outputs — even under heavy loads.',
+                        'desc' => 'From solo to teams, we deliver fast outputs — even under heavy loads.',
                     ],
                     [
                         'icon' => 'ph:shield-check',
                         'title' => 'Secure by design',
-                        'text' => 'Your content and code stay private. We never store sensitive data.',
+                        'desc' => 'Your content and code stay private. We never store sensitive data.',
                     ],
                     [
                         'icon' => 'ph:arrows-clockwise',
                         'title' => 'Always evolving',
-                        'text' => 'We improve weekly with better prompts, UI, and models — for free.',
+                        'desc' => 'We improve weekly with better prompts, UI, and models — for free.',
                     ],
                 ],
                 'fields' => [
@@ -98,7 +98,7 @@ class SpotlightFeaturesGridWidget extends BaseWidget
                         'default' => 'Feature Name',
                     ],
                     [
-                        'name' => 'text',
+                        'name' => 'desc',
                         'type' => 'textarea',
                         'label' => __('Feature Description'),
                         'default' => 'Feature description goes here.',
