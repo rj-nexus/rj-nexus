@@ -889,7 +889,7 @@ function builder() {
 
         getIconSvg(icon, size = 24, color = 'currentColor') {
             if (!icon) return '';
-            return `<iconify-icon icon="${icon}" width="${size}" height="${size}" style="color: ${color};"></iconify-icon>`;
+            return `<iconify-icon icon="${icon}" width="${size}" height="${size}" style="color: ${color} !important;"></iconify-icon>`;
         },
 
         async fetchIcons(query) {

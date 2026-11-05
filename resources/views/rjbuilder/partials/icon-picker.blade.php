@@ -62,7 +62,7 @@
         <!-- Footer -->
         <div class="px-6 py-4 border-t border-gray-100 bg-white rounded-b-2xl flex flex-wrap gap-3 justify-between items-center text-xs text-gray-500">
             <div class="flex items-center gap-3">
-                <span>Powered by <a href="https://iconify.design" target="_blank" class="text-indigo-500 hover:underline">Iconify</a></span>
+                <span x-html="getIconSvg(icon, 24, '#1e293b')" class="w-6 h-6 group-hover:opacity-70 transition-opacity text-slate-800"></span>
                 <a href="https://icon-sets.iconify.design/" target="_blank" rel="noopener noreferrer" class="text-indigo-500 hover:underline">{{ __('Browse all icons') }} ↗</a>
             </div>
 
