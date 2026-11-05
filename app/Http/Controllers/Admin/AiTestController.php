@@ -9,7 +9,7 @@ class AiTestController extends Controller
 {
     public function index()
     {
-        $vaultUrl = env('RJ_VAULT_URL', 'https://twilight-art-0b0e.ruhidjavadoff.workers.dev');
+        $vaultUrl = config('rj-ai.vault_url');
         $vaultStatus = 'Failed';
         $keys = [];
 
@@ -25,7 +25,6 @@ class AiTestController extends Controller
             $vaultStatus = $e->getMessage();
         }
 
-        // Bütün provayderləri mərkəzi config faylından oxuyuruq
         $providers = config('rj-ai.providers', []);
         $results = [];
 
