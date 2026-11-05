@@ -1,7 +1,6 @@
 @php
     $uid = 'contact_' . substr(md5(uniqid('', true)), 0, 8);
     $title = $settings['title'] ?? '';
-    $formId = $settings['form_id'] ?? '';
 @endphp
 
 <section class="rj-contact-section" id="{{ $uid }}">
@@ -38,17 +37,49 @@
             </div>
 
             <div class="rj-contact-right">
-                @if($formId)
-                    @if(function_exists('rj_render_form'))
-                        {!! rj_render_form($formId) !!}
-                    @elseif(function_exists('do_shortcode'))
-                        {!! do_shortcode('[rj_form id="' . $formId . '"]') !!}
+                @if(isset($form) && $form)
+                    @if(view()->exists('plugin-form-builder::widget'))
+                        {!! view('plugin-form-builder::widget', [
+                            'form' => $form,
+                            'layout' => 'stack',
+                            'designPreset' => 'dark',
+                            'showMascot' => false,
+                            'stageSide' => 'right'
+                        ])->render() !!}
                     @else
-                        <div class="rj-contact-no-form">{{ __('Form rendering function not found.') }}</div>
+                        <div class="rj-contact-fallback">
+                            <h3 class="rj-fallback-title">{{ __('Form view not found.') }}</h3>
+                            <p class="rj-fallback-text">{{ __('The form builder plugin view is missing. Please reinstall the plugin.') }}</p>
+                            <div class="rj-fallback-links">
+                                <a href="https://github.com/mr-ruhid/rj-plugin-form-builder/releases" target="_blank" class="rj-fallback-btn primary">{{ __('Download Plugin') }}</a>
+                                <a href="https://github.com/mr-ruhid/rj-plugin-form-builder/discussions/2" target="_blank" class="rj-fallback-btn secondary">{{ __('Plugin Support') }}</a>
+                            </div>
+                        </div>
                     @endif
                 @else
-                    <div class="rj-contact-no-form">
-                        {{ __('Please select an RJ Form from the widget settings.') }}
+                    <div class="rj-contact-fallback">
+                        <div class="rj-fallback-icon">
+                            <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        </div>
+                        <h3 class="rj-fallback-title">{{ __('Form is not configured or plugin is missing.') }}</h3>
+                        <p class="rj-fallback-text">{{ __('To display a form here, please ensure the Form Builder plugin is installed and a form is selected in the widget settings.') }}</p>
+
+                        <div class="rj-fallback-links">
+                            <a href="https://github.com/mr-ruhid/rj-plugin-form-builder/releases" target="_blank" class="rj-fallback-btn primary">
+                                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                {{ __('Install Plugin') }}
+                            </a>
+                        </div>
+
+                        <div class="rj-fallback-support">
+                            <p>{{ __('Having issues?') }}</p>
+                            <a href="https://github.com/mr-ruhid/rj-plugin-form-builder/discussions/2" target="_blank">
+                                {{ __('Plugin Support') }} ↗
+                            </a>
+                            <a href="https://github.com/rj-nexus/spotlight/discussions/1" target="_blank">
+                                {{ __('Widget Support') }} ↗
+                            </a>
+                        </div>
                     </div>
                 @endif
             </div>
@@ -126,99 +157,102 @@
             color: var(--rj-primary);
         }
 
-        #{{ $uid }} .rj-contact-no-form {
-            padding: 40px;
+        /* Fallback Box Styles */
+        #{{ $uid }} .rj-contact-fallback {
             background: rgba(255, 255, 255, 0.03);
             border: 1px dashed rgba(255, 255, 255, 0.2);
-            border-radius: 16px;
-            color: rgba(255, 255, 255, 0.5);
+            border-radius: 24px;
+            padding: 48px;
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        /* RJ Form Builder Dizaynını Şəkildəki Kimi Etmək Üçün */
-        #{{ $uid }} .rj-form {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 24px;
+        #{{ $uid }} .rj-fallback-icon {
+            width: 48px;
+            height: 48px;
+            color: #f59e0b;
+            margin-bottom: 24px;
         }
 
-        #{{ $uid }} .rj-form-field-full,
-        #{{ $uid }} .rj-form-field-textarea,
-        #{{ $uid }} .rj-form-actions {
-            grid-column: 1 / -1;
+        #{{ $uid }} .rj-fallback-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #fff;
+            margin: 0 0 12px;
         }
 
-        #{{ $uid }} .rj-form-field {
+        #{{ $uid }} .rj-fallback-text {
+            font-size: 15px;
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.6;
+            margin: 0 0 32px;
+            max-width: 400px;
+        }
+
+        #{{ $uid }} .rj-fallback-links {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        #{{ $uid }} .rj-fallback-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        #{{ $uid }} .rj-fallback-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        #{{ $uid }} .rj-fallback-btn.primary {
+            background: #3b82f6;
+            color: #fff;
+        }
+
+        #{{ $uid }} .rj-fallback-btn.primary:hover {
+            background: #2563eb;
+        }
+
+        #{{ $uid }} .rj-fallback-btn.secondary {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        #{{ $uid }} .rj-fallback-btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        #{{ $uid }} .rj-fallback-support {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.4);
             display: flex;
             flex-direction: column;
             gap: 8px;
         }
 
-        #{{ $uid }} .rj-form-label {
-            font-size: 14px;
-            color: #fff;
-            font-weight: 500;
+        #{{ $uid }} .rj-fallback-support a {
+            color: var(--rj-primary);
+            text-decoration: none;
         }
 
-        #{{ $uid }} .rj-form-input,
-        #{{ $uid }} .rj-form textarea,
-        #{{ $uid }} .rj-form select {
-            width: 100%;
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            padding: 16px 20px;
-            color: #fff;
-            font-size: 15px;
-            transition: border-color 0.2s, background 0.2s;
-        }
-
-        #{{ $uid }} .rj-form-input::placeholder,
-        #{{ $uid }} .rj-form textarea::placeholder {
-            color: rgba(255, 255, 255, 0.3);
-        }
-
-        #{{ $uid }} .rj-form-input:focus,
-        #{{ $uid }} .rj-form textarea:focus {
-            border-color: var(--rj-primary);
-            outline: none;
-            background: rgba(255, 255, 255, 0.02);
-        }
-
-        #{{ $uid }} .rj-form textarea {
-            min-height: 140px;
-            resize: vertical;
-        }
-
-        #{{ $uid }} .rj-form-checkbox {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 14px;
-            align-items: flex-start;
-        }
-
-        #{{ $uid }} .rj-form-checkbox input {
-            margin-top: 4px;
-        }
-
-        #{{ $uid }} .rj-form-submit {
-            background: #3b82f6;
-            color: #fff;
-            border: none;
-            padding: 16px 40px;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s, transform 0.2s;
-            display: inline-flex;
-            justify-content: center;
-            width: max-content;
-            min-width: 140px;
-        }
-
-        #{{ $uid }} .rj-form-submit:hover {
-            background: #2563eb;
-            transform: translateY(-2px);
+        #{{ $uid }} .rj-fallback-support a:hover {
+            text-decoration: underline;
         }
 
         @media (max-width: 968px) {
@@ -228,12 +262,6 @@
                 gap: 60px;
             }
             #{{ $uid }} .rj-contact-title { margin-bottom: 40px; }
-        }
-
-        @media (max-width: 640px) {
-            #{{ $uid }} .rj-form {
-                grid-template-columns: 1fr;
-            }
         }
     </style>
 </section>
