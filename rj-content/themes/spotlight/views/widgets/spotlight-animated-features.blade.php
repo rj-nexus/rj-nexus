@@ -77,6 +77,10 @@
                 <div class="rj-anf-grid">
                     @foreach($features as $i => $item)
                         <article class="rj-anf-card rj-anf-reveal" style="--i: {{ $i + 2 }};">
+                            {{-- BURADA İKONU EKRANA ÇIXARIRIQ --}}
+                            <div class="rj-anf-card-icon">
+                                <iconify-icon icon="{{ $item['icon'] ?? 'ph:sparkle' }}"></iconify-icon>
+                            </div>
                             <h3 class="rj-anf-card-title">{{ $item['feature_title'] ?? '' }}</h3>
                             <p class="rj-anf-card-desc">{{ $item['feature_text'] ?? '' }}</p>
                         </article>
@@ -472,27 +476,27 @@
         #{{ $uid }} .rj-anf-card:hover::after { opacity: 1; }
 
         #{{ $uid }} .rj-anf-card-title,
-        #{{ $uid }} .rj-anf-card-desc { position: relative; z-index: 1; }
+        #{{ $uid }} .rj-anf-card-desc,
+        #{{ $uid }} .rj-anf-card-icon { position: relative; z-index: 1; }
+
+        /* İKON STİLİ */
+        #{{ $uid }} .rj-anf-card-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: flex-start;
+            margin-bottom: 4px;
+            font-size: 24px;
+            color: var(--a3);
+            filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.4));
+        }
 
         #{{ $uid }} .rj-anf-card-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
             font-size: 15px;
             font-weight: 600;
             letter-spacing: -.01em;
             color: #fff;
             margin: 0;
             line-height: 1.3;
-        }
-        #{{ $uid }} .rj-anf-card-title::before {
-            content: '';
-            flex-shrink: 0;
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--a3);
-            box-shadow: 0 0 10px var(--a3);
         }
         #{{ $uid }} .rj-anf-card-desc {
             font-size: 13px;
@@ -555,6 +559,7 @@
             #{{ $uid }} .rj-anf-content { align-items: center; text-align: center; }
             #{{ $uid }} .rj-anf-text { margin-left: auto; margin-right: auto; }
             #{{ $uid }} .rj-anf-card { text-align: left; }
+            #{{ $uid }} .rj-anf-card-icon { justify-content: center; }
         }
         @media (max-width: 560px) {
             #{{ $uid }} .rj-anf-grid { grid-template-columns: 1fr; }
@@ -622,4 +627,7 @@
             }
         })();
     </script>
+
+    {{-- İKONLARIN YÜKLƏNMƏSİ ÜÇÜN --}}
+    <script type="module" src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
 </section>
