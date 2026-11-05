@@ -2,6 +2,33 @@
 
 All notable changes to the Spotlight theme will be documented in this file.
 
+## [0.4.0-beta]
+
+This update introduces several new, highly requested widgets and significantly improves the Builder integration, specifically the visual Icon Picker and Form Builder compatibility.
+
+### Added
+- **Spotlight Action Grid:** A 3-column layout with cornered icons, titles, text, and buttons. Perfect for Contact pages with a premium glassmorphism hover effect.
+- **Spotlight Contact (Form):** A two-column contact layout featuring contact info on the left and seamless integration with the RJ Form Builder plugin on the right, styled in dark mode.
+- **Spotlight Divider:** A clean, customizable divider widget to elegantly separate page sections.
+- **Spotlight Features Grid:** A compact split layout with an animated rotating core and sleek glass feature cards.
+- **Spotlight Map:** A fully customizable dark-mode map widget using Leaflet.js and OpenStreetMap. API-keyless and features custom markers.
+- **Spotlight Team:** A grid layout to showcase team members, their roles, and social links with hover animations.
+- **Spotlight Trustpilot:** A dedicated widget to dynamically fetch and display real Trustpilot reviews and ratings.
+
+### Fixed
+- **Service Provider Fatal Error:** Removed the non-existent `SpotlightAnimatedFeaturesWidget` from the Service Provider which previously caused the Builder to crash entirely.
+- **Repeater Icon Field:** Fixed the issue where the Icon field inside Repeaters was invisible. Added `sub.type === 'icon'` rendering logic to `repeater.blade.php`.
+- **Icon Picker UI:** Increased the z-index to `z-[99999]` so the Icon Picker modal appears above the Repeater modal. Fixed unreadable text (white on white) and forced a dark color on icons for visibility.
+- **Form Builder Fallback:** Added a fallback UI with a download link and support links for when the Form Builder plugin is not installed or a form is not selected.
+
+### Improved
+- **Visual Icon Integration:** Replaced hardcoded icon selects with visual Icon Pickers in `SpotlightActionGridWidget` and `SpotlightFeaturesGridWidget`.
+- **Unique Default Icons:** Assigned distinct, professional default icons and placeholder text to Action Grid items so the widget looks complete upon insertion.
+- **Dark Mode Map:** Utilized CSS filters (`invert`, `hue-rotate`) to convert standard OpenStreetMap tiles into a sleek dark mode without requiring paid API keys like CARTO.
+- **Action Grid Redesign:** Completely rewrote the Action Grid view to match the reference layout with glowing background rings, corner brackets on icons, and glassmorphism buttons.
+
+---
+
 ## [0.3.0-beta]
 
 This update transforms Spotlight into a complete, premium SaaS/product showcase theme. We added 9 new fully custom, interactive widgets and heavily optimized the layout and UI.

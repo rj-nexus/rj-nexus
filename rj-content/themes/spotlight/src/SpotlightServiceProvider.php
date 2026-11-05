@@ -17,11 +17,25 @@ use Spotlight\Widgets\SpotlightFaqWidget;
 use Spotlight\Widgets\SpotlightNewsletterWidget;
 use Spotlight\Widgets\SpotlightFooterWidget;
 use Spotlight\Widgets\SpotlightTeamWidget;
+<<<<<<< HEAD
 use Spotlight\Widgets\SpotlightActionGridWidget;
 use Spotlight\Widgets\SpotlightTrustpilotWidget;
 use Spotlight\Widgets\SpotlightFeaturesGridWidget;
 use Spotlight\Widgets\SpotlightMapWidget;
 use Spotlight\Widgets\SpotlightContactWidget;
+=======
+<<<<<<< HEAD
+use Spotlight\Widgets\SpotlightActionGridWidget;
+use Spotlight\Widgets\SpotlightTrustpilotWidget;
+use Spotlight\Widgets\SpotlightFeaturesGridWidget;
+use Spotlight\Widgets\SpotlightMapWidget;
+use Spotlight\Widgets\SpotlightContactWidget;
+=======
+use Spotlight\Widgets\SpotlightAnimatedFeaturesWidget;
+use Spotlight\Widgets\SpotlightActionGridWidget;
+use Spotlight\Widgets\SpotlightTrustpilotWidget; // YENİ ƏLAVƏ OLUNDU
+>>>>>>> 88a78bbec7968caaa32e93f7ae4c4baa0f863c9d
+>>>>>>> e24e31ee674847c9f1a29f3c3e8f3fa88c22d693
 
 class SpotlightServiceProvider extends ServiceProvider
 {
@@ -53,11 +67,25 @@ class SpotlightServiceProvider extends ServiceProvider
                     new SpotlightNewsletterWidget(),
                     new SpotlightFooterWidget(),
                     new SpotlightTeamWidget(),
+<<<<<<< HEAD
                     new SpotlightActionGridWidget(),
                     new SpotlightTrustpilotWidget(),
                     new SpotlightFeaturesGridWidget(),
                     new SpotlightMapWidget(),
                     new SpotlightContactWidget(),
+=======
+<<<<<<< HEAD
+                    new SpotlightActionGridWidget(),
+                    new SpotlightTrustpilotWidget(),
+                    new SpotlightFeaturesGridWidget(),
+                    new SpotlightMapWidget(),
+                    new SpotlightContactWidget(),
+=======
+                    new SpotlightAnimatedFeaturesWidget(),
+                    new SpotlightActionGridWidget(),
+                    new SpotlightTrustpilotWidget(), // YENİ ƏLAVƏ OLUNDU
+>>>>>>> 88a78bbec7968caaa32e93f7ae4c4baa0f863c9d
+>>>>>>> e24e31ee674847c9f1a29f3c3e8f3fa88c22d693
                 ];
                 return array_merge($existing, $widgets);
             });

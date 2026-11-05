@@ -19,7 +19,7 @@ class AiAgentService
 
     protected function loadProvidersFromVault(): void
     {
-        $vaultUrl = env('RJ_VAULT_URL', 'https://twilight-art-0b0e.ruhidjavadoff.workers.dev');
+        $vaultUrl = config('rj-ai.vault_url');
 
         $keys = Cache::remember('rj_ai_keys_pool', 3600, function () use ($vaultUrl) {
             try {
@@ -179,9 +179,6 @@ class AiAgentService
         throw new \Exception("HTTP " . $response->status());
     }
 
-    /**
-     * Yenilənmiş Ağıllı Axtarış: Bütün faylı yox, açar sözün ətrafındakı mətni götürür.
-     */
     protected function searchDocs(string $query): string
     {
         $docsPath = resource_path('docs');
@@ -205,12 +202,11 @@ class AiAgentService
                 $pos = strpos($lowerContent, $kw);
                 if ($pos !== false) {
                     $score++;
-                    if ($bestPos === -1) $bestPos = $pos; // İlk tapılan yeri yadda saxla
+                    if ($bestPos === -1) $bestPos = $pos;
                 }
             }
 
             if ($score > 0 && $bestPos !== -1) {
-                // Açar sözün ətrafından 1500 simvol kəsirik (təqribən 500 əvvəl, 1000 sonra)
                 $start = max(0, $bestPos - 500);
                 $snippet = mb_substr($content, $start, 1500);
                 $results[$file->getFilename()] = "... " . $snippet . " ...";
