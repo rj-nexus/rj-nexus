@@ -44,6 +44,8 @@ function builder() {
         historyIndex: -1,
         clipboard: null,
         mediaPickerTarget: null,
+        iconPickerTarget: null,
+        showIconPicker: false,
         dragging: null,
         dragTarget: null,
         showLayoutPicker: false,
@@ -857,16 +859,15 @@ function builder() {
             el.addEventListener('keydown', onKey);
         },
 
-        openMediaPicker(fieldName) {
-            this.mediaPickerTarget = fieldName;
-            const mockInput = document.createElement('input');
-            mockInput.type = 'hidden';
-            const handler = (e) => {
-                this.updateSetting(this.mediaPickerTarget, e.detail.url);
-                window.removeEventListener('media-selected', handler);
-            };
-            window.addEventListener('media-selected', handler);
-            window.dispatchEvent(new CustomEvent('open-media-picker', { detail: { value: mockInput } }));
+        openIconPicker(fieldName) {
+            this.iconPickerTarget = fieldName;
+            this.showIconPicker = true;
+            window.dispatchEvent(new CustomEvent('open-icon-picker', { detail: { field: fieldName } }));
+        },
+
+        getIconSvg(icon) {
+            if (!icon) return '';
+            return `<iconify-icon icon="${icon}" width="24" height="24"></iconify-icon>`;
         },
 
         /* ───────── device + preview + animation playback ───────── */
