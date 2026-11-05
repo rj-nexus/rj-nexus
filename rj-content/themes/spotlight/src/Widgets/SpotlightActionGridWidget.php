@@ -47,20 +47,13 @@ class SpotlightActionGridWidget extends BaseWidget
                 'max_items' => 4,
                 'default' => [
                     [
-<<<<<<< HEAD
                         'icon' => 'ph:presentation-chart',
                         'title' => 'Request a Demo',
                         'desc' => 'Schedule a personalized walkthrough to see how our solution fits your needs.',
-=======
-                        'icon' => 'ph:gear-six',
-                        'title' => 'Request Demo',
-                        'desc' => 'Schedule a personalized demo to see RJ Nexus in action.',
->>>>>>> 88a78bbec7968caaa32e93f7ae4c4baa0f863c9d
                         'btn_text' => 'Book Demo',
                         'btn_url' => '#',
                     ],
                     [
-<<<<<<< HEAD
                         'icon' => 'ph:chat-teardrop-dots',
                         'title' => 'Customer Support',
                         'desc' => 'Our dedicated team is available around the clock to assist you.',
@@ -72,51 +65,18 @@ class SpotlightActionGridWidget extends BaseWidget
                         'title' => 'Partnership',
                         'desc' => 'Interested in collaborating? Let us discuss how we can grow together.',
                         'btn_text' => 'Contact Sales',
-=======
-                        'icon' => 'ph:chats',
-                        'title' => 'Online Support',
-                        'desc' => 'Get help from our support team 24/7.',
-                        'btn_text' => 'Chat Now',
-                        'btn_url' => '#',
-                    ],
-                    [
-                        'icon' => 'ph:users-three',
-                        'title' => 'Partnership',
-                        'desc' => "Interested in partnering with us? Let's talk.",
-                        'btn_text' => 'Contact Us',
->>>>>>> 88a78bbec7968caaa32e93f7ae4c4baa0f863c9d
                         'btn_url' => '#',
                     ],
                 ],
                 'fields' => [
                     [
                         'name' => 'icon',
-<<<<<<< HEAD
                         'type' => 'icon',
                         'label' => __('Icon'),
                         'default' => 'ph:star',
                         'help' => 'e.g. ph:rocket-launch, ph:cpu.',
                         'help_link' => 'https://iconify.design/',
                         'help_link_text' => __('Browse Icons on Iconify ->')
-=======
-                        'type' => 'select',
-                        'label' => __('Icon'),
-                        'default' => 'ph:gear-six',
-                        'options' => [
-                            'ph:gear-six' => 'Gear / Settings',
-                            'ph:chats' => 'Chats / Support',
-                            'ph:users-three' => 'Users / Team',
-                            'ph:phone' => 'Phone',
-                            'ph:envelope' => 'Email / Mail',
-                            'ph:map-pin' => 'Location / Map',
-                            'ph:rocket-launch' => 'Rocket / Launch',
-                            'ph:shield-check' => 'Shield / Security',
-                            'ph:chart-line-up' => 'Chart / Analytics',
-                            'ph:star' => 'Star',
-                            'ph:lightning' => 'Lightning / Speed',
-                            'ph:globe' => 'Globe / Web',
-                        ],
->>>>>>> 88a78bbec7968caaa32e93f7ae4c4baa0f863c9d
                     ],
                     [
                         'name' => 'title',
