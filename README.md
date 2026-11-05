@@ -13,7 +13,7 @@
 
 <br/>
 
-[Website](https://rjnexus.org) &nbsp;&bull;&nbsp; [Changelog](https://github.com/rj-nexus/rj-nexus/blob/main/CHANGELOG.md) &nbsp;&bull;&nbsp; [RJBuilder Changelog](https://github.com/rj-nexus/rj-nexus/blob/main/resources/views/rjbuilder/CHANGELOG.md) &nbsp;&bull;&nbsp; [Themes & Plugins](https://github.com/rj-nexus/rj_cms_theme_and_plugin_list) &nbsp;&bull;&nbsp; [Discussions](https://github.com/orgs/rj-nexus/discussions) &nbsp;&bull;&nbsp; [Source Code](https://github.com/rj-nexus/rj-nexus)
+[Website](https://rjnexus.org) &nbsp;&bull;&nbsp; [Changelog](https://github.com/rj-nexus/rj-nexus/blob/main/CHANGELOG.md) &nbsp;&bull;&nbsp; [RJBuilder Changelog](https://github.com/rj-nexus/rj-nexus/blob/main/resources/views/rjbuilder/CHANGELOG.md) &nbsp;&bull;&nbsp; [Themes & Plugins](https://rj-nexus.github.io/rj-registration/) &nbsp;&bull;&nbsp; [Discussions](https://github.com/orgs/rj-nexus/discussions) &nbsp;&bull;&nbsp; [Source Code](https://github.com/rj-nexus/rj-nexus)
 
 </div>
 
@@ -155,7 +155,7 @@ RJ CMS installs on any shared hosting or VPS without touching a single line of c
     <td width="33%" valign="top">
       <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/themes.svg" width="44" height="44" alt=""/><br/>
       <b>Themes & Plugins</b><br/>
-      Browse the full catalog in the <a href="https://github.com/rj-nexus/rj_cms_theme_and_plugin_list">themes and plugins list</a>.
+      Browse the full catalog in the <a href="https://github.com/rj-nexus/rj-registration">themes and plugins list</a>.
     </td>
   </tr>
 </table>
@@ -344,7 +344,7 @@ RJ CMS installs on any shared hosting or VPS without touching a single line of c
 | <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/website.svg" width="28" alt=""/> | [rjnexus.org](https://rjnexus.org) | Official website |
 | <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/changelog.svg" width="28" alt=""/> | [Changelog](https://github.com/rj-nexus/rj-nexus/blob/main/CHANGELOG.md) | Full release history of RJ CMS |
 | <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/builder.svg" width="28" alt=""/> | [RJBuilder Changelog](https://github.com/rj-nexus/rj-nexus/blob/main/resources/views/rjbuilder/CHANGELOG.md) | Release history of the page builder |
-| <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/themes.svg" width="28" alt=""/> | [Themes & Plugins](https://github.com/rj-nexus/rj_cms_theme_and_plugin_list) | Catalog of available themes and plugins |
+| <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/themes.svg" width="28" alt=""/> | [Themes & Plugins](https://github.com/rj-nexus/rj-registration) | Catalog of available themes and plugins |
 | <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/video.svg" width="28" alt=""/> | [Installation Video](https://www.youtube.com/watch?v=BU4UXY2D3FU) | Step-by-step guide on YouTube |
 | <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/modular.svg" width="28" alt=""/> | [Source Code](https://github.com/rj-nexus/rj-nexus) | RJ CMS core repository |
 | <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/website.svg" width="28" alt=""/> | [Discussions](https://github.com/orgs/rj-nexus/discussions) | Questions, suggestions and complaints |

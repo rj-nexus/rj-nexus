@@ -2,6 +2,29 @@
 
 All notable changes to RJ Nexus will be documented in this file.
 
+## [v1.8.8] - RJ CORE 1
+
+This update focuses on completely revamping the theme and plugin registry system, improving GitHub automation, and fixing the AI Vault integration.
+
+### Added
+- **Split Registry System:** Separated the monolithic `registry.json` into an index file (`registry.json`), `themes.json`, and `plugins.json` for faster parsing, better caching, and smaller PRs.
+- **Registry JSON Schemas:** Added strict JSON schemas (`registry.schema.json`, `theme.schema.json`, `plugin.schema.json`) to validate submissions.
+- **Direct Registry Submission:** Added a new GitHub Pages form (`index.html`) that submits directly to a Cloudflare Worker via `fetch`, eliminating the need for users to redirect to GitHub or create accounts.
+- **Cloudflare Worker Endpoints:** Added explicit `/submit`, `/keys`, and `/health` routes to the Vault Worker. `/submit` triggers a GitHub `repository_dispatch`, `/keys` serves AI vault credentials, and `/health` monitors environment variables.
+- **Registry Dispatch Workflow:** Added `.github/workflows/registry-dispatch.yml` to automatically listen for `repository_dispatch` events, validate payloads, check target repos for manifests, and open PRs automatically.
+- **Animated Success UI:** Added a custom confetti animation and checkmark overlay to the registry submission form upon successful submission.
+
+### Fixed
+- **AI Vault Fallback:** Fixed the Vault worker so that AI keys can be explicitly fetched from the `/keys` endpoint, resolving the `{"error":"Failed to fetch keys"}` issue.
+- **Registry CI Validation:** Updated `.github/workflows/validate.yml` to use `ajv/dist/2020` to support Draft 2020-12 JSON schemas, and added remote manifest matching checks.
+- **Theme Browse Crash:** Fixed `Undefined array key "slug"` in `browse.blade.php` by restoring the dynamically generated `slug` key inside `GitHubRegistry::enrichEntry()`.
+
+### Improved
+- **GitHubRegistry Service:** Refactored `GitHubRegistry.php` to read from the split `themes.json` and `plugins.json` files. It no longer fetches the manifest on every page load; instead, it relies on the registry data and only calls the GitHub API to fetch the latest release ZIP URL.
+- **Registry Automation:** Maintainers no longer need to manually update `count` and `updated_at` in `registry.json`, as the GitHub Action automatically updates these values when merging new PRs.
+
+---
+
 ## [v1.8.7] - RJ CORE 1
 
 This update focuses on fully restoring and stabilizing the visual Icon Picker within the RJ Builder, and adding icon support to Repeater fields.

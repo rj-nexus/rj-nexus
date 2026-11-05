@@ -147,7 +147,7 @@ Child themes override parent views and assets. Place the child theme in `rj-cont
 ### Publishing to the registry
 
 1. Create a GitHub release with a ZIP asset
-2. Add your repository to `rj_cms_theme_and_plugin_list`
+2. Add your repository to `rj-registration`
 3. Wait for review
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for full details.
