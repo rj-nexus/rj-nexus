@@ -397,7 +397,9 @@ class SettingsController extends Controller
     public function security()
     {
         $options = $this->getGroup('security');
-        return view('admin.settings.security', compact('options'));
+        $proxyStatus = rj_proxy_status();
+
+        return view('admin.settings.security', compact('options', 'proxyStatus'));
     }
 
     public function updateSecurity(Request $request)
