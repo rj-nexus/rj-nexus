@@ -36,11 +36,17 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        $user = User::create([
+        $user = new User([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
+
+        // Fillable-dən çıxarıldığı üçün rolları əl ilə təyin edirik
+        $user->role = 'user';
+        $user->status = 'active';
+
+        $user->save();
 
         event(new Registered($user));
 
