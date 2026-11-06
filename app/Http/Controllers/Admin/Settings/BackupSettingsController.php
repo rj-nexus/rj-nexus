@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Settings;
 
 use Illuminate\Http\Request;
 use App\Models\Option;
+use Illuminate\Support\Facades\Process;
 
 class BackupSettingsController extends BaseSettingsController
 {
@@ -204,27 +205,47 @@ class BackupSettingsController extends BaseSettingsController
     {
         $db = config('database.connections.mysql');
 
-        $cmd = sprintf(
-            'mysqldump --host=%s --port=%s --user=%s --password=%s %s > %s 2>&1',
-            escapeshellarg($db['host']),
-            escapeshellarg($db['port'] ?? '3306'),
-            escapeshellarg($db['username']),
-            escapeshellarg($db['password']),
-            escapeshellarg($db['database']),
-            escapeshellarg($path)
-        );
+        $command = [
+            'mysqldump',
+            '--host=' . $db['host'],
+            '--port=' . ($db['port'] ?? '3306'),
+            '--user=' . $db['username'],
+            '--password=' . $db['password'],
+            $db['database']
+        ];
 
-        exec($cmd, $output, $code);
-
-        if ($code !== 0 || !file_exists($path) || filesize($path) === 0) {
-            if (file_exists($path)) {
-                @unlink($path);
+        try {
+            $fileHandle = fopen($path, 'w');
+            
+            if (!$fileHandle) {
+                return ['success' => false, 'error' => 'Cannot open file for writing.'];
             }
 
-            return ['success' => false, 'error' => 'mysqldump failed. Check if mysqldump is available in PATH.'];
-        }
+            $result = Process::timeout(600)
+                ->run($command, function ($type, $buffer) use ($fileHandle) {
+                    if (Process::OUT === $type) {
+                        fwrite($fileHandle, $buffer);
+                    }
+                });
 
-        return ['success' => true];
+            fclose($fileHandle);
+
+            if ($result->failed() || !file_exists($path) || filesize($path) === 0) {
+                if (file_exists($path)) {
+                    @unlink($path);
+                }
+
+                return ['success' => false, 'error' => 'mysqldump failed. Check if mysqldump is available in PATH or DB credentials are correct.'];
+            }
+
+            return ['success' => true];
+        } catch (\Throwable $e) {
+            if (isset($fileHandle) && is_resource($fileHandle)) {
+                fclose($fileHandle);
+            }
+            
+            return ['success' => false, 'error' => 'mysqldump execution error: ' . $e->getMessage()];
+        }
     }
 
     protected function addDirectoryToZip(\ZipArchive $zip, string $dir, string $prefix): void
