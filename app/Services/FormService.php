@@ -14,21 +14,24 @@ class FormService
     {
         $settings = $form->settings();
 
-        $payload = [
+        // Fillable-də olan təhlükəsiz sahələr
+        $submission = new FormSubmission([
             'form_id' => $form->id,
             'data' => $data,
-            'status' => 'new',
-            'ip_address' => $request->ip(),
-            'user_agent' => (string) $request->userAgent(),
-            'referrer' => (string) $request->headers->get('referer', ''),
-            'user_id' => auth()->id(),
-        ];
+        ]);
+
+        // Fillable-dən çıxardığımız sahələri əl ilə təyin edirik
+        $submission->status = 'new';
+        $submission->ip_address = $request->ip();
+        $submission->user_agent = (string) $request->userAgent();
+        $submission->referrer = (string) $request->headers->get('referer', '');
+        $submission->user_id = auth()->id();
 
         if (!($settings['store_submissions'] ?? true)) {
-            $payload['notes'] = __('Submissions storage disabled.');
+            $submission->notes = __('Submissions storage disabled.');
         }
 
-        $submission = FormSubmission::create($payload);
+        $submission->save();
 
         $this->sendAdminNotification($form, $submission);
         $this->sendUserNotification($form, $submission);
