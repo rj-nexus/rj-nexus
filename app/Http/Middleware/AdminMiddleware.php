@@ -36,6 +36,12 @@ class AdminMiddleware
                 return true;
             }
 
+            $proxyStatus = rj_proxy_status();
+
+            if ($proxyStatus['behind_proxy'] && !$proxyStatus['trusted']) {
+                return true;
+            }
+
             $raw = (string) rj_get_option('ip_whitelist', '');
         } catch (\Throwable $e) {
             return true;
