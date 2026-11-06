@@ -11,15 +11,10 @@ class Comment extends Model
     protected $fillable = [
         'post_id',
         'parent_id',
-        'user_id',
         'author_name',
         'author_email',
         'author_url',
-        'author_ip',
         'content',
-        'status',
-        'like_count',
-        'meta',
     ];
 
     protected $casts = [
