@@ -84,7 +84,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::post('/send', [NewsletterController::class, 'sendBulk'])->name('send');
     });
 
-    Route::prefix('posts')->name('posts.')->group(function () {
+    Route::prefix('posts')->name('posts.')->middleware('throttle:60,1')->group(function () {
         Route::get('/', [PostController::class, 'index'])->name('index');
         Route::get('/create', [PostController::class, 'create'])->name('create');
         Route::post('/', [PostController::class, 'store'])->name('store');
@@ -122,7 +122,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/{post}', [PostController::class, 'show'])->name('show');
     });
 
-    Route::prefix('pages')->name('pages.')->group(function () {
+    Route::prefix('pages')->name('pages.')->middleware('throttle:60,1')->group(function () {
         Route::get('/', [PostController::class, 'index'])->name('index')->defaults('type', 'page');
         Route::get('/create', [PostController::class, 'create'])->name('create')->defaults('type', 'page');
         Route::post('/', [PostController::class, 'store'])->name('store');
