@@ -13,18 +13,21 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])
+        ->middleware('throttle:register')
         ->name('register');
 
     Route::post('register', [RegisteredUserController::class, 'store'])
         ->middleware('throttle:register');
 
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
+        ->middleware('throttle:login')
         ->name('login');
 
     Route::post('login', [AuthenticatedSessionController::class, 'store'])
         ->middleware('throttle:login');
 
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
+        ->middleware('throttle:6,1')
         ->name('password.request');
 
     Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
@@ -32,6 +35,7 @@ Route::middleware('guest')->group(function () {
         ->name('password.email');
 
     Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])
+        ->middleware('throttle:6,1')
         ->name('password.reset');
 
     Route::post('reset-password', [NewPasswordController::class, 'store'])
@@ -52,12 +56,15 @@ Route::middleware('auth')->group(function () {
         ->name('verification.send');
 
     Route::get('confirm-password', [ConfirmablePasswordController::class, 'show'])
+        ->middleware('throttle:6,1')
         ->name('password.confirm');
 
     Route::post('confirm-password', [ConfirmablePasswordController::class, 'store'])
         ->middleware('throttle:6,1');
 
-    Route::put('password', [PasswordController::class, 'update'])->name('password.update');
+    Route::put('password', [PasswordController::class, 'update'])
+        ->middleware('throttle:6,1')
+        ->name('password.update');
 
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
