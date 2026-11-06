@@ -26,6 +26,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
         ]);
 
+        $middleware->web(prepend: [
+            \App\Http\Middleware\ForceHttps::class,
+        ]);
+
         $middleware->web(append: [
             \App\Http\Middleware\SetLocale::class,
             \App\Http\Middleware\CheckMaintenanceMode::class,
@@ -35,7 +39,6 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->render(function (\Throwable $e, $request) {
 
-            // BURANI ƏLAVƏ ETDİK: Sessiya bitəndə avtomatik Login-ə yönləndirir
             if ($e instanceof AuthenticationException) {
                 if ($request->expectsJson()) {
                     return response()->json(['message' => 'Unauthenticated.'], 401);
@@ -43,7 +46,6 @@ return Application::configure(basePath: dirname(__DIR__))
                 return redirect()->guest(route('login'));
             }
 
-            // Sənin əvvəlki RJ Debug məntiqin
             if (config('app.debug') && !$request->expectsJson()) {
                 $isHttpException = $e instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
                 $statusCode = $isHttpException ? $e->getStatusCode() : 500;
