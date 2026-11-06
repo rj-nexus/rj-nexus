@@ -60,7 +60,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::prefix('profile')->name('profile.')->group(function () {
         Route::get('/', [ProfileController::class, 'edit'])->name('edit');
         Route::put('/', [ProfileController::class, 'update'])->name('update');
-        Route::put('/password', [ProfileController::class, 'updatePassword'])->name('password');
+        Route::put('/password', [ProfileController::class, 'updatePassword'])->name('password')->middleware('throttle:6,1');
     });
 
     Route::prefix('profile/two-factor')->name('profile.two-factor.')->group(function () {
