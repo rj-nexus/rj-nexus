@@ -111,6 +111,13 @@ class AppServiceProvider extends ServiceProvider
                 Config::set('mail.from.address', rj_get_option('smtp_from_address', 'hello@example.com'));
                 Config::set('mail.from.name', rj_get_option('smtp_from_name', config('app.name')));
             }
+
+            $forceHttps = rj_get_option('force_https') === '1';
+            $isHttps = str_starts_with((string) config('app.url', ''), 'https://');
+
+            if ($forceHttps || $isHttps) {
+                Config::set('session.secure', true);
+            }
         }
     }
 }
