@@ -78,16 +78,21 @@ class CommentController extends Controller
 
         $post = Post::findOrFail($validated['post_id']);
 
-        $comment = Comment::create([
+        // Fillable-də olan təhlükəsiz sahələr
+        $comment = new Comment([
             'post_id' => $post->id,
             'parent_id' => $validated['parent_id'] ?? null,
-            'user_id' => auth()->id(),
             'author_name' => $validated['author_name'] ?? auth()->user()->name,
             'author_email' => $validated['author_email'] ?? auth()->user()->email,
-            'author_ip' => $request->ip(),
             'content' => $validated['content'],
-            'status' => $validated['status'] ?? 'approved',
         ]);
+
+        // Fillable-dən çıxardığımız sahələri əl ilə təyin edirik
+        $comment->user_id = auth()->id();
+        $comment->author_ip = $request->ip();
+        $comment->status = $validated['status'] ?? 'approved';
+
+        $comment->save();
 
         if ($request->expectsJson()) {
             return response()->json(['success' => true, 'comment' => $comment]);
@@ -201,7 +206,7 @@ class CommentController extends Controller
         return back()->with('success', __(':n comment(s) updated.', ['n' => $count]));
     }
 
-        public function toggleGlobal(Request $request)
+    public function toggleGlobal(Request $request)
     {
         $enabled = (bool) rj_get_option('comments_enabled', true);
         $newValue = !$enabled;
@@ -235,7 +240,7 @@ class CommentController extends Controller
         ]);
     }
 
-        public function aiAnalyze(Comment $comment)
+    public function aiAnalyze(Comment $comment)
     {
         $service = app(\App\Services\AiCommentService::class);
 
