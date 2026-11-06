@@ -75,6 +75,9 @@ class ActivityLogController extends Controller
 
     public function destroy(Request $request, ActivityLog $activityLog)
     {
+        // Təhlükəsizlik yoxlaması əlavə edildi
+        abort_unless($request->user()?->isAdmin(), 403, 'Unauthorized action.');
+
         $activityLog->delete();
 
         if ($request->expectsJson()) {
@@ -86,13 +89,17 @@ class ActivityLogController extends Controller
 
     public function bulk(Request $request)
     {
+        // Təhlükəsizlik yoxlaması əlavə edildi
+        abort_unless($request->user()?->isAdmin(), 403, 'Unauthorized action.');
+
         $validated = $request->validate([
             'ids' => 'required|array',
             'ids.*' => 'integer|exists:rj_activity_log,id',
             'action' => 'required|in:delete',
         ]);
 
-        $count = ActivityLog::whereIn('ids', $validated['ids'])->delete();
+        // Bug düzəldildi: 'ids' yox, 'id' olmalıdır
+        $count = ActivityLog::whereIn('id', $validated['ids'])->delete();
 
         if ($request->expectsJson()) {
             return response()->json(['success' => true, 'count' => $count]);
@@ -103,6 +110,9 @@ class ActivityLogController extends Controller
 
     public function clear(Request $request)
     {
+        // Təhlükəsizlik yoxlaması əlavə edildi
+        abort_unless($request->user()?->isAdmin(), 403, 'Unauthorized action.');
+
         $validated = $request->validate([
             'days' => 'nullable|integer|min:1|max:365',
             'log_name' => 'nullable|string|max:100',
