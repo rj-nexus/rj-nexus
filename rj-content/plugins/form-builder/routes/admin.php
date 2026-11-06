@@ -4,11 +4,11 @@ use Illuminate\Support\Facades\Route;
 use RjPlugins\FormBuilder\Controllers\Admin\FormController;
 use RjPlugins\FormBuilder\Controllers\Admin\SubmissionController;
 
-Route::middleware(['web', 'auth', 'admin'])->prefix('admin/plugin/forms')->name('admin.plugin.forms.')->group(function () {
+Route::middleware(['web', 'auth', 'admin', 'throttle:60,1'])->prefix('admin/plugin/forms')->name('admin.plugin.forms.')->group(function () {
     Route::get('/', [FormController::class, 'index'])->name('index');
     Route::get('/create', [FormController::class, 'create'])->name('create');
     Route::post('/', [FormController::class, 'store'])->name('store');
-    
+
     Route::get('/{form}', function (\RjPlugins\FormBuilder\Models\Form $form) {
         return redirect()->route('admin.plugin.forms.edit', $form);
     })->name('show');
