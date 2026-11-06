@@ -76,10 +76,11 @@ class PostController extends Controller
 
         $post = new Post([
             'type' => $type,
-            'status' => 'draft',
             'allow_comments' => true,
             'edit_mode' => $type === 'page' ? 'builder' : 'classic',
         ]);
+
+        $post->status = 'draft';
 
         $categories = Category::with('translations')->ordered()->get()->sortBy('name')->values();
         $tags = Tag::with('translations')->ordered()->get()->sortBy('name')->values();
@@ -283,7 +284,7 @@ class PostController extends Controller
             'slug' => $post->slug,
             'name' => $post->title ?: __('Untitled'),
             'subtitle' => $post->typeLabel(),
-            'templateType' => 'page', // BURANI DÜZƏLTDİK ('page' olaraq qalır)
+            'templateType' => 'page',
             'baseBlocks' => $baseBlocks,
             'activeBlocks' => $activeBlocks,
             'updateUrl' => route('admin.posts.blocks', $post),
