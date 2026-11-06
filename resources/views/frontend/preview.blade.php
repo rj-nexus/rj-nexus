@@ -60,8 +60,7 @@
         @endif
     </div>
 
-    <a href="javascript:history.back()" class="rj-preview-exit">{{ __('Back to builder') }}</a>
-
+    <button type="button" onclick="history.back()" class="rj-preview-exit">{{ __('Back to builder') }}</button>
     @if($activeTheme)
         @foreach(($themeAssets['js'] ?? []) as $js)
             <script src="{{ $activeTheme->assetUrl($js) }}" defer></script>
