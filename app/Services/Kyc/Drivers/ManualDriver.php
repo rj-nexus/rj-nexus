@@ -26,17 +26,20 @@ class ManualDriver implements KycDriverInterface
             }
         }
 
-        KycVerification::create([
-            'user_id' => $user->id,
-            'driver' => 'manual',
-            'status' => 'pending',
+        $verification = new KycVerification([
             'document_type' => $data['document_type'] ?? 'id_card',
             'document_front' => $paths['document_front'] ?? null,
             'document_back' => $paths['document_back'] ?? null,
             'selfie' => $paths['selfie'] ?? null,
         ]);
 
-        $user->update(['kyc_status' => 'pending']);
+        $verification->user_id = $user->id;
+        $verification->driver = 'manual';
+        $verification->status = 'pending';
+        $verification->save();
+
+        $user->kyc_status = 'pending';
+        $user->save();
 
         return true;
     }
