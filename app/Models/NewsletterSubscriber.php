@@ -12,13 +12,7 @@ class NewsletterSubscriber extends Model
     protected $fillable = [
         'email',
         'name',
-        'status',
         'source',
-        'token',
-        'ip_address',
-        'user_agent',
-        'confirmed_at',
-        'unsubscribed_at',
     ];
 
     protected $casts = [
@@ -61,30 +55,32 @@ class NewsletterSubscriber extends Model
 
         $existing = static::where('email', $email)->first();
         if ($existing) {
-            $existing->update([
-                'name'            => $name ?: $existing->name,
-                'status'          => 'active',
-                'unsubscribed_at' => null,
-            ]);
+            $existing->name = $name ?: $existing->name;
+            $existing->status = 'active';
+            $existing->unsubscribed_at = null;
+            $existing->save();
             return $existing;
         }
 
-        return static::create([
-            'email'        => $email,
-            'name'         => $name,
-            'status'       => 'active',
-            'source'       => $source,
-            'ip_address'   => request()->ip(),
-            'user_agent'   => substr((string) request()->userAgent(), 0, 255),
-            'confirmed_at' => now(),
+        $subscriber = new static([
+            'email'  => $email,
+            'name'   => $name,
+            'source' => $source,
         ]);
+
+        $subscriber->status = 'active';
+        $subscriber->ip_address = request()->ip();
+        $subscriber->user_agent = substr((string) request()->userAgent(), 0, 255);
+        $subscriber->confirmed_at = now();
+        $subscriber->save();
+
+        return $subscriber;
     }
 
     public function unsubscribe(): void
     {
-        $this->update([
-            'status'          => 'unsubscribed',
-            'unsubscribed_at' => now(),
-        ]);
+        $this->status = 'unsubscribed';
+        $this->unsubscribed_at = now();
+        $this->save();
     }
 }
