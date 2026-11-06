@@ -235,6 +235,15 @@
             @php
                 $appUrlIsHttps = str_starts_with((string) config('app.url'), 'https://');
                 $currentRequestSecure = request()->secure();
+                $currentIp = request()->ip();
+                $whitelistRaw = (string) ($options['ip_whitelist'] ?? '');
+                $currentIpIsListed = false;
+                foreach (preg_split('/\r\n|\r|\n/', $whitelistRaw) as $line) {
+                    if (trim($line) === $currentIp) {
+                        $currentIpIsListed = true;
+                        break;
+                    }
+                }
             @endphp
 
             <div class="space-y-3 pt-2">
@@ -274,8 +283,26 @@
 
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('Allowed IPs') }}</label>
-                <textarea name="ip_whitelist" rows="3" placeholder="192.168.1.1&#10;10.0.0.1" class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple">{{ old('ip_whitelist', $options['ip_whitelist'] ?? '') }}</textarea>
-                <div class="text-xs text-gray-500 mt-1">{{ __('One IP per line.') }}</div>
+
+                <div class="mb-2 flex items-center gap-2 text-xs">
+                    <span class="text-gray-500">{{ __('Your current IP:') }}</span>
+                    <code class="px-2 py-1 rounded bg-gray-100 text-gray-900 font-mono">{{ $currentIp }}</code>
+                    @if($currentIpIsListed)
+                        <span class="text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded">{{ __('Listed') }}</span>
+                    @else
+                        <span class="text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded">{{ __('Not in list') }}</span>
+                    @endif
+                </div>
+
+                @if(!$currentIpIsListed)
+                    <div class="mb-2 flex items-start gap-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                        <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span>{{ __('Add your current IP to the list before enabling the whitelist, otherwise you will be locked out of the admin panel.') }}</span>
+                    </div>
+                @endif
+
+                <textarea name="ip_whitelist" rows="4" placeholder="192.168.1.1&#10;10.0.0.1" class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple font-mono text-sm">{{ old('ip_whitelist', $options['ip_whitelist'] ?? '') }}</textarea>
+                <div class="text-xs text-gray-500 mt-1">{{ __('One IP per line. Invalid entries are ignored. If the list is empty, the whitelist is disabled even if enabled above.') }}</div>
             </div>
         </div>
 
