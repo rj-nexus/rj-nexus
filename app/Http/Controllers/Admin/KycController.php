@@ -27,16 +27,14 @@ class KycController extends Controller
 
     public function approve(Request $request, KycVerification $verification)
     {
-        $verification->update([
-            'status' => 'approved',
-            'rejection_reason' => null,
-        ]);
+        $verification->status = 'approved';
+        $verification->rejection_reason = null;
+        $verification->save();
 
         $user = $verification->user;
-        $user->update([
-            'kyc_status' => 'approved',
-            'kyc_verified_at' => now(),
-        ]);
+        $user->kyc_status = 'approved';
+        $user->kyc_verified_at = now();
+        $user->save();
 
         return redirect()->route('admin.kyc.index')->with('success', __('KYC verification approved successfully.'));
     }
@@ -47,15 +45,14 @@ class KycController extends Controller
             'rejection_reason' => 'required|string|max:1000',
         ]);
 
-        $verification->update([
-            'status' => 'rejected',
-            'rejection_reason' => $validated['rejection_reason'],
-        ]);
+        $verification->status = 'rejected';
+        $verification->rejection_reason = $validated['rejection_reason'];
+        $verification->save();
 
-        $verification->user->update([
-            'kyc_status' => 'rejected',
-            'kyc_verified_at' => null,
-        ]);
+        $user = $verification->user;
+        $user->kyc_status = 'rejected';
+        $user->kyc_verified_at = null;
+        $user->save();
 
         return redirect()->route('admin.kyc.index')->with('success', __('KYC verification rejected.'));
     }
