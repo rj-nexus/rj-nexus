@@ -28,22 +28,35 @@ class MediaCleanupController extends Controller
     {
         $data = $request->validate([
             'files' => ['required', 'array'],
-            'files.*' => ['required', 'string'],
+            'files.*' => ['required', 'string', 'regex:#^uploads/[A-Za-z0-9_\-./]+$#'],
         ]);
 
+        $uploadsRoot = realpath(public_path('uploads'));
         $deleted = 0;
         $freed = 0;
 
         foreach ($data['files'] as $relative) {
-            $path = public_path($relative);
-
-            if (!file_exists($path) || !is_file($path)) {
+            if (str_contains($relative, '..')) {
                 continue;
             }
 
-            $size = filesize($path);
+            $fullPath = realpath(public_path($relative));
 
-            if (@unlink($path)) {
+            if ($fullPath === false) {
+                continue;
+            }
+
+            if ($uploadsRoot === false || !str_starts_with($fullPath, $uploadsRoot . DIRECTORY_SEPARATOR)) {
+                continue;
+            }
+
+            if (!is_file($fullPath)) {
+                continue;
+            }
+
+            $size = filesize($fullPath);
+
+            if (@unlink($fullPath)) {
                 $deleted++;
                 $freed += $size;
             }
