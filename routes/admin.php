@@ -53,7 +53,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/test-ai', [AiTestController::class, 'index'])->name('test-ai');
 
     Route::view('/services', 'admin.services.index')->name('services.index');
-    Route::post('/dashboard/ask-ai', [DashboardController::class, 'askAi'])->name('ask-ai');
+    Route::post('/dashboard/ask-ai', [DashboardController::class, 'askAi'])->name('ask-ai')->middleware('throttle:10,1');
 
     Route::get('/lang/{locale}', [LangController::class, 'switch'])->name('lang.switch');
 
