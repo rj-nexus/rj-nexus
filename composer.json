@@ -13,8 +13,6 @@
         "pragmarx/google2fa": "^9.1"
     },
     "require-dev": {
-        "artflow-studio/laravel-security": "^0.1.4",
-        "baspa/larascan": "^3.1",
         "fakerphp/faker": "^1.23",
         "laravel/breeze": "^2.4",
         "laravel/pail": "^1.2.2",
