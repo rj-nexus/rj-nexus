@@ -990,3 +990,25 @@ if (!function_exists('rj_flush_theme_mods')) {
         \Illuminate\Support\Facades\Cache::forget('rj_theme_customizations');
     }
 }
+if (!function_exists('rj_proxy_status')) {
+    function rj_proxy_status(): array
+    {
+        $request = request();
+        $remoteAddr = $request->server('REMOTE_ADDR');
+        $cfIp = $request->header('CF-Connecting-IP');
+        $forwardedFor = $request->header('X-Forwarded-For');
+        $laravelIp = $request->ip();
+
+        $behindProxy = !empty($cfIp) || !empty($forwardedFor);
+        $trusted = $laravelIp !== $remoteAddr;
+
+        return [
+            'behind_proxy' => $behindProxy,
+            'trusted' => $trusted,
+            'remote_addr' => $remoteAddr ?? 'Unknown',
+            'laravel_ip' => $laravelIp ?? 'Unknown',
+            'cf_ip' => $cfIp,
+            'forwarded_for' => $forwardedFor,
+        ];
+    }
+}
