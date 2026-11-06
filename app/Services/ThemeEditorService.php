@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Theme;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Str;
 
 class ThemeEditorService
@@ -169,15 +170,12 @@ class ThemeEditorService
                 $tmp = tempnam(sys_get_temp_dir(), 'rj_theme_check_');
                 file_put_contents($tmp, "<?php\n" . $compiled);
 
-                $output = null;
-                $returnCode = 0;
-
-                exec('php -l ' . escapeshellarg($tmp) . ' 2>&1', $output, $returnCode);
-
+                $result = Process::run(['php', '-l', $tmp]);
+                
                 @unlink($tmp);
 
-                if ($returnCode !== 0) {
-                    $message = implode("\n", $output);
+                if ($result->failed()) {
+                    $message = trim($result->output() . "\n" . $result->errorOutput());
 
                     if (preg_match('/Parse error:\s*(.+?)\s+in/', $message, $m)) {
                         $message = $m[1];
