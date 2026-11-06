@@ -64,9 +64,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     });
 
     Route::prefix('profile/two-factor')->name('profile.two-factor.')->group(function () {
-        Route::post('/enable', [TwoFactorController::class, 'enable'])->name('enable');
-        Route::post('/confirm', [TwoFactorController::class, 'confirm'])->name('confirm');
-        Route::delete('/disable', [TwoFactorController::class, 'disable'])->name('disable');
+        Route::post('/enable', [TwoFactorController::class, 'enable'])->name('enable')->middleware('throttle:otp');
+        Route::post('/confirm', [TwoFactorController::class, 'confirm'])->name('confirm')->middleware('throttle:otp');
+        Route::delete('/disable', [TwoFactorController::class, 'disable'])->name('disable')->middleware('throttle:otp');
     });
 
     Route::resource('users', UserController::class)->except(['show']);
