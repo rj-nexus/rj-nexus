@@ -10,6 +10,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\URL;
 
 use App\Observers\ActivityLogObserver;
 use App\Models\Post;
@@ -44,6 +45,20 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         config(['app.base_locale' => config('app.locale', 'en')]);
+
+        $appUrl = (string) config('app.url', '');
+
+        if ($appUrl !== ''
+            && !str_contains($appUrl, 'localhost')
+            && !str_contains($appUrl, '127.0.0.1')
+            && filter_var($appUrl, FILTER_VALIDATE_URL)
+        ) {
+            URL::forceRootUrl($appUrl);
+
+            if (str_starts_with($appUrl, 'https://')) {
+                URL::forceScheme('https');
+            }
+        }
 
         if (!file_exists(storage_path('installed.lock'))) {
             return;
