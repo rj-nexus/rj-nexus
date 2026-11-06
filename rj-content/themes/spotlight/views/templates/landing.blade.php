@@ -264,7 +264,9 @@
         {!! rj_render_blocks($page->blocks['blocks'] ?? []) !!}
     @elseif($page && $page->content)
         <div class="rj-container" style="padding-top:64px;padding-bottom:64px;">
-            <div class="rj-page-content">{!! $page->content !!}</div>
+            <div class="rj-page-content">
+                {!! strip_tags($page->content, '<p><br><strong><b><em><i><u><a><ul><ol><li><h1><h2><h3><h4><h5><h6><img><blockquote><pre><code><span><div><table><thead><tbody><tr><th><td>') !!}
+            </div>
         </div>
     @else
 
