@@ -2,7 +2,9 @@
 
 return [
 
+    // BÜTÜN SKANERLƏR BURADA SADALANIB
     'default_scanners' => [
+        'livewire',
         'rate-limit',
         'function-security',
         'data-exposure',
@@ -11,7 +13,14 @@ return [
         'xss',
         'sql-injection',
         'csrf',
-        'dependencies',
+        'command-injection',
+        'file-upload',
+        'mass-assignment',
+        'session-security',
+        'sensitive-data',
+        'route-security',
+        'dependency',
+        'environment',
     ],
 
     'scan_paths' => [
@@ -20,7 +29,7 @@ return [
         'routes',
         'config',
         'database',
-        'rj-content', // RJ Nexus plagin və temaları üçün əlavə edildi
+        'rj-content',
     ],
 
     'exclude_paths' => [
@@ -40,9 +49,9 @@ return [
     'severity_threshold' => 'low',
 
     'report' => [
-        'format' => 'html', // HTML hesabat daha rahat oxunur
+        'format' => 'html', // HTML hesabatı
         'output_dir' => storage_path('scanner-reports'),
-        'auto_save' => true, // Nəticələri avtomatik yadda saxla
+        'auto_save' => true, // Avtomatik yadda saxla
     ],
 
     'livewire' => [
@@ -62,24 +71,15 @@ return [
             '/login',
             '/register',
             '/password/reset',
-            '/rj-widget/login', // Bizim widget login
-            '/*/account/password', // Frontend şifrə dəyişmə
-            '/admin/profile/password', // Admin şifrə dəyişmə
+            '/rj-widget/login',
+            '/*/account/password',
+            '/admin/profile/password',
         ],
     ],
 
     'function_security' => [
         'dangerous_functions' => [
-            'eval',
-            'exec',
-            'system',
-            'shell_exec',
-            'passthru',
-            'proc_open',
-            'popen',
-            'unserialize',
-            'assert',
-            'create_function',
+            'eval', 'exec', 'system', 'shell_exec', 'passthru', 'proc_open', 'popen', 'unserialize', 'assert', 'create_function',
         ],
         'check_raw_queries' => true,
         'check_file_operations' => true,
@@ -90,14 +90,7 @@ return [
         'check_stack_traces' => true,
         'check_api_responses' => true,
         'sensitive_keywords' => [
-            'password',
-            'secret',
-            'token',
-            'api_key',
-            'private_key',
-            'access_token',
-            'refresh_token',
-            'bearer',
+            'password', 'secret', 'token', 'api_key', 'private_key', 'access_token', 'refresh_token', 'bearer',
         ],
     ],
 
@@ -135,7 +128,5 @@ return [
     ],
 
     'show_fix_suggestions' => true,
-
     'show_progress' => true,
-
 ];
