@@ -26,8 +26,7 @@ class CustomField extends Model
         'is_repeatable',
         'location',
         'sort_order',
-        'status',
-        'author_id',
+
     ];
 
     protected $casts = [
