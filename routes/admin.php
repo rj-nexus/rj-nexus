@@ -57,7 +57,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     Route::get('/lang/{locale}', [LangController::class, 'switch'])->name('lang.switch');
 
-    Route::prefix('profile')->name('profile.')->group(function () {
+    Route::prefix('profile')->name('profile.')->middleware('throttle:60,1')->group(function () {
         Route::get('/', [ProfileController::class, 'edit'])->name('edit');
         Route::put('/', [ProfileController::class, 'update'])->name('update');
         Route::put('/password', [ProfileController::class, 'updatePassword'])->name('password')->middleware('throttle:6,1');
@@ -148,22 +148,24 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/{post}', [PostController::class, 'show'])->name('show');
     });
 
-    Route::get('/media', [MediaController::class, 'index'])->name('media.index');
-    Route::get('/media/picker', [MediaController::class, 'picker'])->name('media.picker');
-    Route::get('/media/create', [MediaController::class, 'create'])->name('media.create');
-    Route::post('/media', [MediaController::class, 'store'])->name('media.store');
-    Route::post('/media/bulk-delete', [MediaController::class, 'bulkDestroy'])->name('media.bulk-delete');
-    Route::get('/media/{medium}/edit', [MediaController::class, 'edit'])->name('media.edit');
-    Route::put('/media/{medium}', [MediaController::class, 'update'])->name('media.update');
-    Route::delete('/media/{medium}', [MediaController::class, 'destroy'])->name('media.destroy');
-    Route::get('/media-cleanup', [MediaCleanupController::class, 'index'])->name('media.cleanup');
-    Route::post('/media-cleanup/delete', [MediaCleanupController::class, 'delete'])->name('media.cleanup.delete');
-    Route::post('/media-cleanup/prune-db', [MediaCleanupController::class, 'pruneDatabase'])->name('media.cleanup.prune-db');
+    Route::middleware('throttle:120,1')->group(function () {
+        Route::get('/media', [MediaController::class, 'index'])->name('media.index');
+        Route::get('/media/picker', [MediaController::class, 'picker'])->name('media.picker');
+        Route::get('/media/create', [MediaController::class, 'create'])->name('media.create');
+        Route::post('/media', [MediaController::class, 'store'])->name('media.store');
+        Route::post('/media/bulk-delete', [MediaController::class, 'bulkDestroy'])->name('media.bulk-delete');
+        Route::get('/media/{medium}/edit', [MediaController::class, 'edit'])->name('media.edit');
+        Route::put('/media/{medium}', [MediaController::class, 'update'])->name('media.update');
+        Route::delete('/media/{medium}', [MediaController::class, 'destroy'])->name('media.destroy');
+        Route::get('/media-cleanup', [MediaCleanupController::class, 'index'])->name('media.cleanup');
+        Route::post('/media-cleanup/delete', [MediaCleanupController::class, 'delete'])->name('media.cleanup.delete');
+        Route::post('/media-cleanup/prune-db', [MediaCleanupController::class, 'pruneDatabase'])->name('media.cleanup.prune-db');
+    });
 
     Route::redirect('/appearance/menus', '/admin/menus')->name('appearance.menus');
     Route::redirect('/appearance/themes', '/admin/themes')->name('appearance.themes');
 
-    Route::prefix('menus')->name('menus.')->group(function () {
+    Route::prefix('menus')->name('menus.')->middleware('throttle:60,1')->group(function () {
         Route::get('/', [MenuController::class, 'index'])->name('index');
         Route::post('/', [MenuController::class, 'store'])->name('store');
         Route::post('/locations', [MenuController::class, 'addLocation'])->name('locations.store');
@@ -192,42 +194,46 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         return redirect()->route('admin.themes.customizer', $theme);
     })->name('appearance.customize');
 
-    Route::get('/appearance/widgets', [AppearanceWidgetsController::class, 'index'])->name('appearance.widgets');
-    Route::post('/appearance/widgets/bulk', [AppearanceWidgetsController::class, 'bulk'])->name('appearance.widgets.bulk');
-    Route::post('/appearance/widgets/{id}/toggle', [AppearanceWidgetsController::class, 'toggle'])->name('appearance.widgets.toggle');
-    Route::post('/appearance/widgets/{id}/update', [AppearanceWidgetsController::class, 'update'])->name('appearance.widgets.update');
-    Route::post('/appearance/widgets/{id}/reset', [AppearanceWidgetsController::class, 'reset'])->name('appearance.widgets.reset');
+    Route::middleware('throttle:60,1')->group(function () {
+        Route::get('/appearance/widgets', [AppearanceWidgetsController::class, 'index'])->name('appearance.widgets');
+        Route::post('/appearance/widgets/bulk', [AppearanceWidgetsController::class, 'bulk'])->name('appearance.widgets.bulk');
+        Route::post('/appearance/widgets/{id}/toggle', [AppearanceWidgetsController::class, 'toggle'])->name('appearance.widgets.toggle');
+        Route::post('/appearance/widgets/{id}/update', [AppearanceWidgetsController::class, 'update'])->name('appearance.widgets.update');
+        Route::post('/appearance/widgets/{id}/reset', [AppearanceWidgetsController::class, 'reset'])->name('appearance.widgets.reset');
 
-    Route::get('/appearance/editor', [ThemeEditorController::class, 'index'])->name('appearance.editor');
-    Route::get('/appearance/editor/{slug}/files', [ThemeEditorController::class, 'files'])->name('appearance.editor.files');
-    Route::get('/appearance/editor/{slug}/read', [ThemeEditorController::class, 'read'])->name('appearance.editor.read');
-    Route::post('/appearance/editor/{slug}/save', [ThemeEditorController::class, 'save'])->name('appearance.editor.save');
-    Route::get('/appearance/editor/{slug}/backups', [ThemeEditorController::class, 'backups'])->name('appearance.editor.backups');
-    Route::post('/appearance/editor/{slug}/backups/{timestamp}/restore', [ThemeEditorController::class, 'restore'])->name('appearance.editor.restore');
-    Route::delete('/appearance/editor/{slug}/backups/{timestamp}', [ThemeEditorController::class, 'deleteBackup'])->name('appearance.editor.backups.delete');
+        Route::get('/appearance/editor', [ThemeEditorController::class, 'index'])->name('appearance.editor');
+        Route::get('/appearance/editor/{slug}/files', [ThemeEditorController::class, 'files'])->name('appearance.editor.files');
+        Route::get('/appearance/editor/{slug}/read', [ThemeEditorController::class, 'read'])->name('appearance.editor.read');
+        Route::post('/appearance/editor/{slug}/save', [ThemeEditorController::class, 'save'])->name('appearance.editor.save');
+        Route::get('/appearance/editor/{slug}/backups', [ThemeEditorController::class, 'backups'])->name('appearance.editor.backups');
+        Route::post('/appearance/editor/{slug}/backups/{timestamp}/restore', [ThemeEditorController::class, 'restore'])->name('appearance.editor.restore');
+        Route::delete('/appearance/editor/{slug}/backups/{timestamp}', [ThemeEditorController::class, 'deleteBackup'])->name('appearance.editor.backups.delete');
 
-    Route::get('/appearance/colors', [AppearanceColorsController::class, 'index'])->name('appearance.colors');
-    Route::post('/appearance/colors/save', [AppearanceColorsController::class, 'save'])->name('appearance.colors.save');
-    Route::post('/appearance/colors/reset', [AppearanceColorsController::class, 'reset'])->name('appearance.colors.reset');
-    Route::get('/appearance/colors/export', [AppearanceColorsController::class, 'export'])->name('appearance.colors.export');
-    Route::post('/appearance/colors/import', [AppearanceColorsController::class, 'import'])->name('appearance.colors.import');
+        Route::get('/appearance/colors', [AppearanceColorsController::class, 'index'])->name('appearance.colors');
+        Route::post('/appearance/colors/save', [AppearanceColorsController::class, 'save'])->name('appearance.colors.save');
+        Route::post('/appearance/colors/reset', [AppearanceColorsController::class, 'reset'])->name('appearance.colors.reset');
+        Route::get('/appearance/colors/export', [AppearanceColorsController::class, 'export'])->name('appearance.colors.export');
+        Route::post('/appearance/colors/import', [AppearanceColorsController::class, 'import'])->name('appearance.colors.import');
 
-    Route::get('/appearance/options', [AppearanceOptionsController::class, 'index'])->name('appearance.options');
-    Route::post('/appearance/options/save', [AppearanceOptionsController::class, 'save'])->name('appearance.options.save');
-    Route::post('/appearance/options/reset', [AppearanceOptionsController::class, 'reset'])->name('appearance.options.reset');
+        Route::get('/appearance/options', [AppearanceOptionsController::class, 'index'])->name('appearance.options');
+        Route::post('/appearance/options/save', [AppearanceOptionsController::class, 'save'])->name('appearance.options.save');
+        Route::post('/appearance/options/reset', [AppearanceOptionsController::class, 'reset'])->name('appearance.options.reset');
+    });
 
-    Route::get('/ai', [AiCenterController::class, 'index'])->name('ai.index');
-    Route::get('/ai/models', [AiCenterController::class, 'models'])->name('ai.models');
-    Route::post('/ai/models', [AiCenterController::class, 'saveModels'])->name('ai.models.save');
-    Route::get('/ai/prompts', [AiCenterController::class, 'prompts'])->name('ai.prompts');
-    Route::post('/ai/prompts', [AiCenterController::class, 'savePrompts'])->name('ai.prompts.save');
-    Route::get('/ai/usage', [AiCenterController::class, 'usage'])->name('ai.usage');
-    Route::get('/ai/tools', [AiToolController::class, 'index'])->name('ai.tools');
-    Route::post('/ai/tools/generate-content', [AiToolController::class, 'generateContent'])->name('ai.tools.generate-content');
-    Route::post('/ai/tools/bulk-translate', [AiToolController::class, 'bulkTranslate'])->name('ai.tools.bulk-translate');
-    Route::get('/ai/tools/seo-audit', [AiToolController::class, 'seoAudit'])->name('ai.tools.seo-audit');
+    Route::prefix('ai')->name('ai.')->middleware('throttle:60,1')->group(function () {
+        Route::get('/', [AiCenterController::class, 'index'])->name('index');
+        Route::get('/models', [AiCenterController::class, 'models'])->name('models');
+        Route::post('/models', [AiCenterController::class, 'saveModels'])->name('models.save');
+        Route::get('/prompts', [AiCenterController::class, 'prompts'])->name('prompts');
+        Route::post('/prompts', [AiCenterController::class, 'savePrompts'])->name('prompts.save');
+        Route::get('/usage', [AiCenterController::class, 'usage'])->name('usage');
+        Route::get('/tools', [AiToolController::class, 'index'])->name('tools');
+        Route::post('/tools/generate-content', [AiToolController::class, 'generateContent'])->name('tools.generate-content');
+        Route::post('/tools/bulk-translate', [AiToolController::class, 'bulkTranslate'])->name('tools.bulk-translate');
+        Route::get('/tools/seo-audit', [AiToolController::class, 'seoAudit'])->name('tools.seo-audit');
+    });
 
-    Route::prefix('support')->name('support.')->group(function () {
+    Route::prefix('support')->name('support.')->middleware('throttle:60,1')->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\SupportController::class, 'index'])->name('index');
         Route::post('/submit', [\App\Http\Controllers\Admin\SupportController::class, 'submit'])->name('submit');
         Route::get('/faq', [\App\Http\Controllers\Admin\SupportController::class, 'faq'])->name('faq');
@@ -240,33 +246,35 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     Route::view('/tools', 'admin.coming-soon')->name('tools.index');
 
-    Route::get('/tools/import', [ToolsImportController::class, 'index'])->name('tools.import');
-    Route::post('/tools/import/preview', [ToolsImportController::class, 'preview'])->name('tools.import.preview');
-    Route::post('/tools/import/run', [ToolsImportController::class, 'run'])->name('tools.import.run');
-    Route::post('/tools/import/cancel', [ToolsImportController::class, 'cancel'])->name('tools.import.cancel');
+    Route::middleware('throttle:60,1')->group(function () {
+        Route::get('/tools/import', [ToolsImportController::class, 'index'])->name('tools.import');
+        Route::post('/tools/import/preview', [ToolsImportController::class, 'preview'])->name('tools.import.preview');
+        Route::post('/tools/import/run', [ToolsImportController::class, 'run'])->name('tools.import.run');
+        Route::post('/tools/import/cancel', [ToolsImportController::class, 'cancel'])->name('tools.import.cancel');
 
-    Route::get('/tools/export', [ToolsExportController::class, 'index'])->name('tools.export');
-    Route::post('/tools/export/run', [ToolsExportController::class, 'run'])->name('tools.export.run');
+        Route::get('/tools/export', [ToolsExportController::class, 'index'])->name('tools.export');
+        Route::post('/tools/export/run', [ToolsExportController::class, 'run'])->name('tools.export.run');
 
-    Route::get('/tools/health', [ToolsHealthController::class, 'index'])->name('tools.health');
-    Route::post('/tools/health/analyze', [ToolsHealthController::class, 'analyze'])->name('tools.health.analyze');
-    Route::post('/tools/health/refresh', [ToolsHealthController::class, 'refresh'])->name('tools.health.refresh');
+        Route::get('/tools/health', [ToolsHealthController::class, 'index'])->name('tools.health');
+        Route::post('/tools/health/analyze', [ToolsHealthController::class, 'analyze'])->name('tools.health.analyze');
+        Route::post('/tools/health/refresh', [ToolsHealthController::class, 'refresh'])->name('tools.health.refresh');
 
-    Route::get('/tools/backup', [ToolsBackupController::class, 'index'])->name('tools.backup');
-    Route::post('/tools/backup/create', [ToolsBackupController::class, 'create'])->name('tools.backup.create');
-    Route::get('/tools/backup/download/{filename}', [ToolsBackupController::class, 'download'])->name('tools.backup.download');
-    Route::delete('/tools/backup/{filename}', [ToolsBackupController::class, 'delete'])->name('tools.backup.delete');
-    Route::post('/tools/backup/restore/{filename}', [ToolsBackupController::class, 'restore'])->name('tools.backup.restore');
-    Route::post('/tools/backup/settings', [ToolsBackupController::class, 'updateSettings'])->name('tools.backup.settings');
+        Route::get('/tools/backup', [ToolsBackupController::class, 'index'])->name('tools.backup');
+        Route::post('/tools/backup/create', [ToolsBackupController::class, 'create'])->name('tools.backup.create');
+        Route::get('/tools/backup/download/{filename}', [ToolsBackupController::class, 'download'])->name('tools.backup.download');
+        Route::delete('/tools/backup/{filename}', [ToolsBackupController::class, 'delete'])->name('tools.backup.delete');
+        Route::post('/tools/backup/restore/{filename}', [ToolsBackupController::class, 'restore'])->name('tools.backup.restore');
+        Route::post('/tools/backup/settings', [ToolsBackupController::class, 'updateSettings'])->name('tools.backup.settings');
 
-    Route::get('/tools/logs', [ToolsLogsController::class, 'index'])->name('tools.logs');
-    Route::post('/tools/logs/fetch', [ToolsLogsController::class, 'fetch'])->name('tools.logs.fetch');
-    Route::post('/tools/logs/clear', [ToolsLogsController::class, 'clear'])->name('tools.logs.clear');
-    Route::get('/tools/logs/download/{filename}', [ToolsLogsController::class, 'download'])->name('tools.logs.download');
+        Route::get('/tools/logs', [ToolsLogsController::class, 'index'])->name('tools.logs');
+        Route::post('/tools/logs/fetch', [ToolsLogsController::class, 'fetch'])->name('tools.logs.fetch');
+        Route::post('/tools/logs/clear', [ToolsLogsController::class, 'clear'])->name('tools.logs.clear');
+        Route::get('/tools/logs/download/{filename}', [ToolsLogsController::class, 'download'])->name('tools.logs.download');
 
-    Route::get('/tools/diagnostics', [ToolsDiagnosticsController::class, 'index'])->name('tools.diagnostics');
+        Route::get('/tools/diagnostics', [ToolsDiagnosticsController::class, 'index'])->name('tools.diagnostics');
+    });
 
-    Route::prefix('rjbuilder')->name('rjbuilder.')->group(function () {
+    Route::prefix('rjbuilder')->name('rjbuilder.')->middleware('throttle:120,1')->group(function () {
         Route::get('/', [BuilderController::class, 'index'])->name('index');
         Route::get('/create', [BuilderController::class, 'create'])->name('create');
         Route::post('/', [BuilderController::class, 'store'])->name('store');
@@ -293,13 +301,13 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::post('/{template}/popup-settings', [BuilderController::class, 'updatePopupSettings'])->name('popup-settings');
     });
 
-    Route::prefix('template-library')->name('template-library.')->group(function () {
+    Route::prefix('template-library')->name('template-library.')->middleware('throttle:60,1')->group(function () {
         Route::post('/export-multiple', [\App\Http\Controllers\Admin\TemplateLibraryController::class, 'exportMultiple'])->name('export-multiple');
         Route::post('/import', [\App\Http\Controllers\Admin\TemplateLibraryController::class, 'import'])->name('import');
         Route::post('/preview', [\App\Http\Controllers\Admin\TemplateLibraryController::class, 'preview'])->name('preview');
     });
 
-    Route::prefix('global-widgets')->name('global-widgets.')->group(function () {
+    Route::prefix('global-widgets')->name('global-widgets.')->middleware('throttle:60,1')->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\GlobalWidgetController::class, 'index'])->name('index');
         Route::post('/', [\App\Http\Controllers\Admin\GlobalWidgetController::class, 'store'])->name('store');
         Route::get('/options', [\App\Http\Controllers\Admin\GlobalWidgetController::class, 'options'])->name('options');
@@ -309,14 +317,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::post('/{globalWidget}/duplicate', [\App\Http\Controllers\Admin\GlobalWidgetController::class, 'duplicate'])->name('duplicate');
     });
 
-    Route::prefix('custom-fonts')->name('custom-fonts.')->group(function () {
+    Route::prefix('custom-fonts')->name('custom-fonts.')->middleware('throttle:60,1')->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\CustomFontController::class, 'index'])->name('index');
         Route::post('/', [\App\Http\Controllers\Admin\CustomFontController::class, 'store'])->name('store');
         Route::put('/{customFont}', [\App\Http\Controllers\Admin\CustomFontController::class, 'update'])->name('update');
         Route::delete('/{customFont}', [\App\Http\Controllers\Admin\CustomFontController::class, 'destroy'])->name('destroy');
     });
 
-    Route::prefix('custom-icons')->name('custom-icons.')->group(function () {
+    Route::prefix('custom-icons')->name('custom-icons.')->middleware('throttle:60,1')->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\CustomIconController::class, 'index'])->name('index');
         Route::post('/', [\App\Http\Controllers\Admin\CustomIconController::class, 'store'])->name('store');
         Route::post('/bulk', [\App\Http\Controllers\Admin\CustomIconController::class, 'storeBulk'])->name('bulk');
@@ -325,7 +333,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::delete('/{customIcon}', [\App\Http\Controllers\Admin\CustomIconController::class, 'destroy'])->name('destroy');
     });
 
-    Route::prefix('comments')->name('comments.')->group(function () {
+    Route::prefix('comments')->name('comments.')->middleware('throttle:60,1')->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\CommentController::class, 'index'])->name('index');
         Route::get('/pending', [\App\Http\Controllers\Admin\CommentController::class, 'index'])->name('pending')->defaults('status_filter', 'pending');
         Route::get('/approved', [\App\Http\Controllers\Admin\CommentController::class, 'index'])->name('approved')->defaults('status_filter', 'approved');
@@ -347,7 +355,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::post('/{comment}/ai/analyze', [\App\Http\Controllers\Admin\CommentController::class, 'aiAnalyze'])->name('ai.analyze');
     });
 
-    Route::prefix('post-types')->name('post-types.')->group(function () {
+    Route::prefix('post-types')->name('post-types.')->middleware('throttle:60,1')->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\PostTypeController::class, 'index'])->name('index');
         Route::get('/create', [\App\Http\Controllers\Admin\PostTypeController::class, 'create'])->name('create');
         Route::post('/', [\App\Http\Controllers\Admin\PostTypeController::class, 'store'])->name('store');
@@ -356,7 +364,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::delete('/{postType}', [\App\Http\Controllers\Admin\PostTypeController::class, 'destroy'])->name('destroy');
     });
 
-    Route::prefix('taxonomies')->name('taxonomies.')->group(function () {
+    Route::prefix('taxonomies')->name('taxonomies.')->middleware('throttle:60,1')->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\TaxonomyController::class, 'index'])->name('index');
         Route::get('/create', [\App\Http\Controllers\Admin\TaxonomyController::class, 'create'])->name('create');
         Route::post('/', [\App\Http\Controllers\Admin\TaxonomyController::class, 'store'])->name('store');
@@ -366,7 +374,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::delete('/{taxonomy}', [\App\Http\Controllers\Admin\TaxonomyController::class, 'destroy'])->name('destroy');
     });
 
-    Route::prefix('terms')->name('terms.')->group(function () {
+    Route::prefix('terms')->name('terms.')->middleware('throttle:60,1')->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\TermController::class, 'index'])->name('index');
         Route::post('/', [\App\Http\Controllers\Admin\TermController::class, 'store'])->name('store');
         Route::post('/bulk', [\App\Http\Controllers\Admin\TermController::class, 'bulk'])->name('bulk');
@@ -378,7 +386,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::delete('/{term}', [\App\Http\Controllers\Admin\TermController::class, 'destroy'])->name('destroy');
     });
 
-    Route::prefix('custom-fields')->name('custom-fields.')->group(function () {
+    Route::prefix('custom-fields')->name('custom-fields.')->middleware('throttle:60,1')->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\CustomFieldController::class, 'index'])->name('index');
         Route::get('/create', [\App\Http\Controllers\Admin\CustomFieldController::class, 'create'])->name('create');
         Route::post('/', [\App\Http\Controllers\Admin\CustomFieldController::class, 'store'])->name('store');
@@ -390,7 +398,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::post('/{customField}/duplicate', [\App\Http\Controllers\Admin\CustomFieldController::class, 'duplicate'])->name('duplicate');
     });
 
-    Route::prefix('roles')->name('roles.')->group(function () {
+    Route::prefix('roles')->name('roles.')->middleware('throttle:60,1')->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\RoleController::class, 'index'])->name('index');
         Route::get('/create', [\App\Http\Controllers\Admin\RoleController::class, 'create'])->name('create');
         Route::post('/', [\App\Http\Controllers\Admin\RoleController::class, 'store'])->name('store');
@@ -403,7 +411,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/{role}/users', [\App\Http\Controllers\Admin\RoleController::class, 'users'])->name('users');
     });
 
-    Route::prefix('permissions')->name('permissions.')->group(function () {
+    Route::prefix('permissions')->name('permissions.')->middleware('throttle:60,1')->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\PermissionController::class, 'index'])->name('index');
         Route::post('/', [\App\Http\Controllers\Admin\PermissionController::class, 'store'])->name('store');
         Route::post('/sync', [\App\Http\Controllers\Admin\PermissionController::class, 'sync'])->name('sync');
@@ -414,7 +422,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::delete('/{permission}', [\App\Http\Controllers\Admin\PermissionController::class, 'destroy'])->name('destroy');
     });
 
-    Route::prefix('revisions')->name('revisions.')->group(function () {
+    Route::prefix('revisions')->name('revisions.')->middleware('throttle:60,1')->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\RevisionController::class, 'index'])->name('index');
         Route::post('/prune', [\App\Http\Controllers\Admin\RevisionController::class, 'prune'])->name('prune');
         Route::get('/{revision}', [\App\Http\Controllers\Admin\RevisionController::class, 'show'])->name('show');
@@ -422,7 +430,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::delete('/{revision}', [\App\Http\Controllers\Admin\RevisionController::class, 'destroy'])->name('destroy');
     });
 
-    Route::prefix('notifications')->name('notifications.')->group(function () {
+    Route::prefix('notifications')->name('notifications.')->middleware('throttle:60,1')->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\NotificationController::class, 'index'])->name('index');
         Route::get('/recent', [\App\Http\Controllers\Admin\NotificationController::class, 'recent'])->name('recent');
         Route::get('/unread-count', [\App\Http\Controllers\Admin\NotificationController::class, 'unreadCount'])->name('unread-count');
@@ -436,7 +444,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::delete('/{notification}', [\App\Http\Controllers\Admin\NotificationController::class, 'destroy'])->name('destroy');
     });
 
-    Route::prefix('activity-log')->name('activity-log.')->group(function () {
+    Route::prefix('activity-log')->name('activity-log.')->middleware('throttle:60,1')->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\ActivityLogController::class, 'index'])->name('index');
         Route::post('/clear', [\App\Http\Controllers\Admin\ActivityLogController::class, 'clear'])->name('clear');
         Route::post('/bulk', [\App\Http\Controllers\Admin\ActivityLogController::class, 'bulk'])->name('bulk');
@@ -444,7 +452,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::delete('/{activityLog}', [\App\Http\Controllers\Admin\ActivityLogController::class, 'destroy'])->name('destroy');
     });
 
-    Route::prefix('plugins')->name('plugins.')->group(function () {
+    Route::prefix('plugins')->name('plugins.')->middleware('throttle:60,1')->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\PluginController::class, 'index'])->name('index');
         Route::get('/browse', [\App\Http\Controllers\Admin\PluginController::class, 'browse'])->name('browse');
         Route::post('/install-github', [\App\Http\Controllers\Admin\PluginController::class, 'installFromGitHub'])->name('install-github');
@@ -468,7 +476,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::put('/{plugin}/settings', [\App\Http\Controllers\Admin\PluginController::class, 'updateSettings'])->name('settings.update');
     });
 
-    Route::prefix('themes')->name('themes.')->group(function () {
+    Route::prefix('themes')->name('themes.')->middleware('throttle:60,1')->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\ThemeController::class, 'index'])->name('index');
         Route::get('/browse', [\App\Http\Controllers\Admin\ThemeController::class, 'browse'])->name('browse');
         Route::post('/install-github', [\App\Http\Controllers\Admin\ThemeController::class, 'installFromGitHub'])->name('install-github');
@@ -486,7 +494,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::post('/{theme}/customizer/import-demo', [\App\Http\Controllers\Admin\ThemeController::class, 'importDemo'])->name('customizer.import-demo');
     });
 
-    Route::prefix('widgets')->name('widgets.')->group(function () {
+    Route::prefix('widgets')->name('widgets.')->middleware('throttle:60,1')->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\UploadedWidgetController::class, 'index'])->name('index');
         Route::post('/upload', [\App\Http\Controllers\Admin\UploadedWidgetController::class, 'upload'])->name('upload');
         Route::post('/bulk', [\App\Http\Controllers\Admin\UploadedWidgetController::class, 'bulk'])->name('bulk');
@@ -497,12 +505,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::delete('/{widget}', [\App\Http\Controllers\Admin\UploadedWidgetController::class, 'destroy'])->name('destroy');
     });
 
-    Route::get('/updates', [UpdatesController::class, 'index'])->name('updates.index');
-    Route::post('/updates/check', [UpdatesController::class, 'check'])->name('updates.check');
-    Route::put('/updates', [UpdatesController::class, 'update'])->name('updates.update');
-    Route::post('/updates/run', [UpdatesController::class, 'run'])->name('updates.run');
+    Route::middleware('throttle:60,1')->group(function () {
+        Route::get('/updates', [UpdatesController::class, 'index'])->name('updates.index');
+        Route::post('/updates/check', [UpdatesController::class, 'check'])->name('updates.check');
+        Route::put('/updates', [UpdatesController::class, 'update'])->name('updates.update');
+        Route::post('/updates/run', [UpdatesController::class, 'run'])->name('updates.run');
+    });
 
-    Route::prefix('settings')->name('settings.')->group(function () {
+    Route::prefix('settings')->name('settings.')->middleware('throttle:60,1')->group(function () {
         Route::get('/', [SettingsController::class, 'index'])->name('index');
         Route::get('/general', [SettingsController::class, 'general'])->name('general');
         Route::put('/general', [SettingsController::class, 'updateGeneral'])->name('general.update');
@@ -571,7 +581,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::redirect('/roles', '/admin/roles')->name('roles');
     });
 
-    Route::prefix('about')->name('about.')->group(function () {
+    Route::prefix('about')->name('about.')->middleware('throttle:60,1')->group(function () {
         Route::get('/', [AboutController::class, 'index'])->name('index')->defaults('slug', 'info');
         Route::get('/api', [AboutController::class, 'index'])->name('api')->defaults('slug', 'api');
         Route::get('/theme', [AboutController::class, 'index'])->name('theme')->defaults('slug', 'theme');
