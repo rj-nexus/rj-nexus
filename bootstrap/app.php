@@ -26,6 +26,28 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
         ]);
 
+        $middleware->trustHosts(at: function () {
+            $hosts = [
+                '^(.+\.)?localhost$',
+                '^127\.0\.0\.1$',
+            ];
+
+            $url = (string) config('app.url', '');
+
+            if ($url !== ''
+                && !str_contains($url, 'localhost')
+                && !str_contains($url, '127.0.0.1')
+            ) {
+                $host = parse_url($url, PHP_URL_HOST);
+
+                if ($host) {
+                    $hosts[] = '^(.+\.)?' . preg_quote($host, '/') . '$';
+                }
+            }
+
+            return $hosts;
+        });
+
         $middleware->web(prepend: [
             \App\Http\Middleware\SecurityHeaders::class,
             \App\Http\Middleware\ForceHttps::class,
