@@ -188,15 +188,47 @@
                 <p class="text-sm text-gray-500 mt-1">{{ __('Additional security layers.') }}</p>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('Login Attempt Limit') }}</label>
-                    <input type="number" name="login_limit" value="{{ old('login_limit', $options['login_limit'] ?? 5) }}" class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple">
+                    <div class="text-sm font-medium text-gray-900 mb-2">{{ __('Login Rate Limit') }}</div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-xs text-gray-500 mb-1.5">{{ __('Attempts') }}</label>
+                            <input type="number" name="login_limit" min="1" max="100" value="{{ old('login_limit', $options['login_limit'] ?? 5) }}" class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-500 mb-1.5">{{ __('Lockout (minutes)') }}</label>
+                            <input type="number" name="login_lockout_minutes" min="1" max="1440" value="{{ old('login_lockout_minutes', $options['login_lockout_minutes'] ?? 15) }}" class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple">
+                        </div>
+                    </div>
                 </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('Lockout Duration (minutes)') }}</label>
-                    <input type="number" name="login_lockout_minutes" value="{{ old('login_lockout_minutes', $options['login_lockout_minutes'] ?? 15) }}" class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple">
+                <div class="pt-3 border-t border-gray-100">
+                    <div class="text-sm font-medium text-gray-900 mb-2">{{ __('Registration Rate Limit') }}</div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-xs text-gray-500 mb-1.5">{{ __('Attempts') }}</label>
+                            <input type="number" name="register_limit" min="1" max="100" value="{{ old('register_limit', $options['register_limit'] ?? 10) }}" class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-500 mb-1.5">{{ __('Lockout (minutes)') }}</label>
+                            <input type="number" name="register_lockout_minutes" min="1" max="1440" value="{{ old('register_lockout_minutes', $options['register_lockout_minutes'] ?? 60) }}" class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-3 border-t border-gray-100">
+                    <div class="text-sm font-medium text-gray-900 mb-2">{{ __('2FA / OTP Rate Limit') }}</div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-xs text-gray-500 mb-1.5">{{ __('Attempts') }}</label>
+                            <input type="number" name="otp_limit" min="1" max="100" value="{{ old('otp_limit', $options['otp_limit'] ?? 6) }}" class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-500 mb-1.5">{{ __('Lockout (minutes)') }}</label>
+                            <input type="number" name="otp_lockout_minutes" min="1" max="1440" value="{{ old('otp_lockout_minutes', $options['otp_lockout_minutes'] ?? 1) }}" class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple">
+                        </div>
+                    </div>
                 </div>
             </div>
 
