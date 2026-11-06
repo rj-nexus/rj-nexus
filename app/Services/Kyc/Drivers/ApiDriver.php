@@ -33,14 +33,15 @@ class ApiDriver implements KycDriverInterface
             if ($response->successful()) {
                 $responseData = $response->json();
 
-                KycVerification::create([
-                    'user_id' => $user->id,
-                    'driver' => 'api',
-                    'status' => 'pending',
-                    'metadata' => $responseData,
-                ]);
+                $verification = new KycVerification();
+                $verification->user_id = $user->id;
+                $verification->driver = 'api';
+                $verification->status = 'pending';
+                $verification->metadata = $responseData;
+                $verification->save();
 
-                $user->update(['kyc_status' => 'pending']);
+                $user->kyc_status = 'pending';
+                $user->save();
 
                 return true;
             }
@@ -62,11 +63,13 @@ class ApiDriver implements KycDriverInterface
                 $verification = KycVerification::where('user_id', $user->id)->latest()->first();
 
                 if ($verification) {
-                    $verification->update(['status' => $payload['status']]);
-                    $user->update([
-                        'kyc_status' => $payload['status'],
-                        'kyc_verified_at' => $payload['status'] === 'approved' ? now() : null
-                    ]);
+                    $verification->status = $payload['status'];
+                    $verification->save();
+
+                    $user->kyc_status = $payload['status'];
+                    $user->kyc_verified_at = $payload['status'] === 'approved' ? now() : null;
+                    $user->save();
+
                     return true;
                 }
             }
