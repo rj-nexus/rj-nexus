@@ -851,6 +851,14 @@ if (!function_exists('rj_locale_url')) {
 if (!function_exists('rj_set_env')) {
     function rj_set_env(string $key, string $value): bool
     {
+        if (!preg_match('/^[A-Z_][A-Z0-9_]*$/', $key)) {
+            return false;
+        }
+
+        if (preg_match('/[\r\n]/', $value)) {
+            return false;
+        }
+
         $path = base_path('.env');
 
         if (!file_exists($path)) {
@@ -859,25 +867,39 @@ if (!function_exists('rj_set_env')) {
 
         try {
             $content = file_get_contents($path);
-            $pattern = "/^{$key}=.*/m";
+
+            if ($content === false) {
+                return false;
+            }
+
+            $pattern = '/^' . preg_quote($key, '/') . '=.*/m';
 
             if (preg_match($pattern, $content)) {
-                $content = preg_replace($pattern, "{$key}={$value}", $content);
+                $newContent = preg_replace($pattern, $key . '=' . $value, $content, 1);
+
+                if ($newContent === null) {
+                    return false;
+                }
+
+                $content = $newContent;
             } else {
-                $content .= "\n{$key}={$value}";
+                $content = rtrim($content, "\n") . "\n" . $key . '=' . $value . "\n";
             }
 
-            $tmpPath = $path . '.tmp_' . uniqid();
-            if (file_put_contents($tmpPath, $content) !== false) {
-                rename($tmpPath, $path);
-            } else {
-                file_put_contents($path, $content);
+            $tmpPath = $path . '.tmp_' . bin2hex(random_bytes(8));
+
+            if (file_put_contents($tmpPath, $content) === false) {
+                return false;
             }
 
-            if (function_exists('shell_exec')) {
-                @shell_exec('php artisan config:clear 2>&1');
-            } else {
+            if (!rename($tmpPath, $path)) {
+                @unlink($tmpPath);
+                return false;
+            }
+
+            try {
                 \Illuminate\Support\Facades\Artisan::call('config:clear');
+            } catch (\Throwable $e) {
             }
 
             return true;
