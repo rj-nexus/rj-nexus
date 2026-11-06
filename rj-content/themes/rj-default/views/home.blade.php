@@ -221,7 +221,7 @@
             {!! rj_render_blocks($page->blocks['blocks'] ?? []) !!}
         @elseif($page->content)
             <div style="max-width:1200px;margin:0 auto;padding:48px 24px;">
-                {!! $page->content !!}
+                {!! strip_tags($page->content, '<p><br><strong><b><em><i><u><a><ul><ol><li><h1><h2><h3><h4><h5><h6><img><blockquote><pre><code><span><div><table><thead><tbody><tr><th><td>') !!}
             </div>
         @endif
     @else
