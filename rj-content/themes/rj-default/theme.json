@@ -1,14 +1,14 @@
 {
     "name": "RJ Default",
     "slug": "rj-default",
-    "version": "0.9.0",
-    "author": "RJ CMS",
-    "author_url": "https://github.com/mr-ruhid",
+    "version": "1.0.0",
+    "author": "RJ NEXUS",
+    "author_url": "https://github.com/rj-nexus",
     "description": "The official default theme for RJ CMS. Clean, minimal, builder-first.",
     "license": "MIT",
     "preview": "screenshot.png",
     "requires": {
-        "rj_cms": ">=1.0.0",
+        "rj_cms": ">=1.5.1",
         "php": ">=8.2"
     },
     "supports": {
