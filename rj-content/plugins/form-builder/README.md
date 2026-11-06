@@ -1,88 +1,43 @@
-# RJ CMS — Form Builder Plugin
+# RJ Nexus - Form Builder Plugin
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
-![RJ CMS](https://img.shields.io/badge/RJ%20CMS-%3E%3D1.0.0-purple)
+A powerful and flexible form creation plugin for RJ Nexus CMS. Build dynamic forms, manage submissions, and receive email notifications without writing any code.
 
-A powerful, fully isolated form builder plugin for **RJ CMS**. Create custom forms, manage submissions, and embed them anywhere using RJBuilder — no core modifications required.
+**Current Version:** v1.2.0
 
----
+## 🚀 Features
 
-## Features
+- **Dynamic Form Builder:** Easily create forms using an intuitive interface.
+- **Custom Fields:** Supports text, email, number, date, time, URL, and file upload fields.
+- **Submission Management:** View, read, and manage user submissions directly from the admin panel.
+- **Security First:** Built-in protection against Mass Assignment vulnerabilities and XSS attacks.
+- **Customizable:** Supports custom placeholder text, help texts, and required fields.
 
-- **Drag & Drop Form Builder** — Create forms with a modern UI built on Alpine.js.
-- **Multiple Field Types** — Text, email, phone, textarea, select, and checkbox.
-- **Submissions Management** — View, read, and delete user submissions.
-- **RJBuilder Integration** — Includes a dedicated "Form Widget" to embed your forms visually.
-- **Fully Isolated Architecture** — Has its own routes, views, migrations, and assets. Does not interfere with the core system.
-- **Extensible** — Built using RJ CMS Plugin API (Service Providers & Autoloaders).
+## 🔒 Security Updates (v1.2.0)
 
----
+In version **1.2.0**, we introduced critical security enhancements:
+- **Mass Assignment Protection:** Sensitive attributes like `status`, `ip_address`, and `user_agent` are now strictly protected in Eloquent models to prevent unauthorized payload injection.
+- **Strict Validation:** Frontend submissions now only save validated data, blocking malicious users from injecting hidden fields.
 
-## Requirements
+*We strongly recommend updating to v1.2.0 or higher for all production environments.*
 
-- **RJ CMS** `>=1.0.0`
-- **PHP** `>=8.2`
-- **Composer** installed on the host server.
+## 📦 Installation
 
----
+This plugin is bundled with RJ Nexus. 
+1. Navigate to **Admin Panel -> Plugins**.
+2. Locate **Form Builder** and click **Activate**.
+3. The plugin will automatically run its database migrations.
 
-## Installation
+## 📖 Usage
 
-### Method 1: Via RJ CMS Admin Panel (Recommended)
-1. Download the latest `form-builder.zip` from the [Releases](https://github.com/mr-ruhid/rj-plugin-form-builder/releases) page.
-2. Go to **Admin → Plugins → Upload Plugin**.
-3. Select the ZIP file and click Upload.
-4. Once uploaded, click **Activate** next to the plugin.
+1. Go to **Admin -> Form Builder**.
+2. Click **Create Form** and give your form a name.
+3. Add your desired fields and save.
+4. Copy the generated shortcode or use the Form Widget in RJBuilder to display the form on your site.
 
-### Method 2: Manual Installation
-1. Clone this repository or download the ZIP.
-2. Extract it into `rj-content/plugins/form-builder/`.
-3. Go to **Admin → Plugins**.
-4. Click **Scan for Plugins** (if available) or refresh the page.
-5. Click **Activate** on the Form Builder plugin.
+## 📝 Changelog
 
----
+Please see [CHANGELOG.md](CHANGELOG.md) for more information on what has changed recently.
 
-## Usage
+## 🛡️ Support
 
-1. **Create a Form:** Go to **Admin → Plugins → Forms** and click "Create Form".
-2. **Add Fields:** Use the built-in builder to add fields, set labels, and mark them as required.
-3. **Embed in Builder:** Go to **RJBuilder**, add the **Form** widget to your page, and select the form you created from the dropdown.
-4. **View Submissions:** Go to the Forms list and click the envelope icon to view user submissions.
-
----
-
-## Architecture
-
-This plugin is a great reference for building your own RJ CMS plugins. It demonstrates:
-
-- **Service Provider:** `FormBuilderServiceProvider` extends the core `PluginServiceProvider`.
-- **Routes:** Handled independently via `routes/admin.php` and `routes/frontend.php`.
-- **Views:** Namespaced under `plugin-form-builder::`.
-- **Migrations:** Auto-loaded via `src/Migrations/`.
-- **Widgets:** Registered automatically using the `builder.widgets` filter.
-
----
-
-## Development
-
-If you want to contribute or customize this plugin:
-
-1. Make sure you have RJ CMS installed locally.
-2. Symlink or copy this folder to `rj-content/plugins/form-builder`.
-3. Activate the plugin from the admin panel.
-4. Modify the code. The core system will automatically pick up the changes.
-
----
-
-## License
-
-This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
-
----
-
-## Credits
-
-- **Author:** [mr-ruhid](https://github.com/mr-ruhid)
-- Built for [RJ CMS](https://github.com/rj-nexus/rj-nexus)
+For issues, feature requests, or security reports, please contact the RJ Nexus support team.
