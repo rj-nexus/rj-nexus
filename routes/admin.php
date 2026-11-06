@@ -71,14 +71,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     Route::resource('users', UserController::class)->except(['show'])->middleware('throttle:60,1');
 
-    Route::prefix('kyc')->name('kyc.')->group(function () {
+    Route::prefix('kyc')->name('kyc.')->middleware('throttle:60,1')->group(function () {
         Route::get('/', [KycController::class, 'index'])->name('index');
         Route::get('/{verification}', [KycController::class, 'show'])->name('show');
         Route::post('/{verification}/approve', [KycController::class, 'approve'])->name('approve');
         Route::post('/{verification}/reject', [KycController::class, 'reject'])->name('reject');
     });
 
-    Route::prefix('newsletter')->name('newsletter.')->group(function () {
+    Route::prefix('newsletter')->name('newsletter.')->middleware('throttle:60,1')->group(function () {
         Route::get('/', [NewsletterController::class, 'index'])->name('index');
         Route::delete('/{subscriber}', [NewsletterController::class, 'destroy'])->name('destroy');
         Route::post('/send', [NewsletterController::class, 'sendBulk'])->name('send');
