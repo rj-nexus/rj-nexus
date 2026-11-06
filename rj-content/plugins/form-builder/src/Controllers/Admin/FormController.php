@@ -31,10 +31,17 @@ class FormController extends Controller
             'status' => 'nullable|in:active,inactive',
         ]);
 
-        $validated['slug'] = Form::uniqueSlug($validated['slug'] ?: $validated['name']);
-        $validated['status'] = $validated['status'] ?? 'active';
+        $slug = Form::uniqueSlug($validated['slug'] ?: $validated['name']);
+        $status = $validated['status'] ?? 'active';
 
-        $form = Form::create($validated);
+        $form = new Form([
+            'name' => $validated['name'],
+            'slug' => $slug,
+            'description' => $validated['description'] ?? null,
+        ]);
+
+        $form->status = $status;
+        $form->save();
 
         return redirect()
             ->route('admin.plugin.forms.edit', $form)
@@ -58,14 +65,16 @@ class FormController extends Controller
             'fields' => 'nullable|string',
         ]);
 
-        $validated['slug'] = Form::uniqueSlug($validated['slug'] ?: $validated['name'], $form->id);
+        $slug = Form::uniqueSlug($validated['slug'] ?: $validated['name'], $form->id);
 
         $form->update([
             'name' => $validated['name'],
-            'slug' => $validated['slug'],
+            'slug' => $slug,
             'description' => $validated['description'] ?? null,
-            'status' => $validated['status'] ?? 'active',
         ]);
+
+        $form->status = $validated['status'] ?? 'active';
+        $form->save();
 
         if (isset($validated['fields'])) {
             $fieldsData = json_decode($validated['fields'], true);

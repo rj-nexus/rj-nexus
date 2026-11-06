@@ -14,7 +14,6 @@ class Form extends Model
         'slug',
         'description',
         'settings',
-        'status',
     ];
 
     protected $casts = [

@@ -50,15 +50,15 @@ class FormSubmitController extends Controller
 
         $validated = $request->validate($rules);
 
-        $data = $request->except(['_token', '_method']);
-
-        FormSubmission::create([
+        $submission = new FormSubmission([
             'form_id' => $form->id,
-            'data' => $data,
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-            'status' => 'new',
+            'data' => $validated, // Yalnız validasiyadan keçən təhlükəsiz məlumatlar
         ]);
+
+        $submission->ip_address = $request->ip();
+        $submission->user_agent = (string) $request->userAgent();
+        $submission->status = 'new';
+        $submission->save();
 
         if ($request->expectsJson()) {
             return response()->json([
