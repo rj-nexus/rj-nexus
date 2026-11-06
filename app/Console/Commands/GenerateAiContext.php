@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Process;
 
 class GenerateAiContext extends Command
 {
@@ -480,17 +481,20 @@ class GenerateAiContext extends Command
     protected function gitCommits(): string
     {
         try {
-            $output = shell_exec('git log --oneline -20 2>&1');
+            $result = Process::run('git log --oneline -20');
+            $output = trim($result->output() . $result->errorOutput());
 
-            if (!$output) {
+            if (empty($output)) {
                 return "_No git history_";
             }
 
-            $lines = explode("\n", trim($output));
+            $lines = explode("\n", $output);
             $out = "";
 
             foreach ($lines as $line) {
-                $out .= "- `{$line}`\n";
+                if (trim($line) !== '') {
+                    $out .= "- `{$line}`\n";
+                }
             }
 
             return $out;
