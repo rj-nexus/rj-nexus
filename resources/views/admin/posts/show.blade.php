@@ -77,7 +77,7 @@
 
                 <div class="p-6">
                     <div class="text-sm text-gray-700 leading-relaxed rj-prose" style="word-break: break-word;">
-                        {!! $post->content ?: '<p class="text-gray-400 italic">' . __('No content yet.') . '</p>' !!}
+                        {!! $post->content ? strip_tags($post->content, '<p><br><strong><b><em><i><u><a><ul><ol><li><h1><h2><h3><h4><h5><h6><img><blockquote><pre><code><span><div><table><thead><tbody><tr><th><td>') : '<p class="text-gray-400 italic">' . __('No content yet.') . '</p>' !!}
                     </div>
                 </div>
             </div>
@@ -132,7 +132,7 @@
                                     <div>
                                         <div class="text-xs text-gray-500 uppercase tracking-wide mb-1">{{ __('Content') }}</div>
                                         <div class="text-sm text-gray-700 leading-relaxed max-h-64 overflow-y-auto rj-scrollbar border border-gray-100 rounded-lg p-4 bg-gray-50">
-                                            {!! $t->content !!}
+                                            {!! strip_tags($t->content, '<p><br><strong><b><em><i><u><a><ul><ol><li><h1><h2><h3><h4><h5><h6><img><blockquote><pre><code><span><div><table><thead><tbody><tr><th><td>') !!}
                                         </div>
                                     </div>
                                 @endif
