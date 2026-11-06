@@ -18,46 +18,56 @@ class CommentService
 
         $status = $this->resolveStatus();
 
-        return Comment::create([
+        $comment = new Comment([
             'post_id' => $post->id,
             'parent_id' => $parentId,
-            'user_id' => auth()->id(),
             'author_name' => $data['author_name'] ?? (auth()->user()->name ?? 'Guest'),
             'author_email' => $data['author_email'] ?? (auth()->user()->email ?? ''),
             'author_url' => $data['author_url'] ?? null,
-            'author_ip' => $request->ip(),
             'content' => trim((string) ($data['content'] ?? '')),
-            'status' => $status,
-            'meta' => [
-                'user_agent' => (string) $request->userAgent(),
-                'referrer' => (string) $request->headers->get('referer', ''),
-            ],
         ]);
+
+        $comment->user_id = auth()->id();
+        $comment->author_ip = $request->ip();
+        $comment->status = $status;
+        $comment->meta = [
+            'user_agent' => (string) $request->userAgent(),
+            'referrer' => (string) $request->headers->get('referer', ''),
+        ];
+
+        $comment->save();
+
+        return $comment;
     }
 
     public function approve(Comment $comment): void
     {
-        $comment->update(['status' => 'approved']);
+        $comment->status = 'approved';
+        $comment->save();
     }
 
     public function unapprove(Comment $comment): void
     {
-        $comment->update(['status' => 'pending']);
+        $comment->status = 'pending';
+        $comment->save();
     }
 
     public function markAsSpam(Comment $comment): void
     {
-        $comment->update(['status' => 'spam']);
+        $comment->status = 'spam';
+        $comment->save();
     }
 
     public function trash(Comment $comment): void
     {
-        $comment->update(['status' => 'trash']);
+        $comment->status = 'trash';
+        $comment->save();
     }
 
     public function restore(Comment $comment): void
     {
-        $comment->update(['status' => 'pending']);
+        $comment->status = 'pending';
+        $comment->save();
     }
 
     public function delete(Comment $comment): void
