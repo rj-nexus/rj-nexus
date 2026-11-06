@@ -69,7 +69,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::delete('/disable', [TwoFactorController::class, 'disable'])->name('disable')->middleware('throttle:otp');
     });
 
-    Route::resource('users', UserController::class)->except(['show']);
+    Route::resource('users', UserController::class)->except(['show'])->middleware('throttle:60,1');
 
     Route::prefix('kyc')->name('kyc.')->group(function () {
         Route::get('/', [KycController::class, 'index'])->name('index');
