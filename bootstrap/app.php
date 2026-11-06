@@ -4,6 +4,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Auth\AuthenticationException;
+use Symfony\Component\HttpFoundation\Response;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -60,6 +61,16 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
+
+        $exceptions->respond(function (Response $response) {
+            $response->headers->set('X-Content-Type-Options', 'nosniff');
+            $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
+            $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
+            $response->headers->set('X-XSS-Protection', '0');
+            $response->headers->set('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+            return $response;
+        });
+
         $exceptions->render(function (\Throwable $e, $request) {
 
             if ($e instanceof AuthenticationException) {
