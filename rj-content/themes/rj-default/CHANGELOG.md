@@ -1,42 +1,42 @@
 # RJ Nexus — Changelog
 
-Bütün əhəmiyyətli dəyişikliklər bu faylda qeyd olunacaq.
+All notable changes to this project will be documented in this file.
 
 ## [1.0.0] - 2026-11-06
 
-### 🎉 İlk Stabil Buraxılış (Stable Release)
+### 🎉 Initial Stable Release
 
-Bu buraxılış RJ Nexus-un ilk tam stabil versiyasıdır. Buraxılış əsasən **tam həcmli təhlükəsizlik auditi** və aşkar edilmiş bütün zəifliklərin aradan qaldırılmasına həsr olunub. Layihə daxilində istifadə olunan bütün təhlükəsizlik skanerləri (LaraScan, Laravel Pentest, Laravel Security) yoxlanılıb və real risklər bağlanıb.
+This is the first fully stable release of RJ Nexus. This release is primarily dedicated to a **comprehensive security audit** and the mitigation of all discovered vulnerabilities. The application has been thoroughly scanned and tested using industry-standard security tools (LaraScan, Laravel Pentest, Laravel Security), and all identified risks have been resolved.
 
-### 🛡️ Təhlükəsizlik Yenilikləri (Security Fixes)
+### 🛡️ Security Fixes & Enhancements
 
-#### Mass Assignment (Kütləvi Təyinat) Qoruması
-- **Modellər:** `User`, `Post`, `Comment`, `FormSubmission`, `KycVerification`, `NewsletterSubscriber`, `CustomField`, `AiLog` və Form Builder plagini daxil olmaqla bütün həssas modellərdə `status`, `role`, `password`, `user_id`, `token` kimi təhlükəli sahələr `$fillable` massivindən çıxarıldı.
-- **Controller və Service-lər:** Çıxarılan bu sahələr `PostController`, `PostService`, `CommentService`, `KycManager`, `NewsletterSubscriber` və digər müvafiq yerlərdə əl ilə təhlükəsiz şəkildə təyin edilməsi təmin edildi.
+#### Mass Assignment Protection
+- **Models:** Removed dangerous attributes (`status`, `role`, `password`, `user_id`, `token`) from the `$fillable` array across all sensitive models, including `User`, `Post`, `Comment`, `FormSubmission`, `KycVerification`, `NewsletterSubscriber`, `CustomField`, and `AiLog`.
+- **Controllers & Services:** Implemented manual, secure assignment of these excluded attributes within `PostController`, `PostService`, `CommentService`, `KycManager`, and `NewsletterSubscriber` to ensure functionality remains intact.
 
-#### XSS (Cross-Site Scripting) Qoruması
-- **Admin və Frontend View-ları:** `posts/show.blade.php`, `rj-default/home.blade.php`, `page.blade.php`, `post.blade.php`, `contact.blade.php` kimi fayllarda `{!! !!}` ilə çıxarılan istifadəçi məzmunu `strip_tags` funksiyası ilə təmizləndi. Bu, Stored XSS hücumlarının qarşısını alır.
-- **Widget-lər və Builder:** RJBuilder widget-lərində (`multi-chat`, `advanced-search` və s.) istifadəçi məlumatlarının `esc()` və `safeUrl()` ilə qorunduğu təsdiqləndi.
+#### XSS (Cross-Site Scripting) Protection
+- **Admin & Frontend Views:** Sanitized user-controllable content output using `strip_tags` in critical views such as `posts/show.blade.php`, `rj-default/home.blade.php`, `page.blade.php`, `post.blade.php`, and `contact.blade.php`. This mitigates Stored XSS attacks via page and post content.
+- **Widgets & Builder:** Verified and secured RJBuilder widgets (`multi-chat`, `advanced-search`, etc.) using custom escaping (`esc()`) and safe URL handling (`safeUrl()`) to prevent script injection.
 
-#### Command Injection & Path Traversal Qoruması
-- **Symfony Process:** `GenerateAiContext.php`, `BackupSettingsController.php` və `ThemeEditorService.php` fayllarındakı təhlükəli `shell_exec()` və `exec()` çağırışları çıxarılaraq Laravel-in `Process::run()` fasadı ilə əvəz edildi.
-- **Fayl Silinməsi:** `MediaCleanupController` daxilində `unlink()` funksiyasına təhlükəsiz yol validasiyası (`realpath`, `str_starts_with`) əlavə edilərək Path Traversal hücumlarının qarşısı alındı.
+#### Command Injection & Path Traversal Protection
+- **Symfony Process:** Replaced vulnerable `shell_exec()` and `exec()` calls with Laravel's `Process::run()` facade in `GenerateAiContext.php`, `BackupSettingsController.php`, and `ThemeEditorService.php`.
+- **File Deletion:** Hardened `MediaCleanupController` by adding strict path validation (`realpath`, `str_starts_with`) to the `unlink()` function, preventing path traversal attacks.
 
-#### Network və Host Təhlükəsizliyi
-- **Host Header Injection:** `AppServiceProvider` və `bootstrap/app.php` fayllarında `URL::forceRootUrl()` və `TrustHosts` middleware-i əlavə edilərək Host başlığı saxtakarlığının qarşısı alındı.
-- **Proxy/Cloudflare Dəstəyi:** IP əsaslı funksiyalar üçün `rj_proxy_status()` yaradıldı. Cloudflare və ya proxy arxasında olan istifadəçilərin özlərini bloklamasının qarşısını almaq üçün `AdminMiddleware`-də "Fail-Open" mexanizmi tətbiq edildi.
-- **HTTP Headers:** `SecurityHeaders` middleware-i ilə bütün cavablara `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `HSTS` başlıqları əlavə edildi (Xəta səhifələri daxil olmaqla).
-- **Force HTTPS:** SSL sertifikatı olduqda HTTP sorğularını avtomatik HTTPS-ə yönləndirən `ForceHttps` middleware-i əlavə edildi.
+#### Network & Host Security
+- **Host Header Injection:** Implemented `URL::forceRootUrl()` and `TrustHosts` middleware in `AppServiceProvider` and `bootstrap/app.php` to prevent host header spoofing.
+- **Proxy/Cloudflare Support:** Introduced `rj_proxy_status()` to detect proxies. Implemented a fail-open mechanism in `AdminMiddleware` to prevent administrators from locking themselves out when behind Cloudflare or a proxy.
+- **HTTP Headers:** Added a `SecurityHeaders` middleware to apply critical headers (`X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `HSTS`) to all responses, including error pages.
+- **Force HTTPS:** Added `ForceHttps` middleware to automatically redirect HTTP requests to HTTPS when an SSL certificate is active.
 
-#### Authentication və Rate Limiting
-- **Brute-Force Qoruması:** Login, Register, 2FA və Şifrə yeniləmə (`PUT /password`) route-larına dinamik `RateLimiter` (throttle) qaydaları tətbiq edildi.
-- **Admin Paneli Limitləri:** Admin paneldəki bütün resurs route-ları (`posts`, `users`, `media`, `rjbuilder` və s.) DoS hücumlarına qarşı `throttle:60,1` və `throttle:120,1` ilə qorundu.
-- **Session Təhlükəsizliyi:** `SESSION_SECURE_COOKIE` parametri üçün avtomatik SSL aşkarlanması əlavə edildi.
+#### Authentication & Rate Limiting
+- **Brute-Force Protection:** Applied dynamic `RateLimiter` (throttle) rules to Login, Register, 2FA, and Password update routes.
+- **Admin Panel Limits:** Secured all Admin resource routes (`posts`, `users`, `media`, `rjbuilder`, etc.) against DoS attacks using `throttle:60,1` and `throttle:120,1`.
+- **Session Security:** Added automatic SSL detection for the `SESSION_SECURE_COOKIE` configuration.
 
-#### Asılılıqlar və Plaginlər
-- **Composer/NPM:** `composer update` və `npm audit fix` işlədilərək Symfony CVE-ləri və `follow-redirects` kimi zəifliklər aradan qaldırıldı.
-- **Form Builder Plagini:** Plagin `v1.2.0` (Security Release) versiyasına yeniləndi. Plagindəki Mass Assignment və Frontend validasiya boşluqları bağlandı.
+#### Dependencies & Plugins
+- **Composer & NPM:** Executed `composer update` and `npm audit fix` to resolve known CVEs in Symfony components and `follow-redirects`.
+- **Form Builder Plugin:** Updated the plugin to `v1.2.0` (Security Release) to fix Mass Assignment and frontend validation vulnerabilities.
 
 ---
 
-**Qeyd:** Bu buraxılışdan sonra sistem kod səviyyəsində tam təhlükəsizdir. İstehsalat (production) mühitinə keçid zamanı yalnız server səviyyəsində `.env` icazələri və MySQL istifadəçi hüquqlarının düzgün konfiqurasiya edilməsi tövsiyə olunur.
+**Note:** Following this release, the application is fully secure at the code level. For production deployment, it is highly recommended to configure server-level settings such as `.env` file permissions and restricted MySQL user privileges.
