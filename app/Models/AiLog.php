@@ -17,8 +17,6 @@ class AiLog extends Model
         'completion_tokens',
         'total_tokens',
         'cost',
-        'status',
-        'error_message',
     ];
 
     protected $casts = [

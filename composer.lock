@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a6a6b2f14670b442ee9dbf804c163a45",
+    "content-hash": "055ea31c234269bb3c856dbcce26cd87",
     "packages": [
         {
             "name": "brick/math",
@@ -8298,6 +8298,77 @@
                 }
             ],
             "time": "2026-10-05T05:47:54+00:00"
+        },
+        {
+            "name": "salvatorecervone/laravel-pentest",
+            "version": "v1.0.563",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/SalvatoreCervone/laravel-pentest.git",
+                "reference": "788aff220dd8c805934ab0971d11857dea65142a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/SalvatoreCervone/laravel-pentest/zipball/788aff220dd8c805934ab0971d11857dea65142a",
+                "reference": "788aff220dd8c805934ab0971d11857dea65142a",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/console": "^10.0|^11.0|^12.0",
+                "illuminate/database": "^10.0|^11.0|^12.0",
+                "illuminate/http": "^10.0|^11.0|^12.0",
+                "illuminate/routing": "^10.0|^11.0|^12.0",
+                "illuminate/support": "^10.0|^11.0|^12.0",
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^8.0|^9.0|^10.0",
+                "phpunit/phpunit": "^10.0|^11.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "LaravelPentest\\LaravelPentestServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "LaravelPentest\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Salvatore Cervone",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Automated In-App Penetration Testing and DAST Security Audit Suite for Laravel",
+            "homepage": "https://github.com/SalvatoreCervone/laravel-pentest",
+            "keywords": [
+                "Audit",
+                "DAST",
+                "devsecops",
+                "idor",
+                "laravel",
+                "mass-assignment",
+                "owasp",
+                "penetration-testing",
+                "pentest",
+                "security",
+                "vulnerability-scanner"
+            ],
+            "support": {
+                "issues": "https://github.com/SalvatoreCervone/laravel-pentest/issues",
+                "source": "https://github.com/SalvatoreCervone/laravel-pentest/tree/v1.0.563"
+            },
+            "time": "2026-09-22T12:51:32+00:00",
+            "published-time": "2026-09-22T12:52:22+00:00"
         },
         {
             "name": "sebastian/cli-parser",
