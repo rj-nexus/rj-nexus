@@ -10,7 +10,20 @@ class Post extends Model
     protected $table = 'rj_posts';
 
     protected $fillable = [
-        'title', 'slug', 'content', 'blocks', 'edit_mode', 'theme_template', 'excerpt', 'featured_image', 'type', 'status', 'is_sticky', 'allow_comments', 'view_count', 'author_id', 'template_id', 'settings', 'meta', 'published_at',
+        'title',
+        'slug',
+        'content',
+        'blocks',
+        'edit_mode',
+        'theme_template',
+        'excerpt',
+        'featured_image',
+        'type',
+        'is_sticky',
+        'allow_comments',
+        'template_id',
+        'settings',
+        'meta',
     ];
 
     protected $casts = [
