@@ -41,7 +41,7 @@ class PostService
             config('app.base_locale')
         );
 
-        $post = Post::create([
+        $post = new Post([
             'title' => $title,
             'slug' => $baseSlug,
             'content' => $data['content'] ?? '',
@@ -50,15 +50,18 @@ class PostService
             'excerpt' => $data['excerpt'] ?? null,
             'featured_image' => $data['featured_image'] ?? null,
             'type' => $type,
-            'status' => $data['status'] ?? 'draft',
             'is_sticky' => !empty($data['is_sticky']),
             'allow_comments' => $data['allow_comments'] ?? true,
-            'author_id' => auth()->id(),
             'template_id' => $data['template_id'] ?? null,
             'settings' => $data['settings'] ?? [],
             'meta' => $data['meta'] ?? [],
-            'published_at' => $this->resolvePublishedAt($data),
         ]);
+
+        $post->status = $data['status'] ?? 'draft';
+        $post->author_id = auth()->id();
+        $post->published_at = $this->resolvePublishedAt($data);
+
+        $post->save();
 
         $this->syncCategories($post, $data['categories'] ?? []);
         $this->syncTags($post, $data['tags'] ?? []);
@@ -85,13 +88,11 @@ class PostService
             'content' => $data['content'] ?? $post->content,
             'excerpt' => $data['excerpt'] ?? null,
             'featured_image' => $data['featured_image'] ?? null,
-            'status' => $data['status'] ?? $post->status,
             'is_sticky' => !empty($data['is_sticky']),
             'allow_comments' => $data['allow_comments'] ?? $post->allow_comments,
             'template_id' => $data['template_id'] ?? null,
             'settings' => $data['settings'] ?? $post->settings,
             'meta' => $data['meta'] ?? $post->meta,
-            'published_at' => $this->resolvePublishedAt($data, $post),
         ];
 
         if (array_key_exists('edit_mode', $data)) {
@@ -103,6 +104,10 @@ class PostService
         }
 
         $post->update($payload);
+
+        $post->status = $data['status'] ?? $post->status;
+        $post->published_at = $this->resolvePublishedAt($data, $post);
+        $post->save();
 
         if (array_key_exists('categories', $data)) {
             $this->syncCategories($post, $data['categories']);
@@ -177,33 +182,34 @@ class PostService
 
     public function publish(Post $post): void
     {
-        $post->update([
-            'status' => 'published',
-            'published_at' => $post->published_at ?? now(),
-        ]);
+        $post->status = 'published';
+        $post->published_at = $post->published_at ?? now();
+        $post->save();
     }
 
     public function unpublish(Post $post): void
     {
-        $post->update(['status' => 'draft']);
+        $post->status = 'draft';
+        $post->save();
     }
 
     public function schedule(Post $post, string $datetime): void
     {
-        $post->update([
-            'status' => 'scheduled',
-            'published_at' => $datetime,
-        ]);
+        $post->status = 'scheduled';
+        $post->published_at = $datetime;
+        $post->save();
     }
 
     public function trash(Post $post): void
     {
-        $post->update(['status' => 'trash']);
+        $post->status = 'trash';
+        $post->save();
     }
 
     public function restore(Post $post): void
     {
-        $post->update(['status' => 'draft']);
+        $post->status = 'draft';
+        $post->save();
     }
 
     public function bulkAction(array $ids, string $action): int
@@ -408,7 +414,6 @@ class PostService
             }
 
             if ($locale !== $base) {
-                // Başlıq, məzmun və SEO sahələrini Baza dildən kopyalayırıq
                 foreach (array_merge(['title', 'content', 'excerpt'], $this->seoFields) as $field) {
                     if (empty($payload[$field] ?? null) && !empty($baseEntry[$field])) {
                         $payload[$field] = $baseEntry[$field];
@@ -419,7 +424,6 @@ class PostService
                 $existingTranslation = $post->translations->firstWhere('locale', $locale);
                 $existingSlug = $existingTranslation?->slug;
 
-                // Slug boşdursa, Baza dilin slug-ını kopyalayırıq
                 if ($rawSlug === '') {
                     if (!empty($baseEntry['slug'])) {
                         $rawSlug = $baseEntry['slug'];
@@ -436,7 +440,6 @@ class PostService
                     $payload['slug'] = null;
                 }
             } else {
-                // Baza dil üçün
                 if (empty($payload['title']) && !empty($post->getRawOriginal('title'))) {
                     $payload['title'] = $post->getRawOriginal('title');
                 }
