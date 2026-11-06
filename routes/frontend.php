@@ -99,7 +99,11 @@ Route::prefix('{locale}')
             Route::get('/account', [AccountController::class, 'index'])->name('frontend.account.index');
             Route::get('/account/settings', [AccountController::class, 'settings'])->name('frontend.account.settings');
             Route::put('/account/settings', [AccountController::class, 'updateSettings'])->name('frontend.account.settings.update');
-            Route::put('/account/password', [AccountController::class, 'updatePassword'])->name('frontend.account.password.update');
+
+            // Rate limiting əlavə olundu
+            Route::put('/account/password', [AccountController::class, 'updatePassword'])
+                ->middleware('throttle:6,1')
+                ->name('frontend.account.password.update');
 
             Route::get('/kyc', [KycController::class, 'index'])->name('frontend.kyc.index');
             Route::post('/kyc', [KycController::class, 'submit'])->name('frontend.kyc.submit');
