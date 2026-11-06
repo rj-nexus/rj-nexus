@@ -2,7 +2,7 @@
 
 A powerful and flexible form creation plugin for RJ Nexus CMS. Build dynamic forms, manage submissions, and receive email notifications without writing any code.
 
-**Current Version:** v1.2.0
+**Current Version:** v1.2.1
 
 ## 🚀 Features
 
@@ -12,13 +12,13 @@ A powerful and flexible form creation plugin for RJ Nexus CMS. Build dynamic for
 - **Security First:** Built-in protection against Mass Assignment vulnerabilities and XSS attacks.
 - **Customizable:** Supports custom placeholder text, help texts, and required fields.
 
-## 🔒 Security Updates (v1.2.0)
+## 🔒 Security Updates (v1.2.1)
 
-In version **1.2.0**, we introduced critical security enhancements:
+In version **1.2.1**, we introduced critical security enhancements:
 - **Mass Assignment Protection:** Sensitive attributes like `status`, `ip_address`, and `user_agent` are now strictly protected in Eloquent models to prevent unauthorized payload injection.
 - **Strict Validation:** Frontend submissions now only save validated data, blocking malicious users from injecting hidden fields.
 
-*We strongly recommend updating to v1.2.0 or higher for all production environments.*
+*We strongly recommend updating to v1.2.1 or higher for all production environments.*
 
 ## 📦 Installation
 
