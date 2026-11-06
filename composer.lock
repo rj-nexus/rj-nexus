@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "055ea31c234269bb3c856dbcce26cd87",
+    "content-hash": "a8905b82962027e3aeb344267430fb43",
     "packages": [
         {
             "name": "brick/math",
@@ -6883,6 +6883,78 @@
         }
     ],
     "packages-dev": [
+        {
+            "name": "artflow-studio/laravel-security",
+            "version": "0.1.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/rahee554/Laravel-Security.git",
+                "reference": "b00a419e53324bf353049e539a31241ec6e70097"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/rahee554/Laravel-Security/zipball/b00a419e53324bf353049e539a31241ec6e70097",
+                "reference": "b00a419e53324bf353049e539a31241ec6e70097",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/console": "*",
+                "illuminate/filesystem": "*",
+                "illuminate/support": "*",
+                "nikic/php-parser": "*",
+                "php": "*",
+                "symfony/finder": "*",
+                "symfony/process": "*"
+            },
+            "require-dev": {
+                "laravel/pint": "*",
+                "mockery/mockery": "*",
+                "orchestra/testbench": "*",
+                "phpstan/phpstan": "*",
+                "phpunit/phpunit": "*"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "ArtflowStudio\\LaravelSecurity\\LaravelSecurityServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "ArtflowStudio\\LaravelSecurity\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Artflow Studio"
+                }
+            ],
+            "description": "Laravel package that scans applications (including Livewire) for security vulnerabilities, reports issues with severity levels, and provides remediation guidance and optional automated fixes.",
+            "keywords": [
+                "Laravel-Security",
+                "code-scanner",
+                "laravel",
+                "livewire",
+                "remediation",
+                "secure-coding",
+                "security-audit",
+                "security-tooling",
+                "static-analysis",
+                "vulnerability-scanner"
+            ],
+            "support": {
+                "issues": "https://github.com/rahee554/Laravel-Security/issues",
+                "source": "https://github.com/rahee554/Laravel-Security/tree/0.1.4"
+            },
+            "time": "2025-10-22T07:26:46+00:00",
+            "published-time": "2025-11-08T07:32:41+00:00"
+        },
         {
             "name": "baspa/larascan",
             "version": "v3.1.3",
