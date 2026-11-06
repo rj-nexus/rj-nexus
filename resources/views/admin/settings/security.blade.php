@@ -200,12 +200,32 @@
                 </div>
             </div>
 
+            @php
+                $appUrlIsHttps = str_starts_with((string) config('app.url'), 'https://');
+                $currentRequestSecure = request()->secure();
+            @endphp
+
             <div class="space-y-3 pt-2">
-                <label class="flex items-center justify-between py-2 border-t border-gray-100">
-                    <span class="text-sm text-gray-700">{{ __('Force HTTPS') }}</span>
-                    <input type="hidden" name="force_https" value="0">
-                    <input type="checkbox" name="force_https" value="1" @checked(old('force_https', $options['force_https'] ?? '0') === '1') class="rounded border-gray-300 text-rj-purple focus:ring-rj-purple">
-                </label>
+                <div class="flex items-start justify-between gap-4 py-3 border-t border-gray-100">
+                    <div>
+                        <div class="text-sm font-medium text-gray-900">{{ __('Force HTTPS') }}</div>
+                        <div class="text-xs text-gray-500 mt-0.5">{{ __('Redirect every HTTP request to HTTPS. Enable only after your SSL certificate works.') }}</div>
+                        @if(!$appUrlIsHttps)
+                            <div class="mt-2 flex items-start gap-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                                <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <span>{{ __('Your site URL is not HTTPS. Turning this on without SSL will make the site unreachable.') }}</span>
+                            </div>
+                        @endif
+                        @if(!$currentRequestSecure)
+                            <div class="mt-2 text-xs text-gray-500">{{ __('You are currently connected over HTTP.') }}</div>
+                        @endif
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer flex-shrink-0 mt-1">
+                        <input type="hidden" name="force_https" value="0">
+                        <input type="checkbox" name="force_https" value="1" @checked(old('force_https', $options['force_https'] ?? '0') === '1') class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-gradient-to-r peer-checked:from-rj-purple peer-checked:to-rj-pink transition after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div>
+                    </label>
+                </div>
 
                 <label class="flex items-center justify-between py-2 border-t border-gray-100">
                     <span class="text-sm text-gray-700">{{ __('Enable CAPTCHA') }}</span>
