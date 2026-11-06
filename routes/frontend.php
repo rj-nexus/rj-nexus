@@ -44,7 +44,7 @@ Route::get('/plugin-assets/{slug}/{path}', function (string $slug, string $path)
     ]);
 })->where('path', '.*')->name('plugin.asset');
 
-Route::post('/rj-widget/login', [WidgetAuthController::class, 'login'])->name('rj.widget.login');
+Route::post('/rj-widget/login', [WidgetAuthController::class, 'login'])->name('rj.widget.login')->middleware('throttle:login');
 Route::post('/rj-widget/logout', [WidgetAuthController::class, 'logout'])->name('rj.widget.logout');
 Route::get('/rj-widget/locale/{locale}', [LocaleController::class, 'switch'])->name('rj.widget.locale');
 Route::post('/rj-widget/newsletter', [NewsletterController::class, 'subscribe'])->name('rj.widget.newsletter');
