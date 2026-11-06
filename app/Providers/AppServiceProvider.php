@@ -46,6 +46,19 @@ class AppServiceProvider extends ServiceProvider
     {
         config(['app.base_locale' => config('app.locale', 'en')]);
 
+        if (Schema::hasTable('rj_options')) {
+            $dbUrl = rj_get_option('site_url');
+
+            if (is_string($dbUrl)
+                && $dbUrl !== ''
+                && filter_var($dbUrl, FILTER_VALIDATE_URL)
+                && !str_contains($dbUrl, 'localhost')
+                && !str_contains($dbUrl, '127.0.0.1')
+            ) {
+                Config::set('app.url', rtrim($dbUrl, '/'));
+            }
+        }
+
         $appUrl = (string) config('app.url', '');
 
         if ($appUrl !== ''
