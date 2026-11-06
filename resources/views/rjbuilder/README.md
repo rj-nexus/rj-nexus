@@ -37,4 +37,4 @@ We continually add new widgets and improve the builder experience. Any new addit
 
 ## License
 
-RJ Builder is a proprietary component of RJ CMS.
+RJ Builder is a proprietary component of RJ NEXUS.
