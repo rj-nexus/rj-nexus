@@ -119,7 +119,7 @@
             </div>
         @elseif($page->content)
             <div class="rj-fw-content-text">
-                {!! $page->content !!}
+                {!! strip_tags($page->content, '<p><br><strong><b><em><i><u><a><ul><ol><li><h1><h2><h3><h4><h5><h6><img><blockquote><pre><code><span><div><table><thead><tbody><tr><th><td>') !!}
             </div>
         @endif
 
