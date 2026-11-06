@@ -1,6 +1,11 @@
 @extends('admin.settings.layout')
 
 @section('settings')
+    @php
+        $proxyStatus = $proxyStatus ?? ['behind_proxy' => false, 'trusted' => false, 'remote_addr' => '', 'laravel_ip' => '', 'cf_ip' => '', 'forwarded_for' => ''];
+        $showProxyWarning = $proxyStatus['behind_proxy'] && !$proxyStatus['trusted'];
+    @endphp
+
     <form method="POST" action="{{ route('admin.settings.security.update') }}" class="space-y-6">
         @csrf
         @method('PUT')
@@ -184,6 +189,87 @@
 
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-5">
             <div>
+                <h2 class="text-lg font-semibold text-gray-900">{{ __('Proxy & IP Detection') }}</h2>
+                <p class="text-sm text-gray-500 mt-1">{{ __('Verify how your server detects client IP addresses before enabling IP-based features.') }}</p>
+            </div>
+
+            @if($showProxyWarning)
+                <div class="border border-amber-200 bg-amber-50 rounded-lg p-4 space-y-3">
+                    <div class="flex items-start gap-3">
+                        <svg class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <div class="flex-1 min-w-0">
+                            <div class="text-sm font-semibold text-amber-900">{{ __('Proxy or Cloudflare detected') }}</div>
+                            <p class="text-xs text-amber-800 mt-1 leading-relaxed">{{ __('Your site appears to be behind a proxy or CDN. IP-based features (whitelist, blacklist, rate limiting) will use the proxy\'s IP instead of the visitor\'s real IP. This can lock you out of the admin panel.') }}</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg border border-amber-200 p-3 font-mono text-xs space-y-1.5">
+                        @if($proxyStatus['cf_ip'])
+                            <div class="flex justify-between gap-4"><span class="text-gray-500">CF-Connecting-IP:</span><span class="text-gray-900">{{ $proxyStatus['cf_ip'] }}</span></div>
+                        @endif
+                        @if($proxyStatus['forwarded_for'])
+                            <div class="flex justify-between gap-4"><span class="text-gray-500">X-Forwarded-For:</span><span class="text-gray-900 truncate">{{ $proxyStatus['forwarded_for'] }}</span></div>
+                        @endif
+                        <div class="flex justify-between gap-4"><span class="text-gray-500">REMOTE_ADDR:</span><span class="text-gray-900">{{ $proxyStatus['remote_addr'] }}</span></div>
+                        <div class="flex justify-between gap-4 border-t border-gray-100 pt-1.5"><span class="text-gray-500">request()->ip():</span><span class="text-red-600 font-semibold">{{ $proxyStatus['laravel_ip'] }} &larr; not real</span></div>
+                    </div>
+
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2">
+                        <svg class="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <div class="text-xs text-red-800 leading-relaxed">
+                            <strong>{{ __('IP Whitelist auto-disabled') }}</strong> {{ __('to prevent self-lockout. Configure') }} <code class="bg-white px-1.5 py-0.5 rounded border border-red-200">trustProxies</code> {{ __('in') }} <code class="bg-white px-1.5 py-0.5 rounded border border-red-200">bootstrap/app.php</code> {{ __('to enable IP-based features.') }}
+                        </div>
+                    </div>
+
+                    <details class="text-xs">
+                        <summary class="cursor-pointer font-semibold text-amber-900 hover:text-amber-950 select-none">{{ __('How to fix — configure trusted proxies') }}</summary>
+                        <div class="mt-3 space-y-2">
+                            <p class="text-amber-800 leading-relaxed">{{ __('Add this to') }} <code class="bg-white px-1.5 py-0.5 rounded border border-amber-200 font-mono">bootstrap/app.php</code>:</p>
+                            <pre class="bg-gray-900 text-gray-100 rounded-lg p-3 overflow-x-auto text-[11px] leading-relaxed"><code>-&gt;withMiddleware(function (Middleware $middleware) {
+    $middleware-&gt;trustProxies(at: [
+        '173.245.48.0/20',
+        '103.21.244.0/22',
+        '103.22.200.0/22',
+        '104.16.0.0/13',
+        '172.64.0.0/13',
+        '131.0.72.0/22',
+    ]);
+})</code></pre>
+                            <p class="text-amber-800 leading-relaxed">{{ __('Full list:') }} <a href="https://www.cloudflare.com/ips/" target="_blank" class="underline font-medium">cloudflare.com/ips</a>. {{ __('After editing, run') }} <code class="bg-white px-1.5 py-0.5 rounded border border-amber-200 font-mono">php artisan config:clear</code>.</p>
+                        </div>
+                    </details>
+                </div>
+            @elseif($proxyStatus['behind_proxy'] && $proxyStatus['trusted'])
+                <div class="border border-green-200 bg-green-50 rounded-lg p-4 flex items-start gap-3">
+                    <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-sm font-semibold text-green-900">{{ __('Proxy detected and configured correctly') }}</div>
+                        <p class="text-xs text-green-800 mt-1 leading-relaxed">{{ __('Your site is behind a proxy, but Laravel is configured to trust it. Real client IPs are detected correctly.') }}</p>
+                        <div class="mt-2 font-mono text-xs space-y-1">
+                            @if($proxyStatus['cf_ip'])
+                                <div class="flex justify-between gap-4"><span class="text-green-700">CF-Connecting-IP:</span><span class="text-green-900">{{ $proxyStatus['cf_ip'] }}</span></div>
+                            @endif
+                            <div class="flex justify-between gap-4"><span class="text-green-700">request()->ip():</span><span class="text-green-900 font-semibold">{{ $proxyStatus['laravel_ip'] }} &#10003;</span></div>
+                        </div>
+                    </div>
+                </div>
+            @else
+                <div class="border border-green-200 bg-green-50 rounded-lg p-4 flex items-start gap-3">
+                    <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-sm font-semibold text-green-900">{{ __('No proxy detected') }}</div>
+                        <p class="text-xs text-green-800 mt-1 leading-relaxed">{{ __('Your server receives connections directly. IP-based features (whitelist, blacklist, rate limiting) work correctly.') }}</p>
+                        <div class="mt-2 font-mono text-xs">
+                            <span class="text-green-700">request()->ip():</span>
+                            <span class="text-green-900 font-semibold ml-2">{{ $proxyStatus['laravel_ip'] }}</span>
+                        </div>
+                    </div>
+                </div>
+            @endif
+        </div>
+
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 space-y-5">
+            <div>
                 <h2 class="text-lg font-semibold text-gray-900">{{ __('Advanced Protection') }}</h2>
                 <p class="text-sm text-gray-500 mt-1">{{ __('Additional security layers.') }}</p>
             </div>
@@ -274,10 +360,15 @@
                     <input type="checkbox" name="captcha_enabled" value="1" @checked(old('captcha_enabled', $options['captcha_enabled'] ?? '0') === '1') class="rounded border-gray-300 text-rj-purple focus:ring-rj-purple">
                 </label>
 
-                <label class="flex items-center justify-between py-2 border-t border-gray-100">
-                    <span class="text-sm text-gray-700">{{ __('IP Whitelist') }}</span>
+                <label class="flex items-center justify-between py-2 border-t border-gray-100 {{ $showProxyWarning ? 'opacity-50 cursor-not-allowed' : '' }}">
+                    <span class="text-sm text-gray-700">
+                        {{ __('IP Whitelist') }}
+                        @if($showProxyWarning)
+                            <span class="text-xs text-amber-600 font-medium ml-2">({{ __('Auto-disabled due to proxy') }})</span>
+                        @endif
+                    </span>
                     <input type="hidden" name="ip_whitelist_enabled" value="0">
-                    <input type="checkbox" name="ip_whitelist_enabled" value="1" @checked(old('ip_whitelist_enabled', $options['ip_whitelist_enabled'] ?? '0') === '1') class="rounded border-gray-300 text-rj-purple focus:ring-rj-purple">
+                    <input type="checkbox" name="ip_whitelist_enabled" value="1" @checked(!$showProxyWarning && old('ip_whitelist_enabled', $options['ip_whitelist_enabled'] ?? '0') === '1') @disabled($showProxyWarning) class="rounded border-gray-300 text-rj-purple focus:ring-rj-purple disabled:opacity-50">
                 </label>
             </div>
 
@@ -294,7 +385,7 @@
                     @endif
                 </div>
 
-                @if(!$currentIpIsListed)
+                @if(!$currentIpIsListed && !$showProxyWarning)
                     <div class="mb-2 flex items-start gap-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
                         <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         <span>{{ __('Add your current IP to the list before enabling the whitelist, otherwise you will be locked out of the admin panel.') }}</span>
