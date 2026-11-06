@@ -346,7 +346,7 @@
         @if($post->isBuilderMode() && $post->hasBlocks())
             {!! rj_render_blocks($post->blocks['blocks'] ?? []) !!}
         @elseif($post->content)
-            {!! $post->content !!}
+            {!! strip_tags($post->content, '<p><br><strong><b><em><i><u><a><ul><ol><li><h1><h2><h3><h4><h5><h6><img><blockquote><pre><code><span><div><table><thead><tbody><tr><th><td>') !!}
         @elseif($post->excerpt)
             <p>{{ $post->excerpt }}</p>
         @else
