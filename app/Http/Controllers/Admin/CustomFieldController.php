@@ -51,8 +51,9 @@ class CustomFieldController extends Controller
             'location' => $request->input('location', 'post'),
             'is_required' => false,
             'is_repeatable' => false,
-            'status' => 'active',
         ]);
+
+        $field->status = 'active'; // Fillable-dən çıxarıldığı üçün əl ilə təyin edirik
 
         $types = CustomField::types();
         $typeGroups = CustomField::typeGroups();
@@ -66,7 +67,7 @@ class CustomFieldController extends Controller
     {
         $validated = $this->validateData($request);
 
-        $field = CustomField::create([
+        $field = new CustomField([
             'name' => $validated['name'],
             'slug' => $validated['slug'] ?? CustomField::uniqueSlug($validated['name']),
             'key' => $validated['key'] ?? CustomField::uniqueKey($validated['name']),
@@ -83,9 +84,13 @@ class CustomFieldController extends Controller
             'is_repeatable' => $validated['is_repeatable'] ?? false,
             'location' => $validated['location'] ?? 'post',
             'sort_order' => $validated['sort_order'] ?? 0,
-            'status' => $validated['status'] ?? 'active',
-            'author_id' => auth()->id(),
         ]);
+
+        // Fillable-dən çıxarılan sahələri əl ilə təyin edirik
+        $field->status = $validated['status'] ?? 'active';
+        $field->author_id = auth()->id();
+
+        $field->save();
 
         if ($request->expectsJson()) {
             return response()->json([
@@ -132,8 +137,11 @@ class CustomFieldController extends Controller
             'is_repeatable' => $validated['is_repeatable'] ?? $customField->is_repeatable,
             'location' => $validated['location'] ?? $customField->location,
             'sort_order' => $validated['sort_order'] ?? $customField->sort_order,
-            'status' => $validated['status'] ?? $customField->status,
         ]);
+
+        // Status-u əl ilə yeniləyirik
+        $customField->status = $validated['status'] ?? $customField->status;
+        $customField->save();
 
         if ($request->expectsJson()) {
             return response()->json(['success' => true, 'field' => $customField]);
