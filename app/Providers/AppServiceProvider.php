@@ -46,17 +46,7 @@ class AppServiceProvider extends ServiceProvider
     {
         config(['app.base_locale' => config('app.locale', 'en')]);
 
-        $hasOptionsTable = false;
-        $hasPluginsTable = false;
-
-        try {
-            $hasOptionsTable = Schema::hasTable('rj_options');
-            $hasPluginsTable = Schema::hasTable('rj_plugins');
-        } catch (\Throwable $e) {
-            // Baza hələ qoşulmayıbsa və ya boşdursa xətanı dayandırır
-        }
-
-        if ($hasOptionsTable) {
+        if (Schema::hasTable('rj_options')) {
             $dbUrl = rj_get_option('site_url');
 
             if (is_string($dbUrl)
@@ -94,9 +84,7 @@ class AppServiceProvider extends ServiceProvider
             $themeManager->registerProviders();
         }
 
-        if ($hasPluginsTable) {
-            $this->app->make(PluginManager::class)->boot();
-        }
+        $this->app->make(PluginManager::class)->boot();
 
         Post::observe(ActivityLogObserver::class);
         Media::observe(ActivityLogObserver::class);
@@ -137,7 +125,7 @@ class AppServiceProvider extends ServiceProvider
             ]);
         });
 
-        if ($hasOptionsTable) {
+        if (Schema::hasTable('rj_options')) {
             $mailHost = rj_get_option('smtp_host');
 
             if ($mailHost) {
