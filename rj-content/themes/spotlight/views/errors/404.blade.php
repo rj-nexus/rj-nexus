@@ -69,14 +69,14 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.08) 0%, transparent 60%);
+        background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 60%);
         animation: rj404Pulse 4s ease-in-out infinite alternate;
     }
 
     .rj-404-cursor {
         position: absolute;
         inset: 0;
-        background: radial-gradient(420px circle at var(--mx) var(--my), rgba(255, 255, 255, 0.05), transparent 65%);
+        background: radial-gradient(420px circle at var(--mx) var(--my), rgba(59, 130, 246, 0.04), transparent 65%);
         transition: background 0.1s;
     }
 
@@ -138,7 +138,7 @@
         inset: 28%;
         border-radius: 50%;
         background: #000;
-        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85), 0 0 40px 6px rgba(255, 255, 255, 0.25);
+        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85), 0 0 40px 6px rgba(59, 130, 246, 0.4);
     }
 
     .rj-404-orbit {
@@ -156,8 +156,8 @@
 
     .rj-404-orbit-b {
         inset: 10%;
-        border-bottom-color: rgba(255, 255, 255, 0.9);
-        border-left-color: rgba(255, 255, 255, 0.2);
+        border-bottom-color: #3b82f6;
+        border-left-color: rgba(59, 130, 246, 0.2);
         animation: rj404Spin 2s linear infinite reverse;
     }
 
@@ -191,7 +191,7 @@
         gap: 12px;
     }
 
-    /* Glassmorphism Buttons */
+    /* Şəffaf arxa plan, mavi kənar və mətn */
     .rj-404-btn {
         position: relative;
         overflow: hidden;
@@ -201,15 +201,15 @@
         gap: 10px;
         padding: 14px 32px;
         border-radius: 12px;
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        color: #fff;
+        background: rgba(59, 130, 246, 0.03); /* Çox açıq mavi şüşə fon */
+        border: 1px solid rgba(59, 130, 246, 0.3); /* Mavi kənar */
+        color: #60a5fa; /* Mavi mətn */
         font-size: 15px;
         font-weight: 500;
         text-decoration: none;
         -webkit-backdrop-filter: blur(12px);
         backdrop-filter: blur(12px);
-        transition: background 0.25s, border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+        transition: background 0.25s, border-color 0.25s, transform 0.25s, box-shadow 0.25s, color 0.25s;
     }
 
     .rj-404-btn::after {
@@ -219,29 +219,32 @@
         left: -80%;
         width: 50%;
         height: 100%;
-        background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.15), transparent);
         transform: skewX(-20deg);
         transition: left 0.6s ease;
     }
 
     .rj-404-btn:hover {
-        background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 255, 255, 0.3);
+        background: rgba(59, 130, 246, 0.1);
+        border-color: rgba(59, 130, 246, 0.8);
+        color: #93c5fd;
         transform: translateY(-2px);
-        box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.5);
+        box-shadow: 0 8px 20px -8px rgba(59, 130, 246, 0.4);
     }
 
     .rj-404-btn:hover::after { left: 130%; }
 
-    /* Slightly highlighted main button but still neutral */
+    /* Əsas düymə daha qabarıq, amma hələ də şəffaf */
     .rj-404-btn-main {
-        background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 255, 255, 0.2);
+        background: rgba(59, 130, 246, 0.08);
+        border-color: rgba(59, 130, 246, 0.5);
+        color: #fff;
     }
 
     .rj-404-btn-main:hover {
-        background: rgba(255, 255, 255, 0.15);
-        border-color: rgba(255, 255, 255, 0.4);
+        background: rgba(59, 130, 246, 0.2);
+        border-color: #3b82f6;
+        box-shadow: 0 12px 26px -12px rgba(59, 130, 246, 0.6);
     }
 
     .rj-404-btn svg {
