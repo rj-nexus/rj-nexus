@@ -65,58 +65,6 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Logo (Light)') }}</label>
-                        <div class="flex items-center gap-3">
-                            <div class="w-20 h-20 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                                <template x-if="options.logo_light">
-                                    <img :src="options.logo_light" class="max-w-full max-h-full object-contain" alt="">
-                                </template>
-                                <template x-if="!options.logo_light">
-                                    <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                </template>
-                            </div>
-                            <div class="flex-1 space-y-2">
-                                <div class="flex gap-2">
-                                    <input type="text" x-model="options.logo_light" @input="markDirty()"
-                                           placeholder="https://... or /storage/..."
-                                           class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">
-                                    <button type="button" @click="openMediaPicker('logo_light')" class="px-3 py-2 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 whitespace-nowrap transition">
-                                        {{ __('Select') }}
-                                    </button>
-                                </div>
-                                <button type="button" @click="options.logo_light = ''; markDirty()" x-show="options.logo_light"
-                                        class="text-xs text-red-600 hover:underline">{{ __('Clear') }}</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Logo (Dark)') }}</label>
-                        <div class="flex items-center gap-3">
-                            <div class="w-20 h-20 rounded-lg bg-gray-800 border border-gray-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                                <template x-if="options.logo_dark">
-                                    <img :src="options.logo_dark" class="max-w-full max-h-full object-contain" alt="">
-                                </template>
-                                <template x-if="!options.logo_dark">
-                                    <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                </template>
-                            </div>
-                            <div class="flex-1 space-y-2">
-                                <div class="flex gap-2">
-                                    <input type="text" x-model="options.logo_dark" @input="markDirty()"
-                                           placeholder="https://... or /storage/..."
-                                           class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">
-                                    <button type="button" @click="openMediaPicker('logo_dark')" class="px-3 py-2 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 whitespace-nowrap transition">
-                                        {{ __('Select') }}
-                                    </button>
-                                </div>
-                                <button type="button" @click="options.logo_dark = ''; markDirty()" x-show="options.logo_dark"
-                                        class="text-xs text-red-600 hover:underline">{{ __('Clear') }}</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Favicon') }}</label>
                         <div class="flex items-center gap-3">
                             <div class="w-12 h-12 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center flex-shrink-0 overflow-hidden">
@@ -294,7 +242,7 @@
 
 </div>
 
-
+@include('admin.partials.media-picker')
 
 <script>
 function appearanceOptions(initial, defaults) {
@@ -321,7 +269,6 @@ function appearanceOptions(initial, defaults) {
         openMediaPicker(field) {
             this.mediaTarget = field;
             
-            // Media Picker-in gözlədiyi "detail.value" obyektini yaradırıq
             const mockInput = document.createElement('input');
             mockInput.type = 'hidden';
 
