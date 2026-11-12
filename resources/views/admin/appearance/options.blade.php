@@ -3,7 +3,7 @@
 @section('title', __('Options'))
 
 @section('content')
-<div class="space-y-6" x-data="appearanceOptions(@js($options), @js($defaults))">
+<div class="space-y-6" x-data="appearanceOptions(@js($options), @js($defaults))" x-init="init()">
 
     <div class="flex items-center justify-between gap-4 flex-wrap">
         <div>
@@ -64,8 +64,6 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    
-                    {{-- Logo Light --}}
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Logo (Light)') }}</label>
                         <div class="flex items-center gap-3">
@@ -79,18 +77,19 @@
                             </div>
                             <div class="flex-1 space-y-2">
                                 <div class="flex gap-2">
-                                    <input type="text" x-model="options.logo_light" @input="markDirty()" placeholder="https://... or /storage/..."
+                                    <input type="text" x-model="options.logo_light" @input="markDirty()"
+                                           placeholder="https://... or /storage/..."
                                            class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">
                                     <button type="button" @click="openMediaPicker('logo_light')" class="px-3 py-2 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 whitespace-nowrap transition">
                                         {{ __('Select') }}
                                     </button>
                                 </div>
-                                <button type="button" @click="options.logo_light = ''; markDirty()" x-show="options.logo_light" class="text-xs text-red-600 hover:underline">{{ __('Clear') }}</button>
+                                <button type="button" @click="options.logo_light = ''; markDirty()" x-show="options.logo_light"
+                                        class="text-xs text-red-600 hover:underline">{{ __('Clear') }}</button>
                             </div>
                         </div>
                     </div>
 
-                    {{-- Logo Dark --}}
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Logo (Dark)') }}</label>
                         <div class="flex items-center gap-3">
@@ -104,18 +103,19 @@
                             </div>
                             <div class="flex-1 space-y-2">
                                 <div class="flex gap-2">
-                                    <input type="text" x-model="options.logo_dark" @input="markDirty()" placeholder="https://... or /storage/..."
+                                    <input type="text" x-model="options.logo_dark" @input="markDirty()"
+                                           placeholder="https://... or /storage/..."
                                            class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">
                                     <button type="button" @click="openMediaPicker('logo_dark')" class="px-3 py-2 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 whitespace-nowrap transition">
                                         {{ __('Select') }}
                                     </button>
                                 </div>
-                                <button type="button" @click="options.logo_dark = ''; markDirty()" x-show="options.logo_dark" class="text-xs text-red-600 hover:underline">{{ __('Clear') }}</button>
+                                <button type="button" @click="options.logo_dark = ''; markDirty()" x-show="options.logo_dark"
+                                        class="text-xs text-red-600 hover:underline">{{ __('Clear') }}</button>
                             </div>
                         </div>
                     </div>
 
-                    {{-- Favicon --}}
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Favicon') }}</label>
                         <div class="flex items-center gap-3">
@@ -129,18 +129,19 @@
                             </div>
                             <div class="flex-1 space-y-2">
                                 <div class="flex gap-2">
-                                    <input type="text" x-model="options.favicon" @input="markDirty()" placeholder="/images/favicon.png"
+                                    <input type="text" x-model="options.favicon" @input="markDirty()"
+                                           placeholder="/images/favicon.png"
                                            class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">
                                     <button type="button" @click="openMediaPicker('favicon')" class="px-3 py-2 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 whitespace-nowrap transition">
                                         {{ __('Select') }}
                                     </button>
                                 </div>
-                                <button type="button" @click="options.favicon = ''; markDirty()" x-show="options.favicon" class="text-xs text-red-600 hover:underline">{{ __('Clear') }}</button>
+                                <button type="button" @click="options.favicon = ''; markDirty()" x-show="options.favicon"
+                                        class="text-xs text-red-600 hover:underline">{{ __('Clear') }}</button>
                             </div>
                         </div>
                     </div>
 
-                    {{-- OG Image --}}
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('OG Image') }}</label>
                         <div class="flex items-center gap-3">
@@ -154,17 +155,18 @@
                             </div>
                             <div class="flex-1 space-y-2">
                                 <div class="flex gap-2">
-                                    <input type="text" x-model="options.og_image" @input="markDirty()" placeholder="1200x630 recommended"
+                                    <input type="text" x-model="options.og_image" @input="markDirty()"
+                                           placeholder="1200x630 recommended"
                                            class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">
                                     <button type="button" @click="openMediaPicker('og_image')" class="px-3 py-2 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 whitespace-nowrap transition">
                                         {{ __('Select') }}
                                     </button>
                                 </div>
-                                <button type="button" @click="options.og_image = ''; markDirty()" x-show="options.og_image" class="text-xs text-red-600 hover:underline">{{ __('Clear') }}</button>
+                                <button type="button" @click="options.og_image = ''; markDirty()" x-show="options.og_image"
+                                        class="text-xs text-red-600 hover:underline">{{ __('Clear') }}</button>
                             </div>
                         </div>
                     </div>
-
                 </div>
 
                 <div class="text-xs text-gray-500 bg-gray-50 rounded-lg p-3">
@@ -173,11 +175,99 @@
             </div>
 
             <div x-show="tab === 'code'" x-cloak class="space-y-6">
-                {{-- Custom Code Tab Content --}}
+
+                <div class="bg-amber-50 border border-amber-100 rounded-lg p-4 flex items-start gap-3">
+                    <svg class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <div class="text-sm text-amber-800">
+                        {{ __('Warning: custom code is injected on every page. Invalid CSS/JS may break layout or functionality.') }}
+                    </div>
+                </div>
+
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Custom CSS') }}</label>
+                        <textarea x-model="options.custom_css" @input="markDirty()" rows="8"
+                                  placeholder="body { ... }"
+                                  class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm font-mono"></textarea>
+                        <p class="text-xs text-gray-500 mt-1">{{ __('Wrapped in <style> and injected in <head>.') }}</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Custom JavaScript') }}</label>
+                        <textarea x-model="options.custom_js" @input="markDirty()" rows="8"
+                                  placeholder="console.log('ready');"
+                                  class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm font-mono"></textarea>
+                        <p class="text-xs text-gray-500 mt-1">{{ __('Wrapped in <script> and injected before </body>.') }}</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Head HTML') }}</label>
+                        <textarea x-model="options.head_html" @input="markDirty()" rows="6"
+                                  placeholder="<meta name='...' content='...'>"
+                                  class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm font-mono"></textarea>
+                        <p class="text-xs text-gray-500 mt-1">{{ __('Inserted inside <head>. Use for verification meta tags, CDN links, etc.') }}</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Body Start HTML') }}</label>
+                        <textarea x-model="options.body_start_html" @input="markDirty()" rows="4"
+                                  placeholder="<div id='preloader'>...</div>"
+                                  class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm font-mono"></textarea>
+                        <p class="text-xs text-gray-500 mt-1">{{ __('Inserted immediately after <body>. GTM noscript, overlays, etc.') }}</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Body End HTML') }}</label>
+                        <textarea x-model="options.body_end_html" @input="markDirty()" rows="4"
+                                  placeholder="<script src='...'></script>"
+                                  class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm font-mono"></textarea>
+                        <p class="text-xs text-gray-500 mt-1">{{ __('Inserted before </body>. Chat widgets, analytics, etc.') }}</p>
+                    </div>
+                </div>
             </div>
 
             <div x-show="tab === 'tracking'" x-cloak class="space-y-6">
-                {{-- Tracking Tab Content --}}
+
+                <div class="bg-blue-50 border border-blue-100 rounded-lg p-4 flex items-start gap-3">
+                    <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <div class="text-sm text-blue-800">
+                        {{ __('Enter tracking IDs only. Scripts are auto-generated and injected in the theme layout.') }}
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Google Analytics 4') }}</label>
+                        <input type="text" x-model="options.ga4_id" @input="markDirty()"
+                               placeholder="G-XXXXXXXXXX"
+                               class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm font-mono">
+                        <p class="text-xs text-gray-500 mt-1">Measurement ID</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Google Tag Manager') }}</label>
+                        <input type="text" x-model="options.gtm_id" @input="markDirty()"
+                               placeholder="GTM-XXXXXXX"
+                               class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm font-mono">
+                        <p class="text-xs text-gray-500 mt-1">Container ID</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Facebook Pixel') }}</label>
+                        <input type="text" x-model="options.fb_pixel_id" @input="markDirty()"
+                               placeholder="1234567890"
+                               class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm font-mono">
+                        <p class="text-xs text-gray-500 mt-1">Pixel ID</p>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('Additional Tracking Script') }}</label>
+                    <textarea x-model="options.tracking_script" @input="markDirty()" rows="8"
+                              placeholder="<script>/* other analytics */</script>"
+                              class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm font-mono"></textarea>
+                    <p class="text-xs text-gray-500 mt-1">{{ __('Inserted in <head>. Use for any third-party tracking not listed above.') }}</p>
+                </div>
             </div>
 
         </div>
@@ -230,7 +320,14 @@ function appearanceOptions(initial, defaults) {
 
         openMediaPicker(field) {
             this.mediaTarget = field;
-            window.dispatchEvent(new CustomEvent('open-media-picker'));
+            
+            // Media Picker-in gözlədiyi "detail.value" obyektini yaradırıq
+            const mockInput = document.createElement('input');
+            mockInput.type = 'hidden';
+
+            window.dispatchEvent(new CustomEvent('open-media-picker', { 
+                detail: { value: mockInput } 
+            }));
         },
 
         markDirty() {
