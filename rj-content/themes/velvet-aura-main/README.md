@@ -4,7 +4,7 @@
 
 <div align="center">
 
-# Version 1.0.1-beta
+# Version 1.0.2-beta
 
 **A premium, modern e-commerce theme exclusively designed for [RJ Nexus](https://github.com/rj-nexus/rj-nexus) and RJ Commerce.**
 
