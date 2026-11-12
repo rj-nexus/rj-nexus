@@ -22,6 +22,7 @@ use Spotlight\Widgets\SpotlightTrustpilotWidget;
 use Spotlight\Widgets\SpotlightFeaturesGridWidget;
 use Spotlight\Widgets\SpotlightMapWidget;
 use Spotlight\Widgets\SpotlightContactWidget;
+use Spotlight\Widgets\SpotlightProductListWidget;
 
 class SpotlightServiceProvider extends ServiceProvider
 {
@@ -58,6 +59,7 @@ class SpotlightServiceProvider extends ServiceProvider
                     new SpotlightFeaturesGridWidget(),
                     new SpotlightMapWidget(),
                     new SpotlightContactWidget(),
+                    new SpotlightProductListWidget(),
                 ];
                 return array_merge($existing, $widgets);
             });
