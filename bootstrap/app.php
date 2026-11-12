@@ -80,6 +80,18 @@ return Application::configure(basePath: dirname(__DIR__))
                 return redirect()->guest(route('login'));
             }
 
+            // Tema daxilində xəta səhifəsi (404, 403, 419 və s.) varsa, onu göstər
+            if ($e instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface) {
+                $statusCode = $e->getStatusCode();
+                
+                // Əgər tema daxilində bu status kodu üçün fayl varsa (məs: theme::errors.404)
+                if (view()->exists("theme::errors.{$statusCode}")) {
+                    return response()->view("theme::errors.{$statusCode}", [
+                        'exception' => $e,
+                    ], $statusCode);
+                }
+            }
+
             if (config('app.debug') && !$request->expectsJson()) {
                 $isHttpException = $e instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
                 $statusCode = $isHttpException ? $e->getStatusCode() : 500;
