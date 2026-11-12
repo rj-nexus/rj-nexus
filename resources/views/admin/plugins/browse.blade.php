@@ -90,18 +90,25 @@
                             || str_contains($versionStr, 'alpha')
                             || str_contains($versionStr, 'rc');
 
-                        $screenshotUrl = $plugin['screenshot'] ?? '';
-                        if ($screenshotUrl && !str_starts_with($screenshotUrl, 'http')) {
-                            $repo = $plugin['repo'] ?? '';
-                            $screenshotUrl = 'https://raw.githubusercontent.com/' . $repo . '/main/' . ltrim($screenshotUrl, '/');
+                        // Kaskad məntiqi: screenshots -> screenshot -> logo -> preview
+                        $imageUrl = '';
+                        
+                        if (!empty($plugin['screenshots']) && is_array($plugin['screenshots'])) {
+                            $imageUrl = $plugin['screenshots'][0];
+                        } elseif (!empty($plugin['screenshot'])) {
+                            $imageUrl = $plugin['screenshot'];
+                        } elseif (!empty($plugin['logo'])) {
+                            $imageUrl = $plugin['logo'];
+                        } elseif (!empty($plugin['preview'])) {
+                            $imageUrl = $plugin['preview'];
                         }
                     @endphp
 
                     <div class="border border-gray-200 rounded-xl overflow-hidden bg-white hover:shadow-lg transition flex flex-col">
 
                         <div class="relative aspect-[16/9] bg-gradient-to-br from-gray-100 to-gray-50 overflow-hidden flex items-center justify-center">
-                            @if (!empty($screenshotUrl))
-                                <img src="{{ $screenshotUrl }}" alt="{{ $plugin['name'] }}"
+                            @if (!empty($imageUrl))
+                                <img src="{{ $imageUrl }}" alt="{{ $plugin['name'] }}"
                                      class="w-full h-full object-cover"
                                      referrerpolicy="no-referrer"
                                      onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
