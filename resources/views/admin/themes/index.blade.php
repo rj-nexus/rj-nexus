@@ -87,7 +87,20 @@
 
                 @foreach ($themes as $theme)
                     @php
-                        $preview = $theme->previewUrl();
+                        $meta = $theme->metadata() ?? [];
+                        $imageUrl = '';
+                        
+                        // Kaskad məntiqi: screenshots -> screenshot -> logo -> preview
+                        if (!empty($meta['screenshots']) && is_array($meta['screenshots'])) {
+                            $imageUrl = $meta['screenshots'][0];
+                        } elseif (!empty($meta['screenshot'])) {
+                            $imageUrl = $meta['screenshot'];
+                        } elseif (!empty($meta['logo'])) {
+                            $imageUrl = $meta['logo'];
+                        } elseif (!empty($meta['preview'])) {
+                            $imageUrl = $meta['preview'];
+                        }
+                        
                         $isActive = $theme->isActive();
                     @endphp
 
@@ -95,8 +108,8 @@
                          class="border {{ $isActive ? 'border-rj-purple ring-1 ring-rj-purple/20' : 'border-gray-200' }} rounded-xl overflow-hidden bg-white hover:shadow-lg transition group">
 
                         <div class="relative aspect-[16/10] bg-gradient-to-br from-gray-100 to-gray-50 overflow-hidden">
-                            @if ($preview)
-                                <img src="{{ $preview }}" alt="{{ $theme->name }}" class="w-full h-full object-cover">
+                            @if ($imageUrl)
+                                <img src="{{ $imageUrl }}" alt="{{ $theme->name }}" class="w-full h-full object-cover" referrerpolicy="no-referrer">
                             @else
                                 <div class="w-full h-full flex items-center justify-center">
                                     <svg class="w-20 h-20 text-gray-300" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/></svg>
