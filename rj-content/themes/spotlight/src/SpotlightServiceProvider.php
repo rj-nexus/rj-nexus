@@ -3,6 +3,7 @@
 namespace Spotlight;
 
 use Illuminate\Support\ServiceProvider;
+use Spotlight\Services\SpotlightStarterContent;
 use Spotlight\Widgets\SpotlightHeroWidget;
 use Spotlight\Widgets\SpotlightHeaderWidget;
 use Spotlight\Widgets\SpotlightLogosWidget;
@@ -33,6 +34,7 @@ class SpotlightServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->registerWidgets();
+        $this->maybeSetupStarterContent();
     }
 
     protected function registerWidgets(): void
@@ -63,6 +65,26 @@ class SpotlightServiceProvider extends ServiceProvider
                 ];
                 return array_merge($existing, $widgets);
             });
+        }
+    }
+
+    protected function maybeSetupStarterContent(): void
+    {
+        if (!function_exists('rj_get_option') || !function_exists('rj_set_option')) {
+            return;
+        }
+
+        try {
+            $activeTheme = rj_get_option('active_theme', '');
+
+            if ($activeTheme === 'spotlight' && !rj_get_option('spotlight_starter_content_imported')) {
+                SpotlightStarterContent::run();
+                rj_set_option('spotlight_starter_content_imported', true);
+            }
+        } catch (\Throwable $e) {
+            if (function_exists('logger')) {
+                logger()->error('Spotlight Starter Content Error: ' . $e->getMessage());
+            }
         }
     }
 }
