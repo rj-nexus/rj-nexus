@@ -6,7 +6,7 @@
     "author_url": "https://github.com/rj-nexus",
     "description": "Dark, modern product showcase theme with builder-first architecture.",
     "license": "MIT",
-    "preview": "screenshot.png",
+    "preview": "https://raw.githubusercontent.com/rj-nexus/spotlight/main/screenshot.png",
     "namespace": "Spotlight",
     "provider": "Spotlight\\SpotlightServiceProvider",
     "requires": {
