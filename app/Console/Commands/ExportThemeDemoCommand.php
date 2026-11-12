@@ -6,7 +6,6 @@ use Illuminate\Console\Command;
 use App\Models\Post;
 use App\Models\Menu;
 use App\Models\Template;
-use App\Models\Media;
 use Illuminate\Support\Facades\File;
 
 class ExportThemeDemoCommand extends Command
@@ -29,11 +28,11 @@ class ExportThemeDemoCommand extends Command
 
         $this->info("Exporting demo content for theme: {$themeSlug}...");
 
-        $posts = Post::with(['translations', 'categories', 'tags'])->get();
+        $posts = Post::with(['translations'])->get();
         File::put($demoPath . '/posts.json', $posts->toJson(JSON_PRETTY_PRINT));
         $this->info('Pages and Posts exported.');
 
-        $templates = Template::with(['translations'])->get();
+        $templates = Template::all();
         File::put($demoPath . '/templates.json', $templates->toJson(JSON_PRETTY_PRINT));
         $this->info('Templates (Header/Footer/Pages) exported.');
 
