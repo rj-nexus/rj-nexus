@@ -126,7 +126,7 @@
                 "icon": "header",
                 "controls": {
                     "logo_text": { "type": "text", "label": "Logo Text", "default": "Spotlight" },
-                    "logo_image": { "type": "text", "label": "Logo Image URL", "default": "" },
+                    "logo_image": { "type": "text", "label": "Logo Image URL", "default": "https://github.com/rj-nexus/spotlight/screenshot.png" },
                     "header_bg": { "type": "color", "label": "Header Background", "default": "#0a0a0f" },
                     "header_text_color": { "type": "color", "label": "Header Text Color", "default": "#f1f5f9" }
                 }
