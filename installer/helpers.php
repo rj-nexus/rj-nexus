@@ -6,27 +6,48 @@ function rj_languages(): array
     return [
         'en' => 'English',
         'az' => 'Azərbaycan',
+        'ar' => 'العربية',
+        'bn' => 'বাংলা',
         'de' => 'Deutsch',
         'es' => 'Español',
+        'fa' => 'فارسی',
         'fr' => 'Français',
-        'pt' => 'Português',
-        'ru' => 'Русский',
-        'tr' => 'Türkçe',
+        'ha' => 'Hausa',
         'hi' => 'हिन्दी',
-        'zh' => '中文',
-        'ja' => '日本語',
-        'id' => 'Bahasa Indonesia',
-        'ar' => 'العربية',
-        'it' => 'Italiano',
-        'nl' => 'Nederlands',
+        'ht' => 'Kreyòl ayisyen',
+        'hu' => 'Magyar',
         'hy' => 'Հայերեն',
+        'id' => 'Bahasa Indonesia',
+        'it' => 'Italiano',
+        'ja' => '日本語',
         'ka' => 'ქართული',
+        'kk' => 'Қазақ тілі',
+        'ko' => '한국어',
+        'ku' => 'Kurdî',
+        'ky' => 'Кыргызча',
+        'mi' => 'Te Reo Māori',
+        'mr' => 'मराठी',
+        'nl' => 'Nederlands',
+        'pl' => 'Polski',
+        'pt' => 'Português',
+        'qu' => 'Runa Simi',
+        'ro' => 'Română',
+        'ru' => 'Русский',
+        'sw' => 'Kiswahili',
+        'te' => 'తెలుగు',
+        'tl' => 'Tagalog',
+        'tr' => 'Türkçe',
+        'uk' => 'Українська',
+        'ur' => 'اردو',
+        'uz' => 'Oʻzbekcha',
+        'vi' => 'Tiếng Việt',
+        'zh' => '中文',
     ];
 }
 
 function rj_rtl_languages(): array
 {
-    return ['ar', 'fa', 'he', 'ur'];
+    return ['ar', 'fa', 'ur', 'ku'];
 }
 
 function rj_is_rtl(?string $lang = null): bool
@@ -241,7 +262,6 @@ function rj_install_run(?string $sqlContent = null): array
     $log = [];
     $lang = $cfg['lang'] ?? 'en';
 
-    // Sığorta (Fallback) dəyərləri
     $siteName = $cfg['site_name'] ?? 'RJ Nexus';
     $siteUrl = $cfg['site_url'] ?? rj_http_host();
     $db = $cfg['db'] ?? [];
@@ -309,7 +329,6 @@ function rj_install_run(?string $sqlContent = null): array
         }
 
         try {
-            // 1. "language" parametrini yeniləyirik
             $stmt = $pdo->prepare("SELECT COUNT(*) FROM rj_options WHERE option_name = 'language'");
             $stmt->execute();
             if ($stmt->fetchColumn() > 0) {
@@ -318,7 +337,6 @@ function rj_install_run(?string $sqlContent = null): array
                 $pdo->prepare("INSERT INTO rj_options (option_name, option_value, option_group, option_type, autoload, created_at, updated_at) VALUES ('language', ?, 'general', 'text', 1, NOW(), NOW())")->execute([$lang]);
             }
 
-            // 2. "frontend_locale" parametrini yeniləyirik
             $stmt = $pdo->prepare("SELECT COUNT(*) FROM rj_options WHERE option_name = 'frontend_locale'");
             $stmt->execute();
             if ($stmt->fetchColumn() > 0) {
@@ -327,7 +345,6 @@ function rj_install_run(?string $sqlContent = null): array
                 $pdo->prepare("INSERT INTO rj_options (option_name, option_value, option_group, option_type, autoload, created_at, updated_at) VALUES ('frontend_locale', ?, 'language', 'text', 1, NOW(), NOW())")->execute([$lang]);
             }
 
-            // 3. "frontend_locales" (array) parametrini yoxlayıb, seçilən dili əlavə edirik
             $stmt = $pdo->prepare("SELECT option_value FROM rj_options WHERE option_name = 'frontend_locales'");
             $stmt->execute();
             $flRow = $stmt->fetch(PDO::FETCH_ASSOC);
