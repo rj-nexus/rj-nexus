@@ -25,25 +25,33 @@ class ExportThemeDemoCommand extends Command
 
         $demoPath = $themePath . '/demo/data';
         File::ensureDirectoryExists($demoPath);
+        
+        // Köhnə məlumatları tam təmizləyirik ki, qarışıqlıq olmasın
+        File::cleanDirectory($demoPath);
 
         $this->info("Exporting demo content for theme: {$themeSlug}...");
 
+        // 1. Səhifələr və Postlar
         $posts = Post::with(['translations'])->get();
         File::put($demoPath . '/posts.json', $posts->toJson(JSON_PRETTY_PRINT));
-        $this->info('Pages and Posts exported.');
+        $this->info("Pages and Posts exported: " . $posts->count());
 
+        // 2. Şablonlar (Header, Footer, Builder Pages)
         $templates = Template::all();
         File::put($demoPath . '/templates.json', $templates->toJson(JSON_PRETTY_PRINT));
-        $this->info('Templates (Header/Footer/Pages) exported.');
+        $this->info("Templates (Header/Footer) exported: " . $templates->count());
 
+        // 3. Menyular
         $menus = Menu::with(['items'])->get();
         File::put($demoPath . '/menus.json', $menus->toJson(JSON_PRETTY_PRINT));
-        $this->info('Menus exported.');
+        $this->info("Menus exported: " . $menus->count());
 
+        // 4. Customizer Ayarları (Rənglər, Loqo, s.)
         $themeMods = rj_get_option('theme_mods_' . $themeSlug, []);
         File::put($demoPath . '/theme_mods.json', json_encode($themeMods, JSON_PRETTY_PRINT));
         $this->info('Customizer settings exported.');
 
+        // 5. Sayt Parametrləri (Ana səhifə, menyu yerləri)
         $options = [
             'site_name' => rj_get_option('site_name'),
             'site_tagline' => rj_get_option('site_tagline'),
