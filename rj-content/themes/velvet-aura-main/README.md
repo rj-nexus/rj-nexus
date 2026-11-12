@@ -2,37 +2,56 @@
   <img src="https://raw.githubusercontent.com/rj-nexus/velvet-aura/main/assets/images/logo_banner.png" alt="VelvetAura" width="100%">
 </p>
 
-<p align="center">
-  A premium, modern e-commerce theme exclusively designed for RJ CMS and RJ Commerce. VelvetAura offers a luxurious, high-end shopping experience with deep RJBuilder integration.
-</p>
+<div align="center">
 
-## Requirements
+# Version 1.0.1-beta
 
-- **PHP:** >= 8.2
-- **RJ CMS:** >= 1.0.0
-- **RJ Commerce Plugin:** Required for full e-commerce functionality.
-- **Database:** MySQL
+**A premium, modern e-commerce theme exclusively designed for [RJ Nexus](https://github.com/rj-nexus/rj-nexus) and RJ Commerce.**
 
-## Installation
+![RJ Nexus](https://img.shields.io/badge/RJ%20Nexus-%E2%89%A5%201.9.0-8A2BE2)
+![PHP](https://img.shields.io/badge/PHP-%E2%89%A5%208.2-777BB4?logo=php&logoColor=white)
+![License](https://img.shields.io/badge/license-CC%20BY--ND%204.0-lightgrey)
+
+> [!WARNING]
+> **Beta notice.** VelvetAura is currently in beta testing. Some bugs and unfinished features are expected, and things may change before the stable release. Feedback and bug reports are highly welcome.
+
+</div>
+
+---
+
+## 📖 About
+
+VelvetAura offers a luxurious, high-end shopping experience with deep RJBuilder integration. It is specifically tailored for product showcases and seamless e-commerce operations.
+
+## 📋 Requirements
+
+| Requirement | Version |
+| --- | --- |
+| **PHP** | `>= 8.2` |
+| **RJ Nexus** | `>= 1.9.0` |
+| **RJ Commerce Plugin** | Required for full e-commerce functionality. |
+| **Database** | MySQL |
+
+## 🚀 Installation
 
 1. Download the `velvet-aura.zip` file from the Releases tab.
-2. Log in to your RJ CMS Admin Panel.
+2. Log in to your RJ Nexus Admin Panel.
 3. Navigate to **Appearance > Themes** and click **Upload Theme**.
 4. Upload the ZIP file and click **Activate**.
 
 *Alternatively, you can manually extract the theme into `rj-content/themes/velvet-aura` and activate it from the admin panel.*
 
-## Features
+## ✨ Features
 
 - **3 Premium Header Styles:** Choose between Luxury Dark, Elegant Light, and Editorial designs.
 - **3 Premium Footer Styles:** Includes Dark Luxury, Light Minimal, and Editorial designs.
 - **RJBuilder Integration:** Custom widgets allow you to build pages, headers, and footers visually.
-- **Dynamic Menus:** Fully integrated with RJ CMS menu system (Header and Footer locations).
+- **Dynamic Menus:** Fully integrated with RJ Nexus menu system (Header and Footer locations).
 - **Editable Announcement Bars:** Change the top bar text directly from the RJBuilder widget settings.
 - **Custom Logo Support:** Override the default logo per header/footer widget instance.
 - **E-commerce Ready:** Beautifully styled views for Shop, Product, Cart, and Checkout pages (when RJ Commerce is active).
 
-## RJBuilder Widgets
+## 🧩 RJBuilder Widgets
 
 VelvetAura comes with 4 custom widgets specifically designed for the RJBuilder. You can find them under the **Velvet Aura** category in the builder panel:
 
@@ -52,7 +71,7 @@ VelvetAura comes with 4 custom widgets specifically designed for the RJBuilder. 
    - Display a curated grid of products.
    - Filter by category, set the number of columns, and limit the number of items.
 
-## Theme Structure
+## 🗂 Theme Structure
 
 If you want to customize the theme, here is a quick overview of the directory structure:
 
@@ -64,7 +83,7 @@ If you want to customize the theme, here is a quick overview of the directory st
   - `widgets/` - Views for the custom RJBuilder widgets.
   - `commerce/` - Custom e-commerce views (if overriding RJ Commerce defaults).
 
-## Screenshots
+## 📸 Screenshots
 
 | Header Style 1 | Header Style 2 | Header Style 3 |
 | :---: | :---: | :---: |
@@ -74,7 +93,7 @@ If you want to customize the theme, here is a quick overview of the directory st
 | :---: | :---: | :---: |
 | ![Footer 1](https://raw.githubusercontent.com/rj-nexus/velvet-aura/main/assets/images/footer1.png) | ![Footer 2](https://raw.githubusercontent.com/rj-nexus/velvet-aura/main/assets/images/footer2.png) | ![Footer 3](https://raw.githubusercontent.com/rj-nexus/velvet-aura/main/assets/images/footer3.png) |
 
-## License
+## 📄 License
 
 This theme is licensed under the **Creative Commons Attribution-NoDerivatives 4.0 International (CC BY-ND 4.0)**.
 
