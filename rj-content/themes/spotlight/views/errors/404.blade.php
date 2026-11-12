@@ -42,7 +42,6 @@
 
 <style>
     .rj-404-main {
-        --rj-404-accent: var(--rj-primary, #3b82f6);
         --mx: 50%;
         --my: 50%;
         position: relative;
@@ -70,7 +69,7 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        background: radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--rj-404-accent) 16%, transparent) 0%, transparent 60%);
+        background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.08) 0%, transparent 60%);
         animation: rj404Pulse 4s ease-in-out infinite alternate;
     }
 
@@ -139,7 +138,7 @@
         inset: 28%;
         border-radius: 50%;
         background: #000;
-        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85), 0 0 40px 6px color-mix(in srgb, var(--rj-404-accent) 55%, transparent);
+        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.85), 0 0 40px 6px rgba(255, 255, 255, 0.25);
     }
 
     .rj-404-orbit {
@@ -157,8 +156,8 @@
 
     .rj-404-orbit-b {
         inset: 10%;
-        border-bottom-color: var(--rj-404-accent);
-        border-left-color: color-mix(in srgb, var(--rj-404-accent) 25%, transparent);
+        border-bottom-color: rgba(255, 255, 255, 0.9);
+        border-left-color: rgba(255, 255, 255, 0.2);
         animation: rj404Spin 2s linear infinite reverse;
     }
 
@@ -192,6 +191,7 @@
         gap: 12px;
     }
 
+    /* Glassmorphism Buttons */
     .rj-404-btn {
         position: relative;
         overflow: hidden;
@@ -199,10 +199,10 @@
         align-items: center;
         justify-content: center;
         gap: 10px;
-        padding: 13px 28px;
+        padding: 14px 32px;
         border-radius: 12px;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.15);
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.12);
         color: #fff;
         font-size: 15px;
         font-weight: 500;
@@ -219,28 +219,29 @@
         left: -80%;
         width: 50%;
         height: 100%;
-        background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+        background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.2), transparent);
         transform: skewX(-20deg);
         transition: left 0.6s ease;
     }
 
     .rj-404-btn:hover {
-        background: rgba(255, 255, 255, 0.1);
-        border-color: rgba(255, 255, 255, 0.35);
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.3);
         transform: translateY(-2px);
+        box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.5);
     }
 
     .rj-404-btn:hover::after { left: 130%; }
 
+    /* Slightly highlighted main button but still neutral */
     .rj-404-btn-main {
-        background: color-mix(in srgb, var(--rj-404-accent) 22%, rgba(255, 255, 255, 0.05));
-        border-color: color-mix(in srgb, var(--rj-404-accent) 60%, rgba(255, 255, 255, 0.2));
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.2);
     }
 
     .rj-404-btn-main:hover {
-        background: color-mix(in srgb, var(--rj-404-accent) 38%, rgba(255, 255, 255, 0.06));
-        border-color: var(--rj-404-accent);
-        box-shadow: 0 12px 26px -12px color-mix(in srgb, var(--rj-404-accent) 70%, transparent);
+        background: rgba(255, 255, 255, 0.15);
+        border-color: rgba(255, 255, 255, 0.4);
     }
 
     .rj-404-btn svg {
