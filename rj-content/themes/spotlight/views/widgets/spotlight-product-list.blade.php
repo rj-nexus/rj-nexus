@@ -73,7 +73,6 @@
 
     <style>
         #{{ $uid }}.rj-pl-section {
-            --pl-accent: var(--rj-primary, #3b82f6);
             position: relative;
             padding: 80px 24px;
             background: transparent;
@@ -149,7 +148,7 @@
             pointer-events: none;
             opacity: 0;
             transition: opacity 0.35s ease;
-            background: radial-gradient(240px circle at var(--mx) var(--my), color-mix(in srgb, var(--pl-accent) 22%, transparent), transparent 65%);
+            background: radial-gradient(240px circle at var(--mx) var(--my), rgba(255, 255, 255, 0.08), transparent 65%);
         }
 
         #{{ $uid }} .rj-pl-card::after {
@@ -162,7 +161,7 @@
             padding: 1px;
             opacity: 0;
             transition: opacity 0.35s ease;
-            background: radial-gradient(180px circle at var(--mx) var(--my), color-mix(in srgb, var(--pl-accent) 90%, #fff), transparent 65%);
+            background: radial-gradient(180px circle at var(--mx) var(--my), rgba(255, 255, 255, 0.5), transparent 65%);
             -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
             -webkit-mask-composite: xor;
             mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
@@ -170,7 +169,7 @@
 
         #{{ $uid }} .rj-pl-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 18px 36px -22px color-mix(in srgb, var(--pl-accent) 55%, transparent);
+            box-shadow: 0 18px 36px -22px rgba(0, 0, 0, 0.8);
         }
         #{{ $uid }} .rj-pl-card:hover::before,
         #{{ $uid }} .rj-pl-card:hover::after { opacity: 1; }
@@ -229,8 +228,8 @@
             transition: background 0.3s, border-color 0.3s;
         }
         #{{ $uid }} .rj-pl-card:hover .rj-pl-price-badge {
-            background: color-mix(in srgb, var(--pl-accent) 55%, rgba(255, 255, 255, 0.1));
-            border-color: color-mix(in srgb, var(--pl-accent) 70%, #fff);
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.4);
         }
 
         #{{ $uid }} .rj-pl-content {
@@ -295,9 +294,9 @@
         }
 
         #{{ $uid }} .rj-pl-card.has-link:hover .rj-pl-btn {
-            background: var(--pl-accent);
-            border-color: var(--pl-accent);
-            box-shadow: 0 6px 16px -8px color-mix(in srgb, var(--pl-accent) 80%, transparent);
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 6px 16px -8px rgba(0, 0, 0, 0.5);
         }
         #{{ $uid }} .rj-pl-card.has-link:hover .rj-pl-btn svg { transform: translateX(3px); }
         #{{ $uid }} .rj-pl-btn:focus-visible { outline: 2px solid rgba(255, 255, 255, 0.7); outline-offset: 3px; }
