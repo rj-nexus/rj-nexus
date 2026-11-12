@@ -49,8 +49,8 @@ class SpotlightProductListWidget extends BaseWidget
             [
                 'name' => 'products',
                 'type' => 'repeater',
-                'label' => __('Products (Max 4)'),
-                'max_items' => 4,
+                'label' => __('Products (Max 16)'),
+                'max_items' => 16,
                 'default' => [
                     [
                         'image' => '',
