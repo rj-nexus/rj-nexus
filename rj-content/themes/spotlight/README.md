@@ -2,13 +2,13 @@
 
 **A dark, modern, builder-first theme for [RJ Nexus](https://rjnexus.org).**
 
-![Version](https://img.shields.io/badge/version-0.4.0--beta-orange)
+![Version](https://img.shields.io/badge/version-1.0.1-green)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![RJ Nexus](https://img.shields.io/badge/RJ%20Nexus-%E2%89%A5%201.8.6-8A2BE2)
 ![PHP](https://img.shields.io/badge/PHP-%E2%89%A5%208.2-777BB4)
 
-> [!WARNING]
-> **Beta notice.** Spotlight is currently in beta testing. Some bugs and unfinished features are expected, and things may change before the stable release. Feedback and bug reports are highly welcome.
+> [!NOTE]
+> **Stable Release.** Spotlight is now fully stable, highly customizable, and ready for production use. It includes auto-generated starter content and 20+ interactive widgets.
 
 ---
 
@@ -32,15 +32,18 @@ Spotlight is a highly customizable, dark-first theme designed for **product show
 
 | Feature | Description |
 | --- | --- |
-| **RJBuilder Integration** | 20+ custom-built widgets tailored specifically for this dark theme. |
+| **RJBuilder Integration** | 20+ custom-built interactive widgets tailored for dark SaaS/product showcases. |
+| **Starter Content** | Auto-generation of default pages (Home, About, Contact, Pricing), menus, and Header/Footer templates upon activation. |
 | **Cinematic Hero** | Full-screen video backgrounds with ping-pong playback, color grading, and HUD overlays. |
-| **Glassmorphism UI** | Beautiful frosted-glass effects, interactive tabs, and glowing borders. |
-| **Dynamic Customizer** | Live CSS variables for colors, typography, and layout. Changes reflect instantly. |
+| **Glassmorphism UI** | Beautiful frosted-glass effects, interactive tabs, and glowing borders across all elements. |
+| **Dynamic Customizer** | Live CSS variables for colors, typography, and layout via the admin panel. |
+| **Product List Widget** | A new glassmorphism grid for showcasing products with hover effects and pricing badges. |
+| **Custom 404 Page** | A beautifully animated, glassmorphism-themed 404 error page. |
 | **Interactive Elements** | Animated pricing tables, infinite marquee testimonials, and accordion FAQs. |
 | **Advanced Forms** | Seamless integration with RJ Form Builder, featuring a custom dark-mode contact section. |
-| **Interactive Maps** | Built-in, API-keyless dark-mode maps powered by Leaflet and OpenStreetMap. |
-| **Multilingual** | Built-in language switcher with automatic RTL support and localized routing. |
-| **Custom Page Templates** | Dedicated templates for Contact, Landing, and Full-Width pages. |
+| **Interactive Maps** | Built-in, 100% free API-keyless dark-mode maps powered by Leaflet and OpenStreetMap. |
+| **Multilingual** | Fully compatible with RJ Nexus's 38 languages, with automatic RTL support. |
+| **Custom Templates** | Dedicated templates for Contact, Landing, and Full-Width pages. |
 | **Performance First** | Lightweight, using pure CSS animations and minimal JS. |
 
 ## 📋 Requirements
