@@ -1,12 +1,12 @@
 {
     "name": "RJ Default",
     "slug": "rj-default",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "author": "RJ Nexus",
     "author_url": "https://github.com/rj-nexus",
     "description": "The official default theme for RJ Nexus. Clean, minimal, builder-first.",
     "license": "MIT",
-    "preview": "https://raw.githubusercontent.com/rj-nexus/rj-nexus/main/rj-content/themes/rj-default/screenshot.png",
+    "logo": "https://raw.githubusercontent.com/rj-nexus/rj-nexus/main/rj-content/themes/rj-default/screenshot.png",
     "requires": {
         "rj_cms": ">=1.5.1",
         "php": ">=8.2"
