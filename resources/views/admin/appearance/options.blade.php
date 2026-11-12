@@ -294,7 +294,7 @@
 
 </div>
 
-@include('admin.partials.media-picker')
+
 
 <script>
 function appearanceOptions(initial, defaults) {
