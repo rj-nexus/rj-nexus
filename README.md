@@ -6,7 +6,7 @@
 
 ![Status](https://img.shields.io/badge/Status-Stable-brightgreen)
 ![Release](https://img.shields.io/badge/Release-RJ%20CORE%201-10b981)
-![Version](https://img.shields.io/badge/Version-v1.9.0-blue)
+![Version](https://img.shields.io/badge/Version-v1.9.1-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Laravel](https://img.shields.io/badge/Laravel-12-red)
 ![PHP](https://img.shields.io/badge/PHP-8.2-purple)
@@ -21,7 +21,7 @@
 
 ## About
 
-**RJ CMS** is a modern, self-hosted content management system built on **Laravel 12**. You install it on your own hosting, keep full ownership of your data, and extend it through an isolated plugin and theme system. It ships with a visual page builder (RJBuilder) with 60+ widgets, a dual AI engine, 17 languages with per-language URLs, and a browser-based installer that works on any shared hosting or VPS.
+**RJ CMS** is a modern, self-hosted content management system built on **Laravel 12**. You install it on your own hosting, keep full ownership of your data, and extend it through an isolated plugin and theme system. It ships with a visual page builder (RJBuilder) with 60+ widgets, a dual AI engine, 38 languages with per-language URLs, and a browser-based installer that works on any shared hosting or VPS.
 
 **RJ Nexus** is the organization behind it. It hosts the CMS core and the ecosystem around it.
 
@@ -29,60 +29,38 @@ Official website: **[rjnexus.org](https://rjnexus.org)**
 
 <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/divider.svg" alt="" width="100%"/>
 
-## What's New in RJ CORE 1 (v1.9.0)
+## What's New in v1.9.1
 
-The first official stable release of RJ CMS. The complete list of changes is available in the [Changelog](https://github.com/rj-nexus/rj-nexus/blob/main/CHANGELOG.md).
+This update significantly expands the system's localization capabilities and optimizes the installer interface for a larger dataset. The complete list of changes is available in the [Changelog](https://github.com/rj-nexus/rj-nexus/blob/main/CHANGELOG.md).
 
 <table>
   <tr>
     <td width="50%" valign="top">
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/installer.svg" width="44" height="44" alt=""/><br/>
-      <b>Visual Installer Wizard</b><br/>
-      Install from the browser: language selection, server requirements check, database setup and admin account creation. Default pages, menus and builder templates are imported automatically.
-    </td>
-    <td width="50%" valign="top">
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/ai.svg" width="44" height="44" alt=""/><br/>
-      <b>Dual AI Engine</b><br/>
-      A keyless Free AI powers the dashboard and global search (<code>Ctrl+K</code>). Connect OpenRouter for advanced SEO, coding help and translations.
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top">
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/search.svg" width="44" height="44" alt=""/><br/>
-      <b>AI Center & Global Search</b><br/>
-      AI tools gathered in one place, plus an AI-powered search available from anywhere in the admin panel.
+      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/language.svg" width="44" height="44" alt=""/><br/>
+      <b>21 New Languages</b><br/>
+      Expanded from 17 to <b>38 languages</b> in the installer and the system: Bengali, Persian, Hausa, Haitian Creole, Hungarian, Kazakh, Korean, Kurdish, Kyrgyz, Maori, Marathi, Polish, Quechua, Romanian, Swahili, Telugu, Tagalog, Ukrainian, Urdu, Uzbek and Vietnamese.
     </td>
     <td width="50%" valign="top">
       <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/slugs.svg" width="44" height="44" alt=""/><br/>
-      <b>17 Languages & Per-Language Slugs</b><br/>
-      Every page can have its own URL per language, for example <code>/en/about</code> and <code>/az/haqqimizda</code>.
+      <b>RTL Support</b><br/>
+      Kurdish (<code>ku</code>) has been added to the list of right-to-left languages.
     </td>
   </tr>
   <tr>
     <td width="50%" valign="top">
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/kyc.svg" width="44" height="44" alt=""/><br/>
-      <b>KYC Management</b><br/>
-      Identity verification (KYC) management built into the admin panel.
+      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/installer.svg" width="44" height="44" alt=""/><br/>
+      <b>Installer UI Optimization</b><br/>
+      The 3D planet animation in the language selection step now calculates planet density, size and stagger speed dynamically, keeping the experience smooth with 38 languages.
     </td>
     <td width="50%" valign="top">
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/backup.svg" width="44" height="44" alt=""/><br/>
-      <b>Backup & Update Pages</b><br/>
-      Dedicated admin pages for managing backups and applying updates delivered through GitHub.
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top">
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/media.svg" width="44" height="44" alt=""/><br/>
-      <b>Media Library & WebP</b><br/>
-      Improved media library with automatic WebP image optimization and lazy loading.
-    </td>
-    <td width="50%" valign="top">
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/errors.svg" width="44" height="44" alt=""/><br/>
-      <b>Redesigned Auth & Error Pages</b><br/>
-      Animated login, register, verification and password reset pages, a new 400 page and a detailed 500 page in debug mode.
+      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/search.svg" width="44" height="44" alt=""/><br/>
+      <b>Language Helper</b><br/>
+      <code>installer/helpers.php</code> now contains the complete list of 38 languages and their aliases for the search functionality.
     </td>
   </tr>
 </table>
+
+Also in this release: obsolete SQL backup files were removed from the database directory to reduce project size.
 
 <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/divider.svg" alt="" width="100%"/>
 
@@ -127,7 +105,7 @@ RJ CMS installs on any shared hosting or VPS without touching a single line of c
   <tr>
     <td width="33%" valign="top">
       <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/roles.svg" width="44" height="44" alt=""/><br/>
-      <b>Roles & Permissions</b><br/>
+      <b>Roles &amp; Permissions</b><br/>
       Fine-grained role-based access control for every admin section.
     </td>
     <td width="33%" valign="top">
@@ -137,8 +115,8 @@ RJ CMS installs on any shared hosting or VPS without touching a single line of c
     </td>
     <td width="33%" valign="top">
       <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/language.svg" width="44" height="44" alt=""/><br/>
-      <b>Multilingual & RTL</b><br/>
-      17 languages with automatic right-to-left rendering for Arabic and other RTL languages.
+      <b>Multilingual &amp; RTL</b><br/>
+      38 languages with automatic right-to-left rendering for Arabic, Kurdish and other RTL languages.
     </td>
   </tr>
   <tr>
@@ -154,7 +132,7 @@ RJ CMS installs on any shared hosting or VPS without touching a single line of c
     </td>
     <td width="33%" valign="top">
       <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/themes.svg" width="44" height="44" alt=""/><br/>
-      <b>Themes & Plugins</b><br/>
+      <b>Themes &amp; Plugins</b><br/>
       Browse the full catalog in the <a href="https://github.com/rj-nexus/rj-registration">themes and plugins list</a>.
     </td>
   </tr>
@@ -163,6 +141,8 @@ RJ CMS installs on any shared hosting or VPS without touching a single line of c
 <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/divider.svg" alt="" width="100%"/>
 
 ## Supported Languages
+
+38 languages are supported, including per-language URLs (for example `/en/about` and `/az/haqqimizda`).
 
 <table>
   <tr>
@@ -174,19 +154,51 @@ RJ CMS installs on any shared hosting or VPS without touching a single line of c
     <td align="center" width="16%"><img src="https://flagcdn.com/pt.svg" width="32" alt="PT"/><br/>Portuguese<br/><code>pt</code></td>
   </tr>
   <tr>
-    <td align="center"><img src="https://flagcdn.com/ru.svg" width="32" alt="RU"/><br/>Russian<br/><code>ru</code></td>
-    <td align="center"><img src="https://flagcdn.com/tr.svg" width="32" alt="TR"/><br/>Turkish<br/><code>tr</code></td>
-    <td align="center"><img src="https://flagcdn.com/in.svg" width="32" alt="HI"/><br/>Hindi<br/><code>hi</code></td>
-    <td align="center"><img src="https://flagcdn.com/cn.svg" width="32" alt="ZH"/><br/>Chinese<br/><code>zh</code></td>
-    <td align="center"><img src="https://flagcdn.com/jp.svg" width="32" alt="JA"/><br/>Japanese<br/><code>ja</code></td>
-    <td align="center"><img src="https://flagcdn.com/id.svg" width="32" alt="ID"/><br/>Indonesian<br/><code>id</code></td>
+    <td align="center" width="16%"><img src="https://flagcdn.com/ru.svg" width="32" alt="RU"/><br/>Russian<br/><code>ru</code></td>
+    <td align="center" width="16%"><img src="https://flagcdn.com/tr.svg" width="32" alt="TR"/><br/>Turkish<br/><code>tr</code></td>
+    <td align="center" width="16%"><img src="https://flagcdn.com/in.svg" width="32" alt="HI"/><br/>Hindi<br/><code>hi</code></td>
+    <td align="center" width="16%"><img src="https://flagcdn.com/cn.svg" width="32" alt="ZH"/><br/>Chinese<br/><code>zh</code></td>
+    <td align="center" width="16%"><img src="https://flagcdn.com/jp.svg" width="32" alt="JA"/><br/>Japanese<br/><code>ja</code></td>
+    <td align="center" width="16%"><img src="https://flagcdn.com/id.svg" width="32" alt="ID"/><br/>Indonesian<br/><code>id</code></td>
   </tr>
   <tr>
-    <td align="center"><img src="https://flagcdn.com/sa.svg" width="32" alt="AR"/><br/>Arabic<br/><code>ar</code></td>
-    <td align="center"><img src="https://flagcdn.com/it.svg" width="32" alt="IT"/><br/>Italian<br/><code>it</code></td>
-    <td align="center"><img src="https://flagcdn.com/nl.svg" width="32" alt="NL"/><br/>Dutch<br/><code>nl</code></td>
-    <td align="center"><img src="https://flagcdn.com/am.svg" width="32" alt="HY"/><br/>Armenian<br/><code>hy</code></td>
-    <td align="center"><img src="https://flagcdn.com/ge.svg" width="32" alt="KA"/><br/>Georgian<br/><code>ka</code></td>
+    <td align="center" width="16%"><img src="https://flagcdn.com/sa.svg" width="32" alt="AR"/><br/>Arabic<br/><code>ar</code></td>
+    <td align="center" width="16%"><img src="https://flagcdn.com/it.svg" width="32" alt="IT"/><br/>Italian<br/><code>it</code></td>
+    <td align="center" width="16%"><img src="https://flagcdn.com/nl.svg" width="32" alt="NL"/><br/>Dutch<br/><code>nl</code></td>
+    <td align="center" width="16%"><img src="https://flagcdn.com/am.svg" width="32" alt="HY"/><br/>Armenian<br/><code>hy</code></td>
+    <td align="center" width="16%"><img src="https://flagcdn.com/ge.svg" width="32" alt="KA"/><br/>Georgian<br/><code>ka</code></td>
+    <td align="center" width="16%"><img src="https://flagcdn.com/bd.svg" width="32" alt="BN"/><br/>Bengali<br/><code>bn</code></td>
+  </tr>
+  <tr>
+    <td align="center" width="16%"><img src="https://flagcdn.com/ir.svg" width="32" alt="FA"/><br/>Persian<br/><code>fa</code></td>
+    <td align="center" width="16%"><img src="https://flagcdn.com/ng.svg" width="32" alt="HA"/><br/>Hausa<br/><code>ha</code></td>
+    <td align="center" width="16%"><img src="https://flagcdn.com/ht.svg" width="32" alt="HT"/><br/>Haitian Creole<br/><code>ht</code></td>
+    <td align="center" width="16%"><img src="https://flagcdn.com/hu.svg" width="32" alt="HU"/><br/>Hungarian<br/><code>hu</code></td>
+    <td align="center" width="16%"><img src="https://flagcdn.com/kz.svg" width="32" alt="KK"/><br/>Kazakh<br/><code>kk</code></td>
+    <td align="center" width="16%"><img src="https://flagcdn.com/kr.svg" width="32" alt="KO"/><br/>Korean<br/><code>ko</code></td>
+  </tr>
+  <tr>
+    <td align="center" width="16%"><b>❓</b><br/>Kurdish<br/><code>ku</code></td>
+    <td align="center" width="16%"><img src="https://flagcdn.com/kg.svg" width="32" alt="KY"/><br/>Kyrgyz<br/><code>ky</code></td>
+    <td align="center" width="16%"><img src="https://flagcdn.com/nz.svg" width="32" alt="MI"/><br/>Maori<br/><code>mi</code></td>
+    <td align="center" width="16%"><img src="https://flagcdn.com/in.svg" width="32" alt="MR"/><br/>Marathi<br/><code>mr</code></td>
+    <td align="center" width="16%"><img src="https://flagcdn.com/pl.svg" width="32" alt="PL"/><br/>Polish<br/><code>pl</code></td>
+    <td align="center" width="16%"><img src="https://flagcdn.com/pe.svg" width="32" alt="QU"/><br/>Quechua<br/><code>qu</code></td>
+  </tr>
+  <tr>
+    <td align="center" width="16%"><img src="https://flagcdn.com/ro.svg" width="32" alt="RO"/><br/>Romanian<br/><code>ro</code></td>
+    <td align="center" width="16%"><img src="https://flagcdn.com/ke.svg" width="32" alt="SW"/><br/>Swahili<br/><code>sw</code></td>
+    <td align="center" width="16%"><img src="https://flagcdn.com/in.svg" width="32" alt="TE"/><br/>Telugu<br/><code>te</code></td>
+    <td align="center" width="16%"><img src="https://flagcdn.com/ph.svg" width="32" alt="TL"/><br/>Tagalog<br/><code>tl</code></td>
+    <td align="center" width="16%"><img src="https://flagcdn.com/ua.svg" width="32" alt="UK"/><br/>Ukrainian<br/><code>uk</code></td>
+    <td align="center" width="16%"><img src="https://flagcdn.com/pk.svg" width="32" alt="UR"/><br/>Urdu<br/><code>ur</code></td>
+  </tr>
+  <tr>
+    <td align="center" width="16%"><img src="https://flagcdn.com/uz.svg" width="32" alt="UZ"/><br/>Uzbek<br/><code>uz</code></td>
+    <td align="center" width="16%"><img src="https://flagcdn.com/vn.svg" width="32" alt="VI"/><br/>Vietnamese<br/><code>vi</code></td>
+    <td align="center"></td>
+    <td align="center"></td>
+    <td align="center"></td>
     <td align="center"></td>
   </tr>
 </table>
