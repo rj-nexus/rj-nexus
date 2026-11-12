@@ -8,6 +8,7 @@
     $release   = $data['lastRelease'] ?? null;
     $hasUpdate = !empty($release['has_update']);
     $hasInfo   = !empty($release);
+    $currentVersion = config('app.version', '1.0.0');
 
     $nxFacts = [
         __('Altair comes from the Arabic "al-nasr al-ta\'ir" — the flying eagle.'),
@@ -25,13 +26,9 @@
 <script>document.documentElement.classList.add('nx-js');</script>
 
 <style>
-    /* =====================================================
-       RJ NEXUS CORE 1  ·  "Altair"
-       ===================================================== */
     .nx-page { --nx-p:#a78bfa; --nx-k:#f472b6; --nx-b:#93c5fd; --nx-bg:#0b0922; }
     .nx-page.nx-new { --nx-p:#f472b6; --nx-k:#fbbf24; }
 
-    /* ---------- HERO ---------- */
     .nx-hero {
         position:relative; overflow:hidden; border-radius:1.25rem; color:#fff; isolation:isolate;
         min-height:600px; display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
@@ -58,7 +55,6 @@
     .nx-hero.nx-boom { animation:nx-shake .6s ease-out; }
     @keyframes nx-shake { 0%,100% { transform:translate(0,0); } 20% { transform:translate(-3px,2px); } 40% { transform:translate(3px,-2px); } 60% { transform:translate(-2px,-1px); } 80% { transform:translate(2px,1px); } }
 
-    /* ---------- ALTAIR ---------- */
     .nx-altair { position:relative; width:190px; height:190px; flex:none; cursor:pointer;
         transform:translate3d(calc(var(--mx) * 16px), calc(var(--my) * 10px), 0); transition:transform .25s ease-out; }
     .nx-altair:hover .nx-core { transform:scale(1.15); }
@@ -81,7 +77,6 @@
     .nx-ring.b::after { background:var(--nx-k); box-shadow:0 0 12px 3px var(--nx-k); }
     .nx-ring.c::after { background:var(--nx-b); box-shadow:0 0 12px 3px var(--nx-b); width:5px; height:5px; }
 
-    /* Altair spins so fast it is flattened at the poles */
     .nx-core { position:absolute; left:50%; top:50%; width:62px; height:54px; margin:-27px 0 0 -31px; border-radius:9999px;
         background:radial-gradient(circle at 40% 36%, #fff 0%, #eef3ff 42%, #b6c9ff 100%);
         box-shadow:0 0 26px 10px rgba(255,255,255,.85), 0 0 80px 32px rgba(150,180,255,.6);
@@ -95,7 +90,6 @@
     .nx-altair.nx-hyper .nx-core { animation:nx-hyper .35s ease-in-out infinite; }
     @keyframes nx-hyper { 0%,100% { transform:scale(1); } 50% { transform:scale(1.35); } }
 
-    /* ---------- TEXT ---------- */
     .nx-content { position:relative; z-index:3; display:flex; flex-direction:column; align-items:center; margin-top:22px; pointer-events:none; }
     .nx-content > * { pointer-events:auto; }
     .nx-label { font-size:12px; letter-spacing:.42em; text-transform:uppercase; color:#c4b5fd; font-weight:600; }
@@ -121,7 +115,6 @@
     .nx-chips { margin-top:16px; display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
     .nx-chip { padding:4px 12px; border-radius:9999px; font-size:11px; color:rgba(226,232,255,.82); background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); backdrop-filter:blur(4px); }
 
-    /* ---------- CHECK BUTTON (over the animation) ---------- */
     .nx-btn { position:relative; overflow:hidden; margin-top:26px; border-radius:9999px; padding:2px; border:0; cursor:pointer; color:#fff;
         box-shadow:0 0 40px -6px var(--nx-p); transition:transform .2s, box-shadow .2s; }
     .nx-btn::before { content:""; position:absolute; inset:-160%; background:conic-gradient(from 0deg, transparent 0 55%, var(--nx-p), var(--nx-k), transparent); animation:nx-spin 3.5s linear infinite; }
@@ -134,7 +127,6 @@
     .nx-btn.nx-loading svg { animation:nx-spin .8s linear infinite; }
     .nx-checked { margin-top:12px; font-size:12px; color:#94a3b8; }
 
-    /* ---------- FACT TOAST + HINT ---------- */
     .nx-fact { position:absolute; z-index:4; top:16px; left:50%; max-width:min(560px,90%); transform:translate(-50%,-14px); opacity:0; pointer-events:none;
         padding:10px 18px; border-radius:14px; font-size:13px; line-height:1.45; color:#e0e7ff; text-align:center;
         background:rgba(15,12,45,.72); border:1px solid rgba(167,139,250,.4); backdrop-filter:blur(10px);
@@ -144,7 +136,6 @@
     .nx-hint { position:absolute; z-index:3; right:18px; bottom:14px; font-size:11px; letter-spacing:.12em; color:rgba(203,213,225,.55); text-transform:uppercase; animation:nx-hint 3s ease-in-out infinite; pointer-events:none; }
     @keyframes nx-hint { 0%,100% { opacity:.35; } 50% { opacity:.9; } }
 
-    /* ---------- CARDS ---------- */
     .nx-card { position:relative; border-radius:1rem; color:#e2e8f0; overflow:hidden;
         background:linear-gradient(160deg, #15113a 0%, #0d0a26 100%);
         border:1px solid rgba(255,255,255,.08); box-shadow:0 14px 40px -20px rgba(60,40,160,.7);
@@ -183,7 +174,6 @@
     .nx-help { font-size:12px; color:#94a3b8; margin-top:6px; }
     .nx-check { accent-color:#a78bfa; width:16px; height:16px; margin-top:2px; }
 
-    /* ---------- TIMELINE ---------- */
     .nx-steps { position:relative; padding:24px 24px 24px 24px; }
     .nx-steps::before { content:""; position:absolute; left:41px; top:34px; bottom:34px; width:2px; background:rgba(255,255,255,.1); }
     .nx-prog { position:absolute; left:41px; top:34px; width:2px; height:0; background:linear-gradient(180deg,#a78bfa,#f472b6); box-shadow:0 0 12px #f472b6; transition:height .5s ease-out; }
@@ -200,7 +190,6 @@
     .nx-cmd button span.cp { font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:#64748b; }
     .nx-cmd button.done span.cp { color:#86efac; }
 
-    /* ---------- REVEAL ---------- */
     .nx-js .nx-reveal { opacity:0; transform:translateY(22px); transition:opacity .7s ease-out, transform .7s ease-out; }
     .nx-js .nx-reveal.nx-in { opacity:1; transform:none; }
 
@@ -222,7 +211,6 @@
 
 <div class="nx-page space-y-6 {{ $hasUpdate ? 'nx-new' : '' }}">
 
-    {{-- ===================== HERO ===================== --}}
     <section id="nxHero" class="nx-hero"
              data-update="{{ $hasUpdate ? '1' : '0' }}"
              data-facts="{{ json_encode($nxFacts, JSON_UNESCAPED_UNICODE) }}"
@@ -247,9 +235,8 @@
         <div class="nx-content">
             <div class="nx-label nx-intro d1">{{ __('RJ NEXUS CORE 1') }}</div>
             <h1 class="nx-title nx-intro d2">Altair</h1>
-            <div class="nx-ver nx-intro d3">RJ CMS <b>v{{ $data['currentVersion'] }}</b></div>
+            <div class="nx-ver nx-intro d3">RJ CMS <b>v{{ $currentVersion }}</b></div>
 
-            {{-- Status lives on the hero --}}
             <div class="nx-intro d3">
                 @if ($hasUpdate)
                     <div class="nx-status new">
@@ -277,7 +264,6 @@
                 <span class="nx-chip">{{ __('Spins in ~9 hours') }}</span>
             </div>
 
-            {{-- Check for updates, right over the animation --}}
             <form method="POST" action="{{ route('admin.updates.check') }}" id="nxCheckForm" class="nx-intro d5">
                 @csrf
                 <button type="submit" id="nxCheckBtn" class="nx-btn">
@@ -296,7 +282,6 @@
         <div class="nx-hint">✦ {{ __('Click the star') }}</div>
     </section>
 
-    {{-- ===================== NEW VERSION (only when there is one) ===================== --}}
     @if ($hasUpdate)
         <section id="nxNewVersion" class="nx-card nx-newcard nx-reveal">
             <div class="p-6 flex items-start justify-between gap-6 flex-wrap">
@@ -310,7 +295,7 @@
                         @endif
                     </div>
                     <div class="nx-path">
-                        <span>v{{ $data['currentVersion'] }}</span>
+                        <span>v{{ $currentVersion }}</span>
                         <span class="line"></span>
                         <b class="text-white">v{{ $release['version'] }}</b>
                     </div>
@@ -346,7 +331,6 @@
         </section>
     @endif
 
-    {{-- ===================== MANUAL STEPS ===================== --}}
     <section class="nx-card nx-reveal">
         <div class="nx-card-h">
             <h2>{{ __('Manual Update Instructions') }}</h2>
@@ -561,7 +545,6 @@
     function start() { if (!running && visible && !document.hidden) { running = true; requestAnimationFrame(frame); } }
     function stop()  { running = false; }
 
-    // pointer: parallax + hover on nodes/star
     hero.addEventListener('mousemove', function (e) {
         var r = hero.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
         tmx = (x / W - .5) * 2; tmy = (y / H - .5) * 2;
@@ -571,7 +554,6 @@
     });
     hero.addEventListener('mouseleave', function () { tmx = 0; tmy = 0; for (var i = 0; i < nodes.length; i++) nodes[i].near = false; });
 
-    // click: star = supernova, node = fact, anywhere = star burst
     hero.addEventListener('click', function (e) {
         if (e.target.closest('button, a, form, input')) return;
         var r = hero.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top, c = starCenter();
@@ -585,7 +567,6 @@
         if (reduce) { ctx.clearRect(0, 0, W, H); drawStars(); }
     });
 
-    // touch parallax (gentle)
     hero.addEventListener('touchmove', function (e) {
         var tch = e.touches[0]; if (!tch) return;
         var r = hero.getBoundingClientRect();
@@ -601,7 +582,6 @@
     resize();
     requestAnimationFrame(frame);
 
-    // "Check for updates" button: scanning state + hyperdrive on submit
     var form = document.getElementById('nxCheckForm'), btn = document.getElementById('nxCheckBtn'), txt = document.getElementById('nxCheckText');
     if (form) form.addEventListener('submit', function () {
         btn.classList.add('nx-loading');
@@ -610,7 +590,6 @@
         var c = starCenter(); burst(c.x, c.y, 90, 3.4); ring(c.x, c.y, Math.max(W, H) * .6, 5, 'rgba(255,255,255,');
     });
 
-    // ---------- reveal on scroll + timeline progress ----------
     var reveals = document.querySelectorAll('.nx-reveal');
     if ('IntersectionObserver' in window) {
         var io = new IntersectionObserver(function (en) {
@@ -635,7 +614,6 @@
     window.addEventListener('scroll', updSteps, { passive: true }); window.addEventListener('resize', updSteps); updSteps();
     var sc = document.querySelector('main, .overflow-y-auto'); if (sc) sc.addEventListener('scroll', updSteps, { passive: true });
 
-    // ---------- click-to-copy commands ----------
     document.querySelectorAll('.nx-cmd button').forEach(function (b) {
         b.addEventListener('click', function () {
             var text = b.getAttribute('data-copy'), label = b.querySelector('.cp');
