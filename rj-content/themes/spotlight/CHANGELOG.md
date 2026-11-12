@@ -2,6 +2,14 @@
 
 All notable changes to the Spotlight theme will be documented in this file.
 
+## [1.0.3] - 2026-11-12
+
+### ⚡ Improvements
+- **JSON Structure Update:** Replaced the `preview` key with `logo` in `theme.json` to align with the updated ecosystem standard and ensure proper rendering in the admin marketplace.
+- **Preview Image:** Mapped the `logo` key directly to the actual screenshot URL for accurate visual display.
+
+---
+
 ## [1.0.2] - 2026-11-12
 
 ### 🛡️ Security Patch & Fixes
