@@ -1,12 +1,12 @@
 {
     "name": "RJ Default",
     "slug": "rj-default",
-    "version": "1.0.0",
-    "author": "RJ NEXUS",
+    "version": "1.0.1",
+    "author": "RJ Nexus",
     "author_url": "https://github.com/rj-nexus",
-    "description": "The official default theme for RJ CMS. Clean, minimal, builder-first.",
+    "description": "The official default theme for RJ Nexus. Clean, minimal, builder-first.",
     "license": "MIT",
-    "preview": "screenshot.png",
+    "preview": "https://raw.githubusercontent.com/rj-nexus/rj-nexus/main/rj-content/themes/rj-default/screenshot.png",
     "requires": {
         "rj_cms": ">=1.5.1",
         "php": ">=8.2"
@@ -177,7 +177,7 @@
                     "logo_text": {
                         "type": "text",
                         "label": "Logo Text",
-                        "default": "RJ CMS"
+                        "default": "RJ Nexus"
                     },
                     "logo_image": {
                         "type": "text",
@@ -203,7 +203,7 @@
                     "footer_text": {
                         "type": "textarea",
                         "label": "Footer Text",
-                        "default": "© 2026 RJ CMS. All rights reserved."
+                        "default": "© 2026 RJ Nexus. All rights reserved."
                     },
                     "footer_bg": {
                         "type": "color",

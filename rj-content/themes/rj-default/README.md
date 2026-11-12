@@ -6,7 +6,7 @@
 
 Clean, minimal and builder-first. Designed to work seamlessly with **RJBuilder**, the drag-and-drop page builder included with RJ Nexus.
 
-![Version](https://img.shields.io/badge/version-1.0.0-brightgreen)
+![Version](https://img.shields.io/badge/version-1.0.1-brightgreen)
 ![RJ Nexus](https://img.shields.io/badge/RJ%20Nexus-v1.9.0-blue)
 ![PHP](https://img.shields.io/badge/PHP-%3E%3D8.2-777BB4?logo=php&logoColor=white)
 ![Laravel](https://img.shields.io/badge/Laravel-12-FF2D20?logo=laravel&logoColor=white)

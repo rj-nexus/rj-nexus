@@ -2,7 +2,7 @@
 
 **A dark, modern, builder-first theme for [RJ Nexus](https://rjnexus.org).**
 
-![Version](https://img.shields.io/badge/version-1.0.1-%238A2BE2)
+![Version](https://img.shields.io/badge/version-1.0.2-%238A2BE2)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![RJ Nexus](https://img.shields.io/badge/RJ%20Nexus-%E2%89%A5%201.8.6-8A2BE2)
 ![PHP](https://img.shields.io/badge/PHP-%E2%89%A5%208.2-777BB4)
