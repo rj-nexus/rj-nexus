@@ -1,16 +1,16 @@
 {
     "name": "Spotlight",
     "slug": "spotlight",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "author": "RJ Nexus",
     "author_url": "https://github.com/rj-nexus",
     "description": "Dark, modern product showcase theme with builder-first architecture.",
     "license": "MIT",
-    "preview": "https://raw.githubusercontent.com/rj-nexus/spotlight/main/screenshot.png",
+    "logo": "https://raw.githubusercontent.com/rj-nexus/spotlight/main/screenshot.png",
     "namespace": "Spotlight",
     "provider": "Spotlight\\SpotlightServiceProvider",
     "requires": {
-        "rj_cms": ">=1.0.0",
+        "rj_cms": ">=1.8.6",
         "php": ">=8.2"
     },
     "supports": {
@@ -100,7 +100,7 @@
                 "controls": {
                     "show_excerpt": { "type": "toggle", "label": "Show Excerpt in Cards", "default": true },
                     "columns": { "type": "select", "label": "Grid Columns", "default": "2", "options": { "1": "1 Column", "2": "2 Columns", "3": "3 Columns" } },
-                    "background_video": { "type": "text", "label": "Background Video URL", "default": "https://raw.githubusercontent.com/rj-nexus/spotlight/main/assets/video/background.mp4" }
+                    "background_video": { "type": "text", "label": "Background Video URL", "default": "" }
                 }
             },
             "blog_single": {
@@ -109,7 +109,7 @@
                 "controls": {
                     "show_featured_image": { "type": "toggle", "label": "Show Featured Image", "default": true },
                     "show_related_posts": { "type": "toggle", "label": "Show Related Posts", "default": true },
-                    "background_video": { "type": "text", "label": "Background Video URL", "default": "https://raw.githubusercontent.com/rj-nexus/spotlight/main/assets/video/background.mp4" }
+                    "background_video": { "type": "text", "label": "Background Video URL", "default": "" }
                 }
             },
             "single_page": {
@@ -118,7 +118,7 @@
                 "controls": {
                     "show_featured_image": { "type": "toggle", "label": "Show Featured Image", "default": true },
                     "content_width": { "type": "select", "label": "Content Width", "default": "normal", "options": { "normal": "Normal (900px)", "wide": "Wide (1100px)", "full": "Full Width" } },
-                    "background_video": { "type": "text", "label": "Background Video URL", "default": "https://raw.githubusercontent.com/rj-nexus/spotlight/main/assets/video/background.mp4" }
+                    "background_video": { "type": "text", "label": "Background Video URL", "default": "" }
                 }
             },
             "header": {
@@ -126,7 +126,7 @@
                 "icon": "header",
                 "controls": {
                     "logo_text": { "type": "text", "label": "Logo Text", "default": "Spotlight" },
-                    "logo_image": { "type": "text", "label": "Logo Image URL", "default": "https://github.com/rj-nexus/spotlight/screenshot.png" },
+                    "logo_image": { "type": "text", "label": "Logo Image URL", "default": "" },
                     "header_bg": { "type": "color", "label": "Header Background", "default": "#0a0a0f" },
                     "header_text_color": { "type": "color", "label": "Header Text Color", "default": "#f1f5f9" }
                 }
@@ -135,7 +135,7 @@
                 "label": "Footer",
                 "icon": "footer",
                 "controls": {
-                    "footer_text": { "type": "textarea", "label": "Footer Text", "default": "© 2026 Spotlight. All rights reserved." },
+                    "footer_text": { "type": "textarea", "label": "Footer Text", "default": "© 2026 RJ Nexus. All rights reserved." },
                     "footer_bg": { "type": "color", "label": "Footer Background", "default": "#050508" },
                     "footer_text_color": { "type": "color", "label": "Footer Text Color", "default": "#94a3b8" }
                 }
