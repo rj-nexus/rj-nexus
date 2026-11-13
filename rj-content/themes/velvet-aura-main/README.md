@@ -4,11 +4,11 @@
 
 <div align="center">
 
-# Version 1.0.2-beta
+# Version 1.0.3-beta
 
 **A premium, modern e-commerce theme exclusively designed for [RJ Nexus](https://github.com/rj-nexus/rj-nexus) and RJ Commerce.**
 
-![RJ Nexus](https://img.shields.io/badge/RJ%20Nexus-%E2%89%A5%201.9.0-8A2BE2)
+![RJ Nexus](https://img.shields.io/badge/RJ%20Nexus-%E2%89%A5%201.X-8A2BE2)
 ![PHP](https://img.shields.io/badge/PHP-%E2%89%A5%208.2-777BB4?logo=php&logoColor=white)
 ![License](https://img.shields.io/badge/license-CC%20BY--ND%204.0-lightgrey)
 
