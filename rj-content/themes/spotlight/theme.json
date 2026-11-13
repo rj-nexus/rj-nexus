@@ -1,12 +1,20 @@
 {
     "name": "Spotlight",
     "slug": "spotlight",
+<<<<<<< HEAD
     "version": "1.0.4",
+=======
+    "version": "1.0.3",
+>>>>>>> 34a4bf862ff0d1f2b0926801c8cf2620aa13aa52
     "author": "RJ Nexus",
     "author_url": "https://github.com/rj-nexus",
     "description": "Dark, modern product showcase theme with builder-first architecture.",
     "license": "MIT",
+<<<<<<< HEAD
     "logo": "https://raw.githubusercontent.com/rj-nexus/spotlight/main/screenshot.png",
+=======
+    "preview": "https://raw.githubusercontent.com/rj-nexus/spotlight/main/screenshot.png",
+>>>>>>> 34a4bf862ff0d1f2b0926801c8cf2620aa13aa52
     "namespace": "Spotlight",
     "provider": "Spotlight\\SpotlightServiceProvider",
     "requires": {
