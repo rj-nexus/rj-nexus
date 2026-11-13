@@ -1,3 +1,10 @@
+@php
+    $rj_favicon = function_exists('rj_site_option') ? rj_site_option('favicon') : null;
+    if (empty($rj_favicon)) {
+        $rj_favicon = rj_get_option('site_favicon');
+    }
+    $rj_og_image = function_exists('rj_site_option') ? rj_site_option('og_image') : null;
+@endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ rj_dir() }}">
 <head>
@@ -6,6 +13,14 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>@yield('title', rj_get_option('site_name', config('app.name')))</title>
+
+    @if(!empty($rj_favicon))
+        <link rel="icon" href="{{ $rj_favicon }}">
+    @endif
+
+    @if(!empty($rj_og_image))
+        <meta property="og:image" content="{{ $rj_og_image }}">
+    @endif
 
     <script src="https://cdn.tailwindcss.com"></script>
 
