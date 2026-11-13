@@ -12,6 +12,7 @@ use App\Services\AiSeoService;
 use App\Services\AiAgentService;
 use App\Services\PostService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 class PostController extends Controller
 {
@@ -20,6 +21,33 @@ class PostController extends Controller
     public function __construct(PostService $service)
     {
         $this->service = $service;
+    }
+
+    protected function editRedirect(Post $post)
+    {
+        $route = $post->type === 'page' ? 'admin.pages.edit' : 'admin.posts.edit';
+        if (!Route::has($route)) {
+            $route = 'admin.posts.edit';
+        }
+        return redirect()->route($route, $post);
+    }
+
+    protected function indexRedirect(Post $post)
+    {
+        $route = $post->type === 'page' ? 'admin.pages.index' : 'admin.posts.index';
+        if (!Route::has($route)) {
+            return redirect()->route('admin.posts.index', ['type' => $post->type]);
+        }
+        return redirect()->route($route);
+    }
+
+    protected function editRouteUrl(Post $post, array $extra = []): string
+    {
+        $route = $post->type === 'page' ? 'admin.pages.edit' : 'admin.posts.edit';
+        if (!Route::has($route)) {
+            $route = 'admin.posts.edit';
+        }
+        return route($route, array_merge([$post], $extra));
     }
 
     public function index(Request $request)
@@ -116,14 +144,16 @@ class PostController extends Controller
         }
 
         if ($request->input('open_builder') === '1') {
+            $buildRoute = $post->type === 'page' && Route::has('admin.pages.build')
+                ? 'admin.pages.build'
+                : 'admin.posts.build';
+
             return redirect()
-                ->route('admin.posts.build', $post)
+                ->route($buildRoute, $post)
                 ->with('success', __('Post created. Start building!'));
         }
 
-        return redirect()
-            ->route('admin.posts.edit', $post)
-            ->with('success', __('Post created.'));
+        return $this->editRedirect($post)->with('success', __('Post created.'));
     }
 
     public function show(Post $post)
@@ -169,18 +199,14 @@ class PostController extends Controller
             return response()->json(['success' => true]);
         }
 
-        return redirect()
-            ->route('admin.posts.index', ['type' => $post->type])
-            ->with('success', __('Post deleted.'));
+        return $this->indexRedirect($post)->with('success', __('Post deleted.'));
     }
 
     public function duplicate(Post $post)
     {
         $copy = $this->service->duplicate($post);
 
-        return redirect()
-            ->route('admin.posts.edit', $copy)
-            ->with('success', __('Post duplicated.'));
+        return $this->editRedirect($copy)->with('success', __('Post duplicated.'));
     }
 
     public function publish(Post $post)
@@ -277,6 +303,12 @@ class PostController extends Controller
         $locales = rj_frontend_locales();
         $defaultLocale = in_array($baseLocale, $locales) ? $baseLocale : ($locales[0] ?? $baseLocale);
 
+        $updateRoute = $post->type === 'page' && Route::has('admin.pages.blocks')
+            ? 'admin.pages.blocks'
+            : 'admin.posts.blocks';
+
+        $backUrl = $this->editRouteUrl($post);
+
         $builder = [
             'entityType' => 'post',
             'entityId' => $post->id,
@@ -287,8 +319,8 @@ class PostController extends Controller
             'templateType' => 'page',
             'baseBlocks' => $baseBlocks,
             'activeBlocks' => $activeBlocks,
-            'updateUrl' => route('admin.posts.blocks', $post),
-            'backUrl' => route('admin.posts.edit', $post),
+            'updateUrl' => route($updateRoute, $post),
+            'backUrl' => $backUrl,
             'viewUrl' => $viewUrl,
             'previewUrl' => route('frontend.preview.post', $post),
             'status' => $post->status,
