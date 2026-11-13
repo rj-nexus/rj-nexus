@@ -84,28 +84,57 @@
                     @php
                         $isInstalled = in_array($theme['slug'] ?? '', $installedSlugs, true);
 
-                        // Yeni JSON strukturuna uyğun şəkil kaskadı
-                        $imageUrl = '';
-                        
-                        if (!empty($theme['screenshots']) && is_array($theme['screenshots'])) {
-                            $imageUrl = $theme['screenshots'][0];
-                        } elseif (!empty($theme['screenshot'])) {
-                            $imageUrl = $theme['screenshot'];
-                        } elseif (!empty($theme['logo'])) {
-                            $imageUrl = $theme['logo'];
-                        } elseif (!empty($theme['preview'])) {
-                            $imageUrl = $theme['preview'];
+                        // Bütün mümkün şəkil URL-lərini sıraya düzürük:
+                        // logo -> screenshots -> screenshot -> preview
+                        $imageUrls = [];
+
+                        if (!empty($theme['logo'])) {
+                            $imageUrls[] = $theme['logo'];
                         }
+
+                        if (!empty($theme['screenshots']) && is_array($theme['screenshots'])) {
+                            foreach ($theme['screenshots'] as $s) {
+                                if (!empty($s)) {
+                                    $imageUrls[] = $s;
+                                }
+                            }
+                        }
+
+                        if (!empty($theme['screenshot'])) {
+                            $imageUrls[] = $theme['screenshot'];
+                        }
+
+                        if (!empty($theme['preview'])) {
+                            $imageUrls[] = $theme['preview'];
+                        }
+
+                        // Təkrarları çıxar
+                        $imageUrls = array_values(array_unique($imageUrls));
+                        $primaryImage = $imageUrls[0] ?? '';
                     @endphp
 
                     <div class="border border-gray-200 rounded-xl overflow-hidden bg-white hover:shadow-lg transition group">
 
                         <div class="relative aspect-[16/10] bg-gradient-to-br from-gray-100 to-gray-50 overflow-hidden">
-                            @if (!empty($imageUrl))
-                                <img src="{{ $imageUrl }}" alt="{{ $theme['name'] }}"
+                            @if (!empty($primaryImage))
+                                <img src="{{ $primaryImage }}"
+                                     alt="{{ $theme['name'] }}"
                                      class="w-full h-full object-cover"
                                      referrerpolicy="no-referrer"
-                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                     data-srcs='@json($imageUrls)'
+                                     data-idx="0"
+                                     onerror="(function(img){
+                                         var urls = [];
+                                         try { urls = JSON.parse(img.getAttribute('data-srcs') || '[]'); } catch(e) {}
+                                         var idx = parseInt(img.getAttribute('data-idx') || '0', 10) + 1;
+                                         if (idx < urls.length) {
+                                             img.setAttribute('data-idx', idx);
+                                             img.src = urls[idx];
+                                         } else {
+                                             img.style.display = 'none';
+                                             if (img.nextElementSibling) img.nextElementSibling.style.display = 'flex';
+                                         }
+                                     })(this);">
                                 <div class="w-full h-full items-center justify-center" style="display:none;">
                                     <svg class="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/></svg>
                                 </div>
