@@ -1,10 +1,15 @@
 @php
     $activeHeaderTemplate = app(\App\Services\ThemeResolver::class)->header();
-    $isSticky = true; // Default
+    $isSticky = true; 
     if ($activeHeaderTemplate) {
         $isSticky = ($activeHeaderTemplate->settings['sticky_header'] ?? '1') === '1';
     } else {
         $isSticky = rj_get_option('header_sticky', '1') === '1';
+    }
+
+    $rj_favicon = function_exists('rj_site_option') ? rj_site_option('favicon') : null;
+    if (empty($rj_favicon)) {
+        $rj_favicon = rj_get_option('site_favicon');
     }
 @endphp
 <!DOCTYPE html>
@@ -16,8 +21,8 @@
 
     <title>{{ $title ?? rj_get_option('site_name', config('app.name')) }}</title>
 
-    @if(rj_get_option('site_favicon'))
-        <link rel="icon" href="{{ rj_get_option('site_favicon') }}">
+    @if(!empty($rj_favicon))
+        <link rel="icon" href="{{ $rj_favicon }}">
     @endif
 
     <style>{!! rj_global_color_css() !!}</style>
@@ -286,7 +291,7 @@
 
     <script>
     (function() {
-        var placeholderUrl = 'https://raw.githubusercontent.com/mr-ruhid/rare-logos-vault/main/placeholder/fallback-image/rj-nexus-no-image.webp';
+        var placeholderUrl = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM2YjcyODAiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxyZWN0IHg9IjMiIHk9IjMiIHdpZHRoPSIxOCIgaGVpZ2h0PSIxOCIgcng9IjIiLz48Y2lyY2xlIGN4PSI4LjUiIGN5PSI4LjUiIHI9IjEuNSIvPjxwYXRoIGQ9Ik0yMSAxNWwtNS01TDUgMjEiLz48L3N2Zz4=';
 
         function applyPlaceholder(img) {
             if (img.dataset.placeholderApplied) return;
