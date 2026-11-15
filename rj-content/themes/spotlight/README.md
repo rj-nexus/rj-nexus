@@ -1,85 +1,105 @@
-# 🔦 Spotlight Theme
+<div align="center">
 
-**A dark, modern, builder-first theme for [RJ Nexus](https://rjnexus.org).**
+# Spotlight
 
-![Version](https://img.shields.io/badge/version-1.1.0-%238A2BE2)
-![License](https://img.shields.io/badge/license-Custom%20Source--Available-lightgrey)
+**A dark, modern, builder-first theme for [RJ Nexus](https://rjnexus.org)**
+
+Built for product showcases, SaaS platforms and content creators.
+
+![Version](https://img.shields.io/badge/version-1.1.0-8A2BE2)
 ![RJ Nexus](https://img.shields.io/badge/RJ%20Nexus-%E2%89%A5%201.8.6-8A2BE2)
 ![PHP](https://img.shields.io/badge/PHP-%E2%89%A5%208.2-777BB4)
+![License](https://img.shields.io/badge/license-Source--Available-lightgrey)
+
+</div>
 
 > [!NOTE]
-> **Stable Release.** Spotlight is now fully stable, highly customizable, and ready for production use. It includes auto-generated starter content and 25+ interactive widgets.
+> **Stable release.** Spotlight is production-ready. On activation it generates starter content (pages, menus, header and footer) and gives you 25+ interactive widgets to build with.
 
 ---
 
-## 📑 Table of Contents
+## Contents
 
-- [About](#-about)
-- [Features](#-features)
-- [Requirements](#-requirements)
-- [Installation](#-installation)
-- [Getting Started with RJBuilder](#-getting-started-with-rjbuilder)
-- [Support & Feedback](#-support--feedback)
-- [License](#-license)
+- [About](#about)
+- [Features](#features)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Getting started](#getting-started)
+- [Support](#support)
+- [License](#license)
 
----
+## About
 
-## 📖 About
+Spotlight is a highly customizable, dark-first theme. It integrates deeply with RJBuilder, so you control the layout, colors and content from the admin panel without writing code.
 
-Spotlight is a highly customizable, dark-first theme designed for **product showcases**, **SaaS platforms**, and **content creators**. It integrates deeply with RJBuilder, giving you full control over your layout, colors, and content directly from the admin panel — without writing a single line of code.
+## Features
 
-## ✨ Features
+### Design
 
 | Feature | Description |
-| --- | --- |
-| **RJBuilder Integration** | 25+ custom-built interactive widgets tailored for dark SaaS/product showcases. |
-| **Starter Content** | Auto-generation of default pages (Home, About, Contact, Pricing), menus, and Header/Footer templates upon activation. |
-| **Cinematic Hero** | Full-screen video backgrounds with ping-pong playback, color grading, and HUD overlays. |
-| **Glassmorphism UI** | Beautiful frosted-glass effects, interactive tabs, and glowing borders across all elements. |
-| **Dynamic Customizer** | Live CSS variables for colors, typography, and layout via the admin panel. |
-| **Product List Widget** | A new glassmorphism grid for showcasing products with hover effects and pricing badges. |
-| **Custom 404 Page** | A beautifully animated, glassmorphism-themed 404 error page. |
-| **Interactive Elements** | Animated pricing tables, infinite marquee testimonials, and accordion FAQs. |
-| **Advanced Forms** | Seamless integration with RJ Form Builder, featuring a custom dark-mode contact section. |
-| **Interactive Maps** | Built-in, 100% free API-keyless dark-mode maps powered by Leaflet and OpenStreetMap. |
-| **Multilingual** | Fully compatible with RJ Nexus's 38 languages, with automatic RTL support. |
-| **Custom Templates** | Dedicated templates for Contact, Landing, and Full-Width pages. |
-| **Performance First** | Lightweight, using pure CSS animations and minimal JS. |
+|---------|-------------|
+| **Cinematic Hero** | Full-screen video backgrounds with ping-pong playback, color grading and HUD overlays. |
+| **Glassmorphism UI** | Frosted-glass surfaces, interactive tabs and glowing borders throughout. |
+| **Custom 404 page** | An animated 404 page that matches the theme. |
+| **Dynamic Customizer** | Live CSS variables for colors, typography and layout. |
 
-## 📋 Requirements
+### Content and widgets
 
-- **RJ Nexus** 1.8.6 or newer
-- **PHP** 8.2 or newer
-- **[RJ Form Builder Plugin](https://github.com/mr-ruhid/rj-plugin-form-builder)** (Required for the Contact widget and advanced form handling)
+| Feature | Description |
+|---------|-------------|
+| **RJBuilder integration** | 25+ interactive widgets made for dark SaaS and product sites. |
+| **Starter content** | Home, About, Contact and Pricing pages, menus and Header/Footer templates are created on activation. |
+| **Product List** | Glass grid with hover effects and pricing badges. |
+| **Interactive elements** | Animated pricing tables, infinite marquee testimonials and accordion FAQs. |
+| **Advanced forms** | Works with RJ Form Builder, with a dark-mode contact section. |
+| **Interactive maps** | Dark-mode maps on Leaflet and OpenStreetMap. No API key needed. |
 
-## 🚀 Installation
+### Platform
+
+| Feature | Description |
+|---------|-------------|
+| **Multilingual** | Compatible with all 38 RJ Nexus languages, with automatic RTL support. |
+| **Page templates** | Contact, Landing and Full-Width templates. |
+| **Performance** | Pure CSS animations and minimal JavaScript. |
+
+## Requirements
+
+| Requirement | Version |
+|-------------|---------|
+| RJ Nexus | `>= 1.8.6` |
+| PHP | `>= 8.2` |
+| [RJ Form Builder](https://github.com/rj-nexus/rj-plugin-form-builder) plugin | Required for the Contact widget and form handling |
+
+## Installation
 
 1. Clone or download this repository into the RJ Nexus themes directory:
 
    ```bash
    cd rj-content/themes
    git clone https://github.com/rj-nexus/spotlight.git
-Go to Admin Panel → Appearance → Themes.
+   ```
 
-Find Spotlight and click Activate.
+2. Go to **Admin Panel > Appearance > Themes**.
+3. Find **Spotlight** and click **Activate**.
+4. Install the **RJ Form Builder** plugin to enable forms.
 
-Install the RJ Form Builder Plugin to enable form functionality.
+## Getting started
 
-🛠 Getting Started with RJBuilder
-Navigate to Admin Panel → RJBuilder.
+1. Go to **Admin Panel > RJBuilder**.
+2. Create a new **Template** or **Page**.
+3. Add Spotlight widgets such as Hero, Stats and Bento Grid to build your layout visually.
 
-Create a new Template or Page.
+## Support
 
-Use the Spotlight widgets (Hero, Stats, Bento Grid, etc.) to build your layout visually.
+Found a bug, have a feature request or need help? [Open an issue](https://github.com/rj-nexus/spotlight/issues) on GitHub.
 
-💬 Support & Feedback
-If you encounter any bugs, have feature requests, or need help, please open an issue on our GitHub Repository.
+## License
 
-📄 License
-This theme is licensed under a Custom Source-Available License.
+Spotlight is released under a **Custom Source-Available License**.
 
-You CAN: View the code and use the theme on unlimited personal or commercial websites.
+| You can | You cannot |
+|---------|------------|
+| View the source code | Modify or alter the source code |
+| Use the theme on unlimited personal and commercial websites | Redistribute the source code |
 
-YOU CANNOT: Modify, alter, or redistribute the source code. The theme must be used as-is.
-
-See the LICENSE file for more details.
+The theme must be used as-is. See the [LICENSE](LICENSE) file for details.
