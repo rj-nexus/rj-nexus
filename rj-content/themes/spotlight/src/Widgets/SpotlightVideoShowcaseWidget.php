@@ -64,7 +64,7 @@ class SpotlightVideoShowcaseWidget extends BaseWidget
                 'name'    => 'cover_image',
                 'type'    => 'image',
                 'label'   => __('Cover Image (Optional)'),
-                'default' => '',
+                'default' => 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=1200&h=675',
                 'tab'     => 'content',
             ],
         ];
