@@ -1,430 +1,175 @@
 @php
+    $uid = $uid ?? ('au_' . substr(md5(uniqid('', true)), 0, 8));
+
     $imgLeft = ($settings['image_position'] ?? 'right') === 'left';
+    $hue     = max(0, min(360, (int) ($settings['hue'] ?? 262)));
+
+    // Optional glass stat tiles: one per line "Value | Label" (e.g. "120K+ | Creators")
+    $stats = [];
+    foreach (preg_split('/\r\n|\r|\n/', (string) ($settings['stats'] ?? '')) as $l) {
+        $l = trim($l);
+        if ($l === '') continue;
+        [$v, $t] = array_pad(explode('|', $l, 2), 2, '');
+        if (trim($v) !== '') $stats[] = ['v' => trim($v), 'l' => trim($t)];
+    }
+    $stats = array_slice($stats, 0, 4);
 @endphp
 
 <style>
-    @property --rj-au-a {
-        syntax: '<angle>';
-        initial-value: 0deg;
-        inherits: false;
-    }
-
+    /*
+     * Glass look WITHOUT backdrop-filter / animated filters (those make the page lag over an animated starfield).
+     * Glass = translucent layers + edge highlights + a specular sheen.
+     * Everything that moves uses transform / opacity only and pauses while off-screen.
+     */
     #{{ $uid }} {
-        width: 100%;
-        padding: clamp(28px, 4vw, 56px) 20px;
-        background: transparent;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        box-sizing: border-box;
+        --h: {{ $hue }};
+        width: 100%; padding: clamp(28px, 4vw, 56px) 20px; background: transparent; font-family: inherit; box-sizing: border-box;
     }
+    #{{ $uid }} *, #{{ $uid }} *::before, #{{ $uid }} *::after { box-sizing: border-box; }
+    #{{ $uid }}:not(.is-live) *, #{{ $uid }}:not(.is-live) *::before, #{{ $uid }}:not(.is-live) *::after { animation-play-state: paused !important; }
 
-    #{{ $uid }} *,
-    #{{ $uid }} *::before,
-    #{{ $uid }} *::after {
-        box-sizing: border-box;
-    }
-
+    /* ---------- Card ---------- */
     #{{ $uid }} .rj-au-card {
-        position: relative;
-        max-width: 1120px;
-        margin: 0 auto;
-        padding: clamp(22px, 3.6vw, 40px);
-        border-radius: 28px;
-        background: linear-gradient(155deg, rgba(24, 18, 58, 0.58), rgba(8, 6, 24, 0.4));
-        -webkit-backdrop-filter: blur(16px) saturate(140%);
-        backdrop-filter: blur(16px) saturate(140%);
-        box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.07);
-        isolation: isolate;
-        animation: rj-au-in 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+        position: relative; max-width: 1120px; margin: 0 auto; border-radius: 30px; overflow: hidden; isolation: isolate;
+        box-shadow: 0 40px 80px -40px rgba(0,0,0,.9), 0 0 70px -30px hsl(var(--h) 90% 55% / .45);
+        animation: rj-au-in .9s cubic-bezier(.2,.8,.2,1) both;
     }
-
     @supports (animation-timeline: view()) {
-        #{{ $uid }} .rj-au-card {
-            animation: rj-au-in linear both;
-            animation-timeline: view();
-            animation-range: entry 0% entry 45%;
-        }
+        #{{ $uid }} .rj-au-card { animation: rj-au-in linear both; animation-timeline: view(); animation-range: entry 0% entry 45%; }
     }
-
-    #{{ $uid }} .rj-au-card::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        border-radius: inherit;
-        padding: 1px;
-        background: conic-gradient(from var(--rj-au-a), rgba(255, 255, 255, 0.08) 0 55%, #a78bfa 72%, #ec4899 86%, rgba(255, 255, 255, 0.08) 100%);
-        -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-        -webkit-mask-composite: xor;
-        mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-        mask-composite: exclude;
-        pointer-events: none;
-        animation: rj-au-spin 9s linear infinite;
-        z-index: 3;
+    /* border light: big conic gradient that only rotates (compositor), visible through a 1px gap */
+    #{{ $uid }} .rj-au-beam {
+        position: absolute; left: 50%; top: 50%; width: 260%; aspect-ratio: 1; translate: -50% -50%; z-index: 0; pointer-events: none; will-change: transform;
+        background: conic-gradient(from 0deg, rgba(255,255,255,.1) 0 55%, hsl(var(--h) 95% 68%) 74%, hsl(calc(var(--h) + 60) 90% 66%) 88%, rgba(255,255,255,.1) 100%);
+        animation: rj-au-spin 10s linear infinite;
     }
-
-    #{{ $uid }} .rj-au-bg {
-        position: absolute;
-        inset: 0;
-        border-radius: inherit;
-        overflow: hidden;
-        pointer-events: none;
-        z-index: 0;
+    #{{ $uid }} .rj-au-glass {
+        position: absolute; inset: 1px; z-index: 1; border-radius: 29px; overflow: hidden; pointer-events: none;
+        background:
+            radial-gradient(60% 70% at 8% 0%, hsl(var(--h) 85% 55% / .26), transparent 65%),
+            radial-gradient(55% 65% at 100% 100%, hsl(calc(var(--h) + 60) 85% 55% / .2), transparent 65%),
+            linear-gradient(155deg, rgba(255,255,255,.09), rgba(255,255,255,.015) 40%, rgba(255,255,255,.045)),
+            rgba(10, 8, 26, .84);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.24), inset 0 0 0 1px rgba(255,255,255,.04), inset 0 -50px 90px -50px hsl(var(--h) 80% 50% / .25);
     }
-
-    #{{ $uid }} .rj-au-bg::before {
-        content: "";
-        position: absolute;
-        width: 60%;
-        aspect-ratio: 1;
-        left: -12%;
-        top: -30%;
-        background: radial-gradient(circle, rgba(124, 58, 237, 0.34), transparent 68%);
-        filter: blur(20px);
+    #{{ $uid }} .rj-au-sheen { /* diagonal specular band, slides across on hover */
+        position: absolute; top: -20%; bottom: -20%; left: -10%; width: 70%; transform: translateX(-60%) skewX(-18deg);
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,.07) 50%, transparent); transition: transform 1.2s cubic-bezier(.2,.8,.2,1);
     }
-
-    #{{ $uid }} .rj-au-bg::after {
-        content: "";
-        position: absolute;
-        width: 55%;
-        aspect-ratio: 1;
-        right: -10%;
-        bottom: -35%;
-        background: radial-gradient(circle, rgba(236, 72, 153, 0.26), transparent 68%);
-        filter: blur(20px);
-    }
-
+    #{{ $uid }} .rj-au-card:hover .rj-au-sheen { transform: translateX(170%) skewX(-18deg); }
     #{{ $uid }} .rj-au-stars {
-        position: absolute;
-        inset: 0;
+        position: absolute; inset: 0; opacity: .6; animation: rj-au-twinkle 6s ease-in-out infinite alternate;
         background-image:
-            radial-gradient(1.5px 1.5px at 12% 22%, #fff, transparent),
-            radial-gradient(1px 1px at 28% 78%, #c4b5fd, transparent),
-            radial-gradient(1.5px 1.5px at 46% 14%, #fff, transparent),
-            radial-gradient(1px 1px at 63% 66%, #f9a8d4, transparent),
-            radial-gradient(1.5px 1.5px at 78% 30%, #fff, transparent),
-            radial-gradient(1px 1px at 90% 82%, #93c5fd, transparent),
-            radial-gradient(1px 1px at 8% 60%, #fff, transparent),
-            radial-gradient(1.5px 1.5px at 55% 90%, #fff, transparent);
-        animation: rj-au-twinkle 5s ease-in-out infinite alternate;
+            radial-gradient(1.5px 1.5px at 12% 22%, #fff, transparent), radial-gradient(1px 1px at 28% 78%, #c4b5fd, transparent),
+            radial-gradient(1.5px 1.5px at 46% 14%, #fff, transparent), radial-gradient(1px 1px at 63% 66%, #f9a8d4, transparent),
+            radial-gradient(1.5px 1.5px at 78% 30%, #fff, transparent), radial-gradient(1px 1px at 90% 82%, #93c5fd, transparent),
+            radial-gradient(1px 1px at 8% 60%, #fff, transparent), radial-gradient(1.5px 1.5px at 55% 90%, #fff, transparent);
     }
+    /* soft light that follows the cursor (moved by transform from JS) */
+    #{{ $uid }} .rj-au-light {
+        position: absolute; left: 0; top: 0; width: 440px; height: 440px; z-index: 2; pointer-events: none; opacity: 0; will-change: transform, opacity;
+        transform: translate3d(40px, 20px, 0); background: radial-gradient(circle closest-side, hsl(var(--h) 95% 72% / .16), transparent); transition: opacity .5s;
+    }
+    #{{ $uid }} .rj-au-card:hover .rj-au-light { opacity: 1; }
 
     #{{ $uid }} .rj-au-grid {
-        position: relative;
-        z-index: 2;
-        display: grid;
-        align-items: stretch;
-        gap: clamp(22px, 3.4vw, 44px);
-        grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
-        grid-template-areas: "text media";
+        position: relative; z-index: 3; display: grid; align-items: stretch; padding: clamp(22px, 3.6vw, 42px);
+        gap: clamp(22px, 3.4vw, 46px); grid-template-columns: minmax(0, 1.12fr) minmax(0, .88fr); grid-template-areas: "text media";
     }
+    #{{ $uid }} .rj-au-grid.is-left { grid-template-columns: minmax(0, .88fr) minmax(0, 1.12fr); grid-template-areas: "media text"; }
 
-    #{{ $uid }} .rj-au-grid.is-left {
-        grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
-        grid-template-areas: "media text";
-    }
-
-    #{{ $uid }} .rj-au-text {
-        grid-area: text;
-        align-self: center;
-        min-width: 0;
-    }
-
+    /* ---------- Text ---------- */
+    #{{ $uid }} .rj-au-text { grid-area: text; align-self: center; min-width: 0; }
     #{{ $uid }} .rj-au-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        margin: 0 0 14px 0;
-        padding: 6px 13px;
-        border-radius: 999px;
-        border: 1px solid rgba(167, 139, 250, 0.35);
-        background: rgba(124, 58, 237, 0.16);
-        color: #ddd6fe;
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: 0.16em;
-        text-transform: uppercase;
+        display: inline-flex; align-items: center; gap: 10px; margin: 0 0 18px; padding: 7px 14px; border-radius: 999px;
+        font: 700 11px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .14em; text-transform: uppercase; color: hsl(var(--h) 95% 88%);
+        background: linear-gradient(160deg, hsl(var(--h) 90% 65% / .2), hsl(var(--h) 90% 55% / .08)); border: 1px solid hsl(var(--h) 90% 75% / .32);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.18);
     }
-
-    #{{ $uid }} .rj-au-badge i {
-        width: 7px;
-        height: 7px;
-        border-radius: 50%;
-        background: #ec4899;
-        box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.7);
-        animation: rj-au-pulse 2s ease-out infinite;
-    }
-
+    #{{ $uid }} .rj-au-badge i { position: relative; width: 7px; height: 7px; border-radius: 50%; background: hsl(var(--h) 95% 70%); }
+    #{{ $uid }} .rj-au-badge i::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: inherit; animation: rj-au-ping 2s ease-out infinite; }
     #{{ $uid }} .rj-au-title {
-        margin: 0;
-        font-size: clamp(26px, 3.6vw, 40px);
-        font-weight: 800;
-        line-height: 1.15;
-        letter-spacing: -0.02em;
-        background: linear-gradient(90deg, #ffffff, #e9d5ff 35%, #f9a8d4 65%, #ffffff);
-        background-size: 220% 100%;
-        -webkit-background-clip: text;
-        background-clip: text;
-        -webkit-text-fill-color: transparent;
-        color: transparent;
-        animation: rj-au-text 9s linear infinite;
-        filter: drop-shadow(0 0 22px rgba(167, 139, 250, 0.35));
+        margin: 0; font-size: clamp(28px, 3.8vw, 44px); font-weight: 500; line-height: 1.1; letter-spacing: -.035em;
+        background: linear-gradient(180deg, #fff 30%, hsl(var(--h) 80% 86%)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
     }
-
     #{{ $uid }} .rj-au-title::after {
-        content: "";
-        display: block;
-        width: 56px;
-        height: 3px;
-        margin-top: 14px;
-        border-radius: 3px;
-        background: linear-gradient(90deg, #7c3aed, #ec4899);
-        box-shadow: 0 0 14px rgba(236, 72, 153, 0.7);
+        content: ''; display: block; width: 56px; height: 3px; margin-top: 18px; border-radius: 3px;
+        background: linear-gradient(90deg, hsl(var(--h) 90% 62%), hsl(calc(var(--h) + 60) 90% 64%)); box-shadow: 0 0 14px hsl(var(--h) 95% 60% / .7);
     }
+    #{{ $uid }} .rj-au-content { margin: 20px 0 0; max-width: 60ch; font-size: 16px; line-height: 1.7; color: rgba(255,255,255,.72); }
 
-    #{{ $uid }} .rj-au-content {
-        margin: 16px 0 0 0;
-        max-width: 60ch;
-        font-size: 16px;
-        line-height: 1.7;
-        color: rgba(226, 232, 240, 0.82);
+    /* glass stat tiles (optional) */
+    #{{ $uid }} .rj-au-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px; margin-top: 26px; max-width: 520px; }
+    #{{ $uid }} .rj-au-stat {
+        padding: 14px 16px; border-radius: 16px; background: linear-gradient(160deg, rgba(255,255,255,.1), rgba(255,255,255,.03));
+        border: 1px solid rgba(255,255,255,.1); box-shadow: inset 0 1px 0 rgba(255,255,255,.18); transition: transform .35s cubic-bezier(.2,.8,.2,1), border-color .35s;
     }
+    #{{ $uid }} .rj-au-stat:hover { transform: translateY(-3px); border-color: hsl(var(--h) 90% 72% / .5); }
+    #{{ $uid }} .rj-au-stat b { display: block; font-size: 24px; font-weight: 500; letter-spacing: -.03em; color: #fff; }
+    #{{ $uid }} .rj-au-stat span { display: block; margin-top: 4px; font: 700 10px/1.3 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .12em; text-transform: uppercase; color: hsl(var(--h) 90% 80% / .8); }
 
     #{{ $uid }} .rj-au-btn {
-        position: relative;
-        overflow: hidden;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        margin-top: 24px;
-        padding: 13px 26px;
-        border-radius: 14px;
-        background: linear-gradient(135deg, #7c3aed, #ec4899);
-        color: #ffffff;
-        font-size: 15px;
-        font-weight: 600;
-        text-decoration: none;
-        box-shadow: 0 12px 30px -10px rgba(168, 85, 247, 0.75);
-        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        position: relative; overflow: hidden; display: inline-flex; align-items: center; gap: 10px; margin-top: 28px; padding: 14px 26px; border-radius: 14px;
+        font-size: 15px; font-weight: 600; text-decoration: none; color: #fff;
+        background: linear-gradient(135deg, hsl(var(--h) 85% 58%), hsl(calc(var(--h) + 60) 85% 58%)); border: 1px solid rgba(255,255,255,.25);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 14px 30px -12px hsl(var(--h) 90% 55% / .8); transition: transform .25s ease;
     }
+    #{{ $uid }} .rj-au-btn::after { content: ''; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,.45) 50%, transparent 70%); translate: -130% 0; }
+    #{{ $uid }} .rj-au-btn:hover { transform: translateY(-2px); color: #fff; }
+    #{{ $uid }} .rj-au-btn:hover::after { translate: 130% 0; transition: translate .7s ease; }
+    #{{ $uid }} .rj-au-btn svg { transition: transform .25s ease; }
+    #{{ $uid }} .rj-au-btn:hover svg { transform: translateX(4px); }
 
-    #{{ $uid }} .rj-au-btn::after {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: -120%;
-        width: 60%;
-        height: 100%;
-        background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-        transform: skewX(-20deg);
-        transition: left 0.6s ease;
+    /* ---------- Media: image inside a glass bezel ---------- */
+    #{{ $uid }} .rj-au-media-wrap { grid-area: media; position: relative; min-width: 0; min-height: 260px; animation: rj-au-float 8s ease-in-out infinite; }
+    #{{ $uid }} .rj-au-aura { position: absolute; inset: -12%; pointer-events: none; background: radial-gradient(closest-side, hsl(var(--h) 90% 60% / .38), transparent 72%); animation: rj-au-breathe 6s ease-in-out infinite; }
+    #{{ $uid }} .rj-au-frame {
+        position: absolute; inset: 0; padding: 10px; border-radius: 26px;
+        background: linear-gradient(150deg, rgba(255,255,255,.16), rgba(255,255,255,.04) 45%, rgba(255,255,255,.09));
+        border: 1px solid rgba(255,255,255,.16); box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 30px 60px -28px hsl(var(--h) 90% 50% / .7);
     }
-
-    #{{ $uid }} .rj-au-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 18px 36px -10px rgba(236, 72, 153, 0.8);
-        color: #ffffff;
-    }
-
-    #{{ $uid }} .rj-au-btn:hover::after {
-        left: 160%;
-    }
-
-    #{{ $uid }} .rj-au-btn svg {
-        transition: transform 0.25s ease;
-    }
-
-    #{{ $uid }} .rj-au-btn:hover svg {
-        transform: translateX(4px);
-    }
-
-    #{{ $uid }} .rj-au-media-wrap {
-        grid-area: media;
-        position: relative;
-        min-width: 0;
-        min-height: 230px;
-        animation: rj-au-float 7s ease-in-out infinite;
-    }
-
-    #{{ $uid }} .rj-au-aura {
-        position: absolute;
-        inset: -6px;
-        border-radius: 28px;
-        background: linear-gradient(135deg, #7c3aed, #ec4899 55%, #38bdf8);
-        filter: blur(22px) hue-rotate(0deg);
-        opacity: 0.34;
-        animation: rj-au-hue 14s linear infinite;
-        pointer-events: none;
-    }
-
-    #{{ $uid }} .rj-au-media {
-        position: absolute;
-        inset: 0;
-        overflow: hidden;
-        border-radius: 20px;
-        border: 1px solid rgba(255, 255, 255, 0.14);
-        background: rgba(10, 8, 30, 0.6);
-        box-shadow: 0 24px 60px -24px rgba(124, 58, 237, 0.7);
-    }
-
-    #{{ $uid }} .rj-au-img {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-        transition: transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
-    }
-
-    #{{ $uid }} .rj-au-media:hover .rj-au-img {
-        transform: scale(1.05);
-    }
-
-    #{{ $uid }} .rj-au-veil {
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(180deg, rgba(124, 58, 237, 0.12), transparent 40%, rgba(5, 4, 15, 0.55));
-        pointer-events: none;
-    }
-
+    #{{ $uid }} .rj-au-media { position: relative; width: 100%; height: 100%; overflow: hidden; border-radius: 18px; background: rgba(10,8,30,.7); }
+    #{{ $uid }} .rj-au-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 1s cubic-bezier(.2,.8,.2,1); }
+    #{{ $uid }} .rj-au-media:hover .rj-au-img { transform: scale(1.05); }
+    #{{ $uid }} .rj-au-veil { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, hsl(var(--h) 80% 55% / .1), transparent 40%, rgba(5,4,15,.55)); }
+    #{{ $uid }} .rj-au-gloss { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(125deg, rgba(255,255,255,.22) 0%, rgba(255,255,255,.05) 26%, transparent 40%); }
     #{{ $uid }} .rj-au-orbit {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        height: 86%;
-        aspect-ratio: 1;
-        border-radius: 50%;
-        border: 1px dashed rgba(221, 214, 254, 0.35);
-        transform: translate(-50%, -50%);
-        animation: rj-au-orbit 28s linear infinite;
-        pointer-events: none;
+        position: absolute; left: 50%; top: 50%; height: 86%; aspect-ratio: 1; border-radius: 50%; border: 1px dashed rgba(255,255,255,.28);
+        translate: -50% -50%; animation: rj-au-orbit 30s linear infinite; pointer-events: none;
     }
+    #{{ $uid }} .rj-au-orbit::before { content: ''; position: absolute; left: 50%; top: -4px; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%; background: #fff; box-shadow: 0 0 12px 3px hsl(var(--h) 95% 65% / .9); }
+    #{{ $uid }} .rj-au-corner { position: absolute; width: 22px; height: 22px; border: 2px solid hsl(var(--h) 95% 82%); pointer-events: none; }
+    #{{ $uid }} .rj-au-corner.tl { top: 12px; left: 12px; border-right: 0; border-bottom: 0; border-top-left-radius: 8px; }
+    #{{ $uid }} .rj-au-corner.br { right: 12px; bottom: 12px; border-left: 0; border-top: 0; border-bottom-right-radius: 8px; }
+    #{{ $uid }} .rj-au-empty { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: hsl(var(--h) 90% 82%); }
+    #{{ $uid }} .rj-au-empty svg { width: 120px; height: 120px; animation: rj-au-float 6s ease-in-out infinite; }
 
-    #{{ $uid }} .rj-au-orbit::before {
-        content: "";
-        position: absolute;
-        left: 50%;
-        top: -4px;
-        width: 8px;
-        height: 8px;
-        margin-left: -4px;
-        border-radius: 50%;
-        background: #fff;
-        box-shadow: 0 0 12px 3px rgba(236, 72, 153, 0.9);
-    }
-
-    #{{ $uid }} .rj-au-corner {
-        position: absolute;
-        width: 22px;
-        height: 22px;
-        border: 2px solid rgba(196, 181, 253, 0.9);
-        pointer-events: none;
-    }
-
-    #{{ $uid }} .rj-au-corner.tl {
-        top: 12px;
-        left: 12px;
-        border-right: 0;
-        border-bottom: 0;
-        border-top-left-radius: 8px;
-    }
-
-    #{{ $uid }} .rj-au-corner.br {
-        right: 12px;
-        bottom: 12px;
-        border-left: 0;
-        border-top: 0;
-        border-bottom-right-radius: 8px;
-    }
-
-    #{{ $uid }} .rj-au-empty {
-        position: absolute;
-        inset: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #c4b5fd;
-    }
-
-    #{{ $uid }} .rj-au-empty svg {
-        width: 120px;
-        height: 120px;
-        filter: drop-shadow(0 0 24px rgba(167, 139, 250, 0.7));
-        animation: rj-au-float 6s ease-in-out infinite;
-    }
-
-    @keyframes rj-au-in {
-        from { opacity: 0; transform: translateY(32px) scale(0.98); }
-        to { opacity: 1; transform: none; }
-    }
-
-    @keyframes rj-au-spin {
-        to { --rj-au-a: 360deg; }
-    }
-
-    @keyframes rj-au-hue {
-        to { filter: blur(22px) hue-rotate(360deg); }
-    }
-
-    @keyframes rj-au-orbit {
-        from { transform: translate(-50%, -50%) rotate(0deg); }
-        to { transform: translate(-50%, -50%) rotate(360deg); }
-    }
-
-    @keyframes rj-au-float {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-6px); }
-    }
-
-    @keyframes rj-au-twinkle {
-        from { opacity: 0.35; }
-        to { opacity: 0.95; }
-    }
-
-    @keyframes rj-au-text {
-        to { background-position: -220% 0; }
-    }
-
-    @keyframes rj-au-pulse {
-        0% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.7); }
-        100% { box-shadow: 0 0 0 10px rgba(236, 72, 153, 0); }
-    }
+    @keyframes rj-au-in { from { opacity: 0; transform: translateY(32px) scale(.98); } to { opacity: 1; transform: none; } }
+    @keyframes rj-au-spin { to { rotate: 360deg; } }
+    @keyframes rj-au-orbit { to { rotate: 360deg; } }
+    @keyframes rj-au-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+    @keyframes rj-au-twinkle { from { opacity: .3; } to { opacity: .8; } }
+    @keyframes rj-au-breathe { 0%, 100% { opacity: .65; transform: scale(.97); } 50% { opacity: 1; transform: scale(1.04); } }
+    @keyframes rj-au-ping { from { transform: scale(1); opacity: .7; } to { transform: scale(2.8); opacity: 0; } }
 
     @media (max-width: 820px) {
-        #{{ $uid }} .rj-au-card {
-            border-radius: 22px;
-        }
-        #{{ $uid }} .rj-au-grid,
-        #{{ $uid }} .rj-au-grid.is-left {
-            grid-template-columns: minmax(0, 1fr);
-            grid-template-areas: "media" "text";
-        }
-        #{{ $uid }} .rj-au-media-wrap {
-            min-height: 0;
-            aspect-ratio: 16 / 10;
-        }
-        #{{ $uid }} .rj-au-content {
-            font-size: 15px;
-        }
+        #{{ $uid }} .rj-au-card { border-radius: 24px; }
+        #{{ $uid }} .rj-au-glass { border-radius: 23px; }
+        #{{ $uid }} .rj-au-grid, #{{ $uid }} .rj-au-grid.is-left { grid-template-columns: minmax(0, 1fr); grid-template-areas: "media" "text"; }
+        #{{ $uid }} .rj-au-media-wrap { min-height: 0; aspect-ratio: 16 / 10; }
+        #{{ $uid }} .rj-au-content { font-size: 15px; }
     }
-
     @media (prefers-reduced-motion: reduce) {
-        #{{ $uid }} .rj-au-card,
-        #{{ $uid }} .rj-au-card::before,
-        #{{ $uid }} .rj-au-stars,
-        #{{ $uid }} .rj-au-title,
-        #{{ $uid }} .rj-au-badge i,
-        #{{ $uid }} .rj-au-media-wrap,
-        #{{ $uid }} .rj-au-aura,
-        #{{ $uid }} .rj-au-orbit,
-        #{{ $uid }} .rj-au-empty svg {
-            animation: none;
-        }
+        #{{ $uid }} .rj-au-card, #{{ $uid }} .rj-au-beam, #{{ $uid }} .rj-au-stars, #{{ $uid }} .rj-au-badge i::after,
+        #{{ $uid }} .rj-au-media-wrap, #{{ $uid }} .rj-au-aura, #{{ $uid }} .rj-au-orbit, #{{ $uid }} .rj-au-empty svg { animation: none; }
     }
 </style>
 
 <div id="{{ $uid }}">
     <div class="rj-au-card">
-        <div class="rj-au-bg"><div class="rj-au-stars"></div></div>
+        <span class="rj-au-beam"></span>
+        <div class="rj-au-glass"><div class="rj-au-stars"></div><div class="rj-au-sheen"></div></div>
+        <span class="rj-au-light"></span>
 
         <div class="rj-au-grid {{ $imgLeft ? 'is-left' : '' }}">
             <div class="rj-au-text">
@@ -440,6 +185,14 @@
                     <div class="rj-au-content">{!! nl2br(e($settings['content'])) !!}</div>
                 @endif
 
+                @if(!empty($stats))
+                    <div class="rj-au-stats">
+                        @foreach($stats as $s)
+                            <div class="rj-au-stat"><b>{{ $s['v'] }}</b>@if($s['l'])<span>{{ $s['l'] }}</span>@endif</div>
+                        @endforeach
+                    </div>
+                @endif
+
                 @if(!empty($settings['button_text']))
                     <a href="{{ $settings['button_url'] ?? '#' }}" class="rj-au-btn">
                         {{ $settings['button_text'] }}
@@ -452,24 +205,50 @@
 
             <div class="rj-au-media-wrap">
                 <div class="rj-au-aura"></div>
-                <div class="rj-au-media">
-                    @if(!empty($settings['image']))
-                        <img src="{{ $settings['image'] }}" alt="{{ $settings['title'] ?? 'About Us' }}" class="rj-au-img" loading="lazy" decoding="async">
-                        <div class="rj-au-veil"></div>
-                    @else
-                        <div class="rj-au-empty">
-                            <svg viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                                <circle cx="60" cy="60" r="26" fill="rgba(124,58,237,0.35)"/>
-                                <ellipse cx="60" cy="62" rx="52" ry="14" transform="rotate(-18 60 62)"/>
-                                <circle cx="104" cy="44" r="3" fill="currentColor"/>
-                            </svg>
-                        </div>
-                    @endif
-                    <div class="rj-au-orbit"></div>
-                    <span class="rj-au-corner tl"></span>
-                    <span class="rj-au-corner br"></span>
+                <div class="rj-au-frame">
+                    <div class="rj-au-media">
+                        @if(!empty($settings['image']))
+                            <img src="{{ $settings['image'] }}" alt="{{ $settings['title'] ?? 'About Us' }}" class="rj-au-img" loading="lazy" decoding="async">
+                            <div class="rj-au-veil"></div>
+                            <div class="rj-au-gloss"></div>
+                        @else
+                            <div class="rj-au-empty">
+                                <svg viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                                    <circle cx="60" cy="60" r="26" fill="rgba(124,58,237,0.35)"/>
+                                    <ellipse cx="60" cy="62" rx="52" ry="14" transform="rotate(-18 60 62)"/>
+                                    <circle cx="104" cy="44" r="3" fill="currentColor"/>
+                                </svg>
+                            </div>
+                        @endif
+                        <div class="rj-au-orbit"></div>
+                        <span class="rj-au-corner tl"></span>
+                        <span class="rj-au-corner br"></span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+(function () {
+    var root = document.getElementById(@js($uid));
+    if (!root) return;
+
+    // run animations only while the card is on screen
+    if ('IntersectionObserver' in window) {
+        new IntersectionObserver(function (e) { root.classList.toggle('is-live', e[0].isIntersecting); }).observe(root);
+    } else { root.classList.add('is-live'); }
+
+    // cursor light: one transform write per frame
+    if (window.matchMedia && window.matchMedia('(hover: hover)').matches) {
+        var card = root.querySelector('.rj-au-card'), light = root.querySelector('.rj-au-light'), raf = 0, px = 0, py = 0;
+        function frame() {
+            raf = 0;
+            var r = card.getBoundingClientRect();
+            light.style.transform = 'translate3d(' + (px - r.left - 220) + 'px,' + (py - r.top - 220) + 'px,0)';
+        }
+        card.addEventListener('pointermove', function (e) { px = e.clientX; py = e.clientY; if (!raf) raf = requestAnimationFrame(frame); });
+    }
+})();
+</script>
