@@ -2,13 +2,13 @@
 
 **A dark, modern, builder-first theme for [RJ Nexus](https://rjnexus.org).**
 
-![Version](https://img.shields.io/badge/version-1.0.4-%238A2BE2)
+![Version](https://img.shields.io/badge/version-1.1.0-%238A2BE2)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![RJ Nexus](https://img.shields.io/badge/RJ%20Nexus-%E2%89%A5%201.8.6-8A2BE2)
 ![PHP](https://img.shields.io/badge/PHP-%E2%89%A5%208.2-777BB4)
 
 > [!NOTE]
-> **Stable Release.** Spotlight is now fully stable, highly customizable, and ready for production use. It includes auto-generated starter content and 20+ interactive widgets.
+> **Stable Release.** Spotlight is now fully stable, highly customizable, and ready for production use. It includes auto-generated starter content and 25+ interactive widgets.
 
 ---
 
@@ -32,7 +32,7 @@ Spotlight is a highly customizable, dark-first theme designed for **product show
 
 | Feature | Description |
 | --- | --- |
-| **RJBuilder Integration** | 20+ custom-built interactive widgets tailored for dark SaaS/product showcases. |
+| **RJBuilder Integration** | 25+ custom-built interactive widgets tailored for dark SaaS/product showcases. |
 | **Starter Content** | Auto-generation of default pages (Home, About, Contact, Pricing), menus, and Header/Footer templates upon activation. |
 | **Cinematic Hero** | Full-screen video backgrounds with ping-pong playback, color grading, and HUD overlays. |
 | **Glassmorphism UI** | Beautiful frosted-glass effects, interactive tabs, and glowing borders across all elements. |
@@ -50,6 +50,7 @@ Spotlight is a highly customizable, dark-first theme designed for **product show
 
 - **RJ Nexus** 1.8.6 or newer
 - **PHP** 8.2 or newer
+- **[RJ Form Builder Plugin](https://github.com/mr-ruhid/rj-plugin-form-builder)** (Required for the Contact widget and advanced form handling)
 
 ## 🚀 Installation
 
@@ -58,3 +59,21 @@ Spotlight is a highly customizable, dark-first theme designed for **product show
    ```bash
    cd rj-content/themes
    git clone https://github.com/rj-nexus/spotlight.git
+Go to Admin Panel → Appearance → Themes.
+
+Find Spotlight and click Activate.
+
+Install the RJ Form Builder Plugin to enable form functionality.
+
+🛠 Getting Started with RJBuilder
+Navigate to Admin Panel → RJBuilder.
+
+Create a new Template or Page.
+
+Use the Spotlight widgets (Hero, Stats, Bento Grid, etc.) to build your layout visually.
+
+💬 Support & Feedback
+If you encounter any bugs, have feature requests, or need help, please open an issue on our GitHub Repository.
+
+📄 License
+This theme is licensed under the MIT License. See the LICENSE file for more details.
