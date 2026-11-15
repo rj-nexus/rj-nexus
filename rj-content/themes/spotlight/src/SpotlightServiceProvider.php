@@ -38,6 +38,9 @@ class SpotlightServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Laravel-ə spotlight:: namespace-inin harada olduğunu deyirik
+        $this->loadViewsFrom(__DIR__ . '/../views', 'spotlight');
+
         $this->registerWidgets();
         $this->maybeSetupStarterContent();
     }
