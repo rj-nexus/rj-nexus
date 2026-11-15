@@ -3,7 +3,7 @@
 **A dark, modern, builder-first theme for [RJ Nexus](https://rjnexus.org).**
 
 ![Version](https://img.shields.io/badge/version-1.1.0-%238A2BE2)
-![License](https://img.shields.io/badge/license-MIT-blue)
+![License](https://img.shields.io/badge/license-Custom%20Source--Available-lightgrey)
 ![RJ Nexus](https://img.shields.io/badge/RJ%20Nexus-%E2%89%A5%201.8.6-8A2BE2)
 ![PHP](https://img.shields.io/badge/PHP-%E2%89%A5%208.2-777BB4)
 
@@ -76,4 +76,10 @@ Use the Spotlight widgets (Hero, Stats, Bento Grid, etc.) to build your layout v
 If you encounter any bugs, have feature requests, or need help, please open an issue on our GitHub Repository.
 
 📄 License
-This theme is licensed under the MIT License. See the LICENSE file for more details.
+This theme is licensed under a Custom Source-Available License.
+
+You CAN: View the code and use the theme on unlimited personal or commercial websites.
+
+YOU CANNOT: Modify, alter, or redistribute the source code. The theme must be used as-is.
+
+See the LICENSE file for more details.
