@@ -57,7 +57,7 @@ class SpotlightVideoShowcaseWidget extends BaseWidget
                 'name'    => 'video_url',
                 'type'    => 'text',
                 'label'   => __('Video URL (YouTube, Vimeo, or MP4)'),
-                'default' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                'default' => 'https://www.youtube.com/watch?v=BU4UXY2D3FU&t=23s',
                 'tab'     => 'content',
             ],
             [
