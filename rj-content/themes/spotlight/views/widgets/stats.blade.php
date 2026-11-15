@@ -152,26 +152,6 @@
         var values = root.querySelectorAll('.rj-stat-value');
         var animated = false;
 
-        function animateValue(obj, start, end, duration, suffix) {
-            var startTimestamp = null;
-            
-            function step(timestamp) {
-                if (!startTimestamp) startTimestamp = timestamp;
-                var progress = Math.min((timestamp - startTimestamp) / duration, 1);
-                
-                // Easing function (easeOutQuart)
-                var easeOut = 1 - Math.pow(1 - progress, 4);
-                var current = Math.floor(easeOut * (end - start) + start);
-                
-                obj.innerHTML = current.toLocaleString() + suffix;
-                
-                if (progress < 1) {
-                    window.requestAnimationFrame(step);
-                }
-            }
-            window.requestAnimationFrame(step);
-        }
-
         var observer = new IntersectionObserver(function(entries) {
             if (entries[0].isIntersecting && !animated) {
                 animated = true;
@@ -179,33 +159,37 @@
                 values.forEach(function(el) {
                     var targetStr = el.getAttribute('data-target');
                     
-                    // Rəqəmi və hərfləri/simvolları ayırırıq (məsələn: 10K+ -> 10 və K+)
-                    var numMatch = targetStr.match(/[\d.]+/);
+                    var numMatch = targetStr.match(/[\d,.]+/);
                     if (!numMatch) {
                         el.innerHTML = targetStr;
                         return;
                     }
                     
-                    var targetNum = parseFloat(numMatch[0]);
-                    var suffix = targetStr.replace(numMatch[0], '');
-                    var isDecimal = targetStr.indexOf('.') !== -1;
+                    var rawNum = numMatch[0];
+                    var targetNum = parseFloat(rawNum.replace(/,/g, ''));
+                    var suffix = targetStr.replace(rawNum, '');
+                    var isDecimal = rawNum.indexOf('.') !== -1;
                     
-                    if (isDecimal) {
-                        // Ondalıq ədədlər üçün (məsələn: 99.9%)
-                        var startTimestamp = null;
-                        function stepDecimal(timestamp) {
-                            if (!startTimestamp) startTimestamp = timestamp;
-                            var progress = Math.min((timestamp - startTimestamp) / 2000, 1);
-                            var easeOut = 1 - Math.pow(1 - progress, 4);
-                            var current = (easeOut * targetNum).toFixed(1);
-                            el.innerHTML = current + suffix;
-                            if (progress < 1) window.requestAnimationFrame(stepDecimal);
+                    var startTimestamp = null;
+                    
+                    function step(timestamp) {
+                        if (!startTimestamp) startTimestamp = timestamp;
+                        var progress = Math.min((timestamp - startTimestamp) / 2000, 1);
+                        var easeOut = 1 - Math.pow(1 - progress, 4);
+                        var current = easeOut * targetNum;
+                        
+                        if (isDecimal) {
+                            el.innerHTML = current.toFixed(1) + suffix;
+                        } else {
+                            el.innerHTML = Math.floor(current).toLocaleString('en-US') + suffix;
                         }
-                        window.requestAnimationFrame(stepDecimal);
-                    } else {
-                        // Tam ədədlər üçün
-                        animateValue(el, 0, targetNum, 2000, suffix);
+                        
+                        if (progress < 1) {
+                            window.requestAnimationFrame(step);
+                        }
                     }
+                    
+                    window.requestAnimationFrame(step);
                 });
                 
                 observer.disconnect();
