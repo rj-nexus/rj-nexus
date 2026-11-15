@@ -103,6 +103,36 @@ class SpotlightBentoGridWidget extends BaseWidget
                         'default' => 'glass',
                     ],
                 ],
+                'default' => [
+                    [
+                        'title' => __('Lightning Fast'),
+                        'description' => __('Optimized rendering for maximum performance and speed.'),
+                        'size' => '2x1',
+                        'style' => 'glass',
+                        'icon' => 'bolt',
+                    ],
+                    [
+                        'title' => __('Secure'),
+                        'description' => __('Enterprise-grade security built-in.'),
+                        'size' => '1x1',
+                        'style' => 'gradient',
+                        'icon' => 'shield-check',
+                    ],
+                    [
+                        'title' => __('Analytics'),
+                        'description' => __('Real-time data and insights.'),
+                        'size' => '1x1',
+                        'style' => 'solid',
+                        'icon' => 'chart-bar',
+                    ],
+                    [
+                        'title' => __('Global CDN'),
+                        'description' => __('Deliver content faster to users worldwide.'),
+                        'size' => '2x1',
+                        'style' => 'glass',
+                        'icon' => 'globe',
+                    ],
+                ],
             ],
         ];
     }
