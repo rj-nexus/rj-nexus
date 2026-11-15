@@ -2,11 +2,11 @@
 
 All notable changes to the Spotlight theme will be documented in this file.
 
-## [1.1.0] - 2026-11-16
+## [1.1.1] - 2026-11-16
 
-### 🚀 Feature Release: New Layout Widgets
+### 🚀 Patch Release: New Widgets & Fixes
 
-This release introduces 5 powerful new widgets designed for modern SaaS and AI landing pages, along with a refreshed default logo.
+This release introduces 5 powerful new widgets designed for modern SaaS and AI landing pages, fixes view rendering errors, and ensures all widgets have default demo content.
 
 ### Added
 - **Bento Grid Widget:** A masonry-style grid with varying box sizes (1x1, 2x1, 1x2, 2x2) to showcase features and stats in a modern layout.
@@ -15,6 +15,9 @@ This release introduces 5 powerful new widgets designed for modern SaaS and AI l
 - **Video Showcase Widget:** A sleek browser mockup layout with a lightbox play button to present product videos (YouTube, Vimeo, or MP4).
 - **Comparison Table Widget:** A responsive, side-by-side pricing/feature comparison table with "Popular" plan highlighting.
 
+### Fixed
+- **View Namespace Error:** Fixed the `No hint path defined for [spotlight]` error by registering the theme's view namespace in `SpotlightServiceProvider`.
+- **Demo Content:** Added default demo data to the schemas of the new widgets so they look great right out of the box.
+
 ### Improved
-- **Service Provider:** Registered all 5 new widgets in `SpotlightServiceProvider.php` to ensure they appear in the RJBuilder panel.
 - **Branding:** Updated the default logo image to reflect the latest version.
