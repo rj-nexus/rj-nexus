@@ -2,15 +2,19 @@
 
 All notable changes to the Spotlight theme will be documented in this file.
 
-## [1.0.4] - 2026-11-13
+## [1.1.0] - 2026-11-16
 
-### 🐛 Bug Fixes & Improvements
+### 🚀 Feature Release: New Layout Widgets
 
-This release fixes favicon synchronization between the admin Site Options and the frontend, along with two minor layout corrections.
+This release introduces 5 powerful new widgets designed for modern SaaS and AI landing pages, along with a refreshed default logo.
 
-### Fixed
-- **Favicon Not Updating:** The `layout.blade.php` now reads the favicon from `rj_site_option('favicon')` with a fallback to the legacy `rj_get_option('site_favicon')` key. This resolves the issue where favicons selected in Admin → Appearance → Options were not displaying on the frontend.
+### Added
+- **Bento Grid Widget:** A masonry-style grid with varying box sizes (1x1, 2x1, 1x2, 2x2) to showcase features and stats in a modern layout.
+- **Stats Widget:** A counter section with scroll-triggered animations to display key metrics (e.g., "10K+ Users").
+- **CTA Banner Widget:** A high-impact call-to-action section with a glowing grid background and gradient buttons.
+- **Video Showcase Widget:** A sleek browser mockup layout with a lightbox play button to present product videos (YouTube, Vimeo, or MP4).
+- **Comparison Table Widget:** A responsive, side-by-side pricing/feature comparison table with "Popular" plan highlighting.
 
 ### Improved
-- **Footer Background Color:** Replaced the hardcoded `#0a0a0f` color with the dynamic CSS variable `var(--rj-footer-bg)`. The footer background now respects the customizer settings.
-- **Image Placeholder:** Replaced the external GitHub-hosted fallback image with an inline Base64 SVG data URI. This removes external CDN dependency and improves loading performance for missing images.
+- **Service Provider:** Registered all 5 new widgets in `SpotlightServiceProvider.php` to ensure they appear in the RJBuilder panel.
+- **Branding:** Updated the default logo image to reflect the latest version.
