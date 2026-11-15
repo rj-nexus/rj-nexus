@@ -90,6 +90,26 @@ class SpotlightComparisonTableWidget extends BaseWidget
                         'default' => false,
                     ],
                 ],
+                'default' => [
+                    [
+                        'name' => __('Starter'),
+                        'price' => __('$9/mo'),
+                        'button_text' => __('Get Started'),
+                        'is_popular' => false,
+                    ],
+                    [
+                        'name' => __('Pro'),
+                        'price' => __('$29/mo'),
+                        'button_text' => __('Get Started'),
+                        'is_popular' => true,
+                    ],
+                    [
+                        'name' => __('Enterprise'),
+                        'price' => __('$99/mo'),
+                        'button_text' => __('Contact Sales'),
+                        'is_popular' => false,
+                    ],
+                ],
             ],
             [
                 'name'    => 'features',
@@ -120,6 +140,26 @@ class SpotlightComparisonTableWidget extends BaseWidget
                         'type'    => 'toggle',
                         'label'   => __('Included in Plan 3'),
                         'default' => false,
+                    ],
+                ],
+                'default' => [
+                    [
+                        'name' => __('Core Features'),
+                        'p1' => true,
+                        'p2' => true,
+                        'p3' => true,
+                    ],
+                    [
+                        'name' => __('Advanced Analytics'),
+                        'p1' => false,
+                        'p2' => true,
+                        'p3' => true,
+                    ],
+                    [
+                        'name' => __('Priority Support'),
+                        'p1' => false,
+                        'p2' => false,
+                        'p3' => true,
                     ],
                 ],
             ],
