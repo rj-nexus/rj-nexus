@@ -43,7 +43,7 @@ class SpotlightStatsWidget extends BaseWidget
                 'name'    => 'title',
                 'type'    => 'text',
                 'label'   => __('Title (Optional)'),
-                'default' => '',
+                'default' => __('Trusted by developers worldwide'),
                 'tab'     => 'content',
             ],
             [
@@ -68,6 +68,28 @@ class SpotlightStatsWidget extends BaseWidget
                         'name'    => 'icon',
                         'type'    => 'icon',
                         'label'   => __('Icon (Optional)'),
+                    ],
+                ],
+                'default' => [
+                    [
+                        'value' => '10K+',
+                        'label' => __('Active Users'),
+                        'icon' => 'users',
+                    ],
+                    [
+                        'value' => '99.9%',
+                        'label' => __('Uptime Guarantee'),
+                        'icon' => 'server',
+                    ],
+                    [
+                        'value' => '24/7',
+                        'label' => __('Customer Support'),
+                        'icon' => 'headset',
+                    ],
+                    [
+                        'value' => '150+',
+                        'label' => __('Countries Served'),
+                        'icon' => 'globe',
                     ],
                 ],
             ],
