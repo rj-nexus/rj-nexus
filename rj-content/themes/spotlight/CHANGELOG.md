@@ -2,22 +2,18 @@
 
 All notable changes to the Spotlight theme will be documented in this file.
 
-## [1.1.1] - 2026-11-16
+## [1.1.2] - 2026-11-16
 
-### 🚀 Patch Release: New Widgets & Fixes
+### 🎨 Design Fixes & Mobile Improvements
 
-This release introduces 5 powerful new widgets designed for modern SaaS and AI landing pages, fixes view rendering errors, and ensures all widgets have default demo content.
+This release focuses on refining the user interface of the newly added widgets, fixing mobile responsiveness, and polishing the overall design system.
 
-### Added
-- **Bento Grid Widget:** A masonry-style grid with varying box sizes (1x1, 2x1, 1x2, 2x2) to showcase features and stats in a modern layout.
-- **Stats Widget:** A counter section with scroll-triggered animations to display key metrics (e.g., "10K+ Users").
-- **CTA Banner Widget:** A high-impact call-to-action section with a glowing grid background and gradient buttons.
-- **Video Showcase Widget:** A sleek browser mockup layout with a lightbox play button to present product videos (YouTube, Vimeo, or MP4).
-- **Comparison Table Widget:** A responsive, side-by-side pricing/feature comparison table with "Popular" plan highlighting.
+### 🐛 Bug Fixes & Mobile Responsiveness
+- **Pricing Grid:** Updated the mobile view to display a 2-column layout instead of a single column, improving space utilization.
+- **Pricing Section (Annual View):** Fixed the layout and visual glitches in the "Annual" billing view.
+- **Header Mobile CTA:** Fixed the "Get Started" button on mobile. It is now a perfect glass circle that smoothly transitions to the primary blue color on touch (`:active` state).
+- **Stats Widget:** Fixed the counter animation to properly handle thousands separators and decimals without breaking the layout.
 
-### Fixed
-- **View Namespace Error:** Fixed the `No hint path defined for [spotlight]` error by registering the theme's view namespace in `SpotlightServiceProvider`.
-- **Demo Content:** Added default demo data to the schemas of the new widgets so they look great right out of the box.
-
-### Improved
-- **Branding:** Updated the default logo image to reflect the latest version.
+### ⚡ Improvements
+- **New Widgets Polishing:** Applied general design improvements, padding adjustments, and responsive fixes across all newly added widgets (Bento Grid, Stats, CTA Banner, Video Showcase, Comparison Table).
+- **Global Design Tweaks:** Refined hover states, typography scaling, and element spacing across the entire theme for a more cohesive look.
