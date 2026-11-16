@@ -17,14 +17,16 @@ class UpdatesController extends Controller
     {
         $this->repo = rj_get_option('update_repo', 'rj-nexus/rj-nexus');
 
-        $configVersion = ltrim((string) config('rj.version', '1.5.0'), 'v');
-        $dbVersion = ltrim((string) rj_get_option('rj_version', '1.5.0'), 'v');
+        // config/app.php-dəki versiyanı götürürük
+        $configVersion = ltrim((string) config('app.version', '1.9.3'), 'v');
+        $dbVersion = ltrim((string) rj_get_option('rj_version', '1.0.0'), 'v');
 
+        // Sistem həmişə fayldakı (config) versiyanı əsas götürür
+        $this->currentVersion = $configVersion;
+
+        // Əgər config yenidirsə, bazanı da yeniləyirik
         if (version_compare($configVersion, $dbVersion, '>')) {
             rj_set_option('rj_version', $configVersion);
-            $this->currentVersion = $configVersion;
-        } else {
-            $this->currentVersion = $dbVersion;
         }
     }
 
@@ -72,8 +74,6 @@ class UpdatesController extends Controller
                 'has_update' => $hasUpdate,
             ]), 'updates');
 
-            // The result is shown on the page itself: green "latest version"
-            // status or pink "Update available" status plus the new version card.
             return back();
         } catch (\Throwable $e) {
             return back()->with('error', __('Update check failed: :message', ['message' => $e->getMessage()]));
@@ -146,8 +146,6 @@ class UpdatesController extends Controller
             return null;
         }
 
-        // Recompute against the installed version, so the status is correct
-        // right after an upgrade without needing a new check.
         if (!empty($decoded['version'])) {
             $decoded['has_update'] = version_compare(
                 ltrim((string) $decoded['version'], 'v'),

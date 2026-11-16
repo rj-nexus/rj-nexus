@@ -11,13 +11,16 @@ class CheckForUpdates
 {
     public function handle(Request $request, Closure $next): Response
     {
-        // TEST REJİMİ: Hər səhifə yüklənməsində (refresh) yoxlayır
-        // Vaxt məhdudiyyətini və keş yoxlamasını müvəqqəti söndürdük
+        $lastChecked = Cache::get('rj_update_check_time', 0);
         
-        // Arxa planda yoxlama əmrini işə salırıq
-        dispatch(function () {
-            \Illuminate\Support\Facades\Artisan::call('rj:check-updates');
-        })->afterResponse();
+        // 900 saniyə = 15 dəqiqə
+        if (time() - $lastChecked > 900) { 
+            Cache::put('rj_update_check_time', time(), now()->addDay());
+
+            dispatch(function () {
+                \Illuminate\Support\Facades\Artisan::call('rj:check-updates');
+            })->afterResponse();
+        }
 
         return $next($request);
     }
