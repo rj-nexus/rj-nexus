@@ -225,7 +225,7 @@
     .rj-glass-dropdown-link:hover, .rj-glass-dropdown-link.active { color: #fff; background: var(--rjg-hover-bg); }
     .rj-glass-dropdown-link.active { color: var(--rj-primary); font-weight: 600; }
 
-    .rj-glass-actions { display: flex; align-items: center; gap: 10px; }
+    .rj-glass-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
 
     .rj-glass-lang-btn {
         display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px;
@@ -255,28 +255,28 @@
     .rj-glass-user-btn svg { width: 18px; height: 18px; }
     .rj-glass-user-btn:hover { background: rgba(255, 255, 255, 0.14); color: #fff; border-color: rgba(255, 255, 255, 0.3); }
 
-    /* DESKTOP CTA DÜYMƏSİ (Glass Style) */
+    /* CTA DÜYMƏSİ (GLASS DEFAULT, MAVİ HOVER) */
     .rj-glass-cta {
         display: inline-flex; align-items: center; justify-content: center; gap: 8px;
         padding: 9px 20px;
-        background: var(--rjg-glass);
-        border: 1px solid var(--rjg-line);
+        background: rgba(255, 255, 255, 0.05); /* Şüşə fon */
+        border: 1px solid rgba(255, 255, 255, 0.15); /* Şüşə sərhəd */
         border-radius: 10px;
         backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-        color: var(--rj-primary);
+        color: #ffffff; /* İlkin rəng ağdır */
         font-size: 13px; font-weight: 600; text-decoration: none;
-        transition: all 0.2s ease;
-        flex-shrink: 0; /* Sıxılmanın qarşısını alır */
+        transition: all 0.25s ease;
+        flex-shrink: 0;
     }
     .rj-glass-cta:hover {
-        background: rgba(255, 255, 255, 0.12);
-        border-color: rgba(255, 255, 255, 0.3);
-        color: var(--rj-primary);
-        box-shadow: 0 0 15px rgba(139, 92, 246, 0.3);
+        background: var(--rj-primary); /* Hoverdə mavi/bənövşəyi */
+        border-color: var(--rj-primary);
+        color: #ffffff;
+        box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
     }
     .rj-glass-cta-icon { display: none; width: 18px; height: 18px; }
 
-    .rj-glass-mobile-toggle { display: none; background: transparent; border: none; color: #fff; cursor: pointer; padding: 8px; }
+    .rj-glass-mobile-toggle { display: none; background: transparent; border: none; color: #fff; cursor: pointer; padding: 8px; flex-shrink: 0; }
     .rj-glass-mobile-toggle svg { width: 24px; height: 24px; }
     .rj-icon-close { display: none; }
 
@@ -311,7 +311,7 @@
         .rj-glass-header.rj-mobile-open .rj-icon-menu { display: none; }
         .rj-glass-header.rj-mobile-open .rj-icon-close { display: block; }
 
-        /* MOBİL CTA (MÜKƏMMƏL DAİRƏ VƏ GLASS) */
+        /* MOBİL CTA: SABİT ÖLÇÜ VƏ MÜKƏMMƏL DAİRƏ */
         .rj-glass-actions { gap: 8px; }
         .rj-glass-cta {
             width: 38px;
@@ -323,8 +323,8 @@
             aspect-ratio: 1 / 1;
             flex-shrink: 0;
             box-sizing: border-box;
-            background: var(--rjg-glass);
-            border: 1px solid var(--rjg-line);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
         }
         .rj-glass-cta-text { display: none; }
         .rj-glass-cta-icon {
