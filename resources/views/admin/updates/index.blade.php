@@ -264,6 +264,13 @@
                 <span class="nx-chip">{{ __('Spins in ~9 hours') }}</span>
             </div>
 
+            <div class="mt-4 nx-intro d4">
+                <a href="https://ruhidjavadoff.blogspot.com/2026/11/rj-nexus-altair-series-altair-brightest.html" target="_blank" rel="noopener" class="text-xs text-indigo-300 hover:text-indigo-100 transition-colors flex items-center justify-center gap-1.5 underline decoration-indigo-400/30 underline-offset-4 hover:decoration-indigo-300/80">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    {{ __('Learn more about the Altair star') }}
+                </a>
+            </div>
+
             <form method="POST" action="{{ route('admin.updates.check') }}" id="nxCheckForm" class="nx-intro d5">
                 @csrf
                 <button type="submit" id="nxCheckBtn" class="nx-btn">
