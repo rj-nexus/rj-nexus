@@ -90,7 +90,6 @@
                         $meta = $theme->metadata() ?? [];
                         $imageUrl = '';
                         
-                        // Kaskad məntiqi: screenshots -> screenshot -> logo -> preview
                         if (!empty($meta['screenshots']) && is_array($meta['screenshots'])) {
                             $imageUrl = $meta['screenshots'][0];
                         } elseif (!empty($meta['screenshot'])) {
@@ -102,8 +101,6 @@
                         }
                         
                         $isActive = $theme->isActive();
-
-                        // YENİLƏMƏ YOXLAMASI
                         $latestVersion = $meta['latest_version'] ?? null;
                         $hasUpdate = $latestVersion && version_compare($latestVersion, $theme->version, '>');
                     @endphp
@@ -164,20 +161,14 @@
 
                             <div class="flex items-center gap-2 flex-wrap">
                                 @if ($hasUpdate)
-                                    @if ($isActive)
-                                        <span class="text-xs text-amber-600 font-medium bg-amber-50 px-2 py-1.5 rounded-lg border border-amber-200">
-                                            {{ __('Deactivate to update') }}
-                                        </span>
-                                    @else
-                                        <form method="POST" action="{{ route('admin.themes.update', $theme) }}" class="inline">
-                                            @csrf
-                                            <button type="submit"
-                                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 text-white text-xs font-semibold hover:bg-amber-600 transition shadow-sm">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                                                {{ __('Update Now') }}
-                                            </button>
-                                        </form>
-                                    @endif
+                                    <form method="POST" action="{{ route('admin.themes.update', $theme) }}" class="inline">
+                                        @csrf
+                                        <button type="submit"
+                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 text-white text-xs font-semibold hover:bg-amber-600 transition shadow-sm">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                            {{ __('Update Now') }}
+                                        </button>
+                                    </form>
                                 @endif
 
                                 @if ($isActive && !$hasUpdate)
