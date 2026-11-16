@@ -376,15 +376,18 @@ class ThemeManager
             return ['success' => false, 'message' => __('No update source configured.')];
         }
 
-        if ($theme->isActive()) {
-            return ['success' => false, 'message' => __('Deactivate the theme before updating.')];
-        }
-
         try {
+            // Əgər tema aktivdirsə, yeniləmə zamanı müvəqqəti deaktiv edirik
+            $wasActive = $theme->isActive();
+            if ($wasActive) {
+                $theme->update(['status' => 'inactive']);
+            }
+
             // 1. Yeni versiyanı yüklə
             $response = \Illuminate\Support\Facades\Http::timeout(60)->get($downloadUrl);
 
             if (!$response->successful()) {
+                if ($wasActive) $theme->update(['status' => 'active']);
                 return ['success' => false, 'message' => __('Could not download update.')];
             }
 
@@ -395,6 +398,7 @@ class ThemeManager
             $zip = new \ZipArchive();
             if ($zip->open($tmpFile) !== true) {
                 @unlink($tmpFile);
+                if ($wasActive) $theme->update(['status' => 'active']);
                 return ['success' => false, 'message' => __('Could not open ZIP archive.')];
             }
 
@@ -408,12 +412,14 @@ class ThemeManager
             $manifestPath = $this->findManifest($extractPath);
             if (!$manifestPath) {
                 File::deleteDirectory($extractPath);
+                if ($wasActive) $theme->update(['status' => 'active']);
                 return ['success' => false, 'message' => __('theme.json not found in archive.')];
             }
 
             $manifest = json_decode(File::get($manifestPath), true);
             if (!is_array($manifest) || empty($manifest['name'])) {
                 File::deleteDirectory($extractPath);
+                if ($wasActive) $theme->update(['status' => 'active']);
                 return ['success' => false, 'message' => __('Invalid theme.json.')];
             }
 
@@ -435,6 +441,7 @@ class ThemeManager
                 'metadata' => $newManifest,
                 'name' => $newManifest['name'] ?? $theme->name,
                 'description' => $newManifest['description'] ?? $theme->description,
+                'status' => $wasActive ? 'active' : 'inactive', // Statusu bərpa edirik
             ]);
 
             $this->clearCache();
@@ -442,6 +449,9 @@ class ThemeManager
 
             return ['success' => true, 'message' => __('Theme updated successfully to v:version', ['version' => $theme->fresh()->version])];
         } catch (\Throwable $e) {
+            if (isset($wasActive) && $wasActive) {
+                $theme->update(['status' => 'active']);
+            }
             return ['success' => false, 'message' => $e->getMessage()];
         }
     }
