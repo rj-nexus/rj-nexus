@@ -102,10 +102,14 @@
                         }
                         
                         $isActive = $theme->isActive();
+
+                        // YENİLƏMƏ YOXLAMASI
+                        $latestVersion = $meta['latest_version'] ?? null;
+                        $hasUpdate = $latestVersion && version_compare($latestVersion, $theme->version, '>');
                     @endphp
 
                     <div x-show="search === '' || '{{ strtolower($theme->name) }}'.includes(search.toLowerCase())"
-                         class="border {{ $isActive ? 'border-rj-purple ring-1 ring-rj-purple/20' : 'border-gray-200' }} rounded-xl overflow-hidden bg-white hover:shadow-lg transition group">
+                         class="border {{ $hasUpdate ? 'border-amber-400 ring-1 ring-amber-400/30' : ($isActive ? 'border-rj-purple ring-1 ring-rj-purple/20' : 'border-gray-200') }} rounded-xl overflow-hidden bg-white hover:shadow-lg transition group relative">
 
                         <div class="relative aspect-[16/10] bg-gradient-to-br from-gray-100 to-gray-50 overflow-hidden">
                             @if ($imageUrl)
@@ -123,7 +127,12 @@
                                 </span>
                             @endif
 
-                            @if ($theme->status === 'error')
+                            @if ($hasUpdate)
+                                <span class="absolute top-3 right-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500 text-white text-xs font-bold shadow-lg animate-pulse">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                    {{ __('v:ver Available', ['ver' => $latestVersion]) }}
+                                </span>
+                            @elseif ($theme->status === 'error')
                                 <span class="absolute top-3 right-3 inline-flex items-center px-2.5 py-1 rounded-full bg-red-500 text-white text-xs font-semibold shadow-lg">
                                     {{ __('Error') }}
                                 </span>
@@ -154,18 +163,30 @@
                             @endif
 
                             <div class="flex items-center gap-2 flex-wrap">
-                                @if ($isActive)
+                                @if ($hasUpdate)
+                                    @if ($isActive)
+                                        <span class="text-xs text-amber-600 font-medium bg-amber-50 px-2 py-1.5 rounded-lg border border-amber-200">
+                                            {{ __('Deactivate to update') }}
+                                        </span>
+                                    @else
+                                        <form method="POST" action="{{ route('admin.themes.update', $theme) }}" class="inline">
+                                            @csrf
+                                            <button type="submit"
+                                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 text-white text-xs font-semibold hover:bg-amber-600 transition shadow-sm">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                                {{ __('Update Now') }}
+                                            </button>
+                                        </form>
+                                    @endif
+                                @endif
+
+                                @if ($isActive && !$hasUpdate)
                                     <a href="{{ route('admin.themes.customizer', $theme) }}"
                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-rj-purple to-rj-pink text-white text-xs font-medium hover:opacity-90 transition">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
                                         {{ __('Customize') }}
                                     </a>
-
-                                    <a href="{{ route('admin.themes.show', $theme) }}"
-                                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-gray-300 text-gray-700 text-xs font-medium hover:bg-gray-50 transition">
-                                        {{ __('Details') }}
-                                    </a>
-                                @else
+                                @elseif (!$isActive && !$hasUpdate)
                                     <form method="POST" action="{{ route('admin.themes.activate', $theme) }}" class="inline">
                                         @csrf
                                         <button type="submit"
@@ -174,12 +195,14 @@
                                             {{ __('Activate') }}
                                         </button>
                                     </form>
+                                @endif
 
-                                    <a href="{{ route('admin.themes.show', $theme) }}"
-                                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-gray-300 text-gray-700 text-xs font-medium hover:bg-gray-50 transition">
-                                        {{ __('Details') }}
-                                    </a>
+                                <a href="{{ route('admin.themes.show', $theme) }}"
+                                   class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-gray-300 text-gray-700 text-xs font-medium hover:bg-gray-50 transition">
+                                    {{ __('Details') }}
+                                </a>
 
+                                @if (!$isActive)
                                     <button type="button"
                                             @click="$dispatch('theme-preview', { slug: '{{ $theme->slug }}' })"
                                             class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white border border-gray-300 text-gray-500 hover:bg-gray-50 hover:text-rj-purple transition"
