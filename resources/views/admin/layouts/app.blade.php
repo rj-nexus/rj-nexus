@@ -674,6 +674,12 @@
             ],
         ];
 
+        $navSections = [
+            ['title' => null, 'items' => $coreTop],
+            ['title' => __('Plugins'), 'items' => $pluginNav],
+            ['title' => null, 'items' => $coreBottom],
+        ];
+
         $rj_currentType = null;
 
         $rj_post = request()->route('post');
