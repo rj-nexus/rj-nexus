@@ -43,6 +43,18 @@ class ThemeManager
 
             $slug = $manifest['slug'] ?? Str::slug($manifest['name']);
 
+            // KÖHNƏ METADATA-NI OXUYURUQ
+            $existing = Theme::where('slug', $slug)->first();
+            $oldMeta = $existing ? $existing->metadata() : [];
+
+            // YENİLƏMƏ MƏLUMATLARINI QORUYURUQ
+            if (isset($oldMeta['latest_version'])) {
+                $manifest['latest_version'] = $oldMeta['latest_version'];
+            }
+            if (isset($oldMeta['download_url'])) {
+                $manifest['download_url'] = $oldMeta['download_url'];
+            }
+
             Theme::updateOrCreate(
                 ['slug' => $slug],
                 [
@@ -51,7 +63,7 @@ class ThemeManager
                     'description' => $manifest['description'] ?? null,
                     'author' => $manifest['author'] ?? null,
                     'author_url' => $manifest['author_url'] ?? null,
-                    'preview_image' => $manifest['preview'] ?? null,
+                    'preview_image' => $manifest['preview'] ?? ($manifest['screenshot'] ?? ($manifest['logo'] ?? null)),
                     'folder' => basename($folder),
                     'is_child' => !empty($manifest['parent']),
                     'parent_slug' => $manifest['parent'] ?? null,
@@ -68,7 +80,6 @@ class ThemeManager
             $defaultTheme = Theme::where('slug', 'rj-default')->first() ?? Theme::first();
             if ($defaultTheme) {
                 $defaultTheme->markAsActive();
-                // rj_options cədvəlini də sinxronlaşdıraq
                 if (function_exists('rj_update_option')) {
                     rj_update_option('frontend_theme', $defaultTheme->slug);
                 }
