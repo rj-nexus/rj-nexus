@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Cache;
 use App\Models\Option;
 use App\Models\Notification;
 use App\Models\User;
+use App\Models\Theme;
+use App\Models\Plugin;
+use Illuminate\Support\Facades\Log;
 
 class CheckUpdates extends Command
 {
@@ -43,9 +46,14 @@ class CheckUpdates extends Command
                 Option::set('latest_release_data', json_encode($updateData), 'updates');
 
                 if ($hasUpdate) {
-                    $this->createNotification($latestVersion);
+                    $this->notifyAdmins(
+                        __('New System Update Available'),
+                        __('RJ Nexus v:version is ready. Click to view details.', ['version' => $latestVersion]),
+                        route('admin.updates.index'),
+                        __('View Update'),
+                        ['type' => 'core', 'version' => $latestVersion]
+                    );
                 }
-
                 $this->info('Core versiya: ' . $latestVersion);
             }
         } catch (\Throwable $e) {
@@ -65,6 +73,10 @@ class CheckUpdates extends Command
                 $pluginManager->checkForUpdates();
                 $this->info('Plaginlər yoxlanıldı.');
             }
+            
+            $this->checkThemeNotifications();
+            $this->checkPluginNotifications();
+            
         } catch (\Throwable $e) {
             $this->error('Tema/Plagin yoxlama xətası: ' . $e->getMessage());
         }
@@ -72,43 +84,77 @@ class CheckUpdates extends Command
         $this->info('Bütün yoxlamalar tamamlandı.');
     }
 
-    protected function createNotification($version)
+    protected function notifyAdmins($title, $message, $url, $label, $meta = [])
     {
         try {
-            // Yoxlayaq görək bu versiya üçün əvvəl bildiriş yaradılıb?
-            $exists = Notification::where('type', 'system')
-                ->where('title', 'like', "%{$version}%")
-                ->exists();
-            
-            if (!$exists) {
-                // Adminləri tapırıq
-                $admins = User::whereIn('role', ['admin', 'super-admin'])->get();
-                $defaultLocale = app()->getLocale();
+            $admins = User::whereIn('role', ['admin', 'super-admin'])->get();
+            $defaultLocale = app()->getLocale();
 
-                foreach ($admins as $admin) {
-                    // Hər adminin öz dilini təyin edirik (əgər admin modelində locale sütunu varsa)
-                    // Yoxdursa, default dil qalır
-                    $adminLocale = $admin->locale ?? $defaultLocale;
-                    app()->setLocale($adminLocale);
+            foreach ($admins as $admin) {
+                $adminLocale = $admin->locale ?? $defaultLocale;
+                app()->setLocale($adminLocale);
 
+                // DUBLİKATLARIN QARŞISINI ALMAQ ÜÇÜN MÖHKƏM YOXLAMA
+                $exists = Notification::where('user_id', $admin->id)
+                    ->where('action_url', $url)
+                    ->get()
+                    ->contains(function ($n) use ($meta) {
+                        return ($n->meta['version'] ?? '') === ($meta['version'] ?? '') && 
+                               ($n->meta['type'] ?? '') === ($meta['type'] ?? '');
+                    });
+
+                if (!$exists) {
                     Notification::send($admin, [
                         'type' => 'system',
-                        'title' => __('New System Update Available'),
-                        'message' => __('RJ Nexus v:version is ready. Click to view details.', ['version' => $version]),
+                        'title' => $title,
+                        'message' => $message,
                         'icon' => 'download',
-                        'color' => '#ec4899',
-                        'action_url' => route('admin.updates.index'),
-                        'action_label' => __('View Update'),
+                        'color' => $meta['type'] === 'plugin' ? '#f59e0b' : ($meta['type'] === 'theme' ? '#8b5cf6' : '#ec4899'),
+                        'action_url' => $url,
+                        'action_label' => $label,
+                        'meta' => $meta,
                     ]);
                 }
-
-                // Sonda sistemi öz default dilinə qaytarırıq
-                app()->setLocale($defaultLocale);
-                
-                $this->info('Bildiriş yaradıldı: Yeni versiya v' . $version);
             }
+            app()->setLocale($defaultLocale);
         } catch (\Throwable $e) {
-            $this->error('Bildiriş yaradılarkən xəta: ' . $e->getMessage());
+            Log::error('Bildiriş xətası: ' . $e->getMessage());
+        }
+    }
+
+    protected function checkThemeNotifications()
+    {
+        foreach (Theme::all() as $theme) {
+            $meta = $theme->metadata();
+            $latest = $meta['latest_version'] ?? null;
+            
+            if ($latest && version_compare($latest, $theme->version, '>')) {
+                $this->notifyAdmins(
+                    __('Theme Update Available: :name', ['name' => $theme->name]),
+                    __('New version v:version is available for this theme.', ['version' => $latest]),
+                    route('admin.themes.index'),
+                    __('View Themes'),
+                    ['type' => 'theme', 'slug' => $theme->slug, 'version' => $latest]
+                );
+            }
+        }
+    }
+
+    protected function checkPluginNotifications()
+    {
+        foreach (Plugin::all() as $plugin) {
+            $meta = $plugin->metadata();
+            $latest = $meta['latest_version'] ?? null;
+            
+            if ($latest && version_compare($latest, $plugin->version, '>')) {
+                $this->notifyAdmins(
+                    __('Plugin Update Available: :name', ['name' => $plugin->name]),
+                    __('New version v:version is available for this plugin.', ['version' => $latest]),
+                    route('admin.plugins.index'),
+                    __('View Plugins'),
+                    ['type' => 'plugin', 'slug' => $plugin->slug, 'version' => $latest]
+                );
+            }
         }
     }
 }
