@@ -49,13 +49,6 @@
         $raw = "Name: Starter\nPrice: 0\nDesc: Everything you need to start creating.\nButton: Get started | /register\n- 50 AI generations / month\n- 1 workspace\n- Community support\n- ~Priority generation\n- ~Custom models\n---\nName: Pro\nBadge: Most popular\nFeatured: yes\nPrice: 29\nYearly: 24\nDesc: For creators and teams who ship every week.\nButton: Start free trial | /register\n- Unlimited generations\n- Multi-model engine\n- 10 workspaces\n- Priority support\n- Export in 4K\n---\nName: Business\nPrice: 99\nYearly: 79\nDesc: Advanced control for growing companies.\nButton: Contact sales | /contact\n- Everything in Pro\n- Unlimited seats\n- Custom model tuning\n- SSO and audit logs\n- Dedicated manager";
     }
 
-    /*
-     * Plan format (blocks separated by a line with only ---):
-     *   Name: Pro            Price: 29        Yearly: 24      Period: /month
-     *   Desc: short text     Badge: Popular   Featured: yes   Hue: 265
-     *   Button: Text | URL
-     *   - feature            - ~feature that is NOT included
-     */
     $plans = [];
     foreach (preg_split('/^\s*---\s*$/m', $raw) as $block) {
         $p = ['name' => '', 'price' => '', 'yearly' => '', 'period' => '/month', 'desc' => '', 'badge' => '',
@@ -124,11 +117,18 @@
         <div class="rj-pr-grid" style="--n: {{ max(1, count($plans)) }};">
             @foreach($plans as $i => $p)
                 @php
-                    $hue = $p['hue'] ?? $defaultHues[$i % 4];
+                    $hue     = $p['hue'] ?? $defaultHues[$i % 4];
                     $numeric = is_numeric($p['price']);
-                    $yNum = is_numeric($p['yearly']);
-                    $dec = max($decimals($p['price']), $decimals($p['yearly']));
-                    $fmt = fn($v) => number_format((float) $v, $dec);
+                    $yNum    = is_numeric($p['yearly']);
+                    $dec     = max($decimals($p['price']), $decimals($p['yearly']));
+                    $fmt     = fn($v) => number_format((float) $v, $dec);
+
+                    // Monthly mode → monthly price, "/month"
+                    // Yearly  mode → total yearly price (monthly * 12) → "/year"
+                    $priceM = (float) $p['price'];
+                    $priceY = $yNum ? ((float) $p['yearly'] * 12) : $priceM;
+                    $periodM = $p['period'];
+                    $periodY = $yNum ? '/year' : $p['period'];
                 @endphp
                 <article class="rj-pr-card {{ $p['featured'] ? 'is-featured' : '' }}" style="--h: {{ $hue }}; --i: {{ $i }};">
                     <span class="rj-pr-fx">
@@ -149,15 +149,22 @@
                         <div class="rj-pr-price {{ $numeric ? '' : 'is-text' }}">
                             @if($numeric)
                                 <span class="rj-pr-cur">{{ $cur }}</span>
-                                <span class="rj-pr-amount" data-dec="{{ $dec }}" data-now="{{ (float) $p['price'] }}"
-                                      data-m="{{ (float) $p['price'] }}" data-y="{{ $yNum ? (float) $p['yearly'] : (float) $p['price'] }}">{{ $fmt($p['price']) }}</span>
-                                <span class="rj-pr-per">{{ $p['period'] }}</span>
+                                <span class="rj-pr-amount"
+                                      data-dec="{{ $dec }}"
+                                      data-now="{{ $priceM }}"
+                                      data-m="{{ $priceM }}"
+                                      data-y="{{ $priceY }}">{{ $fmt($priceM) }}</span>
+                                <span class="rj-pr-per"
+                                      data-m="{{ $periodM }}"
+                                      data-y="{{ $periodY }}">{{ $periodM }}</span>
                             @else
                                 <span class="rj-pr-amount-text">{{ $p['price'] }}</span>
                             @endif
                         </div>
                         <div class="rj-pr-billed">
-                            @if($numeric && $yNum)<span class="rj-pr-billed-y">Billed {{ $cur }}{{ number_format((float) $p['yearly'] * 12, $dec) }} yearly</span>@endif
+                            @if($numeric && $yNum)
+                                <span class="rj-pr-billed-y">= {{ $cur }}{{ number_format((float) $p['yearly'], $dec) }}/month</span>
+                            @endif
                         </div>
 
                         @if($p['btn'])
@@ -198,7 +205,7 @@
 
     <style>
         #{{ $uid }}.rj-pr { position: relative; width: 100%; overflow-x: clip; overflow-y: visible; background: transparent; color: #fff; padding: 120px 24px 150px; }
-        #{{ $uid }}.rj-pr::before { /* ambient light: starts and ends fully transparent, so there is no visible edge top or bottom */
+        #{{ $uid }}.rj-pr::before {
             content: ''; position: absolute; left: 0; right: 0; top: -200px; bottom: -200px; pointer-events: none; z-index: 0;
             background: radial-gradient(ellipse 60% 42% at 50% 38%, hsl(217 90% 55% / .17), transparent 72%);
             -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 30%, #000 70%, transparent 100%);
@@ -206,7 +213,6 @@
         }
         #{{ $uid }} .rj-pr-inner { position: relative; z-index: 1; max-width: var(--rj-container, 1200px); margin: 0 auto; }
 
-        /* Section off-screen: pause every infinite animation (big CPU/GPU saver) */
         #{{ $uid }}.rj-idle *, #{{ $uid }}.rj-idle *::before, #{{ $uid }}.rj-idle *::after { animation-play-state: paused !important; }
 
         /* ---------- Header ---------- */
@@ -255,7 +261,7 @@
             background: linear-gradient(160deg, rgba(255,255,255,.075), rgba(255,255,255,.015) 45%, rgba(255,255,255,.035));
             border: 1px solid rgba(255,255,255,.1);
             box-shadow: inset 0 1px 0 rgba(255,255,255,.13);
-            -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);   /* saturate() removed: it is the most expensive part */
+            -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
             transform: perspective(1100px) rotateX(var(--rx)) rotateY(var(--ry));
             contain: layout style;
             transition: transform .35s cubic-bezier(.2,.8,.2,1), translate .5s cubic-bezier(.2,.8,.2,1), scale .5s cubic-bezier(.2,.8,.2,1), opacity .5s, box-shadow .5s;
@@ -263,10 +269,8 @@
         #{{ $uid }} .rj-pr-card.is-featured { translate: 0 -14px; box-shadow: inset 0 1px 0 rgba(255,255,255,.18), inset 0 0 90px -30px hsl(var(--h) 90% 55% / .28); }
         #{{ $uid }} .rj-pr-card:hover { translate: 0 -8px; box-shadow: inset 0 1px 0 rgba(255,255,255,.2), inset 0 0 100px -30px hsl(var(--h) 90% 55% / .35); }
         #{{ $uid }} .rj-pr-card.is-featured:hover { translate: 0 -20px; }
-        /* when one card is hovered, the others step back (class set by JS instead of :has + filter) */
         #{{ $uid }} .rj-pr-grid.is-dim .rj-pr-card:not(.is-hover) { opacity: .55; scale: .985; }
 
-        /* border light that follows the cursor */
         #{{ $uid }} .rj-pr-card::before {
             content: ''; position: absolute; inset: 0; z-index: 4; border-radius: inherit; padding: 1px; pointer-events: none;
             -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
@@ -276,7 +280,6 @@
         }
         #{{ $uid }} .rj-pr-card:hover::before { opacity: 1; }
 
-        /* rotating beam (featured card): now a transform rotation, so it runs on the GPU instead of repainting every frame */
         #{{ $uid }} .rj-pr-ring {
             position: absolute; inset: 0; z-index: 4; border-radius: inherit; padding: 1px; overflow: hidden; pointer-events: none;
             -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
@@ -285,11 +288,10 @@
         #{{ $uid }} .rj-pr-ring::before {
             content: ''; position: absolute; left: 50%; top: 50%; width: 240%; aspect-ratio: 1 / 1; translate: -50% -50%;
             background: conic-gradient(transparent 0 62%, hsl(var(--h) 95% 60% / .9) 82%, #fff 92%, transparent 100%);
-            will-change: transform; animation: rjPrSpin 9s linear infinite; /* beam speed: change 9s */
+            will-change: transform; animation: rjPrSpin 9s linear infinite;
         }
         @keyframes rjPrSpin { to { rotate: 360deg; } }
 
-        /* effects layer: clipped to the card and faded out near the edges, so nothing is cut sharply or leaves the card */
         #{{ $uid }} .rj-pr-fx {
             position: absolute; inset: 0; z-index: 0; pointer-events: none; border-radius: inherit; overflow: hidden;
             -webkit-mask-image: linear-gradient(90deg, transparent, #000 48px, #000 calc(100% - 48px), transparent), linear-gradient(180deg, #000 calc(100% - 80px), transparent);
@@ -298,7 +300,6 @@
                     mask-composite: intersect;
         }
 
-        /* light inside the card: a fixed-size glow moved with transform (no gradient repaint on mouse move) */
         #{{ $uid }} .rj-pr-glow {
             position: absolute; left: 0; top: 0; width: 520px; height: 520px; z-index: 0; pointer-events: none; opacity: 0; transition: opacity .45s;
             translate: calc(var(--mx) - 260px) calc(var(--my) - 260px); will-change: translate, opacity;
@@ -319,7 +320,6 @@
         }
         #{{ $uid }} .rj-pr-card:hover .rj-pr-lamp { scale: 1 1; }
 
-        /* sparks that rise on hover (only run while hovering) */
         #{{ $uid }} .rj-pr-spark { position: absolute; bottom: -6px; left: var(--x); width: 3px; height: 3px; border-radius: 50%; z-index: 1; opacity: 0; pointer-events: none; background: hsl(var(--h) 100% 85%); box-shadow: 0 0 8px 2px hsl(var(--h) 95% 65%); }
         #{{ $uid }} .rj-pr-card:hover .rj-pr-spark { animation: rjPrRise var(--t) ease-out var(--d) infinite; }
         @keyframes rjPrRise { 0% { transform: translateY(0) scale(.6); opacity: 0; } 15% { opacity: 1; } 100% { transform: translateY(-300px) scale(1.1); opacity: 0; } }
@@ -351,7 +351,6 @@
         #{{ $uid }} .rj-pr-billed-y { opacity: 0; transform: translateY(6px); display: inline-block; transition: opacity .4s, transform .4s; }
         #{{ $uid }}[data-mode="y"] .rj-pr-billed-y { opacity: 1; transform: none; }
 
-        /* button with shimmer sweep */
         #{{ $uid }} .rj-pr-btn {
             position: relative; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 15px 22px; border-radius: 12px;
             font-size: 15px; font-weight: 600; text-decoration: none; color: #fff; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.16);
@@ -365,7 +364,6 @@
         #{{ $uid }} .is-featured .rj-pr-btn { background: #fff; color: #05070d; border-color: #fff; }
         #{{ $uid }} .is-featured .rj-pr-btn:hover { background: hsl(var(--h) 90% 66%); border-color: hsl(var(--h) 90% 66%); color: #fff; }
 
-        /* feature list */
         #{{ $uid }} .rj-pr-list { list-style: none; margin: 30px 0 0; padding: 26px 0 0; border-top: 1px solid rgba(255,255,255,.09); display: flex; flex-direction: column; gap: 14px; }
         #{{ $uid }} .rj-pr-list li { display: flex; align-items: flex-start; gap: 12px; font-size: 14.5px; line-height: 1.45; color: rgba(255,255,255,.78); transition: translate .35s, color .35s; }
         #{{ $uid }} .rj-pr-list li i {
@@ -381,7 +379,6 @@
 
         #{{ $uid }} .rj-pr-note { margin: 56px 0 0; text-align: center; font: 700 11px/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.55); }
 
-        /* reveal */
         #{{ $uid }}.rj-js:not(.is-in) .rj-pr-card { opacity: 0; }
         #{{ $uid }}.is-in .rj-pr-card { animation: rjPrIn .9s cubic-bezier(.2,.8,.2,1) calc(var(--i) * .12s) backwards; }
         @keyframes rjPrIn { from { opacity: 0; translate: 0 40px; } }
@@ -398,17 +395,68 @@
         #{{ $uid }} .rj-hl { left: 22px; } #{{ $uid }} .rj-hr { right: 22px; }
         #{{ $uid }} .rj-pr-hud b { display: block; width: 3px; height: 26px; background: #fff; }
 
+        /* Disable hover-driven transforms on touch devices (they cause layout shift on tap) */
+        @media (hover: none) {
+            #{{ $uid }} .rj-pr-card,
+            #{{ $uid }} .rj-pr-card.is-featured,
+            #{{ $uid }} .rj-pr-card:hover,
+            #{{ $uid }} .rj-pr-card.is-featured:hover { translate: 0 0; transform: none; }
+            #{{ $uid }} .rj-pr-card:hover .rj-pr-glow,
+            #{{ $uid }} .rj-pr-card:hover .rj-pr-cone,
+            #{{ $uid }} .rj-pr-card:hover .rj-pr-lamp,
+            #{{ $uid }} .rj-pr-card:hover .rj-pr-spark { animation: none; opacity: 0; scale: 1; }
+            #{{ $uid }} .rj-pr-card:hover .rj-pr-lamp { scale: .405 1; }
+            #{{ $uid }} .rj-pr-card:hover::before { opacity: 0; }
+            #{{ $uid }} .rj-pr-card:hover .rj-pr-list li:not(.is-off) { translate: 0; }
+            #{{ $uid }} .rj-pr-card:hover .rj-pr-list li:not(.is-off) i { animation: none; }
+        }
+
         @media (max-width: 1100px) {
             #{{ $uid }} .rj-pr-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         }
+
+        /* ---------- MOBILE: horizontal swipe carousel ---------- */
         @media (max-width: 720px) {
-            #{{ $uid }}.rj-pr { padding: 90px 20px 130px; }
-            #{{ $uid }} .rj-pr-grid { grid-template-columns: 1fr; max-width: 460px; margin: 0 auto; }
-            #{{ $uid }} .rj-pr-card { -webkit-backdrop-filter: none; backdrop-filter: none; background: linear-gradient(160deg, rgba(255,255,255,.09), rgba(255,255,255,.03)); }
-            #{{ $uid }} .rj-pr-card.is-featured { translate: 0 0; }
+            #{{ $uid }}.rj-pr { padding: 90px 0 130px; }
+            #{{ $uid }} .rj-pr-inner { padding: 0 20px; }
+            #{{ $uid }} .rj-pr-header { margin-bottom: 44px; }
             #{{ $uid }} .rj-pr-bars { display: none; }
             #{{ $uid }} .rj-pr-desc { min-height: 0; }
+            #{{ $uid }} .rj-pr-note { padding: 0 20px; }
+
+            #{{ $uid }} .rj-pr-grid {
+                display: flex;
+                flex-wrap: nowrap;
+                grid-template-columns: none;
+                gap: 16px;
+                overflow-x: auto;
+                overflow-y: hidden;
+                margin: 0 -20px;
+                padding: 14px 20px 28px;
+                scroll-snap-type: x mandatory;
+                scroll-padding: 0 20px;
+                scroll-behavior: smooth;
+                overscroll-behavior-x: contain;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+            }
+            #{{ $uid }} .rj-pr-grid::-webkit-scrollbar { display: none; }
+
+            #{{ $uid }} .rj-pr-card {
+                flex: 0 0 85%;
+                max-width: 400px;
+                scroll-snap-align: start;
+                -webkit-backdrop-filter: none;
+                backdrop-filter: none;
+                background: linear-gradient(160deg, rgba(255,255,255,.09), rgba(255,255,255,.03));
+                transform: none;
+            }
+            #{{ $uid }} .rj-pr-card.is-featured { translate: 0 0; }
+
+            #{{ $uid }} .rj-pr-amount,
+            #{{ $uid }} .rj-pr-amount-text { font-size: 52px; }
         }
+
         @media (prefers-reduced-motion: reduce) {
             #{{ $uid }} *, #{{ $uid }} *::before, #{{ $uid }} *::after { animation: none !important; transition: none !important; }
             #{{ $uid }}.rj-js:not(.is-in) .rj-pr-card { opacity: 1; }
@@ -421,7 +469,6 @@
         if (!root) return;
         root.classList.add('rj-js');
 
-        // reveal once, and pause all infinite animations while the section is off-screen
         if ('IntersectionObserver' in window) {
             new IntersectionObserver(function (e) {
                 var on = e[0].isIntersecting;
@@ -430,11 +477,12 @@
             }, { threshold: 0.05 }).observe(root);
         } else { root.classList.add('is-in'); }
 
-        // monthly / yearly toggle with rolling numbers
-        var btns = Array.prototype.slice.call(root.querySelectorAll('.rj-pr-tbtn'));
-        var thumb = root.querySelector('.rj-pr-thumb');
+        // monthly / yearly toggle — updates amount, period text, billed text
+        var btns    = Array.prototype.slice.call(root.querySelectorAll('.rj-pr-tbtn'));
+        var thumb   = root.querySelector('.rj-pr-thumb');
         var amounts = root.querySelectorAll('.rj-pr-amount');
-        var active = btns[0];
+        var periods = root.querySelectorAll('.rj-pr-per[data-y]');
+        var active  = btns[0];
 
         function fmt(v, d) { return v.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }); }
         function tween(el, to) {
@@ -458,6 +506,7 @@
                 btns.forEach(function (x) { x.classList.toggle('is-on', x === b); x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
                 place();
                 amounts.forEach(function (el) { tween(el, parseFloat(el.getAttribute('data-' + m))); });
+                periods.forEach(function (el) { el.textContent = el.getAttribute('data-' + m); });
             });
         });
         if (btns.length) {
@@ -466,7 +515,7 @@
             place();
         }
 
-        // cursor spotlight + 3D tilt (only on devices with a real hover), throttled to one update per frame
+        // cursor spotlight + 3D tilt (hover-capable devices only)
         if (window.matchMedia && window.matchMedia('(hover: hover)').matches) {
             var grid = root.querySelector('.rj-pr-grid');
             root.querySelectorAll('.rj-pr-card').forEach(function (c) {
