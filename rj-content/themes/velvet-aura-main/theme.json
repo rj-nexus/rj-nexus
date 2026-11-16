@@ -1,8 +1,9 @@
 {
     "name": "VelvetAura",
     "slug": "velvet-aura",
-    "version": "1.0.3-beta",
+    "version": "1.0.4-beta",
     "author": "RJ Nexus",
+    "repo": "rj-nexus/velvet-aura",
     "author_url": "https://github.com/rj-nexus",
     "description": "A premium, modern e-commerce theme exclusively designed for RJ Commerce.",
     "license": "MIT",

@@ -2,6 +2,14 @@
 
 All notable changes to the VelvetAura theme will be documented in this file.
 
+## [1.0.4-beta] - 2026-11-16
+
+### 🐛 Bug Fixes & Improvements
+
+- **Auto-Update Support:** Added the GitHub repository link (`repo`) to `theme.json`. This resolves the issue where the system could not automatically check for new versions or fetch the update ZIP file.
+
+---
+
 ## [1.0.3-beta] - 2026-11-13
 
 ### 🐛 Bug Fixes & Improvements
