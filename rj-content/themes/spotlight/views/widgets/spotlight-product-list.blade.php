@@ -310,18 +310,64 @@
             font-size: 14px;
         }
 
+        /* ---------- Tablet / mobile: keep 2 columns ---------- */
         @media (max-width: 768px) {
             #{{ $uid }}.rj-pl-section { padding: 56px 16px; }
-            #{{ $uid }} .rj-pl-header { margin-bottom: 32px; }
-            #{{ $uid }} .rj-pl-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+            #{{ $uid }} .rj-pl-header { margin-bottom: 28px; }
+
+            #{{ $uid }} .rj-pl-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                justify-content: stretch;
+                gap: 10px;
+            }
+
+            /* kill expensive blur on mobile */
+            #{{ $uid }} .rj-pl-card {
+                -webkit-backdrop-filter: none;
+                backdrop-filter: none;
+                background: linear-gradient(160deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+            }
+
+            /* squarer image fits 2-up better */
+            #{{ $uid }} .rj-pl-image-wrap { aspect-ratio: 1 / 1; }
+
+            #{{ $uid }} .rj-pl-content { padding: 10px 11px 12px; }
+            #{{ $uid }} .rj-pl-item-title { font-size: 13px; margin-bottom: 4px; }
+            #{{ $uid }} .rj-pl-desc {
+                font-size: 11px;
+                line-height: 1.45;
+                margin-bottom: 10px;
+                -webkit-line-clamp: 2;
+            }
+            #{{ $uid }} .rj-pl-btn {
+                padding: 8px 10px;
+                font-size: 11.5px;
+                gap: 6px;
+                border-radius: 9px;
+            }
+            #{{ $uid }} .rj-pl-btn svg { width: 13px; height: 13px; }
+            #{{ $uid }} .rj-pl-price-badge {
+                left: 8px;
+                bottom: 8px;
+                padding: 3px 8px;
+                font-size: 10.5px;
+            }
+            #{{ $uid }} .rj-pl-placeholder svg { width: 22px; height: 22px; }
         }
 
+        /* Very small phones: tighter outer padding, still 2 columns */
         @media (max-width: 420px) {
-            #{{ $uid }} .rj-pl-grid { grid-template-columns: minmax(0, 260px); }
+            #{{ $uid }}.rj-pl-section { padding: 44px 12px; }
+            #{{ $uid }} .rj-pl-grid { gap: 8px; }
+            #{{ $uid }} .rj-pl-content { padding: 9px 9px 10px; }
+            #{{ $uid }} .rj-pl-item-title { font-size: 12px; }
+            #{{ $uid }} .rj-pl-desc { font-size: 10.5px; -webkit-line-clamp: 2; }
+            #{{ $uid }} .rj-pl-btn { padding: 7px 9px; font-size: 11px; }
         }
 
         @media (hover: none) {
             #{{ $uid }} .rj-pl-card:hover { transform: none; }
+            #{{ $uid }} .rj-pl-card:hover .rj-pl-image-wrap img { transform: none; }
         }
     </style>
 
@@ -345,13 +391,16 @@
             items.forEach(function (el) { el.classList.add('is-visible'); });
         }
 
-        root.querySelectorAll('[data-card]').forEach(function (card) {
-            card.addEventListener('pointermove', function (e) {
-                var r = card.getBoundingClientRect();
-                card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
-                card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+        // spotlight only on hover-capable devices
+        if (window.matchMedia && window.matchMedia('(hover: hover)').matches) {
+            root.querySelectorAll('[data-card]').forEach(function (card) {
+                card.addEventListener('pointermove', function (e) {
+                    var r = card.getBoundingClientRect();
+                    card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+                    card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+                });
             });
-        });
+        }
     })();
     </script>
 </section>
