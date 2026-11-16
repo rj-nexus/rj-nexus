@@ -1,8 +1,9 @@
 {
     "name": "RJ Default",
     "slug": "rj-default",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "author": "RJ Nexus",
+    "repo": "rj-nexus/rj-default-theme",
     "author_url": "https://github.com/rj-nexus",
     "description": "The official default theme for RJ Nexus. Clean, minimal, builder-first.",
     "license": "MIT",
