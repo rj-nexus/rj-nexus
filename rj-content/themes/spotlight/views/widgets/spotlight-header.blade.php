@@ -255,21 +255,23 @@
     .rj-glass-user-btn svg { width: 18px; height: 18px; }
     .rj-glass-user-btn:hover { background: rgba(255, 255, 255, 0.14); color: #fff; border-color: rgba(255, 255, 255, 0.3); }
 
-    /* CTA DÜYMƏSİ (GLASS DEFAULT, MAVİ HOVER) */
+    /* CTA DÜYMƏSİ: STANDART HALDA ŞÜŞƏ, TOXUNANDA MAVİ */
     .rj-glass-cta {
         display: inline-flex; align-items: center; justify-content: center; gap: 8px;
         padding: 9px 20px;
-        background: rgba(255, 255, 255, 0.05); /* Şüşə fon */
-        border: 1px solid rgba(255, 255, 255, 0.15); /* Şüşə sərhəd */
+        background: rgba(255, 255, 255, 0.05); 
+        border: 1px solid rgba(255, 255, 255, 0.15); 
         border-radius: 10px;
         backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-        color: #ffffff; /* İlkin rəng ağdır */
+        color: #ffffff; 
         font-size: 13px; font-weight: 600; text-decoration: none;
         transition: all 0.25s ease;
         flex-shrink: 0;
     }
-    .rj-glass-cta:hover {
-        background: var(--rj-primary); /* Hoverdə mavi/bənövşəyi */
+    /* Həm hover (kompüter), həm active (mobil toxunma) üçün mavi rəng */
+    .rj-glass-cta:hover,
+    .rj-glass-cta:active {
+        background: var(--rj-primary);
         border-color: var(--rj-primary);
         color: #ffffff;
         box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
@@ -311,7 +313,7 @@
         .rj-glass-header.rj-mobile-open .rj-icon-menu { display: none; }
         .rj-glass-header.rj-mobile-open .rj-icon-close { display: block; }
 
-        /* MOBİL CTA: SABİT ÖLÇÜ VƏ MÜKƏMMƏL DAİRƏ */
+        /* MOBİL CTA: SABİT ÖLÇÜ VƏ TOXUNANDA MAVİ */
         .rj-glass-actions { gap: 8px; }
         .rj-glass-cta {
             width: 38px;
@@ -325,6 +327,11 @@
             box-sizing: border-box;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        .rj-glass-cta:hover,
+        .rj-glass-cta:active {
+            background: var(--rj-primary) !important;
+            border-color: var(--rj-primary) !important;
         }
         .rj-glass-cta-text { display: none; }
         .rj-glass-cta-icon {
