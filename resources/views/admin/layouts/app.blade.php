@@ -674,27 +674,39 @@
             ],
         ];
 
-        $navSections = [
-            ['title' => null, 'items' => $coreTop],
-            ['title' => __('Plugins'), 'items' => $pluginNav],
-            ['title' => null, 'items' => $coreBottom],
-        ];
+        $rj_currentType = null;
 
-        // Posts vs Pages ayrımı — sidebar-ın düzgün aktiv olması üçün
-        $rj_currentPost = request()->route('post');
-        if ($rj_currentPost instanceof \App\Models\Post && $rj_currentPost->type === 'page') {
-            foreach ($navSections as &$rj_section) {
-                foreach ($rj_section['items'] as &$rj_item) {
-                    $rj_label = $rj_item['label'] ?? '';
-                    if ($rj_label === __('Posts')) {
-                        $rj_item['active'] = false;
-                    } elseif ($rj_label === __('Pages')) {
-                        $rj_item['active'] = true;
-                    }
+        $rj_post = request()->route('post');
+        if ($rj_post instanceof \App\Models\Post) {
+            $rj_currentType = $rj_post->type;
+        }
+
+        if ($rj_currentType === null && request()->filled('type')) {
+            $rj_currentType = (string) request('type');
+        }
+
+        if ($rj_currentType === null) {
+            if (request()->routeIs('admin.pages.*')) {
+                $rj_currentType = 'page';
+            } elseif (request()->routeIs('admin.posts.*')) {
+                $rj_currentType = 'post';
+            }
+        }
+
+        $rj_isPage = $rj_currentType === 'page';
+        $rj_isPost = $rj_currentType === 'post';
+
+        foreach ($navSections as &$rj_section) {
+            foreach ($rj_section['items'] as &$rj_item) {
+                $rj_label = $rj_item['label'] ?? '';
+                if ($rj_label === __('Posts')) {
+                    $rj_item['active'] = $rj_isPost;
+                } elseif ($rj_label === __('Pages')) {
+                    $rj_item['active'] = $rj_isPage;
                 }
             }
-            unset($rj_section, $rj_item);
         }
+        unset($rj_section, $rj_item);
 
         $searchIndex = [];
         foreach ($navSections as $section) {
