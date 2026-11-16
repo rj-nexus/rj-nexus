@@ -278,23 +278,59 @@ class ThemeManager
 
         foreach (Theme::all() as $theme) {
             $metadata = $theme->metadata();
+            
+            // theme.json-dan repo və ya update_url oxuyuruq
+            $repo = $metadata['repo'] ?? null;
             $updateUrl = $metadata['update_url'] ?? null;
 
-            if (!$updateUrl) {
+            if (!$repo && !$updateUrl) {
                 continue;
             }
 
             try {
-                $response = \Illuminate\Support\Facades\Http::timeout(10)->get($updateUrl);
+                if ($repo) {
+                    // GitHub API ilə yoxlayırıq
+                    $response = \Illuminate\Support\Facades\Http::timeout(10)
+                        ->withHeaders(['User-Agent' => 'RJ-Nexus'])
+                        ->get("https://api.github.com/repos/{$repo}/releases/latest");
 
-                if (!$response->successful()) {
-                    continue;
-                }
+                    if ($response->successful()) {
+                        $release = $response->json();
+                        $latestVersion = ltrim($release['tag_name'] ?? '', 'v');
 
-                $remote = $response->json();
+                        if ($latestVersion && version_compare($latestVersion, $theme->version, '>')) {
+                            $zipUrl = null;
+                            foreach ($release['assets'] ?? [] as $asset) {
+                                if (str_ends_with(strtolower($asset['name'] ?? ''), '.zip')) {
+                                    $zipUrl = $asset['browser_download_url'];
+                                    break;
+                                }
+                            }
 
-                if (!empty($remote['version']) && version_compare($remote['version'], $theme->version, '>')) {
-                    $count++;
+                            // Tapılan yeni versiyanı və linki metadata-ya yazırıq!
+                            $metadata['latest_version'] = $latestVersion;
+                            if ($zipUrl) {
+                                $metadata['download_url'] = $zipUrl;
+                            }
+                            
+                            $theme->update(['metadata' => $metadata]);
+                            $count++;
+                        }
+                    }
+                } elseif ($updateUrl) {
+                    // Əgər kimsə hələ də update_url istifadə edirsə, köhnə məntiq
+                    $response = \Illuminate\Support\Facades\Http::timeout(10)->get($updateUrl);
+                    if ($response->successful()) {
+                        $remote = $response->json();
+                        if (!empty($remote['version']) && version_compare($remote['version'], $theme->version, '>')) {
+                            $metadata['latest_version'] = $remote['version'];
+                            if (!empty($remote['download_url'])) {
+                                $metadata['download_url'] = $remote['download_url'];
+                            }
+                            $theme->update(['metadata' => $metadata]);
+                            $count++;
+                        }
+                    }
                 }
             } catch (\Throwable $e) {
                 continue;

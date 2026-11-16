@@ -1,8 +1,9 @@
 {
     "name": "Spotlight",
     "slug": "spotlight",
-    "version": "1.1.2",
+    "version": "1.0.0",
     "author": "RJ Nexus",
+    "repo": "rj-nexus/spotlight",
     "author_url": "https://github.com/rj-nexus",
     "description": "Dark, modern product showcase theme with builder-first architecture.",
     "license": "MIT",
