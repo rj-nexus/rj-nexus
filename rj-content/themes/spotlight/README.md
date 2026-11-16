@@ -6,7 +6,7 @@
 
 Built for product showcases, SaaS platforms and content creators.
 
-![Version](https://img.shields.io/badge/version-1.1.0-8A2BE2)
+![Version](https://img.shields.io/badge/version-1.1.2-8A2BE2)
 ![RJ Nexus](https://img.shields.io/badge/RJ%20Nexus-%E2%89%A5%201.8.6-8A2BE2)
 ![PHP](https://img.shields.io/badge/PHP-%E2%89%A5%208.2-777BB4)
 ![License](https://img.shields.io/badge/license-Source--Available-lightgrey)
