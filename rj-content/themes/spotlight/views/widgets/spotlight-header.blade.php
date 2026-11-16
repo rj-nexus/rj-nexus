@@ -152,7 +152,12 @@
             @endif
 
             @if($ctaText)
-                <a href="{{ $ctaUrl }}" class="rj-glass-cta">{{ $ctaText }}</a>
+                <a href="{{ $ctaUrl }}" class="rj-glass-cta" aria-label="{{ $ctaText }}">
+                    <span class="rj-glass-cta-text">{{ $ctaText }}</span>
+                    <svg class="rj-glass-cta-icon" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                </a>
             @endif
 
             <button class="rj-glass-mobile-toggle" onclick="document.getElementById('rj-header').classList.toggle('rj-mobile-open')">
@@ -250,14 +255,20 @@
     .rj-glass-user-btn svg { width: 18px; height: 18px; }
     .rj-glass-user-btn:hover { background: rgba(255, 255, 255, 0.14); color: #fff; border-color: rgba(255, 255, 255, 0.3); }
 
+    /* YENİ CTA DÜYMƏSİ STİLİ */
     .rj-glass-cta {
-        display: inline-flex; align-items: center; padding: 9px 20px;
-        background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 10px;
+        display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        padding: 9px 20px;
+        background: rgba(139, 92, 246, 0.15); /* Yumşaq əsas rəng fonu */
+        border: 1px solid var(--rj-primary); /* Əsas rəng çərçivəsi */
+        border-radius: 10px;
         backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-        color: #fff; font-size: 13px; font-weight: 500; text-decoration: none;
-        transition: background 0.2s, border-color 0.2s;
+        color: var(--rj-primary); /* Boz yox, mavi/bənövşəyi rəng */
+        font-size: 13px; font-weight: 600; text-decoration: none;
+        transition: background 0.2s, border-color 0.2s, color 0.2s;
     }
-    .rj-glass-cta:hover { background: rgba(255, 255, 255, 0.14); border-color: rgba(255, 255, 255, 0.4); }
+    .rj-glass-cta:hover { background: var(--rj-primary); color: #fff; border-color: var(--rj-primary); }
+    .rj-glass-cta-icon { display: none; width: 18px; height: 18px; }
 
     .rj-glass-mobile-toggle { display: none; background: transparent; border: none; color: #fff; cursor: pointer; padding: 8px; }
     .rj-glass-mobile-toggle svg { width: 24px; height: 24px; }
@@ -293,6 +304,16 @@
         .rj-glass-header.rj-mobile-open .rj-glass-actions { margin-left: auto; }
         .rj-glass-header.rj-mobile-open .rj-icon-menu { display: none; }
         .rj-glass-header.rj-mobile-open .rj-icon-close { display: block; }
+
+        /* MOBİL ÜÇÜN YENİ CTA DÜYMƏSİ */
+        .rj-glass-cta {
+            width: 38px; 
+            height: 38px; 
+            padding: 0; 
+            border-radius: 50%; /* Dairəvi buton */
+        }
+        .rj-glass-cta-text { display: none; } /* Yazını gizlət */
+        .rj-glass-cta-icon { display: block; width: 20px; height: 20px; } /* İkonu göstər */
     }
 </style>
 
