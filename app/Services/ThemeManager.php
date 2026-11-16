@@ -78,7 +78,7 @@ class ThemeManager
         return $count;
     }
 
-     public function activate(Theme $theme): array
+    public function activate(Theme $theme): array
     {
         if ($theme->isActive()) {
             return ['success' => false, 'message' => __('Theme is already active.')];
@@ -124,6 +124,7 @@ class ThemeManager
             return ['success' => false, 'message' => $e->getMessage()];
         }
     }
+    
     public function delete(Theme $theme): array
     {
         if ($theme->isActive()) {
@@ -369,6 +370,7 @@ class ThemeManager
         }
 
         try {
+            // 1. Yeni versiyanı yüklə
             $response = \Illuminate\Support\Facades\Http::timeout(60)->get($downloadUrl);
 
             if (!$response->successful()) {
@@ -378,21 +380,56 @@ class ThemeManager
             $tmpFile = tempnam(sys_get_temp_dir(), 'theme_update_');
             file_put_contents($tmpFile, $response->body());
 
-            $fake = new UploadedFile($tmpFile, 'update.zip', 'application/zip', null, true);
-
-            $result = $this->installFromZip($fake);
-
-            if (!$result['success']) {
-                return $result;
+            // 2. ZIP-i aç
+            $zip = new \ZipArchive();
+            if ($zip->open($tmpFile) !== true) {
+                @unlink($tmpFile);
+                return ['success' => false, 'message' => __('Could not open ZIP archive.')];
             }
 
-            $newTheme = Theme::where('slug', $theme->slug)->first();
+            $extractPath = storage_path('app/theme-temp/' . uniqid('theme_update_'));
+            File::makeDirectory($extractPath, 0755, true);
+            $zip->extractTo($extractPath);
+            $zip->close();
+            @unlink($tmpFile);
 
-            if ($newTheme) {
-                $newTheme->update(['version' => $metadata['latest_version'] ?? $newTheme->version]);
+            // 3. Manifest-i tap
+            $manifestPath = $this->findManifest($extractPath);
+            if (!$manifestPath) {
+                File::deleteDirectory($extractPath);
+                return ['success' => false, 'message' => __('theme.json not found in archive.')];
             }
 
-            return ['success' => true, 'message' => __('Theme updated.')];
+            $manifest = json_decode(File::get($manifestPath), true);
+            if (!is_array($manifest) || empty($manifest['name'])) {
+                File::deleteDirectory($extractPath);
+                return ['success' => false, 'message' => __('Invalid theme.json.')];
+            }
+
+            $sourceDir = dirname($manifestPath);
+            $targetDir = $this->themesPath . '/' . basename($sourceDir);
+
+            // 4. Köhnə faylları sil və yenilərini köçür
+            if (File::isDirectory($targetDir)) {
+                File::deleteDirectory($targetDir);
+            }
+            
+            File::moveDirectory($sourceDir, $targetDir, true);
+            File::deleteDirectory($extractPath);
+
+            // 5. Bazadakı versiyanı və metadata-nı yenilə
+            $newManifest = json_decode(File::get($targetDir . '/theme.json'), true);
+            $theme->update([
+                'version' => $newManifest['version'] ?? $metadata['latest_version'] ?? $theme->version,
+                'metadata' => $newManifest,
+                'name' => $newManifest['name'] ?? $theme->name,
+                'description' => $newManifest['description'] ?? $theme->description,
+            ]);
+
+            $this->clearCache();
+            \Illuminate\Support\Facades\Artisan::call('view:clear');
+
+            return ['success' => true, 'message' => __('Theme updated successfully to v:version', ['version' => $theme->fresh()->version])];
         } catch (\Throwable $e) {
             return ['success' => false, 'message' => $e->getMessage()];
         }
