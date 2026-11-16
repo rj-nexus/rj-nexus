@@ -6,7 +6,8 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
 use App\Models\Option;
-use App\Models\Notification; // Bildiriş modeli
+use App\Models\Notification;
+use App\Models\User;
 
 class CheckUpdates extends Command
 {
@@ -41,7 +42,6 @@ class CheckUpdates extends Command
                 Option::set('last_update_check', now()->toDateTimeString(), 'updates');
                 Option::set('latest_release_data', json_encode($updateData), 'updates');
 
-                // ƏGƏR YENİ VERSİYA VARSA, BİLDİRİŞ YARADIRIQ
                 if ($hasUpdate) {
                     $this->createNotification($latestVersion);
                 }
@@ -75,22 +75,39 @@ class CheckUpdates extends Command
     protected function createNotification($version)
     {
         try {
-            // Eyni versiya üçün əvvəl bildiriş yaradılıbsa, təkrar yaratmırıq
-            $exists = Notification::where('title', 'like', "%{$version}%")->exists();
+            // Yoxlayaq görək bu versiya üçün əvvəl bildiriş yaradılıb?
+            $exists = Notification::where('type', 'system')
+                ->where('title', 'like', "%{$version}%")
+                ->exists();
             
             if (!$exists) {
-                Notification::create([
-                    'title' => __('New System Update Available'),
-                    'message' => __('RJ Nexus v:version is ready. Click to view details.', ['version' => $version]),
-                    'action_url' => route('admin.updates.index'),
-                    'is_read' => false,
-                    'color' => '#ec4899', // Çəhrayı rəng (yeniləmə üçün)
-                ]);
+                // Adminləri tapırıq
+                $admins = User::whereIn('role', ['admin', 'super-admin'])->get();
+                $defaultLocale = app()->getLocale();
+
+                foreach ($admins as $admin) {
+                    // Hər adminin öz dilini təyin edirik (əgər admin modelində locale sütunu varsa)
+                    // Yoxdursa, default dil qalır
+                    $adminLocale = $admin->locale ?? $defaultLocale;
+                    app()->setLocale($adminLocale);
+
+                    Notification::send($admin, [
+                        'type' => 'system',
+                        'title' => __('New System Update Available'),
+                        'message' => __('RJ Nexus v:version is ready. Click to view details.', ['version' => $version]),
+                        'icon' => 'download',
+                        'color' => '#ec4899',
+                        'action_url' => route('admin.updates.index'),
+                        'action_label' => __('View Update'),
+                    ]);
+                }
+
+                // Sonda sistemi öz default dilinə qaytarırıq
+                app()->setLocale($defaultLocale);
                 
                 $this->info('Bildiriş yaradıldı: Yeni versiya v' . $version);
             }
         } catch (\Throwable $e) {
-            // Əgər Notification modelinin sütun adları fərqlidirsə, xəta verməsin
             $this->error('Bildiriş yaradılarkən xəta: ' . $e->getMessage());
         }
     }
