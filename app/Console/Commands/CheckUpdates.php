@@ -1,36 +1,66 @@
 <?php
 
-namespace App\Http\Middleware;
+namespace App\Console\Commands;
 
-use Closure;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
-use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Cache;
+use App\Models\Option;
 
-class CheckForUpdates
+class CheckUpdates extends Command
 {
-    public function handle(Request $request, Closure $next): Response
-    {
-        // Yalnız admin panelində və ya frontend-də işləməsini istəyiriksə, şərt əlavə edə bilərik.
-        // Amma ən sadə halda hər sorğuda yoxlayırıq.
-        
-        // Son yoxlama vaxtını keşdən oxuyuruq (əgər yoxdursa, 0 qəbul edirik)
-        $lastChecked = Cache::get('rj_update_check_time', 0);
-        
-        // Əgər son yoxlamadan 12 saat (43200 saniyə) keçibsə...
-        if (time() - $lastChecked > 43200) { 
-            // Dərhal yoxlama vaxtını yeniləyirik ki, eyni anda bir neçə sorğu gəlsə, 
-            // hamısı GitHub-a sorğu göndərməsin.
-            Cache::put('rj_update_check_time', time(), now()->addDay());
+    protected $signature = 'rj:check-updates';
+    protected $description = 'Avtomatik olaraq Core, Tema və Plagin yeniləmələrini yoxlayır';
 
-            // Arxa planda (səhifəni gözlətmədən) yoxlama əmrini işə salırıq.
-            // Bu, istifadəçinin səhifə yükləmə sürətinə təsir etməyəcək.
-            dispatch(function () {
-                \Illuminate\Support\Facades\Artisan::call('rj:check-updates');
-            })->afterResponse();
+    public function handle()
+    {
+        $this->info('Sistem yeniləmələri yoxlanılır...');
+
+        // 1. Core CMS Yoxlaması
+        try {
+            $response = Http::timeout(10)->get('https://api.github.com/repos/rj-nexus/rj-nexus/releases/latest');
+
+            if ($response->successful()) {
+                $latest = $response->json();
+                $latestVersion = ltrim($latest['tag_name'] ?? '', 'v');
+                $currentVersion = config('app.version', '1.0.0');
+                
+                $updateData = [
+                    'has_update' => version_compare($latestVersion, $currentVersion, '>'),
+                    'version' => $latestVersion,
+                    'name' => $latest['name'] ?? '',
+                    'published_at' => $latest['published_at'] ?? null,
+                    'body' => $latest['body'] ?? '',
+                    'url' => $latest['html_url'] ?? '',
+                ];
+
+                Cache::put('rj_latest_release', $updateData, now()->addDays(1));
+                Option::set('last_update_check', now()->toDateTimeString(), 'updates');
+                Option::set('latest_release_data', json_encode($updateData), 'updates');
+
+                $this->info('Core versiya: ' . $latestVersion);
+            }
+        } catch (\Throwable $e) {
+            $this->error('Core yoxlama xətası: ' . $e->getMessage());
         }
 
-        return $next($request);
+        // 2. Tema və Plagin Yoxlaması
+        try {
+            $themeManager = app(\App\Services\ThemeManager::class);
+            if (method_exists($themeManager, 'checkForUpdates')) {
+                $themeManager->checkForUpdates();
+                $this->info('Temalar yoxlanıldı.');
+            }
+
+            $pluginManager = app(\App\Services\PluginManager::class);
+            if (method_exists($pluginManager, 'checkForUpdates')) {
+                $pluginManager->checkForUpdates();
+                $this->info('Plaginlər yoxlanıldı.');
+            }
+        } catch (\Throwable $e) {
+            $this->error('Tema/Plagin yoxlama xətası: ' . $e->getMessage());
+        }
+
+        $this->info('Bütün yoxlamalar tamamlandı.');
     }
 }
