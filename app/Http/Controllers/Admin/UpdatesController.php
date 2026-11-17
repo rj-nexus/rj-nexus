@@ -7,6 +7,7 @@ use App\Models\Notification;
 use App\Models\Option;
 use App\Services\BackupService;
 use App\Services\GitHubService;
+use App\Support\ZipGuard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
@@ -200,6 +201,13 @@ class UpdatesController extends Controller
             $zip = new \ZipArchive();
             if ($zip->open($zipPath) !== true) {
                 throw new \RuntimeException(__('Cannot open downloaded ZIP file.'));
+            }
+
+            $guard = ZipGuard::inspect($zip, 524288000, 20000);
+
+            if (empty($guard['ok'])) {
+                $zip->close();
+                throw new \RuntimeException($guard['message']);
             }
 
             $rootManifest = $zip->getFromName('public/build/manifest.json');
