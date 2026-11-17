@@ -27,6 +27,7 @@ class ThemeManager
 
         $folders = File::directories($this->themesPath);
         $count = 0;
+        $preserve = ['latest_version', 'download_url', 'is_prerelease', 'origin_domain'];
 
         foreach ($folders as $folder) {
             $manifestPath = $folder . '/theme.json';
@@ -43,16 +44,13 @@ class ThemeManager
 
             $slug = $manifest['slug'] ?? Str::slug($manifest['name']);
 
-            // KÖHNƏ METADATA-NI OXUYURUQ
             $existing = Theme::where('slug', $slug)->first();
             $oldMeta = $existing ? $existing->metadata() : [];
 
-            // YENİLƏMƏ MƏLUMATLARINI QORUYURUQ
-            if (isset($oldMeta['latest_version'])) {
-                $manifest['latest_version'] = $oldMeta['latest_version'];
-            }
-            if (isset($oldMeta['download_url'])) {
-                $manifest['download_url'] = $oldMeta['download_url'];
+            foreach ($preserve as $key) {
+                if (isset($oldMeta[$key])) {
+                    $manifest[$key] = $oldMeta[$key];
+                }
             }
 
             Theme::updateOrCreate(
@@ -75,7 +73,6 @@ class ThemeManager
             $count++;
         }
 
-        // --- ƏLAVƏ: Əgər heç bir tema aktiv deyilsə, rj-default-u avtomatik aktiv et ---
         if (Theme::where('status', 'active')->count() === 0) {
             $defaultTheme = Theme::where('slug', 'rj-default')->first() ?? Theme::first();
             if ($defaultTheme) {
@@ -112,11 +109,9 @@ class ThemeManager
         try {
             $theme->markAsActive();
 
-            // --- YENİ ƏLAVƏ: Aktiv temanı rj_options cədvəlinə də yaz ---
             if (function_exists('rj_update_option')) {
                 rj_update_option('frontend_theme', $theme->slug);
             } else {
-                // Əgər helper funksiya yoxdursa birbaşa DB ilə yaz
                 \DB::table('rj_options')->updateOrInsert(
                     ['option_name' => 'frontend_theme'],
                     ['option_value' => $theme->slug, 'updated_at' => now()]
@@ -125,7 +120,6 @@ class ThemeManager
 
             $this->clearCache();
 
-            // Blade keşini də təmizləyək ki, dərhal tətbiq olunsun
             \Illuminate\Support\Facades\Artisan::call('view:clear');
 
             return ['success' => true, 'message' => __('Theme activated.')];
@@ -135,14 +129,13 @@ class ThemeManager
             return ['success' => false, 'message' => $e->getMessage()];
         }
     }
-    
+
     public function delete(Theme $theme): array
     {
         if ($theme->isActive()) {
             return ['success' => false, 'message' => __('Cannot delete the active theme.')];
         }
 
-        // --- ƏLAVƏ: Standart temanın silinməsinin qarşısını al ---
         if ($theme->slug === 'rj-default') {
             return ['success' => false, 'message' => __('Default system theme cannot be deleted.')];
         }
@@ -165,7 +158,7 @@ class ThemeManager
         }
     }
 
-    public function installFromZip(UploadedFile $file): array
+    public function installFromZip(UploadedFile $file, ?string $originDomain = null): array
     {
         $tempPath = $file->getRealPath();
 
@@ -214,6 +207,15 @@ class ThemeManager
         File::deleteDirectory($extractPath);
 
         $this->discover();
+
+        if ($originDomain !== null && $originDomain !== '') {
+            $installed = Theme::where('slug', $slug)->first();
+            if ($installed) {
+                $meta = $installed->metadata();
+                $meta['origin_domain'] = $originDomain;
+                $installed->update(['metadata' => $meta]);
+            }
+        }
 
         return ['success' => true, 'message' => __('Theme uploaded.')];
     }
@@ -287,11 +289,11 @@ class ThemeManager
     public function checkForUpdates(): array
     {
         $count = 0;
+        $safe = app(SafeHttpService::class);
 
         foreach (Theme::all() as $theme) {
             $metadata = $theme->metadata();
-            
-            // theme.json-dan repo və ya update_url oxuyuruq
+
             $repo = $metadata['repo'] ?? null;
             $updateUrl = $metadata['update_url'] ?? null;
 
@@ -301,7 +303,6 @@ class ThemeManager
 
             try {
                 if ($repo) {
-                    // GitHub API ilə yoxlayırıq
                     $response = \Illuminate\Support\Facades\Http::timeout(10)
                         ->withHeaders(['User-Agent' => 'RJ-Nexus'])
                         ->get("https://api.github.com/repos/{$repo}/releases/latest");
@@ -319,26 +320,49 @@ class ThemeManager
                                 }
                             }
 
-                            // Tapılan yeni versiyanı və linki metadata-ya yazırıq!
-                            $metadata['latest_version'] = $latestVersion;
-                            if ($zipUrl) {
-                                $metadata['download_url'] = $zipUrl;
+                            if (!$zipUrl) {
+                                $zipUrl = $release['zipball_url'] ?? null;
                             }
-                            
-                            $theme->update(['metadata' => $metadata]);
-                            $count++;
+
+                            if ($zipUrl) {
+                                $originDomain = $metadata['origin_domain'] ?? null;
+
+                                if ($originDomain !== null && !$safe->isSameOrigin($originDomain, $zipUrl)) {
+                                    continue;
+                                }
+
+                                $metadata['latest_version'] = $latestVersion;
+                                $metadata['download_url'] = $zipUrl;
+
+                                $theme->update(['metadata' => $metadata]);
+                                $count++;
+                            }
                         }
                     }
                 } elseif ($updateUrl) {
-                    // Əgər kimsə hələ də update_url istifadə edirsə, köhnə məntiq
+                    if (!$safe->validateUrl($updateUrl)['ok']) {
+                        continue;
+                    }
+
                     $response = \Illuminate\Support\Facades\Http::timeout(10)->get($updateUrl);
                     if ($response->successful()) {
                         $remote = $response->json();
                         if (!empty($remote['version']) && version_compare($remote['version'], $theme->version, '>')) {
-                            $metadata['latest_version'] = $remote['version'];
-                            if (!empty($remote['download_url'])) {
-                                $metadata['download_url'] = $remote['download_url'];
+                            $downloadUrl = $remote['download_url'] ?? null;
+
+                            if (!$downloadUrl || !$safe->validateUrl($downloadUrl)['ok']) {
+                                continue;
                             }
+
+                            $originDomain = $metadata['origin_domain'] ?? null;
+
+                            if ($originDomain !== null && !$safe->isSameOrigin($originDomain, $downloadUrl)) {
+                                continue;
+                            }
+
+                            $metadata['latest_version'] = $remote['version'];
+                            $metadata['download_url'] = $downloadUrl;
+
                             $theme->update(['metadata' => $metadata]);
                             $count++;
                         }
@@ -371,30 +395,37 @@ class ThemeManager
     {
         $metadata = $theme->metadata();
         $downloadUrl = $metadata['download_url'] ?? null;
+        $originDomain = $metadata['origin_domain'] ?? null;
 
         if (!$downloadUrl) {
             return ['success' => false, 'message' => __('No update source configured.')];
         }
 
+        $safe = app(SafeHttpService::class);
+
+        if ($originDomain !== null && !$safe->isSameOrigin($originDomain, $downloadUrl)) {
+            return [
+                'success' => false,
+                'message' => __('Update blocked: download domain does not match the original install domain.'),
+            ];
+        }
+
+        $wasActive = $theme->isActive();
+
         try {
-            // Əgər tema aktivdirsə, yeniləmə zamanı müvəqqəti deaktiv edirik
-            $wasActive = $theme->isActive();
             if ($wasActive) {
                 $theme->update(['status' => 'inactive']);
             }
 
-            // 1. Yeni versiyanı yüklə
-            $response = \Illuminate\Support\Facades\Http::timeout(60)->get($downloadUrl);
+            $tmpFile = tempnam(sys_get_temp_dir(), 'theme_update_');
+            $download = $safe->download($downloadUrl, $tmpFile);
 
-            if (!$response->successful()) {
+            if (empty($download['success'])) {
+                @unlink($tmpFile);
                 if ($wasActive) $theme->update(['status' => 'active']);
-                return ['success' => false, 'message' => __('Could not download update.')];
+                return ['success' => false, 'message' => $download['message'] ?? __('Could not download update.')];
             }
 
-            $tmpFile = tempnam(sys_get_temp_dir(), 'theme_update_');
-            file_put_contents($tmpFile, $response->body());
-
-            // 2. ZIP-i aç
             $zip = new \ZipArchive();
             if ($zip->open($tmpFile) !== true) {
                 @unlink($tmpFile);
@@ -408,7 +439,6 @@ class ThemeManager
             $zip->close();
             @unlink($tmpFile);
 
-            // 3. Manifest-i tap
             $manifestPath = $this->findManifest($extractPath);
             if (!$manifestPath) {
                 File::deleteDirectory($extractPath);
@@ -416,8 +446,8 @@ class ThemeManager
                 return ['success' => false, 'message' => __('theme.json not found in archive.')];
             }
 
-            $manifest = json_decode(File::get($manifestPath), true);
-            if (!is_array($manifest) || empty($manifest['name'])) {
+            $newManifest = json_decode(File::get($manifestPath), true);
+            if (!is_array($newManifest) || empty($newManifest['name'])) {
                 File::deleteDirectory($extractPath);
                 if ($wasActive) $theme->update(['status' => 'active']);
                 return ['success' => false, 'message' => __('Invalid theme.json.')];
@@ -426,22 +456,55 @@ class ThemeManager
             $sourceDir = dirname($manifestPath);
             $targetDir = $this->themesPath . '/' . basename($sourceDir);
 
-            // 4. Köhnə faylları sil və yenilərini köçür
+            $backupDir = $targetDir . '.bak.' . time();
+
             if (File::isDirectory($targetDir)) {
-                File::deleteDirectory($targetDir);
+                if (!File::moveDirectory($targetDir, $backupDir, true)) {
+                    File::deleteDirectory($extractPath);
+                    if ($wasActive) $theme->update(['status' => 'active']);
+                    return ['success' => false, 'message' => __('Could not back up existing theme.')];
+                }
             }
-            
-            File::moveDirectory($sourceDir, $targetDir, true);
+
+            try {
+                if (!File::moveDirectory($sourceDir, $targetDir, true)) {
+                    throw new \RuntimeException(__('Could not move new theme files.'));
+                }
+            } catch (\Throwable $moveEx) {
+                if (File::isDirectory($backupDir) && !File::isDirectory($targetDir)) {
+                    @File::moveDirectory($backupDir, $targetDir, true);
+                }
+                File::deleteDirectory($extractPath);
+                if ($wasActive) $theme->update(['status' => 'active']);
+                return ['success' => false, 'message' => $moveEx->getMessage()];
+            }
+
+            if (File::isDirectory($backupDir)) {
+                File::deleteDirectory($backupDir);
+            }
             File::deleteDirectory($extractPath);
 
-            // 5. Bazadakı versiyanı və metadata-nı yenilə
-            $newManifest = json_decode(File::get($targetDir . '/theme.json'), true);
+            $finalManifest = json_decode(File::get($targetDir . '/theme.json'), true) ?: $newManifest;
+
+            $mergedMeta = array_merge($metadata, $finalManifest);
+
+            unset($mergedMeta['latest_version'], $mergedMeta['download_url'], $mergedMeta['is_prerelease']);
+
+            if ($originDomain !== null) {
+                $mergedMeta['origin_domain'] = $originDomain;
+            } else {
+                $adopted = $safe->extractDomain($downloadUrl);
+                if ($adopted) {
+                    $mergedMeta['origin_domain'] = $adopted;
+                }
+            }
+
             $theme->update([
-                'version' => $newManifest['version'] ?? $metadata['latest_version'] ?? $theme->version,
-                'metadata' => $newManifest,
-                'name' => $newManifest['name'] ?? $theme->name,
-                'description' => $newManifest['description'] ?? $theme->description,
-                'status' => $wasActive ? 'active' : 'inactive', // Statusu bərpa edirik
+                'version' => $finalManifest['version'] ?? $metadata['latest_version'] ?? $theme->version,
+                'metadata' => $mergedMeta,
+                'name' => $finalManifest['name'] ?? $theme->name,
+                'description' => $finalManifest['description'] ?? $theme->description,
+                'status' => $wasActive ? 'active' : 'inactive',
             ]);
 
             $this->clearCache();
@@ -482,7 +545,6 @@ class ThemeManager
     {
         try {
             return Cache::remember('rj_active_theme', 3600, function () {
-                // Bazada həm active_theme, həm də frontend_theme axtarılır
                 $slug = rj_get_option('frontend_theme', rj_get_option('active_theme', ''));
 
                 if ($slug) {
@@ -492,13 +554,11 @@ class ThemeManager
                     }
                 }
 
-                // Əgər aktiv tapılmasa, hər hansı aktiv temanı götür
                 $active = Theme::where('status', 'active')->first();
                 if ($active) {
                     return $active;
                 }
 
-                // --- ULTIMATE FALLBACK: rj-default-u məcburi aktiv et ---
                 $default = Theme::where('slug', 'rj-default')->first() ?? Theme::first();
                 if ($default) {
                     $default->markAsActive();
@@ -617,12 +677,10 @@ class ThemeManager
             }
         }
 
-        // --- Fallback 1: resources/views/frontend/... ---
         if (view()->exists('frontend.' . $view)) {
             return view('frontend.' . $view, $data);
         }
 
-        // --- ULTIMATE FALLBACK: Xəta vermək yerinə sadə HTML qaytar ---
         return response(
             '<html><head><title>RJ Nexus</title></head><body style="font-family:sans-serif;padding:2rem;text-align:center;">'
             . '<h1 style="color:#7c3aed;">RJ Nexus işləyir ✓</h1>'
