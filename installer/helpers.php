@@ -42,6 +42,8 @@ function rj_languages(): array
         'uz' => 'Oʻzbekcha',
         'vi' => 'Tiếng Việt',
         'zh' => '中文',
+        'he' => 'עברית',
+        'th' => 'ไทย',
     ];
 }
 
