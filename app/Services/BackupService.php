@@ -298,7 +298,7 @@ class BackupService
         ]);
     }
 
-    protected function setProgress(?int $userId, string $step, string $label, int $percent, string $status): void
+    public function setProgress(?int $userId, string $step, string $label, int $percent, string $status): void
     {
         if ($userId === null) {
             return;
@@ -310,6 +310,11 @@ class BackupService
             'percent' => max(0, min(100, $percent)),
             'status' => $status,
         ], 600);
+    }
+
+    public function deleteStaleProgress(int $userId): void
+    {
+        Cache::forget('rj_backup_progress_' . $userId);
     }
 
     protected function applyRetention(string $type): void
