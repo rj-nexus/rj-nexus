@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class UpdatesController extends Controller
 {
@@ -140,11 +141,15 @@ class UpdatesController extends Controller
             'database/seeders/data',
         ];
 
+        $dbBackupFilename = null;
+        $dbRestored = false;
+
         try {
             $backupResult = $backup->create('local');
             if (empty($backupResult['success'])) {
                 throw new \RuntimeException(__('Backup failed: :msg', ['msg' => $backupResult['message'] ?? '']));
             }
+            $dbBackupFilename = $backupResult['filename'] ?? null;
 
             File::ensureDirectoryExists(dirname($zipPath));
             File::ensureDirectoryExists($extractPath);
@@ -224,10 +229,25 @@ class UpdatesController extends Controller
                 Artisan::call('up');
             } catch (\Throwable $e2) {}
 
+            if ($dbBackupFilename) {
+                try {
+                    $restoreResult = $backup->restore($dbBackupFilename, 'local');
+                    if (!empty($restoreResult['success'])) {
+                        $dbRestored = true;
+                    } else {
+                        Log::error('DB rollback failed: ' . ($restoreResult['message'] ?? ''));
+                    }
+                } catch (\Throwable $e3) {
+                    Log::error('DB rollback exception: ' . $e3->getMessage());
+                }
+            }
+
             if (File::exists($codeBackupPath)) {
                 try {
                     $this->restoreCodeBackup($codeBackupPath);
-                } catch (\Throwable $e3) {}
+                } catch (\Throwable $e4) {
+                    Log::error('Code rollback exception: ' . $e4->getMessage());
+                }
                 File::delete($codeBackupPath);
             }
 
@@ -236,7 +256,11 @@ class UpdatesController extends Controller
 
             $lock->release();
 
-            return back()->with('error', __('Update failed: :msg. Site files restored from pre-update backup. DB backup is in Backups.', ['msg' => $e->getMessage()]));
+            if ($dbRestored) {
+                return back()->with('error', __('Update failed: :msg. Site files and database restored from pre-update backup.', ['msg' => $e->getMessage()]));
+            }
+
+            return back()->with('error', __('Update failed: :msg. Site files restored from backup, but database rollback failed — restore manually from Backups.', ['msg' => $e->getMessage()]));
         }
     }
 
