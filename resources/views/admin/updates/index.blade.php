@@ -9,6 +9,8 @@
     $hasUpdate = !empty($release['has_update']);
     $hasInfo   = !empty($release);
     $currentVersion = config('app.version', '1.0.0');
+    $autoCheck = (string) ($options['auto_check'] ?? '1') === '1';
+    $updateRepo = $options['update_repo'] ?? 'rj-nexus/rj-nexus';
 
     $nxFacts = [
         __('Altair comes from the Arabic "al-nasr al-ta\'ir" — the flying eagle.'),
@@ -175,6 +177,7 @@
     .nx-lbl { display:block; font-size:13px; font-weight:500; color:#e2e8f0; margin-bottom:6px; }
     .nx-help { font-size:12px; color:#94a3b8; margin-top:6px; }
     .nx-check { accent-color:#a78bfa; width:16px; height:16px; margin-top:2px; }
+    .nx-toggle-row { display:flex; align-items:flex-start; gap:12px; padding:14px; border-radius:12px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); }
 
     .nx-steps { position:relative; padding:24px 24px 24px 24px; }
     .nx-steps::before { content:""; position:absolute; left:41px; top:34px; bottom:34px; width:2px; background:rgba(255,255,255,.1); }
@@ -341,6 +344,43 @@
             </div>
         </section>
     @endif
+
+    <section class="nx-card nx-reveal">
+        <div class="nx-card-h">
+            <h2>{{ __('Update Settings') }}</h2>
+            <p>{{ __('Configure update source and automatic checks.') }}</p>
+        </div>
+
+        <form method="POST" action="{{ route('admin.updates.update') }}" class="p-6 space-y-5">
+            @csrf
+            @method('PUT')
+
+            <div>
+                <label class="nx-lbl" for="nxUpdateRepo">{{ __('GitHub Repository') }}</label>
+                <input type="text" id="nxUpdateRepo" name="update_repo" class="nx-input" value="{{ old('update_repo', $updateRepo) }}" placeholder="owner/repo" required>
+                <div class="nx-help">{{ __('Format: :format. Example: :example', ['format' => 'owner/repo', 'example' => 'rj-nexus/rj-nexus']) }}</div>
+                @error('update_repo')
+                    <div class="text-xs text-rose-400 mt-2">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="nx-toggle-row">
+                <input type="hidden" name="auto_check" value="0">
+                <input type="checkbox" id="nxAutoCheck" name="auto_check" value="1" class="nx-check" @checked(old('auto_check', $autoCheck ? '1' : '0') === '1')>
+                <div class="flex-1">
+                    <label for="nxAutoCheck" class="nx-lbl" style="margin-bottom:2px;">{{ __('Automatic Update Checks') }}</label>
+                    <div class="nx-help" style="margin-top:2px;">{{ __('When enabled, the system checks for updates every 15 minutes and notifies admins when a new version is available.') }}</div>
+                </div>
+            </div>
+
+            <div class="flex justify-end">
+                <button type="submit" class="nx-act">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    {{ __('Save Settings') }}
+                </button>
+            </div>
+        </form>
+    </section>
 
     <section class="nx-card nx-reveal">
         <div class="nx-card-h">
