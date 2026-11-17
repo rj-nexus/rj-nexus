@@ -301,8 +301,16 @@ class PluginManager
             }
 
             $slug = $manifest['slug'] ?? Str::slug($manifest['name']);
+            $folderName = basename($folder);
 
             $existing = Plugin::where('slug', $slug)->first();
+
+            if ($existing && $existing->folder !== $folderName) {
+                if (File::isDirectory($this->pluginsPath . '/' . $existing->folder)) {
+                    continue;
+                }
+            }
+
             $oldMeta = $existing ? $existing->metadata() : [];
 
             foreach ($preserve as $key) {
@@ -320,7 +328,7 @@ class PluginManager
                     'author' => $manifest['author'] ?? null,
                     'author_url' => $manifest['author_url'] ?? null,
                     'plugin_url' => $manifest['plugin_url'] ?? null,
-                    'folder' => basename($folder),
+                    'folder' => $folderName,
                     'main_file' => $manifest['main'],
                     'requires' => $manifest['requires'] ?? null,
                     'metadata' => $manifest,
@@ -531,11 +539,27 @@ class PluginManager
                 return ['success' => false, 'message' => __('Could not open ZIP archive.')];
             }
 
+            $guard = \App\Support\ZipGuard::inspect($zip);
+
+            if (empty($guard['ok'])) {
+                $zip->close();
+                @unlink($tmpFile);
+                if ($wasActive) $plugin->update(['status' => 'active']);
+                return ['success' => false, 'message' => $guard['message']];
+            }
+
             $extractPath = storage_path('app/plugin-temp/' . uniqid('plugin_update_'));
-            File::makeDirectory($extractPath, 0755, true);
-            $zip->extractTo($extractPath);
+
+            $extract = \App\Support\ZipGuard::extract($zip, $extractPath);
+
             $zip->close();
             @unlink($tmpFile);
+
+            if (empty($extract['ok'])) {
+                File::deleteDirectory($extractPath);
+                if ($wasActive) $plugin->update(['status' => 'active']);
+                return ['success' => false, 'message' => $extract['message']];
+            }
 
             $manifestPath = $this->findManifest($extractPath);
 
