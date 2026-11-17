@@ -170,6 +170,7 @@
     .nx-n-changed  { --c:#60a5fa; }
     .nx-n-fixed    { --c:#fbbf24; }
     .nx-n-security { --c:#f472b6; }
+    .nx-n-other    { --c:#94a3b8; }
     .nx-n-removed  { --c:#f87171; }
     .nx-nlist { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:7px; }
     .nx-nlist li { position:relative; padding-left:16px; }
