@@ -68,10 +68,18 @@ class BackupSettingsController extends BaseSettingsController
         ]);
 
         @set_time_limit(0);
+        @ignore_user_abort(true);
 
         $userId = (int) auth()->id();
         $storageMode = rj_get_option('backup_storage_mode', 'local');
         $targetDir = $storageMode === 'download' ? 'download' : 'local';
+
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
+
+        $this->backup->deleteStaleProgress($userId);
+        $this->backup->setProgress($userId, 'init', __('Starting backup...'), 1, 'running');
 
         $result = match ($validated['type']) {
             'database' => $this->backup->createDatabaseBackup($targetDir, $userId),
@@ -143,6 +151,7 @@ class BackupSettingsController extends BaseSettingsController
         ]);
 
         @set_time_limit(0);
+        @ignore_user_abort(true);
 
         $userId = (int) auth()->id();
         $filename = basename($file);
@@ -162,6 +171,13 @@ class BackupSettingsController extends BaseSettingsController
             }
             return back()->with('error', __('Backup file not found.'));
         }
+
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
+
+        $this->backup->deleteStaleProgress($userId);
+        $this->backup->setProgress($userId, 'init', __('Starting restore...'), 1, 'running');
 
         $result = $this->backup->restore($filename, $type, $userId);
 
