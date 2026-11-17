@@ -97,6 +97,8 @@ class UpdatesController extends Controller
             Option::set($name, $value, 'updates');
         }
 
+        Cache::forget('github_releases_' . str_replace('/', '_', $this->repo));
+
         return back()->with('success', __('Update settings saved.'));
     }
 
@@ -173,6 +175,16 @@ class UpdatesController extends Controller
             $entries = array_values(array_filter(File::directories($extractPath)));
             $root = count($entries) === 1 ? $entries[0] : $extractPath;
 
+            $manifestPath = $root . '/public/build/manifest.json';
+            if (!File::exists($manifestPath)) {
+                throw new \RuntimeException(__('Update aborted: the release package is missing public/build/manifest.json. The developer must include built assets in the release.'));
+            }
+
+            $manifestData = json_decode(File::get($manifestPath), true);
+            if (!is_array($manifestData) || empty($manifestData)) {
+                throw new \RuntimeException(__('Update aborted: public/build/manifest.json is invalid.'));
+            }
+
             Artisan::call('down', ['--render' => 'errors::503']);
 
             $this->createCodeBackup($codeBackupPath, $protected);
@@ -184,6 +196,8 @@ class UpdatesController extends Controller
 
             Artisan::call('migrate', ['--force' => true]);
             Artisan::call('optimize:clear');
+            Cache::forget('github_releases_' . str_replace('/', '_', $this->repo));
+            Cache::forget('rj_options');
 
             rj_set_option('rj_version', ltrim((string) $release['version'], 'v'));
             Option::set('last_release', json_encode(array_merge($release, ['has_update' => false])), 'updates');
