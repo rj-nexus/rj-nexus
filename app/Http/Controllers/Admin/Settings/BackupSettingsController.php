@@ -2,16 +2,19 @@
 
 namespace App\Http\Controllers\Admin\Settings;
 
-use Illuminate\Http\Request;
 use App\Models\Option;
-use Illuminate\Support\Facades\Process;
+use App\Services\BackupService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 
 class BackupSettingsController extends BaseSettingsController
 {
     protected string $backupPath;
+    protected BackupService $backup;
 
-    public function __construct()
+    public function __construct(BackupService $backup)
     {
+        $this->backup = $backup;
         $this->backupPath = storage_path('app/backups');
 
         if (!is_dir($this->backupPath)) {
@@ -53,243 +56,146 @@ class BackupSettingsController extends BaseSettingsController
             Option::set($name, $value, 'backup');
         }
 
+        rj_flush_options();
+
         return back()->with('success', __('Backup settings saved.'));
     }
 
     public function create(Request $request)
     {
-        $data = $request->validate([
+        $validated = $request->validate([
             'type' => ['required', 'in:site,database,full'],
         ]);
 
-        try {
-            $result = match ($data['type']) {
-                'database' => $this->makeDatabaseBackup(),
-                'site' => $this->makeFilesBackup(),
-                'full' => $this->makeFullBackup(),
-            };
+        @set_time_limit(0);
 
-            if (!$result['success']) {
-                return back()->with('error', $result['error']);
-            }
+        $userId = (int) auth()->id();
+        $storageMode = rj_get_option('backup_storage_mode', 'local');
+        $targetDir = $storageMode === 'download' ? 'download' : 'local';
 
-            $storageMode = rj_get_option('backup_storage_mode', 'local');
+        $result = match ($validated['type']) {
+            'database' => $this->backup->createDatabaseBackup($targetDir, $userId),
+            'site' => $this->backup->createFilesBackup($targetDir, $userId),
+            'full' => $this->backup->createFullBackup($targetDir, $userId),
+        };
 
-            if ($storageMode === 'download') {
-                return response()->download($result['path'], $result['file'])->deleteFileAfterSend(true);
-            }
-
-            return back()->with('success', __('Backup created: :file', ['file' => $result['file']]));
-        } catch (\Throwable $e) {
-            return back()->with('error', __('Backup failed: :message', ['message' => $e->getMessage()]));
+        if ($request->expectsJson()) {
+            return response()->json($result, $result['success'] ? 200 : 422);
         }
+
+        if (!$result['success']) {
+            return back()->with('error', $result['message']);
+        }
+
+        if ($storageMode === 'download' && File::exists($result['path'] ?? '')) {
+            return response()->download($result['path'], $result['filename'])->deleteFileAfterSend(true);
+        }
+
+        return back()->with('success', __('Backup created: :file', ['file' => $result['filename']]));
+    }
+
+    public function progress()
+    {
+        $userId = (int) auth()->id();
+        return response()->json($this->backup->progress($userId));
     }
 
     public function download(string $file)
     {
         $file = basename($file);
-        $path = $this->backupPath . DIRECTORY_SEPARATOR . $file;
 
-        if (!file_exists($path)) {
-            return back()->with('error', __('Backup file not found.'));
+        foreach (['local', 'download'] as $type) {
+            $path = $this->backupPath . '/' . $type . '/' . $file;
+
+            if (File::exists($path)) {
+                return response()->download($path);
+            }
         }
 
-        return response()->download($path);
+        return back()->with('error', __('Backup file not found.'));
     }
 
     public function delete(string $file)
     {
         $file = basename($file);
-        $path = $this->backupPath . DIRECTORY_SEPARATOR . $file;
+        $deleted = false;
 
-        if (!file_exists($path)) {
-            return back()->with('error', __('Backup file not found.'));
+        foreach (['local', 'download'] as $type) {
+            $path = $this->backupPath . '/' . $type . '/' . $file;
+
+            if (File::exists($path)) {
+                @unlink($path);
+                $deleted = true;
+            }
         }
 
-        @unlink($path);
+        if (!$deleted) {
+            return back()->with('error', __('Backup file not found.'));
+        }
 
         return back()->with('success', __('Backup deleted.'));
     }
 
-    protected function makeDatabaseBackup(): array
+    public function restore(Request $request, string $file)
     {
-        $filename = 'db-' . date('Y-m-d-His') . '.sql';
-        $path = $this->backupPath . DIRECTORY_SEPARATOR . $filename;
+        $validated = $request->validate([
+            'type' => ['nullable', 'in:local,download'],
+        ]);
 
-        $result = $this->dumpDatabase($path);
+        @set_time_limit(0);
 
-        if (!$result['success']) {
-            return $result;
-        }
+        $userId = (int) auth()->id();
+        $filename = basename($file);
+        $type = $validated['type'] ?? 'local';
 
-        return ['success' => true, 'file' => $filename, 'path' => $path];
-    }
-
-    protected function makeFilesBackup(): array
-    {
-        if (!class_exists('ZipArchive')) {
-            return ['success' => false, 'error' => 'ZipArchive PHP extension is not enabled.'];
-        }
-
-        $filename = 'site-' . date('Y-m-d-His') . '.zip';
-        $path = $this->backupPath . DIRECTORY_SEPARATOR . $filename;
-
-        $zip = new \ZipArchive();
-
-        if ($zip->open($path, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
-            return ['success' => false, 'error' => 'Cannot create zip archive.'];
-        }
-
-        $sources = [
-            storage_path('app/public') => 'storage',
-            public_path('uploads') => 'uploads',
-        ];
-
-        foreach ($sources as $dir => $prefix) {
-            if (is_dir($dir)) {
-                $this->addDirectoryToZip($zip, $dir, $prefix);
+        $path = $this->backupPath . '/' . $type . '/' . $filename;
+        if (!File::exists($path)) {
+            $path = $this->backupPath . '/download/' . $filename;
+            if (!File::exists($path)) {
+                $path = $this->backupPath . '/local/' . $filename;
             }
         }
 
-        $zip->close();
-
-        return ['success' => true, 'file' => $filename, 'path' => $path];
-    }
-
-    protected function makeFullBackup(): array
-    {
-        if (!class_exists('ZipArchive')) {
-            return ['success' => false, 'error' => 'ZipArchive PHP extension is not enabled.'];
-        }
-
-        $dbFile = 'db-temp-' . date('Y-m-d-His') . '.sql';
-        $dbPath = $this->backupPath . DIRECTORY_SEPARATOR . $dbFile;
-
-        $dbResult = $this->dumpDatabase($dbPath);
-
-        if (!$dbResult['success']) {
-            return $dbResult;
-        }
-
-        $filename = 'full-' . date('Y-m-d-His') . '.zip';
-        $path = $this->backupPath . DIRECTORY_SEPARATOR . $filename;
-
-        $zip = new \ZipArchive();
-
-        if ($zip->open($path, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
-            @unlink($dbPath);
-
-            return ['success' => false, 'error' => 'Cannot create zip archive.'];
-        }
-
-        $zip->addFile($dbPath, 'database.sql');
-
-        $sources = [
-            storage_path('app/public') => 'storage',
-            public_path('uploads') => 'uploads',
-        ];
-
-        foreach ($sources as $dir => $prefix) {
-            if (is_dir($dir)) {
-                $this->addDirectoryToZip($zip, $dir, $prefix);
+        if (!File::exists($path)) {
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => __('Backup file not found.')], 404);
             }
+            return back()->with('error', __('Backup file not found.'));
         }
 
-        $zip->close();
-        @unlink($dbPath);
+        $result = $this->backup->restore($filename, $type, $userId);
 
-        return ['success' => true, 'file' => $filename, 'path' => $path];
-    }
-
-    protected function dumpDatabase(string $path): array
-    {
-        $db = config('database.connections.mysql');
-
-        $command = [
-            'mysqldump',
-            '--host=' . $db['host'],
-            '--port=' . ($db['port'] ?? '3306'),
-            '--user=' . $db['username'],
-            '--password=' . $db['password'],
-            $db['database']
-        ];
-
-        try {
-            $fileHandle = fopen($path, 'w');
-            
-            if (!$fileHandle) {
-                return ['success' => false, 'error' => 'Cannot open file for writing.'];
-            }
-
-            $result = Process::timeout(600)
-                ->run($command, function ($type, $buffer) use ($fileHandle) {
-                    if (Process::OUT === $type) {
-                        fwrite($fileHandle, $buffer);
-                    }
-                });
-
-            fclose($fileHandle);
-
-            if ($result->failed() || !file_exists($path) || filesize($path) === 0) {
-                if (file_exists($path)) {
-                    @unlink($path);
-                }
-
-                return ['success' => false, 'error' => 'mysqldump failed. Check if mysqldump is available in PATH or DB credentials are correct.'];
-            }
-
-            return ['success' => true];
-        } catch (\Throwable $e) {
-            if (isset($fileHandle) && is_resource($fileHandle)) {
-                fclose($fileHandle);
-            }
-            
-            return ['success' => false, 'error' => 'mysqldump execution error: ' . $e->getMessage()];
+        if ($request->expectsJson()) {
+            return response()->json($result, $result['success'] ? 200 : 422);
         }
-    }
 
-    protected function addDirectoryToZip(\ZipArchive $zip, string $dir, string $prefix): void
-    {
-        $iterator = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS),
-            \RecursiveIteratorIterator::SELF_FIRST
-        );
-
-        $baseLen = strlen($dir) + 1;
-
-        foreach ($iterator as $file) {
-            $relative = substr($file->getPathname(), $baseLen);
-            $localPath = $prefix . '/' . str_replace('\\', '/', $relative);
-
-            if ($file->isDir()) {
-                $zip->addEmptyDir($localPath);
-            } else {
-                $zip->addFile($file->getPathname(), $localPath);
-            }
-        }
+        return back()->with($result['success'] ? 'success' : 'error', $result['message']);
     }
 
     protected function listBackups(): array
     {
-        $files = glob($this->backupPath . DIRECTORY_SEPARATOR . '*');
-
-        if (!$files) {
-            return [];
-        }
-
         $result = [];
 
-        foreach ($files as $path) {
-            if (!is_file($path)) {
+        foreach (['local', 'download'] as $type) {
+            $dir = $this->backupPath . '/' . $type;
+
+            if (!File::isDirectory($dir)) {
                 continue;
             }
 
-            $result[] = [
-                'name' => basename($path),
-                'size' => $this->humanSize(filesize($path)),
-                'created_at' => date('Y-m-d H:i:s', filemtime($path)),
-                'age' => $this->humanAge(filemtime($path)),
-            ];
+            foreach (File::files($dir) as $file) {
+                $ext = strtolower($file->getExtension());
+                if (!in_array($ext, ['zip', 'sql'], true)) continue;
+
+                $result[] = [
+                    'name' => $file->getFilename(),
+                    'size' => $this->humanSize($file->getSize()),
+                    'created_at' => date('Y-m-d H:i:s', $file->getMTime()),
+                    'age' => $this->humanAge($file->getMTime()),
+                    'storage' => $type,
+                    'extension' => $ext,
+                ];
+            }
         }
 
         usort($result, fn($a, $b) => strcmp($b['created_at'], $a['created_at']));
@@ -299,13 +205,15 @@ class BackupSettingsController extends BaseSettingsController
 
     protected function stats(): array
     {
-        $files = glob($this->backupPath . DIRECTORY_SEPARATOR . '*') ?: [];
         $totalSize = 0;
         $count = 0;
 
-        foreach ($files as $f) {
-            if (is_file($f)) {
-                $totalSize += filesize($f);
+        foreach (['local', 'download'] as $type) {
+            $dir = $this->backupPath . '/' . $type;
+            if (!File::isDirectory($dir)) continue;
+
+            foreach (File::files($dir) as $file) {
+                $totalSize += $file->getSize();
                 $count++;
             }
         }
