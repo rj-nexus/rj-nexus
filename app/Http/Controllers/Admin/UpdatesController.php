@@ -64,9 +64,7 @@ class UpdatesController extends Controller
             $latest = ltrim($release['tag_name'], 'v');
             $hasUpdate = version_compare($latest, $this->currentVersion, '>');
 
-            $downloadUrl = $release['assets'][0]['browser_download_url']
-                ?? $release['zipball_url']
-                ?? null;
+            $downloadUrl = $this->pickDownloadUrl($release);
 
             Option::set('last_checked', now()->toDateTimeString(), 'updates');
             Option::set('last_release', json_encode([
@@ -148,7 +146,22 @@ class UpdatesController extends Controller
             File::ensureDirectoryExists(dirname($zipPath));
             File::ensureDirectoryExists($extractPath);
 
-            Http::timeout(600)->sink($zipPath)->get($release['download_url'])->throw();
+            $response = Http::withHeaders([
+                'User-Agent' => 'RJ-Nexus-Updater/1.0',
+                'Accept' => 'application/octet-stream, application/zip, */*',
+            ])
+                ->timeout(600)
+                ->withOptions(['allow_redirects' => ['max' => 10, 'strict' => false, 'referer' => false, 'protocols' => ['http', 'https']]])
+                ->sink($zipPath)
+                ->get($release['download_url']);
+
+            if (!$response->successful()) {
+                throw new \RuntimeException(__('Download failed with HTTP :code', ['code' => $response->status()]));
+            }
+
+            if (!File::exists($zipPath) || File::size($zipPath) < 1024) {
+                throw new \RuntimeException(__('Downloaded file is empty or too small.'));
+            }
 
             $zip = new \ZipArchive();
             if ($zip->open($zipPath) !== true) {
@@ -208,6 +221,27 @@ class UpdatesController extends Controller
 
             return back()->with('error', __('Update failed: :msg. Site files restored from pre-update backup. DB backup is in Backups.', ['msg' => $e->getMessage()]));
         }
+    }
+
+    protected function pickDownloadUrl(array $release): ?string
+    {
+        $assets = $release['assets'] ?? [];
+
+        if (is_array($assets)) {
+            foreach ($assets as $asset) {
+                if (!is_array($asset)) continue;
+                $name = (string) ($asset['name'] ?? '');
+                $url = (string) ($asset['browser_download_url'] ?? '');
+
+                if ($url === '') continue;
+
+                if (str_ends_with(strtolower($name), '.zip')) {
+                    return $url;
+                }
+            }
+        }
+
+        return $release['zipball_url'] ?? null;
     }
 
     protected function createCodeBackup(string $zipPath, array $protected): void
@@ -302,6 +336,10 @@ class UpdatesController extends Controller
 
         foreach ($releases as $release) {
             if (!is_array($release) || !empty($release['draft']) || empty($release['tag_name'])) {
+                continue;
+            }
+
+            if (!empty($release['prerelease'])) {
                 continue;
             }
 
