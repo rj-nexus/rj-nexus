@@ -163,6 +163,21 @@
     .nx-notes { max-height:260px; overflow:auto; font-size:13px; line-height:1.65; color:#cbd5e1; padding-right:6px; }
     .nx-notes::-webkit-scrollbar { width:6px; } .nx-notes::-webkit-scrollbar-thumb { background:rgba(255,255,255,.18); border-radius:6px; }
 
+    .nx-ngroup + .nx-ngroup { margin-top:18px; }
+    .nx-ntitle { display:flex; align-items:center; gap:8px; margin-bottom:8px; font-size:11px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:#e2e8f0; }
+    .nx-ndot { width:8px; height:8px; border-radius:9999px; background:var(--c,#94a3b8); box-shadow:0 0 10px var(--c,#94a3b8); }
+    .nx-n-added    { --c:#4ade80; }
+    .nx-n-changed  { --c:#60a5fa; }
+    .nx-n-fixed    { --c:#fbbf24; }
+    .nx-n-security { --c:#f472b6; }
+    .nx-n-removed  { --c:#f87171; }
+    .nx-nlist { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:7px; }
+    .nx-nlist li { position:relative; padding-left:16px; }
+    .nx-nlist li::before { content:""; position:absolute; left:2px; top:.72em; width:5px; height:5px; border-radius:9999px; background:var(--c,#94a3b8); opacity:.85; }
+    .nx-nlist strong { color:#fff; font-weight:600; }
+    .nx-nlist em { color:#e0e7ff; }
+    .nx-nlist code { padding:1px 6px; border-radius:5px; background:rgba(255,255,255,.08); color:#c4b5fd; font-size:12px; font-family:ui-monospace,monospace; }
+
     .nx-act { display:inline-flex; align-items:center; gap:8px; padding:10px 20px; border-radius:10px; font-size:13px; font-weight:600; color:#fff; border:0; cursor:pointer;
         background:linear-gradient(90deg,#a78bfa,#f472b6); transition:transform .2s, box-shadow .2s, filter .2s; box-shadow:0 8px 24px -8px rgba(244,114,182,.7); }
     .nx-act:hover { transform:translateY(-2px); filter:brightness(1.1); }
@@ -378,9 +393,26 @@
             </div>
 
             @if (!empty($release['body']))
+                @php $nxNotes = \App\Support\ReleaseNotes::parse($release['body']); @endphp
                 <div class="px-6 pb-6">
                     <div class="text-xs uppercase tracking-wider text-slate-500 font-medium mb-3">{{ __('Release Notes') }}</div>
-                    <div class="nx-notes">{!! nl2br(e($release['body'])) !!}</div>
+                    <div class="nx-notes">
+                        @forelse ($nxNotes as $group)
+                            <div class="nx-ngroup nx-n-{{ $group['type'] }}">
+                                <div class="nx-ntitle"><span class="nx-ndot"></span>{{ $group['title'] }}</div>
+                                <ul class="nx-nlist">
+                                    @foreach ($group['items'] as $item)
+                                        <li>
+                                            @if ($item['title'] !== '')<strong>{!! $item['title'] !!}</strong>@endif
+                                            {!! $item['text'] !!}
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @empty
+                            {!! nl2br(e($release['body'])) !!}
+                        @endforelse
+                    </div>
                 </div>
             @endif
 
@@ -893,13 +925,7 @@
             credentials: 'same-origin'
         })
             .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, data: j }; }); })
-            .then(function (res) {
-                if (res.ok && res.data && res.data.success) {
-                    poll();
-                } else {
-                    poll();
-                }
-            })
+            .then(function () { poll(); })
             .catch(function () { poll(); });
     });
 
