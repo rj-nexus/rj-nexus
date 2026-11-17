@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Notification;
 use App\Models\Option;
 use App\Services\BackupService;
 use App\Services\GitHubService;
@@ -201,6 +202,8 @@ class UpdatesController extends Controller
 
             rj_set_option('rj_version', ltrim((string) $release['version'], 'v'));
             Option::set('last_release', json_encode(array_merge($release, ['has_update' => false])), 'updates');
+
+            Notification::where('action_url', route('admin.updates.index'))->delete();
 
             Artisan::call('up');
 
