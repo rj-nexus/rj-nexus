@@ -510,6 +510,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::post('/updates/check', [UpdatesController::class, 'check'])->name('updates.check');
         Route::put('/updates', [UpdatesController::class, 'update'])->name('updates.update');
         Route::post('/updates/run', [UpdatesController::class, 'run'])->name('updates.run');
+        Route::get('/updates/progress', [UpdatesController::class, 'progress'])->name('updates.progress');
     });
 
     Route::prefix('settings')->name('settings.')->middleware('throttle:60,1')->group(function () {
