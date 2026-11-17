@@ -234,26 +234,124 @@ function rj_env_write(array $values): void
 
 function rj_artisan(array $args): array
 {
-    if (!function_exists('exec')) {
-        return ['code' => -1, 'out' => 'exec() disabled on server'];
+    $command = $args[0];
+
+    // 1. Native implementations for simple commands
+    if ($command === 'config:clear') {
+        $file = RJ_ROOT . '/bootstrap/cache/config.php';
+        if (file_exists($file)) @unlink($file);
+        return ['code' => 0, 'out' => 'Configuration cache cleared successfully.'];
     }
 
-    $outFile = tempnam(sys_get_temp_dir(), 'rj_art_');
+    if ($command === 'cache:clear') {
+        $dir = RJ_ROOT . '/storage/framework/cache/data';
+        if (is_dir($dir)) {
+            $files = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS),
+                RecursiveIteratorIterator::CHILD_FIRST
+            );
+            foreach ($files as $fileinfo) {
+                $todo = ($fileinfo->isDir() ? 'rmdir' : 'unlink');
+                @$todo($fileinfo->getRealPath());
+            }
+        }
+        return ['code' => 0, 'out' => 'Application cache cleared successfully.'];
+    }
 
-    $cmd = escapeshellarg(PHP_BINARY)
-        . ' '
-        . escapeshellarg(RJ_ROOT . '/artisan')
-        . ' '
-        . implode(' ', array_map('escapeshellarg', $args))
-        . ' > ' . escapeshellarg($outFile) . ' 2>&1';
+    if ($command === 'optimize:clear') {
+        rj_artisan(['config:clear']);
+        rj_artisan(['cache:clear']);
+        $views = RJ_ROOT . '/storage/framework/views';
+        if (is_dir($views)) {
+            foreach (glob($views . '/*.php') as $file) {
+                @unlink($file);
+            }
+        }
+        return ['code' => 0, 'out' => 'All caches cleared.'];
+    }
 
-    $code = 0;
-    @exec($cmd, $dummy, $code);
+    if ($command === 'storage:link') {
+        $link = RJ_ROOT . '/public/storage';
+        $target = RJ_ROOT . '/storage/app/public';
+        
+        if (!is_dir($target)) {
+            @mkdir($target, 0755, true);
+        }
+        
+        if (!file_exists($link)) {
+            if (function_exists('symlink')) {
+                @symlink($target, $link);
+            } else {
+                return ['code' => -1, 'out' => 'symlink() is disabled. Please create a symbolic link manually from /public/storage to /storage/app/public.'];
+            }
+        }
+        return ['code' => 0, 'out' => 'The [public/storage] directory has been linked.'];
+    }
 
-    $output = file_exists($outFile) ? file_get_contents($outFile) : '';
-    @unlink($outFile);
+    // 2. Use exec() if available for all other commands
+    if (function_exists('exec')) {
+        $outFile = tempnam(sys_get_temp_dir(), 'rj_art_');
+        $cmd = escapeshellarg(PHP_BINARY)
+            . ' '
+            . escapeshellarg(RJ_ROOT . '/artisan')
+            . ' '
+            . implode(' ', array_map('escapeshellarg', $args))
+            . ' > ' . escapeshellarg($outFile) . ' 2>&1';
 
-    return ['code' => $code, 'out' => $output];
+        $code = 0;
+        @exec($cmd, $dummy, $code);
+
+        $output = file_exists($outFile) ? file_get_contents($outFile) : '';
+        @unlink($outFile);
+
+        return ['code' => $code, 'out' => $output];
+    }
+
+    // 3. Native fallback for migrate, db:seed
+    if (!file_exists(RJ_ROOT . '/vendor/autoload.php')) {
+        return ['code' => -1, 'out' => 'vendor/autoload.php missing'];
+    }
+
+    try {
+        if (!class_exists('\Illuminate\Contracts\Console\Kernel')) {
+            require_once RJ_ROOT . '/vendor/autoload.php';
+        }
+
+        if (!isset($GLOBALS['rj_laravel_app'])) {
+            $GLOBALS['rj_laravel_app'] = require RJ_ROOT . '/bootstrap/app.php';
+        }
+        $app = $GLOBALS['rj_laravel_app'];
+
+        $kernel = $app->make(\Illuminate\Contracts\Console\Kernel::class);
+        $kernel->bootstrap();
+
+        $parameters = ['command' => $command];
+        for ($i = 1; $i < count($args); $i++) {
+            $arg = $args[$i];
+            if (str_starts_with($arg, '--')) {
+                $opt = substr($arg, 2);
+                if (str_contains($opt, '=')) {
+                    [$k, $v] = explode('=', $opt, 2);
+                    $parameters[$k] = $v;
+                } else {
+                    $parameters[$opt] = true;
+                }
+            }
+        }
+
+        $input = new \Symfony\Component\Console\Input\ArrayInput($parameters);
+        $output = new \Symfony\Component\Console\Output\BufferedOutput();
+
+        try {
+            $code = $kernel->handle($input, $output);
+        } catch (\Throwable $e) {
+            return ['code' => 1, 'out' => $e->getMessage()];
+        }
+
+        return ['code' => $code, 'out' => $output->fetch()];
+    } catch (\Throwable $e) {
+        return ['code' => -1, 'out' => 'Native Artisan failed: ' . $e->getMessage()];
+    }
 }
 
 function rj_install_run(?string $sqlContent = null): array
