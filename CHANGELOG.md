@@ -21,8 +21,7 @@ All notable changes to RJ Nexus will be documented in this file.
 - **Theme Update Badge:** Fixed the missing "update available" badge on themes in the Themes section. The badge and update action now display correctly when a new version is available.
 - **Plugin Update Badge:** Fixed the same missing "update available" badge issue on plugins. The badge and update action now display correctly when a new version is available.
 
-## [v1.9.4] - 2026-11-17
-
+## [v1.9.4] - 2026-11-16
 ### 🐛 Fixed
 - **Sidebar Post Type Detection:** Sidebar no longer incorrectly shows/highlights "Pages" when creating, editing, or viewing a Post. Active state is now correctly detected via route param, query string, and route name, with layout-type flag overrides for posts/pages.
 - **Automatic Update Check:** Theme and plugin updates from the registry are now checked automatically every 15 minutes via pseudo-cron, guarded by an atomic cache lock to prevent duplicate requests.
