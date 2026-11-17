@@ -118,23 +118,27 @@ class UpdatesController extends Controller
         return response()->json($data);
     }
 
-    public function run(BackupService $backup)
+    public function run(BackupService $backup, Request $request)
     {
         $userId = (int) auth()->id();
+        $wantsJson = $request->expectsJson() || $request->ajax();
 
         $release = $this->getCachedRelease();
 
         if (empty($release) || empty($release['has_update'])) {
-            return back()->with('error', __('No update available to install.'));
+            $msg = __('No update available to install.');
+            return $wantsJson ? response()->json(['success' => false, 'message' => $msg], 422) : back()->with('error', $msg);
         }
 
         if (empty($release['download_url'])) {
-            return back()->with('error', __('Download URL missing. Please run "Check for Updates" again.'));
+            $msg = __('Download URL missing. Please run "Check for Updates" again.');
+            return $wantsJson ? response()->json(['success' => false, 'message' => $msg], 422) : back()->with('error', $msg);
         }
 
         $lock = Cache::lock('rj_update_in_progress', 900);
         if (!$lock->get()) {
-            return back()->with('error', __('An update is already in progress. Please wait.'));
+            $msg = __('An update is already in progress. Please wait.');
+            return $wantsJson ? response()->json(['success' => false, 'message' => $msg], 423) : back()->with('error', $msg);
         }
 
         @set_time_limit(900);
@@ -260,7 +264,7 @@ class UpdatesController extends Controller
 
             $this->setProgress($userId, 'done', $message, 100, 'success');
 
-            return back()->with('success', $message);
+            return $wantsJson ? response()->json(['success' => true, 'message' => $message]) : back()->with('success', $message);
         } catch (\Throwable $e) {
             $this->setProgress($userId, 'error', __('Rolling back...'), 96, 'running');
 
@@ -301,7 +305,7 @@ class UpdatesController extends Controller
 
             $this->setProgress($userId, 'error', $errorMsg, 100, 'error');
 
-            return back()->with('error', $errorMsg);
+            return $wantsJson ? response()->json(['success' => false, 'message' => $errorMsg], 500) : back()->with('error', $errorMsg);
         }
     }
 
