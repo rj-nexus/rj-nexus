@@ -235,13 +235,12 @@ class BackupService
             return ['success' => false, 'message' => __('Backup not found.')];
         }
 
-        $this->setProgress($userId, 'init', __('Preparing restore...'), 5, 'running');
+        $this->setProgress($userId, 'init', __('Preparing restore...'), 2, 'running');
         $tempDir = null;
 
         try {
             if (str_ends_with(strtolower($filename), '.sql')) {
-                $this->setProgress($userId, 'database', __('Restoring database...'), 50, 'running');
-                $this->restoreDatabase($path);
+                $this->restoreDatabase($path, $userId, 5, 100);
                 $this->setProgress($userId, 'done', __('Database restored successfully.'), 100, 'success');
                 return ['success' => true, 'message' => __('Database restored successfully.')];
             }
@@ -249,7 +248,7 @@ class BackupService
             $tempDir = storage_path('app/temp-restore-' . time() . '-' . Str::random(4));
             File::ensureDirectoryExists($tempDir);
 
-            $this->setProgress($userId, 'extract', __('Extracting archive...'), 20, 'running');
+            $this->setProgress($userId, 'extract', __('Extracting archive...'), 5, 'running');
 
             $zip = new \ZipArchive();
             if ($zip->open($path) !== true) {
@@ -259,18 +258,18 @@ class BackupService
             $zip->close();
 
             $sqlFile = $tempDir . '/database.sql';
+            $uploadsDir = $tempDir . '/uploads';
+            $storageDir = $tempDir . '/storage/app/public';
+
             if (File::exists($sqlFile)) {
-                $this->setProgress($userId, 'database', __('Restoring database...'), 50, 'running');
-                $this->restoreDatabase($sqlFile);
+                $this->restoreDatabase($sqlFile, $userId, 10, 70);
             }
 
-            $uploadsDir = $tempDir . '/uploads';
             if (File::isDirectory($uploadsDir)) {
                 $this->setProgress($userId, 'uploads', __('Restoring uploads...'), 75, 'running');
                 File::copyDirectory($uploadsDir, public_path('uploads'));
             }
 
-            $storageDir = $tempDir . '/storage/app/public';
             if (File::isDirectory($storageDir)) {
                 $this->setProgress($userId, 'storage', __('Restoring storage...'), 90, 'running');
                 File::copyDirectory($storageDir, storage_path('app/public'));
@@ -308,7 +307,7 @@ class BackupService
         Cache::put('rj_backup_progress_' . $userId, [
             'step' => $step,
             'label' => $label,
-            'percent' => $percent,
+            'percent' => max(0, min(100, $percent)),
             'status' => $status,
         ], 600);
     }
@@ -414,15 +413,149 @@ class BackupService
         }
     }
 
-    protected function restoreDatabase(string $sqlFile): void
+    protected function restoreDatabase(string $sqlFile, ?int $userId = null, int $startPct = 0, int $endPct = 100): void
     {
-        $sql = File::get($sqlFile);
+        if (!File::exists($sqlFile)) {
+            throw new \RuntimeException(__('SQL file not found.'));
+        }
 
-        if (trim($sql) === '') {
+        $fileSize = (int) File::size($sqlFile);
+        if ($fileSize === 0) {
             throw new \RuntimeException(__('SQL file is empty.'));
         }
 
-        DB::unprepared($sql);
+        $handle = fopen($sqlFile, 'r');
+        if ($handle === false) {
+            throw new \RuntimeException(__('Cannot open SQL file for reading.'));
+        }
+
+        $buffer = '';
+        $bytesRead = 0;
+        $statementCount = 0;
+        $lastReportPct = -1;
+        $lastReportTime = 0.0;
+
+        $inSingle = false;
+        $inDouble = false;
+        $inBacktick = false;
+        $inLineComment = false;
+        $inBlockComment = false;
+        $escaped = false;
+
+        $span = max(1, $endPct - $startPct);
+
+        try {
+            while (!feof($handle)) {
+                $chunk = fread($handle, 65536);
+                if ($chunk === false || $chunk === '') {
+                    break;
+                }
+
+                $bytesRead += strlen($chunk);
+                $len = strlen($chunk);
+
+                for ($i = 0; $i < $len; $i++) {
+                    $c = $chunk[$i];
+                    $next = ($i + 1 < $len) ? $chunk[$i + 1] : '';
+
+                    if ($escaped) {
+                        $buffer .= $c;
+                        $escaped = false;
+                        continue;
+                    }
+
+                    if ($inLineComment) {
+                        if ($c === "\n") {
+                            $inLineComment = false;
+                            $buffer .= ' ';
+                        }
+                        continue;
+                    }
+
+                    if ($inBlockComment) {
+                        if ($c === '*' && $next === '/') {
+                            $inBlockComment = false;
+                            $i++;
+                        }
+                        continue;
+                    }
+
+                    if (!$inSingle && !$inDouble && !$inBacktick) {
+                        if ($c === '-' && $next === '-') {
+                            $inLineComment = true;
+                            $i++;
+                            continue;
+                        }
+                        if ($c === '/' && $next === '*') {
+                            $inBlockComment = true;
+                            $i++;
+                            continue;
+                        }
+                    }
+
+                    if ($c === '\\') {
+                        $escaped = true;
+                        $buffer .= $c;
+                        continue;
+                    }
+
+                    if ($c === "'" && !$inDouble && !$inBacktick) {
+                        $inSingle = !$inSingle;
+                    } elseif ($c === '"' && !$inSingle && !$inBacktick) {
+                        $inDouble = !$inDouble;
+                    } elseif ($c === '`' && !$inSingle && !$inDouble) {
+                        $inBacktick = !$inBacktick;
+                    }
+
+                    $buffer .= $c;
+
+                    if ($c === ';' && !$inSingle && !$inDouble && !$inBacktick) {
+                        $sql = trim($buffer);
+                        $buffer = '';
+
+                        if ($sql !== '' && $sql !== ';') {
+                            DB::unprepared($sql);
+                            $statementCount++;
+                        }
+
+                        $now = microtime(true);
+                        if ($userId !== null && ($now - $lastReportTime >= 1.5 || $statementCount % 100 === 0)) {
+                            $pct = $startPct + (int) (($bytesRead / $fileSize) * $span);
+                            $pct = max($startPct, min($endPct - 1, $pct));
+                            if ($pct !== $lastReportPct) {
+                                $lastReportPct = $pct;
+                                $this->setProgress(
+                                    $userId,
+                                    'database',
+                                    __('Restoring database... :n statements', ['n' => number_format($statementCount)]),
+                                    $pct,
+                                    'running'
+                                );
+                            }
+                            $lastReportTime = $now;
+                        }
+                    }
+                }
+            }
+
+            $tail = trim($buffer);
+            if ($tail !== '' && $tail !== ';') {
+                DB::unprepared($tail);
+                $statementCount++;
+            }
+
+            if ($userId !== null) {
+                $this->setProgress(
+                    $userId,
+                    'database',
+                    __('Database restored (:n statements)', ['n' => number_format($statementCount)]),
+                    $endPct,
+                    'running'
+                );
+            }
+        } finally {
+            fclose($handle);
+        }
     }
 
     protected function addDirectoryToZip(\ZipArchive $zip, string $dir, string $base): void
