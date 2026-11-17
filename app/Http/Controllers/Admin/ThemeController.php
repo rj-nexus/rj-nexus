@@ -5,10 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Theme;
 use App\Services\GitHubRegistry;
+use App\Services\SafeHttpService;
 use App\Services\ThemeManager;
 use App\Services\GitHubService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 
 class ThemeController extends Controller
 {
@@ -125,27 +125,16 @@ class ThemeController extends Controller
             return back()->with('error', $message);
         }
 
+        $safe = app(SafeHttpService::class);
+
         try {
             $tmp = tempnam(sys_get_temp_dir(), 'rj_theme_');
 
-            $response = Http::timeout(120)
-                ->withOptions(['sink' => $tmp])
-                ->get($validated['zip_url']);
+            $download = $safe->download($validated['zip_url'], $tmp, 50 * 1024 * 1024);
 
-            if (!$response->successful()) {
+            if (empty($download['success'])) {
                 @unlink($tmp);
-                $message = __('Could not download theme package.');
-
-                if ($request->expectsJson()) {
-                    return response()->json(['success' => false, 'message' => $message], 422);
-                }
-
-                return back()->with('error', $message);
-            }
-
-            if (filesize($tmp) > 50 * 1024 * 1024) {
-                @unlink($tmp);
-                $message = __('Theme package exceeds 50 MB limit.');
+                $message = $download['message'] ?? __('Could not download theme package.');
 
                 if ($request->expectsJson()) {
                     return response()->json(['success' => false, 'message' => $message], 422);
@@ -156,7 +145,9 @@ class ThemeController extends Controller
 
             $file = new \Illuminate\Http\UploadedFile($tmp, 'theme.zip', 'application/zip', null, true);
 
-            $result = $this->manager->installFromZip($file);
+            $originDomain = $safe->extractDomain($validated['zip_url']);
+
+            $result = $this->manager->installFromZip($file, $originDomain);
 
             @unlink($tmp);
 
@@ -172,6 +163,10 @@ class ThemeController extends Controller
 
             return back()->with('error', $result['message']);
         } catch (\Throwable $e) {
+            if (isset($tmp) && file_exists($tmp)) {
+                @unlink($tmp);
+            }
+
             $message = __('Installation failed: :msg', ['msg' => $e->getMessage()]);
 
             if ($request->expectsJson()) {
@@ -249,7 +244,7 @@ class ThemeController extends Controller
             'file' => 'required|file|mimes:zip|max:51200',
         ]);
 
-        $result = $this->manager->installFromZip($validated['file']);
+        $result = $this->manager->installFromZip($validated['file'], null);
 
         if ($request->expectsJson()) {
             return response()->json($result, $result['success'] ? 200 : 422);
