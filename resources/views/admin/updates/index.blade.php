@@ -123,7 +123,7 @@
     .nx-btn .in { position:relative; display:flex; align-items:center; gap:10px; padding:14px 32px; border-radius:9999px; background:#0d0a26; font-size:15px; font-weight:600; letter-spacing:.03em; }
     .nx-btn svg { transition:transform .6s; }
     .nx-btn:hover svg { transform:rotate(180deg); }
-    .nx-btn.nx-loading { pointer-events:none; }
+    .nx-btn.nx-loading { pointer-events:none; opacity:.85; }
     .nx-btn.nx-loading svg { animation:nx-spin .8s linear infinite; }
     .nx-checked { margin-top:12px; font-size:12px; color:#94a3b8; }
 
@@ -164,6 +164,8 @@
     .nx-act { display:inline-flex; align-items:center; gap:8px; padding:10px 20px; border-radius:10px; font-size:13px; font-weight:600; color:#fff; border:0; cursor:pointer;
         background:linear-gradient(90deg,#a78bfa,#f472b6); transition:transform .2s, box-shadow .2s, filter .2s; box-shadow:0 8px 24px -8px rgba(244,114,182,.7); }
     .nx-act:hover { transform:translateY(-2px); filter:brightness(1.1); }
+    .nx-act:disabled, .nx-act.nx-loading { pointer-events:none; opacity:.75; }
+    .nx-act.nx-loading svg { animation:nx-spin .8s linear infinite; }
     .nx-ghost { display:inline-flex; align-items:center; gap:6px; padding:10px 16px; border-radius:10px; font-size:13px; color:#c4b5fd; border:1px solid rgba(196,181,253,.35); transition:background .2s; }
     .nx-ghost:hover { background:rgba(196,181,253,.12); }
 
@@ -235,7 +237,7 @@
         <div class="nx-content">
             <div class="nx-label nx-intro d1">{{ __('RJ NEXUS CORE 1') }}</div>
             <h1 class="nx-title nx-intro d2">Altair</h1>
-            <div class="nx-ver nx-intro d3">RJ CMS <b>v{{ $currentVersion }}</b></div>
+            <div class="nx-ver nx-intro d3">RJ Nexus <b>v{{ $currentVersion }}</b></div>
 
             <div class="nx-intro d3">
                 @if ($hasUpdate)
@@ -315,11 +317,13 @@
                             <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                         </a>
                     @endif
-                    <form method="POST" action="{{ route('admin.updates.run') }}">
+                    <form method="POST" action="{{ route('admin.updates.run') }}" id="nxUpdateForm">
                         @csrf
-                        <button type="submit" class="nx-act">
-                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                            {{ __('Prepare Update') }}
+                        <button type="submit" id="nxUpdateBtn" class="nx-act"
+                                data-confirm="{{ __('Install v:version now? A backup will be created automatically before updating.', ['version' => $release['version']]) }}"
+                                data-updating="{{ __('Updating, please wait...') }}">
+                            <svg id="nxUpdateIcon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            <span id="nxUpdateText">{{ __('Install Update Now') }}</span>
                         </button>
                     </form>
                 </div>
@@ -333,7 +337,7 @@
             @endif
 
             <div class="px-6 py-3 border-t border-white/10 text-xs text-slate-400">
-                {{ __('A newer version is available. Follow the installation steps below.') }}
+                {{ __('The system will create a backup, download the update, replace files, and run migrations automatically.') }}
             </div>
         </section>
     @endif
@@ -341,7 +345,7 @@
     <section class="nx-card nx-reveal">
         <div class="nx-card-h">
             <h2>{{ __('Manual Update Instructions') }}</h2>
-            <p>{{ __('Follow these steps to update RJ CMS manually.') }}</p>
+            <p>{{ __('If the automatic update fails, follow these steps to update RJ Nexus manually.') }}</p>
         </div>
 
         <div class="nx-steps" id="nxSteps">
@@ -595,6 +599,21 @@
         if (txt) txt.textContent = @json(__('Scanning the stars...'));
         star.classList.add('nx-hyper');
         var c = starCenter(); burst(c.x, c.y, 90, 3.4); ring(c.x, c.y, Math.max(W, H) * .6, 5, 'rgba(255,255,255,');
+    });
+
+    var updForm = document.getElementById('nxUpdateForm');
+    var updBtn  = document.getElementById('nxUpdateBtn');
+    var updTxt  = document.getElementById('nxUpdateText');
+    if (updForm && updBtn) updForm.addEventListener('submit', function (e) {
+        var msg = updBtn.getAttribute('data-confirm');
+        if (msg && !window.confirm(msg)) { e.preventDefault(); return; }
+        updBtn.classList.add('nx-loading');
+        updBtn.disabled = true;
+        if (updTxt) updTxt.textContent = updBtn.getAttribute('data-updating') || 'Updating...';
+        star.classList.add('nx-hyper');
+        var c = starCenter();
+        burst(c.x, c.y, 140, 4.2);
+        ring(c.x, c.y, Math.max(W, H) * .8, 7, 'rgba(244,114,182,');
     });
 
     var reveals = document.querySelectorAll('.nx-reveal');
