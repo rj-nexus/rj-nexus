@@ -556,8 +556,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/backup', [BackupSettingsController::class, 'index'])->name('backup');
         Route::put('/backup', [BackupSettingsController::class, 'update'])->name('backup.update');
         Route::post('/backup/create', [BackupSettingsController::class, 'create'])->name('backup.create');
+        Route::get('/backup/progress', [BackupSettingsController::class, 'progress'])->name('backup.progress');
         Route::get('/backup/download/{file}', [BackupSettingsController::class, 'download'])->name('backup.download');
         Route::delete('/backup/{file}', [BackupSettingsController::class, 'delete'])->name('backup.delete');
+        Route::post('/backup/restore/{file}', [BackupSettingsController::class, 'restore'])->name('backup.restore');
         Route::get('/cache', [CacheSettingsController::class, 'index'])->name('cache');
         Route::put('/cache', [CacheSettingsController::class, 'update'])->name('cache.update');
         Route::post('/cache/clear/{type}', [CacheSettingsController::class, 'clear'])->name('cache.clear');
