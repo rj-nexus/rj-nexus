@@ -146,7 +146,6 @@ class UpdatesController extends Controller
 
         $timestamp = now()->format('YmdHis');
         $zipPath = storage_path('app/temp/update-' . $timestamp . '.zip');
-        $extractPath = storage_path('app/temp/update-' . $timestamp);
         $codeBackupPath = storage_path('app/temp/pre-update-' . $timestamp . '.zip');
 
         $composerBefore = File::exists(base_path('composer.json')) ? md5_file(base_path('composer.json')) : '';
@@ -176,9 +175,8 @@ class UpdatesController extends Controller
             $dbBackupFilename = $backupResult['filename'] ?? null;
 
             File::ensureDirectoryExists(dirname($zipPath));
-            File::ensureDirectoryExists($extractPath);
 
-            $this->setProgress($userId, 'download', __('Downloading update package from GitHub...'), 25, 'running');
+            $this->setProgress($userId, 'download', __('Downloading update package from GitHub...'), 30, 'running');
 
             $response = Http::withHeaders([
                 'User-Agent' => 'RJ-Nexus-Updater/1.0',
@@ -197,39 +195,60 @@ class UpdatesController extends Controller
                 throw new \RuntimeException(__('Downloaded file is empty or too small.'));
             }
 
-            $this->setProgress($userId, 'extract', __('Extracting archive...'), 45, 'running');
+            $this->setProgress($userId, 'verify', __('Verifying release archive...'), 45, 'running');
 
             $zip = new \ZipArchive();
             if ($zip->open($zipPath) !== true) {
                 throw new \RuntimeException(__('Cannot open downloaded ZIP file.'));
             }
-            $zip->extractTo($extractPath);
-            $zip->close();
 
-            $entries = array_values(array_filter(File::directories($extractPath)));
-            $root = count($entries) === 1 ? $entries[0] : $extractPath;
-
-            $this->setProgress($userId, 'verify', __('Verifying built assets...'), 55, 'running');
-
-            $manifestPath = $root . '/public/build/manifest.json';
-            if (!File::exists($manifestPath)) {
-                throw new \RuntimeException(__('Update aborted: the release package is missing public/build/manifest.json. The developer must include built assets in the release.'));
+            $rootManifest = $zip->getFromName('public/build/manifest.json');
+            if ($rootManifest === false) {
+                $zip->close();
+                throw new \RuntimeException(__('Update aborted: the release package must have files at the ZIP root (no wrapper folder) and include public/build/manifest.json.'));
             }
 
-            $manifestData = json_decode(File::get($manifestPath), true);
+            $manifestData = json_decode($rootManifest, true);
             if (!is_array($manifestData) || empty($manifestData)) {
+                $zip->close();
                 throw new \RuntimeException(__('Update aborted: public/build/manifest.json is invalid.'));
             }
 
-            $this->setProgress($userId, 'backup_code', __('Creating code snapshot for rollback...'), 62, 'running');
+            $this->setProgress($userId, 'backup_code', __('Creating code snapshot for rollback...'), 55, 'running');
 
             Artisan::call('down', ['--render' => 'errors::503']);
 
-            $this->createCodeBackup($codeBackupPath, $protected);
+            $this->createCodeBackup($codeBackupPath);
 
             $this->setProgress($userId, 'replace', __('Replacing application files...'), 72, 'running');
 
-            $this->replaceFiles($root, base_path(), $protected);
+            $filesToExtract = [];
+            for ($i = 0; $i < $zip->numFiles; $i++) {
+                $name = $zip->getNameIndex($i);
+                if ($name === false || $name === '' || substr($name, -1) === '/') continue;
+
+                $skip = false;
+                foreach ($protected as $p) {
+                    if ($name === $p || str_starts_with($name, $p . '/')) {
+                        $skip = true;
+                        break;
+                    }
+                }
+                if ($skip) continue;
+
+                $filesToExtract[] = $name;
+            }
+
+            if (empty($filesToExtract)) {
+                $zip->close();
+                throw new \RuntimeException(__('Update aborted: no files to extract.'));
+            }
+
+            if (!$zip->extractTo(base_path(), $filesToExtract)) {
+                $zip->close();
+                throw new \RuntimeException(__('Failed to extract update files.'));
+            }
+            $zip->close();
 
             $composerAfter = File::exists(base_path('composer.json')) ? md5_file(base_path('composer.json')) : '';
             $composerChanged = $composerBefore !== $composerAfter;
@@ -252,7 +271,6 @@ class UpdatesController extends Controller
             Artisan::call('up');
 
             File::delete($zipPath);
-            File::deleteDirectory($extractPath);
             File::delete($codeBackupPath);
 
             $lock->release();
@@ -295,7 +313,6 @@ class UpdatesController extends Controller
             }
 
             if (File::exists($zipPath)) File::delete($zipPath);
-            if (File::isDirectory($extractPath)) File::deleteDirectory($extractPath);
 
             $lock->release();
 
@@ -342,48 +359,43 @@ class UpdatesController extends Controller
         return $release['zipball_url'] ?? null;
     }
 
-    protected function createCodeBackup(string $zipPath, array $protected): void
+    protected function createCodeBackup(string $zipPath): void
     {
         $zip = new \ZipArchive();
         if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
             throw new \RuntimeException(__('Cannot create pre-update backup archive.'));
         }
 
-        $base = base_path();
+        $whitelist = [
+            'app',
+            'bootstrap/app.php',
+            'config',
+            'routes',
+            'database/migrations',
+        ];
 
-        foreach (@scandir($base) ?: [] as $item) {
-            if ($item === '.' || $item === '..') continue;
-            if (in_array($item, $protected, true)) continue;
-
-            $full = $base . DIRECTORY_SEPARATOR . $item;
-
-            if (is_dir($full)) {
-                $this->addToZip($zip, $full, $item, $protected);
-            } elseif (is_file($full)) {
-                $zip->addFile($full, $item);
+        foreach ($whitelist as $rel) {
+            $full = base_path($rel);
+            if (is_file($full)) {
+                $zip->addFile($full, $rel);
+            } elseif (is_dir($full)) {
+                $this->addToZip($zip, $full, $rel);
             }
         }
 
         $zip->close();
     }
 
-    protected function addToZip(\ZipArchive $zip, string $dir, string $prefix, array $protected): void
+    protected function addToZip(\ZipArchive $zip, string $dir, string $prefix): void
     {
         foreach (@scandir($dir) ?: [] as $item) {
             if ($item === '.' || $item === '..') continue;
 
             $relative = $prefix . '/' . $item;
-
-            foreach ($protected as $p) {
-                if ($relative === $p || str_starts_with($relative, $p . '/')) {
-                    continue 2;
-                }
-            }
-
             $full = $dir . DIRECTORY_SEPARATOR . $item;
 
             if (is_dir($full)) {
-                $this->addToZip($zip, $full, $relative, $protected);
+                $this->addToZip($zip, $full, $relative);
             } elseif (is_file($full)) {
                 $zip->addFile($full, $relative);
             }
@@ -398,34 +410,6 @@ class UpdatesController extends Controller
         }
         $zip->extractTo(base_path());
         $zip->close();
-    }
-
-    protected function replaceFiles(string $source, string $target, array $protected, string $prefix = ''): void
-    {
-        foreach (@scandir($source) ?: [] as $item) {
-            if ($item === '.' || $item === '..') continue;
-
-            $relative = $prefix === '' ? $item : $prefix . '/' . $item;
-
-            foreach ($protected as $p) {
-                if ($relative === $p || str_starts_with($relative, $p . '/')) {
-                    continue 2;
-                }
-            }
-
-            $src = $source . DIRECTORY_SEPARATOR . $item;
-            $dst = $target . DIRECTORY_SEPARATOR . $item;
-
-            if (is_dir($src)) {
-                if (!is_dir($dst)) @mkdir($dst, 0755, true);
-                $this->replaceFiles($src, $dst, $protected, $relative);
-            } elseif (is_file($src)) {
-                if (!@copy($src, $dst)) {
-                    @chmod($dst, 0644);
-                    @copy($src, $dst);
-                }
-            }
-        }
     }
 
     protected function pickLatestRelease(array $releases): ?array
