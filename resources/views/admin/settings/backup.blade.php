@@ -13,6 +13,7 @@
             @csrf
             @method('PUT')
 
+            
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-3">{{ __('Storage Mode') }}</label>
 

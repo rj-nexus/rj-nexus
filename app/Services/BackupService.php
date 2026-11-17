@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
@@ -18,65 +19,170 @@ class BackupService
 
     protected function ensureDirs(): void
     {
-        if (!File::isDirectory($this->basePath . '/local')) {
-            File::makeDirectory($this->basePath . '/local', 0755, true);
-        }
-        if (!File::isDirectory($this->basePath . '/download')) {
-            File::makeDirectory($this->basePath . '/download', 0755, true);
+        foreach (['local', 'download'] as $type) {
+            $dir = $this->basePath . '/' . $type;
+            if (!File::isDirectory($dir)) {
+                File::makeDirectory($dir, 0755, true);
+            }
         }
     }
 
-    public function create(string $type = 'local'): array
+    public function create(string $storage = 'local', ?int $userId = null): array
     {
-        $filename = 'backup-' . date('Y-m-d-H-i-s') . '-' . Str::random(4) . '.zip';
-        $dir = $this->basePath . '/' . $type;
+        return $this->createFullBackup($storage, $userId);
+    }
 
-        if (!File::isDirectory($dir)) {
-            File::makeDirectory($dir, 0755, true);
-        }
-
-        $zipPath = $dir . '/' . $filename;
-        $sqlPath = storage_path('app/temp-backup.sql');
+    public function createDatabaseBackup(string $storage = 'local', ?int $userId = null): array
+    {
+        $this->setProgress($userId, 'init', __('Preparing database backup...'), 5, 'running');
 
         try {
-            $this->dumpDatabase($sqlPath);
+            $filename = 'db-' . date('Y-m-d-H-i-s') . '-' . Str::random(4) . '.sql';
+            $path = $this->basePath . '/' . $storage . '/' . $filename;
+
+            $this->setProgress($userId, 'dump', __('Dumping database tables...'), 40, 'running');
+            $this->dumpDatabase($path);
+
+            if (!File::exists($path) || File::size($path) === 0) {
+                throw new \RuntimeException(__('Database dump is empty.'));
+            }
+
+            $this->setProgress($userId, 'cleanup', __('Applying retention policy...'), 90, 'running');
+            $this->applyRetention($storage);
+
+            $this->setProgress($userId, 'done', __('Database backup created successfully.'), 100, 'success');
+
+            return [
+                'success' => true,
+                'filename' => $filename,
+                'path' => $path,
+                'size' => File::size($path),
+                'message' => __('Database backup created.'),
+            ];
         } catch (\Throwable $e) {
-            return ['success' => false, 'message' => __('Database dump failed: :msg', ['msg' => $e->getMessage()])];
+            if (File::exists($path)) File::delete($path);
+            $this->setProgress($userId, 'error', $e->getMessage(), 100, 'error');
+            return ['success' => false, 'message' => __('Backup failed: :msg', ['msg' => $e->getMessage()])];
+        }
+    }
+
+    public function createFilesBackup(string $storage = 'local', ?int $userId = null): array
+    {
+        $this->setProgress($userId, 'init', __('Preparing files backup...'), 5, 'running');
+
+        if (!class_exists('ZipArchive')) {
+            $this->setProgress($userId, 'error', __('ZipArchive not available.'), 100, 'error');
+            return ['success' => false, 'message' => __('ZipArchive PHP extension is not enabled.')];
         }
 
-        $zip = new \ZipArchive();
+        $path = null;
 
-        if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+        try {
+            $filename = 'files-' . date('Y-m-d-H-i-s') . '-' . Str::random(4) . '.zip';
+            $path = $this->basePath . '/' . $storage . '/' . $filename;
+
+            $zip = new \ZipArchive();
+            if ($zip->open($path, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+                throw new \RuntimeException(__('Could not create ZIP archive.'));
+            }
+
+            $this->setProgress($userId, 'uploads', __('Archiving uploads...'), 30, 'running');
+            $uploads = public_path('uploads');
+            if (File::isDirectory($uploads)) {
+                $this->addDirectoryToZip($zip, $uploads, 'uploads');
+            }
+
+            $this->setProgress($userId, 'storage', __('Archiving storage...'), 70, 'running');
+            $storageApp = storage_path('app/public');
+            if (File::isDirectory($storageApp)) {
+                $this->addDirectoryToZip($zip, $storageApp, 'storage/app/public');
+            }
+
+            $zip->close();
+
+            $this->setProgress($userId, 'cleanup', __('Applying retention policy...'), 95, 'running');
+            $this->applyRetention($storage);
+
+            $this->setProgress($userId, 'done', __('Files backup created successfully.'), 100, 'success');
+
+            return [
+                'success' => true,
+                'filename' => $filename,
+                'path' => $path,
+                'size' => File::size($path),
+                'message' => __('Files backup created.'),
+            ];
+        } catch (\Throwable $e) {
+            if ($path && File::exists($path)) File::delete($path);
+            $this->setProgress($userId, 'error', $e->getMessage(), 100, 'error');
+            return ['success' => false, 'message' => __('Backup failed: :msg', ['msg' => $e->getMessage()])];
+        }
+    }
+
+    public function createFullBackup(string $storage = 'local', ?int $userId = null): array
+    {
+        $this->setProgress($userId, 'init', __('Preparing full backup...'), 5, 'running');
+
+        if (!class_exists('ZipArchive')) {
+            $this->setProgress($userId, 'error', __('ZipArchive not available.'), 100, 'error');
+            return ['success' => false, 'message' => __('ZipArchive PHP extension is not enabled.')];
+        }
+
+        $sqlPath = storage_path('app/temp-backup-' . Str::random(10) . '.sql');
+        $path = null;
+
+        try {
+            $this->setProgress($userId, 'dump', __('Dumping database...'), 20, 'running');
+            $this->dumpDatabase($sqlPath);
+
+            if (!File::exists($sqlPath) || File::size($sqlPath) === 0) {
+                throw new \RuntimeException(__('Database dump is empty.'));
+            }
+
+            $filename = 'full-' . date('Y-m-d-H-i-s') . '-' . Str::random(4) . '.zip';
+            $path = $this->basePath . '/' . $storage . '/' . $filename;
+
+            $zip = new \ZipArchive();
+            if ($zip->open($path, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+                throw new \RuntimeException(__('Could not create ZIP archive.'));
+            }
+
+            $zip->addFile($sqlPath, 'database.sql');
+
+            $this->setProgress($userId, 'uploads', __('Archiving uploads...'), 45, 'running');
+            $uploads = public_path('uploads');
+            if (File::isDirectory($uploads)) {
+                $this->addDirectoryToZip($zip, $uploads, 'uploads');
+            }
+
+            $this->setProgress($userId, 'storage', __('Archiving storage...'), 80, 'running');
+            $storageApp = storage_path('app/public');
+            if (File::isDirectory($storageApp)) {
+                $this->addDirectoryToZip($zip, $storageApp, 'storage/app/public');
+            }
+
+            $zip->close();
+
             if (File::exists($sqlPath)) File::delete($sqlPath);
-            return ['success' => false, 'message' => __('Could not create ZIP archive.')];
+
+            $this->setProgress($userId, 'cleanup', __('Applying retention policy...'), 95, 'running');
+            $this->applyRetention($storage);
+
+            $this->setProgress($userId, 'done', __('Full backup created successfully.'), 100, 'success');
+
+            return [
+                'success' => true,
+                'filename' => $filename,
+                'path' => $path,
+                'size' => File::size($path),
+                'message' => __('Full backup created.'),
+            ];
+        } catch (\Throwable $e) {
+            if (File::exists($sqlPath)) File::delete($sqlPath);
+            if ($path && File::exists($path)) File::delete($path);
+            $this->setProgress($userId, 'error', $e->getMessage(), 100, 'error');
+            return ['success' => false, 'message' => __('Backup failed: :msg', ['msg' => $e->getMessage()])];
         }
-
-        $zip->addFile($sqlPath, 'database.sql');
-
-        $publicPath = public_path('uploads');
-        if (File::isDirectory($publicPath)) {
-            $this->addDirectoryToZip($zip, $publicPath, 'uploads');
-        }
-
-        $storageAppPublic = storage_path('app/public');
-        if (File::isDirectory($storageAppPublic)) {
-            $this->addDirectoryToZip($zip, $storageAppPublic, 'storage/app/public');
-        }
-
-        $zip->close();
-
-        if (File::exists($sqlPath)) {
-            File::delete($sqlPath);
-        }
-
-        $this->applyRetention($type);
-
-        return [
-            'success' => true,
-            'filename' => $filename,
-            'size' => File::size($zipPath),
-            'message' => __('Backup created successfully.'),
-        ];
     }
 
     public function getBackups(string $type = 'local'): array
@@ -91,13 +197,16 @@ class BackupService
         $result = [];
 
         foreach ($files as $file) {
-            if ($file->getExtension() !== 'zip') continue;
+            $ext = strtolower($file->getExtension());
+            if (!in_array($ext, ['zip', 'sql'], true)) continue;
+
             $result[] = [
                 'filename' => $file->getFilename(),
                 'size' => $file->getSize(),
                 'size_human' => $this->formatSize($file->getSize()),
                 'created_at' => date('Y-m-d H:i:s', $file->getMTime()),
                 'timestamp' => $file->getMTime(),
+                'extension' => $ext,
             ];
         }
 
@@ -118,7 +227,7 @@ class BackupService
         return ['success' => false, 'message' => __('Backup not found.')];
     }
 
-    public function restore(string $filename, string $type = 'local'): array
+    public function restore(string $filename, string $type = 'local', ?int $userId = null): array
     {
         $path = $this->basePath . '/' . $type . '/' . basename($filename);
 
@@ -126,44 +235,82 @@ class BackupService
             return ['success' => false, 'message' => __('Backup not found.')];
         }
 
-        $tempDir = storage_path('app/temp-restore-' . time());
+        $this->setProgress($userId, 'init', __('Preparing restore...'), 5, 'running');
+        $tempDir = null;
 
-        if (!File::isDirectory($tempDir)) {
-            File::makeDirectory($tempDir, 0755, true);
-        }
+        try {
+            if (str_ends_with(strtolower($filename), '.sql')) {
+                $this->setProgress($userId, 'database', __('Restoring database...'), 50, 'running');
+                $this->restoreDatabase($path);
+                $this->setProgress($userId, 'done', __('Database restored successfully.'), 100, 'success');
+                return ['success' => true, 'message' => __('Database restored successfully.')];
+            }
 
-        $zip = new \ZipArchive();
-        if ($zip->open($path) === true) {
+            $tempDir = storage_path('app/temp-restore-' . time() . '-' . Str::random(4));
+            File::ensureDirectoryExists($tempDir);
+
+            $this->setProgress($userId, 'extract', __('Extracting archive...'), 20, 'running');
+
+            $zip = new \ZipArchive();
+            if ($zip->open($path) !== true) {
+                throw new \RuntimeException(__('Could not open ZIP file.'));
+            }
             $zip->extractTo($tempDir);
             $zip->close();
-        } else {
-            File::deleteDirectory($tempDir);
-            return ['success' => false, 'message' => __('Could not open ZIP file.')];
-        }
 
-        $sqlFile = $tempDir . '/database.sql';
-        if (File::exists($sqlFile)) {
-            try {
+            $sqlFile = $tempDir . '/database.sql';
+            if (File::exists($sqlFile)) {
+                $this->setProgress($userId, 'database', __('Restoring database...'), 50, 'running');
                 $this->restoreDatabase($sqlFile);
-            } catch (\Throwable $e) {
-                File::deleteDirectory($tempDir);
-                return ['success' => false, 'message' => __('Database restore failed: :msg', ['msg' => $e->getMessage()])];
             }
+
+            $uploadsDir = $tempDir . '/uploads';
+            if (File::isDirectory($uploadsDir)) {
+                $this->setProgress($userId, 'uploads', __('Restoring uploads...'), 75, 'running');
+                File::copyDirectory($uploadsDir, public_path('uploads'));
+            }
+
+            $storageDir = $tempDir . '/storage/app/public';
+            if (File::isDirectory($storageDir)) {
+                $this->setProgress($userId, 'storage', __('Restoring storage...'), 90, 'running');
+                File::copyDirectory($storageDir, storage_path('app/public'));
+            }
+
+            File::deleteDirectory($tempDir);
+            $this->setProgress($userId, 'done', __('Restore completed successfully.'), 100, 'success');
+
+            return ['success' => true, 'message' => __('Restored successfully.')];
+        } catch (\Throwable $e) {
+            if ($tempDir && File::isDirectory($tempDir)) {
+                File::deleteDirectory($tempDir);
+            }
+            $this->setProgress($userId, 'error', $e->getMessage(), 100, 'error');
+            return ['success' => false, 'message' => __('Restore failed: :msg', ['msg' => $e->getMessage()])];
+        }
+    }
+
+    public function progress(int $userId): array
+    {
+        return Cache::get('rj_backup_progress_' . $userId, [
+            'step' => 'idle',
+            'label' => '',
+            'percent' => 0,
+            'status' => 'idle',
+        ]);
+    }
+
+    protected function setProgress(?int $userId, string $step, string $label, int $percent, string $status): void
+    {
+        if ($userId === null) {
+            return;
         }
 
-        $uploadsDir = $tempDir . '/uploads';
-        if (File::isDirectory($uploadsDir)) {
-            File::copyDirectory($uploadsDir, public_path('uploads'));
-        }
-
-        $storageDir = $tempDir . '/storage/app/public';
-        if (File::isDirectory($storageDir)) {
-            File::copyDirectory($storageDir, storage_path('app/public'));
-        }
-
-        File::deleteDirectory($tempDir);
-
-        return ['success' => true, 'message' => __('Restored successfully.')];
+        Cache::put('rj_backup_progress_' . $userId, [
+            'step' => $step,
+            'label' => $label,
+            'percent' => $percent,
+            'status' => $status,
+        ], 600);
     }
 
     protected function applyRetention(string $type): void
@@ -181,8 +328,7 @@ class BackupService
         $backups = $this->getBackups($type);
 
         if (count($backups) > $limit) {
-            $toDelete = array_slice($backups, $limit);
-            foreach ($toDelete as $b) {
+            foreach (array_slice($backups, $limit) as $b) {
                 File::delete($this->basePath . '/' . $type . '/' . $b['filename']);
             }
         }
@@ -192,9 +338,27 @@ class BackupService
     {
         $conn = DB::connection();
         $driver = $conn->getDriverName();
-        $handle = fopen($path, 'w+');
 
-        if ($driver === 'mysql') {
+        if ($driver !== 'mysql') {
+            throw new \RuntimeException(__('Database driver :driver is not supported for backup.', ['driver' => $driver]));
+        }
+
+        $handle = fopen($path, 'w+');
+        if (!$handle) {
+            throw new \RuntimeException(__('Cannot open dump file for writing.'));
+        }
+
+        $pdo = $conn->getPdo();
+        $originalBuffered = true;
+
+        try {
+            try {
+                $originalBuffered = (bool) $pdo->getAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY);
+            } catch (\Throwable $e) {}
+
+            fwrite($handle, "SET FOREIGN_KEY_CHECKS=0;\n");
+            fwrite($handle, "SET SQL_MODE='NO_AUTO_VALUE_ON_ZERO';\n\n");
+
             $tables = $conn->select('SHOW TABLES');
             $dbName = $conn->getDatabaseName();
             $key = 'Tables_in_' . $dbName;
@@ -204,35 +368,60 @@ class BackupService
                 $createTable = $conn->select("SHOW CREATE TABLE `$tableName`");
                 $createSql = $createTable[0]->{'Create Table'} ?? '';
 
-                fwrite($handle, "\n\n-- Table structure for $tableName\n");
+                fwrite($handle, "\n-- Table: `$tableName`\n");
                 fwrite($handle, "DROP TABLE IF EXISTS `$tableName`;\n");
                 fwrite($handle, $createSql . ";\n\n");
 
-                $rows = $conn->table($tableName)->get();
-                if ($rows->count() > 0) {
-                    fwrite($handle, "-- Dumping data for table `$tableName`\n");
-                    foreach ($rows as $row) {
-                        $data = (array) $row;
-                        $keys = array_map(fn($k) => "`$k`", array_keys($data));
-                        $values = array_map(function ($v) use ($conn) {
-                            if (is_null($v)) return 'NULL';
-                            return $conn->getPdo()->quote((string) $v);
-                        }, array_values($data));
+                try {
+                    $pdo->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
+                } catch (\Throwable $e) {}
 
-                        fwrite($handle, "INSERT INTO `$tableName` (" . implode(', ', $keys) . ") VALUES (" . implode(', ', $values) . ");\n");
+                $stmt = $pdo->query("SELECT * FROM `$tableName`");
+                $batch = [];
+
+                while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+                    $keys = array_map(fn($k) => "`$k`", array_keys($row));
+                    $values = array_map(function ($v) use ($pdo) {
+                        if ($v === null) return 'NULL';
+                        return $pdo->quote((string) $v);
+                    }, array_values($row));
+
+                    $batch[] = "INSERT INTO `$tableName` (" . implode(', ', $keys) . ") VALUES (" . implode(', ', $values) . ");";
+
+                    if (count($batch) >= 500) {
+                        fwrite($handle, implode("\n", $batch) . "\n");
+                        $batch = [];
                     }
                 }
-            }
-        } else {
-            fwrite($handle, "-- Database dump for driver $driver not supported in this simple backup.\n");
-        }
 
-        fclose($handle);
+                if (!empty($batch)) {
+                    fwrite($handle, implode("\n", $batch) . "\n");
+                }
+
+                fwrite($handle, "\n");
+
+                try {
+                    $pdo->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, $originalBuffered);
+                } catch (\Throwable $e) {}
+            }
+
+            fwrite($handle, "\nSET FOREIGN_KEY_CHECKS=1;\n");
+        } finally {
+            fclose($handle);
+            try {
+                $pdo->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, $originalBuffered);
+            } catch (\Throwable $e) {}
+        }
     }
 
     protected function restoreDatabase(string $sqlFile): void
     {
         $sql = File::get($sqlFile);
+
+        if (trim($sql) === '') {
+            throw new \RuntimeException(__('SQL file is empty.'));
+        }
+
         DB::unprepared($sql);
     }
 
@@ -247,7 +436,7 @@ class BackupService
             if ($file->isDir()) continue;
             $filePath = $file->getRealPath();
             $relative = $base . '/' . substr($filePath, strlen($dir) + 1);
-            $zip->addFile($filePath, $relative);
+            $zip->addFile($filePath, str_replace('\\', '/', $relative));
         }
     }
 
