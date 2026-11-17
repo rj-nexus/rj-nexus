@@ -13,7 +13,6 @@
             @csrf
             @method('PUT')
 
-            
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-3">{{ __('Storage Mode') }}</label>
 
@@ -133,7 +132,7 @@
 
         <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-3">
 
-            <form method="POST" action="{{ route('admin.settings.backup.create') }}">
+            <form method="POST" action="{{ route('admin.settings.backup.create') }}" class="js-backup-form">
                 @csrf
                 <input type="hidden" name="type" value="database">
                 <button type="submit" class="w-full flex items-center gap-3 px-4 py-4 rounded-xl border border-gray-200 hover:border-rj-purple/30 hover:bg-rj-purple/5 transition text-left">
@@ -147,7 +146,7 @@
                 </button>
             </form>
 
-            <form method="POST" action="{{ route('admin.settings.backup.create') }}">
+            <form method="POST" action="{{ route('admin.settings.backup.create') }}" class="js-backup-form">
                 @csrf
                 <input type="hidden" name="type" value="site">
                 <button type="submit" class="w-full flex items-center gap-3 px-4 py-4 rounded-xl border border-gray-200 hover:border-rj-purple/30 hover:bg-rj-purple/5 transition text-left">
@@ -161,7 +160,7 @@
                 </button>
             </form>
 
-            <form method="POST" action="{{ route('admin.settings.backup.create') }}">
+            <form method="POST" action="{{ route('admin.settings.backup.create') }}" class="js-backup-form">
                 @csrf
                 <input type="hidden" name="type" value="full">
                 <button type="submit" class="w-full flex items-center gap-3 px-4 py-4 rounded-xl border-2 border-rj-purple/20 hover:border-rj-purple/40 bg-rj-purple/5 hover:bg-rj-purple/10 transition text-left">
@@ -200,7 +199,7 @@
                     <div class="px-6 py-4 flex items-center justify-between gap-4 hover:bg-gray-50/50">
                         <div class="flex items-center gap-3 min-w-0">
                             <div class="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
-                                @if (str_ends_with($backup['name'], '.sql'))
+                                @if ($backup['extension'] === 'sql')
                                     <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/></svg>
                                 @else
                                     <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/></svg>
@@ -213,6 +212,16 @@
                         </div>
 
                         <div class="flex items-center gap-2 flex-shrink-0">
+                            <button type="button"
+                                    class="js-restore-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-amber-300 bg-amber-50 text-xs font-medium text-amber-700 hover:bg-amber-100 transition"
+                                    data-filename="{{ $backup['name'] }}"
+                                    data-type="{{ $backup['storage'] }}"
+                                    data-restore-url="{{ route('admin.settings.backup.restore', $backup['name']) }}"
+                                    data-confirm="{{ __('Restore this backup? Current data will be overwritten.') }}">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                {{ __('Restore') }}
+                            </button>
+
                             <a href="{{ route('admin.settings.backup.download', $backup['name']) }}"
                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-300 text-xs text-gray-700 hover:bg-gray-50 transition">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
@@ -234,5 +243,217 @@
         @endif
     </div>
 
+    <div id="bkProgressOverlay" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-black/60 backdrop-blur-sm p-5">
+        <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden">
+            <div class="px-6 py-5 border-b border-gray-100 flex items-center gap-4">
+                <div id="bkProgressSpinner" class="w-9 h-9 flex-none rounded-full border-[3px] border-rj-purple/20 border-t-rj-purple animate-spin"></div>
+                <div class="flex-1 min-w-0">
+                    <div id="bkProgressTitle" class="text-base font-semibold text-gray-900">{{ __('Processing...') }}</div>
+                    <div id="bkProgressSub" class="text-xs text-gray-500 mt-0.5">{{ __('Please do not close this tab') }}</div>
+                </div>
+            </div>
+
+            <div class="px-6 py-5">
+                <div class="h-2 rounded-full bg-gray-100 overflow-hidden">
+                    <div id="bkProgressBar" class="h-full w-0 rounded-full bg-gradient-to-r from-rj-purple to-rj-pink transition-all duration-500"></div>
+                </div>
+                <div class="flex justify-between mt-2 text-xs text-gray-500">
+                    <span id="bkProgressLabel">{{ __('Starting...') }}</span>
+                    <b id="bkProgressPct" class="text-gray-900">0%</b>
+                </div>
+
+                <div id="bkProgressMessage" class="hidden mt-4 p-3 rounded-lg text-sm"></div>
+            </div>
+
+            <div class="px-6 pb-5 flex justify-end">
+                <button type="button" id="bkProgressClose" class="hidden px-4 py-2 rounded-lg bg-gradient-to-r from-rj-purple to-rj-pink text-white text-sm font-medium hover:opacity-90">
+                    {{ __('Reload Page') }}
+                </button>
+            </div>
+        </div>
+    </div>
+
 </div>
+
+<script>
+(function () {
+    var progressUrl = @json(route('admin.settings.backup.progress'));
+    var overlay = document.getElementById('bkProgressOverlay');
+    var spinner = document.getElementById('bkProgressSpinner');
+    var pTitle = document.getElementById('bkProgressTitle');
+    var pSub = document.getElementById('bkProgressSub');
+    var pBar = document.getElementById('bkProgressBar');
+    var pPct = document.getElementById('bkProgressPct');
+    var pLabel = document.getElementById('bkProgressLabel');
+    var pMsg = document.getElementById('bkProgressMessage');
+    var pClose = document.getElementById('bkProgressClose');
+
+    var pollTimer = null;
+
+    function openOverlay(title, sub) {
+        overlay.classList.remove('hidden');
+        overlay.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+        pTitle.textContent = title || '{{ __('Processing...') }}';
+        pSub.textContent = sub || '{{ __('Please do not close this tab') }}';
+        pBar.style.width = '0%';
+        pPct.textContent = '0%';
+        pLabel.textContent = '{{ __('Starting...') }}';
+        spinner.className = 'w-9 h-9 flex-none rounded-full border-[3px] border-rj-purple/20 border-t-rj-purple animate-spin';
+        pMsg.classList.add('hidden');
+        pMsg.className = 'hidden mt-4 p-3 rounded-lg text-sm';
+        pClose.classList.add('hidden');
+    }
+
+    function closeOverlay() {
+        overlay.classList.add('hidden');
+        overlay.classList.remove('flex');
+        document.body.style.overflow = '';
+    }
+
+    function poll() {
+        fetch(progressUrl, {
+            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+            credentials: 'same-origin'
+        })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (!data) return;
+                var pct = Math.max(0, Math.min(100, parseInt(data.percent, 10) || 0));
+                pBar.style.width = pct + '%';
+                pPct.textContent = pct + '%';
+                if (data.label) pLabel.textContent = data.label;
+
+                if (data.status === 'success') {
+                    clearInterval(pollTimer);
+                    spinner.className = 'w-9 h-9 flex-none rounded-full bg-green-500 flex items-center justify-center text-white';
+                    spinner.innerHTML = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>';
+                    pTitle.textContent = '{{ __('Complete') }}';
+                    pSub.textContent = '{{ __('The page will reload shortly') }}';
+                    pMsg.className = 'mt-4 p-3 rounded-lg text-sm bg-green-50 border border-green-200 text-green-800';
+                    pMsg.textContent = data.label || '';
+                    pMsg.classList.remove('hidden');
+                    pClose.classList.remove('hidden');
+                    setTimeout(function () { window.location.reload(); }, 2000);
+                    return;
+                }
+
+                if (data.status === 'error') {
+                    clearInterval(pollTimer);
+                    spinner.className = 'w-9 h-9 flex-none rounded-full bg-red-500 flex items-center justify-center text-white';
+                    spinner.innerHTML = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>';
+                    pTitle.textContent = '{{ __('Failed') }}';
+                    pSub.textContent = '{{ __('An error occurred') }}';
+                    pMsg.className = 'mt-4 p-3 rounded-lg text-sm bg-red-50 border border-red-200 text-red-800';
+                    pMsg.textContent = data.label || '';
+                    pMsg.classList.remove('hidden');
+                    pClose.classList.remove('hidden');
+                    return;
+                }
+            })
+            .catch(function () {});
+    }
+
+    function startPolling() {
+        if (pollTimer) clearInterval(pollTimer);
+        pollTimer = setInterval(poll, 1000);
+        poll();
+    }
+
+    document.querySelectorAll('.js-backup-form').forEach(function (form) {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            openOverlay('{{ __('Creating Backup') }}', '{{ __('Please do not close this tab') }}');
+            startPolling();
+
+            var fd = new FormData(form);
+
+            fetch(form.action, {
+                method: 'POST',
+                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                body: fd,
+                credentials: 'same-origin'
+            })
+                .then(function (r) {
+                    var ct = r.headers.get('Content-Type') || '';
+                    if (ct.indexOf('application/json') !== -1) {
+                        return r.json().then(function (j) { return { json: j, response: r }; });
+                    }
+                    return { json: null, response: r };
+                })
+                .then(function (result) {
+                    if (result.json && !result.json.success) {
+                        clearInterval(pollTimer);
+                        spinner.className = 'w-9 h-9 flex-none rounded-full bg-red-500 flex items-center justify-center text-white';
+                        spinner.innerHTML = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>';
+                        pTitle.textContent = '{{ __('Failed') }}';
+                        pSub.textContent = '';
+                        pMsg.className = 'mt-4 p-3 rounded-lg text-sm bg-red-50 border border-red-200 text-red-800';
+                        pMsg.textContent = result.json.message || '{{ __('Unknown error') }}';
+                        pMsg.classList.remove('hidden');
+                        pClose.classList.remove('hidden');
+                    }
+                })
+                .catch(function (err) {
+                    clearInterval(pollTimer);
+                    pMsg.className = 'mt-4 p-3 rounded-lg text-sm bg-red-50 border border-red-200 text-red-800';
+                    pMsg.textContent = err.message || '{{ __('Network error') }}';
+                    pMsg.classList.remove('hidden');
+                    pClose.classList.remove('hidden');
+                });
+        });
+    });
+
+    document.querySelectorAll('.js-restore-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var msg = btn.getAttribute('data-confirm') || '{{ __('Restore this backup?') }}';
+            if (!window.confirm(msg)) return;
+
+            var url = btn.getAttribute('data-restore-url');
+            var type = btn.getAttribute('data-type') || 'local';
+
+            openOverlay('{{ __('Restoring Backup') }}', '{{ __('Please do not close this tab') }}');
+            startPolling();
+
+            var fd = new FormData();
+            fd.append('_token', '{{ csrf_token() }}');
+            fd.append('_method', 'POST');
+            fd.append('type', type);
+
+            fetch(url, {
+                method: 'POST',
+                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                body: fd,
+                credentials: 'same-origin'
+            })
+                .then(function (r) { return r.json().then(function (j) { return { json: j, ok: r.ok }; }); })
+                .then(function (result) {
+                    if (result.json && !result.json.success) {
+                        clearInterval(pollTimer);
+                        spinner.className = 'w-9 h-9 flex-none rounded-full bg-red-500 flex items-center justify-center text-white';
+                        spinner.innerHTML = '<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>';
+                        pTitle.textContent = '{{ __('Restore Failed') }}';
+                        pSub.textContent = '';
+                        pMsg.className = 'mt-4 p-3 rounded-lg text-sm bg-red-50 border border-red-200 text-red-800';
+                        pMsg.textContent = result.json.message || '{{ __('Unknown error') }}';
+                        pMsg.classList.remove('hidden');
+                        pClose.classList.remove('hidden');
+                    }
+                })
+                .catch(function (err) {
+                    clearInterval(pollTimer);
+                    pMsg.className = 'mt-4 p-3 rounded-lg text-sm bg-red-50 border border-red-200 text-red-800';
+                    pMsg.textContent = err.message || '{{ __('Network error') }}';
+                    pMsg.classList.remove('hidden');
+                    pClose.classList.remove('hidden');
+                });
+        });
+    });
+
+    pClose.addEventListener('click', function () {
+        window.location.reload();
+    });
+})();
+</script>
 @endsection
