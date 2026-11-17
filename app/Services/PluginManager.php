@@ -343,12 +343,23 @@ class PluginManager
             return ['success' => false, 'message' => __('Could not open ZIP archive.')];
         }
 
+        $guard = \App\Support\ZipGuard::inspect($zip);
+
+        if (empty($guard['ok'])) {
+            $zip->close();
+            return ['success' => false, 'message' => $guard['message']];
+        }
+
         $extractPath = storage_path('app/plugin-temp/' . uniqid('plugin_'));
 
-        File::makeDirectory($extractPath, 0755, true);
+        $extract = \App\Support\ZipGuard::extract($zip, $extractPath);
 
-        $zip->extractTo($extractPath);
         $zip->close();
+
+        if (empty($extract['ok'])) {
+            File::deleteDirectory($extractPath);
+            return ['success' => false, 'message' => $extract['message']];
+        }
 
         $manifestPath = $this->findManifest($extractPath);
 
