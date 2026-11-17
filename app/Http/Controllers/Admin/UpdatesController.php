@@ -23,7 +23,7 @@ class UpdatesController extends Controller
     {
         $this->repo = rj_get_option('update_repo', 'rj-nexus/rj-nexus');
 
-        $configVersion = ltrim((string) config('app.version', '1.9.5'), 'v');
+        $configVersion = ltrim((string) config('app.version', '1.9.6'), 'v');
         $dbVersion = ltrim((string) rj_get_option('rj_version', '1.0.0'), 'v');
 
         $this->currentVersion = $configVersion;
@@ -104,8 +104,24 @@ class UpdatesController extends Controller
         return back()->with('success', __('Update settings saved.'));
     }
 
+    public function progress(Request $request)
+    {
+        $userId = (int) $request->user()->id;
+        $data = Cache::get('rj_update_progress_' . $userId, [
+            'step' => 'idle',
+            'label' => '',
+            'percent' => 0,
+            'status' => 'idle',
+            'message' => '',
+        ]);
+
+        return response()->json($data);
+    }
+
     public function run(BackupService $backup)
     {
+        $userId = (int) auth()->id();
+
         $release = $this->getCachedRelease();
 
         if (empty($release) || empty($release['has_update'])) {
@@ -144,7 +160,11 @@ class UpdatesController extends Controller
         $dbBackupFilename = null;
         $dbRestored = false;
 
+        $this->setProgress($userId, 'init', __('Preparing update...'), 5, 'running');
+
         try {
+            $this->setProgress($userId, 'backup', __('Creating database and code backup...'), 10, 'running');
+
             $backupResult = $backup->create('local');
             if (empty($backupResult['success'])) {
                 throw new \RuntimeException(__('Backup failed: :msg', ['msg' => $backupResult['message'] ?? '']));
@@ -153,6 +173,8 @@ class UpdatesController extends Controller
 
             File::ensureDirectoryExists(dirname($zipPath));
             File::ensureDirectoryExists($extractPath);
+
+            $this->setProgress($userId, 'download', __('Downloading update package from GitHub...'), 25, 'running');
 
             $response = Http::withHeaders([
                 'User-Agent' => 'RJ-Nexus-Updater/1.0',
@@ -171,6 +193,8 @@ class UpdatesController extends Controller
                 throw new \RuntimeException(__('Downloaded file is empty or too small.'));
             }
 
+            $this->setProgress($userId, 'extract', __('Extracting archive...'), 45, 'running');
+
             $zip = new \ZipArchive();
             if ($zip->open($zipPath) !== true) {
                 throw new \RuntimeException(__('Cannot open downloaded ZIP file.'));
@@ -180,6 +204,8 @@ class UpdatesController extends Controller
 
             $entries = array_values(array_filter(File::directories($extractPath)));
             $root = count($entries) === 1 ? $entries[0] : $extractPath;
+
+            $this->setProgress($userId, 'verify', __('Verifying built assets...'), 55, 'running');
 
             $manifestPath = $root . '/public/build/manifest.json';
             if (!File::exists($manifestPath)) {
@@ -191,16 +217,25 @@ class UpdatesController extends Controller
                 throw new \RuntimeException(__('Update aborted: public/build/manifest.json is invalid.'));
             }
 
+            $this->setProgress($userId, 'backup_code', __('Creating code snapshot for rollback...'), 62, 'running');
+
             Artisan::call('down', ['--render' => 'errors::503']);
 
             $this->createCodeBackup($codeBackupPath, $protected);
+
+            $this->setProgress($userId, 'replace', __('Replacing application files...'), 72, 'running');
 
             $this->replaceFiles($root, base_path(), $protected);
 
             $composerAfter = File::exists(base_path('composer.json')) ? md5_file(base_path('composer.json')) : '';
             $composerChanged = $composerBefore !== $composerAfter;
 
+            $this->setProgress($userId, 'migrate', __('Running database migrations...'), 85, 'running');
+
             Artisan::call('migrate', ['--force' => true]);
+
+            $this->setProgress($userId, 'cleanup', __('Clearing caches...'), 95, 'running');
+
             Artisan::call('optimize:clear');
             Cache::forget('github_releases_' . str_replace('/', '_', $this->repo));
             Cache::forget('rj_options');
@@ -223,8 +258,12 @@ class UpdatesController extends Controller
                 $message .= ' ' . __('Note: composer.json changed — run `composer install --no-dev` to update vendor.');
             }
 
+            $this->setProgress($userId, 'done', $message, 100, 'success');
+
             return back()->with('success', $message);
         } catch (\Throwable $e) {
+            $this->setProgress($userId, 'error', __('Rolling back...'), 96, 'running');
+
             try {
                 Artisan::call('up');
             } catch (\Throwable $e2) {}
@@ -256,12 +295,26 @@ class UpdatesController extends Controller
 
             $lock->release();
 
-            if ($dbRestored) {
-                return back()->with('error', __('Update failed: :msg. Site files and database restored from pre-update backup.', ['msg' => $e->getMessage()]));
-            }
+            $errorMsg = $dbRestored
+                ? __('Update failed: :msg. Site files and database restored from backup.', ['msg' => $e->getMessage()])
+                : __('Update failed: :msg. Files restored; database rollback failed — restore manually from Backups.', ['msg' => $e->getMessage()]);
 
-            return back()->with('error', __('Update failed: :msg. Site files restored from backup, but database rollback failed — restore manually from Backups.', ['msg' => $e->getMessage()]));
+            $this->setProgress($userId, 'error', $errorMsg, 100, 'error');
+
+            return back()->with('error', $errorMsg);
         }
+    }
+
+    protected function setProgress(int $userId, string $step, string $label, int $percent, string $status): void
+    {
+        Cache::put('rj_update_progress_' . $userId, [
+            'step' => $step,
+            'label' => $label,
+            'percent' => $percent,
+            'status' => $status,
+            'message' => $status === 'success' || $status === 'error' ? $label : '',
+            'updated_at' => now()->toDateTimeString(),
+        ], 900);
     }
 
     protected function pickDownloadUrl(array $release): ?string
