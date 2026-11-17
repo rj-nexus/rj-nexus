@@ -2,27 +2,24 @@
 
 All notable changes to RJ Nexus will be documented in this file.
 
-## [v1.9.5] - 2026-11-17
+## [v1.9.6] - 2026-11-17
 
 ### 🚀 Added
-- **Core Info Panel (Updates):** Added a small informational panel in the Updates section about "Altair" (the star) and the RJ CORE 1 series, with a subtle design touch.
-- **Appearance → Options Redesign:** Simplified the Appearance → Options section for a cleaner, lighter user experience.
+- **One-Click Core Auto-Updater:** The "Install Update Now" button now performs a full in-place update — downloads the release ZIP from GitHub, verifies `public/build/manifest.json`, replaces application files, runs migrations, and clears caches. No manual installation required.
+- **Pre-Update Code Backup:** Before replacing files, the updater creates a ZIP snapshot of the current codebase (excluding `.env`, `storage/`, `vendor/`, user themes/plugins) so the system can roll back on failure.
+- **Database Rollback:** If the update fails after migrations run, the database is automatically restored from the pre-update backup alongside the code rollback.
+- **Update Settings Card:** Added `update_repo` input and `auto_check` toggle directly on the Updates page, so admins can change the GitHub source and disable automatic checks without editing files.
 
 ### ⚡ Changed
-- **Dependency Updates:** Upgraded Composer packages, Laravel framework, and bundled plugins to their latest stable versions.
-- **Performance Optimization:** General optimization pass improving overall system responsiveness and reducing resource usage across the admin panel and frontend.
+- **Update Button:** Renamed from "Prepare Update" to "Install Update Now" with a confirmation dialog and loading state ("Updating, please wait…").
+- **Asset Selection:** Download now prefers `.zip` assets from the GitHub release, and skips prerelease versions when picking the latest stable release.
+- **Download Request:** Added `User-Agent` and full redirect handling to GitHub downloads to avoid rate-limit and redirect failures.
+- **Auto-Check Middleware:** `CheckForUpdates` now respects the `auto_check` setting and releases the cache lock on failure.
+- **CheckUpdates Command:** Now uses the correct option keys (`last_release`/`last_checked`), reads `update_repo`, adds `download_url`, filters prereleases, and calls `GitHubService` instead of hitting the GitHub API directly.
+- **GitHubService:** Added a fallback to the direct GitHub API when the proxy `/releases` endpoint is unavailable or returns invalid data.
 
 ### 🐛 Fixed
-- **Global Favicon Support:** Favicon set via Appearance → Options now displays correctly across all themes. Themes no longer override the admin-configured favicon.
-- **Sidebar Post Type Detection:** Sidebar no longer incorrectly shows/highlights "Pages" when creating, editing, or viewing a Post. Active state is now correctly detected via route param, query string, and route name, with layout-type flag overrides for posts/pages.
-- **Automatic Update Check:** Theme and plugin updates from the registry are now checked automatically every 15 minutes via pseudo-cron, guarded by an atomic cache lock to prevent duplicate requests.
-- **Update Notifications:** Theme and plugin update alerts now correctly appear in the notification bell. Fixed the issue where updates were silently applied without generating a notification. Duplicate notifications are prevented and alerts are localized per admin user with JSON translation keys.
-- **Update System Reliability:** Theme, plugin, and core updates now apply correctly end-to-end. Previously updates could fail silently or leave the system in an inconsistent state; the update flow is now stable and reports accurate status.
-- **Theme Update Badge:** Fixed the missing "update available" badge on themes in the Themes section. The badge and update action now display correctly when a new version is available.
-- **Plugin Update Badge:** Fixed the same missing "update available" badge issue on plugins. The badge and update action now display correctly when a new version is available.
-
-## [v1.9.4] - 2026-11-16
-### 🐛 Fixed
-- **Sidebar Post Type Detection:** Sidebar no longer incorrectly shows/highlights "Pages" when creating, editing, or viewing a Post. Active state is now correctly detected via route param, query string, and route name, with layout-type flag overrides for posts/pages.
-- **Automatic Update Check:** Theme and plugin updates from the registry are now checked automatically every 15 minutes via pseudo-cron, guarded by an atomic cache lock to prevent duplicate requests.
-- **Update Notifications:** Theme and plugin update alerts now correctly appear in the notification bell. Fixed the issue where updates were silently applied without generating a notification. Duplicate notifications are prevented and alerts are localized per admin user with JSON translation keys.
+- **"Manual Installation Required" Message:** Removed. The updater now installs updates automatically; the message was a leftover placeholder that never performed a real update.
+- **Missing Manifest Check:** Updates are aborted with a clear error if the release ZIP does not include `public/build/manifest.json`, preventing broken CSS/JS after install.
+- **Stale Update Notifications:** After a successful update, all core update notifications are cleared from the admin bell.
+- **Cache Invalidation:** `github_releases_*` and `rj_options` caches are cleared after an update so the next check returns fresh data.
