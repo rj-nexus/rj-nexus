@@ -2,48 +2,56 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Cache;
-use App\Models\Option;
 use App\Models\Notification;
-use App\Models\User;
-use App\Models\Theme;
+use App\Models\Option;
 use App\Models\Plugin;
+use App\Models\Theme;
+use App\Models\User;
+use App\Services\GitHubService;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
 class CheckUpdates extends Command
 {
     protected $signature = 'rj:check-updates';
-    protected $description = 'Avtomatik olaraq Core, Tema və Plagin yeniləmələrini yoxlayır';
+    protected $description = 'Check for core, theme and plugin updates';
 
     public function handle()
     {
-        $this->info('Sistem yeniləmələri yoxlanılır...');
+        $this->info('Checking system updates...');
 
-        // 1. Core CMS Yoxlaması
         try {
-            $response = Http::timeout(10)->get('https://api.github.com/repos/rj-nexus/rj-nexus/releases/latest');
+            $repo = rj_get_option('update_repo', 'rj-nexus/rj-nexus');
+            $parts = explode('/', $repo);
 
-            if ($response->successful()) {
-                $latest = $response->json();
-                $latestVersion = ltrim($latest['tag_name'] ?? '', 'v');
-                $currentVersion = config('app.version', '1.0.0');
-                
+            if (count($parts) !== 2) {
+                throw new \RuntimeException('Invalid update_repo format: ' . $repo);
+            }
+
+            $github = app(GitHubService::class);
+            $releases = $github->getReleases($parts[0], $parts[1]);
+            $release = $this->pickLatestRelease($releases);
+
+            if (!$release) {
+                $this->warn('No stable release found.');
+            } else {
+                $latestVersion = ltrim($release['tag_name'] ?? '', 'v');
+                $currentVersion = ltrim((string) config('app.version', '1.0.0'), 'v');
                 $hasUpdate = version_compare($latestVersion, $currentVersion, '>');
 
-                $updateData = [
-                    'has_update' => $hasUpdate,
+                $releaseData = [
                     'version' => $latestVersion,
-                    'name' => $latest['name'] ?? '',
-                    'published_at' => $latest['published_at'] ?? null,
-                    'body' => $latest['body'] ?? '',
-                    'url' => $latest['html_url'] ?? '',
+                    'name' => $release['name'] ?? $release['tag_name'],
+                    'body' => $release['body'] ?? '',
+                    'url' => $release['html_url'] ?? '',
+                    'download_url' => $this->pickDownloadUrl($release),
+                    'published_at' => $release['published_at'] ?? null,
+                    'prerelease' => false,
+                    'has_update' => $hasUpdate,
                 ];
 
-                Cache::put('rj_latest_release', $updateData, now()->addDays(1));
-                Option::set('last_update_check', now()->toDateTimeString(), 'updates');
-                Option::set('latest_release_data', json_encode($updateData), 'updates');
+                Option::set('last_release', json_encode($releaseData), 'updates');
+                Option::set('last_checked', now()->toDateTimeString(), 'updates');
 
                 if ($hasUpdate) {
                     $this->notifyAdmins(
@@ -54,34 +62,74 @@ class CheckUpdates extends Command
                         ['type' => 'core', 'version' => $latestVersion]
                     );
                 }
-                $this->info('Core versiya: ' . $latestVersion);
+
+                $this->info('Core: v' . $latestVersion . ($hasUpdate ? ' (update available)' : ' (up to date)'));
             }
         } catch (\Throwable $e) {
-            $this->error('Core yoxlama xətası: ' . $e->getMessage());
+            $this->error('Core check failed: ' . $e->getMessage());
+            Log::warning('rj:check-updates core failure: ' . $e->getMessage());
         }
 
-        // 2. Tema və Plagin Yoxlaması
         try {
             $themeManager = app(\App\Services\ThemeManager::class);
             if (method_exists($themeManager, 'checkForUpdates')) {
                 $themeManager->checkForUpdates();
-                $this->info('Temalar yoxlanıldı.');
+                $this->info('Themes checked.');
             }
 
             $pluginManager = app(\App\Services\PluginManager::class);
             if (method_exists($pluginManager, 'checkForUpdates')) {
                 $pluginManager->checkForUpdates();
-                $this->info('Plaginlər yoxlanıldı.');
+                $this->info('Plugins checked.');
             }
-            
+
             $this->checkThemeNotifications();
             $this->checkPluginNotifications();
-            
         } catch (\Throwable $e) {
-            $this->error('Tema/Plagin yoxlama xətası: ' . $e->getMessage());
+            $this->error('Theme/plugin check failed: ' . $e->getMessage());
+            Log::warning('rj:check-updates theme/plugin failure: ' . $e->getMessage());
         }
 
-        $this->info('Bütün yoxlamalar tamamlandı.');
+        $this->info('All checks complete.');
+    }
+
+    protected function pickLatestRelease(array $releases): ?array
+    {
+        $best = null;
+
+        foreach ($releases as $release) {
+            if (!is_array($release) || !empty($release['draft']) || empty($release['tag_name'])) {
+                continue;
+            }
+
+            if (!empty($release['prerelease'])) {
+                continue;
+            }
+
+            if ($best === null || version_compare(ltrim($release['tag_name'], 'v'), ltrim($best['tag_name'], 'v'), '>')) {
+                $best = $release;
+            }
+        }
+
+        return $best;
+    }
+
+    protected function pickDownloadUrl(array $release): ?string
+    {
+        $assets = $release['assets'] ?? [];
+
+        if (is_array($assets)) {
+            foreach ($assets as $asset) {
+                if (!is_array($asset)) continue;
+                $url = (string) ($asset['browser_download_url'] ?? '');
+                $name = (string) ($asset['name'] ?? '');
+                if ($url !== '' && str_ends_with(strtolower($name), '.zip')) {
+                    return $url;
+                }
+            }
+        }
+
+        return $release['zipball_url'] ?? null;
     }
 
     protected function notifyAdmins($title, $message, $url, $label, $meta = [])
@@ -94,13 +142,12 @@ class CheckUpdates extends Command
                 $adminLocale = $admin->locale ?? $defaultLocale;
                 app()->setLocale($adminLocale);
 
-                // DUBLİKATLARIN QARŞISINI ALMAQ ÜÇÜN MÖHKƏM YOXLAMA
                 $exists = Notification::where('user_id', $admin->id)
                     ->where('action_url', $url)
                     ->get()
                     ->contains(function ($n) use ($meta) {
-                        return ($n->meta['version'] ?? '') === ($meta['version'] ?? '') && 
-                               ($n->meta['type'] ?? '') === ($meta['type'] ?? '');
+                        return ($n->meta['version'] ?? '') === ($meta['version'] ?? '')
+                            && ($n->meta['type'] ?? '') === ($meta['type'] ?? '');
                     });
 
                 if (!$exists) {
@@ -116,9 +163,10 @@ class CheckUpdates extends Command
                     ]);
                 }
             }
+
             app()->setLocale($defaultLocale);
         } catch (\Throwable $e) {
-            Log::error('Bildiriş xətası: ' . $e->getMessage());
+            Log::error('Notification failed: ' . $e->getMessage());
         }
     }
 
@@ -127,7 +175,7 @@ class CheckUpdates extends Command
         foreach (Theme::all() as $theme) {
             $meta = $theme->metadata();
             $latest = $meta['latest_version'] ?? null;
-            
+
             if ($latest && version_compare($latest, $theme->version, '>')) {
                 $this->notifyAdmins(
                     __('Theme Update Available: :name', ['name' => $theme->name]),
@@ -145,7 +193,7 @@ class CheckUpdates extends Command
         foreach (Plugin::all() as $plugin) {
             $meta = $plugin->metadata();
             $latest = $meta['latest_version'] ?? null;
-            
+
             if ($latest && version_compare($latest, $plugin->version, '>')) {
                 $this->notifyAdmins(
                     __('Plugin Update Available: :name', ['name' => $plugin->name]),
