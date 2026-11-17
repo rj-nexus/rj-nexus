@@ -27,7 +27,7 @@
                 @endif
 
                 @foreach ($section['items'] as $item)
-                    @php
+                     @php
                         $hasChildren = !empty($item['children']);
                         $itemUrl = $item['url'] ?? ($hasChildren ? $item['children'][0]['url'] : '#');
 
@@ -41,8 +41,15 @@
                             }
                         }
                         $isParentActive = ($item['active'] ?? false) || $hasActiveChild;
-                    @endphp
 
+                        $rj_navLabel = $item['label'] ?? '';
+                        if ($rj_navLabel === __('Posts') && isset($rj_isPost)) {
+                            $isParentActive = $rj_isPost;
+                        } elseif ($rj_navLabel === __('Pages') && isset($rj_isPage)) {
+                            $isParentActive = $rj_isPage;
+                        }
+                    @endphp
+                    
                     @if ($hasChildren)
                         @if ($isParentActive)
                             <div>
