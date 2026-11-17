@@ -285,6 +285,7 @@ class PluginManager
 
         $folders = File::directories($this->pluginsPath);
         $count = 0;
+        $preserve = ['latest_version', 'download_url', 'is_prerelease', 'origin_domain'];
 
         foreach ($folders as $folder) {
             $manifestPath = $folder . '/plugin.json';
@@ -304,14 +305,10 @@ class PluginManager
             $existing = Plugin::where('slug', $slug)->first();
             $oldMeta = $existing ? $existing->metadata() : [];
 
-            if (isset($oldMeta['latest_version'])) {
-                $manifest['latest_version'] = $oldMeta['latest_version'];
-            }
-            if (isset($oldMeta['download_url'])) {
-                $manifest['download_url'] = $oldMeta['download_url'];
-            }
-            if (isset($oldMeta['is_prerelease'])) {
-                $manifest['is_prerelease'] = $oldMeta['is_prerelease'];
+            foreach ($preserve as $key) {
+                if (isset($oldMeta[$key])) {
+                    $manifest[$key] = $oldMeta[$key];
+                }
             }
 
             Plugin::updateOrCreate(
@@ -336,7 +333,7 @@ class PluginManager
         return $count;
     }
 
-    public function installFromZip(UploadedFile $file): array
+    public function installFromZip(UploadedFile $file, ?string $originDomain = null): array
     {
         $tempPath = $file->getRealPath();
 
@@ -388,12 +385,22 @@ class PluginManager
 
         WidgetRegistry::reset();
 
+        if ($originDomain !== null && $originDomain !== '') {
+            $installed = Plugin::where('slug', $slug)->first();
+            if ($installed) {
+                $meta = $installed->metadata();
+                $meta['origin_domain'] = $originDomain;
+                $installed->update(['metadata' => $meta]);
+            }
+        }
+
         return ['success' => true, 'message' => __('Plugin uploaded.')];
     }
 
     public function checkForUpdates(): array
     {
         $count = 0;
+        $safe = app(SafeHttpService::class);
 
         foreach (Plugin::all() as $plugin) {
             $metadata = $plugin->metadata();
@@ -405,7 +412,7 @@ class PluginManager
                 $repo = $matches[1] . '/' . $matches[2];
 
                 try {
-                    $headers = ['Accept' => 'application/vnd.github+json', 'User-Agent' => 'RJ-CMS'];
+                    $headers = ['Accept' => 'application/vnd.github+json', 'User-Agent' => 'RJ-Nexus'];
                     if ($token = rj_get_option('github_token')) {
                         $headers['Authorization'] = 'Bearer ' . $token;
                     }
@@ -428,7 +435,17 @@ class PluginManager
                             }
                         }
 
+                        if (!$zipUrl) {
+                            $zipUrl = $release['zipball_url'] ?? null;
+                        }
+
                         if ($zipUrl) {
+                            $originDomain = $metadata['origin_domain'] ?? null;
+
+                            if ($originDomain !== null && !$safe->isSameOrigin($originDomain, $zipUrl)) {
+                                continue;
+                            }
+
                             $metadata['latest_version'] = $latestVersion;
                             $metadata['download_url'] = $zipUrl;
                             $metadata['is_prerelease'] = $isPrerelease;
@@ -464,24 +481,42 @@ class PluginManager
     {
         $metadata = $plugin->metadata();
         $downloadUrl = $metadata['download_url'] ?? null;
+        $originDomain = $metadata['origin_domain'] ?? null;
 
         if (!$downloadUrl) {
             return ['success' => false, 'message' => __('No update source configured.')];
         }
 
-        try {
-            $response = \Illuminate\Support\Facades\Http::timeout(60)->get($downloadUrl);
+        $safe = app(SafeHttpService::class);
 
-            if (!$response->successful()) {
-                return ['success' => false, 'message' => __('Could not download update.')];
+        if ($originDomain !== null && !$safe->isSameOrigin($originDomain, $downloadUrl)) {
+            return [
+                'success' => false,
+                'message' => __('Update blocked: download domain does not match the original install domain.'),
+            ];
+        }
+
+        $wasActive = $plugin->isActive();
+
+        try {
+            if ($wasActive) {
+                $plugin->update(['status' => 'inactive']);
             }
 
             $tmpFile = tempnam(sys_get_temp_dir(), 'plugin_update_');
-            file_put_contents($tmpFile, $response->body());
+            $download = $safe->download($downloadUrl, $tmpFile);
+
+            if (empty($download['success'])) {
+                @unlink($tmpFile);
+                if ($wasActive) $plugin->update(['status' => 'active']);
+                return ['success' => false, 'message' => $download['message'] ?? __('Could not download update.')];
+            }
 
             $zip = new \ZipArchive();
 
             if ($zip->open($tmpFile) !== true) {
+                @unlink($tmpFile);
+                if ($wasActive) $plugin->update(['status' => 'active']);
                 return ['success' => false, 'message' => __('Could not open ZIP archive.')];
             }
 
@@ -495,6 +530,7 @@ class PluginManager
 
             if (!$manifestPath) {
                 File::deleteDirectory($extractPath);
+                if ($wasActive) $plugin->update(['status' => 'active']);
                 return ['success' => false, 'message' => __('plugin.json not found in archive.')];
             }
 
@@ -502,28 +538,59 @@ class PluginManager
 
             if (!is_array($newManifest) || empty($newManifest['name']) || empty($newManifest['main'])) {
                 File::deleteDirectory($extractPath);
+                if ($wasActive) $plugin->update(['status' => 'active']);
                 return ['success' => false, 'message' => __('Invalid plugin.json.')];
             }
 
             $sourceDir = dirname($manifestPath);
             $targetDir = $plugin->path();
+            $backupDir = $targetDir . '.bak.' . time();
 
             if (File::isDirectory($targetDir)) {
-                File::deleteDirectory($targetDir);
+                if (!File::moveDirectory($targetDir, $backupDir, true)) {
+                    File::deleteDirectory($extractPath);
+                    if ($wasActive) $plugin->update(['status' => 'active']);
+                    return ['success' => false, 'message' => __('Could not back up existing plugin.')];
+                }
             }
 
-            File::moveDirectory($sourceDir, $targetDir, true);
+            try {
+                if (!File::moveDirectory($sourceDir, $targetDir, true)) {
+                    throw new \RuntimeException(__('Could not move new plugin files.'));
+                }
+            } catch (\Throwable $moveEx) {
+                if (File::isDirectory($backupDir) && !File::isDirectory($targetDir)) {
+                    @File::moveDirectory($backupDir, $targetDir, true);
+                }
+                File::deleteDirectory($extractPath);
+                if ($wasActive) $plugin->update(['status' => 'active']);
+                return ['success' => false, 'message' => $moveEx->getMessage()];
+            }
+
+            if (File::isDirectory($backupDir)) {
+                File::deleteDirectory($backupDir);
+            }
             File::deleteDirectory($extractPath);
 
-            $newMeta = array_merge($metadata, $newManifest);
+            $finalManifest = json_decode(File::get($targetDir . '/plugin.json'), true) ?: $newManifest;
 
-            unset($newMeta['latest_version']);
-            unset($newMeta['download_url']);
-            unset($newMeta['is_prerelease']);
+            $mergedMeta = array_merge($metadata, $finalManifest);
+
+            unset($mergedMeta['latest_version'], $mergedMeta['download_url'], $mergedMeta['is_prerelease']);
+
+            if ($originDomain !== null) {
+                $mergedMeta['origin_domain'] = $originDomain;
+            } else {
+                $adopted = $safe->extractDomain($downloadUrl);
+                if ($adopted) {
+                    $mergedMeta['origin_domain'] = $adopted;
+                }
+            }
 
             $plugin->update([
-                'version' => $newManifest['version'] ?? $plugin->version,
-                'metadata' => $newMeta,
+                'version' => $finalManifest['version'] ?? $plugin->version,
+                'metadata' => $mergedMeta,
+                'status' => $wasActive ? 'active' : 'inactive',
             ]);
 
             $plugin->refresh();
@@ -533,6 +600,9 @@ class PluginManager
 
             return ['success' => true, 'message' => __('Plugin updated successfully to v:version', ['version' => $plugin->version])];
         } catch (\Throwable $e) {
+            if (isset($wasActive) && $wasActive) {
+                $plugin->update(['status' => 'active']);
+            }
             return ['success' => false, 'message' => $e->getMessage()];
         }
     }
