@@ -4,15 +4,9 @@ namespace App\Support;
 
 class ReleaseNotes
 {
-    /** Bu başlıqlar altındakı məzmun göstərilmir. */
-    private const SKIP = '/(overview|summary|install|upgrad|resources|links|download|documentation)/i';
+    /** Yalnız bu sözlərlə BAŞLAYAN başlıqlar atlanır (mötərizədə "Removed Downloads" kimi başlıqlar qorunur). */
+    private const SKIP = '/^(overview|summary|install|upgrad|resources|links|download|documentation)/i';
 
-    /**
-     * Markdown release body-ni qruplara ayırır.
-     *
-     * Qaytarır:
-     * [ ['title' => 'Added', 'type' => 'added', 'items' => [['title' => '..', 'text' => '..'], ...]], ... ]
-     */
     public static function parse(?string $body): array
     {
         if (!$body || trim($body) === '') {
@@ -28,7 +22,6 @@ class ReleaseNotes
         foreach (preg_split('/\R/', $body) as $line) {
             $trim = trim($line);
 
-            // Kod bloklarını keç
             if (str_starts_with($trim, '```') || str_starts_with($trim, '~~~')) {
                 $inCode = !$inCode;
                 continue;
@@ -37,7 +30,6 @@ class ReleaseNotes
                 continue;
             }
 
-            // H1 / H2 başlıq: yeni qrup və ya keçid
             if (preg_match('/^#{1,2}\s+(.+)$/u', $trim, $m)) {
                 $title   = self::headingText($m[1]);
                 $skip    = $title === '' || (bool) preg_match(self::SKIP, $title);
@@ -46,7 +38,6 @@ class ReleaseNotes
                 continue;
             }
 
-            // H3+ alt başlıqlar: qrupu dəyişmir
             if (preg_match('/^#{3,6}\s+/', $trim)) {
                 $inTable = false;
                 continue;
@@ -56,25 +47,25 @@ class ReleaseNotes
                 continue;
             }
 
-            // Cədvəl sətirləri
             if (str_starts_with($trim, '|')) {
-                // Separator sətri: |---|---|
                 if (preg_match('/^\|[\s:|-]+\|?$/', $trim) && str_contains($trim, '--')) {
                     $inTable = true;
                     continue;
                 }
-                // Header sətri (separatordan əvvəl)
                 if (!$inTable) {
                     $inTable = true;
                     continue;
                 }
-                $cells = array_map('trim', explode('|', trim($trim, '|')));
+
+                $row = str_replace('\\|', "\x00PIPE\x00", $trim);
+                $cells = array_map('trim', explode('|', trim($row, '|')));
+                $cells = array_map(fn($c) => str_replace("\x00PIPE\x00", '|', $c), $cells);
+
                 self::push($groups, $current, $cells[0] ?? '', $cells[1] ?? '');
                 continue;
             }
             $inTable = false;
 
-            // Bullet maddələr
             if (preg_match('/^[-*+]\s+(.+)$/u', $trim, $m)) {
                 $title = '';
                 $text  = $m[1];
@@ -111,18 +102,16 @@ class ReleaseNotes
         ];
     }
 
-    /** Şəkil, link, HTML və çılpaq URL-ləri təmizləyir. */
     private static function clean(string $s): string
     {
-        $s = preg_replace('/!\[[^\]]*\]\([^)]*\)/', '', $s);      // şəkillər / badge-lər
-        $s = preg_replace('/\[([^\]]*)\]\([^)]*\)/', '$1', $s);   // [mətn](url) -> mətn
-        $s = preg_replace('/<[^>]+>/', '', $s);                    // HTML teqləri
-        $s = preg_replace('#https?://\S+#i', '', $s);              // çılpaq URL-lər
+        $s = preg_replace('/!\[[^\]]*\]\([^)]*\)/', '', $s);
+        $s = preg_replace('/\[([^\]]*)\]\([^)]*\)/', '$1', $s);
+        $s = preg_replace('/<[^>]+>/', '', $s);
+        $s = preg_replace('#https?://\S+#i', '', $s);
 
         return trim(preg_replace('/\s{2,}/', ' ', $s));
     }
 
-    /** Təhlükəsiz HTML: əvvəl escape, sonra yalnız qalın / italik / kod. */
     private static function format(string $s): string
     {
         if ($s === '') {
@@ -131,7 +120,6 @@ class ReleaseNotes
 
         $s = e($s);
 
-        // Qalın (kod daxilində də işləyir, backtick-lər toxunulmaz qalır)
         $s = preg_replace('/\*\*(.+?)\*\*/su', '<strong>$1</strong>', $s);
 
         $parts = preg_split('/(`[^`]*`)/u', $s, -1, PREG_SPLIT_DELIM_CAPTURE);
@@ -149,7 +137,6 @@ class ReleaseNotes
         return $out;
     }
 
-    /** Emoji və xüsusi simvolları başlıqdan təmizləyir. */
     private static function headingText(string $h): string
     {
         $h = preg_replace('/[^\p{L}\p{N}\s&\/\-]/u', '', $h);
