@@ -168,43 +168,54 @@ class ThemeManager
             return ['success' => false, 'message' => __('Could not open ZIP archive.')];
         }
 
+        $guard = \App\Support\ZipGuard::inspect($zip);
+
+        if (empty($guard['ok'])) {
+            $zip->close();
+            return ['success' => false, 'message' => $guard['message']];
+        }
+
         $extractPath = storage_path('app/theme-temp/' . uniqid('theme_'));
 
-        File::makeDirectory($extractPath, 0755, true);
+        $extract = \App\Support\ZipGuard::extract($zip, $extractPath);
 
-        $zip->extractTo($extractPath);
         $zip->close();
+
+        if (empty($extract['ok'])) {
+            \Illuminate\Support\Facades\File::deleteDirectory($extractPath);
+            return ['success' => false, 'message' => $extract['message']];
+        }
 
         $manifestPath = $this->findManifest($extractPath);
 
         if (!$manifestPath) {
-            File::deleteDirectory($extractPath);
+            \Illuminate\Support\Facades\File::deleteDirectory($extractPath);
             return ['success' => false, 'message' => __('theme.json not found in archive.')];
         }
 
-        $manifest = json_decode(File::get($manifestPath), true);
+        $manifest = json_decode(\Illuminate\Support\Facades\File::get($manifestPath), true);
 
         if (!is_array($manifest) || empty($manifest['name'])) {
-            File::deleteDirectory($extractPath);
+            \Illuminate\Support\Facades\File::deleteDirectory($extractPath);
             return ['success' => false, 'message' => __('Invalid theme.json.')];
         }
 
-        $slug = $manifest['slug'] ?? Str::slug($manifest['name']);
+        $slug = $manifest['slug'] ?? \Illuminate\Support\Str::slug($manifest['name']);
 
         if (Theme::where('slug', $slug)->exists()) {
-            File::deleteDirectory($extractPath);
+            \Illuminate\Support\Facades\File::deleteDirectory($extractPath);
             return ['success' => false, 'message' => __('Theme already installed.')];
         }
 
         $sourceDir = dirname($manifestPath);
         $targetDir = $this->themesPath . '/' . basename($sourceDir);
 
-        if (!File::isDirectory($this->themesPath)) {
-            File::makeDirectory($this->themesPath, 0755, true);
+        if (!\Illuminate\Support\Facades\File::isDirectory($this->themesPath)) {
+            \Illuminate\Support\Facades\File::makeDirectory($this->themesPath, 0755, true);
         }
 
-        File::moveDirectory($sourceDir, $targetDir, true);
-        File::deleteDirectory($extractPath);
+        \Illuminate\Support\Facades\File::moveDirectory($sourceDir, $targetDir, true);
+        \Illuminate\Support\Facades\File::deleteDirectory($extractPath);
 
         $this->discover();
 
@@ -219,7 +230,7 @@ class ThemeManager
 
         return ['success' => true, 'message' => __('Theme uploaded.')];
     }
-
+    
     public function export(Theme $theme): array
     {
         if (!File::isDirectory($theme->path())) {
