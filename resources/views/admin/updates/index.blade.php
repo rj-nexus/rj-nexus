@@ -202,6 +202,50 @@
     .nx-intro.d1 { animation-delay:.15s; } .nx-intro.d2 { animation-delay:.3s; } .nx-intro.d3 { animation-delay:.45s; } .nx-intro.d4 { animation-delay:.6s; } .nx-intro.d5 { animation-delay:.75s; }
     @keyframes nx-intro { to { opacity:1; transform:none; } }
 
+    .nx-progress-overlay { position:fixed; inset:0; z-index:9999; display:none; align-items:center; justify-content:center;
+        background:rgba(5,4,15,.82); backdrop-filter:blur(10px); padding:20px; }
+    .nx-progress-overlay.nx-open { display:flex; }
+    .nx-progress-modal { width:100%; max-width:560px; border-radius:1.25rem; overflow:hidden; color:#e2e8f0;
+        background:linear-gradient(160deg,#1b1244,#0d0a26); border:1px solid rgba(167,139,250,.35);
+        box-shadow:0 30px 80px -20px rgba(120,90,255,.7); }
+    .nx-progress-header { padding:24px 24px 18px; border-bottom:1px solid rgba(255,255,255,.08); display:flex; align-items:center; gap:14px; }
+    .nx-progress-title { font-size:17px; font-weight:700; color:#fff; }
+    .nx-progress-sub { font-size:12px; color:#94a3b8; margin-top:2px; }
+    .nx-progress-spinner { width:34px; height:34px; flex:none; border-radius:9999px; border:3px solid rgba(167,139,250,.2);
+        border-top-color:#a78bfa; animation:nx-spin .9s linear infinite; }
+    .nx-progress-spinner.nx-done { border-color:#22c55e; border-top-color:#22c55e; animation:none;
+        background:radial-gradient(circle at center, #22c55e 0 40%, transparent 42%); }
+    .nx-progress-spinner.nx-error { border-color:#ef4444; border-top-color:#ef4444; animation:none;
+        background:radial-gradient(circle at center, #ef4444 0 40%, transparent 42%); }
+    .nx-progress-body { padding:20px 24px; }
+    .nx-progress-bar-wrap { position:relative; height:8px; border-radius:9999px; background:rgba(255,255,255,.08); overflow:hidden; }
+    .nx-progress-bar { position:absolute; inset:0 auto 0 0; width:0%; border-radius:9999px;
+        background:linear-gradient(90deg,#a78bfa,#f472b6); transition:width .5s ease-out;
+        box-shadow:0 0 18px rgba(244,114,182,.6); }
+    .nx-progress-pct { display:flex; justify-content:space-between; font-size:12px; color:#94a3b8; margin-top:10px; }
+    .nx-progress-pct b { color:#fff; }
+    .nx-progress-steps { margin-top:16px; display:flex; flex-direction:column; gap:8px; max-height:260px; overflow:auto; padding-right:4px; }
+    .nx-progress-steps::-webkit-scrollbar { width:5px; } .nx-progress-steps::-webkit-scrollbar-thumb { background:rgba(255,255,255,.18); border-radius:5px; }
+    .nx-pstep { display:flex; align-items:center; gap:12px; padding:8px 12px; border-radius:10px; font-size:13px; color:#64748b;
+        background:rgba(255,255,255,.02); border:1px solid rgba(255,255,255,.04); transition:all .3s; }
+    .nx-pstep .ic { width:22px; height:22px; flex:none; border-radius:9999px; display:flex; align-items:center; justify-content:center;
+        background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1); font-size:11px; color:#64748b; }
+    .nx-pstep.nx-active { color:#fff; background:rgba(167,139,250,.12); border-color:rgba(167,139,250,.35); }
+    .nx-pstep.nx-active .ic { background:linear-gradient(135deg,#7c3aed,#db2777); color:#fff; border-color:transparent; animation:nx-pstep-pulse 1.4s ease-in-out infinite; }
+    @keyframes nx-pstep-pulse { 0%,100% { box-shadow:0 0 0 0 rgba(167,139,250,.6); } 50% { box-shadow:0 0 0 6px rgba(167,139,250,0); } }
+    .nx-pstep.nx-done { color:#86efac; background:rgba(34,197,94,.08); border-color:rgba(34,197,94,.25); }
+    .nx-pstep.nx-done .ic { background:#22c55e; color:#052e16; border-color:transparent; }
+    .nx-pstep.nx-fail { color:#fca5a5; background:rgba(239,68,68,.08); border-color:rgba(239,68,68,.25); }
+    .nx-pstep.nx-fail .ic { background:#ef4444; color:#fff; border-color:transparent; }
+    .nx-progress-message { margin-top:16px; padding:12px 14px; border-radius:10px; font-size:13px; line-height:1.5; display:none; }
+    .nx-progress-message.nx-show { display:block; }
+    .nx-progress-message.nx-success { background:rgba(34,197,94,.12); border:1px solid rgba(34,197,94,.35); color:#86efac; }
+    .nx-progress-message.nx-error { background:rgba(239,68,68,.12); border:1px solid rgba(239,68,68,.35); color:#fca5a5; }
+    .nx-progress-footer { padding:14px 24px 20px; display:flex; justify-content:flex-end; gap:10px; }
+    .nx-progress-close { display:none; padding:10px 20px; border-radius:10px; font-size:13px; font-weight:600;
+        color:#fff; background:linear-gradient(90deg,#a78bfa,#f472b6); border:0; cursor:pointer; }
+    .nx-progress-close.nx-show { display:inline-flex; }
+
     @media (max-width:640px) {
         .nx-hero { min-height:560px; padding-top:64px; }
         .nx-altair { width:150px; height:150px; }
@@ -320,7 +364,8 @@
                             <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                         </a>
                     @endif
-                    <form method="POST" action="{{ route('admin.updates.run') }}" id="nxUpdateForm">
+                    <form method="POST" action="{{ route('admin.updates.run') }}" id="nxUpdateForm"
+                          data-progress-url="{{ route('admin.updates.progress') }}">
                         @csrf
                         <button type="submit" id="nxUpdateBtn" class="nx-act"
                                 data-confirm="{{ __('Install v:version now? A backup will be created automatically before updating.', ['version' => $release['version']]) }}"
@@ -419,6 +464,45 @@
         </div>
     </section>
 
+</div>
+
+<div id="nxProgressOverlay" class="nx-progress-overlay" role="dialog" aria-modal="true" aria-labelledby="nxProgressTitle">
+    <div class="nx-progress-modal">
+        <div class="nx-progress-header">
+            <div id="nxProgressSpinner" class="nx-progress-spinner"></div>
+            <div class="flex-1">
+                <div id="nxProgressTitle" class="nx-progress-title">{{ __('Installing Update') }}</div>
+                <div id="nxProgressSub" class="nx-progress-sub">{{ __('Please do not close this tab') }}</div>
+            </div>
+        </div>
+
+        <div class="nx-progress-body">
+            <div class="nx-progress-bar-wrap">
+                <div id="nxProgressBar" class="nx-progress-bar"></div>
+            </div>
+            <div class="nx-progress-pct">
+                <span id="nxProgressLabel">{{ __('Starting...') }}</span>
+                <b id="nxProgressPct">0%</b>
+            </div>
+
+            <div class="nx-progress-steps" id="nxProgressSteps">
+                <div class="nx-pstep" data-step="backup"><div class="ic">1</div><div>{{ __('Creating database and code backup') }}</div></div>
+                <div class="nx-pstep" data-step="download"><div class="ic">2</div><div>{{ __('Downloading update package from GitHub') }}</div></div>
+                <div class="nx-pstep" data-step="extract"><div class="ic">3</div><div>{{ __('Extracting archive') }}</div></div>
+                <div class="nx-pstep" data-step="verify"><div class="ic">4</div><div>{{ __('Verifying built assets (manifest.json)') }}</div></div>
+                <div class="nx-pstep" data-step="backup_code"><div class="ic">5</div><div>{{ __('Creating code snapshot for rollback') }}</div></div>
+                <div class="nx-pstep" data-step="replace"><div class="ic">6</div><div>{{ __('Replacing application files') }}</div></div>
+                <div class="nx-pstep" data-step="migrate"><div class="ic">7</div><div>{{ __('Running database migrations') }}</div></div>
+                <div class="nx-pstep" data-step="cleanup"><div class="ic">8</div><div>{{ __('Clearing caches') }}</div></div>
+            </div>
+
+            <div id="nxProgressMessage" class="nx-progress-message"></div>
+        </div>
+
+        <div class="nx-progress-footer">
+            <button type="button" id="nxProgressClose" class="nx-progress-close" data-reload-url="{{ route('admin.updates.index') }}">{{ __('Reload Page') }}</button>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -641,21 +725,6 @@
         var c = starCenter(); burst(c.x, c.y, 90, 3.4); ring(c.x, c.y, Math.max(W, H) * .6, 5, 'rgba(255,255,255,');
     });
 
-    var updForm = document.getElementById('nxUpdateForm');
-    var updBtn  = document.getElementById('nxUpdateBtn');
-    var updTxt  = document.getElementById('nxUpdateText');
-    if (updForm && updBtn) updForm.addEventListener('submit', function (e) {
-        var msg = updBtn.getAttribute('data-confirm');
-        if (msg && !window.confirm(msg)) { e.preventDefault(); return; }
-        updBtn.classList.add('nx-loading');
-        updBtn.disabled = true;
-        if (updTxt) updTxt.textContent = updBtn.getAttribute('data-updating') || 'Updating...';
-        star.classList.add('nx-hyper');
-        var c = starCenter();
-        burst(c.x, c.y, 140, 4.2);
-        ring(c.x, c.y, Math.max(W, H) * .8, 7, 'rgba(244,114,182,');
-    });
-
     var reveals = document.querySelectorAll('.nx-reveal');
     if ('IntersectionObserver' in window) {
         var io = new IntersectionObserver(function (en) {
@@ -690,6 +759,152 @@
             if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(text).then(done, done); }
             else { var ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch (e) {} document.body.removeChild(ta); done(); }
         });
+    });
+
+    var updForm   = document.getElementById('nxUpdateForm');
+    var updBtn    = document.getElementById('nxUpdateBtn');
+    var updTxt    = document.getElementById('nxUpdateText');
+    var overlay   = document.getElementById('nxProgressOverlay');
+    var spinner   = document.getElementById('nxProgressSpinner');
+    var pTitle    = document.getElementById('nxProgressTitle');
+    var pSub      = document.getElementById('nxProgressSub');
+    var pBar      = document.getElementById('nxProgressBar');
+    var pPct      = document.getElementById('nxProgressPct');
+    var pLabel    = document.getElementById('nxProgressLabel');
+    var pMsg      = document.getElementById('nxProgressMessage');
+    var pClose    = document.getElementById('nxProgressClose');
+    var pStepEls  = document.querySelectorAll('#nxProgressSteps .nx-pstep');
+    var progressUrl = updForm ? updForm.getAttribute('data-progress-url') : null;
+
+    var stepOrder = ['backup','download','extract','verify','backup_code','replace','migrate','cleanup'];
+    var pollTimer = null;
+    var isFinal = false;
+
+    function resetSteps() {
+        pStepEls.forEach(function (el) { el.classList.remove('nx-active','nx-done','nx-fail'); });
+    }
+
+    function markSteps(currentStep) {
+        var idx = stepOrder.indexOf(currentStep);
+        pStepEls.forEach(function (el) {
+            var s = el.getAttribute('data-step');
+            var sIdx = stepOrder.indexOf(s);
+            el.classList.remove('nx-active','nx-done','nx-fail');
+            if (idx === -1) return;
+            if (sIdx < idx) el.classList.add('nx-done');
+            else if (sIdx === idx) el.classList.add('nx-active');
+        });
+    }
+
+    function markAllDone() {
+        pStepEls.forEach(function (el) { el.classList.remove('nx-active'); el.classList.add('nx-done'); });
+    }
+
+    function markFail(currentStep) {
+        var idx = stepOrder.indexOf(currentStep);
+        pStepEls.forEach(function (el) {
+            var s = el.getAttribute('data-step');
+            var sIdx = stepOrder.indexOf(s);
+            el.classList.remove('nx-active','nx-done','nx-fail');
+            if (idx === -1) { el.classList.add('nx-fail'); return; }
+            if (sIdx < idx) el.classList.add('nx-done');
+            else if (sIdx === idx) el.classList.add('nx-fail');
+        });
+    }
+
+    function openOverlay() {
+        overlay.classList.add('nx-open');
+        document.body.style.overflow = 'hidden';
+        resetSteps();
+        pBar.style.width = '0%';
+        pPct.textContent = '0%';
+        pLabel.textContent = @json(__('Starting...'));
+        spinner.classList.remove('nx-done','nx-error');
+        pTitle.textContent = @json(__('Installing Update'));
+        pSub.textContent = @json(__('Please do not close this tab'));
+        pMsg.classList.remove('nx-show','nx-success','nx-error');
+        pClose.classList.remove('nx-show');
+        isFinal = false;
+    }
+
+    function poll() {
+        if (!progressUrl) return;
+        fetch(progressUrl, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'same-origin' })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (!data) return;
+                var pct = Math.max(0, Math.min(100, parseInt(data.percent, 10) || 0));
+                pBar.style.width = pct + '%';
+                pPct.textContent = pct + '%';
+                if (data.label) pLabel.textContent = data.label;
+
+                if (data.status === 'success') {
+                    isFinal = true;
+                    markAllDone();
+                    spinner.classList.add('nx-done');
+                    pTitle.textContent = @json(__('Update Complete'));
+                    pSub.textContent = @json(__('The page will reload shortly'));
+                    pMsg.textContent = data.message || '';
+                    pMsg.classList.add('nx-show','nx-success');
+                    pClose.classList.add('nx-show');
+                    clearInterval(pollTimer);
+                    setTimeout(function () { window.location.reload(); }, 2500);
+                    return;
+                }
+
+                if (data.status === 'error') {
+                    isFinal = true;
+                    markFail(data.step);
+                    spinner.classList.add('nx-error');
+                    pTitle.textContent = @json(__('Update Failed'));
+                    pSub.textContent = @json(__('Rollback completed'));
+                    pMsg.textContent = data.message || '';
+                    pMsg.classList.add('nx-show','nx-error');
+                    pClose.classList.add('nx-show');
+                    clearInterval(pollTimer);
+                    return;
+                }
+
+                if (data.status === 'running') {
+                    markSteps(data.step);
+                }
+            })
+            .catch(function () {});
+    }
+
+    if (updForm && updBtn) updForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var msg = updBtn.getAttribute('data-confirm');
+        if (msg && !window.confirm(msg)) return;
+
+        updBtn.classList.add('nx-loading');
+        updBtn.disabled = true;
+        if (updTxt) updTxt.textContent = updBtn.getAttribute('data-updating') || 'Updating...';
+
+        openOverlay();
+        pollTimer = setInterval(poll, 1000);
+        poll();
+
+        var fd = new FormData(updForm);
+        fetch(updForm.action, {
+            method: 'POST',
+            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+            body: fd,
+            credentials: 'same-origin'
+        })
+            .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, data: j }; }); })
+            .then(function (res) {
+                if (res.ok && res.data && res.data.success) {
+                    poll();
+                } else {
+                    poll();
+                }
+            })
+            .catch(function () { poll(); });
+    });
+
+    if (pClose) pClose.addEventListener('click', function () {
+        window.location.reload();
     });
 })();
 </script>
