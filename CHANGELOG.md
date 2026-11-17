@@ -1,4 +1,8 @@
-## [Unreleased] — v1.9.5
+# Changelog
+
+All notable changes to RJ Nexus will be documented in this file.
+
+## [v1.9.5] - 2026-11-17
 
 ### ⚡ Changed
 - **Dependency Updates:** Upgraded Composer packages, Laravel framework, and bundled plugins to their latest stable versions.
