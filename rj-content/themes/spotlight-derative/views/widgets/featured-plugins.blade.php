@@ -1,24 +1,26 @@
-<section class="py-16" style="background: var(--rj-bg);">
+<section style="padding: 60px 0; background: var(--rj-bg);">
     <div class="rj-container">
-        <div class="flex justify-between items-end mb-10">
-            <h2 class="text-3xl font-bold" style="color: var(--rj-text);">{{ $settings['title'] ?? __('Featured Plugins') }}</h2>
-            <a href="/plugins" class="text-sm font-semibold hover:underline" style="color: var(--rj-primary);">Bütün plaqinlər &rarr;</a>
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px;">
+            <h2 style="font-size: 28px; font-weight: 700; color: var(--rj-text); margin: 0;">{{ $settings['title'] ?? __('Featured Plugins') }}</h2>
+            <a href="/plugins" style="font-size: 14px; font-weight: 600; color: var(--rj-primary); text-decoration: none;">Bütün plaqinlər &rarr;</a>
         </div>
         
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px;">
             @foreach($plugins as $plugin)
-                <div class="rounded-2xl p-6 border transition-transform hover:-translate-y-1" style="background: var(--rj-surface); border-color: var(--rj-border);">
-                    <div class="flex items-center gap-4 mb-4">
-                        <img src="{{ $plugin['logo'] ?? '' }}" class="w-12 h-12 rounded-lg bg-gray-800 object-cover" alt="">
+                <div style="background: var(--rj-surface); border: 1px solid var(--rj-border); border-radius: 16px; padding: 24px; display: flex; flex-direction: column;">
+                    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+                        <img src="{{ $plugin['logo'] ?? '' }}" style="width: 48px; height: 48px; border-radius: 8px; background: #1f2937; object-fit: cover;" alt="">
                         <div>
-                            <h3 class="font-bold" style="color: var(--rj-text);">{{ $plugin['name'] }}</h3>
-                            <p class="text-xs" style="color: var(--rj-muted);">v{{ $plugin['version'] }}</p>
+                            <h3 style="font-size: 18px; font-weight: 700; color: var(--rj-text); margin: 0 0 4px 0;">{{ $plugin['name'] }}</h3>
+                            <p style="font-size: 12px; color: var(--rj-muted); margin: 0;">v{{ $plugin['version'] }}</p>
                         </div>
                     </div>
-                    <p class="text-sm line-clamp-2 mb-6" style="color: var(--rj-muted);">{{ $plugin['description'] }}</p>
-                    <div class="flex gap-2">
-                        <a href="/plugins/{{ $plugin['slug'] }}" class="flex-1 text-center py-2 rounded-lg text-sm font-medium transition" style="background: rgba(255,255,255,0.05); color: var(--rj-text); border: 1px solid var(--rj-border);">Ətraflı</a>
-                        <a href="{{ $plugin['zip_url'] }}" class="flex-1 text-center py-2 rounded-lg text-sm font-medium text-white transition" style="background: var(--rj-primary);">Yüklə</a>
+                    <p style="font-size: 14px; color: var(--rj-muted); margin: 0 0 24px 0; flex-grow: 1; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ $plugin['description'] }}</p>
+                    <div style="display: flex; gap: 8px;">
+                        <a href="/plugins/{{ $plugin['slug'] }}" style="flex: 1; text-align: center; padding: 10px; border-radius: 8px; font-size: 14px; font-weight: 600; background: rgba(255,255,255,0.05); color: var(--rj-text); border: 1px solid var(--rj-border); text-decoration: none;">Ətraflı</a>
+                        @if($plugin['release_available'])
+                            <a href="{{ $plugin['zip_url'] }}" style="flex: 1; text-align: center; padding: 10px; border-radius: 8px; font-size: 14px; font-weight: 600; background: var(--rj-primary); color: #fff; text-decoration: none;">Yüklə</a>
+                        @endif
                     </div>
                 </div>
             @endforeach
