@@ -93,7 +93,8 @@
             @forelse($themes as $theme)
                 <div class="rj-theme-card">
                     <div class="rj-theme-img-wrap">
-                        <img src="{{ $theme['screenshots'][0] ?? $theme['logo'] ?? '' }}" class="rj-theme-img" alt="">
+                        <!-- DÜZƏLİŞ: Yenidən logo istifadə olunur -->
+                        <img src="{{ $theme['logo'] ?? '' }}" class="rj-theme-img" alt="">
                     </div>
                     <div style="padding: 28px; display: flex; flex-direction: column; flex-grow: 1;">
                         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
