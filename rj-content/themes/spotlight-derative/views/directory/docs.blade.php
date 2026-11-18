@@ -8,66 +8,7 @@
     @endif
 </header>
 
-<script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js"></script>
-<script>
-    function docsApp() {
-        return {
-            query: '',
-            results: [],
-            fuse: null,
-            debugInfo: '',
-            
-            init() {
-                const searchIndex = @json($searchIndex ?? []);
-                if (window.rjDocsDebug) {
-                    console.log('[Docs] searchIndex length:', Array.isArray(searchIndex) ? searchIndex.length : 'not array');
-                }
-                this.setupFuse(searchIndex, 0);
-            },
-            
-            setupFuse(searchIndex, attempts) {
-                if (typeof Fuse === 'undefined') {
-                    if (attempts > 100) {
-                        this.debugInfo = 'Fuse.js failed to load';
-                        console.error('[Docs] Fuse.js not available after 10s');
-                        return;
-                    }
-                    setTimeout(() => this.setupFuse(searchIndex, attempts + 1), 100);
-                    return;
-                }
-                
-                if (!Array.isArray(searchIndex) || searchIndex.length === 0) {
-                    this.debugInfo = 'Search index is empty';
-                    console.warn('[Docs] Search index empty or invalid');
-                    return;
-                }
-                
-                this.fuse = new Fuse(searchIndex, {
-                    keys: ['title', 'content'],
-                    threshold: 0.4,
-                    distance: 100,
-                    includeMatches: true,
-                    minMatchCharLength: 2
-                });
-                console.log('[Docs] Fuse ready with', searchIndex.length, 'items');
-            },
-            
-            searchDocs() {
-                if (this.query.trim().length === 0) {
-                    this.results = [];
-                    return;
-                }
-                if (!this.fuse) {
-                    this.results = [];
-                    return;
-                }
-                this.results = this.fuse.search(this.query.trim()).slice(0, 10);
-            }
-        }
-    }
-</script>
-
-<main class="rj-frontend-main" x-data="docsApp()">
+<main class="rj-frontend-main">
     <style>
         .rj-docs-wrap { display: flex; gap: 40px; padding-top: 80px; padding-bottom: 100px; max-width: 1300px; margin: 0 auto; align-items: flex-start; }
         .rj-docs-sidebar { width: 300px; flex-shrink: 0; position: sticky; top: 100px; background: var(--rj-surface); border: 1px solid var(--rj-border); border-radius: 24px; padding: 24px; backdrop-filter: blur(20px); }
@@ -83,6 +24,7 @@
         .rj-docs-menu a { display: block; padding: 10px 16px; border-radius: 10px; color: var(--rj-muted); text-decoration: none; font-size: 14px; font-weight: 500; transition: all 0.2s; border: 1px solid transparent; }
         .rj-docs-menu a:hover { color: var(--rj-text); background: rgba(255,255,255,0.03); }
         .rj-docs-menu a.active { color: var(--rj-primary); background: rgba(167, 139, 250, 0.1); border-color: rgba(167, 139, 250, 0.2); font-weight: 600; }
+        .rj-docs-no-results { color: var(--rj-muted); font-size: 14px; font-style: italic; padding: 10px 16px; display: block; }
         
         .rj-markdown { color: var(--rj-muted); font-size: 16px; line-height: 1.8; }
         .rj-markdown h1 { font-size: 36px; font-weight: 800; color: #fff; margin-bottom: 24px; letter-spacing: -0.02em; }
@@ -108,10 +50,10 @@
         <aside class="rj-docs-sidebar">
             <div class="rj-docs-search">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                <input type="text" x-model="query" @input="searchDocs()" placeholder="{{ __('Search documentation...') }}">
+                <input type="text" id="rj-docs-search-input" placeholder="{{ __('Search documentation...') }}">
             </div>
 
-            <ul class="rj-docs-menu" x-show="query.length === 0">
+            <ul class="rj-docs-menu" id="rj-docs-menu">
                 @foreach($menu as $item)
                     <li>
                         <a href="{{ url(app()->getLocale() . '/docs/' . $item['slug']) }}" 
@@ -122,20 +64,7 @@
                 @endforeach
             </ul>
 
-            <ul class="rj-docs-menu" x-show="query.length > 0" x-cloak>
-                <template x-for="res in results" :key="res.item.slug">
-                    <li>
-                        <a :href="'{{ url(app()->getLocale() . '/docs') }}/' + res.item.slug">
-                            <span x-text="res.item.title"></span>
-                        </a>
-                    </li>
-                </template>
-                <li x-show="results.length === 0 && query.length > 0">
-                    <span style="color: var(--rj-muted); font-size: 14px; font-style: italic; padding: 10px 16px; display: block;">
-                        {{ __('No results found') }}
-                    </span>
-                </li>
-            </ul>
+            <ul class="rj-docs-menu" id="rj-docs-results" style="display: none;"></ul>
         </aside>
 
         <main class="rj-docs-main">
@@ -162,4 +91,81 @@
         {!! rj_render_template($footerTmpl) !!}
     @endif
 </footer>
+
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js"></script>
+<script>
+(function () {
+    var searchIndex = @json($searchIndex ?? []);
+    var docsBase = '{{ url(app()->getLocale() . '/docs') }}';
+
+    console.log('[Docs] searchIndex length:', Array.isArray(searchIndex) ? searchIndex.length : 'not array');
+    if (searchIndex[0]) console.log('[Docs] first item sample:', searchIndex[0].slug, '-', searchIndex[0].title);
+
+    var input = document.getElementById('rj-docs-search-input');
+    var menuList = document.getElementById('rj-docs-menu');
+    var resultsList = document.getElementById('rj-docs-results');
+    var fuse = null;
+
+    function initFuse() {
+        if (typeof Fuse === 'undefined') {
+            console.error('[Docs] Fuse.js not loaded from CDN');
+            return;
+        }
+        if (!Array.isArray(searchIndex) || searchIndex.length === 0) {
+            console.warn('[Docs] Search index empty — nothing to search');
+            return;
+        }
+        fuse = new Fuse(searchIndex, {
+            keys: ['title', 'content'],
+            threshold: 0.4,
+            distance: 100,
+            includeMatches: true,
+            minMatchCharLength: 2
+        });
+        console.log('[Docs] Fuse ready with', searchIndex.length, 'items');
+    }
+
+    input.addEventListener('input', function (e) {
+        var q = e.target.value.trim();
+
+        if (q.length === 0) {
+            menuList.style.display = '';
+            resultsList.style.display = 'none';
+            resultsList.innerHTML = '';
+            return;
+        }
+
+        menuList.style.display = 'none';
+        resultsList.style.display = '';
+
+        if (!fuse) {
+            resultsList.innerHTML = '<li><span class="rj-docs-no-results">' + '{{ __('Search is not ready. Check console.') }}' + '</span></li>';
+            return;
+        }
+
+        var results = fuse.search(q).slice(0, 10);
+        resultsList.innerHTML = '';
+
+        if (results.length === 0) {
+            resultsList.innerHTML = '<li><span class="rj-docs-no-results">' + '{{ __('No results found') }}' + '</span></li>';
+            return;
+        }
+
+        results.forEach(function (res) {
+            var li = document.createElement('li');
+            var a = document.createElement('a');
+            a.href = docsBase + '/' + res.item.slug;
+            a.textContent = res.item.title;
+            li.appendChild(a);
+            resultsList.appendChild(li);
+        });
+    });
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initFuse);
+    } else {
+        initFuse();
+    }
+})();
+</script>
 @endsection
