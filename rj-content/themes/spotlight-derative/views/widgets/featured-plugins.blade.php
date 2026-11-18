@@ -10,7 +10,7 @@
         padding: 24px;
     }
     .rj-plugin-card:hover {
-        border-color: rgba(167, 139, 250, 0.4); /* Primary color glow */
+        border-color: rgba(167, 139, 250, 0.4);
         transform: translateY(-4px);
         box-shadow: 0 20px 40px -20px rgba(0,0,0,0.8), 0 0 20px -5px rgba(167, 139, 250, 0.2);
     }
@@ -31,13 +31,11 @@
 
 <section style="padding: 80px 0; background: var(--rj-bg); position: relative;">
     <div class="rj-container">
-        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px;">
+        <!-- Link çıxarıldı, sadəcə başlıq qaldı -->
+        <div style="margin-bottom: 40px;">
             <h2 style="font-size: 32px; font-weight: 800; color: var(--rj-text); margin: 0; letter-spacing: -0.02em;">
                 {{ $settings['title'] ?? __('Featured Plugins') }}
             </h2>
-            <a href="/plugins" style="font-size: 14px; font-weight: 600; color: var(--rj-primary); text-decoration: none; display: flex; align-items: center; gap: 6px;">
-                {{ __('View all plugins') }} <span>&rarr;</span>
-            </a>
         </div>
         
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px;">

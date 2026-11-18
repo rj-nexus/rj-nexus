@@ -21,13 +21,11 @@
 
 <section style="padding: 80px 0; background: var(--rj-bg);">
     <div class="rj-container">
-        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px;">
+        <!-- Link çıxarıldı, sadəcə başlıq qaldı -->
+        <div style="margin-bottom: 40px;">
             <h2 style="font-size: 32px; font-weight: 800; color: var(--rj-text); margin: 0; letter-spacing: -0.02em;">
                 {{ $settings['title'] ?? __('Featured Themes') }}
             </h2>
-            <a href="/themes" style="font-size: 14px; font-weight: 600; color: var(--rj-primary); text-decoration: none; display: flex; align-items: center; gap: 6px;">
-                {{ __('View all themes') }} <span>&rarr;</span>
-            </a>
         </div>
         
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px;">
