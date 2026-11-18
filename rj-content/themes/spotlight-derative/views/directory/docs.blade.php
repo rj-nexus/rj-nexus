@@ -8,6 +8,65 @@
     @endif
 </header>
 
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js"></script>
+<script>
+    function docsApp() {
+        return {
+            query: '',
+            results: [],
+            fuse: null,
+            debugInfo: '',
+            
+            init() {
+                const searchIndex = @json($searchIndex ?? []);
+                if (window.rjDocsDebug) {
+                    console.log('[Docs] searchIndex length:', Array.isArray(searchIndex) ? searchIndex.length : 'not array');
+                }
+                this.setupFuse(searchIndex, 0);
+            },
+            
+            setupFuse(searchIndex, attempts) {
+                if (typeof Fuse === 'undefined') {
+                    if (attempts > 100) {
+                        this.debugInfo = 'Fuse.js failed to load';
+                        console.error('[Docs] Fuse.js not available after 10s');
+                        return;
+                    }
+                    setTimeout(() => this.setupFuse(searchIndex, attempts + 1), 100);
+                    return;
+                }
+                
+                if (!Array.isArray(searchIndex) || searchIndex.length === 0) {
+                    this.debugInfo = 'Search index is empty';
+                    console.warn('[Docs] Search index empty or invalid');
+                    return;
+                }
+                
+                this.fuse = new Fuse(searchIndex, {
+                    keys: ['title', 'content'],
+                    threshold: 0.4,
+                    distance: 100,
+                    includeMatches: true,
+                    minMatchCharLength: 2
+                });
+                console.log('[Docs] Fuse ready with', searchIndex.length, 'items');
+            },
+            
+            searchDocs() {
+                if (this.query.trim().length === 0) {
+                    this.results = [];
+                    return;
+                }
+                if (!this.fuse) {
+                    this.results = [];
+                    return;
+                }
+                this.results = this.fuse.search(this.query.trim()).slice(0, 10);
+            }
+        }
+    }
+</script>
+
 <main class="rj-frontend-main" x-data="docsApp()">
     <style>
         .rj-docs-wrap { display: flex; gap: 40px; padding-top: 80px; padding-bottom: 100px; max-width: 1300px; margin: 0 auto; align-items: flex-start; }
@@ -66,11 +125,15 @@
             <ul class="rj-docs-menu" x-show="query.length > 0" x-cloak>
                 <template x-for="res in results" :key="res.item.slug">
                     <li>
-                        <a :href="'{{ url(app()->getLocale() . '/docs') }}/' + res.item.slug" x-text="res.item.title"></a>
+                        <a :href="'{{ url(app()->getLocale() . '/docs') }}/' + res.item.slug">
+                            <span x-text="res.item.title"></span>
+                        </a>
                     </li>
                 </template>
-                <li x-show="results.length === 0">
-                    <span style="color: var(--rj-muted); font-size: 14px; font-style: italic; padding: 10px 16px; display: block;">{{ __('No results found') }}</span>
+                <li x-show="results.length === 0 && query.length > 0">
+                    <span style="color: var(--rj-muted); font-size: 14px; font-style: italic; padding: 10px 16px; display: block;">
+                        {{ __('No results found') }}
+                    </span>
                 </li>
             </ul>
         </aside>
@@ -84,7 +147,9 @@
                 <div style="text-align: center; padding: 40px;">
                     <h1 style="color: #ef4444; font-size: 32px;">{{ __('404 - Document Not Found') }}</h1>
                     <p style="color: var(--rj-muted); margin-top: 16px;">{{ __('The requested documentation page could not be found or is unavailable.') }}</p>
-                    <a href="{{ url(app()->getLocale() . '/docs') }}" class="rj-btn-primary" style="display: inline-block; margin-top: 24px; padding: 12px 24px;">{{ __('Back to Docs') }}</a>
+                    <a href="{{ url(app()->getLocale() . '/docs') }}" style="display: inline-block; margin-top: 24px; padding: 12px 24px; background: linear-gradient(135deg, var(--rj-primary), var(--rj-secondary)); color: #fff; border-radius: 12px; text-decoration: none; font-weight: 600;">
+                        {{ __('Back to Docs') }}
+                    </a>
                 </div>
             @endif
         </main>
@@ -97,41 +162,4 @@
         {!! rj_render_template($footerTmpl) !!}
     @endif
 </footer>
-
-<script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js"></script>
-<script>
-    function docsApp() {
-        return {
-            query: '',
-            results: [],
-            fuse: null,
-            
-            init() {
-                const searchIndex = @json($searchIndex ?? []);
-                if (searchIndex.length > 0 && typeof Fuse !== 'undefined') {
-                    this.fuse = new Fuse(searchIndex, {
-                        keys: ['title', 'content'],
-                        threshold: 0.4,
-                        distance: 100,
-                        includeMatches: true,
-                        minMatchCharLength: 2
-                    });
-                }
-            },
-            
-            searchDocs() {
-                if (this.query.trim().length === 0) {
-                    this.results = [];
-                    return;
-                }
-                if (!this.fuse) {
-                    this.results = [];
-                    return;
-                }
-                const res = this.fuse.search(this.query.trim());
-                this.results = res.slice(0, 10);
-            }
-        }
-    }
-</script>
 @endsection
