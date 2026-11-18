@@ -7,11 +7,18 @@
         padding: 12px 24px; font-size: 15px; font-weight: 600; color: var(--rj-muted);
         background: transparent; border: none; border-bottom: 2px solid transparent;
         cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 8px;
+        white-space: nowrap;
     }
     .rj-tab-btn:hover { color: var(--rj-text); }
     .rj-tab-btn.active { color: var(--rj-primary); border-bottom-color: var(--rj-primary); }
     
-    /* README Markdown Stilləri (Qaranlıq Tema üçün) */
+    /* Tab Məzmunu (Default olaraq gizli) */
+    .rj-tab-content { display: none; }
+    .rj-tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+    
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    
+    /* README Markdown Stilləri */
     .rj-markdown { color: var(--rj-muted); font-size: 15px; line-height: 1.7; }
     .rj-markdown h1, .rj-markdown h2, .rj-markdown h3 { color: var(--rj-text); margin-top: 24px; margin-bottom: 16px; font-weight: 700; }
     .rj-markdown h1 { font-size: 28px; border-bottom: 1px solid var(--rj-border); padding-bottom: 10px; }
@@ -28,7 +35,7 @@
     .rj-markdown img { max-width: 100%; height: auto; border-radius: 8px; margin: 16px 0; }
 </style>
 
-<div class="rj-container" style="padding-top: 100px; padding-bottom: 100px; max-width: 1100px;" x-data="{ tab: 'overview' }">
+<div class="rj-container" style="padding-top: 100px; padding-bottom: 100px; max-width: 1100px;">
     
     <a href="{{ url(app()->getLocale() . '/plugins') }}" style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 32px; color: var(--rj-primary); text-decoration: none; font-weight: 600; font-size: 14px;">
         &larr; {{ __('Back to all plugins') }}
@@ -69,20 +76,20 @@
 
         <!-- Tab Menyusu -->
         <div style="display: flex; gap: 8px; padding: 0 48px; border-bottom: 1px solid var(--rj-border); background: rgba(0,0,0,0.2); overflow-x: auto;">
-            <button @click="tab = 'overview'" :class="{'active': tab === 'overview'}" class="rj-tab-btn">
+            <button onclick="switchTab(event, 'tab-overview')" class="rj-tab-btn active">
                 <svg style="width: 18px; height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 {{ __('Overview') }}
             </button>
-            <button @click="tab = 'readme'" :class="{'active': tab === 'readme'}" class="rj-tab-btn">
+            <button onclick="switchTab(event, 'tab-readme')" class="rj-tab-btn">
                 <svg style="width: 18px; height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
                 {{ __('Readme') }}
             </button>
-            <button @click="tab = 'installation'" :class="{'active': tab === 'installation'}" class="rj-tab-btn">
+            <button onclick="switchTab(event, 'tab-installation')" class="rj-tab-btn">
                 <svg style="width: 18px; height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 {{ __('Installation') }}
             </button>
             @if(!empty($plugin['screenshots']))
-            <button @click="tab = 'screenshots'" :class="{'active': tab === 'screenshots'}" class="rj-tab-btn">
+            <button onclick="switchTab(event, 'tab-screenshots')" class="rj-tab-btn">
                 <svg style="width: 18px; height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                 {{ __('Screenshots') }}
             </button>
@@ -93,7 +100,7 @@
         <div style="padding: 48px;">
             
             <!-- 1. Overview Tab -->
-            <div x-show="tab === 'overview'" x-transition.opacity>
+            <div id="tab-overview" class="rj-tab-content active">
                 <h3 style="font-size: 22px; font-weight: 700; color: var(--rj-text); margin: 0 0 20px 0;">{{ __('Key Features') }}</h3>
                 <ul style="list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
                     @foreach($plugin['features'] as $feature)
@@ -106,7 +113,7 @@
             </div>
 
             <!-- 2. Readme Tab -->
-            <div x-show="tab === 'readme'" x-transition.opacity x-cloak>
+            <div id="tab-readme" class="rj-tab-content">
                 @if($readmeHtml)
                     <div class="rj-markdown">
                         {!! $readmeHtml !!}
@@ -120,7 +127,7 @@
             </div>
 
             <!-- 3. Installation Tab -->
-            <div x-show="tab === 'installation'" x-transition.opacity x-cloak>
+            <div id="tab-installation" class="rj-tab-content">
                 <h3 style="font-size: 22px; font-weight: 700; color: var(--rj-text); margin: 0 0 24px 0;">{{ __('Installation Steps') }}</h3>
                 <ol style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 24px; max-width: 600px;">
                     @foreach($plugin['steps'] as $index => $step)
@@ -134,9 +141,9 @@
                 </ol>
             </div>
 
-            <!-- 4. Screenshots Tab (Əgər varsa) -->
+            <!-- 4. Screenshots Tab -->
             @if(!empty($plugin['screenshots']))
-            <div x-show="tab === 'screenshots'" x-transition.opacity x-cloak>
+            <div id="tab-screenshots" class="rj-tab-content">
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
                     @foreach($plugin['screenshots'] as $screenshot)
                         <a href="{{ $screenshot }}" target="_blank" style="display: block; border-radius: 16px; overflow: hidden; border: 1px solid var(--rj-border);">
@@ -150,4 +157,26 @@
         </div>
     </div>
 </div>
+
+<!-- Tablar üçün Təmiz JavaScript -->
+<script>
+    function switchTab(event, tabId) {
+        // 1. Bütün düymələrdən 'active' klasını sil
+        const buttons = document.querySelectorAll('.rj-tab-btn');
+        buttons.forEach(btn => btn.classList.remove('active'));
+
+        // 2. Kliklənən düyməyə 'active' klasını əlavə et
+        event.currentTarget.classList.add('active');
+
+        // 3. Bütün məzmunları gizlət
+        const contents = document.querySelectorAll('.rj-tab-content');
+        contents.forEach(content => content.classList.remove('active'));
+
+        // 4. Hədəf məzmunu göstər
+        const targetContent = document.getElementById(tabId);
+        if (targetContent) {
+            targetContent.classList.add('active');
+        }
+    }
+</script>
 @endsection
