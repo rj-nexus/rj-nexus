@@ -11,25 +11,25 @@ class DirectoryRoutesMiddleware
     public function handle(Request $request, Closure $next)
     {
         $path = $request->path();
-        
-        // URL-in strukturunu yoxlayırıq: /en/plugins və ya /en/plugins/rj-commerce
-        if (preg_match('/^([a-zA-Z]{2}(?:_[A-Z]{2})?)\/(plugins|themes)(?:\/([^\/]+))?$/', $path, $matches)) {
+
+        if (preg_match('/^([a-zA-Z]{2}(?:_[A-Z]{2})?)\/(plugins|themes|docs)(?:\/([^\/]+))?$/', $path, $matches)) {
             $locale = $matches[1];
-            $type = $matches[2]; // plugins və ya themes
+            $type = $matches[2];
             $slug = $matches[3] ?? null;
 
             app()->setLocale($locale);
             session(['locale' => $locale]);
 
             $controller = app(DirectoryController::class);
-            
+
             if ($type === 'plugins') {
                 $result = $slug ? $controller->pluginDetails($request, $locale, $slug) : $controller->plugins($request);
-            } else {
+            } elseif ($type === 'themes') {
                 $result = $slug ? $controller->themeDetails($request, $locale, $slug) : $controller->themes($request);
+            } else {
+                $result = $controller->docs($request, $locale, $slug);
             }
 
-            // VACİB: View obyektini Response-a çeviririk ki, digər middleware-lər xəta verməsin
             return response($result);
         }
 
