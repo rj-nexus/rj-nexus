@@ -1,4 +1,4 @@
-@extends('spotlight::layout')
+@extends('theme::layout')
 
 @section('content')
 <style>
@@ -17,18 +17,69 @@
         transform: translateY(-4px);
         box-shadow: 0 20px 40px -20px rgba(0,0,0,0.8);
     }
+    
+    .rj-btn-secondary {
+        flex: 1; text-align: center; padding: 10px; border-radius: 10px; font-size: 14px; font-weight: 600;
+        background: rgba(255,255,255,0.03); color: var(--rj-text); border: 1px solid var(--rj-border);
+        text-decoration: none; transition: all 0.2s;
+    }
+    .rj-btn-secondary:hover { background: rgba(255,255,255,0.08); color: #fff; }
+
+    .rj-btn-primary {
+        flex: 1; text-align: center; padding: 10px; border-radius: 10px; font-size: 14px; font-weight: 600;
+        background: linear-gradient(135deg, var(--rj-primary), var(--rj-secondary)); color: #fff; border: none;
+        text-decoration: none; transition: all 0.2s; box-shadow: 0 4px 15px -5px var(--rj-primary);
+    }
+    .rj-btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    /* GLASSMORPHISM AXTARIŞ QUTUSU */
+    .rj-glass-search {
+        display: flex; align-items: center; background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 999px;
+        padding: 4px 4px 4px 20px; transition: all 0.3s ease;
+        box-shadow: 0 4px 20px -10px rgba(0,0,0,0.5);
+    }
+    .rj-glass-search:focus-within {
+        border-color: rgba(167, 139, 250, 0.5); background: rgba(255, 255, 255, 0.06);
+        box-shadow: 0 0 20px -5px rgba(167, 139, 250, 0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+    .rj-glass-search input {
+        background: transparent; border: none; color: var(--rj-text);
+        font-size: 14px; width: 220px; outline: none;
+    }
+    .rj-glass-search input::placeholder { color: var(--rj-muted); opacity: 0.7; }
+    .rj-glass-search button {
+        background: linear-gradient(135deg, var(--rj-primary), var(--rj-secondary));
+        color: #fff; border: none; border-radius: 999px;
+        width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+        cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px -3px var(--rj-primary);
+    }
+    .rj-glass-search button:hover { transform: scale(1.05); box-shadow: 0 6px 16px -3px var(--rj-primary); }
 </style>
 
 <div class="rj-container" style="padding-top: 100px; padding-bottom: 100px; min-height: 100vh;">
-    <div style="margin-bottom: 60px; text-align: center;">
-        <h1 style="font-size: 48px; font-weight: 800; color: var(--rj-text); margin: 0 0 16px 0; letter-spacing: -0.03em; background: linear-gradient(to right, #fff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-            {{ __('Plugins') }}
-        </h1>
-        <p style="font-size: 18px; color: var(--rj-muted); margin: 0;">{{ __('Addons that power up RJ Nexus.') }}</p>
+    
+    <!-- Başlıq və Axtarış Hissəsi -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 50px; flex-wrap: wrap; gap: 24px;">
+        <div>
+            <h1 style="font-size: 40px; font-weight: 800; color: var(--rj-text); margin: 0 0 12px 0; letter-spacing: -0.03em; background: linear-gradient(to right, #fff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                {{ __('Plugins') }}
+            </h1>
+            <p style="font-size: 16px; color: var(--rj-muted); margin: 0;">{{ __('Addons that power up RJ Nexus.') }}</p>
+        </div>
+
+        <form action="{{ url(app()->getLocale() . '/plugins') }}" method="GET" class="rj-glass-search">
+            <input type="text" name="search" placeholder="{{ __('Search plugins...') }}" value="{{ request('search') }}">
+            <button type="submit">
+                <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </button>
+        </form>
     </div>
 
+    <!-- Plaqinlər Şəbəkəsi -->
     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 24px;">
-        @foreach($plugins as $plugin)
+        @forelse($plugins as $plugin)
             <div class="rj-dir-card">
                 <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
                     <div style="width: 64px; height: 64px; border-radius: 16px; background: var(--rj-surface); border: 1px solid var(--rj-border); display: flex; align-items: center; justify-content: center; overflow: hidden;">
@@ -48,13 +99,21 @@
                 <p style="font-size: 14px; line-height: 1.6; color: var(--rj-muted); margin: 0 0 24px 0; flex-grow: 1;">{{ $plugin['description'] }}</p>
                 
                 <div style="display: flex; gap: 12px;">
-                    <a href="{{ route('spotlight.plugins.show', $plugin['slug']) }}" class="rj-btn-secondary">{{ __('Details') }}</a>
+                    <!-- Düzəldilmiş Link (route əvəzinə url) -->
+                    <a href="{{ url(app()->getLocale() . '/plugins/' . $plugin['slug']) }}" class="rj-btn-secondary">{{ __('Details') }}</a>
+                    
                     @if($plugin['release_available'])
                         <a href="{{ $plugin['zip_url'] }}" class="rj-btn-primary">{{ __('Download') }}</a>
                     @endif
                 </div>
             </div>
-        @endforeach
+        @empty
+            <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; background: var(--rj-surface); border-radius: 20px; border: 1px dashed var(--rj-border);">
+                <svg style="width: 48px; height: 48px; color: var(--rj-muted); margin: 0 auto 16px auto; display: block; opacity: 0.5;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                <h3 style="font-size: 20px; font-weight: 600; color: var(--rj-text); margin: 0 0 8px 0;">{{ __('No plugins found') }}</h3>
+                <p style="font-size: 14px; color: var(--rj-muted); margin: 0;">{{ __('Try adjusting your search criteria.') }}</p>
+            </div>
+        @endforelse
     </div>
 </div>
 @endsection

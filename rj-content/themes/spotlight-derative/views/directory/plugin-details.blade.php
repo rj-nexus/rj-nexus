@@ -1,13 +1,16 @@
-@extends('spotlight::layout')
+@extends('theme::layout')
 
 @section('content')
 <div class="rj-container" style="padding-top: 100px; padding-bottom: 100px; max-width: 1000px;">
-    <a href="{{ route('spotlight.plugins.index') }}" style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 32px; color: var(--rj-primary); text-decoration: none; font-weight: 600; font-size: 14px;">
+    
+    <!-- Geri Qayıt Linki (Düzəldildi) -->
+    <a href="{{ url(app()->getLocale() . '/plugins') }}" style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 32px; color: var(--rj-primary); text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.2s;">
         &larr; {{ __('Back to all plugins') }}
     </a>
     
     <div style="background: linear-gradient(145deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%); border: 1px solid var(--rj-border); border-radius: 32px; overflow: hidden; backdrop-filter: blur(20px); box-shadow: 0 30px 60px -30px rgba(0,0,0,0.8);">
-        <!-- Hero Section -->
+        
+        <!-- Üst Hissə (Hero) -->
         <div style="padding: 48px; border-bottom: 1px solid var(--rj-border); display: flex; flex-wrap: wrap; gap: 40px; align-items: flex-start; background: radial-gradient(circle at top right, rgba(167, 139, 250, 0.05), transparent 50%);">
             <div style="width: 140px; height: 140px; border-radius: 24px; background: var(--rj-surface); border: 1px solid var(--rj-border); display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);">
                 <img src="{{ $plugin['logo'] ?? '' }}" style="width: 100%; height: 100%; object-fit: cover;" alt="">
@@ -25,19 +28,19 @@
 
             <div style="width: 100%; max-width: 240px; background: rgba(255,255,255,0.01); padding: 24px; border-radius: 20px; border: 1px solid var(--rj-border);">
                 @if($plugin['release_available'])
-                    <a href="{{ $plugin['zip_url'] }}" class="rj-btn-primary" style="display: block; padding: 16px; font-size: 16px;">
+                    <a href="{{ $plugin['zip_url'] }}" class="rj-btn-primary" style="display: block; padding: 16px; font-size: 16px; text-align: center; border-radius: 12px; font-weight: 700; background: linear-gradient(135deg, var(--rj-primary), var(--rj-secondary)); color: #fff; text-decoration: none; box-shadow: 0 4px 15px -5px var(--rj-primary); transition: all 0.2s;">
                         {{ __('Download Now') }}
                     </a>
                     <p style="text-align: center; font-size: 12px; color: var(--rj-muted); margin-top: 12px;">{{ number_format($plugin['size'] / 1024 / 1024, 1) }} MB &bull; ZIP</p>
                 @endif
                 
-                <a href="{{ $plugin['docs'] }}" target="_blank" style="display: block; text-align: center; margin-top: 16px; font-size: 14px; font-weight: 600; color: var(--rj-primary); text-decoration: none; transition: color 0.2s;">
+                <a href="{{ $plugin['docs'] }}" target="_blank" style="display: block; text-align: center; margin-top: 16px; font-size: 14px; font-weight: 600; color: var(--rj-primary); text-decoration: none;">
                     {{ __('Read Documentation') }} &rarr;
                 </a>
             </div>
         </div>
 
-        <!-- Details Section -->
+        <!-- Alt Hissə (Xüsusiyyətlər və Qaydalar) -->
         <div style="padding: 48px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 60px;">
             <div>
                 <h3 style="font-size: 24px; font-weight: 700; color: var(--rj-text); margin: 0 0 24px 0; display: flex; align-items: center; gap: 10px;">
