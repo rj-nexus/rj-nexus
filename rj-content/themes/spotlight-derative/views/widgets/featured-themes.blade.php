@@ -21,11 +21,25 @@
 
 <section style="padding: 80px 0; background: var(--rj-bg);">
     <div class="rj-container">
-        <!-- Link çıxarıldı, sadəcə başlıq qaldı -->
-        <div style="margin-bottom: 40px;">
+        
+        <!-- Başlıq və Axtarış Hissəsi -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; flex-wrap: wrap; gap: 20px;">
             <h2 style="font-size: 32px; font-weight: 800; color: var(--rj-text); margin: 0; letter-spacing: -0.02em;">
                 {{ $settings['title'] ?? __('Featured Themes') }}
             </h2>
+            
+            <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+                <form action="/themes" method="GET" class="rj-widget-search">
+                    <input type="text" name="search" placeholder="{{ __('Search themes...') }}" value="{{ request('search') }}">
+                    <button type="submit">
+                        <svg style="width: 18px; height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    </button>
+                </form>
+
+                <a href="/themes" style="font-size: 14px; font-weight: 600; color: var(--rj-primary); text-decoration: none; display: flex; align-items: center; gap: 6px; white-space: nowrap;">
+                    {{ __('View all themes') }} <span>&rarr;</span>
+                </a>
+            </div>
         </div>
         
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px;">
