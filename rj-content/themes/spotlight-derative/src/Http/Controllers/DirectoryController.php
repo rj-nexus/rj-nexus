@@ -33,9 +33,7 @@ class DirectoryController extends Controller
         $plugins = $this->registry->enrichPlugins();
         $plugin = collect($plugins)->firstWhere('slug', $slug);
         
-        if (!$plugin) {
-            abort(404, 'Plugin tapılmadı: ' . $slug);
-        }
+        if (!$plugin) abort(404);
 
         return view('spotlight::directory.plugin-details', compact('plugin'));
     }
@@ -58,9 +56,7 @@ class DirectoryController extends Controller
         $themes = $this->registry->enrichThemes();
         $theme = collect($themes)->firstWhere('slug', $slug);
         
-        if (!$theme) {
-            abort(404, 'Tema tapılmadı: ' . $slug);
-        }
+        if (!$theme) abort(404);
 
         return view('spotlight::directory.theme-details', compact('theme'));
     }

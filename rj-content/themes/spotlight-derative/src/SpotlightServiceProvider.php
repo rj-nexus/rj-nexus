@@ -4,8 +4,7 @@ namespace Spotlight;
 
 use Illuminate\Support\ServiceProvider;
 use Spotlight\Services\SpotlightStarterContent;
-use Spotlight\Widgets\FeaturedPluginsWidget; // YENİ
-use Spotlight\Widgets\FeaturedThemesWidget;  // YENİ
+use Spotlight\Http\Middleware\DirectoryRoutesMiddleware; // YENİ ƏLAVƏ EDİLDİ
 use Spotlight\Widgets\SpotlightHeroWidget;
 use Spotlight\Widgets\SpotlightHeaderWidget;
 use Spotlight\Widgets\SpotlightLogosWidget;
@@ -31,6 +30,8 @@ use Spotlight\Widgets\SpotlightStatsWidget;
 use Spotlight\Widgets\SpotlightCtaBannerWidget;
 use Spotlight\Widgets\SpotlightVideoShowcaseWidget;
 use Spotlight\Widgets\SpotlightComparisonTableWidget;
+use Spotlight\Widgets\FeaturedPluginsWidget; // YENİ
+use Spotlight\Widgets\FeaturedThemesWidget;  // YENİ
 
 class SpotlightServiceProvider extends ServiceProvider
 {
@@ -40,8 +41,12 @@ class SpotlightServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Laravel-ə spotlight:: namespace-inin harada olduğunu deyirik
         $this->loadViewsFrom(__DIR__ . '/../views', 'spotlight');
-        $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
+
+        // YENİ: Route faylı yerinə, bizim xüsusi Middleware-i 'web' qrupuna əlavə edirik
+        $router = $this->app['router'];
+        $router->pushMiddlewareToGroup('web', DirectoryRoutesMiddleware::class);
 
         $this->registerWidgets();
         $this->maybeSetupStarterContent();
@@ -52,11 +57,11 @@ class SpotlightServiceProvider extends ServiceProvider
         if (function_exists('rj_add_filter')) {
             rj_add_filter('builder.widgets', function ($existing) {
                 $widgets = [
-                    // YENİ VİDGETLƏR BURADA:
+                    // Yeni əlavə etdiyimiz kataloq vidgetləri
                     new FeaturedPluginsWidget(),
                     new FeaturedThemesWidget(),
-                    
-                    // Mövcud olanlar:
+
+                    // Mövcud Spotlight vidgetləri
                     new SpotlightHeroWidget(),
                     new SpotlightHeaderWidget(),
                     new SpotlightLogosWidget(),
@@ -90,7 +95,6 @@ class SpotlightServiceProvider extends ServiceProvider
 
     protected function maybeSetupStarterContent(): void
     {
-        // ... (bu hissə olduğu kimi qalır)
         if (!function_exists('rj_get_option') || !function_exists('rj_set_option')) {
             return;
         }
