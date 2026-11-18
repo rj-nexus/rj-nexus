@@ -4,6 +4,7 @@ namespace Spotlight\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Services\GitHubRegistry;
+use Illuminate\Http\Request; // VACİB: Request-i əlavə edin
 
 class DirectoryController extends Controller
 {
@@ -11,42 +12,56 @@ class DirectoryController extends Controller
 
     public function __construct()
     {
-        // Mövcud olan GitHubRegistry servisini çağırırıq
         $this->registry = app(GitHubRegistry::class);
     }
 
-    public function plugins()
+    public function plugins(Request $request)
     {
         $plugins = $this->registry->enrichPlugins();
+        
+        if ($search = $request->query('search')) {
+            $plugins = array_filter($plugins, function($p) use ($search) {
+                return stripos($p['name'], $search) !== false || stripos($p['description'], $search) !== false;
+            });
+        }
+
         return view('spotlight::directory.plugins', compact('plugins'));
     }
 
-    public function pluginDetails($slug)
+    public function pluginDetails(Request $request, $slug = null)
     {
+        // Əgər route-da locale varsa, slug-i request-dən götürürük
+        $slug = $slug ?? $request->route('slug');
+        
         $plugins = $this->registry->enrichPlugins();
         $plugin = collect($plugins)->firstWhere('slug', $slug);
         
-        if (!$plugin) {
-            abort(404);
-        }
+        if (!$plugin) abort(404);
 
         return view('spotlight::directory.plugin-details', compact('plugin'));
     }
 
-    public function themes()
+    public function themes(Request $request)
     {
         $themes = $this->registry->enrichThemes();
+
+        if ($search = $request->query('search')) {
+            $themes = array_filter($themes, function($t) use ($search) {
+                return stripos($t['name'], $search) !== false || stripos($t['description'], $search) !== false;
+            });
+        }
+
         return view('spotlight::directory.themes', compact('themes'));
     }
 
-    public function themeDetails($slug)
+    public function themeDetails(Request $request, $slug = null)
     {
+        $slug = $slug ?? $request->route('slug');
+        
         $themes = $this->registry->enrichThemes();
         $theme = collect($themes)->firstWhere('slug', $slug);
         
-        if (!$theme) {
-            abort(404);
-        }
+        if (!$theme) abort(404);
 
         return view('spotlight::directory.theme-details', compact('theme'));
     }

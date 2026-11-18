@@ -67,8 +67,8 @@
                 {{ $settings['title'] ?? __('Featured Plugins') }}
             </h2>
             
-            <!-- Axtarış Formu -->
-            <form action="/plugins" method="GET" class="rj-glass-search">
+            <!-- Axtarış Formu (Dil dəstəyi ilə) -->
+            <form action="{{ url(app()->getLocale() . '/plugins') }}" method="GET" class="rj-glass-search">
                 <input type="text" name="search" placeholder="{{ __('Search plugins...') }}" value="{{ request('search') }}">
                 <button type="submit">
                     <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
@@ -87,7 +87,9 @@
                             {{ $plugin['description'] }}
                         </p>
                         <div style="display: flex; gap: 12px;">
-                            <a href="/plugins/{{ $plugin['slug'] }}" class="rj-btn-secondary">{{ __('Details') }}</a>
+                            <!-- Details Linki (Dil dəstəyi ilə) -->
+                            <a href="{{ url(app()->getLocale() . '/plugins/' . $plugin['slug']) }}" class="rj-btn-secondary">{{ __('Details') }}</a>
+                            
                             @if($plugin['release_available'])
                                 <a href="{{ $plugin['zip_url'] }}" class="rj-btn-primary">{{ __('Download') }}</a>
                             @endif
