@@ -24,6 +24,9 @@
         .rj-docs-menu a { display: block; padding: 10px 16px; border-radius: 10px; color: var(--rj-muted); text-decoration: none; font-size: 14px; font-weight: 500; transition: all 0.2s; border: 1px solid transparent; }
         .rj-docs-menu a:hover { color: var(--rj-text); background: rgba(255,255,255,0.03); }
         .rj-docs-menu a.active { color: var(--rj-primary); background: rgba(167, 139, 250, 0.1); border-color: rgba(167, 139, 250, 0.2); font-weight: 600; }
+        .rj-docs-result-item a { padding: 12px 16px; }
+        .rj-docs-result-item a strong { display: block; color: var(--rj-text); font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+        .rj-docs-result-item a small { display: block; color: var(--rj-muted); font-size: 12px; line-height: 1.5; opacity: 0.8; }
         .rj-docs-no-results { color: var(--rj-muted); font-size: 14px; font-style: italic; padding: 10px 16px; display: block; }
         
         .rj-markdown { color: var(--rj-muted); font-size: 16px; line-height: 1.8; }
@@ -38,6 +41,9 @@
         .rj-markdown code { background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 6px; font-family: monospace; color: var(--rj-secondary); font-size: 14px; }
         .rj-markdown pre { background: rgba(0,0,0,0.4); padding: 24px; border-radius: 16px; overflow-x: auto; border: 1px solid var(--rj-border); margin-bottom: 24px; }
         .rj-markdown pre code { background: transparent; padding: 0; color: #e5e7eb; }
+        .rj-markdown table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+        .rj-markdown table th, .rj-markdown table td { padding: 10px 14px; border: 1px solid var(--rj-border); text-align: left; }
+        .rj-markdown table th { background: rgba(255,255,255,0.03); color: var(--rj-text); font-weight: 600; }
         
         @media (max-width: 900px) {
             .rj-docs-wrap { flex-direction: column; padding-top: 40px; }
@@ -50,7 +56,7 @@
         <aside class="rj-docs-sidebar">
             <div class="rj-docs-search">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                <input type="text" id="rj-docs-search-input" placeholder="{{ __('Search documentation...') }}">
+                <input type="text" id="rj-docs-search-input" placeholder="{{ __('Search documentation...') }}" autocomplete="off">
             </div>
 
             <ul class="rj-docs-menu" id="rj-docs-menu">
@@ -99,7 +105,11 @@
     var docsBase = '{{ url(app()->getLocale() . '/docs') }}';
 
     console.log('[Docs] searchIndex length:', Array.isArray(searchIndex) ? searchIndex.length : 'not array');
-    if (searchIndex[0]) console.log('[Docs] first item sample:', searchIndex[0].slug, '-', searchIndex[0].title);
+    if (searchIndex[0]) {
+        console.log('[Docs] first item:', searchIndex[0].slug, '-', searchIndex[0].title);
+        console.log('[Docs] has headings field:', 'headings' in searchIndex[0]);
+        console.log('[Docs] content length:', (searchIndex[0].content || '').length);
+    }
 
     var input = document.getElementById('rj-docs-search-input');
     var menuList = document.getElementById('rj-docs-menu');
@@ -112,17 +122,84 @@
             return;
         }
         if (!Array.isArray(searchIndex) || searchIndex.length === 0) {
-            console.warn('[Docs] Search index empty — nothing to search');
+            console.warn('[Docs] Search index empty');
             return;
         }
+
+        var keys = [
+            { name: 'title', weight: 3 },
+            { name: 'content', weight: 1 }
+        ];
+
+        if (searchIndex[0] && 'headings' in searchIndex[0]) {
+            keys.splice(1, 0, { name: 'headings', weight: 2 });
+        }
+
         fuse = new Fuse(searchIndex, {
-            keys: ['title', 'content'],
-            threshold: 0.4,
-            distance: 100,
+            keys: keys,
+            threshold: 0.6,
+            distance: 1000,
+            ignoreLocation: true,
+            includeScore: true,
             includeMatches: true,
-            minMatchCharLength: 2
+            minMatchCharLength: 2,
+            shouldSort: true,
+            findAllMatches: true
         });
-        console.log('[Docs] Fuse ready with', searchIndex.length, 'items');
+
+        console.log('[Docs] Fuse ready with', searchIndex.length, 'items, keys:', keys.map(k => k.name).join(','));
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function highlight(text, query) {
+        if (!text || !query) return escapeHtml(text);
+        var tokens = query.toLowerCase().split(/\s+/).filter(function (t) { return t.length >= 2; });
+        if (tokens.length === 0) return escapeHtml(text);
+
+        var escaped = escapeHtml(text);
+        tokens.forEach(function (tok) {
+            var re = new RegExp('(' + tok.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+            escaped = escaped.replace(re, '<mark style="background:rgba(167,139,250,0.3);color:#fff;padding:0 2px;border-radius:3px;">$1</mark>');
+        });
+        return escaped;
+    }
+
+    function renderResults(items, query) {
+        resultsList.innerHTML = '';
+
+        if (items.length === 0) {
+            resultsList.innerHTML = '<li><span class="rj-docs-no-results">' + '{{ __('No results found') }}' + '</span></li>';
+            return;
+        }
+
+        items.forEach(function (res) {
+            var item = res.item;
+            var li = document.createElement('li');
+            li.className = 'rj-docs-result-item';
+
+            var a = document.createElement('a');
+            a.href = docsBase + '/' + item.slug;
+
+            var strong = document.createElement('strong');
+            strong.innerHTML = highlight(item.title || item.slug, query);
+
+            var small = document.createElement('small');
+            small.innerHTML = highlight(item.excerpt || (item.content || '').substring(0, 120), query);
+
+            a.appendChild(strong);
+            a.appendChild(small);
+            li.appendChild(a);
+            resultsList.appendChild(li);
+        });
     }
 
     input.addEventListener('input', function (e) {
@@ -143,22 +220,8 @@
             return;
         }
 
-        var results = fuse.search(q).slice(0, 10);
-        resultsList.innerHTML = '';
-
-        if (results.length === 0) {
-            resultsList.innerHTML = '<li><span class="rj-docs-no-results">' + '{{ __('No results found') }}' + '</span></li>';
-            return;
-        }
-
-        results.forEach(function (res) {
-            var li = document.createElement('li');
-            var a = document.createElement('a');
-            a.href = docsBase + '/' + res.item.slug;
-            a.textContent = res.item.title;
-            li.appendChild(a);
-            resultsList.appendChild(li);
-        });
+        var results = fuse.search(q).slice(0, 8);
+        renderResults(results, q);
     });
 
     if (document.readyState === 'loading') {
