@@ -28,14 +28,8 @@ class DirectoryController extends Controller
         return view('spotlight::directory.plugins', compact('plugins'));
     }
 
-    public function pluginDetails(Request $request)
+    public function pluginDetails(Request $request, $locale, $slug)
     {
-        // URL-dən slug-ı götürürük
-        $slug = $request->route('slug');
-        
-        // YOXLAMAQ ÜÇÜN MÜVƏQQƏTİ OLARAQ BU SƏTRİ AÇIN:
-        // dd('Controller işləyir! Slug: ' . $slug); 
-
         $plugins = $this->registry->enrichPlugins();
         $plugin = collect($plugins)->firstWhere('slug', $slug);
         
@@ -59,10 +53,8 @@ class DirectoryController extends Controller
         return view('spotlight::directory.themes', compact('themes'));
     }
 
-    public function themeDetails(Request $request)
+    public function themeDetails(Request $request, $locale, $slug)
     {
-        $slug = $request->route('slug');
-        
         $themes = $this->registry->enrichThemes();
         $theme = collect($themes)->firstWhere('slug', $slug);
         
