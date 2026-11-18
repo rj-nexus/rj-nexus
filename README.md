@@ -21,7 +21,7 @@
 
 ## About
 
-**RJ CMS** is a modern, self-hosted content management system built on **Laravel 12**. You install it on your own hosting, keep full ownership of your data, and extend it through an isolated plugin and theme system. It ships with a visual page builder (RJBuilder) with 60+ widgets, a dual AI engine, 38 languages with per-language URLs, and a browser-based installer that works on any shared hosting or VPS.
+**RJ CMS** is a modern, self-hosted content management system built on **Laravel 12**. You install it on your own hosting, keep full ownership of your data, and extend it through an isolated plugin and theme system. It ships with a visual page builder (RJBuilder) with 60+ widgets, a dual AI engine, 43 languages with per-language URLs, and a browser-based installer that works on any shared hosting or VPS.
 
 **RJ Nexus** is the organization behind it. It hosts the CMS core and the ecosystem around it.
 
@@ -31,36 +31,36 @@ Official website: **[rjnexus.org](https://rjnexus.org)**
 
 ## What's New in v1.9.7
 
-This update significantly expands the system's localization capabilities and optimizes the installer interface for a larger dataset. The complete list of changes is available in the [Changelog](https://github.com/rj-nexus/rj-nexus/blob/main/CHANGELOG.md).
+This release adds one-click backup restore with live progress, lets the installer and the backup engine run on restrictive shared hosting, and brings the language count to 43. The complete list of changes is available in the [Changelog](https://github.com/rj-nexus/rj-nexus/blob/main/CHANGELOG.md).
 
 <table>
   <tr>
     <td width="50%" valign="top">
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/language.svg" width="44" height="44" alt=""/><br/>
-      <b>21 New Languages</b><br/>
-      Expanded from 17 to <b>38 languages</b> in the installer and the system: Bengali, Persian, Hausa, Haitian Creole, Hungarian, Kazakh, Korean, Kurdish, Kyrgyz, Maori, Marathi, Polish, Quechua, Romanian, Swahili, Telugu, Tagalog, Ukrainian, Urdu, Uzbek and Vietnamese.
+      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/security.svg" width="44" height="44" alt=""/><br/>
+      <b>One-Click Backup Restore</b><br/>
+      Restore your site from a database, files, or full backup directly from the backup management page, with a single click.
     </td>
     <td width="50%" valign="top">
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/slugs.svg" width="44" height="44" alt=""/><br/>
-      <b>RTL Support</b><br/>
-      Kurdish (<code>ku</code>) has been added to the list of right-to-left languages.
+      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/activity.svg" width="44" height="44" alt=""/><br/>
+      <b>Live Backup Progress</b><br/>
+      The backup page now shows real-time progress, so you can follow the backup creation process as it happens.
     </td>
   </tr>
   <tr>
     <td width="50%" valign="top">
       <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/installer.svg" width="44" height="44" alt=""/><br/>
-      <b>Installer UI Optimization</b><br/>
-      The 3D planet animation in the language selection step now calculates planet density, size and stagger speed dynamically, keeping the experience smooth with 38 languages.
+      <b>Installs Without <code>exec()</code></b><br/>
+      The installer no longer needs <code>exec()</code>, and the backup engine no longer needs <code>proc_open</code>. RJ Nexus now installs and backs up on highly restrictive shared hosting.
     </td>
     <td width="50%" valign="top">
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/search.svg" width="44" height="44" alt=""/><br/>
-      <b>Language Helper</b><br/>
-      <code>installer/helpers.php</code> now contains the complete list of 38 languages and their aliases for the search functionality.
+      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/language.svg" width="44" height="44" alt=""/><br/>
+      <b>5 New Languages</b><br/>
+      Expanded from 38 to <b>43 languages</b> in the installer and the system: Thai, Hebrew, Swedish, Estonian and Kinyarwanda.
     </td>
   </tr>
 </table>
 
-Also in this release: obsolete SQL backup files were removed from the database directory to reduce project size.
+Also in this release: missing translation strings were completed across dozens of languages, the `mysqldump` backup error was fixed, and a critical Bengali installer translation bug was resolved.
 
 <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/divider.svg" alt="" width="100%"/>
 
@@ -116,7 +116,7 @@ RJ CMS installs on any shared hosting or VPS without touching a single line of c
     <td width="33%" valign="top">
       <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/language.svg" width="44" height="44" alt=""/><br/>
       <b>Multilingual &amp; RTL</b><br/>
-      38 languages with automatic right-to-left rendering for Arabic, Kurdish and other RTL languages.
+      43 languages with automatic right-to-left rendering for Arabic, Kurdish and other RTL languages.
     </td>
   </tr>
   <tr>
@@ -142,7 +142,7 @@ RJ CMS installs on any shared hosting or VPS without touching a single line of c
 
 ## Supported Languages
 
-38 languages are supported, including per-language URLs (for example `/en/about` and `/az/haqqimizda`).
+43 languages are supported, including per-language URLs (for example `/en/about` and `/az/haqqimizda`).
 
 <table>
   <tr>
@@ -178,7 +178,7 @@ RJ CMS installs on any shared hosting or VPS without touching a single line of c
     <td align="center" width="16%"><img src="https://flagcdn.com/kr.svg" width="32" alt="KO"/><br/>Korean<br/><code>ko</code></td>
   </tr>
   <tr>
-    <td align="center" width="16%"><b>❓</b><br/>Kurdish<br/><code>ku</code></td>
+    <td align="center" width="16%"><b>KU</b><br/>Kurdish<br/><code>ku</code></td>
     <td align="center" width="16%"><img src="https://flagcdn.com/kg.svg" width="32" alt="KY"/><br/>Kyrgyz<br/><code>ky</code></td>
     <td align="center" width="16%"><img src="https://flagcdn.com/nz.svg" width="32" alt="MI"/><br/>Maori<br/><code>mi</code></td>
     <td align="center" width="16%"><img src="https://flagcdn.com/in.svg" width="32" alt="MR"/><br/>Marathi<br/><code>mr</code></td>
@@ -196,6 +196,14 @@ RJ CMS installs on any shared hosting or VPS without touching a single line of c
   <tr>
     <td align="center" width="16%"><img src="https://flagcdn.com/uz.svg" width="32" alt="UZ"/><br/>Uzbek<br/><code>uz</code></td>
     <td align="center" width="16%"><img src="https://flagcdn.com/vn.svg" width="32" alt="VI"/><br/>Vietnamese<br/><code>vi</code></td>
+    <td align="center" width="16%"><img src="https://flagcdn.com/th.svg" width="32" alt="TH"/><br/>Thai<br/><code>th</code></td>
+    <td align="center" width="16%"><img src="https://flagcdn.com/il.svg" width="32" alt="HE"/><br/>Hebrew<br/><code>he</code></td>
+    <td align="center" width="16%"><img src="https://flagcdn.com/se.svg" width="32" alt="SV"/><br/>Swedish<br/><code>sv</code></td>
+    <td align="center" width="16%"><img src="https://flagcdn.com/ee.svg" width="32" alt="ET"/><br/>Estonian<br/><code>et</code></td>
+  </tr>
+  <tr>
+    <td align="center" width="16%"><img src="https://flagcdn.com/rw.svg" width="32" alt="RW"/><br/>Kinyarwanda<br/><code>rw</code></td>
+    <td align="center"></td>
     <td align="center"></td>
     <td align="center"></td>
     <td align="center"></td>
