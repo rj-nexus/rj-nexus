@@ -4,6 +4,8 @@ namespace Spotlight;
 
 use Illuminate\Support\ServiceProvider;
 use Spotlight\Services\SpotlightStarterContent;
+use Spotlight\Widgets\FeaturedPluginsWidget; // YENİ
+use Spotlight\Widgets\FeaturedThemesWidget;  // YENİ
 use Spotlight\Widgets\SpotlightHeroWidget;
 use Spotlight\Widgets\SpotlightHeaderWidget;
 use Spotlight\Widgets\SpotlightLogosWidget;
@@ -38,10 +40,7 @@ class SpotlightServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // Laravel-ə spotlight:: namespace-inin harada olduğunu deyirik
         $this->loadViewsFrom(__DIR__ . '/../views', 'spotlight');
-
-        // YENİ ƏLAVƏ EDİLƏN SƏTİR: Temanın öz route-larını yükləyirik
         $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
 
         $this->registerWidgets();
@@ -53,6 +52,11 @@ class SpotlightServiceProvider extends ServiceProvider
         if (function_exists('rj_add_filter')) {
             rj_add_filter('builder.widgets', function ($existing) {
                 $widgets = [
+                    // YENİ VİDGETLƏR BURADA:
+                    new FeaturedPluginsWidget(),
+                    new FeaturedThemesWidget(),
+                    
+                    // Mövcud olanlar:
                     new SpotlightHeroWidget(),
                     new SpotlightHeaderWidget(),
                     new SpotlightLogosWidget(),
@@ -86,6 +90,7 @@ class SpotlightServiceProvider extends ServiceProvider
 
     protected function maybeSetupStarterContent(): void
     {
+        // ... (bu hissə olduğu kimi qalır)
         if (!function_exists('rj_get_option') || !function_exists('rj_set_option')) {
             return;
         }

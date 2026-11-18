@@ -17,38 +17,17 @@ class FeaturedPluginsWidget extends BaseWidget
     public function schema(): array
     {
         return [
-            [
-                'name'    => 'title',
-                'type'    => 'text',
-                'label'   => __('Section Title'),
-                'default' => __('Featured Plugins'),
-                'tab'     => 'content',
-            ],
-            [
-                'name'    => 'limit',
-                'type'    => 'number',
-                'label'   => __('Number of Plugins to Show'),
-                'default' => 3,
-                'tab'     => 'style',
-            ]
+            ['name' => 'title', 'type' => 'text', 'label' => __('Section Title'), 'default' => __('Featured Plugins'), 'tab' => 'content'],
+            ['name' => 'limit', 'type' => 'number', 'label' => __('Limit'), 'default' => 3, 'tab' => 'style']
         ];
     }
 
     public function render(array $settings): string
     {
-        $registry = app(GitHubRegistry::class);
-        $allPlugins = $registry->enrichPlugins();
-        
-        // Yalnız 'featured' olanları seçirik, əgər yoxdursa ilk limit qədərini götürürük
+        $allPlugins = app(GitHubRegistry::class)->enrichPlugins();
         $featured = array_values(array_filter($allPlugins, fn($p) => $p['featured'] ?? false));
-        $limit = (int) ($settings['limit'] ?? 3);
+        $plugins = array_slice(empty($featured) ? $allPlugins : $featured, 0, (int)($settings['limit'] ?? 3));
         
-        if (empty($featured)) {
-            $plugins = array_slice($allPlugins, 0, $limit);
-        } else {
-            $plugins = array_slice($featured, 0, $limit);
-        }
-
         return view('spotlight::widgets.featured-plugins', compact('settings', 'plugins'))->render();
     }
 }

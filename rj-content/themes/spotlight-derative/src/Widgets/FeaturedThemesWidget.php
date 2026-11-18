@@ -17,28 +17,16 @@ class FeaturedThemesWidget extends BaseWidget
     public function schema(): array
     {
         return [
-            [
-                'name'    => 'title',
-                'type'    => 'text',
-                'label'   => __('Section Title'),
-                'default' => __('Featured Themes'),
-                'tab'     => 'content',
-            ]
+            ['name' => 'title', 'type' => 'text', 'label' => __('Section Title'), 'default' => __('Featured Themes'), 'tab' => 'content']
         ];
     }
 
     public function render(array $settings): string
     {
-        $registry = app(GitHubRegistry::class);
-        $allThemes = $registry->enrichThemes();
-        
+        $allThemes = app(GitHubRegistry::class)->enrichThemes();
         $featured = array_values(array_filter($allThemes, fn($t) => $t['featured'] ?? false));
-        if (empty($featured)) {
-            $themes = array_slice($allThemes, 0, 3);
-        } else {
-            $themes = array_slice($featured, 0, 3);
-        }
-
+        $themes = array_slice(empty($featured) ? $allThemes : $featured, 0, 3);
+        
         return view('spotlight::widgets.featured-themes', compact('settings', 'themes'))->render();
     }
 }
