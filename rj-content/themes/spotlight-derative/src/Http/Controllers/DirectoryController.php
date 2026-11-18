@@ -7,7 +7,7 @@ use App\Services\GitHubRegistry;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Str; // Markdown üçün vacibdir
+use Illuminate\Support\Str;
 
 class DirectoryController extends Controller
 {
@@ -21,9 +21,9 @@ class DirectoryController extends Controller
     public function plugins(Request $request)
     {
         $plugins = $this->registry->enrichPlugins();
-        
+
         if ($search = $request->query('search')) {
-            $plugins = array_filter($plugins, function($p) use ($search) {
+            $plugins = array_filter($plugins, function ($p) use ($search) {
                 return stripos($p['name'], $search) !== false || stripos($p['description'], $search) !== false;
             });
         }
@@ -35,10 +35,9 @@ class DirectoryController extends Controller
     {
         $plugins = $this->registry->enrichPlugins();
         $plugin = collect($plugins)->firstWhere('slug', $slug);
-        
+
         if (!$plugin) abort(404);
 
-        // README-ni çəkirik
         $readmeHtml = $this->fetchReadme($plugin['docs']);
 
         return view('spotlight::directory.plugin-details', compact('plugin', 'readmeHtml'));
@@ -49,7 +48,7 @@ class DirectoryController extends Controller
         $themes = $this->registry->enrichThemes();
 
         if ($search = $request->query('search')) {
-            $themes = array_filter($themes, function($t) use ($search) {
+            $themes = array_filter($themes, function ($t) use ($search) {
                 return stripos($t['name'], $search) !== false || stripos($t['description'], $search) !== false;
             });
         }
@@ -61,32 +60,58 @@ class DirectoryController extends Controller
     {
         $themes = $this->registry->enrichThemes();
         $theme = collect($themes)->firstWhere('slug', $slug);
-        
+
         if (!$theme) abort(404);
 
-        // README-ni çəkirik
         $readmeHtml = $this->fetchReadme($theme['docs']);
 
         return view('spotlight::directory.theme-details', compact('theme', 'readmeHtml'));
     }
 
-    // README-ni GitHub-dan çəkən köməkçi funksiya
+    public function docs(Request $request, $locale, $slug = null)
+    {
+        $menu = $this->fetchJson('https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/documents/menu.json');
+        $searchIndex = $this->fetchJson('https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/documents/documentation/search.json');
+
+        if (!$slug && !empty($menu)) {
+            $slug = $menu[0]['slug'] ?? 'getting-started';
+        }
+
+        $contentHtml = null;
+        $docTitle = null;
+
+        if ($slug) {
+            if (!empty($menu)) {
+                foreach ($menu as $item) {
+                    if (($item['slug'] ?? '') === $slug) {
+                        $docTitle = $item['title'] ?? $slug;
+                        break;
+                    }
+                }
+            }
+
+            $rawUrl = "https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/documents/documentation/content/{$slug}.md";
+            $md = $this->fetchRaw($rawUrl, 3600);
+
+            if ($md) {
+                $contentHtml = Str::markdown($md);
+            }
+        }
+
+        return view('spotlight::directory.docs', compact('menu', 'searchIndex', 'slug', 'contentHtml', 'docTitle'));
+    }
+
     private function fetchReadme($docsUrl)
     {
-        // URL-dən owner və repo adını çıxarırıq (məs: rj-nexus/rj-commerce)
         if (preg_match('/github\.com\/([^\/]+)\/([^\/#]+)/', $docsUrl, $matches)) {
             $owner = $matches[1];
             $repo = $matches[2];
-
-            // README-nin xam (raw) linki
             $rawUrl = "https://raw.githubusercontent.com/{$owner}/{$repo}/main/README.md";
 
-            // 1 saatlıq kesh edirik ki, hər dəfə GitHub-a sorğu getməsin
             return Cache::remember("plugin_readme_{$owner}_{$repo}", 3600, function () use ($rawUrl) {
                 try {
                     $response = Http::timeout(10)->get($rawUrl);
                     if ($response->successful()) {
-                        // Markdown-u HTML-ə çeviririk
                         return Str::markdown($response->body());
                     }
                 } catch (\Exception $e) {
@@ -96,5 +121,40 @@ class DirectoryController extends Controller
             });
         }
         return null;
+    }
+
+    private function fetchJson(string $url): array
+    {
+        $cacheKey = 'rj_docs_json_' . md5($url);
+
+        return Cache::remember($cacheKey, 3600, function () use ($url) {
+            try {
+                $response = Http::timeout(10)->get($url);
+                if ($response->successful()) {
+                    $data = $response->json();
+                    return is_array($data) ? $data : [];
+                }
+            } catch (\Exception $e) {
+                return [];
+            }
+            return [];
+        });
+    }
+
+    private function fetchRaw(string $url, int $ttl = 3600): ?string
+    {
+        $cacheKey = 'rj_docs_raw_' . md5($url);
+
+        return Cache::remember($cacheKey, $ttl, function () use ($url) {
+            try {
+                $response = Http::timeout(10)->get($url);
+                if ($response->successful()) {
+                    return $response->body();
+                }
+            } catch (\Exception $e) {
+                return null;
+            }
+            return null;
+        });
     }
 }
