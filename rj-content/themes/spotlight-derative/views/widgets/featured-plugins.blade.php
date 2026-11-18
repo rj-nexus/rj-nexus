@@ -33,48 +33,47 @@
     }
     .rj-btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
 
-    /* AXTARIŞ QUTUSU ÜÇÜN STİL */
-    .rj-widget-search {
-        display: flex; gap: 8px; width: 100%; max-width: 320px; position: relative;
+    /* GLASSMORPHISM AXTARIŞ QUTUSU */
+    .rj-glass-search {
+        display: flex; align-items: center; background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 999px;
+        padding: 4px 4px 4px 20px; transition: all 0.3s ease;
+        box-shadow: 0 4px 20px -10px rgba(0,0,0,0.5);
     }
-    .rj-widget-search input {
-        width: 100%; padding: 10px 16px; border-radius: 10px; font-size: 14px;
-        background: rgba(255,255,255,0.03); border: 1px solid var(--rj-border); color: var(--rj-text);
-        outline: none; transition: all 0.3s;
+    .rj-glass-search:focus-within {
+        border-color: rgba(167, 139, 250, 0.5); background: rgba(255, 255, 255, 0.06);
+        box-shadow: 0 0 20px -5px rgba(167, 139, 250, 0.3), inset 0 1px 0 rgba(255,255,255,0.1);
     }
-    .rj-widget-search input:focus {
-        border-color: var(--rj-primary); background: rgba(255,255,255,0.05);
-        box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.15);
+    .rj-glass-search input {
+        background: transparent; border: none; color: var(--rj-text);
+        font-size: 14px; width: 200px; outline: none;
     }
-    .rj-widget-search button {
-        padding: 10px 16px; border-radius: 10px; background: var(--rj-primary); color: #fff;
-        border: none; cursor: pointer; font-weight: 600; transition: all 0.2s;
+    .rj-glass-search input::placeholder { color: var(--rj-muted); opacity: 0.7; }
+    .rj-glass-search button {
+        background: linear-gradient(135deg, var(--rj-primary), var(--rj-secondary));
+        color: #fff; border: none; border-radius: 999px;
+        width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+        cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px -3px var(--rj-primary);
     }
-    .rj-widget-search button:hover { opacity: 0.9; }
+    .rj-glass-search button:hover { transform: scale(1.05); box-shadow: 0 6px 16px -3px var(--rj-primary); }
 </style>
 
 <section style="padding: 80px 0; background: var(--rj-bg); position: relative;">
     <div class="rj-container">
         
-        <!-- Başlıq və Axtarış Hissəsi -->
-        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; flex-wrap: wrap; gap: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; flex-wrap: wrap; gap: 20px;">
             <h2 style="font-size: 32px; font-weight: 800; color: var(--rj-text); margin: 0; letter-spacing: -0.02em;">
                 {{ $settings['title'] ?? __('Featured Plugins') }}
             </h2>
             
-            <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
-                <!-- Axtarış Formu -->
-                <form action="/plugins" method="GET" class="rj-widget-search">
-                    <input type="text" name="search" placeholder="{{ __('Search plugins...') }}" value="{{ request('search') }}">
-                    <button type="submit">
-                        <svg style="width: 18px; height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                    </button>
-                </form>
-
-                <a href="/plugins" style="font-size: 14px; font-weight: 600; color: var(--rj-primary); text-decoration: none; display: flex; align-items: center; gap: 6px; white-space: nowrap;">
-                    {{ __('View all plugins') }} <span>&rarr;</span>
-                </a>
-            </div>
+            <!-- Axtarış Formu -->
+            <form action="/plugins" method="GET" class="rj-glass-search">
+                <input type="text" name="search" placeholder="{{ __('Search plugins...') }}" value="{{ request('search') }}">
+                <button type="submit">
+                    <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </button>
+            </form>
         </div>
 
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px;">
