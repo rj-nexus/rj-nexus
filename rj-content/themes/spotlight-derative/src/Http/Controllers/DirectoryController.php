@@ -4,7 +4,7 @@ namespace Spotlight\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Services\GitHubRegistry;
-use Illuminate\Http\Request; // VACİB: Request-i əlavə edin
+use Illuminate\Http\Request;
 
 class DirectoryController extends Controller
 {
@@ -28,15 +28,20 @@ class DirectoryController extends Controller
         return view('spotlight::directory.plugins', compact('plugins'));
     }
 
-    public function pluginDetails(Request $request, $slug = null)
+    public function pluginDetails(Request $request)
     {
-        // Əgər route-da locale varsa, slug-i request-dən götürürük
-        $slug = $slug ?? $request->route('slug');
+        // URL-dən slug-ı götürürük
+        $slug = $request->route('slug');
         
+        // YOXLAMAQ ÜÇÜN MÜVƏQQƏTİ OLARAQ BU SƏTRİ AÇIN:
+        // dd('Controller işləyir! Slug: ' . $slug); 
+
         $plugins = $this->registry->enrichPlugins();
         $plugin = collect($plugins)->firstWhere('slug', $slug);
         
-        if (!$plugin) abort(404);
+        if (!$plugin) {
+            abort(404, 'Plugin tapılmadı: ' . $slug);
+        }
 
         return view('spotlight::directory.plugin-details', compact('plugin'));
     }
@@ -54,14 +59,16 @@ class DirectoryController extends Controller
         return view('spotlight::directory.themes', compact('themes'));
     }
 
-    public function themeDetails(Request $request, $slug = null)
+    public function themeDetails(Request $request)
     {
-        $slug = $slug ?? $request->route('slug');
+        $slug = $request->route('slug');
         
         $themes = $this->registry->enrichThemes();
         $theme = collect($themes)->firstWhere('slug', $slug);
         
-        if (!$theme) abort(404);
+        if (!$theme) {
+            abort(404, 'Tema tapılmadı: ' . $slug);
+        }
 
         return view('spotlight::directory.theme-details', compact('theme'));
     }
