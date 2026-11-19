@@ -221,6 +221,42 @@ if (!function_exists('rj_color_presets')) {
                 'dark-2' => '12 45 60',
                 'dark-3' => '17 62 82',
             ],
+            'lavender' => [
+                'label' => 'Lavender',
+                'purple' => '139 92 246',
+                'purple-light' => '196 181 253',
+                'pink' => '244 114 182',
+                'dark-1' => '30 20 60',
+                'dark-2' => '45 30 85',
+                'dark-3' => '60 40 110',
+            ],
+            'crimson' => [
+                'label' => 'Crimson',
+                'purple' => '190 18 60',
+                'purple-light' => '225 29 72',
+                'pink' => '251 113 133',
+                'dark-1' => '40 10 20',
+                'dark-2' => '60 15 30',
+                'dark-3' => '80 20 40',
+            ],
+            'coffee' => [
+                'label' => 'Coffee',
+                'purple' => '146 64 14',
+                'purple-light' => '180 83 9',
+                'pink' => '217 119 6',
+                'dark-1' => '35 22 15',
+                'dark-2' => '50 32 22',
+                'dark-3' => '70 45 30',
+            ],
+            'forest' => [
+                'label' => 'Forest',
+                'purple' => '22 101 52',
+                'purple-light' => '34 139 69',
+                'pink' => '101 163 13',
+                'dark-1' => '10 30 20',
+                'dark-2' => '15 45 30',
+                'dark-3' => '22 60 40',
+            ],
         ];
     }
 }
