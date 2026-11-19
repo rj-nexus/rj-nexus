@@ -6,7 +6,7 @@
 
 ![Status](https://img.shields.io/badge/Status-Stable-brightgreen)
 ![Release](https://img.shields.io/badge/Release-RJ%20CORE%201-10b981)
-![Version](https://img.shields.io/badge/Version-v1.9.9-blue)
+![Version](https://img.shields.io/badge/Version-v1.9.10-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Laravel](https://img.shields.io/badge/Laravel-12-red)
 ![PHP](https://img.shields.io/badge/PHP-8.2-purple)
@@ -21,7 +21,7 @@
 
 ## About
 
-**RJ CMS** is a modern, self-hosted content management system built on **Laravel 12**. You install it on your own hosting, keep full ownership of your data, and extend it through an isolated plugin and theme system. It ships with a visual page builder (RJBuilder) with 60+ widgets, a dual AI engine, 43 languages with per-language URLs, and a browser-based installer that works on any shared hosting or VPS.
+**RJ CMS** is a modern, self-hosted content management system built on **Laravel 12**. You install it on your own hosting, keep full ownership of your data, and extend it through an isolated plugin and theme system. It ships with a visual page builder (RJBuilder) with 60+ widgets, a dual AI engine, 44 languages with per-language URLs, and a browser-based installer that works on any shared hosting or VPS.
 
 **RJ Nexus** is the organization behind it. It hosts the CMS core and the ecosystem around it.
 
@@ -29,9 +29,9 @@ Official website: **[rjnexus.org](https://rjnexus.org)**
 
 <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/divider.svg" alt="" width="100%"/>
 
-## What's New in v1.9.9
+## What's New in v1.9.10
 
-This release gives the 504 error page its own animated design and expands the admin color presets with four new themes. The complete list of changes is available in the [Changelog](https://github.com/rj-nexus/rj-nexus/blob/main/CHANGELOG.md).
+This release gives the 504 error page its own animated design and expands the admin color presets with four new themes. It also adds **Amharic** as a new language, bringing the total to 44. The complete list of changes is available in the [Changelog](https://github.com/rj-nexus/rj-nexus/blob/main/CHANGELOG.md).
 
 <table>
   <tr>
@@ -102,7 +102,7 @@ RJ CMS installs on any shared hosting or VPS without touching a single line of c
     <td width="33%" valign="top">
       <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/language.svg" width="44" height="44" alt=""/><br/>
       <b>Multilingual &amp; RTL</b><br/>
-      43 languages with automatic right-to-left rendering for Arabic, Kurdish and other RTL languages.
+      44 languages with automatic right-to-left rendering for Arabic, Kurdish and other RTL languages.
     </td>
   </tr>
   <tr>
@@ -128,7 +128,7 @@ RJ CMS installs on any shared hosting or VPS without touching a single line of c
 
 ## Supported Languages
 
-43 languages are supported, including per-language URLs (for example `/en/about` and `/az/haqqimizda`).
+44 languages are supported, including per-language URLs (for example `/en/about` and `/az/haqqimizda`).
 
 <table>
   <tr>
@@ -189,7 +189,7 @@ RJ CMS installs on any shared hosting or VPS without touching a single line of c
   </tr>
   <tr>
     <td align="center" width="16%"><img src="https://flagcdn.com/rw.svg" width="32" alt="RW"/><br/>Kinyarwanda<br/><code>rw</code></td>
-    <td align="center"></td>
+    <td align="center" width="16%"><img src="https://flagcdn.com/et.svg" width="32" alt="AM"/><br/>Amharic<br/><code>am</code></td>
     <td align="center"></td>
     <td align="center"></td>
     <td align="center"></td>
