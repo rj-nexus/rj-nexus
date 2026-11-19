@@ -6,6 +6,7 @@ function rj_languages(): array
     return [
         'en' => 'English',
         'az' => 'Azərbaycan',
+        'am' => 'አማርኛ',
         'ar' => 'العربية',
         'bn' => 'বাংলা',
         'de' => 'Deutsch',
@@ -238,7 +239,6 @@ function rj_artisan(array $args): array
 {
     $command = $args[0];
 
-    // 1. Native implementations for simple commands
     if ($command === 'config:clear') {
         $file = RJ_ROOT . '/bootstrap/cache/config.php';
         if (file_exists($file)) @unlink($file);
@@ -290,7 +290,6 @@ function rj_artisan(array $args): array
         return ['code' => 0, 'out' => 'The [public/storage] directory has been linked.'];
     }
 
-    // 2. Use exec() if available for all other commands
     if (function_exists('exec')) {
         $outFile = tempnam(sys_get_temp_dir(), 'rj_art_');
         $cmd = escapeshellarg(PHP_BINARY)
@@ -309,7 +308,6 @@ function rj_artisan(array $args): array
         return ['code' => $code, 'out' => $output];
     }
 
-    // 3. Native fallback for migrate, db:seed
     if (!file_exists(RJ_ROOT . '/vendor/autoload.php')) {
         return ['code' => -1, 'out' => 'vendor/autoload.php missing'];
     }
