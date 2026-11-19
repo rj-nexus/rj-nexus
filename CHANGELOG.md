@@ -1,20 +1,9 @@
-# Changelog
-
-All notable changes to RJ Nexus will be documented in this file.
-
-## [v1.9.7] - 2026-11-18
+## [v1.9.8] - 2026-11-19
 
 ### 🚀 Added
-- **One-Click Backup Restore:** Added a full restore functionality to the backup management page. Admins can now restore their site (Database, Files, or Full Backup) with a single click.
-- **Backup Process Monitoring:** Added real-time progress tracking on the backup page, allowing admins to monitor the backup creation process live.
-- **New Localizations:** Added 5 new languages (Thai `th`, Hebrew `he`, Swedish `sv`, Estonian `et`, and Kinyarwanda `rw`) to the installer and core system.
-
-### ⚡ Changed
-- **Installer Freedom (`exec` disabled):** The installation process no longer requires the `exec()` function to be enabled on the server. The system can now be installed on highly restrictive shared hostings, fully embracing the "self-hosted" philosophy.
-- **Translation Completion:** Completed missing translation strings across dozens of languages in the core application.
-- **Backup Engine:** Removed the dependency on `proc_open` for backup operations, making the system much more compatible with various server configurations.
+- **New Color Presets:** Added four new color schemes (Fuchsia, Lime, Sunset, and Noir), available in Settings → Colors.
 
 ### 🐛 Fixed
-- **Critical: `mysqldump` Execution Error:** Fixed the critical error `mysqldump execution error: Undefined constant Illuminate\Support\Facades\Process::OUT` that occurred during database backups.
-- **Critical: Empty Installer Localization (`bn`):** Fixed a critical bug in the installer where selecting Bengali (`bn`) caused an installation error due to an empty translation file.
-- **Installer `exec` Error:** Fixed the execution error thrown during installation when the `exec` function was disabled on the hosting provider.
+- **Core Update Extraction Failure:** Fixed the critical error `Update aborted: the release package must have files at the ZIP root (no wrapper folder) and include public/build/manifest.json` that occurred even when the archive was correctly structured. The updater now scans every ZIP entry instead of relying on `ZipArchive::getFromName()` with an exact path, accepts both `/` and `\` as path separators (Windows-created archives), handles archives with a wrapper folder automatically, and writes each file individually via `File::put()` instead of `ZipArchive::extractTo()`, bypassing PHP archive extraction permission issues entirely.
+- **Missing Manifest No Longer Aborts Update:** If `public/build/manifest.json` is absent or unreadable, the updater logs a warning and continues instead of blocking the entire installation.
+- **Rollback Message Accuracy:** The failure message now clearly distinguishes between a successful rollback and a failed database restore, so admins know exactly which state the site is in.
