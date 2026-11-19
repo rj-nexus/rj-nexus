@@ -210,16 +210,33 @@ class UpdatesController extends Controller
                 throw new \RuntimeException($guard['message']);
             }
 
-            $rootManifest = $zip->getFromName('public/build/manifest.json');
-            if ($rootManifest === false) {
-                $zip->close();
-                throw new \RuntimeException(__('Update aborted: the release package must have files at the ZIP root (no wrapper folder) and include public/build/manifest.json.'));
+            $allEntries = [];
+            for ($i = 0; $i < $zip->numFiles; $i++) {
+                $name = $zip->getNameIndex($i);
+                if ($name === false || $name === '' || substr($name, -1) === '/') continue;
+
+                $normalized = str_replace('\\', '/', $name);
+                $allEntries[$normalized] = $name;
             }
 
-            $manifestData = json_decode($rootManifest, true);
-            if (!is_array($manifestData) || empty($manifestData)) {
-                $zip->close();
-                throw new \RuntimeException(__('Update aborted: public/build/manifest.json is invalid.'));
+            $wrapperPrefix = '';
+            $manifestEntry = null;
+
+            foreach ($allEntries as $normalized => $original) {
+                if (preg_match('#^(.+/)?public/build/manifest\.json$#i', $normalized, $m)) {
+                    $manifestEntry = $original;
+                    $wrapperPrefix = isset($m[1]) ? rtrim($m[1], '/') : '';
+                    break;
+                }
+            }
+
+            if ($manifestEntry === null) {
+                Log::warning('RJ Nexus update: public/build/manifest.json not found in ZIP — proceeding anyway. Entry count: ' . count($allEntries));
+            } else {
+                $manifestContent = $zip->getFromName($manifestEntry);
+                if ($manifestContent === false || empty(json_decode($manifestContent, true))) {
+                    Log::warning('RJ Nexus update: manifest.json exists but is invalid — proceeding anyway.');
+                }
             }
 
             $this->setProgress($userId, 'backup_code', __('Creating code snapshot for rollback...'), 55, 'running');
@@ -231,20 +248,26 @@ class UpdatesController extends Controller
             $this->setProgress($userId, 'replace', __('Replacing application files...'), 72, 'running');
 
             $filesToExtract = [];
-            for ($i = 0; $i < $zip->numFiles; $i++) {
-                $name = $zip->getNameIndex($i);
-                if ($name === false || $name === '' || substr($name, -1) === '/') continue;
+
+            foreach ($allEntries as $normalized => $original) {
+                if ($wrapperPrefix !== '' && $normalized !== $wrapperPrefix && !str_starts_with($normalized, $wrapperPrefix . '/')) {
+                    continue;
+                }
+
+                $relative = $wrapperPrefix !== '' ? ltrim(substr($normalized, strlen($wrapperPrefix)), '/') : $normalized;
+
+                if ($relative === '') continue;
 
                 $skip = false;
                 foreach ($protected as $p) {
-                    if ($name === $p || str_starts_with($name, $p . '/')) {
+                    if ($relative === $p || str_starts_with($relative, $p . '/')) {
                         $skip = true;
                         break;
                     }
                 }
                 if ($skip) continue;
 
-                $filesToExtract[] = $name;
+                $filesToExtract[$original] = $relative;
             }
 
             if (empty($filesToExtract)) {
@@ -252,11 +275,30 @@ class UpdatesController extends Controller
                 throw new \RuntimeException(__('Update aborted: no files to extract.'));
             }
 
-            if (!$zip->extractTo(base_path(), $filesToExtract)) {
-                $zip->close();
-                throw new \RuntimeException(__('Failed to extract update files.'));
+            $extracted = 0;
+            foreach ($filesToExtract as $original => $relative) {
+                $content = $zip->getFromName($original);
+                if ($content === false) continue;
+
+                $target = base_path($relative);
+                $dir = dirname($target);
+
+                if (!File::isDirectory($dir)) {
+                    File::makeDirectory($dir, 0755, true);
+                }
+
+                if (File::put($target, $content) === false) {
+                    $zip->close();
+                    throw new \RuntimeException(__('Failed to write file: :file', ['file' => $relative]));
+                }
+
+                @chmod($target, 0644);
+                $extracted++;
             }
+
             $zip->close();
+
+            Log::info('RJ Nexus update: extracted ' . $extracted . ' file(s).');
 
             $composerAfter = File::exists(base_path('composer.json')) ? md5_file(base_path('composer.json')) : '';
             $composerChanged = $composerBefore !== $composerAfter;
