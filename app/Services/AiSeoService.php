@@ -65,7 +65,7 @@ PROMPT;
         $result = $this->ai->chat([
             ['role' => 'system', 'content' => 'You are a professional SEO copywriter. Always respond with valid JSON only.'],
             ['role' => 'user', 'content' => $prompt],
-        ], null, [
+        ], $this->getModel(), [
             'temperature' => 0.7,
             'max_tokens' => 800,
         ]);
@@ -131,7 +131,7 @@ PROMPT;
 
         $result = $this->ai->chat([
             ['role' => 'user', 'content' => $prompt],
-        ], null, [
+        ], $this->getModel(), [
             'temperature' => 0.7,
             'max_tokens' => 100,
         ]);
@@ -176,7 +176,7 @@ PROMPT;
 
         $result = $this->ai->chat([
             ['role' => 'user', 'content' => $prompt],
-        ], null, [
+        ], $this->getModel(), [
             'temperature' => 0.7,
             'max_tokens' => 150,
         ]);
@@ -219,7 +219,7 @@ PROMPT;
 
         $result = $this->ai->chat([
             ['role' => 'user', 'content' => $prompt],
-        ], null, [
+        ], $this->getModel(), [
             'temperature' => 0.5,
             'max_tokens' => 30,
         ]);
@@ -232,6 +232,12 @@ PROMPT;
             'success' => true,
             'keyword' => $this->limit(trim(str_replace(['"', "'", '.'], '', $result['content'])), 50),
         ];
+    }
+
+    protected function getModel(): string
+    {
+        return rj_get_option('ai_seo_model')
+            ?: rj_get_option('ai_default_model', 'google/gemini-2.0-flash-exp:free');
     }
 
     protected function cleanContent(string $content): string

@@ -2,9 +2,6 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
-
 class AiBuilderService
 {
     protected OpenRouterService $openRouter;
@@ -16,7 +13,7 @@ class AiBuilderService
 
     public function enabled(): bool
     {
-        return trim((string) rj_get_option('ai_openrouter_api_key', '')) !== '';
+        return $this->openRouter->isConfigured();
     }
 
     public function generateText(string $prompt, array $options = []): array
@@ -214,56 +211,37 @@ class AiBuilderService
             return [
                 'success' => false,
                 'text' => '',
-                'error' => __('AI is not configured. Add your OpenRouter API key in Settings → AI.'),
+                'error' => __('AI is not configured. Add your OpenRouter API key in Settings -> AI.'),
             ];
         }
 
-        try {
-            $payload = [
-                'model' => rj_get_option('ai_default_model', 'openai/gpt-4o-mini'),
-                'messages' => [
-                    ['role' => 'system', 'content' => $system],
-                    ['role' => 'user', 'content' => $userMessage],
-                ],
+        $model = rj_get_option('ai_builder_model')
+            ?: rj_get_option('ai_default_model', 'google/gemini-2.0-flash-exp:free');
+
+        $result = $this->openRouter->chat(
+            [
+                ['role' => 'system', 'content' => $system],
+                ['role' => 'user', 'content' => $userMessage],
+            ],
+            $model,
+            [
                 'temperature' => $options['temperature'] ?? (float) rj_get_option('ai_default_temperature', 0.7),
                 'max_tokens' => $options['max_tokens'] ?? (int) rj_get_option('ai_default_max_tokens', 1000),
-            ];
+            ]
+        );
 
-            $endpoint = rtrim((string) rj_get_option('ai_openrouter_endpoint', 'https://openrouter.ai/api/v1'), '/') . '/chat/completions';
-            $apiKey = trim((string) rj_get_option('ai_openrouter_api_key', ''));
-            $timeout = (int) rj_get_option('ai_timeout', 60);
-
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $apiKey,
-                'Content-Type' => 'application/json',
-                'HTTP-Referer' => url('/'),
-                'X-Title' => rj_get_option('site_name', 'RJ CMS'),
-            ])->timeout($timeout)->post($endpoint, $payload);
-
-            if (!$response->successful()) {
-                $msg = $response->json('error.message') ?: ('HTTP ' . $response->status());
-
-                if (rj_get_option('ai_log_enabled', false)) {
-                    Log::warning('AI request failed', ['status' => $response->status(), 'body' => $response->body()]);
-                }
-
-                return ['success' => false, 'text' => '', 'error' => $msg];
-            }
-
-            $data = $response->json();
-            $text = $data['choices'][0]['message']['content'] ?? '';
-
+        if (!$result['success']) {
             return [
-                'success' => true,
-                'text' => trim((string) $text),
-                'error' => null,
+                'success' => false,
+                'text' => '',
+                'error' => $result['error'] ?? __('AI request failed.'),
             ];
-        } catch (\Throwable $e) {
-            if (rj_get_option('ai_log_enabled', false)) {
-                Log::error('AI request exception: ' . $e->getMessage());
-            }
-
-            return ['success' => false, 'text' => '', 'error' => $e->getMessage()];
         }
+
+        return [
+            'success' => true,
+            'text' => trim((string) ($result['content'] ?? '')),
+            'error' => null,
+        ];
     }
 }
