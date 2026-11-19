@@ -62,15 +62,25 @@ Rules:
 - seo_description must be under 160 chars
 PROMPT;
 
-        $result = $this->ai->chat([
+        $messages = [
             ['role' => 'system', 'content' => 'You are a professional SEO copywriter. Always respond with valid JSON only.'],
             ['role' => 'user', 'content' => $prompt],
-        ], $this->getModel(), [
-            'temperature' => 0.7,
-            'max_tokens' => 800,
-        ]);
+        ];
 
-        if (!$result['success']) {
+        $chatOptions = [
+            'temperature' => 0.7,
+            'max_tokens' => 2000,
+            'response_format' => ['type' => 'json_object'],
+        ];
+
+        $result = $this->ai->chat($messages, $this->getModel(), $chatOptions);
+
+        if (empty($result['success']) && stripos((string) ($result['error'] ?? ''), 'response_format') !== false) {
+            unset($chatOptions['response_format']);
+            $result = $this->ai->chat($messages, $this->getModel(), $chatOptions);
+        }
+
+        if (empty($result['success'])) {
             return $result;
         }
 
@@ -283,19 +293,22 @@ PROMPT;
         $start = strpos($raw, '{');
         $end = strrpos($raw, '}');
 
-        if ($start === false || $end === false) {
-            return null;
+        if ($start !== false && $end !== false && $end > $start) {
+            $json = substr($raw, $start, $end - $start + 1);
+            $decoded = json_decode($json, true);
+
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                return $decoded;
+            }
         }
 
-        $json = substr($raw, $start, $end - $start + 1);
+        $decoded = json_decode($raw, true);
 
-        $decoded = json_decode($json, true);
-
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            return null;
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            return $decoded;
         }
 
-        return is_array($decoded) ? $decoded : null;
+        return null;
     }
 
     protected function limit(string $value, int $max): string
