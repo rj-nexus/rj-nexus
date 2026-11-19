@@ -257,6 +257,42 @@ if (!function_exists('rj_color_presets')) {
                 'dark-2' => '23 23 23',
                 'dark-3' => '38 38 38',
             ],
+            'cyan' => [
+                'label' => 'Cyan',
+                'purple' => '6 182 212',
+                'purple-light' => '103 232 249',
+                'pink' => '232 121 249',
+                'dark-1' => '6 18 22',
+                'dark-2' => '10 32 40',
+                'dark-3' => '14 46 58',
+            ],
+            'pink' => [
+                'label' => 'Pink',
+                'purple' => '244 114 182',
+                'purple-light' => '249 168 212',
+                'pink' => '192 132 252',
+                'dark-1' => '38 14 30',
+                'dark-2' => '58 20 46',
+                'dark-3' => '80 28 63',
+            ],
+            'red' => [
+                'label' => 'Red',
+                'purple' => '220 38 38',
+                'purple-light' => '248 113 113',
+                'pink' => '251 146 60',
+                'dark-1' => '28 8 8',
+                'dark-2' => '46 14 14',
+                'dark-3' => '68 20 20',
+            ],
+            'copper' => [
+                'label' => 'Copper & Mint',
+                'purple' => '194 120 62',
+                'purple-light' => '232 168 110',
+                'pink' => '94 234 212',
+                'dark-1' => '28 18 14',
+                'dark-2' => '43 28 21',
+                'dark-3' => '61 40 30',
+            ],
         ];
     }
 }
@@ -1026,6 +1062,7 @@ if (!function_exists('rj_flush_theme_mods')) {
         \Illuminate\Support\Facades\Cache::forget('rj_theme_customizations');
     }
 }
+
 if (!function_exists('rj_proxy_status')) {
     function rj_proxy_status(): array
     {
