@@ -6,7 +6,7 @@
 
 ![Status](https://img.shields.io/badge/Status-Stable-brightgreen)
 ![Release](https://img.shields.io/badge/Release-RJ%20CORE%201-10b981)
-![Version](https://img.shields.io/badge/Version-v1.9.8-blue)
+![Version](https://img.shields.io/badge/Version-v1.9.9-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Laravel](https://img.shields.io/badge/Laravel-12-red)
 ![PHP](https://img.shields.io/badge/PHP-8.2-purple)
@@ -29,38 +29,24 @@ Official website: **[rjnexus.org](https://rjnexus.org)**
 
 <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/divider.svg" alt="" width="100%"/>
 
-## What's New in v1.9.8
+## What's New in v1.9.9
 
-This release adds one-click backup restore with live progress, lets the installer and the backup engine run on restrictive shared hosting, and brings the language count to 43. The complete list of changes is available in the [Changelog](https://github.com/rj-nexus/rj-nexus/blob/main/CHANGELOG.md).
+This release gives the 504 error page its own animated design and expands the admin color presets with four new themes. The complete list of changes is available in the [Changelog](https://github.com/rj-nexus/rj-nexus/blob/main/CHANGELOG.md).
 
 <table>
   <tr>
     <td width="50%" valign="top">
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/security.svg" width="44" height="44" alt=""/><br/>
-      <b>One-Click Backup Restore</b><br/>
-      Restore your site from a database, files, or full backup directly from the backup management page, with a single click.
-    </td>
-    <td width="50%" valign="top">
       <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/activity.svg" width="44" height="44" alt=""/><br/>
-      <b>Live Backup Progress</b><br/>
-      The backup page now shows real-time progress, so you can follow the backup creation process as it happens.
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top">
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/installer.svg" width="44" height="44" alt=""/><br/>
-      <b>Installs Without <code>exec()</code></b><br/>
-      The installer no longer needs <code>exec()</code>, and the backup engine no longer needs <code>proc_open</code>. RJ Nexus now installs and backs up on highly restrictive shared hosting.
+      <b>New 504 Gateway Timeout Page</b><br/>
+      A redesigned, animated 504 page built around the timeout itself: a ticking clock, a live request path (You, Gateway, Server) where packets get lost before reaching the server, a 30-second stopwatch and an automatic retry countdown.
     </td>
     <td width="50%" valign="top">
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/language.svg" width="44" height="44" alt=""/><br/>
-      <b>5 New Languages</b><br/>
-      Expanded from 38 to <b>43 languages</b> in the installer and the system: Thai, Hebrew, Swedish, Estonian and Kinyarwanda.
+      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/themes.svg" width="44" height="44" alt=""/><br/>
+      <b>4 New Color Presets</b><br/>
+      The admin color presets grow from 12 to <b>16</b>: <b>Cyan</b>, <b>Pink</b> and <b>Red</b> in true, deep tones, plus <b>Copper &amp; Mint</b>, a warm copper and cool mint combination.
     </td>
   </tr>
 </table>
-
-Also in this release: missing translation strings were completed across dozens of languages, the `mysqldump` backup error was fixed, and a critical Bengali installer translation bug was resolved.
 
 <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/divider.svg" alt="" width="100%"/>
 
@@ -264,8 +250,8 @@ RJ CMS installs on any shared hosting or VPS without touching a single line of c
       <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/07.png" alt="Settings - AI" width="100%"/>
     </td>
     <td width="50%" align="center">
-      <b>Settings &rarr; Theme</b><br/><br/>
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/06.png" alt="Settings - Theme" width="100%"/>
+      <b>Settings &rarr; Colors</b><br/><br/>
+      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot-19-11/new-color-page.png" alt="Settings - Colors" width="100%"/>
     </td>
   </tr>
   <tr>
@@ -340,8 +326,12 @@ RJ CMS installs on any shared hosting or VPS without touching a single line of c
     <td width="33%" align="center"><b>405 Invalid Request Method</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/11.png" alt="405" width="100%"/></td>
     <td width="33%" align="center"><b>429 Rate Limit Exceeded</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/13.png" alt="429" width="100%"/></td>
   </tr>
+</table>
+
+<table>
   <tr>
-    <td width="100%" colspan="3" align="center"><b>500 Server Error (Debug Mode)</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/500-error-debug.png" alt="500 Debug" width="60%"/></td>
+    <td width="50%" align="center"><b>500 Server Error (Debug Mode)</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/500-error-debug.png" alt="500 Debug" width="100%"/></td>
+    <td width="50%" align="center"><b>504 Gateway Timeout</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot-19-11/504-error.png" alt="504" width="100%"/></td>
   </tr>
 </table>
 
