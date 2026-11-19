@@ -76,9 +76,9 @@
                 @endif
             </div>
 
-            @if ($item->type === 'custom' && count(rj_available_locales()) > 1)
+            @if ($item->type === 'custom' && count(rj_frontend_locales()) > 1)
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2 border-t border-gray-200">
-                    @foreach (rj_available_locales() as $locale)
+                    @foreach (rj_frontend_locales() as $locale)
                         @if ($locale === config('app.locale')) @continue @endif
                         <div>
                             <label class="block text-xs font-medium text-gray-700 mb-1">
