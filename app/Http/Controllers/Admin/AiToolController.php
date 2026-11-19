@@ -37,16 +37,27 @@ class AiToolController extends Controller
         $prompt = "Generate a blog post about: {$validated['topic']}. Tone: " . ($validated['tone'] ?? 'professional') . ". Return ONLY valid JSON with these keys: title, content (HTML format), excerpt, seo_title, seo_description.";
 
         try {
-            $response = $this->openRouter->chat([
-                ['role' => 'system', 'content' => 'You are an expert content writer. Return only valid JSON, no markdown.'],
-                ['role' => 'user', 'content' => $prompt]
-            ], [
-                'temperature' => 0.7,
-                'model' => rj_get_option('ai_builder_model', 'openai/gpt-4o-mini')
-            ]);
+            $model = rj_get_option('ai_builder_model')
+                ?: rj_get_option('ai_default_model', 'google/gemini-2.0-flash-exp:free');
+
+            $response = $this->openRouter->chat(
+                [
+                    ['role' => 'system', 'content' => 'You are an expert content writer. Return only valid JSON, no markdown.'],
+                    ['role' => 'user', 'content' => $prompt],
+                ],
+                $model,
+                ['temperature' => 0.7]
+            );
+
+            if (!$response['success']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $response['error'] ?? __('AI request failed.'),
+                ], 422);
+            }
 
             $content = $response['content'] ?? '{}';
-            
+
             if (str_starts_with(trim($content), '```')) {
                 $content = preg_replace('/^```(?:json)?\s*/i', '', $content);
                 $content = preg_replace('/\s*```$/', '', $content);
@@ -73,7 +84,7 @@ class AiToolController extends Controller
             $post = $this->postService->create($data, $request);
 
             return response()->json([
-                'success' => true, 
+                'success' => true,
                 'message' => __('Post created successfully as a draft.'),
                 'redirect' => route('admin.posts.edit', $post->id)
             ]);
@@ -94,7 +105,11 @@ class AiToolController extends Controller
             ->get();
 
         $count = 0;
+        $failed = 0;
         set_time_limit(0);
+
+        $model = rj_get_option('ai_translate_model')
+            ?: rj_get_option('ai_default_model', 'google/gemini-2.0-flash-exp:free');
 
         foreach ($posts as $post) {
             if ($post->translations()->where('locale', $validated['target_locale'])->exists()) {
@@ -102,23 +117,29 @@ class AiToolController extends Controller
             }
 
             try {
-                $prompt = "Translate the following content to language code: {$validated['target_locale']}. CRITICAL RULE: You must preserve ALL HTML tags (like <p>, <a>, <img>, <strong>, <ul>, <li>, etc.) exactly as they are. Only translate the text content inside the tags. Return ONLY valid JSON with keys: title, content, excerpt.\n\n" . 
+                $prompt = "Translate the following content to language code: {$validated['target_locale']}. CRITICAL RULE: You must preserve ALL HTML tags (like <p>, <a>, <img>, <strong>, <ul>, <li>, etc.) exactly as they are. Only translate the text content inside the tags. Return ONLY valid JSON with keys: title, content, excerpt.\n\n" .
                     json_encode([
                         'title' => $post->title,
                         'content' => $post->content,
                         'excerpt' => $post->excerpt
                     ], JSON_UNESCAPED_UNICODE);
 
-                $response = $this->openRouter->chat([
-                    ['role' => 'system', 'content' => 'You are a professional translator. Return only valid JSON, no markdown.'],
-                    ['role' => 'user', 'content' => $prompt]
-                ], [
-                    'temperature' => 0.3,
-                    'model' => rj_get_option('ai_builder_model', 'openai/gpt-4o-mini')
-                ]);
+                $response = $this->openRouter->chat(
+                    [
+                        ['role' => 'system', 'content' => 'You are a professional translator. Return only valid JSON, no markdown.'],
+                        ['role' => 'user', 'content' => $prompt],
+                    ],
+                    $model,
+                    ['temperature' => 0.3]
+                );
+
+                if (!$response['success']) {
+                    $failed++;
+                    continue;
+                }
 
                 $content = $response['content'] ?? '{}';
-                
+
                 if (str_starts_with(trim($content), '```')) {
                     $content = preg_replace('/^```(?:json)?\s*/i', '', $content);
                     $content = preg_replace('/\s*```$/', '', $content);
@@ -132,10 +153,13 @@ class AiToolController extends Controller
                             $validated['target_locale'] => $translated
                         ]
                     ], $request);
-                    
+
                     $count++;
+                } else {
+                    $failed++;
                 }
             } catch (\Throwable $e) {
+                $failed++;
                 continue;
             }
         }
@@ -143,7 +167,9 @@ class AiToolController extends Controller
         return response()->json([
             'success' => true,
             'count' => $count,
+            'failed' => $failed,
             'message' => __(':n items have been successfully translated.', ['n' => $count])
+                . ($failed > 0 ? ' ' . __(':n items failed.', ['n' => $failed]) : ''),
         ]);
     }
 
