@@ -38,14 +38,46 @@ class AiCenterController extends Controller
 
     public function models()
     {
-        $models = Cache::remember('rj_openrouter_models', 86400, function () {
-            try {
-                $res = Http::get('https://openrouter.ai/api/v1/models');
-                return $res->successful() ? $res->json('data') : [];
-            } catch (\Throwable $e) {
-                return [];
-            }
-        });
+        $cacheKey = 'rj_openrouter_models_slim_v1';
+
+        try {
+            $models = Cache::remember($cacheKey, 86400, function () {
+                try {
+                    $res = Http::withHeaders([
+                        'User-Agent' => 'RJ-Nexus/1.0',
+                        'Accept' => 'application/json',
+                    ])->timeout(15)->get('https://openrouter.ai/api/v1/models');
+
+                    if (!$res->successful()) {
+                        return [];
+                    }
+
+                    $data = $res->json('data');
+                    if (!is_array($data)) {
+                        return [];
+                    }
+
+                    return array_values(array_map(function ($m) {
+                        return [
+                            'id' => (string) ($m['id'] ?? ''),
+                            'name' => (string) ($m['name'] ?? ($m['id'] ?? '')),
+                            'pricing' => [
+                                'prompt' => (string) ($m['pricing']['prompt'] ?? ''),
+                            ],
+                        ];
+                    }, $data));
+                } catch (\Throwable $e) {
+                    return [];
+                }
+            });
+        } catch (\Throwable $e) {
+            try { Cache::forget($cacheKey); } catch (\Throwable $ignored) {}
+            $models = [];
+        }
+
+        if (!empty($models)) {
+            try { Cache::forget('rj_openrouter_models'); } catch (\Throwable $ignored) {}
+        }
 
         $defaultModel = rj_get_option('ai_default_model', 'google/gemini-2.0-flash-exp:free');
         $seoModel = rj_get_option('ai_seo_model', $defaultModel);
