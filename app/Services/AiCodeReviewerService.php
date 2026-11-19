@@ -58,7 +58,7 @@ PROMPT;
         $result = $this->ai->chat([
             ['role' => 'system', 'content' => 'You are a strict but fair code reviewer. Always respond with valid JSON only.'],
             ['role' => 'user', 'content' => $prompt],
-        ], null, [
+        ], $this->getModel(), [
             'temperature' => 0.2,
             'max_tokens' => 1500,
         ]);
@@ -72,7 +72,7 @@ PROMPT;
         if (!$parsed) {
             return [
                 'success' => false,
-                'error' => __('Could not parse AI response.'),
+                'error' => __('Could not parse the AI response.'),
                 'raw' => $result['content'],
             ];
         }
@@ -90,6 +90,12 @@ PROMPT;
                     : [],
             ],
         ];
+    }
+
+    protected function getModel(): string
+    {
+        return rj_get_option('ai_code_model')
+            ?: rj_get_option('ai_default_model', 'google/gemini-2.0-flash-exp:free');
     }
 
     protected function detectLanguage(string $filename): string
