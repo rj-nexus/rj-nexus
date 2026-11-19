@@ -175,7 +175,6 @@
                         </div>
                     </template>
 
-                    {{-- ═══ CONTENT TAB ═══ --}}
                     <div x-show="activeTab === 'content'" class="p-6 space-y-5">
                         @foreach ($locales as $locale)
                             @php
@@ -249,7 +248,6 @@
                         @endforeach
                     </div>
 
-                    {{-- ═══ SEO TAB ═══ --}}
                     <div x-show="activeTab === 'seo'" x-cloak class="p-6 space-y-6">
 
                         <div class="flex items-center justify-between gap-3 flex-wrap">
@@ -403,7 +401,6 @@
 
                     </div>
 
-                    {{-- ═══ SOCIAL TAB ═══ --}}
                     <div x-show="activeTab === 'social'" x-cloak class="p-6 space-y-6">
 
                         <div>
@@ -513,7 +510,6 @@
 
                     </div>
 
-                    {{-- ═══ ADVANCED TAB ═══ --}}
                     <div x-show="activeTab === 'advanced'" x-cloak class="p-6 space-y-6">
 
                         <div>
@@ -864,7 +860,8 @@ function postEditor() {
                     body: JSON.stringify({
                         title: title,
                         content: content,
-                        locale: this.activeLocale
+                        locale: this.activeLocale,
+                        post_id: '{{ $post->id }}'
                     })
                 });
                 const data = await res.json();
