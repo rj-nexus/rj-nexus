@@ -20,8 +20,8 @@ class AiCenterController extends Controller
 
     public function index()
     {
-        $aiEnabled = !empty(rj_get_option('ai_api_key'));
-        $activeModel = rj_get_option('ai_default_model', 'openai/gpt-4o-mini');
+        $aiEnabled = $this->openRouter->isConfigured();
+        $activeModel = rj_get_option('ai_default_model', 'google/gemini-2.0-flash-exp:free');
 
         $totalTokens = AiLog::sum('total_tokens');
         $totalCost = AiLog::sum('cost');
@@ -31,7 +31,7 @@ class AiCenterController extends Controller
         $todayCost = AiLog::whereDate('created_at', today())->sum('cost');
 
         return view('admin.ai.index', compact(
-            'aiEnabled', 'activeModel', 'totalTokens', 'totalCost', 
+            'aiEnabled', 'activeModel', 'totalTokens', 'totalCost',
             'totalRequests', 'todayRequests', 'todayCost'
         ));
     }
@@ -47,7 +47,7 @@ class AiCenterController extends Controller
             }
         });
 
-        $defaultModel = rj_get_option('ai_default_model', 'openai/gpt-4o-mini');
+        $defaultModel = rj_get_option('ai_default_model', 'google/gemini-2.0-flash-exp:free');
         $seoModel = rj_get_option('ai_seo_model', $defaultModel);
         $translateModel = rj_get_option('ai_translate_model', $defaultModel);
         $builderModel = rj_get_option('ai_builder_model', $defaultModel);
