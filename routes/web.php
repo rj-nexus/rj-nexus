@@ -10,8 +10,3 @@ Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])
 Route::get('/robots.txt', [SeoController::class, 'robots'])
     ->middleware('throttle:100,1')
     ->name('robots');
-
-// MÜVƏQQƏTİ: 504 səhifəsini görmək üçün
-Route::get('/test-504', function () {
-    abort(504);
-})->name('test.504');
