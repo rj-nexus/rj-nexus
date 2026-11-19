@@ -125,7 +125,7 @@
                     </div>
 
                     <div x-show="activeType === 'custom'" class="space-y-4">
-                        @php $locales = rj_available_locales(); @endphp
+                        @php $locales = rj_frontend_locales(); @endphp
                         @if (count($locales) > 1)
                             <div x-data="{ openTranslations: false }" class="rounded-xl border border-gray-200 bg-gray-50/60">
                                 <button type="button" @click="openTranslations = !openTranslations" class="w-full flex items-center justify-between px-4 py-2.5 text-sm font-semibold text-gray-700 hover:text-rj-purple transition">
