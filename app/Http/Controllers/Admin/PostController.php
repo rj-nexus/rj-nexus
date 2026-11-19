@@ -373,6 +373,14 @@ class PostController extends Controller
         $title = (string) $request->input('title', '');
         $content = (string) $request->input('content', '');
         $locale = (string) $request->input('locale', config('app.locale'));
+        $postId = $request->input('post_id');
+
+        if ($postId) {
+            $post = Post::find($postId);
+            if ($post && empty(trim(strip_tags($content)))) {
+                $content = $this->resolvePostContent($post, $locale);
+            }
+        }
 
         if ($title === '') {
             return response()->json(['success' => false, 'message' => __('Title is required.')]);
