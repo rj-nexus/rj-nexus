@@ -99,7 +99,7 @@ class AiTranslatorService
                 ['role' => 'system', 'content' => $system],
                 ['role' => 'user', 'content' => $userContent],
             ],
-            null,
+            $this->getModel(),
             [
                 'temperature' => 0.2,
                 'max_tokens' => max(500, count($keys) * 80),
@@ -113,6 +113,12 @@ class AiTranslatorService
         $translations = $this->parseResponse($result['content'] ?? '', $keys);
 
         return ['success' => true, 'translations' => $translations];
+    }
+
+    protected function getModel(): string
+    {
+        return rj_get_option('ai_translate_model')
+            ?: rj_get_option('ai_default_model', 'google/gemini-2.0-flash-exp:free');
     }
 
     protected function parseResponse(string $content, array $keys): array
