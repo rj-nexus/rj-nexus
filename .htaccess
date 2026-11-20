@@ -1,20 +1,50 @@
+# 1. LiteSpeed Cache (Yalnız LiteSpeed serverlərində işləyir, digərlərində xəta vermir)
+<IfModule LiteSpeed>
+    CacheLookup on
+</IfModule>
+
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
+    # Təhlükəsizlik: Həssas fayllara birbaşa girişi bağlayırıq
     RewriteRule ^(\.env.*|composer\.(json|lock)|package(-lock)?\.json|artisan|phpunit\.xml|vite\.config\.js|tailwind\.config\.js|postcss\.config\.js|README\.md|CHANGELOG\.md|LICENSE)$ - [F,L]
 
+    # Təhlükəsizlik: Sistem qovluqlarına girişi bağlayırıq
     RewriteRule ^(app|bootstrap|config|database|resources|routes|storage|vendor|tests|node_modules)/ - [F,L]
 
+    # Trafiki public/ qovluğuna yönləndiririk
     RewriteCond %{REQUEST_URI} !^/public/
     RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>
 
+# 2. Gizli fayllara (məsələn .git) girişi bağlayırıq
 <FilesMatch "^\.">
     Require all denied
 </FilesMatch>
 
+# 3. Təhlükəli uzantıları bloklayırıq
 <FilesMatch "\.(env|env\..*|log|sql|sqlite|bak|old|orig|swp|ini|yml|yaml|lock|dist)$">
     Require all denied
 </FilesMatch>
 
+# 4. Qovluqların içindəki faylların siyahısının görünməsini qadağan edirik
 Options -Indexes
+
+# 5. GZIP Sıxılması (Saytın yüklənmə sürətini artırır)
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json application/xml
+</IfModule>
+
+# 6. Brauzer Keşi (Şəkillər, CSS və JS faylları brauzerdə yadda saxlanılır)
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpg "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType font/woff2 "access plus 1 year"
+</IfModule>

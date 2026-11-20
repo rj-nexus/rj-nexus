@@ -5,6 +5,7 @@ namespace App\Observers;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Spatie\ResponseCache\Facades\ResponseCache;
+use Litespeed\LSCache\LSCache; // YENİ
 
 class ResponseCacheObserver
 {
@@ -18,27 +19,24 @@ class ResponseCacheObserver
         $this->clear($model, 'deleted');
     }
 
-    public function restored(Model $model): void
-    {
-        $this->clear($model, 'restored');
-    }
-
     protected function clear(Model $model, string $event): void
     {
-        // Əgər Spatie paketi quraşdırılmayıbsa, heç nə etmə
-        if (!class_exists(ResponseCache::class)) {
-            return;
+        // 1. Spatie Keşini Təmizlə
+        if (class_exists(ResponseCache::class) && function_exists('rj_get_option') && rj_get_option('response_cache_enabled', '0') === '1') {
+            try {
+                ResponseCache::clear();
+            } catch (\Throwable $e) {
+                Log::warning('Spatie cache clear failed: ' . $e->getMessage());
+            }
         }
 
-        // DÜZƏLİŞ: Config yerinə Admin Paneldəki ayarı yoxlayırıq
-        if (function_exists('rj_get_option') && rj_get_option('response_cache_enabled', '0') !== '1') {
-            return;
-        }
-
-        try {
-            ResponseCache::clear();
-        } catch (\Throwable $e) {
-            Log::warning('Response cache clear failed (' . get_class($model) . '::' . $event . '): ' . $e->getMessage());
+        // 2. LiteSpeed Keşini Təmizlə (YENİ)
+        if (class_exists(LSCache::class)) {
+            try {
+                LSCache::purgeAll();
+            } catch (\Throwable $e) {
+                Log::warning('LiteSpeed cache clear failed: ' . $e->getMessage());
+            }
         }
     }
 }
