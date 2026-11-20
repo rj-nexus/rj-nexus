@@ -12,6 +12,10 @@ use App\Http\Controllers\Frontend\WidgetAuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+$rjCache = class_exists(\Spatie\ResponseCache\Middlewares\CacheResponse::class)
+    ? [\Spatie\ResponseCache\Middlewares\CacheResponse::class]
+    : [];
+
 Route::get('/theme-assets/{slug}/{path}', function (string $slug, string $path) {
     $manager = app(\App\Services\ThemeManager::class);
     $file = $manager->resolveAsset($slug, $path);
@@ -89,18 +93,18 @@ Route::get('/', function () {
 
 Route::prefix('{locale}')
     ->where(['locale' => '[a-z]{2}(_[A-Z]{2})?'])
-    ->group(function () {
-        Route::get('/', [FrontendController::class, 'home'])->name('frontend.home');
-
-        Route::get('/blog', [PostController::class, 'archive'])->name('frontend.posts.index');
-        Route::get('/blog/{slug}', [PostController::class, 'show'])->name('frontend.posts.show');
+    ->group(function () use ($rjCache) {
+        Route::middleware($rjCache)->group(function () {
+            Route::get('/', [FrontendController::class, 'home'])->name('frontend.home');
+            Route::get('/blog', [PostController::class, 'archive'])->name('frontend.posts.index');
+            Route::get('/blog/{slug}', [PostController::class, 'show'])->name('frontend.posts.show');
+        });
 
         Route::middleware(['auth'])->group(function () {
             Route::get('/account', [AccountController::class, 'index'])->name('frontend.account.index');
             Route::get('/account/settings', [AccountController::class, 'settings'])->name('frontend.account.settings');
             Route::put('/account/settings', [AccountController::class, 'updateSettings'])->name('frontend.account.settings.update');
 
-            // Rate limiting əlavə olundu
             Route::put('/account/password', [AccountController::class, 'updatePassword'])
                 ->middleware('throttle:6,1')
                 ->name('frontend.account.password.update');
@@ -109,9 +113,11 @@ Route::prefix('{locale}')
             Route::post('/kyc', [KycController::class, 'submit'])->name('frontend.kyc.submit');
         });
 
-        Route::get('/{slug}', [PageController::class, 'show'])
-            ->where('slug', '^(?!admin|login|register|logout|password|email|verification|api|rj-preview|rj-form|rj-fonts|rj-widget|theme-assets|plugin-assets|blog|account|kyc|profile|storage|up|sanctum|livewire|shop|cart|checkout|product).*$')
-            ->name('frontend.page');
+        Route::middleware($rjCache)->group(function () {
+            Route::get('/{slug}', [PageController::class, 'show'])
+                ->where('slug', '^(?!admin|login|register|logout|password|email|verification|api|rj-preview|rj-form|rj-fonts|rj-widget|theme-assets|plugin-assets|blog|account|kyc|profile|storage|up|sanctum|livewire|shop|cart|checkout|product).*$')
+                ->name('frontend.page');
+        });
     });
 
 Route::get('/{path}', function (Request $request, string $path) {
