@@ -24,6 +24,7 @@ class CacheSettingsController extends BaseSettingsController
 
     public function update(Request $request)
     {
+        // YENİ: response_cache_enabled və response_cache_lifetime validasiyaya əlavə edildi
         $data = $request->validate([
             'cache_enabled' => ['nullable', 'boolean'],
             'cache_driver' => ['required', 'in:file,redis,memcached,database,array'],
@@ -31,6 +32,9 @@ class CacheSettingsController extends BaseSettingsController
             'query_cache' => ['nullable', 'boolean'],
             'view_cache' => ['nullable', 'boolean'],
             'opcache_enabled' => ['nullable', 'boolean'],
+
+            'response_cache_enabled' => ['nullable', 'boolean'],
+            'response_cache_lifetime' => ['nullable', 'integer', 'min:60', 'max:604800'],
 
             'browser_cache' => ['nullable', 'boolean'],
             'browser_cache_ttl' => ['nullable', 'integer', 'min:0', 'max:31536000'],
@@ -40,11 +44,13 @@ class CacheSettingsController extends BaseSettingsController
             'cdn_url' => ['nullable', 'url', 'max:255'],
         ]);
 
+        // YENİ: response_cache_enabled boolean siyahısına əlavə edildi
         $booleanKeys = [
             'cache_enabled',
             'query_cache',
             'view_cache',
             'opcache_enabled',
+            'response_cache_enabled',
             'browser_cache',
             'gzip_enabled',
             'cdn_enabled',
@@ -57,6 +63,7 @@ class CacheSettingsController extends BaseSettingsController
         $typeMap = [
             'cache_ttl' => 'number',
             'browser_cache_ttl' => 'number',
+            'response_cache_lifetime' => 'number', // YENİ
         ];
 
         foreach ($data as $name => $value) {
@@ -68,7 +75,8 @@ class CacheSettingsController extends BaseSettingsController
 
     public function clear(string $type)
     {
-        $allowed = ['data', 'views', 'routes', 'config', 'all'];
+        // YENİ: 'response' siyahıya əlavə edildi
+        $allowed = ['data', 'views', 'routes', 'config', 'response', 'all'];
 
         if (!in_array($type, $allowed, true)) {
             return back()->with('error', __('Invalid cache type.'));
@@ -80,6 +88,7 @@ class CacheSettingsController extends BaseSettingsController
                 'views' => Artisan::call('view:clear'),
                 'routes' => Artisan::call('route:clear'),
                 'config' => Artisan::call('config:clear'),
+                'response' => Artisan::call('responsecache:clear'), // YENİ: Spatie Response Cache təmizləmə
                 'all' => $this->clearAll(),
             };
 
@@ -96,6 +105,7 @@ class CacheSettingsController extends BaseSettingsController
         Artisan::call('route:clear');
         Artisan::call('config:clear');
         Artisan::call('cache:clear');
+        Artisan::call('responsecache:clear'); // YENİ: Bütün kesh təmizlənəndə response cache də silinsin
         Artisan::call('optimize:clear');
     }
 
