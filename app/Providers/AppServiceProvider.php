@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\URL;
 
 use App\Observers\ActivityLogObserver;
+use App\Observers\ResponseCacheObserver;
 use App\Models\Post;
 use App\Models\Media;
 use App\Models\User;
@@ -20,7 +21,12 @@ use App\Models\Template;
 use App\Models\Category;
 use App\Models\Tag;
 use App\Models\Menu;
+use App\Models\MenuItem;
 use App\Models\Role;
+use App\Models\Theme;
+use App\Models\ThemeCustomization;
+use App\Models\GlobalWidget;
+use App\Models\Comment;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Auth\Events\Failed;
@@ -94,6 +100,19 @@ class AppServiceProvider extends ServiceProvider
         Tag::observe(ActivityLogObserver::class);
         Menu::observe(ActivityLogObserver::class);
         Role::observe(ActivityLogObserver::class);
+
+        if (class_exists(\Spatie\ResponseCache\Facades\ResponseCache::class)) {
+            Post::observe(ResponseCacheObserver::class);
+            Category::observe(ResponseCacheObserver::class);
+            Tag::observe(ResponseCacheObserver::class);
+            Menu::observe(ResponseCacheObserver::class);
+            MenuItem::observe(ResponseCacheObserver::class);
+            Template::observe(ResponseCacheObserver::class);
+            Theme::observe(ResponseCacheObserver::class);
+            ThemeCustomization::observe(ResponseCacheObserver::class);
+            GlobalWidget::observe(ResponseCacheObserver::class);
+            Comment::observe(ResponseCacheObserver::class);
+        }
 
         Event::listen(Login::class, function ($event) {
             ActivityLog::record([
