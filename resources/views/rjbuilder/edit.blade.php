@@ -45,6 +45,19 @@
             ->toArray();
     }
 
+    $activeTheme = rj_get_option('active_theme', '');
+    $isDarkTheme = in_array(strtolower($activeTheme), ['spotlight', 'spotlight-derative', 'velvet-aura-main']);
+    
+    $themeBg = function_exists('rj_theme_mod') ? rj_theme_mod('background_color') : null;
+    $themeText = function_exists('rj_theme_mod') ? rj_theme_mod('text_color') : null;
+
+    if (!$themeBg) {
+        $themeBg = $isDarkTheme ? '#0a0a0f' : '#ffffff';
+    }
+    if (!$themeText) {
+        $themeText = $isDarkTheme ? '#e5e7eb' : '#111827';
+    }
+
     $i18n = collect([
         'Add element', 'Sections', 'Navigator', 'History', 'Settings', 'Edit element', 'Back', 'Undo', 'Redo',
         'Preview', 'Edit', 'Save', 'Saving...', 'Saved', 'Unsaved', 'Desktop', 'Tablet', 'Mobile',
@@ -91,25 +104,17 @@
 
 @include('rjbuilder.partials.styles')
 
-@php
-    $themeBg = function_exists('rj_theme_mod') ? (rj_theme_mod('background_color') ?: '#ffffff') : '#ffffff';
-    $themeText = function_exists('rj_theme_mod') ? (rj_theme_mod('text_color') ?: '#111827') : '#111827';
-@endphp
-
 <style>
-    #rj-canvas.rj-page {
-        background-color: {{ $themeBg }} !important;
-        color: {{ $themeText }} !important;
-        min-height: 500px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        border-radius: 8px;
-    }
     .rj-main {
         background-color: #e5e7eb !important;
     }
-    @if(in_array(strtolower($themeBg), ['#0a0a0f', '#000000', '#111827', '#1f2937', '#111', '#05050a']))
-        .rj-main { background-color: #1a1a24 !important; }
-        .rj-devlabel { color: #9ca3af !important; }
+    @if($isDarkTheme)
+        .rj-main {
+            background-color: #1a1a24 !important;
+        }
+        .rj-devlabel {
+            color: #9ca3af !important;
+        }
     @endif
 </style>
 
@@ -681,7 +686,7 @@
 
                 <div class="rj-devlabel" x-show="device !== 'desktop' && blocks.length > 0" x-text="t(deviceLabel) + ' · ' + deviceWidthLabel"></div>
 
-                <div x-show="blocks.length > 0" id="rj-canvas" class="rj-canvas" :class="(prefs.outlines ? 'rj-outlines ' : '') + (preview && device === 'desktop' ? '' : 'rj-page')" :style="canvasStyle">
+                <div x-show="blocks.length > 0" id="rj-canvas" class="rj-canvas" :class="(prefs.outlines ? 'rj-outlines ' : '') + (preview && device === 'desktop' ? '' : 'rj-page')" :style="(canvasStyle || '') + '; background-color: {{ $themeBg }} !important; color: {{ $themeText }} !important; border-radius: 12px; min-height: 400px;'">
                     <template x-for="(block, index) in blocks" :key="block.id + '-' + activeLocale">
                         <div>
                             <div x-show="!preview"
