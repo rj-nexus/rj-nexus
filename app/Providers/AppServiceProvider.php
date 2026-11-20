@@ -171,7 +171,7 @@ class AppServiceProvider extends ServiceProvider
                 Config::set('responsecache.enabled', $isEnabled);
                 
                 $lifetimeSeconds = (int) rj_get_option('response_cache_lifetime', 3600);
-                Config::set('responsecache.cache_lifetime_in_minutes', $lifetimeSeconds / 60);
+                Config::set('responsecache.cache.lifetime_in_seconds', $lifetimeSeconds);
             }
         }
     }
