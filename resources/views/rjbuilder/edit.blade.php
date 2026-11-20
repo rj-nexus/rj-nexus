@@ -91,17 +91,26 @@
 
 @include('rjbuilder.partials.styles')
 
+@php
+    $themeBg = function_exists('rj_theme_mod') ? (rj_theme_mod('background_color') ?: '#ffffff') : '#ffffff';
+    $themeText = function_exists('rj_theme_mod') ? (rj_theme_mod('text_color') ?: '#111827') : '#111827';
+@endphp
+
 <style>
     #rj-canvas.rj-page {
-        background-color: var(--rj-bg, #ffffff) !important;
-        color: var(--rj-text, #111827) !important;
-    }
-    #rj-canvas.rj-page .rj-empty {
-        color: var(--rj-text, #111827) !important;
+        background-color: {{ $themeBg }} !important;
+        color: {{ $themeText }} !important;
+        min-height: 500px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        border-radius: 8px;
     }
     .rj-main {
-        background-color: var(--rj-surface, #f3f4f6) !important;
+        background-color: #e5e7eb !important;
     }
+    @if(in_array(strtolower($themeBg), ['#0a0a0f', '#000000', '#111827', '#1f2937', '#111', '#05050a']))
+        .rj-main { background-color: #1a1a24 !important; }
+        .rj-devlabel { color: #9ca3af !important; }
+    @endif
 </style>
 
 <div x-data="builder()" x-init="init()" class="rj-app" dir="ltr"
