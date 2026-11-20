@@ -30,10 +30,6 @@ class RjCacheProfile extends CacheAllSuccessfulGetRequests
             return false;
         }
 
-        if (session()->has('errors') || session()->has('success') || session()->has('error') || session()->has('warning') || session()->has('status')) {
-            return false;
-        }
-
         if ($request->has('preview') || $request->has('rj_theme_preview') || $request->has('token')) {
             return false;
         }
@@ -59,10 +55,9 @@ class RjCacheProfile extends CacheAllSuccessfulGetRequests
             return false;
         }
 
-        $cacheControl = (string) $response->headers->get('Cache-Control', '');
-        if (stripos($cacheControl, 'no-cache') !== false || stripos($cacheControl, 'no-store') !== false || stripos($cacheControl, 'private') !== false) {
-            return false;
-        }
+        // DÜZƏLİŞ: Cache-Control başlığını yoxlamağı SİLDİK.
+        // Çünki Laravel CSRF səbəbindən avtomatik "private, no-cache" yazır.
+        // Biz CsrfTokenReplacer istifadə etdiyimiz üçün bunu keşləyə bilərik.
 
         return true;
     }
