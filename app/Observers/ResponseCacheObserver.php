@@ -25,11 +25,13 @@ class ResponseCacheObserver
 
     protected function clear(Model $model, string $event): void
     {
+        // Əgər Spatie paketi quraşdırılmayıbsa, heç nə etmə
         if (!class_exists(ResponseCache::class)) {
             return;
         }
 
-        if (!config('responsecache.enabled', false)) {
+        // DÜZƏLİŞ: Config yerinə Admin Paneldəki ayarı yoxlayırıq
+        if (function_exists('rj_get_option') && rj_get_option('response_cache_enabled', '0') !== '1') {
             return;
         }
 
