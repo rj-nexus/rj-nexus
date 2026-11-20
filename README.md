@@ -10,6 +10,8 @@
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Laravel](https://img.shields.io/badge/Laravel-12-red)
 ![PHP](https://img.shields.io/badge/PHP-8.2-purple)
+![Languages](https://img.shields.io/badge/Languages-47-orange)
+![Cache](https://img.shields.io/badge/Cache-ResponseCache%20%2B%20LSCache-0ea5e9)
 
 <br/>
 
@@ -21,7 +23,7 @@
 
 ## About
 
-**RJ CMS** is a modern, self-hosted content management system built on **Laravel 12**. You install it on your own hosting, keep full ownership of your data, and extend it through an isolated plugin and theme system. It ships with a visual page builder (RJBuilder) with 60+ widgets, a dual AI engine, 44 languages with per-language URLs, and a browser-based installer that works on any shared hosting or VPS.
+**RJ CMS** is a modern, self-hosted content management system built on **Laravel 12**. You install it on your own hosting, keep full ownership of your data, and extend it through an isolated plugin and theme system. It ships with a visual page builder (RJBuilder) with 60+ widgets, a dual AI engine, **47 languages** with per-language URLs, a **two-layer caching system** (Response Cache + LiteSpeed LSCache), and a browser-based installer that works on any shared hosting or VPS.
 
 **RJ Nexus** is the organization behind it. It hosts the CMS core and the ecosystem around it.
 
@@ -31,9 +33,21 @@ Official website: **[rjnexus.org](https://rjnexus.org)**
 
 ## What's New in v1.10.0
 
-This release gives the 504 error page its own animated design and expands the admin color presets with four new themes. It also adds **Amharic** as a new language, bringing the total to 44. The complete list of changes is available in the [Changelog](https://github.com/rj-nexus/rj-nexus/blob/main/CHANGELOG.md).
+This release introduces a **two-layer caching system** built on `laravel-responsecache` and `litespeed/lscache-laravel`, and grows the language catalog from 44 to **47** with **Czech**, **Greek** and **Brazilian Portuguese**. It also gives the 504 error page its own animated design and expands the admin color presets with four new themes. The complete list of changes is available in the [Changelog](https://github.com/rj-nexus/rj-nexus/blob/main/CHANGELOG.md).
 
 <table>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/performance.svg" width="44" height="44" alt=""/><br/>
+      <b>Two-Layer Caching System</b><br/>
+      Full-page caching now works at two levels: <b>laravel-responsecache</b> stores complete application responses, and <b>litespeed/lscache-laravel</b> hands pages over to the <b>LiteSpeed server cache</b> on supported hosting. Repeat visits are served without booting the full application. See <a href="#caching">Caching</a> for details.
+    </td>
+    <td width="50%" valign="top">
+      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/language.svg" width="44" height="44" alt=""/><br/>
+      <b>3 New Languages &mdash; 47 in Total</b><br/>
+      <b>Czech</b> (<code>cs</code>), <b>Greek</b> (<code>el</code>) and <b>Brazilian Portuguese</b> (<code>pt_BR</code>) join <b>Amharic</b>, which arrived earlier in this release. The catalog now covers <b>47 languages</b> with per-language URLs and automatic RTL rendering.
+    </td>
+  </tr>
   <tr>
     <td width="50%" valign="top">
       <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/activity.svg" width="44" height="44" alt=""/><br/>
@@ -102,14 +116,14 @@ RJ CMS installs on any shared hosting or VPS without touching a single line of c
     <td width="33%" valign="top">
       <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/language.svg" width="44" height="44" alt=""/><br/>
       <b>Multilingual &amp; RTL</b><br/>
-      44 languages with automatic right-to-left rendering for Arabic, Kurdish and other RTL languages.
+      <b>47 languages</b> with per-language URLs and automatic right-to-left rendering for Arabic, Kurdish and other RTL languages.
     </td>
   </tr>
   <tr>
     <td width="33%" valign="top">
       <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/performance.svg" width="44" height="44" alt=""/><br/>
       <b>Performance First</b><br/>
-      WebP optimization, lazy loading and fast asset compilation via Vite.
+      Two-layer page caching (Response Cache + LiteSpeed LSCache), WebP optimization, lazy loading and fast asset compilation via Vite.
     </td>
     <td width="33%" valign="top">
       <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/modular.svg" width="44" height="44" alt=""/><br/>
@@ -126,9 +140,41 @@ RJ CMS installs on any shared hosting or VPS without touching a single line of c
 
 <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/divider.svg" alt="" width="100%"/>
 
+<a id="caching"></a>
+
+## Caching
+
+RJ CMS ships with a built-in, two-layer page caching system, so your site stays fast under real traffic, even on modest shared hosting.
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/performance.svg" width="44" height="44" alt=""/><br/>
+      <b>Response Cache</b><br/>
+      Powered by <a href="https://github.com/spatie/laravel-responsecache"><code>laravel-responsecache</code></a>. Complete application responses are stored and served directly on repeat requests, which skips most of the framework work. Works on any hosting, with no special server required.
+    </td>
+    <td width="50%" valign="top">
+      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/modular.svg" width="44" height="44" alt=""/><br/>
+      <b>LiteSpeed Cache (LSCache)</b><br/>
+      Powered by <a href="https://github.com/litespeedtech/lscache-laravel"><code>litespeed/lscache-laravel</code></a>. On LiteSpeed and OpenLiteSpeed hosting, pages are cached at the web server level and delivered before PHP is even started.
+    </td>
+  </tr>
+</table>
+
+| | Response Cache | LiteSpeed LSCache |
+|---|---|---|
+| Package | `laravel-responsecache` | `litespeed/lscache-laravel` |
+| Cache level | Application (Laravel) | Web server (LiteSpeed) |
+| Hosting requirement | Any PHP hosting | LiteSpeed / OpenLiteSpeed |
+| Best for | Universal baseline speed-up | Maximum speed on LiteSpeed hosts |
+
+Cache behavior is managed from **Admin &rarr; Settings &rarr; Cache**.
+
+<img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/divider.svg" alt="" width="100%"/>
+
 ## Supported Languages
 
-44 languages are supported, including per-language URLs (for example `/en/about` and `/az/haqqimizda`).
+47 languages are supported, including per-language URLs (for example `/en/about` and `/az/haqqimizda`).
 
 <table>
   <tr>
@@ -140,59 +186,59 @@ RJ CMS installs on any shared hosting or VPS without touching a single line of c
     <td align="center" width="16%"><img src="https://flagcdn.com/cn.svg" width="32" alt="ZH"/><br/>Chinese<br/><code>zh</code></td>
   </tr>
   <tr>
+    <td align="center" width="16%"><img src="https://flagcdn.com/cz.svg" width="32" alt="CS"/><br/>Czech <b>NEW</b><br/><code>cs</code></td>
     <td align="center" width="16%"><img src="https://flagcdn.com/nl.svg" width="32" alt="NL"/><br/>Dutch<br/><code>nl</code></td>
     <td align="center" width="16%"><img src="https://flagcdn.com/gb.svg" width="32" alt="EN"/><br/>English<br/><code>en</code></td>
     <td align="center" width="16%"><img src="https://flagcdn.com/ee.svg" width="32" alt="ET"/><br/>Estonian<br/><code>et</code></td>
     <td align="center" width="16%"><img src="https://flagcdn.com/fr.svg" width="32" alt="FR"/><br/>French<br/><code>fr</code></td>
     <td align="center" width="16%"><img src="https://flagcdn.com/ge.svg" width="32" alt="KA"/><br/>Georgian<br/><code>ka</code></td>
-    <td align="center" width="16%"><img src="https://flagcdn.com/de.svg" width="32" alt="DE"/><br/>German<br/><code>de</code></td>
   </tr>
   <tr>
+    <td align="center" width="16%"><img src="https://flagcdn.com/de.svg" width="32" alt="DE"/><br/>German<br/><code>de</code></td>
+    <td align="center" width="16%"><img src="https://flagcdn.com/gr.svg" width="32" alt="EL"/><br/>Greek <b>NEW</b><br/><code>el</code></td>
     <td align="center" width="16%"><img src="https://flagcdn.com/ht.svg" width="32" alt="HT"/><br/>Haitian Creole<br/><code>ht</code></td>
     <td align="center" width="16%"><img src="https://flagcdn.com/ng.svg" width="32" alt="HA"/><br/>Hausa<br/><code>ha</code></td>
     <td align="center" width="16%"><img src="https://flagcdn.com/il.svg" width="32" alt="HE"/><br/>Hebrew<br/><code>he</code></td>
     <td align="center" width="16%"><img src="https://flagcdn.com/in.svg" width="32" alt="HI"/><br/>Hindi<br/><code>hi</code></td>
-    <td align="center" width="16%"><img src="https://flagcdn.com/hu.svg" width="32" alt="HU"/><br/>Hungarian<br/><code>hu</code></td>
-    <td align="center" width="16%"><img src="https://flagcdn.com/id.svg" width="32" alt="ID"/><br/>Indonesian<br/><code>id</code></td>
   </tr>
   <tr>
+    <td align="center" width="16%"><img src="https://flagcdn.com/hu.svg" width="32" alt="HU"/><br/>Hungarian<br/><code>hu</code></td>
+    <td align="center" width="16%"><img src="https://flagcdn.com/id.svg" width="32" alt="ID"/><br/>Indonesian<br/><code>id</code></td>
     <td align="center" width="16%"><img src="https://flagcdn.com/it.svg" width="32" alt="IT"/><br/>Italian<br/><code>it</code></td>
     <td align="center" width="16%"><img src="https://flagcdn.com/jp.svg" width="32" alt="JA"/><br/>Japanese<br/><code>ja</code></td>
     <td align="center" width="16%"><img src="https://flagcdn.com/kz.svg" width="32" alt="KK"/><br/>Kazakh<br/><code>kk</code></td>
     <td align="center" width="16%"><img src="https://flagcdn.com/rw.svg" width="32" alt="RW"/><br/>Kinyarwanda<br/><code>rw</code></td>
-    <td align="center" width="16%"><img src="https://flagcdn.com/kr.svg" width="32" alt="KO"/><br/>Korean<br/><code>ko</code></td>
-    <td align="center" width="16%"><b>KU</b><br/>Kurdish<br/><code>ku</code></td>
   </tr>
   <tr>
+    <td align="center" width="16%"><img src="https://flagcdn.com/kr.svg" width="32" alt="KO"/><br/>Korean<br/><code>ko</code></td>
+    <td align="center" width="16%"><b>KU</b><br/>Kurdish<br/><code>ku</code></td>
     <td align="center" width="16%"><img src="https://flagcdn.com/kg.svg" width="32" alt="KY"/><br/>Kyrgyz<br/><code>ky</code></td>
     <td align="center" width="16%"><img src="https://flagcdn.com/nz.svg" width="32" alt="MI"/><br/>Maori<br/><code>mi</code></td>
     <td align="center" width="16%"><img src="https://flagcdn.com/in.svg" width="32" alt="MR"/><br/>Marathi<br/><code>mr</code></td>
     <td align="center" width="16%"><img src="https://flagcdn.com/ir.svg" width="32" alt="FA"/><br/>Persian<br/><code>fa</code></td>
-    <td align="center" width="16%"><img src="https://flagcdn.com/pl.svg" width="32" alt="PL"/><br/>Polish<br/><code>pl</code></td>
-    <td align="center" width="16%"><img src="https://flagcdn.com/pt.svg" width="32" alt="PT"/><br/>Portuguese<br/><code>pt</code></td>
   </tr>
   <tr>
+    <td align="center" width="16%"><img src="https://flagcdn.com/pl.svg" width="32" alt="PL"/><br/>Polish<br/><code>pl</code></td>
+    <td align="center" width="16%"><img src="https://flagcdn.com/pt.svg" width="32" alt="PT"/><br/>Portuguese<br/><code>pt</code></td>
+    <td align="center" width="16%"><img src="https://flagcdn.com/br.svg" width="32" alt="PT-BR"/><br/>Portuguese (Brazil) <b>NEW</b><br/><code>pt_BR</code></td>
     <td align="center" width="16%"><img src="https://flagcdn.com/pe.svg" width="32" alt="QU"/><br/>Quechua<br/><code>qu</code></td>
     <td align="center" width="16%"><img src="https://flagcdn.com/ro.svg" width="32" alt="RO"/><br/>Romanian<br/><code>ro</code></td>
     <td align="center" width="16%"><img src="https://flagcdn.com/ru.svg" width="32" alt="RU"/><br/>Russian<br/><code>ru</code></td>
+  </tr>
+  <tr>
     <td align="center" width="16%"><img src="https://flagcdn.com/es.svg" width="32" alt="ES"/><br/>Spanish<br/><code>es</code></td>
     <td align="center" width="16%"><img src="https://flagcdn.com/ke.svg" width="32" alt="SW"/><br/>Swahili<br/><code>sw</code></td>
     <td align="center" width="16%"><img src="https://flagcdn.com/se.svg" width="32" alt="SV"/><br/>Swedish<br/><code>sv</code></td>
-  </tr>
-  <tr>
     <td align="center" width="16%"><img src="https://flagcdn.com/ph.svg" width="32" alt="TL"/><br/>Tagalog<br/><code>tl</code></td>
     <td align="center" width="16%"><img src="https://flagcdn.com/in.svg" width="32" alt="TE"/><br/>Telugu<br/><code>te</code></td>
     <td align="center" width="16%"><img src="https://flagcdn.com/th.svg" width="32" alt="TH"/><br/>Thai<br/><code>th</code></td>
+  </tr>
+  <tr>
     <td align="center" width="16%"><img src="https://flagcdn.com/tr.svg" width="32" alt="TR"/><br/>Turkish<br/><code>tr</code></td>
     <td align="center" width="16%"><img src="https://flagcdn.com/ua.svg" width="32" alt="UK"/><br/>Ukrainian<br/><code>uk</code></td>
     <td align="center" width="16%"><img src="https://flagcdn.com/pk.svg" width="32" alt="UR"/><br/>Urdu<br/><code>ur</code></td>
-  </tr>
-  <tr>
     <td align="center" width="16%"><img src="https://flagcdn.com/uz.svg" width="32" alt="UZ"/><br/>Uzbek<br/><code>uz</code></td>
     <td align="center" width="16%"><img src="https://flagcdn.com/vn.svg" width="32" alt="VI"/><br/>Vietnamese<br/><code>vi</code></td>
-    <td align="center"></td>
-    <td align="center"></td>
-    <td align="center"></td>
     <td align="center"></td>
   </tr>
 </table>
@@ -345,6 +391,7 @@ RJ CMS installs on any shared hosting or VPS without touching a single line of c
 | Database | MySQL |
 | Frontend | Blade, Tailwind CSS v3, Alpine.js |
 | Build tool | Vite |
+| Caching | `laravel-responsecache`, `litespeed/lscache-laravel` |
 | AI engine | OpenRouter and Free AI Proxy |
 
 ## Resources
