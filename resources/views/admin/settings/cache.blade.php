@@ -110,6 +110,64 @@
 
     <div class="bg-white rounded-lg shadow-sm border border-gray-100">
         <div class="px-6 py-4 border-b border-gray-100">
+            <h2 class="text-base font-semibold text-gray-900">{{ __('Full Page Cache') }}</h2>
+            <p class="text-sm text-gray-500 mt-1">{{ __('Cache complete HTML pages for anonymous visitors. Powered by spatie/laravel-responsecache.') }}</p>
+        </div>
+
+        <form method="POST" action="{{ route('admin.settings.cache.update') }}" class="p-6 space-y-5">
+            @csrf
+            @method('PUT')
+
+            <input type="hidden" name="cache_driver" value="{{ $options['cache_driver'] ?? $data['cacheInfo']['driver'] }}">
+            <input type="hidden" name="cache_ttl" value="{{ $options['cache_ttl'] ?? 3600 }}">
+
+            <label class="flex items-start gap-3 cursor-pointer">
+                <input type="checkbox" name="response_cache_enabled" value="1"
+                       {{ ($options['response_cache_enabled'] ?? '0') === '1' ? 'checked' : '' }}
+                       class="mt-0.5 rounded border-gray-300 text-rj-purple focus:ring-rj-purple">
+                <span>
+                    <span class="block text-sm font-medium text-gray-700">{{ __('Enable full page cache') }}</span>
+                    <span class="block text-xs text-gray-500 mt-0.5">{{ __('Cache complete HTML pages for logged-out visitors. Admin and account pages are never cached.') }}</span>
+                </span>
+            </label>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('Cache Lifetime') }}</label>
+                <select name="response_cache_lifetime" class="w-full md:w-64 rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">
+                    @foreach ([900 => __('15 minutes'), 1800 => __('30 minutes'), 3600 => __('1 hour'), 10800 => __('3 hours'), 21600 => __('6 hours'), 86400 => __('24 hours')] as $val => $label)
+                        <option value="{{ $val }}" {{ ($options['response_cache_lifetime'] ?? 3600) == $val ? 'selected' : '' }}>{{ $label }}</option>
+                    @endforeach
+                </select>
+                <p class="text-xs text-gray-500 mt-1">{{ __('Cache is automatically cleared when content changes (posts, pages, menus, themes, widgets).') }}</p>
+            </div>
+
+            <div class="bg-blue-50 border border-blue-100 rounded-lg p-3 flex items-start gap-2">
+                <svg class="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <div class="text-xs text-blue-800 leading-relaxed">
+                    {{ __('Admin panel, account pages, forms, and previews are never cached. Only public frontend pages served to anonymous visitors.') }}
+                </div>
+            </div>
+
+            <div class="border-t border-gray-100 pt-5 flex items-center justify-between gap-3 flex-wrap">
+                <button type="submit" class="inline-flex items-center px-4 py-2 rounded-lg bg-gradient-to-r from-rj-purple to-rj-pink text-white text-sm font-medium hover:opacity-90 transition">
+                    {{ __('Save Changes') }}
+                </button>
+            </div>
+        </form>
+
+        <div class="px-6 pb-6">
+            <form method="POST" action="{{ route('admin.settings.cache.clear', 'response') }}">
+                @csrf
+                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    {{ __('Clear Response Cache') }}
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm border border-gray-100">
+        <div class="px-6 py-4 border-b border-gray-100">
             <h2 class="text-base font-semibold text-gray-900">{{ __('Browser Cache & Compression') }}</h2>
             <p class="text-sm text-gray-500 mt-1">{{ __('Client-side caching and HTTP compression.') }}</p>
         </div>
@@ -248,7 +306,18 @@
                 </button>
             </form>
 
-            <form method="POST" action="{{ route('admin.settings.cache.clear', 'all') }}" class="sm:col-span-2 lg:col-span-2">
+            <form method="POST" action="{{ route('admin.settings.cache.clear', 'response') }}">
+                @csrf
+                <button type="submit" class="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg border border-gray-200 hover:border-rj-purple/30 hover:bg-rj-purple/5 transition text-left">
+                    <div>
+                        <div class="text-sm font-medium text-gray-900">{{ __('Response Cache') }}</div>
+                        <div class="text-xs text-gray-500 mt-0.5">{{ __('Full page HTML cache') }}</div>
+                    </div>
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                </button>
+            </form>
+
+            <form method="POST" action="{{ route('admin.settings.cache.clear', 'all') }}">
                 @csrf
                 <button type="submit" onclick="return confirm('{{ __('Clear all caches? Site may slow down briefly.') }}')"
                         class="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg border-2 border-red-200 hover:border-red-300 hover:bg-red-50 transition text-left">
