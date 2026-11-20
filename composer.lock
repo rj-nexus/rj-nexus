@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6aa43c6e5fd5abdf204a958598c6a67a",
+    "content-hash": "4e114a2e5e1dbe7e245886c9c298f2c4",
     "packages": [
         {
             "name": "brick/math",
@@ -2147,6 +2147,62 @@
                 }
             ],
             "time": "2026-03-08T20:05:35+00:00"
+        },
+        {
+            "name": "litespeed/lscache-laravel",
+            "version": "v2.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/litespeedtech/lscache-laravel.git",
+                "reference": "e98f8b133e0243d877055ffe190cf3f4d437ed30"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/litespeedtech/lscache-laravel/zipball/e98f8b133e0243d877055ffe190cf3f4d437ed30",
+                "reference": "e98f8b133e0243d877055ffe190cf3f4d437ed30",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/support": "^5.1|^6|^7|^8|^9|^10.0|^11.0|^12.0|^13.0",
+                "php": ">=5.6"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "LSCache": "Litespeed\\LSCache\\LSCache"
+                    },
+                    "providers": [
+                        "Litespeed\\LSCache\\LSCacheServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Litespeed\\LSCache\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0-only"
+            ],
+            "authors": [
+                {
+                    "name": "Lucas Rolff",
+                    "email": "lucas@lucasrolff.com"
+                },
+                {
+                    "name": "LiteSpeed Technologies",
+                    "email": "support@litespeedtech.com"
+                }
+            ],
+            "description": "LSCache Implementation for Laravel",
+            "support": {
+                "issues": "https://github.com/litespeedtech/lscache-laravel/issues",
+                "source": "https://github.com/litespeedtech/lscache-laravel/tree/v2.0.0"
+            },
+            "time": "2026-04-06T09:47:41+00:00",
+            "published-time": "2026-04-06T09:48:48+00:00"
         },
         {
             "name": "moe-mizrak/laravel-openrouter",
