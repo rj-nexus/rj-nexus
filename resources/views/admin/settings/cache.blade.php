@@ -34,6 +34,15 @@
                 @csrf
                 @method('PUT')
 
+                {{-- Digər formların ayarlarını qoruyan gizli inputlar --}}
+                <input type="hidden" name="response_cache_enabled" value="{{ ($options['response_cache_enabled'] ?? '0') === '1' ? '1' : '0' }}">
+                <input type="hidden" name="response_cache_lifetime" value="{{ $options['response_cache_lifetime'] ?? 3600 }}">
+                <input type="hidden" name="browser_cache" value="{{ ($options['browser_cache'] ?? '1') === '1' ? '1' : '0' }}">
+                <input type="hidden" name="browser_cache_ttl" value="{{ $options['browser_cache_ttl'] ?? '86400' }}">
+                <input type="hidden" name="gzip_enabled" value="{{ ($options['gzip_enabled'] ?? '1') === '1' ? '1' : '0' }}">
+                <input type="hidden" name="cdn_enabled" value="{{ ($options['cdn_enabled'] ?? '0') === '1' ? '1' : '0' }}">
+                <input type="hidden" name="cdn_url" value="{{ $options['cdn_url'] ?? '' }}">
+
                 <label class="flex items-start gap-3 cursor-pointer">
                     <input type="checkbox" name="cache_enabled" value="1"
                            {{ ($options['cache_enabled'] ?? '1') === '1' ? 'checked' : '' }}
@@ -120,6 +129,17 @@
 
             <input type="hidden" name="cache_driver" value="{{ $options['cache_driver'] ?? $data['cacheInfo']['driver'] }}">
             <input type="hidden" name="cache_ttl" value="{{ $options['cache_ttl'] ?? 3600 }}">
+            
+            {{-- Digər formların ayarlarını qoruyan gizli inputlar --}}
+            <input type="hidden" name="cache_enabled" value="{{ ($options['cache_enabled'] ?? '1') === '1' ? '1' : '0' }}">
+            <input type="hidden" name="query_cache" value="{{ ($options['query_cache'] ?? '1') === '1' ? '1' : '0' }}">
+            <input type="hidden" name="view_cache" value="{{ ($options['view_cache'] ?? '1') === '1' ? '1' : '0' }}">
+            <input type="hidden" name="opcache_enabled" value="{{ ($options['opcache_enabled'] ?? '0') === '1' ? '1' : '0' }}">
+            <input type="hidden" name="browser_cache" value="{{ ($options['browser_cache'] ?? '1') === '1' ? '1' : '0' }}">
+            <input type="hidden" name="browser_cache_ttl" value="{{ $options['browser_cache_ttl'] ?? '86400' }}">
+            <input type="hidden" name="gzip_enabled" value="{{ ($options['gzip_enabled'] ?? '1') === '1' ? '1' : '0' }}">
+            <input type="hidden" name="cdn_enabled" value="{{ ($options['cdn_enabled'] ?? '0') === '1' ? '1' : '0' }}">
+            <input type="hidden" name="cdn_url" value="{{ $options['cdn_url'] ?? '' }}">
 
             <label class="flex items-start gap-3 cursor-pointer">
                 <input type="checkbox" name="response_cache_enabled" value="1"
@@ -179,6 +199,16 @@
             <input type="hidden" name="cache_driver" value="{{ $options['cache_driver'] ?? $data['cacheInfo']['driver'] }}">
             <input type="hidden" name="cache_ttl" value="{{ $options['cache_ttl'] ?? 3600 }}">
 
+            {{-- Digər formların ayarlarını qoruyan gizli inputlar --}}
+            <input type="hidden" name="cache_enabled" value="{{ ($options['cache_enabled'] ?? '1') === '1' ? '1' : '0' }}">
+            <input type="hidden" name="query_cache" value="{{ ($options['query_cache'] ?? '1') === '1' ? '1' : '0' }}">
+            <input type="hidden" name="view_cache" value="{{ ($options['view_cache'] ?? '1') === '1' ? '1' : '0' }}">
+            <input type="hidden" name="opcache_enabled" value="{{ ($options['opcache_enabled'] ?? '0') === '1' ? '1' : '0' }}">
+            <input type="hidden" name="response_cache_enabled" value="{{ ($options['response_cache_enabled'] ?? '0') === '1' ? '1' : '0' }}">
+            <input type="hidden" name="response_cache_lifetime" value="{{ $options['response_cache_lifetime'] ?? 3600 }}">
+            <input type="hidden" name="cdn_enabled" value="{{ ($options['cdn_enabled'] ?? '0') === '1' ? '1' : '0' }}">
+            <input type="hidden" name="cdn_url" value="{{ $options['cdn_url'] ?? '' }}">
+
             <label class="flex items-start gap-3 cursor-pointer">
                 <input type="checkbox" name="browser_cache" value="1"
                        {{ ($options['browser_cache'] ?? '1') === '1' ? 'checked' : '' }}
@@ -227,6 +257,17 @@
 
             <input type="hidden" name="cache_driver" value="{{ $options['cache_driver'] ?? $data['cacheInfo']['driver'] }}">
             <input type="hidden" name="cache_ttl" value="{{ $options['cache_ttl'] ?? 3600 }}">
+
+            {{-- Digər formların ayarlarını qoruyan gizli inputlar --}}
+            <input type="hidden" name="cache_enabled" value="{{ ($options['cache_enabled'] ?? '1') === '1' ? '1' : '0' }}">
+            <input type="hidden" name="query_cache" value="{{ ($options['query_cache'] ?? '1') === '1' ? '1' : '0' }}">
+            <input type="hidden" name="view_cache" value="{{ ($options['view_cache'] ?? '1') === '1' ? '1' : '0' }}">
+            <input type="hidden" name="opcache_enabled" value="{{ ($options['opcache_enabled'] ?? '0') === '1' ? '1' : '0' }}">
+            <input type="hidden" name="response_cache_enabled" value="{{ ($options['response_cache_enabled'] ?? '0') === '1' ? '1' : '0' }}">
+            <input type="hidden" name="response_cache_lifetime" value="{{ $options['response_cache_lifetime'] ?? 3600 }}">
+            <input type="hidden" name="browser_cache" value="{{ ($options['browser_cache'] ?? '1') === '1' ? '1' : '0' }}">
+            <input type="hidden" name="browser_cache_ttl" value="{{ $options['browser_cache_ttl'] ?? '86400' }}">
+            <input type="hidden" name="gzip_enabled" value="{{ ($options['gzip_enabled'] ?? '1') === '1' ? '1' : '0' }}">
 
             <label class="flex items-start gap-3 cursor-pointer">
                 <input type="checkbox" name="cdn_enabled" value="1"
