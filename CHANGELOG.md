@@ -1,14 +1,20 @@
-## [v1.9.10] - 2026-11-20
+## [v1.10.0] - 2026-11-21
 
 ### 🚀 Added
-- **Amharic Language Support:** Added Amharic (`am`) as a fully supported language across the system, including the core translation files (`lang/am.json`), installer translations (`installer/lang/am.php`), and the Ethiopian flag.
+- **New Languages Support:** Added 3 new languages to the system and installer: **Portuguese (Brazil)**, **Greek**, and **Czech**. All missing translation strings have been populated across all existing languages.
+- **Language Settings Cache:** Implemented a new caching logic in the Language settings page to improve performance.
+- **Amharic Language Support:** Added Amharic (`am`) as a fully supported language, including core and installer translation files, and the Ethiopian flag.
+
+### 🎨 Changed
+- **Language Page UI Redesign:** Modernized the Language settings page. Country flags are now displayed as circles instead of squares, and the frontend language list is now shown in a responsive grid layout to prevent the page from becoming too long.
+- **RJBuilder Core Update:** Updated RJBuilder to **v1.9.4** (`resources/views/rjbuilder/CHANGELOG.md`), which includes a fix for background image pulling issues.
 
 ### 🐛 Fixed
-- **AI Center Status Detection:** The AI Center was looking for a non-existent option key (`ai_api_key`) to determine the connection status, resulting in a false "API Disconnected" state even when OpenRouter was configured. It now correctly relies on `OpenRouterService::isConfigured()`.
-- **AI Center Cache Overflow:** Fetching the OpenRouter models list caused a `MySQL max_allowed_packet` error because the entire model metadata array was being stored in the database cache. The cached data is now stripped down to only the essential fields (`id`, `name`, `pricing`), preventing database connection drops.
-- **AI Model Selection Ignored:** The SEO, Code Reviewer, Translator, and Builder services were always using the default model, ignoring the specific models assigned in AI Center → Models. All services now correctly read their respective options (`ai_seo_model`, `ai_code_model`, `ai_translate_model`, `ai_builder_model`) and fall back to the default model only when necessary.
-- **AI Builder Connection:** `AiBuilderService` was using its own redundant HTTP logic and had an outdated default model. It now delegates directly to `OpenRouterService`, ensuring consistency and correctly using the selected Builder model.
-- **AI Tools Request Signature:** `AiToolController` was passing the model options array into the wrong argument of the `chat()` method, causing OpenRouter API to return a 400 error. The method signature and fallback logic have been corrected.
-- **Auto SEO Invalid JSON:** `AiSeoService` was prone to returning truncated or malformed JSON responses (especially in non-English languages), leading to "AI returned invalid JSON" errors. It now enforces `json_object` response formatting, increases `max_tokens` to 2000, and features a more tolerant JSON parser.
-- **Auto SEO with RJBuilder:** Generating SEO for a page designed with RJBuilder failed because the textarea content was empty. The system now passes the `post_id` to the backend, allowing it to extract text directly from the RJBuilder blocks before sending the request to the AI.
-- **AI SEO Routing:** The "Auto SEO" button in the Post/Page editor was incorrectly routing through the free AI agent (RAG). It now correctly uses `AiSeoService` and your OpenRouter API key for high-quality results.
+- **AI Center Status Detection:** The AI Center was looking for a non-existent option key (`ai_api_key`), resulting in a false "API Disconnected" state. It now correctly relies on `OpenRouterService::isConfigured()`.
+- **AI Center Cache Overflow:** Fetching the OpenRouter models list caused a `MySQL max_allowed_packet` error. The cached data is now stripped down to essential fields (`id`, `name`, `pricing`) to prevent database connection drops.
+- **AI Model Selection Ignored:** The SEO, Code Reviewer, Translator, and Builder services now correctly read their specific assigned models (`ai_seo_model`, `ai_code_model`, `ai_translate_model`, `ai_builder_model`) instead of always defaulting to the main model.
+- **AI Builder Connection:** `AiBuilderService` was using outdated HTTP logic. It now delegates directly to `OpenRouterService` for consistency.
+- **AI Tools Request Signature:** `AiToolController` was passing parameters in the wrong order, causing OpenRouter API 400 errors. This has been corrected.
+- **Auto SEO Invalid JSON:** `AiSeoService` now enforces `json_object` formatting, increases `max_tokens` to 2000, and features a more tolerant parser to prevent "invalid JSON" errors.
+- **Auto SEO with RJBuilder:** Fixed an issue where generating SEO for RJBuilder pages failed because the textarea was empty. It now extracts text directly from the builder blocks.
+- **AI SEO Routing:** The "Auto SEO" button in the Post/Page editor now correctly uses `AiSeoService` and the OpenRouter API key, instead of routing through the free RAG agent.
