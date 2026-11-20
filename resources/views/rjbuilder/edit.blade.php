@@ -91,7 +91,19 @@
 
 @include('rjbuilder.partials.styles')
 
-{{-- BURADA dir="ltr" ƏLAVƏ ETDİK Kİ ƏRƏB DİLİNDƏ BELƏ BUILDER DAĞILMASIN --}}
+<style>
+    #rj-canvas.rj-page {
+        background-color: var(--rj-bg, #ffffff) !important;
+        color: var(--rj-text, #111827) !important;
+    }
+    #rj-canvas.rj-page .rj-empty {
+        color: var(--rj-text, #111827) !important;
+    }
+    .rj-main {
+        background-color: var(--rj-surface, #f3f4f6) !important;
+    }
+</style>
+
 <div x-data="builder()" x-init="init()" class="rj-app" dir="ltr"
      @dragend.window="endDrag()"
      @keydown.window="onKey($event)"
