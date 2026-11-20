@@ -9,6 +9,7 @@ function rj_languages(): array
         'am' => 'አማርኛ',
         'ar' => 'العربية',
         'bn' => 'বাংলা',
+        'cs' => 'Čeština',
         'de' => 'Deutsch',
         'es' => 'Español',
         'fa' => 'فارسی',
@@ -382,6 +383,9 @@ function rj_install_run(?string $sqlContent = null): array
             'DB_DATABASE' => $dbName,
             'DB_USERNAME' => $dbUser,
             'DB_PASSWORD' => $dbPass,
+            'RESPONSE_CACHE_ENABLED' => 'false',
+            'RESPONSE_CACHE_DRIVER' => 'file',
+            'RESPONSE_CACHE_LIFETIME' => '3600',
         ]);
         $log[] = '.env written with app key';
 
@@ -506,7 +510,7 @@ function rj_install_run(?string $sqlContent = null): array
 
         file_put_contents(RJ_LOCK, json_encode([
             'installed_at' => date('c'),
-            'version' => '1.6.0',
+            'version' => '1.9.10',
             'lang' => $lang,
         ], JSON_PRETTY_PRINT));
 
