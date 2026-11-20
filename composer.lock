@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "634dc84204aecf7bb45943efa26fad5a",
+    "content-hash": "6aa43c6e5fd5abdf204a958598c6a67a",
     "packages": [
         {
             "name": "brick/math",
@@ -4007,6 +4007,154 @@
                 }
             ],
             "time": "2026-09-28T07:16:50+00:00"
+        },
+        {
+            "name": "spatie/laravel-responsecache",
+            "version": "8.7.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/spatie/laravel-responsecache.git",
+                "reference": "0773a95751172f1a1c4f0410f60fb7e16bc099ed"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/spatie/laravel-responsecache/zipball/0773a95751172f1a1c4f0410f60fb7e16bc099ed",
+                "reference": "0773a95751172f1a1c4f0410f60fb7e16bc099ed",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/cache": "^12.0|^13.0",
+                "illuminate/console": "^12.0|^13.0",
+                "illuminate/container": "^12.0|^13.0",
+                "illuminate/http": "^12.0|^13.0",
+                "illuminate/support": "^12.0|^13.0",
+                "nesbot/carbon": "^3.0",
+                "php": "^8.4",
+                "spatie/laravel-package-tools": "^1.9",
+                "spatie/php-attribute-reader": "^1.0"
+            },
+            "require-dev": {
+                "jasonmccreary/double": "^1.0",
+                "larastan/larastan": "^3.9",
+                "laravel/framework": "^12.0|^13.0",
+                "laravel/pint": "^1.13.7",
+                "mockery/mockery": "^1.6",
+                "orchestra/testbench": "^10.0|^11.0",
+                "pestphp/pest": "^4.7.8|^5.3.3"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "ResponseCache": "Spatie\\ResponseCache\\Facades\\ResponseCache"
+                    },
+                    "providers": [
+                        "Spatie\\ResponseCache\\ResponseCacheServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Spatie\\ResponseCache\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Freek Van der Herten",
+                    "email": "freek@spatie.be",
+                    "homepage": "https://spatie.be",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Speed up a Laravel application by caching the entire response",
+            "homepage": "https://github.com/spatie/laravel-responsecache",
+            "keywords": [
+                "cache",
+                "laravel",
+                "laravel-responsecache",
+                "performance",
+                "response",
+                "spatie"
+            ],
+            "support": {
+                "issues": "https://github.com/spatie/laravel-responsecache/issues",
+                "source": "https://github.com/spatie/laravel-responsecache/tree/8.7.0"
+            },
+            "funding": [
+                {
+                    "url": "https://spatie.be/open-source/support-us",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/spatie",
+                    "type": "github"
+                }
+            ],
+            "time": "2026-11-13T09:29:57+00:00",
+            "published-time": "2026-11-13T09:30:44+00:00"
+        },
+        {
+            "name": "spatie/php-attribute-reader",
+            "version": "1.2.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/spatie/php-attribute-reader.git",
+                "reference": "1483a248ff0dafd9b9409e65cda685730da2b23d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/spatie/php-attribute-reader/zipball/1483a248ff0dafd9b9409e65cda685730da2b23d",
+                "reference": "1483a248ff0dafd9b9409e65cda685730da2b23d",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.4"
+            },
+            "require-dev": {
+                "pestphp/pest": "^5.3.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Spatie\\Attributes\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Freek Van der Herten",
+                    "email": "freek@spatie.be",
+                    "homepage": "https://spatie.be",
+                    "role": "Developer"
+                }
+            ],
+            "description": "A clean API for working with PHP attributes",
+            "homepage": "https://github.com/spatie/php-attribute-reader",
+            "keywords": [
+                "attributes",
+                "php-attribute-reader",
+                "reflection",
+                "spatie"
+            ],
+            "support": {
+                "issues": "https://github.com/spatie/php-attribute-reader/issues",
+                "source": "https://github.com/spatie/php-attribute-reader/tree/1.2.1"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/spatie",
+                    "type": "github"
+                }
+            ],
+            "time": "2026-11-06T12:12:33+00:00",
+            "published-time": "2026-11-06T12:14:35+00:00"
         },
         {
             "name": "spatie/php-structure-discoverer",
