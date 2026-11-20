@@ -3,7 +3,7 @@ if (!defined('RJ_INSTALLER')) { http_response_code(403); exit; }
 
 function rj_languages(): array
 {
-    return [
+return [
         'en' => 'English',
         'az' => 'Azərbaycan',
         'am' => 'አማርኛ',
@@ -11,6 +11,7 @@ function rj_languages(): array
         'bn' => 'বাংলা',
         'cs' => 'Čeština',
         'de' => 'Deutsch',
+        'el' => 'Ελληνικά',
         'es' => 'Español',
         'fa' => 'فارسی',
         'fr' => 'Français',
@@ -32,6 +33,7 @@ function rj_languages(): array
         'nl' => 'Nederlands',
         'pl' => 'Polski',
         'pt' => 'Português',
+        'pt_BR' => 'Português (Brasil)',
         'qu' => 'Runa Simi',
         'ro' => 'Română',
         'ru' => 'Русский',
