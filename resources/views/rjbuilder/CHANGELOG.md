@@ -1,25 +1,37 @@
 # RJ Builder & Theme Extensions — Changelog
 
-## [v1.9.0] - 2026-11-06
+## [v1.9.4] - 2026-11-20
 
-### Security Release (RJ Builder Ecosystem)
+### 🚀 Features & Improvements
+- **Spotlight Theme (Documentation System):**
+  - Added a fully integrated Documentation (`/docs`) page to the Spotlight theme.
+  - Implemented `DirectoryController@docs` to fetch Markdown files, `menu.json`, and `search.json` directly from GitHub.
+  - Built a custom, vanilla JavaScript-based fuzzy search (Fuse.js) for the Docs page with excerpt highlighting and typo tolerance.
+  - Updated the GitHub Pages `generate-search.js` script to preserve code blocks, extract sub-headings, and generate fallback titles for better search indexing.
+  - Improved GitHub Pages `index.html` Fuse.js configuration to match the CMS search logic.
 
-This release focuses entirely on hardening the RJ Builder ecosystem, including core widgets, the Theme Editor, and the Form Builder extension. 
+- **Localization:**
+  - Added Hebrew (`he`) and Thai (`th`) languages to the system.
+  - Added corresponding translations to the Installer wizard (`he.php`, `th.php`).
 
-### 🔒 Security Fixes
+### 🛠 Bug Fixes
+- **Backup System:**
+  - Fixed the database restore process to use chunk-based streaming (`64KB`) instead of loading the entire SQL file into memory, preventing "Allowed memory size exhausted" errors.
+  - Fixed the backup progress bar blocking issue by adding `session_write_close()` to the controller, allowing asynchronous polling.
+  - Added `deleteStaleProgress` to clear old progress states before starting new backups/restores.
+  - Polished the backup modal UI for better success and error feedback.
 
-- **Form Builder Extension (Mass Assignment Fix):**
-  - Removed `status` from the `Form` model's `$fillable` array.
-  - Removed `status`, `ip_address`, and `user_agent` from the `FormSubmission` model's `$fillable` array.
-  - Attributes are now assigned manually and safely within `FormController` and `FormSubmitController`.
-  - Enforced strict backend validation in the frontend submission controller. Only validated data (`$validated`) is now saved, preventing attackers from injecting hidden payloads into the form data.
+- **RJBuilder (Canvas):**
+  - Fixed the canvas background not matching the active theme. The builder now dynamically injects `rj_theme_mod` colors directly into the `#rj-canvas` inline styles.
+  - Auto-detects dark themes (e.g., Spotlight) to apply dark backgrounds and proper text colors, ensuring transparent widgets are visible during editing.
 
-- **Theme Editor (Path Traversal Protection):**
-  - Hardened the `ThemeEditorService` to ensure safe file paths. Verified that `resolveSafePath()` and `realpath()` properly prevent directory traversal attacks during file reading, saving, and deleting.
+- **Admin Sidebar:**
+  - Fixed the issue where both "Posts" and "Pages" menus remained active simultaneously. The sidebar now correctly detects the post type via route parameters, query strings, and model binding.
 
-- **Core Widgets (XSS Audit):**
-  - Audited all built-in widgets (`MultiChatWidget`, `AdvancedSearchWidget`, `FooterBadgesWidget`) for XSS vulnerabilities.
-  - Verified that all dynamic HTML injections (`{!! !!}`) are safely handled and protected against Cross-Site Scripting (XSS) payloads.
+- **Update System:**
+  - Fixed the pseudo-cron auto-update mechanism to properly throttle checks to once every 15 minutes using an atomic cache lock, preventing GitHub API rate limit exhaustion.
 
-### 🛠 Maintenance
-- Removed outdated `v1.8.0` notes from the changelog to reflect the current stable and secure state of the RJ Builder system.
+- **Installer:**
+  - Removed the dependency on `exec()` and `shell_exec()`. 
+  - Implemented native PHP fallbacks for `config:clear`, `cache:clear`, `optimize:clear`, and `storage:link`.
+  - Added native Laravel Kernel fallback to run `migrate` and `db:seed` without shell access, making the installer fully compatible with restrictive shared hosting environments.
