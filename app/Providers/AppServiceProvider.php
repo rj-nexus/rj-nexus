@@ -165,6 +165,14 @@ class AppServiceProvider extends ServiceProvider
             if ($forceHttps || $isHttps) {
                 Config::set('session.secure', true);
             }
+
+            if (class_exists(\Spatie\ResponseCache\Facades\ResponseCache::class)) {
+                $isEnabled = rj_get_option('response_cache_enabled', '0') === '1';
+                Config::set('responsecache.enabled', $isEnabled);
+                
+                $lifetimeSeconds = (int) rj_get_option('response_cache_lifetime', 3600);
+                Config::set('responsecache.cache_lifetime_in_minutes', $lifetimeSeconds / 60);
+            }
         }
     }
 }
