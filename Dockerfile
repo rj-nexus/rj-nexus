@@ -16,10 +16,14 @@ RUN a2enmod rewrite
 WORKDIR /var/www/html
 COPY . .
 
+RUN cp -n .env.example .env
+
 ENV COMPOSER_MEMORY_LIMIT=-1
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+RUN chmod +x /var/www/html/artisan
+RUN chown -R www-data:www-data /var/www/html
+RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
