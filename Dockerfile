@@ -1,8 +1,9 @@
 FROM php:8.4-apache
 
+# PHP genişlənmələri və Node.js (Vite build üçün) quraşdırılır
 RUN apt-get update && apt-get install -y \
     libzip-dev zip unzip git curl libpng-dev libjpeg-dev libfreetype6-dev \
-    libonig-dev libxml2-dev libicu-dev libpq-dev \
+    libonig-dev libxml2-dev libicu-dev libpq-dev nodejs npm \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install pdo pdo_mysql pdo_pgsql zip gd mbstring xml intl bcmath
 
@@ -20,6 +21,9 @@ RUN cp -n .env.example .env
 
 ENV COMPOSER_MEMORY_LIMIT=-1
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
+
+# Frontend (CSS/JS) fayllarını Vite ilə yığır
+RUN npm install && npm run build
 
 RUN chmod +x /var/www/html/artisan
 RUN chown -R www-data:www-data /var/www/html
