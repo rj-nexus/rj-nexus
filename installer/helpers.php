@@ -295,12 +295,14 @@ function rj_artisan(array $args): array
 
     if (function_exists('exec')) {
         $outFile = tempnam(sys_get_temp_dir(), 'rj_art_');
-        $cmd = escapeshellarg(PHP_BINARY)
+        $phpBin = (defined('PHP_BINARY') && PHP_BINARY !== '' && is_executable(PHP_BINARY)) ? escapeshellarg(PHP_BINARY) : 'php';
+        $cmd = $phpBin
             . ' '
             . escapeshellarg(RJ_ROOT . '/artisan')
             . ' '
             . implode(' ', array_map('escapeshellarg', $args))
             . ' > ' . escapeshellarg($outFile) . ' 2>&1';
+
 
         $code = 0;
         @exec($cmd, $dummy, $code);
