@@ -28,11 +28,11 @@ class DemoModeMiddleware
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Demo rejimində dəyişiklik etmək və ya fayl silmək qadağandır!'
+                    'message' => 'Modifications and deletions are disabled in demo mode.'
                 ], 403);
             }
 
-            return back()->with('error', 'Demo rejimində dəyişiklik etmək və ya silmək mümkün deyil!');
+            return back()->with('error', 'Modifications and deletions are disabled in demo mode.');
         }
 
         return $next($request);
