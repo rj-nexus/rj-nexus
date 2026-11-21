@@ -27,6 +27,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
         ]);
 
+        $middleware->trustProxies(at: '*');
+
         $middleware->trustHosts(at: function () {
             $hosts = [
                 '^(.+\.)?localhost$',
@@ -55,10 +57,11 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->web(append: [
-            \App\Http\Middleware\CheckForUpdates::class, // <-- YENİ ƏLAVƏ EDİLDİ
+            \App\Http\Middleware\CheckForUpdates::class,
             \App\Http\Middleware\SetLocale::class,
             \App\Http\Middleware\CheckMaintenanceMode::class,
             \App\Http\Middleware\InjectRtlDirection::class,
+            \App\Http\Middleware\DemoModeMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
@@ -81,11 +84,9 @@ return Application::configure(basePath: dirname(__DIR__))
                 return redirect()->guest(route('login'));
             }
 
-            // Tema daxilində xəta səhifəsi (404, 403, 419 və s.) varsa, onu göstər
             if ($e instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface) {
                 $statusCode = $e->getStatusCode();
                 
-                // Əgər tema daxilində bu status kodu üçün fayl varsa (məs: theme::errors.404)
                 if (view()->exists("theme::errors.{$statusCode}")) {
                     return response()->view("theme::errors.{$statusCode}", [
                         'exception' => $e,
