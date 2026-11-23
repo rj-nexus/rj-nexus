@@ -6,6 +6,7 @@ use App\Widgets\Builtin\AccordionWidget;
 use App\Widgets\Builtin\AdvancedSearchWidget;
 use App\Widgets\Builtin\AlertWidget;
 use App\Widgets\Builtin\AnimatedHeadlineWidget;
+use App\Widgets\Builtin\PrayerTimesWidget;
 use App\Widgets\Builtin\AnimatedHeroWidget;
 use App\Widgets\Builtin\BasicGalleryWidget;
 use App\Widgets\Builtin\BlockquoteWidget;
@@ -156,6 +157,7 @@ class WidgetList
             new MultiChatWidget(),
             new ContactInfoWidget(),
             new BusinessHoursWidget(),
+            new PrayerTimesWidget(),
             new GoogleReviewsWidget(),
             new CurrencyRatesWidget(),
             
