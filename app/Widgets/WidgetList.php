@@ -3,6 +3,7 @@
 namespace App\Widgets;
 
 use App\Widgets\Builtin\AccordionWidget;
+use App\Widgets\Builtin\ChristianHolidaysWidget;
 use App\Widgets\Builtin\AdvancedSearchWidget;
 use App\Widgets\Builtin\AlertWidget;
 use App\Widgets\Builtin\AnimatedHeadlineWidget;
@@ -160,6 +161,7 @@ class WidgetList
             new BusinessHoursWidget(),
             new PrayerTimesWidget(),
             new ShabbatTimesWidget(),
+            new ChristianHolidaysWidget(),
             new GoogleReviewsWidget(),
             new CurrencyRatesWidget(),
             
