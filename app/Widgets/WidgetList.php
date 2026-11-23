@@ -71,6 +71,8 @@ use App\Widgets\Builtin\VideoHeroWidget;
 use App\Widgets\Builtin\VideoMaskTextWidget;
 use App\Widgets\Builtin\VideoWidget;
 use App\Widgets\Builtin\WheelOfFortuneWidget;
+use App\Widgets\Builtin\MarkdownTextWidget;
+use App\Widgets\Builtin\PdfReaderWidget;
 
 class WidgetList
 {
@@ -122,6 +124,8 @@ class WidgetList
 
             // --- Content & Blog ---
             new PostsWidget(),
+            new MarkdownTextWidget(),   // ← YENİ
+            new PdfReaderWidget(), 
             new AccordionWidget(),
             new TabsWidget(),
             new ToggleCardsWidget(),
