@@ -92,9 +92,9 @@ class PrayerTimesWidget extends BaseWidget
                 'name' => 'style',
                 'type' => 'select',
                 'label' => __('Style'),
-                'default' => 'clean',
+                'default' => 'glass',
                 'tab' => 'style',
-                'options' => ['clean' => __('Clean (Light)'), 'dark' => __('Dark Theme')],
+                'options' => ['glass' => __('Glass'), 'glass-dark' => __('Glass (Dark)')],
             ],
             ['name' => 'accent_color', 'type' => 'color', 'label' => __('Accent Color'), 'default' => '#10b981', 'tab' => 'style'],
         ];
@@ -134,7 +134,7 @@ class PrayerTimesWidget extends BaseWidget
             'scene' => $this->flag($settings['show_scene'] ?? null, true),
             'side' => $this->pick($settings['scene_side'] ?? 'left', ['left', 'right'], 'left'),
             'animate' => $this->flag($settings['animate'] ?? null, true),
-            'style' => $this->pick($settings['style'] ?? 'clean', ['clean', 'dark'], 'clean'),
+            'style' => $this->pick($settings['style'] ?? 'glass', ['glass', 'glass-dark'], 'glass'),
             'accent' => $this->hex($settings['accent_color'] ?? null, '#10b981'),
             'countdown' => $this->flag($settings['show_countdown'] ?? null, true),
         ];
