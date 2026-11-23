@@ -7,6 +7,7 @@ use App\Widgets\Builtin\ChristianHolidaysWidget;
 use App\Widgets\Builtin\AdvancedSearchWidget;
 use App\Widgets\Builtin\AlertWidget;
 use App\Widgets\Builtin\AnimatedHeadlineWidget;
+use App\Widgets\Builtin\HinduFestivalsWidget;
 use App\Widgets\Builtin\PrayerTimesWidget;
 use App\Widgets\Builtin\AnimatedHeroWidget;
 use App\Widgets\Builtin\BasicGalleryWidget;
@@ -162,6 +163,7 @@ class WidgetList
             new PrayerTimesWidget(),
             new ShabbatTimesWidget(),
             new ChristianHolidaysWidget(),
+            new HinduFestivalsWidget(),
             new GoogleReviewsWidget(),
             new CurrencyRatesWidget(),
             
