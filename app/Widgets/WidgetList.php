@@ -74,6 +74,7 @@ use App\Widgets\Builtin\WheelOfFortuneWidget;
 use App\Widgets\Builtin\MarkdownTextWidget;
 use App\Widgets\Builtin\PdfReaderWidget;
 use App\Widgets\Builtin\ShareWidget;
+use App\Widgets\Builtin\TimelineWidget;
 
 class WidgetList
 {
@@ -136,6 +137,7 @@ class WidgetList
             new TestimonialWidget(),
             new BlockquoteWidget(),
             new StepFlowWidget(),
+            new TimelineWidget(),
             new AnimatedHeadlineWidget(),
             new DualColorHeadingWidget(),
             new PriceListWidget(),
@@ -156,6 +158,7 @@ class WidgetList
             new BusinessHoursWidget(),
             new GoogleReviewsWidget(),
             new CurrencyRatesWidget(),
+            
 
             // --- Forms & E-commerce ---
             new LoginWidget(),
