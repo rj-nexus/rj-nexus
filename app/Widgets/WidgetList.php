@@ -73,6 +73,7 @@ use App\Widgets\Builtin\VideoWidget;
 use App\Widgets\Builtin\WheelOfFortuneWidget;
 use App\Widgets\Builtin\MarkdownTextWidget;
 use App\Widgets\Builtin\PdfReaderWidget;
+use App\Widgets\Builtin\ShareWidget;
 
 class WidgetList
 {
@@ -149,6 +150,7 @@ class WidgetList
             new NewsletterSignupWidget(),
             new SocialFeedWidget(),
             new SocialIconsWidget(),
+            new ShareWidget(),
             new MultiChatWidget(),
             new ContactInfoWidget(),
             new BusinessHoursWidget(),
