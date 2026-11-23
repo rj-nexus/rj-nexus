@@ -38,12 +38,11 @@ class PdfReaderWidget extends BaseWidget
         return [
             [
                 'name' => 'pdf_file',
-                'type' => 'file',
+                'type' => 'media',
                 'label' => __('Upload PDF'),
                 'default' => '',
                 'tab' => 'content',
-                'accept' => 'application/pdf,.pdf',
-                'help' => __('Choose a PDF from your device. If set, it is used instead of the URL below.'),
+                'help' => __('Choose a PDF from the media library. If set, it is used instead of the URL below.'),
             ],
             [
                 'name' => 'pdf_url',
@@ -93,11 +92,9 @@ class PdfReaderWidget extends BaseWidget
 
     public function render(array $settings): string
     {
-        // Cihazdan yüklənmiş fayl URL-dən üstündür
-        $file = trim((string) ($settings['pdf_file'] ?? ''));
-        $url = $file !== ''
-            ? $this->fileUrl($file)
-            : trim((string) ($settings['pdf_url'] ?? ''));
+        // Media kitabxanasından seçilmiş fayl URL-dən üstündür
+        $file = $this->fileUrl($settings['pdf_file'] ?? '');
+        $url = $file !== '' ? $file : trim((string) ($settings['pdf_url'] ?? ''));
 
         if ($url === '' || !filter_var($url, FILTER_VALIDATE_URL)) {
             return '';
@@ -129,19 +126,49 @@ class PdfReaderWidget extends BaseWidget
     }
 
     /**
-     * Yüklənmiş faylın yolunu tam URL-ə çevirir.
+     * Media idarəedicisindən gələn dəyəri (string və ya massiv) tam URL-ə çevirir.
      */
-    private function fileUrl(string $file): string
+    private function fileUrl(mixed $value): string
     {
-        if (filter_var($file, FILTER_VALIDATE_URL)) {
-            return $file;
+        if (is_object($value)) { $value = (array) $value; }
+
+        if (is_array($value)) {
+            $found = '';
+            foreach (['url', 'src', 'path', 'file', 'original', 'full'] as $key) {
+                if (!empty($value[$key]) && is_string($value[$key])) { $found = $value[$key]; break; }
+            }
+            $value = $found;
         }
 
-        if (str_starts_with($file, '/')) {
-            return url($file);
+        if (!is_string($value)) { return ''; }
+        $value = trim($value);
+        if ($value === '') { return ''; }
+
+        if (str_starts_with($value, '//')) { $value = request()->getScheme() . ':' . $value; }
+
+        $origin = rtrim(request()->getSchemeAndHttpHost(), '/');
+
+        if (preg_match('/^[a-z][a-z0-9+.\-]*:/i', $value)) {
+            if (!preg_match('/^https?:/i', $value)) { return ''; }
+
+            $parts = parse_url($value);
+            $host = strtolower((string) ($parts['host'] ?? ''));
+            $reqHost = strtolower(request()->getHost());
+            $appHost = strtolower((string) parse_url((string) config('app.url'), PHP_URL_HOST));
+            $local = in_array($host, ['localhost', '127.0.0.1', '::1', '[::1]'], true)
+                || ($appHost !== '' && $host === $appHost);
+
+            // APP_URL / localhost ilə saxlanmış linkləri cari domenə çevir
+            if ($host !== '' && $host !== $reqHost && $local) {
+                return $origin . ($parts['path'] ?? '/') . (isset($parts['query']) ? '?' . $parts['query'] : '');
+            }
+
+            return $value;
         }
 
-        return asset('storage/' . ltrim($file, '/'));
+        if (str_starts_with($value, '/')) { return $origin . $value; }
+
+        return $origin . '/' . ltrim($value, '/');
     }
 
     /**
@@ -152,7 +179,7 @@ class PdfReaderWidget extends BaseWidget
     {
         $host = strtolower((string) parse_url($url, PHP_URL_HOST));
 
-        // Eyni saytın PDF-i (yüklənmiş fayllar daxil): keşləməyə ehtiyac yoxdur
+        // Eyni saytın PDF-i (media kitabxanası daxil): keşləməyə ehtiyac yoxdur
         if ($host === strtolower(request()->getHost())) {
             return $url;
         }
