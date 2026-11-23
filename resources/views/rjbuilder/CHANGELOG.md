@@ -1,37 +1,42 @@
-# RJ Builder & Theme Extensions — Changelog
+## [v1.10.0] - 2026-11-23
 
-## [v1.9.4] - 2026-11-20
+> RJ Builder is a standalone page builder. It runs inside RJ Nexus CMS and is also developed in its own repository, so it keeps its own changelog and versioning, separate from the CMS core.
 
-### 🚀 Features & Improvements
-- **Spotlight Theme (Documentation System):**
-  - Added a fully integrated Documentation (`/docs`) page to the Spotlight theme.
-  - Implemented `DirectoryController@docs` to fetch Markdown files, `menu.json`, and `search.json` directly from GitHub.
-  - Built a custom, vanilla JavaScript-based fuzzy search (Fuse.js) for the Docs page with excerpt highlighting and typo tolerance.
-  - Updated the GitHub Pages `generate-search.js` script to preserve code blocks, extract sub-headings, and generate fallback titles for better search indexing.
-  - Improved GitHub Pages `index.html` Fuse.js configuration to match the CMS search logic.
+### 🚀 Added
 
-- **Localization:**
-  - Added Hebrew (`he`) and Thai (`th`) languages to the system.
-  - Added corresponding translations to the Installer wizard (`he.php`, `th.php`).
+**New widgets**
+- **Prayer Times:** A dedicated widget for daily prayer times.
+- **Shabbat Times:** A dedicated widget for Jewish communities, showing Shabbat times.
+- **Christian Festivals:** A widget for Christian holidays and festivals.
+- **Hindu Festivals:** A widget covering Sanātana Dharma and Buddha Dharma festivals. The label can be switched between **Sanātana Dharma (सनातन धर्म)**, **Vaidika Dharma (वैदिक धर्म)** and **Hindu (हिन्दू)**.
+- **中国节日 (Chinese Festivals):** Countdown to upcoming Chinese festivals, today's lunar date, 宜 / 忌 (auspicious / avoid activities of the day), and the current Shi Chen (Chinese hour). Calculated offline, no external API.
+- **Timeline:** A widget for building timelines.
+- **Product Compare:** Add products and generate a comparison table.
+- **Cost Calculator:** Define fields and values in the admin panel. Visitors enter their own values on the frontend and get the calculated result instantly.
+- **Age Verification (age selector):** A second age verification widget. Visitors select their age instead of typing it. The admin sets a minimum age (for example 16), and anyone below it is blocked. As the selected age changes, the animation ages or rejuvenates to match.
+- **Bento Grid Showcase:** A bento-style grid widget for showcasing content.
+- **PDF Reader:** A built-in PDF viewer for displaying PDF files on the page.
 
-### 🛠 Bug Fixes
-- **Backup System:**
-  - Fixed the database restore process to use chunk-based streaming (`64KB`) instead of loading the entire SQL file into memory, preventing "Allowed memory size exhausted" errors.
-  - Fixed the backup progress bar blocking issue by adding `session_write_close()` to the controller, allowing asynchronous polling.
-  - Added `deleteStaleProgress` to clear old progress states before starting new backups/restores.
-  - Polished the backup modal UI for better success and error feedback.
+**New plugins**
+- **Share Widget:** A new plugin for sharing pages.
+- **Hexagon Story:** A hexagon-shaped story plugin with rounded corners and an original design.
 
-- **RJBuilder (Canvas):**
-  - Fixed the canvas background not matching the active theme. The builder now dynamically injects `rj_theme_mod` colors directly into the `#rj-canvas` inline styles.
-  - Auto-detects dark themes (e.g., Spotlight) to apply dark backgrounds and proper text colors, ensuring transparent widgets are visible during editing.
+**Text widget**
+- **Links in text:** The Text widget now understands links. Use Markdown (`[text](url)`), HTML (`<a href>`) or plain URLs. Includes link color and open-in-new-tab settings, with unsafe tags and URL schemes sanitized.
+- **Markdown text field:** A dedicated Markdown text field for writing Markdown content.
 
-- **Admin Sidebar:**
-  - Fixed the issue where both "Posts" and "Pages" menus remained active simultaneously. The sidebar now correctly detects the post type via route parameters, query strings, and model binding.
+**PDF widget**
+- **Select from device:** Upload a PDF from your device and store it on your own site, instead of relying only on an external URL.
+- **Media picker integration:** The PDF widget now works with the built-in media picker.
 
-- **Update System:**
-  - Fixed the pseudo-cron auto-update mechanism to properly throttle checks to once every 15 minutes using an atomic cache lock, preventing GitHub API rate limit exhaustion.
+### 🎨 Changed
 
-- **Installer:**
-  - Removed the dependency on `exec()` and `shell_exec()`. 
-  - Implemented native PHP fallbacks for `config:clear`, `cache:clear`, `optimize:clear`, and `storage:link`.
-  - Added native Laravel Kernel fallback to run `migrate` and `db:seed` without shell access, making the installer fully compatible with restrictive shared hosting environments.
+- **Prayer Times:** Redesigned with a glass-style look.
+- **PDF "Select from device":** Improved the upload and selection flow.
+
+### 🐛 Fixed
+
+- **Widgets missing from the list:** `IconBoxWidget`, `ImageBoxWidget` and `AdvancedSearchWidget` were not visible because they were never registered in the widget list. All three now appear.
+- **PDF widget:** Fixed the issue where the PDF was not displayed.
+- **Chinese Festivals:** Fixed a wrong calendar library namespace that caused a false "Calendar library is not installed" error, and added a dedicated error screen. The widget cache is now locale-aware, so festival names are shown in the visitor's language.
+- **Cookie widget:** Fixed the design and the mobile layout.
