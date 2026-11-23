@@ -2,6 +2,10 @@
 
 <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/banner.svg" alt="RJ Nexus" width="100%"/>
 
+<!-- README-I18N:START -->
+**English** | [Português](./README.pt.md) | [中文](./README.zh.md) | [Español](./README.es.md)
+<!-- README-I18N:END -->
+
 <br/>
 
 ![Status](https://img.shields.io/badge/Status-Stable-brightgreen)
@@ -141,6 +145,21 @@ RJ CMS installs on any shared hosting or VPS without touching a single line of c
 <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/divider.svg" alt="" width="100%"/>
 
 <a id="caching"></a>
+
+## Live Demo
+
+You can try RJ Nexus in the demo below.
+
+> **Note:** The demo site may not run the latest version (v1.11.1) at the moment. It is provided only to give you an idea of how RJ Nexus looks and works.
+
+| | | |
+|:-:|---|---|
+| <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/update-1.11.1/globe.svg" width="20" height="20" alt="" /> | **Demo site** | [rj-nexus.onrender.com](https://rj-nexus.onrender.com) |
+| <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/update-1.11.1/layers.svg" width="20" height="20" alt="" /> | **Admin panel** | Add `/admin` to the end of the demo URL: [rj-nexus.onrender.com/admin](https://rj-nexus.onrender.com/admin) |
+| <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/update-1.11.1/file-text.svg" width="20" height="20" alt="" /> | **Email** | `admin@admin.com` |
+| <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/update-1.11.1/file.svg" width="20" height="20" alt="" /> | **Password** | `admin123` |
+
+---
 
 ## Caching
 
