@@ -3,14 +3,16 @@
 namespace App\Widgets\Builtin;
 
 use App\Widgets\BaseWidget;
-use com\nlp\lunar\Lunar;
-use com\nlp\lunar\Solar;
+use com\nlf\calendar\Lunar;
+use com\nlf\calendar\Solar;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 
 /**
  * 中国节日 — Çin bayramları, Ay təqvimi, Yi/Ji və 12 Shi Chen.
  * Xarici API yoxdur. Tələb: composer require 6tail/lunar-php
+ *
+ * Qeyd: paketin namespace-i com\nlf\calendar-dır (com\nlp\lunar DEYİL).
  */
 class ChineseFestivalsWidget extends BaseWidget
 {
@@ -124,7 +126,10 @@ class ChineseFestivalsWidget extends BaseWidget
         $uid = 'cf_' . substr(md5(uniqid('', true)), 0, 8);
 
         $now = Carbon::now($tz);
-        $cacheKey = 'rj_cnfest:' . md5(json_encode([$tz, $now->format('Y-m-d'), $count]));
+
+        // Dil də açarda olmalıdır: bayram adları __() ilə tərcümə olunur,
+        // yoxsa ilk ziyarətçinin dili 6 saat hamıya göstərilər.
+        $cacheKey = 'rj_cnfest:' . md5(json_encode([$tz, $now->format('Y-m-d'), $count, app()->getLocale()]));
 
         $data = Cache::remember($cacheKey, now()->addHours(self::CACHE_HOURS), function () use ($now, $tz, $count) {
             try {

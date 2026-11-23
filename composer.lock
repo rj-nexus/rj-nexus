@@ -4,8 +4,86 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b16f6d1ffb0da9edddf613cace664a8a",
+    "content-hash": "940cff43ed43d99c8d366844874e1eaa",
     "packages": [
+        {
+            "name": "6tail/lunar-php",
+            "version": "1.4.8",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/6tail/lunar-php.git",
+                "reference": "e12dd62c472ecaee86aff1684640e4b82d2e2ed4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/6tail/lunar-php/zipball/e12dd62c472ecaee86aff1684640e4b82d2e2ed4",
+                "reference": "e12dd62c472ecaee86aff1684640e4b82d2e2ed4",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "com\\nlf\\calendar\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "6tail",
+                    "email": "6tail@6tail.cn",
+                    "homepage": "https://6tail.cn"
+                }
+            ],
+            "description": "lunar是一款无第三方依赖的日历工具，支持公历(阳历)、农历(阴历、老黄历)、佛历和道历，支持星座、儒略日、干支、生肖、节气、节日、彭祖百忌、每日宜忌、吉神宜趋、凶煞宜忌、吉神(喜神/福神/财神/阳贵神/阴贵神)方位、胎神方位、冲煞、纳音、星宿、八字、五行、十神、建除十二值星、青龙名堂等十二神、黄道日及吉凶等。lunar is a calendar library for Solar and Chinese Lunar.",
+            "homepage": "https://github.com/6tail/lunar-php",
+            "keywords": [
+                "calendar",
+                "lunar",
+                "solar",
+                "五行",
+                "儒略日",
+                "八字",
+                "冲煞",
+                "凶煞宜忌",
+                "十神",
+                "吉神宜趋",
+                "喜神",
+                "干支",
+                "建除十二值星",
+                "彭祖百忌",
+                "时辰宜忌",
+                "星宿",
+                "星座",
+                "每日宜忌",
+                "生肖",
+                "福神",
+                "纳音",
+                "胎神",
+                "节假日",
+                "节日",
+                "节气",
+                "财神",
+                "阳贵神",
+                "阴贵神",
+                "青龙名堂等十二神",
+                "黄道日"
+            ],
+            "support": {
+                "issues": "https://github.com/6tail/lunar-php/issues",
+                "source": "https://github.com/6tail/lunar-php/tree/1.4.8"
+            },
+            "time": "2026-11-05T12:39:55+00:00",
+            "published-time": "2026-11-05T12:41:23+00:00"
+        },
         {
             "name": "brick/math",
             "version": "0.14.8",
