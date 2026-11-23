@@ -9,6 +9,7 @@ return [
     'retry' => 'Yenidən cəhd et',
     'install' => 'İndi quraşdır',
     'skip' => 'Keç',
+    
     'check' => 'Yoxla',
     'delete_installer' => 'Quraşdırıcını sil və Admin panelini aç',
     'lang' => 'Dil',
@@ -87,4 +88,5 @@ return [
     'err_admin' => 'Zəhmət olmasa bütün sahələri düzgün doldurun.',
     'err_inst' => 'Quraşdırma uğursuz oldu.',
     'err_direct' => 'Zəhmət olmasa əvvəlcə əvvəlki addımları tamamlayın.',
+    
 ];
