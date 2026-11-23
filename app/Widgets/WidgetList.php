@@ -23,6 +23,7 @@ use App\Widgets\Builtin\ContactInfoWidget;
 use App\Widgets\Builtin\ContainerWidget;
 use App\Widgets\Builtin\StructureContainerWidget;
 use App\Widgets\Builtin\CookieNoticeWidget;
+use App\Widgets\Builtin\AgeVerificationGateWidget;
 use App\Widgets\Builtin\CounterWidget;
 use App\Widgets\Builtin\CountdownWidget;
 use App\Widgets\Builtin\CurrencyRatesWidget;
@@ -159,6 +160,7 @@ class WidgetList
             new PromoBannerWidget(),
             new WheelOfFortuneWidget(),
             new CookieNoticeWidget(),
+            new AgeVerificationGateWidget(),
             new NewsletterSignupWidget(),
             new SocialFeedWidget(),
             new SocialIconsWidget(),
