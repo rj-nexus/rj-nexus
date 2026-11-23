@@ -28,6 +28,7 @@ use App\Widgets\Builtin\AgeVerificationGateWidget;
 use App\Widgets\Builtin\CounterWidget;
 use App\Widgets\Builtin\CountdownWidget;
 use App\Widgets\Builtin\CurrencyRatesWidget;
+use App\Widgets\Builtin\CostCalculatorWidget;
 use App\Widgets\Builtin\CustomHtmlWidget;
 use App\Widgets\Builtin\DividerWidget;
 use App\Widgets\Builtin\DualColorHeadingWidget;
@@ -177,6 +178,7 @@ class WidgetList
             new HinduFestivalsWidget(),
             new GoogleReviewsWidget(),
             new CurrencyRatesWidget(),
+            new CostCalculatorWidget(),
             
 
             // --- Forms & E-commerce ---
