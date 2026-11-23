@@ -11,11 +11,13 @@ use App\Http\Controllers\Frontend\NewsletterController;
 use App\Http\Controllers\Frontend\WidgetAuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Spotlight\Http\Controllers\DocsController; // YENİ ƏLAVƏ EDİLDİ
+use Spotlight\Http\Controllers\DocsController; 
 
 $rjCache = class_exists(\Spatie\ResponseCache\Middlewares\CacheResponse::class)
     ? [\Spatie\ResponseCache\Middlewares\CacheResponse::class]
     : [];
+
+
 
 Route::get('/theme-assets/{slug}/{path}', function (string $slug, string $path) {
     $manager = app(\App\Services\ThemeManager::class);

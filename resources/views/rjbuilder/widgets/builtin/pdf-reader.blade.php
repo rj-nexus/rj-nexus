@@ -3,6 +3,7 @@
     $viewerHeight = $heightMap[$opts['height']] ?? '700px';
     $displayTitle = $opts['title'] !== '' ? $opts['title'] : basename(parse_url($url, PHP_URL_PATH) ?: 'document.pdf');
     $safeUrl = e($url);
+    $safeSrc = e($src);
 @endphp
 
 <style>
@@ -37,16 +38,18 @@
     #{{ $uid }} .rjpdf-zoom { color: var(--m); font-variant-numeric: tabular-nums; min-width: 48px; text-align: center; }
 
     /* Viewer */
-    #{{ $uid }} .rjpdf-viewer { position: relative; width: 100%; height: {{ $viewerHeight }}; background: #525659; overflow: auto; display: flex; justify-content: center; padding: 20px; }
+    #{{ $uid }} .rjpdf-viewer { position: relative; width: 100%; height: {{ $viewerHeight }}; background: #525659; overflow: auto; padding: 20px; outline: none; }
     #{{ $uid }}[data-style="minimal"] .rjpdf-viewer { background: #475569; }
-    #{{ $uid }} .rjpdf-canvas-wrap { position: relative; box-shadow: 0 4px 20px rgba(0,0,0,.4); }
-    #{{ $uid }} .rjpdf-canvas { display: block; background: #fff; max-width: 100%; height: auto; }
-    #{{ $uid }} .rjpdf-status { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px; color: #fff; background: rgba(0,0,0,.5); font-size: .95rem; }
+    #{{ $uid }} .rjpdf-canvas-wrap { position: relative; width: fit-content; margin: 0 auto; box-shadow: 0 4px 20px rgba(0,0,0,.4); }
+    #{{ $uid }} .rjpdf-canvas { display: block; background: #fff; }
+    #{{ $uid }} .rjpdf-status { position: absolute; inset: 0; z-index: 2; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px; color: #fff; background: rgba(0,0,0,.5); font-size: .95rem; }
     #{{ $uid }} .rjpdf-status[hidden] { display: none; }
     #{{ $uid }} .rjpdf-spinner { width: 32px; height: 32px; border: 3px solid rgba(255,255,255,.2); border-top-color: #fff; border-radius: 50%; animation: rjpdf-spin .8s linear infinite; }
     @keyframes rjpdf-spin { to { transform: rotate(360deg); } }
-    #{{ $uid }} .rjpdf-error { color: #fca5a5; text-align: center; padding: 24px; max-width: 360px; }
-    #{{ $uid }} .rjpdf-error a { color: #93c5fd; text-decoration: underline; }
+    #{{ $uid }} .rjpdf-error { display: flex; flex-direction: column; align-items: center; gap: 12px; color: #fecaca; text-align: center; padding: 24px; max-width: 360px; }
+    #{{ $uid }} .rjpdf-error p { margin: 0; font-weight: 600; }
+    #{{ $uid }} .rjpdf-error .rjpdf-act { background: var(--acc); color: #fff; }
+    #{{ $uid }} .rjpdf-error .rjpdf-act:hover { background: var(--acc); color: #fff; filter: brightness(1.1); }
 
     @media (max-width: 640px) {
         #{{ $uid }} { padding: 16px 8px; }
@@ -57,7 +60,7 @@
     }
 </style>
 
-<section id="{{ $uid }}" data-style="{{ $opts['style'] }}" data-url="{{ $safeUrl }}" data-start="{{ $opts['start_page'] }}">
+<section id="{{ $uid }}" data-style="{{ $opts['style'] }}" data-url="{{ $safeUrl }}" data-src="{{ $safeSrc }}" data-start="{{ $opts['start_page'] }}">
     <div class="rjpdf-card">
 
         <div class="rjpdf-header">
@@ -75,7 +78,7 @@
                     </a>
                 @endif
                 @if ($opts['show_download'])
-                    <a href="{{ $safeUrl }}" download="{{ $opts['download_name'] }}" class="rjpdf-act" title="{{ __('Download') }}">
+                    <a href="{{ $safeSrc }}" download="{{ $opts['download_name'] }}" class="rjpdf-act" title="{{ __('Download') }}">
                         <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg>
                         <span>{{ __('Download') }}</span>
                     </a>
@@ -97,11 +100,11 @@
                 </button>
                 <span class="rjpdf-sep"></span>
                 <button type="button" class="rjpdf-tb-btn" data-act="zoom-out" title="{{ __('Zoom out') }}" aria-label="{{ __('Zoom out') }}">
-                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M11 8v6m-3-3h6"/></svg>
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M8 11h6"/><circle cx="11" cy="11" r="7"/></svg>
                 </button>
                 <span class="rjpdf-zoom" data-act="zoom-label">100%</span>
                 <button type="button" class="rjpdf-tb-btn" data-act="zoom-in" title="{{ __('Zoom in') }}" aria-label="{{ __('Zoom in') }}">
-                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M11 8v6m-3-3h6"/></svg>
+                    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M11 8v6m-3-3h6"/><circle cx="11" cy="11" r="7"/></svg>
                 </button>
                 <span class="rjpdf-sep"></span>
                 <button type="button" class="rjpdf-tb-btn" data-act="fit-width" title="{{ __('Fit width') }}" aria-label="{{ __('Fit width') }}">
@@ -114,7 +117,7 @@
             </div>
         @endif
 
-        <div class="rjpdf-viewer" data-act="viewer">
+        <div class="rjpdf-viewer" data-act="viewer" tabindex="0">
             <div class="rjpdf-canvas-wrap">
                 <canvas class="rjpdf-canvas" data-act="canvas"></canvas>
             </div>
@@ -134,6 +137,7 @@
     root.dataset.ready = '1';
 
     const url = root.dataset.url;
+    const src = root.dataset.src || url;
     const startPage = Math.max(1, parseInt(root.dataset.start || '1', 10));
 
     const canvas = root.querySelector('[data-act="canvas"]');
@@ -143,9 +147,12 @@
     const totalEl = root.querySelector('[data-act="total"]');
     const zoomLabel = root.querySelector('[data-act="zoom-label"]');
 
+    const PDFJS = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/';
+
     let pdfDoc = null;
     let pageNum = startPage;
     let scale = 1.2;
+    let baseScale = null;
     let rendering = false;
     let pending = null;
 
@@ -156,10 +163,30 @@
         status.innerHTML = html;
     }
 
+    function showError() {
+        setStatus(
+            '<div class="rjpdf-error">' +
+            '<svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg>' +
+            '<p>' + @json(__('Unable to load the PDF.')) + '</p>' +
+            '<a class="rjpdf-act" href="' + url + '" target="_blank" rel="noopener">' + @json(__('Open PDF directly')) + '</a>' +
+            '</div>'
+        );
+    }
+
     function updateToolbar() {
         if (pageInput) pageInput.value = pageNum;
         if (totalEl && pdfDoc) totalEl.textContent = pdfDoc.numPages;
-        if (zoomLabel) zoomLabel.textContent = Math.round((scale / 1.2) * 100) + '%';
+        if (zoomLabel && baseScale) zoomLabel.textContent = Math.round((scale / baseScale) * 100) + '%';
+    }
+
+    function availableWidth() {
+        return Math.max(200, viewer.clientWidth - (window.innerWidth <= 640 ? 20 : 40));
+    }
+
+    async function fitToWidth(num) {
+        const page = await pdfDoc.getPage(num);
+        const w = page.getViewport({ scale: 1 }).width;
+        return availableWidth() / w;
     }
 
     async function renderPage(num) {
@@ -168,13 +195,7 @@
         rendering = true;
         try {
             const page = await pdfDoc.getPage(num);
-            const containerWidth = viewer.clientWidth - 40;
-            const viewport0 = page.getViewport({ scale: 1 });
-            let fitScale = scale;
-            if (viewport0.width * fitScale > containerWidth) {
-                fitScale = containerWidth / viewport0.width;
-            }
-            const viewport = page.getViewport({ scale: fitScale });
+            const viewport = page.getViewport({ scale: scale });
             const dpr = window.devicePixelRatio || 1;
 
             canvas.width = Math.floor(viewport.width * dpr);
@@ -185,7 +206,7 @@
             const ctx = canvas.getContext('2d');
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-            await page.render({ canvasContext: ctx, viewport }).promise;
+            await page.render({ canvasContext: ctx, viewport: viewport }).promise;
             updateToolbar();
         } catch (err) {
             console.error(err);
@@ -199,28 +220,37 @@
         }
     }
 
-    function loadPdfJs() {
-        return import('https://cdn.jsdelivr.net/npm/pdfjs-dist@4/build/pdf.min.mjs').then(function (mod) {
-            mod.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4/build/pdf.worker.min.mjs';
-            return mod;
+    function goTo(n) {
+        if (!pdfDoc || n < 1 || n > pdfDoc.numPages) return;
+        pageNum = n;
+        viewer.scrollTop = 0;
+        renderPage(pageNum);
+    }
+
+    async function loadPdfJs() {
+        const mod = await import(PDFJS + 'pdf.min.mjs');
+        // Worker CDN-dən (cross-origin) birbaşa yüklənə bilmir, ona görə blob kimi yükləyirik
+        const code = await fetch(PDFJS + 'pdf.worker.min.mjs').then(function (r) {
+            if (!r.ok) throw new Error('Worker load failed');
+            return r.text();
         });
+        mod.GlobalWorkerOptions.workerSrc = URL.createObjectURL(new Blob([code], { type: 'text/javascript' }));
+        return mod;
     }
 
     loadPdfJs().then(function (pdfjsLib) {
-        return pdfjsLib.getDocument({ url: url, withCredentials: false }).promise;
-    }).then(function (doc) {
+        return pdfjsLib.getDocument({ url: src, withCredentials: false }).promise;
+    }).then(async function (doc) {
         pdfDoc = doc;
         if (pageNum > doc.numPages) pageNum = 1;
+        // İlk açılışda səhifəni eninə sığdır (maks. 1.2)
+        scale = Math.min(1.2, await fitToWidth(pageNum));
+        baseScale = scale;
         setStatus(null);
         return renderPage(pageNum);
     }).catch(function (err) {
         console.error('PDF load error', err);
-        setStatus(
-            '<div class="rjpdf-error">' +
-            '<p>{{ __('Unable to load the PDF.') }}</p>' +
-            '<p><a href="' + url + '" target="_blank" rel="noopener">{{ __('Open PDF directly') }}</a></p>' +
-            '</div>'
-        );
+        showError();
     });
 
     function bind(act, fn) {
@@ -228,31 +258,25 @@
         if (el) el.addEventListener('click', fn);
     }
 
-    bind('prev', function () {
-        if (pageNum <= 1) return;
-        pageNum--;
-        renderPage(pageNum);
-    });
-    bind('next', function () {
-        if (!pdfDoc || pageNum >= pdfDoc.numPages) return;
-        pageNum++;
-        renderPage(pageNum);
-    });
+    bind('prev', function () { goTo(pageNum - 1); });
+    bind('next', function () { goTo(pageNum + 1); });
     bind('zoom-in', function () {
-        scale = Math.min(scale * 1.25, 4);
+        scale = Math.min(scale * 1.25, 5);
         renderPage(pageNum);
     });
     bind('zoom-out', function () {
-        scale = Math.max(scale / 1.25, 0.4);
+        scale = Math.max(scale / 1.25, 0.3);
         renderPage(pageNum);
     });
-    bind('fit-width', function () {
-        scale = 1.2;
+    bind('fit-width', async function () {
+        if (!pdfDoc) return;
+        scale = await fitToWidth(pageNum);
         renderPage(pageNum);
     });
     bind('fullscreen', function () {
+        const card = root.querySelector('.rjpdf-card');
         if (!document.fullscreenElement) {
-            viewer.requestFullscreen && viewer.requestFullscreen();
+            card && card.requestFullscreen && card.requestFullscreen();
         } else {
             document.exitFullscreen && document.exitFullscreen();
         }
@@ -262,8 +286,7 @@
         pageInput.addEventListener('change', function () {
             const n = parseInt(pageInput.value, 10);
             if (pdfDoc && n >= 1 && n <= pdfDoc.numPages) {
-                pageNum = n;
-                renderPage(pageNum);
+                goTo(n);
             } else {
                 pageInput.value = pageNum;
             }
@@ -273,14 +296,14 @@
         });
     }
 
-    // Keyboard nav
-    document.addEventListener('keydown', function (e) {
-        if (!root.contains(document.activeElement) && !viewer.contains(document.activeElement)) return;
-        if (e.key === 'ArrowRight') { bind('next'); }
-        if (e.key === 'ArrowLeft') { bind('prev'); }
-    }, { passive: true });
+    // Klaviatura naviqasiyası
+    root.addEventListener('keydown', function (e) {
+        if (e.target === pageInput) return;
+        if (e.key === 'ArrowRight' || e.key === 'PageDown') { goTo(pageNum + 1); }
+        if (e.key === 'ArrowLeft' || e.key === 'PageUp') { goTo(pageNum - 1); }
+    });
 
-    // Re-render on resize
+    // Ölçü dəyişəndə yenidən render
     let resizeTimer;
     window.addEventListener('resize', function () {
         clearTimeout(resizeTimer);

@@ -3,6 +3,8 @@
 namespace App\Widgets\Builtin;
 
 use App\Widgets\BaseWidget;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 
 class PdfReaderWidget extends BaseWidget
 {
@@ -108,8 +110,58 @@ class PdfReaderWidget extends BaseWidget
         ];
 
         $uid = 'pdf_' . substr(md5(uniqid('', true)), 0, 8);
+        $src = $this->resolveSource($url);
 
-        return view('rjbuilder.widgets.builtin.pdf-reader', compact('url', 'opts', 'uid'))->render();
+        return view('rjbuilder.widgets.builtin.pdf-reader', compact('url', 'src', 'opts', 'uid'))->render();
+    }
+
+    /**
+     * Xarici PDF-i serverə keşləyir ki, brauzer same-origin oxusun (CORS problemi olmasın).
+     * Alınmasa, orijinal URL qaytarılır.
+     */
+    private function resolveSource(string $url): string
+    {
+        $host = strtolower((string) parse_url($url, PHP_URL_HOST));
+
+        // Eyni saytın PDF-i: keşləməyə ehtiyac yoxdur
+        if ($host === strtolower(request()->getHost())) {
+            return $url;
+        }
+
+        $path = 'rjpdf/' . md5($url) . '.pdf';
+        $disk = Storage::disk('public');
+
+        // 7 gündən təzədirsə, keşdən istifadə et
+        if ($disk->exists($path) && $disk->lastModified($path) > now()->subDays(7)->timestamp) {
+            return asset('storage/' . $path);
+        }
+
+        try {
+            // SSRF qoruması: daxili/private IP-lər olmaz
+            $ip = gethostbyname($host);
+            if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+                return $url;
+            }
+
+            $res = Http::timeout(25)
+                ->withOptions(['allow_redirects' => ['max' => 3, 'protocols' => ['http', 'https']]])
+                ->withHeaders(['Accept' => 'application/pdf', 'User-Agent' => 'Mozilla/5.0'])
+                ->get($url);
+
+            $body = $res->body();
+
+            if (!$res->ok() || strlen($body) > 30 * 1024 * 1024 || !str_starts_with($body, '%PDF')) {
+                return $url;
+            }
+
+            $disk->put($path, $body);
+
+            return asset('storage/' . $path);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return $url;
+        }
     }
 
     private function toBool(mixed $value, bool $default): bool
