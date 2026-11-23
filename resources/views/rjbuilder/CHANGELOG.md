@@ -1,42 +1,38 @@
 ## [v1.10.0] - 2026-11-23
-
-> RJ Builder is a standalone page builder. It runs inside RJ Nexus CMS and is also developed in its own repository, so it keeps its own changelog and versioning, separate from the CMS core.
-
+ 
 ### 🚀 Added
-
-**New widgets**
-- **Prayer Times:** A dedicated widget for daily prayer times.
-- **Shabbat Times:** A dedicated widget for Jewish communities, showing Shabbat times.
-- **Christian Festivals:** A widget for Christian holidays and festivals.
-- **Hindu Festivals:** A widget covering Sanātana Dharma and Buddha Dharma festivals. The label can be switched between **Sanātana Dharma (सनातन धर्म)**, **Vaidika Dharma (वैदिक धर्म)** and **Hindu (हिन्दू)**.
-- **中国节日 (Chinese Festivals):** Countdown to upcoming Chinese festivals, today's lunar date, 宜 / 忌 (auspicious / avoid activities of the day), and the current Shi Chen (Chinese hour). Calculated offline, no external API.
-- **Timeline:** A widget for building timelines.
-- **Product Compare:** Add products and generate a comparison table.
-- **Cost Calculator:** Define fields and values in the admin panel. Visitors enter their own values on the frontend and get the calculated result instantly.
-- **Age Verification (age selector):** A second age verification widget. Visitors select their age instead of typing it. The admin sets a minimum age (for example 16), and anyone below it is blocked. As the selected age changes, the animation ages or rejuvenates to match.
-- **Bento Grid Showcase:** A bento-style grid widget for showcasing content.
-- **PDF Reader:** A built-in PDF viewer for displaying PDF files on the page.
-
-**New plugins**
-- **Share Widget:** A new plugin for sharing pages.
-- **Hexagon Story:** A hexagon-shaped story plugin with rounded corners and an original design.
-
-**Text widget**
-- **Links in text:** The Text widget now understands links. Use Markdown (`[text](url)`), HTML (`<a href>`) or plain URLs. Includes link color and open-in-new-tab settings, with unsafe tags and URL schemes sanitized.
-- **Markdown text field:** A dedicated Markdown text field for writing Markdown content.
-
-**PDF widget**
-- **Select from device:** Upload a PDF from your device and store it on your own site, instead of relying only on an external URL.
-- **Media picker integration:** The PDF widget now works with the built-in media picker.
-
+ 
+**New widgets (15)**
+ 
+*Culture, Religion and Holidays (5)*
+- **`PrayerTimesWidget`:** Islamic prayer times, with a glass-style design.
+- **`ShabbatTimesWidget`:** Jewish Shabbat candle-lighting and end times.
+- **`ChristianHolidaysWidget`:** Christian holidays and calendar.
+- **`ChineseFestivalsWidget`:** Chinese lunar calendar festivals with countdowns, today's lunar date, Yi / Ji (宜 / 忌) auspicious guidance, Shi Chen and the current China time.
+- **`HinduFestivalsWidget`:** Hindu festivals covering Sanātana Dharma and Buddha Dharma. The display name is selectable: Sanātana Dharma (सनातन धर्म), Vaidika Dharma (वैदिक धर्म) or Hindu (हिन्दू).
+*Conversion, E-commerce and Calculators (4)*
+- **`CostCalculatorWidget`:** Interactive price and service calculator. Values are defined in the admin panel; visitors enter their own values on the frontend and get a calculated result.
+- **`ProductCompareWidget`:** Build a product or package comparison table by entering products.
+- **`AgeVerificationGateWidget`:** Age confirmation modal (18+ confirm button).
+- **`AgePickerGateWidget`:** Age check where the visitor selects their age. The minimum age is set in the admin panel (e.g. 16) and visitors below it are blocked. The figure ages or rejuvenates with an animation as the selected age changes.
+*Media, Design and Content (4)*
+- **`VideoStoriesCarouselWidget`:** Instagram/TikTok-style vertical video stories carousel, with a hexagon (rounded-corner) story option.
+- **`BentoGridShowcaseWidget`:** Modern Apple-style Bento card grid.
+- **`MarkdownTextWidget`:** Markdown text field and renderer for markdown content.
+- **`PdfReaderWidget`:** In-page PDF reader.
+*Other (2)*
+- **`ShareWidget`:** Share widget.
+- **`TimelineWidget`:** Timeline widget.
+**PDF**
+- **PDF: Choose from Device:** PDF widgets can now upload a PDF from the device and store it on the site.
+- **PDF: Media Picker Integration:** The device-upload flow now uses the media picker.
+- **PDF: Improved Upload:** The "choose from device" function has been improved.
 ### 🎨 Changed
-
-- **Prayer Times:** Redesigned with a glass-style look.
-- **PDF "Select from device":** Improved the upload and selection flow.
-
+- **Prayer Times Design:** Refined the design (glass style).
 ### 🐛 Fixed
-
-- **Widgets missing from the list:** `IconBoxWidget`, `ImageBoxWidget` and `AdvancedSearchWidget` were not visible because they were never registered in the widget list. All three now appear.
-- **PDF widget:** Fixed the issue where the PDF was not displayed.
-- **Chinese Festivals:** Fixed a wrong calendar library namespace that caused a false "Calendar library is not installed" error, and added a dedicated error screen. The widget cache is now locale-aware, so festival names are shown in the visitor's language.
-- **Cookie widget:** Fixed the design and the mobile layout.
+- **Missing Widgets:** `IconBoxWidget`, `ImageBoxWidget` and `AdvancedSearchWidget` were not visible in the widget list because they were not registered. They now appear in the builder.
+- **PDF Widget Not Rendering:** Fixed the PDF not being displayed in the PDF widget.
+- **Text Widget Links:** The text widget now recognizes and renders links.
+- **ChineseFestivalsWidget Error:** Fixed an error and added a dedicated error screen.
+- **Cookie Widget:** Fixed the design and the mobile layout.
+ 
