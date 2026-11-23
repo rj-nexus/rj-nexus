@@ -29,6 +29,7 @@ use App\Widgets\Builtin\CounterWidget;
 use App\Widgets\Builtin\CountdownWidget;
 use App\Widgets\Builtin\CurrencyRatesWidget;
 use App\Widgets\Builtin\CostCalculatorWidget;
+use App\Widgets\Builtin\BentoGridShowcaseWidget;
 use App\Widgets\Builtin\CustomHtmlWidget;
 use App\Widgets\Builtin\DividerWidget;
 use App\Widgets\Builtin\DualColorHeadingWidget;
@@ -156,6 +157,7 @@ class WidgetList
             new ProductCompareWidget(),
             new CallToActionWidget(),
             new FlipBoxWidget(),
+            new BentoGridShowcaseWidget(),
             
 
             // --- Marketing & Conversion ---
