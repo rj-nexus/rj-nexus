@@ -5,7 +5,7 @@
     $text  = fn ($k, $d) => trim((string) ($settings[$k] ?? '')) !== '' ? $settings[$k] : $d;
 
     $pos       = $pick('position', ['bottom', 'bottom-left', 'bottom-right', 'center', 'top'], 'bottom');
-    $style     = $pick('style', ['card', 'dark', 'glass', 'minimal'], 'card');
+    $style     = $pick('style', ['card', 'dark', 'glass', 'minimal'], 'glass');
     $accent    = $color($settings['accent'] ?? '', '#8b5cf6');
     $ink       = $color($settings['text_color'] ?? '', '#0f172a');
     $muted     = $color($settings['muted_color'] ?? '', '#64748b');
@@ -48,9 +48,34 @@
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
         &[data-style="dark"] { --bg: #0f172a; --solid: #0f172a; --ink: #f1f5f9; --muted: #94a3b8; --link: color-mix(in srgb, var(--accent) 55%, #fff); }
-        &[data-style="glass"] { --bg: rgba(255, 255, 255, .72); --solid: #fff;
-            .cn-card { -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); }
+
+        &[data-style="glass"] {
+            --bg: rgba(255, 255, 255, .6);
+            --solid: rgba(255, 255, 255, .78);
+            --line: rgba(255, 255, 255, .6);
+            --sep: rgba(100, 116, 139, .22);
+
+            .cn-card {
+                background: linear-gradient(135deg, rgba(255, 255, 255, .78), rgba(255, 255, 255, .42));
+                -webkit-backdrop-filter: blur(22px) saturate(180%);
+                backdrop-filter: blur(22px) saturate(180%);
+                box-shadow: 0 24px 60px -24px rgba(15, 23, 42, .45), inset 0 1px 0 rgba(255, 255, 255, .8), inset 0 -1px 0 rgba(255, 255, 255, .25);
+            }
+            .cn-box {
+                border: 1px solid rgba(255, 255, 255, .65);
+                -webkit-backdrop-filter: blur(28px) saturate(180%);
+                backdrop-filter: blur(28px) saturate(180%);
+                box-shadow: 0 40px 80px -20px rgba(15, 23, 42, .5), inset 0 1px 0 rgba(255, 255, 255, .8);
+            }
+            .cn-box-head, .cn-box-foot, .cn-cat { border-color: var(--sep); }
+            .cn-btn:not(.is-primary) { border-color: var(--sep); background: rgba(255, 255, 255, .45); }
+            .cn-btn:not(.is-primary):hover { background: rgba(255, 255, 255, .75); }
         }
+        @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+            &[data-style="glass"] .cn-card { background: rgba(255, 255, 255, .96); }
+            &[data-style="glass"] .cn-box { background: #fff; }
+        }
+
         &[data-style="minimal"] .cn-card { box-shadow: none; }
 
         .cn-banner { position: fixed; z-index: 99980; display: none; --cr: var(--r); --from: 50px;
@@ -99,7 +124,7 @@
         .cn-modal { position: fixed; inset: 0; z-index: 99990; display: none; place-items: center; padding: 20px;
             &.is-open { display: grid; }
         }
-        .cn-back { position: absolute; inset: 0; background: rgba(2, 6, 23, .65); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+        .cn-back { position: absolute; inset: 0; background: rgba(2, 6, 23, .55); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
         .cn-box { position: relative; display: flex; flex-direction: column; width: 100%; max-width: 520px; max-height: 85vh; overflow: hidden; border-radius: var(--r); background: var(--solid); color: var(--ink); box-shadow: 0 40px 80px -20px rgba(0, 0, 0, .55); animation: rj-cn-pop .4s cubic-bezier(.34, 1.56, .64, 1) both; }
         .cn-box-head { display: flex; align-items: center; gap: 12px; padding: 18px 22px; border-bottom: 1px solid var(--line);
             svg { width: 32px; height: 32px; animation: rj-cn-wobble 5s ease-in-out infinite; }
@@ -109,7 +134,7 @@
                 svg { width: 14px; height: 14px; animation: none; }
             }
         }
-        .cn-box-body { flex: 1; padding: 6px 22px; overflow-y: auto; }
+        .cn-box-body { flex: 1; padding: 6px 22px; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
         .cn-cat { padding: 14px 0; border-bottom: 1px solid var(--line);
             &:last-child { border-bottom: 0; }
             div { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
@@ -131,9 +156,45 @@
             .cn-actions { width: 100%; }
             .cn-btn { flex: 1; }
         }
+
+        /* ---------- Mobile ---------- */
         @media (max-width: 640px) {
-            &[data-pos="bottom-left"] .cn-banner, &[data-pos="bottom-right"] .cn-banner { left: 12px; right: 12px; bottom: 12px; width: auto; }
+            /* Floating card with side gaps instead of edge-to-edge */
+            &:not([data-pos="center"]) .cn-banner {
+                left: 10px; right: 10px; width: auto; --cr: var(--r);
+            }
+            &:not([data-pos="center"]):not([data-pos="top"]) .cn-banner {
+                top: auto; bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+            }
+            &[data-pos="top"] .cn-banner {
+                bottom: auto; top: calc(10px + env(safe-area-inset-top, 0px));
+            }
+            &[data-pos="center"] .cn-banner { width: calc(100% - 24px); }
+
+            &[data-pos] .cn-card { --px: 18px; gap: 14px; padding: 20px var(--px) 40px; }
+            .has-cookie .cn-card { padding-inline-start: var(--px); }
+
+            /* Cookie moves to the corner so it never overlaps the text */
+            .cn-cookie { top: 14px; inset-inline-start: auto; inset-inline-end: 14px; width: 40px; height: 40px; }
+            .has-cookie .cn-title { padding-inline-end: 48px; }
+
+            .cn-body { flex: 1 1 100%; min-width: 0; }
+            .cn-title { font-size: 15px; }
+            .cn-msg { font-size: 13px; line-height: 1.55; }
+
+            .cn-actions { gap: 8px; }
+            .cn-btn { flex: 1 1 calc(50% - 4px); min-height: 44px; padding: 13px 12px; font-size: 13.5px; }
+            .cn-btn.is-primary { flex-basis: 100%; order: -1; }
+
+            /* Settings modal becomes a bottom sheet */
+            .cn-modal { align-items: end; padding: 0; }
+            .cn-box { max-width: none; max-height: 88vh; max-height: 88dvh; border-radius: var(--r) var(--r) 0 0; animation: rj-cn-sheet .4s cubic-bezier(.2, .9, .3, 1) both; }
+            .cn-box-head { padding: 16px 18px; }
+            .cn-box-body { padding: 4px 18px; }
+            .cn-box-foot { padding: 12px 18px calc(12px + env(safe-area-inset-bottom, 0px)); }
+            .cn-box-foot .cn-btn { flex: 1 1 100%; }
         }
+
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after { animation: none !important; transition: none !important; }
         }
@@ -141,6 +202,7 @@
 
     @keyframes rj-cn-in { from { opacity: 0; transform: translateY(var(--from)); } to { opacity: 1; transform: none; } }
     @keyframes rj-cn-pop { from { opacity: 0; transform: scale(.9) translateY(12px); } to { opacity: 1; transform: none; } }
+    @keyframes rj-cn-sheet { from { opacity: 0; transform: translateY(100%); } to { opacity: 1; transform: none; } }
     @keyframes rj-cn-flow { to { background-position: 200% 0; } }
     @keyframes rj-cn-shine { 0%, 55% { left: -60%; } 100% { left: 130%; } }
     @keyframes rj-cn-wave { to { transform: translateX(-50%); } }
