@@ -6,6 +6,7 @@ use App\Widgets\Builtin\AccordionWidget;
 use App\Widgets\Builtin\ChristianHolidaysWidget;
 use App\Widgets\Builtin\ChineseFestivalsWidget;
 use App\Widgets\Builtin\AdvancedSearchWidget;
+use App\Widgets\Builtin\ProductCompareWidget;
 use App\Widgets\Builtin\AlertWidget;
 use App\Widgets\Builtin\AnimatedHeadlineWidget;
 use App\Widgets\Builtin\HinduFestivalsWidget;
@@ -147,6 +148,7 @@ class WidgetList
             new DualColorHeadingWidget(),
             new PriceListWidget(),
             new PriceTableWidget(),
+            new ProductCompareWidget(),
             new CallToActionWidget(),
             new FlipBoxWidget(),
 
