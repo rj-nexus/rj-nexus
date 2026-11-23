@@ -76,6 +76,7 @@ use App\Widgets\Builtin\MarkdownTextWidget;
 use App\Widgets\Builtin\PdfReaderWidget;
 use App\Widgets\Builtin\ShareWidget;
 use App\Widgets\Builtin\TimelineWidget;
+use App\Widgets\Builtin\ShabbatTimesWidget;
 
 class WidgetList
 {
@@ -158,6 +159,7 @@ class WidgetList
             new ContactInfoWidget(),
             new BusinessHoursWidget(),
             new PrayerTimesWidget(),
+            new ShabbatTimesWidget(),
             new GoogleReviewsWidget(),
             new CurrencyRatesWidget(),
             
