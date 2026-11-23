@@ -3,7 +3,7 @@
 <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/banner.svg" alt="RJ Nexus" width="100%"/>
 
 <!-- README-I18N:START -->
-[English](./README.md) | [Português](./README.pt.md) | [中文](./README.zh.md) | **Español**
+[English](./README.md) | [Português](./README.pt.md) | [中文](./README.zh.md) | **Español** | [한국어](./README.ko.md) | [日本語](./README.ja.md) | [Русский](./README.ru.md)
 <!-- README-I18N:END -->
 
 <br/>
