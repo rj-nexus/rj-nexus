@@ -3,6 +3,7 @@
 namespace App\Widgets;
 
 use App\Widgets\Builtin\AccordionWidget;
+use App\Widgets\Builtin\AgePickerGateWidget;
 use App\Widgets\Builtin\ChristianHolidaysWidget;
 use App\Widgets\Builtin\ChineseFestivalsWidget;
 use App\Widgets\Builtin\AdvancedSearchWidget;
@@ -161,6 +162,7 @@ class WidgetList
             new WheelOfFortuneWidget(),
             new CookieNoticeWidget(),
             new AgeVerificationGateWidget(),
+            new AgePickerGateWidget(),
             new NewsletterSignupWidget(),
             new SocialFeedWidget(),
             new SocialIconsWidget(),
