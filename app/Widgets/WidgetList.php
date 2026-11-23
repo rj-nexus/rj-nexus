@@ -8,6 +8,7 @@ use App\Widgets\Builtin\ChineseFestivalsWidget;
 use App\Widgets\Builtin\AdvancedSearchWidget;
 use App\Widgets\Builtin\ProductCompareWidget;
 use App\Widgets\Builtin\AlertWidget;
+use App\Widgets\Builtin\VideoStoriesCarouselWidget;
 use App\Widgets\Builtin\AnimatedHeadlineWidget;
 use App\Widgets\Builtin\HinduFestivalsWidget;
 use App\Widgets\Builtin\PrayerTimesWidget;
@@ -116,6 +117,7 @@ class WidgetList
             new AnimatedHeroWidget(),
             new VideoHeroWidget(),
             new VideoWidget(),
+            new VideoStoriesCarouselWidget(),
             new ImageComparisonWidget(),
             new InteractiveMapWidget(),
             new Google360Widget(),
@@ -151,6 +153,7 @@ class WidgetList
             new ProductCompareWidget(),
             new CallToActionWidget(),
             new FlipBoxWidget(),
+            
 
             // --- Marketing & Conversion ---
             new PromoBannerWidget(),
