@@ -37,6 +37,15 @@ class PdfReaderWidget extends BaseWidget
     {
         return [
             [
+                'name' => 'pdf_file',
+                'type' => 'file',
+                'label' => __('Upload PDF'),
+                'default' => '',
+                'tab' => 'content',
+                'accept' => 'application/pdf,.pdf',
+                'help' => __('Choose a PDF from your device. If set, it is used instead of the URL below.'),
+            ],
+            [
                 'name' => 'pdf_url',
                 'type' => 'text',
                 'label' => __('PDF URL'),
@@ -84,7 +93,11 @@ class PdfReaderWidget extends BaseWidget
 
     public function render(array $settings): string
     {
-        $url = trim((string) ($settings['pdf_url'] ?? ''));
+        // Cihazdan yüklənmiş fayl URL-dən üstündür
+        $file = trim((string) ($settings['pdf_file'] ?? ''));
+        $url = $file !== ''
+            ? $this->fileUrl($file)
+            : trim((string) ($settings['pdf_url'] ?? ''));
 
         if ($url === '' || !filter_var($url, FILTER_VALIDATE_URL)) {
             return '';
@@ -116,6 +129,22 @@ class PdfReaderWidget extends BaseWidget
     }
 
     /**
+     * Yüklənmiş faylın yolunu tam URL-ə çevirir.
+     */
+    private function fileUrl(string $file): string
+    {
+        if (filter_var($file, FILTER_VALIDATE_URL)) {
+            return $file;
+        }
+
+        if (str_starts_with($file, '/')) {
+            return url($file);
+        }
+
+        return asset('storage/' . ltrim($file, '/'));
+    }
+
+    /**
      * Xarici PDF-i serverə keşləyir ki, brauzer same-origin oxusun (CORS problemi olmasın).
      * Alınmasa, orijinal URL qaytarılır.
      */
@@ -123,7 +152,7 @@ class PdfReaderWidget extends BaseWidget
     {
         $host = strtolower((string) parse_url($url, PHP_URL_HOST));
 
-        // Eyni saytın PDF-i: keşləməyə ehtiyac yoxdur
+        // Eyni saytın PDF-i (yüklənmiş fayllar daxil): keşləməyə ehtiyac yoxdur
         if ($host === strtolower(request()->getHost())) {
             return $url;
         }
