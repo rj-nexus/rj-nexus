@@ -32,24 +32,28 @@
             <div class="px-6 py-3 border-b border-gray-100 flex items-center gap-3 flex-wrap flex-shrink-0">
                 <div class="relative flex-1 min-w-[200px]">
                     <svg class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                    <input type="text" x-model.debounce.300ms="search" @input="loadMedia()"
+                    <input type="text" x-model="search" @input.debounce.300ms="page = 1; loadMedia()"
                            placeholder="{{ __('Search...') }}"
                            class="w-full pl-10 pr-3 py-2 rounded-lg border border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">
                 </div>
 
-                <select x-model="filter" @change="loadMedia()"
+                <select x-model="filter" @change="page = 1; loadMedia()"
                         class="rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">
                     <option value="">{{ __('All types') }}</option>
                     <option value="image">{{ __('Images') }}</option>
                     <option value="video">{{ __('Videos') }}</option>
                     <option value="audio">{{ __('Audio') }}</option>
+                    <option value="pdf">{{ __('PDF') }}</option>
                     <option value="document">{{ __('Documents') }}</option>
+                    <option value="archive">{{ __('Archives') }}</option>
                 </select>
 
                 <label class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-rj-purple to-rj-pink text-white text-sm font-medium hover:opacity-90 transition cursor-pointer">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
                     {{ __('Upload') }}
-                    <input type="file" class="hidden" accept="image/*" @change="uploadFile($event)">
+                    <input type="file" class="hidden" multiple
+                           accept="image/*,video/*,audio/*,.jpg,.jpeg,.png,.gif,.webp,.svg,.bmp,.ico,.avif,.tiff,.tif,.heic,.mp4,.webm,.mov,.avi,.mkv,.m4v,.wmv,.flv,.3gp,.mpeg,.mpg,.ogv,.mp3,.wav,.ogg,.m4a,.aac,.flac,.opus,.wma,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.rtf,.odt,.ods,.odp,.zip,.rar,.7z,.tar,.gz"
+                           @change="uploadFile($event)">
                 </label>
             </div>
 
@@ -71,16 +75,34 @@
                                 @click="select(item)"
                                 :class="selected && selected.id === item.id ? 'ring-2 ring-rj-purple ring-offset-2' : 'hover:border-rj-purple'"
                                 class="relative rounded-lg overflow-hidden border border-gray-200 transition text-left group">
-                            <div class="aspect-square bg-gray-50 flex items-center justify-center overflow-hidden">
+                            <div class="aspect-square bg-gray-50 flex items-center justify-center overflow-hidden relative">
+
                                 <template x-if="item.type === 'image'">
-                                    <img :src="item.url" :alt="item.original_name" class="w-full h-full object-cover group-hover:scale-105 transition">
+                                    <img :src="item.url" :alt="item.original_name" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition">
                                 </template>
-                                <template x-if="item.type !== 'image'">
-                                    <div class="flex flex-col items-center justify-center p-3">
-                                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                                        <div class="text-[10px] text-gray-600 mt-2 truncate w-full text-center" x-text="item.original_name"></div>
-                                    </div>
+
+                                <template x-if="item.type === 'video'">
+                                    <svg class="w-10 h-10 text-purple-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                 </template>
+
+                                <template x-if="item.type === 'audio'">
+                                    <svg class="w-10 h-10 text-pink-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/></svg>
+                                </template>
+
+                                <template x-if="item.type === 'pdf'">
+                                    <svg class="w-10 h-10 text-red-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                </template>
+
+                                <template x-if="item.type === 'archive'">
+                                    <svg class="w-10 h-10 text-amber-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                                </template>
+
+                                <template x-if="item.type === 'document'">
+                                    <svg class="w-10 h-10 text-blue-500" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                </template>
+
+                                <span x-show="item.type !== 'image' && item.ext" x-text="item.ext"
+                                      class="absolute bottom-2 left-2 px-1.5 py-0.5 rounded bg-gray-900/70 text-white text-[9px] font-semibold uppercase tracking-wide"></span>
                             </div>
 
                             <div class="p-2 bg-white">
@@ -150,6 +172,10 @@ function mediaPicker() {
             this.selected = null;
             this.items = [];
             this.page = 1;
+            this.search = '';
+            // Sahə tip göndərirsə (məs. 'pdf', 'video'), filtr avtomatik seçilir
+            this.filter = detail.type
+                || (detail.value && detail.value.dataset ? (detail.value.dataset.mediaType || '') : '');
             this.isOpen = true;
             this.loadMedia();
         },
@@ -199,11 +225,11 @@ function mediaPicker() {
         },
 
         async uploadFile(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+            const files = Array.from(event.target.files || []);
+            if (!files.length) return;
 
             const formData = new FormData();
-            formData.append('files[]', file);
+            files.forEach(function (f) { formData.append('files[]', f); });
 
             this.loading = true;
             try {
@@ -217,7 +243,12 @@ function mediaPicker() {
                     body: formData,
                 });
 
-                if (res.ok || res.redirected) {
+                if (res.status === 422) {
+                    const data = await res.json();
+                    alert(Object.values(data.errors || {}).flat().join('\n') || '{{ __('Upload failed.') }}');
+                } else if (res.status === 413) {
+                    alert('{{ __('File is too large.') }}');
+                } else if (res.ok || res.redirected) {
                     this.page = 1;
                     await this.loadMedia();
                 }
