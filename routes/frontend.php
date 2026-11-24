@@ -12,7 +12,7 @@ use App\Http\Controllers\Frontend\WidgetAuthController;
 use App\Http\Controllers\Frontend\CommentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use Spotlight\Http\Controllers\DocsController; 
+//use Spotlight\Http\Controllers\DocsController; 
 
 $rjCache = class_exists(\Spatie\ResponseCache\Middlewares\CacheResponse::class)
     ? [\Spatie\ResponseCache\Middlewares\CacheResponse::class]
@@ -101,7 +101,7 @@ Route::prefix('{locale}')
             Route::get('/blog', [PostController::class, 'archive'])->name('frontend.posts.index');
             Route::get('/blog/{slug}', [PostController::class, 'show'])->name('frontend.posts.show');
 
-            Route::get('/docs/{slug?}', [DocsController::class, 'index'])->name('frontend.docs');
+            //Route::get('/docs/{slug?}', [DocsController::class, 'index'])->name('frontend.docs');
         });
 
         Route::post('/blog/{post}/comment', [CommentController::class, 'store'])
