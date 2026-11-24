@@ -11,7 +11,6 @@ class CommentController extends Controller
 {
     public function store(Request $request, string $locale, string $post)
     {
-        
         $post = (new Post)->resolveRouteBinding($post);
         abort_if(!$post, 404);
 
@@ -26,6 +25,19 @@ class CommentController extends Controller
             'parent_id' => 'nullable|integer|exists:rj_comments,id',
             'author_url' => 'nullable|url|max:255',
         ]);
+
+        $urlCount = preg_match_all('#https?://#i', $validated['content']);
+        if ($urlCount > 2) {
+            return back()->withInput()->withErrors(['content' => __('Too many links in your comment.')]);
+        }
+
+        $blocklist = ['viagra', 'casino', 'crypto giveaway', 'porn', 'xxx', 'loan offer'];
+        $lower = mb_strtolower($validated['content'] . ' ' . $validated['author_name']);
+        foreach ($blocklist as $word) {
+            if (str_contains($lower, $word)) {
+                return back()->withInput()->withErrors(['content' => __('Your comment was flagged as spam.')]);
+            }
+        }
 
         $comment = new Comment([
             'post_id' => $post->id,
