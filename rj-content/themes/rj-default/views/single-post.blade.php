@@ -262,6 +262,167 @@
             border-color: #c4b5fd;
         }
 
+        .rj-post-comments {
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 48px 24px;
+            border-top: 1px solid #f3f4f6;
+        }
+        .rj-comments-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .rj-comments-count {
+            background: #ede9fe;
+            color: #6d28d9;
+            font-size: 13px;
+            font-weight: 700;
+            padding: 2px 10px;
+            border-radius: 999px;
+        }
+        .rj-comment {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .rj-comment-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .rj-comment-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .rj-comment-content {
+            flex-grow: 1;
+            background: #f9fafb;
+            padding: 16px 20px;
+            border-radius: 16px;
+            border-top-left-radius: 4px;
+        }
+        .rj-comment-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .rj-comment-author {
+            font-weight: 700;
+            color: #0f172a;
+            font-size: 14px;
+        }
+        .rj-comment-date {
+            font-size: 12px;
+            color: #9ca3af;
+        }
+        .rj-comment-text {
+            font-size: 15px;
+            color: #374151;
+            line-height: 1.6;
+            margin: 0;
+        }
+        .rj-comment-reply-btn {
+            background: none;
+            border: none;
+            color: #7c3aed;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0;
+            margin-top: 10px;
+            display: inline-block;
+        }
+        .rj-comment-reply-btn:hover {
+            text-decoration: underline;
+        }
+        .rj-comment-children {
+            margin-top: 20px;
+            margin-left: 56px;
+        }
+        .rj-comment-form-wrap {
+            margin-top: 48px;
+            background: #fff;
+            padding: 28px;
+            border-radius: 20px;
+            border: 1px solid #f3f4f6;
+            box-shadow: 0 4px 20px -10px rgba(0,0,0,.05);
+        }
+        .rj-comment-form-wrap h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 20px;
+        }
+        .rj-form-group {
+            margin-bottom: 16px;
+        }
+        .rj-form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+        .rj-form-input, .rj-form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: 1px solid #d1d5db;
+            font-size: 14px;
+            color: #1f2937;
+            font-family: inherit;
+            transition: border-color .2s, box-shadow .2s;
+        }
+        .rj-form-input:focus, .rj-form-textarea:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 3px rgba(139,92,246,.15);
+        }
+        .rj-form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .rj-submit-btn {
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity .2s;
+        }
+        .rj-submit-btn:hover {
+            opacity: .9;
+        }
+        .rj-alert {
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+        .rj-alert-success {
+            background: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        .rj-alert-error {
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
         .rj-post-related {
             background: #fafafa;
             padding: 64px 24px;
@@ -299,8 +460,10 @@
             .rj-post-body h2 { font-size: 22px; margin: 32px 0 14px; }
             .rj-post-footer-meta { padding: 24px 20px; }
             .rj-post-tags { padding: 20px 20px 44px; }
+            .rj-post-comments { padding: 32px 20px; }
             .rj-post-related { padding: 44px 20px; }
             .rj-post-related-header h2 { font-size: 20px; }
+            .rj-comment-children { margin-left: 20px; }
         }
     </style>
 @endpush
@@ -389,6 +552,115 @@
                 </a>
             @endforeach
         </div>
+    @endif
+
+    @if(rj_get_option('comments_enabled', true) && $post->allow_comments)
+        <section class="rj-post-comments">
+            <h2 class="rj-comments-title">
+                {{ __('Comments') }}
+                <span class="rj-comments-count">{{ $post->comments()->where('status', 'approved')->count() }}</span>
+            </h2>
+
+            @if(session('success'))
+                <div class="rj-alert rj-alert-success">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            @if($errors->any())
+                <div class="rj-alert rj-alert-error">
+                    <ul style="margin: 0; padding-left: 20px;">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            @php
+                $comments = $post->comments()->where('status', 'approved')->whereNull('parent_id')->with(['children' => function($q) { $q->where('status', 'approved')->orderBy('created_at'); }])->orderBy('created_at')->get();
+            @endphp
+
+            <div class="rj-comments-list">
+                @forelse($comments as $comment)
+                    <div class="rj-comment">
+                        <div class="rj-comment-avatar">
+                            <img src="{{ $comment->avatar_url }}" alt="{{ $comment->author_name }}">
+                        </div>
+                        <div class="rj-comment-content">
+                            <div class="rj-comment-header">
+                                <span class="rj-comment-author">{{ $comment->author_name }}</span>
+                                <span class="rj-comment-date">{{ $comment->created_at->diffForHumans() }}</span>
+                            </div>
+                            <p class="rj-comment-text">{{ $comment->content }}</p>
+                            
+                            <details style="margin-top: 10px;">
+                                <summary class="rj-comment-reply-btn" style="list-style: none;">{{ __('Reply') }}</summary>
+                                <form action="{{ route('frontend.comments.store', $post) }}" method="POST" style="margin-top: 16px; padding: 16px; background: #fff; border-radius: 12px; border: 1px solid #f3f4f6;">
+                                    @csrf
+                                    <input type="hidden" name="parent_id" value="{{ $comment->id }}">
+                                    <div class="rj-form-group">
+                                        <textarea name="content" class="rj-form-textarea" rows="2" placeholder="{{ __('Write a reply...') }}" required></textarea>
+                                    </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <input type="text" name="author_name" class="rj-form-input" placeholder="{{ __('Name') }}" required value="{{ old('author_name') }}">
+                                        <input type="email" name="author_email" class="rj-form-input" placeholder="{{ __('Email') }}" required value="{{ old('author_email') }}">
+                                    </div>
+                                    <button type="submit" class="rj-submit-btn" style="margin-top: 12px; padding: 8px 16px; font-size: 12px;">{{ __('Submit Reply') }}</button>
+                                </form>
+                            </details>
+                        </div>
+                    </div>
+
+                    @if($comment->children->isNotEmpty())
+                        <div class="rj-comment-children">
+                            @foreach($comment->children as $child)
+                                <div class="rj-comment">
+                                    <div class="rj-comment-avatar">
+                                        <img src="{{ $child->avatar_url }}" alt="{{ $child->author_name }}">
+                                    </div>
+                                    <div class="rj-comment-content">
+                                        <div class="rj-comment-header">
+                                            <span class="rj-comment-author">{{ $child->author_name }}</span>
+                                            <span class="rj-comment-date">{{ $child->created_at->diffForHumans() }}</span>
+                                        </div>
+                                        <p class="rj-comment-text">{{ $child->content }}</p>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                @empty
+                    <p style="color: #6b7280; font-size: 15px;">{{ __('No comments yet. Be the first to share your thoughts!') }}</p>
+                @endforelse
+            </div>
+
+            <div class="rj-comment-form-wrap">
+                <h3>{{ __('Leave a comment') }}</h3>
+                <form action="{{ route('frontend.comments.store', $post) }}" method="POST">
+                    @csrf
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 rj-form-group">
+                        <div>
+                            <label class="rj-form-label">{{ __('Name') }} *</label>
+                            <input type="text" name="author_name" class="rj-form-input" required value="{{ old('author_name', auth()->user()->name ?? '') }}">
+                        </div>
+                        <div>
+                            <label class="rj-form-label">{{ __('Email') }} *</label>
+                            <input type="email" name="author_email" class="rj-form-input" required value="{{ old('author_email', auth()->user()->email ?? '') }}">
+                        </div>
+                    </div>
+                    <div class="rj-form-group">
+                        <label class="rj-form-label">{{ __('Website (Optional)') }}</label>
+                        <input type="url" name="author_url" class="rj-form-input" value="{{ old('author_url') }}">
+                    </div>
+                    <div class="rj-form-group">
+                        <label class="rj-form-label">{{ __('Comment') }} *</label>
+                        <textarea name="content" class="rj-form-textarea" required placeholder="{{ __('Share your thoughts...') }}">{{ old('content') }}</textarea>
+                    </div>
+                    <button type="submit" class="rj-submit-btn">{{ __('Post Comment') }}</button>
+                </form>
+            </div>
+        </section>
     @endif
 
     @if($related->isNotEmpty())
