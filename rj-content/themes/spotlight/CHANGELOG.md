@@ -1,9 +1,6 @@
-# Changelog
+[1.1.4] - 2026-11-24
+🐛 Bug Fixes
+Comment form URL: Reply and main comment forms now use url()->current() . '/comment' (stored in $commentAction) instead of route('frontend.comments.store', $post), preventing 404 errors on translated slugs.
 
-All notable changes to the Spotlight theme will be documented in this file.
-
-## [1.1.3] - 2026-11-16
-
-### 🐛 Bug Fixes & Improvements
-
-- **Auto-Update Support:** Added the GitHub repository link (`repo`) to `theme.json`. This resolves the issue where the system could not automatically check for new versions or fetch the update ZIP file.
+🎨 UI
+Comment form layout: Replaced Tailwind grid classes (grid grid-cols-1 md:grid-cols-2 gap-4) with the theme's own .rj-form-row class, ensuring proper stacking on mobile via the existing @media (max-width: 640px) rule.
