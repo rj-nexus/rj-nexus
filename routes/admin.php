@@ -260,6 +260,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::post('/tools/health/refresh', [ToolsHealthController::class, 'refresh'])->name('tools.health.refresh');
 
         Route::get('/tools/backup', [ToolsBackupController::class, 'index'])->name('tools.backup');
+        Route::get('/tools/backup/progress', [\App\Http\Controllers\Admin\ToolsBackupController::class, 'progress'])->name('tools.backup.progress');
         Route::post('/tools/backup/create', [ToolsBackupController::class, 'create'])->name('tools.backup.create');
         Route::get('/tools/backup/download/{filename}', [ToolsBackupController::class, 'download'])->name('tools.backup.download');
         Route::delete('/tools/backup/{filename}', [ToolsBackupController::class, 'delete'])->name('tools.backup.delete');

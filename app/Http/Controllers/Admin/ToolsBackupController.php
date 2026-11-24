@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\BackupService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Cache;
 
 class ToolsBackupController extends Controller
 {
@@ -26,6 +27,8 @@ class ToolsBackupController extends Controller
             'schedule' => rj_get_option('backup_schedule', 'daily'),
             'local_limit' => (int) rj_get_option('backup_local_limit', 5),
             'download_limit' => (int) rj_get_option('backup_download_limit', 2),
+            'include_db' => rj_get_option('backup_include_db', '1') === '1',
+            'include_files' => rj_get_option('backup_include_files', '1') === '1',
         ];
 
         return view('admin.tools.backup', compact('localBackups', 'downloadBackups', 'settings'));
@@ -36,10 +39,16 @@ class ToolsBackupController extends Controller
         @set_time_limit(0);
 
         $validated = $request->validate([
-            'type' => 'required|in:local,download',
+            'type' => 'required|in:full,database,files',
         ]);
 
-        $result = $this->backup->create($validated['type']);
+        $storage = rj_get_option('backup_storage_mode', 'local');
+
+        $result = match ($validated['type']) {
+            'full' => $this->backup->createFullBackup($storage),
+            'database' => $this->backup->createDatabaseBackup($storage),
+            'files' => $this->backup->createFilesBackup($storage),
+        };
 
         if ($request->expectsJson()) {
             return response()->json($result, $result['success'] ? 200 : 422);
@@ -50,6 +59,18 @@ class ToolsBackupController extends Controller
         }
 
         return back()->with('error', $result['message']);
+    }
+
+    // YENİ: Gedişatı yoxlayan metod
+    public function progress()
+    {
+        $progress = Cache::get('backup_progress', [
+            'status' => 'idle',
+            'percent' => 0,
+            'label' => __('Waiting for backup...'),
+        ]);
+
+        return response()->json($progress);
     }
 
     public function download(Request $request, string $filename)
@@ -83,7 +104,8 @@ class ToolsBackupController extends Controller
     {
         @set_time_limit(0);
 
-        $result = $this->backup->restore($filename, 'local');
+        $type = $request->input('type', 'local');
+        $result = $this->backup->restore($filename, $type);
 
         if ($request->expectsJson()) {
             return response()->json($result, $result['success'] ? 200 : 422);
@@ -99,12 +121,16 @@ class ToolsBackupController extends Controller
             'schedule' => 'required|in:daily,weekly,monthly',
             'local_limit' => 'required|integer|min:1|max:20',
             'download_limit' => 'required|integer|min:1|max:3',
+            'include_db' => 'nullable|boolean',
+            'include_files' => 'nullable|boolean',
         ]);
 
         rj_set_option('backup_mode', $validated['mode']);
         rj_set_option('backup_schedule', $validated['schedule']);
         rj_set_option('backup_local_limit', (string) $validated['local_limit']);
         rj_set_option('backup_download_limit', (string) $validated['download_limit']);
+        rj_set_option('backup_include_db', $request->boolean('include_db') ? '1' : '0');
+        rj_set_option('backup_include_files', $request->boolean('include_files') ? '1' : '0');
 
         rj_flush_options();
 
