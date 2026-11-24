@@ -1,9 +1,11 @@
-# Changelog
+## [v1.0.4] - 2026-11-24
 
-All notable changes to the RJ Default theme will be documented in this file.
-
-## [1.0.3] - 2026-11-16
-
-### 🐛 Bug Fixes & Improvements
-
-- **Auto-Update Support:** Added the GitHub repository link (`repo`) to `theme.json`. This resolves the issue where the system could not automatically check for new versions or fetch the update ZIP file.
+### 🚀 Added
+- **Frontend Comments System:** Added a fully functional, native comment system for frontend posts, including:
+  - A dedicated `CommentController` to securely handle visitor submissions.
+  - Registered the `/blog/{post}/comment` route with rate-limiting (`throttle:10,1`) to prevent spam.
+  - Modern UI integration in the `rj-default` theme (`single-post.blade.php`).
+  - Support for nested replies (threaded comments).
+  - Auto-generated user avatars via Gravatar.
+  - Form validation with session-based success and error alerts.
+  - Global comment toggle support (`comments_enabled` option) and per-post comment settings.
