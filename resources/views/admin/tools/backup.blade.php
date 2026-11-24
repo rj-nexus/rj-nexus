@@ -25,10 +25,10 @@
 
             {{-- Create Backup with Type Selector --}}
             <div class="flex items-center gap-2 bg-white/10 p-1.5 rounded-xl backdrop-blur ring-1 ring-white/20">
-                <select x-model="createType" class="bg-transparent text-white text-sm font-semibold border-none focus:ring-0 cursor-pointer pr-8 outline-none">
-                    <option value="full" class="text-gray-900">{{ __('Full (DB + Files)') }}</option>
-                    <option value="database" class="text-gray-900">{{ __('Database Only') }}</option>
-                    <option value="files" class="text-gray-900">{{ __('Files Only') }}</option>
+                <select x-model="createType" class="bg-white text-gray-900 text-sm font-semibold border-none focus:ring-0 cursor-pointer rounded-lg py-2 pl-3 pr-8 outline-none shadow-sm">
+                    <option value="full">{{ __('Full (DB + Files)') }}</option>
+                    <option value="database">{{ __('Database Only') }}</option>
+                    <option value="files">{{ __('Files Only') }}</option>
                 </select>
                 <button type="button" @click="createBackup()" :disabled="creating"
                         class="inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-white text-gray-900 text-sm font-bold hover:bg-gray-50 active:scale-[.98] transition shadow-md disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-white">
