@@ -14,13 +14,14 @@ class RunAutoBackupCommand extends Command
 
     public function handle(BackupService $backup): int
     {
-        if (rj_get_option('backup_mode', 'manual') !== 'auto') {
+        $force = (bool) $this->option('force');
+
+        if (!$force && rj_get_option('backup_mode', 'manual') !== 'auto') {
             $this->line('Auto backup is disabled.');
             return self::SUCCESS;
         }
 
         $schedule = rj_get_option('backup_schedule', 'daily');
-        $force = (bool) $this->option('force');
 
         if (!$force && !$this->isDue($schedule)) {
             $this->line("Schedule '{$schedule}' is not due right now.");
