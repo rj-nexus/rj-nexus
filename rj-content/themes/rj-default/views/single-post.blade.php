@@ -392,6 +392,11 @@
             resize: vertical;
             min-height: 100px;
         }
+        .rj-form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
         .rj-submit-btn {
             background: linear-gradient(135deg, #8b5cf6, #ec4899);
             color: #fff;
@@ -464,6 +469,7 @@
             .rj-post-related { padding: 44px 20px; }
             .rj-post-related-header h2 { font-size: 20px; }
             .rj-comment-children { margin-left: 20px; }
+            .rj-form-row { grid-template-columns: 1fr; }
         }
     </style>
 @endpush
@@ -579,6 +585,7 @@
 
             @php
                 $comments = $post->comments()->where('status', 'approved')->whereNull('parent_id')->with(['children' => function($q) { $q->where('status', 'approved')->orderBy('created_at'); }])->orderBy('created_at')->get();
+                $commentAction = url()->current() . '/comment';
             @endphp
 
             <div class="rj-comments-list">
@@ -593,16 +600,16 @@
                                 <span class="rj-comment-date">{{ $comment->created_at->diffForHumans() }}</span>
                             </div>
                             <p class="rj-comment-text">{{ $comment->content }}</p>
-                            
+
                             <details style="margin-top: 10px;">
                                 <summary class="rj-comment-reply-btn" style="list-style: none;">{{ __('Reply') }}</summary>
-                                <form action="{{ route('frontend.comments.store', $post) }}" method="POST" style="margin-top: 16px; padding: 16px; background: #fff; border-radius: 12px; border: 1px solid #f3f4f6;">
+                                <form action="{{ $commentAction }}" method="POST" style="margin-top: 16px; padding: 16px; background: #fff; border-radius: 12px; border: 1px solid #f3f4f6;">
                                     @csrf
                                     <input type="hidden" name="parent_id" value="{{ $comment->id }}">
                                     <div class="rj-form-group">
                                         <textarea name="content" class="rj-form-textarea" rows="2" placeholder="{{ __('Write a reply...') }}" required></textarea>
                                     </div>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="rj-form-row">
                                         <input type="text" name="author_name" class="rj-form-input" placeholder="{{ __('Name') }}" required value="{{ old('author_name') }}">
                                         <input type="email" name="author_email" class="rj-form-input" placeholder="{{ __('Email') }}" required value="{{ old('author_email') }}">
                                     </div>
@@ -637,9 +644,9 @@
 
             <div class="rj-comment-form-wrap">
                 <h3>{{ __('Leave a comment') }}</h3>
-                <form action="{{ route('frontend.comments.store', $post) }}" method="POST">
+                <form action="{{ $commentAction }}" method="POST">
                     @csrf
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 rj-form-group">
+                    <div class="rj-form-row rj-form-group">
                         <div>
                             <label class="rj-form-label">{{ __('Name') }} *</label>
                             <input type="text" name="author_name" class="rj-form-input" required value="{{ old('author_name', auth()->user()->name ?? '') }}">
