@@ -7,7 +7,6 @@
             isolation: isolate;
         }
 
-        /* === Arxa Fon Videosu (Archive ilə eyni) === */
         .rj-bg-video {
             position: absolute;
             top: 0;
@@ -52,7 +51,6 @@
             z-index: 2;
         }
 
-        /* === Əsas Konteyner === */
         .rj-single-container {
             --q-accent: #2f6bff;
             --q-line: rgba(255, 255, 255, .16);
@@ -66,7 +64,6 @@
             padding: 64px 24px 96px;
         }
 
-        /* === Başlıq və Meta (Yuxarıda, kartdan kənar) === */
         .rj-single-header {
             text-align: center;
             margin-bottom: 48px;
@@ -136,7 +133,6 @@
             border-color: #2f6bff;
         }
 
-        /* === Grid Sistemi (Məzmun və Sidebar) === */
         .rj-single-grid {
             display: grid;
             grid-template-columns: 1fr 380px;
@@ -144,7 +140,6 @@
             align-items: start;
         }
 
-        /* === Sol Tərəf: Yazı Kartı === */
         .rj-single-card {
             background: var(--q-card);
             border: 1px solid var(--q-line);
@@ -181,7 +176,6 @@
             font-style: italic;
         }
 
-        /* Məzmunun daxili stilləri (Dark glass üçün) */
         .rj-single-content {
             font-size: 17px;
             line-height: 1.75;
@@ -221,7 +215,6 @@
         .rj-single-content img { border-radius: 16px; margin: 8px 0; }
         .rj-single-content hr { border: 0; border-top: 1px solid var(--q-line); margin: 48px 0; }
 
-        /* Teqlər və Naviqasiya */
         .rj-single-tags {
             display: flex; flex-wrap: wrap; gap: 10px; margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--q-line);
         }
@@ -244,7 +237,6 @@
         .rj-single-nav-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: rgba(255,255,255,0.6); }
         .rj-single-nav-title { font-size: 16px; font-weight: 500; color: #fff; line-height: 1.4; }
 
-        /* === Sağ Tərəf: Sidebar (Archive ilə eyni) === */
         .rj-sidebar {
             display: flex;
             flex-direction: column;
@@ -325,6 +317,170 @@
         }
         .rj-recent-title:hover { color: var(--q-accent); }
 
+        .rj-comments-wrap {
+            margin-top: 64px;
+            padding-top: 32px;
+            border-top: 1px solid var(--q-line);
+        }
+        .rj-comments-heading {
+            font-size: 28px;
+            font-weight: 500;
+            color: #fff;
+            margin: 0 0 32px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .rj-comments-count {
+            font-size: 14px;
+            font-weight: 600;
+            background: rgba(47, 107, 255, 0.2);
+            color: #60a5fa;
+            padding: 2px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(47, 107, 255, 0.3);
+        }
+        .rj-comment-item {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .rj-comment-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            overflow: hidden;
+            flex-shrink: 0;
+            border: 1px solid var(--q-line);
+        }
+        .rj-comment-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .rj-comment-body {
+            flex-grow: 1;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--q-line);
+            padding: 20px 24px;
+            border-radius: 20px;
+            border-top-left-radius: 4px;
+        }
+        .rj-comment-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .rj-comment-author {
+            font-weight: 600;
+            color: #fff;
+            font-size: 15px;
+        }
+        .rj-comment-date {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+        .rj-comment-text {
+            font-size: 15px;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.85);
+            margin: 0;
+        }
+        .rj-reply-toggle {
+            cursor: pointer;
+            color: var(--q-accent);
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 12px;
+            display: inline-block;
+            list-style: none;
+        }
+        .rj-reply-toggle::-webkit-details-marker {
+            display: none;
+        }
+        .rj-reply-toggle:hover {
+            text-decoration: underline;
+        }
+        .rj-comment-children {
+            margin-top: 24px;
+            margin-left: 48px;
+            padding-left: 24px;
+            border-left: 1px solid var(--q-line);
+        }
+        .rj-comment-form-box {
+            margin-top: 48px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--q-line);
+            padding: 32px;
+            border-radius: 24px;
+        }
+        .rj-comment-form-box h3 {
+            font-size: 20px;
+            font-weight: 500;
+            color: #fff;
+            margin: 0 0 24px;
+        }
+        .rj-form-group {
+            margin-bottom: 20px;
+        }
+        .rj-form-label {
+            display: block;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 8px;
+        }
+        .rj-form-input, .rj-form-textarea {
+            width: 100%;
+            padding: 14px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--q-line);
+            border-radius: 16px;
+            color: #fff;
+            font-size: 15px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .rj-form-input:focus, .rj-form-textarea:focus {
+            border-color: var(--q-accent);
+        }
+        .rj-form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        .rj-submit-btn {
+            background: var(--q-accent);
+            color: #fff;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 16px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .rj-submit-btn:hover {
+            opacity: 0.9;
+        }
+        .rj-alert {
+            padding: 16px 20px;
+            border-radius: 16px;
+            font-size: 14px;
+            margin-bottom: 32px;
+            border: 1px solid transparent;
+        }
+        .rj-alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #34d399;
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+        .rj-alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #f87171;
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
         @media (max-width: 1200px) {
             .rj-single-grid { grid-template-columns: 1fr 340px; }
             .rj-single-card { padding: 32px; }
@@ -345,6 +501,8 @@
             .rj-single-nav { grid-template-columns: 1fr; }
             .rj-single-nav-item.rj-next { text-align: left; }
             .rj-widget-title { font-size: 24px; }
+            .rj-comment-children { margin-left: 0; padding-left: 16px; }
+            .rj-comment-form-box { padding: 24px; }
         }
     </style>
 @endpush
@@ -353,18 +511,15 @@
     $locale = app()->getLocale();
     $blogUrl = route('frontend.posts.index', ['locale' => $locale]);
 
-    // Customizer dəyərləri
     $showImage = filter_var(rj_theme_mod('show_featured_image', true, 'blog_single'), FILTER_VALIDATE_BOOLEAN);
     $showRelated = filter_var(rj_theme_mod('show_related_posts', true, 'blog_single'), FILTER_VALIDATE_BOOLEAN);
 
-    // Banner Video (Archive ilə eyni)
     $defaultBgVideo = 'https://raw.githubusercontent.com/rj-nexus/spotlight/main/assets/video/background.mp4';
     $bgVideo = trim((string) rj_theme_mod('background_video', '', 'blog_list'));
     if ($bgVideo === '') {
         $bgVideo = $defaultBgVideo;
     }
 
-    // Sidebar məlumatları
     try {
         $sidebarCategories = \App\Models\Category::take(10)->get();
         $sidebarRecent = \App\Models\Post::where('type', 'post')->where('status', 'published')->where('id', '!=', $post->id)->orderByDesc('published_at')->take(5)->get();
@@ -401,7 +556,6 @@
 
 <main class="rj-frontend-main">
 
-    {{-- Arxa Fon Video --}}
     <div class="rj-bg-video" aria-hidden="true">
         <div class="rj-bg-video-inner">
             <video autoplay muted loop playsinline preload="auto" src="{{ $bgVideo }}"></video>
@@ -412,7 +566,6 @@
 
     <div class="rj-single-container">
 
-        {{-- Başlıq və Meta --}}
         <header class="rj-single-header">
             <nav class="rj-single-breadcrumb">
                 <a href="{{ url('/' . $locale) }}">{{ __('Home') }}</a>
@@ -447,10 +600,8 @@
             </div>
         </header>
 
-        {{-- Grid: Məzmun və Sidebar --}}
         <div class="rj-single-grid">
 
-            {{-- Sol Tərəf: Yazı Kartı --}}
             <article class="rj-single-card">
 
                 @if($showImage && $post->featured_image)
@@ -500,12 +651,116 @@
                         @endif
                     </nav>
                 @endif
+
+                @if(rj_get_option('comments_enabled', true) && $post->allow_comments)
+                    <div class="rj-comments-wrap">
+                        <h3 class="rj-comments-heading">
+                            {{ __('Comments') }}
+                            <span class="rj-comments-count">{{ $post->comments()->where('status', 'approved')->count() }}</span>
+                        </h3>
+
+                        @if(session('success'))
+                            <div class="rj-alert rj-alert-success">{{ session('success') }}</div>
+                        @endif
+
+                        @if($errors->any())
+                            <div class="rj-alert rj-alert-error">
+                                <ul style="margin: 0; padding-left: 20px;">
+                                    @foreach($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
+                        @php
+                            $comments = $post->comments()->where('status', 'approved')->whereNull('parent_id')->with(['children' => function($q) { $q->where('status', 'approved')->orderBy('created_at'); }])->orderBy('created_at')->get();
+                        @endphp
+
+                        <div class="rj-comments-list">
+                            @forelse($comments as $comment)
+                                <div class="rj-comment-item">
+                                    <div class="rj-comment-avatar">
+                                        <img src="{{ $comment->avatar_url }}" alt="{{ $comment->author_name }}">
+                                    </div>
+                                    <div class="rj-comment-body">
+                                        <div class="rj-comment-meta">
+                                            <span class="rj-comment-author">{{ $comment->author_name }}</span>
+                                            <span class="rj-comment-date">{{ $comment->created_at->diffForHumans() }}</span>
+                                        </div>
+                                        <p class="rj-comment-text">{{ $comment->content }}</p>
+
+                                        <details>
+                                            <summary class="rj-reply-toggle">{{ __('Reply') }}</summary>
+                                            <form action="{{ route('frontend.comments.store', $post) }}" method="POST" style="margin-top: 16px;">
+                                                @csrf
+                                                <input type="hidden" name="parent_id" value="{{ $comment->id }}">
+                                                <div class="rj-form-group">
+                                                    <textarea name="content" class="rj-form-textarea" rows="2" placeholder="{{ __('Write a reply...') }}" required></textarea>
+                                                </div>
+                                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                                                    <input type="text" name="author_name" class="rj-form-input" placeholder="{{ __('Name') }}" required value="{{ old('author_name') }}">
+                                                    <input type="email" name="author_email" class="rj-form-input" placeholder="{{ __('Email') }}" required value="{{ old('author_email') }}">
+                                                </div>
+                                                <button type="submit" class="rj-submit-btn" style="padding: 10px 20px; font-size: 13px;">{{ __('Submit Reply') }}</button>
+                                            </form>
+                                        </details>
+                                    </div>
+                                </div>
+
+                                @if($comment->children->isNotEmpty())
+                                    <div class="rj-comment-children">
+                                        @foreach($comment->children as $child)
+                                            <div class="rj-comment-item">
+                                                <div class="rj-comment-avatar">
+                                                    <img src="{{ $child->avatar_url }}" alt="{{ $child->author_name }}">
+                                                </div>
+                                                <div class="rj-comment-body">
+                                                    <div class="rj-comment-meta">
+                                                        <span class="rj-comment-author">{{ $child->author_name }}</span>
+                                                        <span class="rj-comment-date">{{ $child->created_at->diffForHumans() }}</span>
+                                                    </div>
+                                                    <p class="rj-comment-text">{{ $child->content }}</p>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            @empty
+                                <p style="color: rgba(255,255,255,0.6); font-size: 15px;">{{ __('No comments yet. Be the first to share your thoughts!') }}</p>
+                            @endforelse
+                        </div>
+
+                        <div class="rj-comment-form-box">
+                            <h3>{{ __('Leave a comment') }}</h3>
+                            <form action="{{ route('frontend.comments.store', $post) }}" method="POST">
+                                @csrf
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                                    <div class="rj-form-group">
+                                        <label class="rj-form-label">{{ __('Name') }} *</label>
+                                        <input type="text" name="author_name" class="rj-form-input" required value="{{ old('author_name', auth()->user()->name ?? '') }}">
+                                    </div>
+                                    <div class="rj-form-group">
+                                        <label class="rj-form-label">{{ __('Email') }} *</label>
+                                        <input type="email" name="author_email" class="rj-form-input" required value="{{ old('author_email', auth()->user()->email ?? '') }}">
+                                    </div>
+                                </div>
+                                <div class="rj-form-group">
+                                    <label class="rj-form-label">{{ __('Website (Optional)') }}</label>
+                                    <input type="url" name="author_url" class="rj-form-input" value="{{ old('author_url') }}">
+                                </div>
+                                <div class="rj-form-group">
+                                    <label class="rj-form-label">{{ __('Comment') }} *</label>
+                                    <textarea name="content" class="rj-form-textarea" required placeholder="{{ __('Share your thoughts...') }}">{{ old('content') }}</textarea>
+                                </div>
+                                <button type="submit" class="rj-submit-btn">{{ __('Post Comment') }}</button>
+                            </form>
+                        </div>
+                    </div>
+                @endif
             </article>
 
-            {{-- Sağ Tərəf: Sidebar --}}
             <aside class="rj-sidebar">
-
-                {{-- Axtarış --}}
                 <div class="rj-widget">
                     <h3 class="rj-widget-title">{{ __('Search') }}</h3>
                     <form method="GET" action="{{ $blogUrl }}" class="rj-search-form">
@@ -516,7 +771,6 @@
                     </form>
                 </div>
 
-                {{-- Kateqoriyalar --}}
                 @if($sidebarCategories->isNotEmpty())
                     <div class="rj-widget">
                         <h3 class="rj-widget-title">{{ __('Categories') }}</h3>
@@ -533,7 +787,6 @@
                     </div>
                 @endif
 
-                {{-- Son Yazılar --}}
                 @if($sidebarRecent->isNotEmpty())
                     <div class="rj-widget">
                         <h3 class="rj-widget-title">{{ __('Recent posts') }}</h3>
@@ -559,11 +812,9 @@
                         </ul>
                     </div>
                 @endif
-
             </aside>
         </div>
 
-        {{-- Əlaqəli Yazılar (Kartın altında) --}}
         @if($showRelated && isset($related) && $related->isNotEmpty())
             <div style="margin-top: 64px;">
                 <h3 style="font-size: 28px; font-weight: 500; margin-bottom: 32px; color: #fff; text-align: center;">{{ __('Related Posts') }}</h3>
