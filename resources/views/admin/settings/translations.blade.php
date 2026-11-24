@@ -72,7 +72,7 @@
                                 <td class="px-4 py-2 font-mono text-xs text-gray-700 break-all align-top pt-3" x-text="row.key"></td>
                                 <td class="px-4 py-2">
                                     <input type="text"
-                                           :name="'translations[' + row.key.replace(/[\[\]]/g, '') + ']'"
+                                           :name="'translations[' + row.key.replace(/[\[\]]/g, '').replace(/\./g, '___DOT___') + ']'"
                                            x-model="row.value"
                                            @input="row.value = $event.target.value"
                                            placeholder="{{ __('Empty — needs translation') }}"
