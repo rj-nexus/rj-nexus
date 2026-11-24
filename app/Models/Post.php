@@ -38,6 +38,7 @@ class Post extends Model
     public function template() { return $this->belongsTo(Template::class, 'template_id'); }
     public function categories() { return $this->belongsToMany(Category::class, 'rj_post_category', 'post_id', 'category_id'); }
     public function tags() { return $this->belongsToMany(Tag::class, 'rj_post_tag', 'post_id', 'tag_id'); }
+    public function comments() { return $this->hasMany(Comment::class, 'post_id'); }
     public function translations() { return $this->hasMany(PostTranslation::class, 'post_id'); }
 
     public function scopePublished($query)
