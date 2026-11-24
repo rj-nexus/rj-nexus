@@ -692,7 +692,7 @@
 
                                         <details>
                                             <summary class="rj-reply-toggle">{{ __('Reply') }}</summary>
-                                            <form action="{{ route('frontend.comments.store', $post) }}" method="POST" style="margin-top: 16px;">
+                                            <form action="{{ url()->current() }}/comment" method="POST" style="margin-top: 16px;">
                                                 @csrf
                                                 <input type="hidden" name="parent_id" value="{{ $comment->id }}">
                                                 <div class="rj-form-group">
@@ -733,7 +733,7 @@
 
                         <div class="rj-comment-form-box">
                             <h3>{{ __('Leave a comment') }}</h3>
-                            <form action="{{ route('frontend.comments.store', $post) }}" method="POST">
+                            <form action="{{ url()->current() }}/comment" method="POST">
                                 @csrf
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                                     <div class="rj-form-group">
