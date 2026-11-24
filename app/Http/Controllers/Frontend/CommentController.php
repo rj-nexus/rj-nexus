@@ -9,8 +9,9 @@ use Illuminate\Http\Request;
 
 class CommentController extends Controller
 {
-    public function store(Request $request, string $post)
+    public function store(Request $request, string $locale, string $post)
     {
+        \Log::info('COMMENT_HIT', ['post_param' => $post, 'url' => request()->url()]);
         $post = (new Post)->resolveRouteBinding($post);
         abort_if(!$post, 404);
 
