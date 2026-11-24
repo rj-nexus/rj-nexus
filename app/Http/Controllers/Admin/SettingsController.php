@@ -294,14 +294,19 @@ class SettingsController extends Controller
             abort(404);
         }
 
-        $data = $request->validate([
+        $request->validate([
             'translations' => ['nullable', 'array'],
-            'translations.*' => ['nullable', 'string'],
         ]);
 
-        $translations = $data['translations'] ?? [];
+        $translations = [];
+        $rawTranslations = $request->input('translations', []);
 
-        $translations = array_filter($translations, fn($value) => $value !== null && $value !== '');
+        foreach ($rawTranslations as $key => $value) {
+            if (!is_string($value)) continue;
+
+            $realKey = str_replace('___DOT___', '.', $key);
+            $translations[$realKey] = $value;
+        }
 
         ksort($translations);
 
