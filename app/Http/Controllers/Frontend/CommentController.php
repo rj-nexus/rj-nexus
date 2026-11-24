@@ -9,8 +9,12 @@ use Illuminate\Http\Request;
 
 class CommentController extends Controller
 {
-    public function store(Request $request, Post $post)
+    public function store(Request $request, string $post)
     {
+        $post = Post::query()->where('slug', $post)->first()
+            ?? Post::query()->whereHas('translations', fn ($q) => $q->where('slug', $post))->first();
+        abort_if(!$post, 404);
+
         if (!rj_get_option('comments_enabled', true) || !$post->allow_comments) {
             abort(403, __('Comments are disabled for this post.'));
         }
