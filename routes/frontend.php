@@ -104,7 +104,7 @@ Route::prefix('{locale}')
             Route::get('/docs/{slug?}', [DocsController::class, 'index'])->name('frontend.docs');
         });
 
-        Route::post('/blog/{post:slug}/comment', [CommentController::class, 'store'])
+        Route::post('/blog/{post}/comment', [CommentController::class, 'store'])
             ->middleware('throttle:10,1')
             ->name('frontend.comments.store');
 
