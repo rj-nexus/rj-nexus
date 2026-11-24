@@ -11,8 +11,7 @@ class CommentController extends Controller
 {
     public function store(Request $request, string $post)
     {
-        $post = Post::query()->where('slug', $post)->first()
-            ?? Post::query()->whereHas('translations', fn ($q) => $q->where('slug', $post))->first();
+        $post = (new Post)->resolveRouteBinding($post);
         abort_if(!$post, 404);
 
         if (!rj_get_option('comments_enabled', true) || !$post->allow_comments) {
@@ -37,12 +36,12 @@ class CommentController extends Controller
         ]);
 
         $comment->author_ip = $request->ip();
-        
+
         if (auth()->check()) {
             $comment->user_id = auth()->id();
         }
 
-        $comment->status = 'pending'; // Şərhlər əvvəlcə təsdiq gözləyir
+        $comment->status = 'pending';
 
         $comment->save();
 
