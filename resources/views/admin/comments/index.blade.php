@@ -7,6 +7,14 @@
 
 <div class="space-y-6" x-data="{ selected: [], bulkAction: '' }">
 
+    <form id="bulk-form" method="POST" action="{{ route('admin.comments.bulk') }}">
+        @csrf
+        <input type="hidden" name="action" :value="bulkAction">
+        <template x-for="id in selected" :key="id">
+            <input type="hidden" name="ids[]" :value="id">
+        </template>
+    </form>
+
     <div class="flex items-center justify-between gap-4 flex-wrap">
         <div>
             <h2 class="text-base font-semibold text-gray-900">{{ __('Comments') }}</h2>
@@ -106,9 +114,7 @@
                 </p>
             </div>
         @else
-            <form method="POST" action="{{ route('admin.comments.bulk') }}">
-                @csrf
-
+            <div>
                 <div x-show="selected.length > 0" x-cloak class="px-4 py-2.5 border-b border-gray-100 bg-rj-purple/5 flex items-center gap-3 flex-wrap">
                     <span class="text-xs text-gray-600"><b x-text="selected.length"></b> {{ __('selected') }}</span>
 
@@ -121,14 +127,9 @@
                         <option value="delete">{{ __('Delete Permanently') }}</option>
                     </select>
 
-                    <button type="submit" class="px-3 py-1.5 rounded-lg bg-gray-900 text-white text-xs font-medium hover:bg-gray-800 transition">
+                    <button type="submit" form="bulk-form" class="px-3 py-1.5 rounded-lg bg-gray-900 text-white text-xs font-medium hover:bg-gray-800 transition">
                         {{ __('Apply') }}
                     </button>
-
-                    <template x-for="id in selected" :key="id">
-                        <input type="hidden" name="ids[]" :value="id">
-                    </template>
-                    <input type="hidden" name="action" :value="bulkAction">
                 </div>
 
                 <table class="w-full text-sm">
@@ -283,7 +284,7 @@
                         @endforeach
                     </tbody>
                 </table>
-            </form>
+            </div>
 
             @if ($comments->hasPages())
                 <div class="px-4 py-3 border-t border-gray-100">
