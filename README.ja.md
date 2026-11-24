@@ -10,7 +10,7 @@
 
 ![Status](https://img.shields.io/badge/Status-Stable-brightgreen)
 ![Release](https://img.shields.io/badge/Release-RJ%20CORE%201-10b981)
-![Version](https://img.shields.io/badge/Version-v1.11.1-blue)
+![Version](https://img.shields.io/badge/Version-v1.11.2-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Laravel](https://img.shields.io/badge/Laravel-12-red)
 ![PHP](https://img.shields.io/badge/PHP-8.2-purple)
@@ -35,7 +35,7 @@
 
 <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/divider.svg" alt="" width="100%"/>
 
-## v1.11.1 の新機能
+## v1.11.2 の新機能
 
 このリリースでは、RJBuilder が **80 以上のウィジェット**に拡張され、新しい文化・祝日カレンダー、計算機、年齢確認、ビデオストーリーカルーセル、Bento グリッド、Markdown テキスト、ページ内 PDF リーダーが追加されました。メディアピッカーは PDF アップロードとより多くのファイル形式をサポートし、言語カタログは 47 から **51** に拡大され、**繁体字中国語**、**マレー語**、**タミル語**、**デンマーク語**が追加されました。変更の完全なリストは[変更履歴](https://github.com/rj-nexus/rj-nexus/blob/main/CHANGELOG.md)で確認できます。
 
@@ -150,7 +150,7 @@ RJ CMS は、コードを一行も変更することなく、あらゆる共有�
 
 以下のデモで RJ Nexus をお試しいただけます。
 
-> **注意:** デモサイトは現在、最新バージョン(v1.11.1)を実行していない可能性があります。RJ Nexus の見た目と動作を把握していただくためのみに提供されています。
+> **注意:** デモサイトは現在、最新バージョン を実行していない可能性があります。RJ Nexus の見た目と動作を把握していただくためのみに提供されています。
 
 | | | |
 |:-:|---|---|

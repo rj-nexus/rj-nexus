@@ -10,7 +10,7 @@
 
 ![Status](https://img.shields.io/badge/Status-Stable-brightgreen)
 ![Release](https://img.shields.io/badge/Release-RJ%20CORE%201-10b981)
-![Version](https://img.shields.io/badge/Version-v1.11.1-blue)
+![Version](https://img.shields.io/badge/Version-v1.11.2-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Laravel](https://img.shields.io/badge/Laravel-12-red)
 ![PHP](https://img.shields.io/badge/PHP-8.2-purple)
@@ -35,7 +35,7 @@ Official website: **[rjnexus.org](https://rjnexus.org)**
 
 <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/divider.svg" alt="" width="100%"/>
 
-## What's New in v1.11.1
+## What's New in v1.11.2
 
 This release grows RJBuilder to **80+ widgets** with new culture and holiday calendars, calculators, age gates, a video stories carousel, a Bento grid, Markdown text and an in-page PDF reader. The media picker now supports PDF upload and many more file types, and the language catalog grows from 47 to **51** with **Traditional Chinese**, **Malay**, **Tamil** and **Danish**. The complete list of changes is available in the [Changelog](https://github.com/rj-nexus/rj-nexus/blob/main/CHANGELOG.md).
 
@@ -150,7 +150,7 @@ RJ CMS installs on any shared hosting or VPS without touching a single line of c
 
 You can try RJ Nexus in the demo below.
 
-> **Note:** The demo site may not run the latest version (v1.11.1) at the moment. It is provided only to give you an idea of how RJ Nexus looks and works.
+> **Note:** The demo site may not run the latest version at the moment. It is provided only to give you an idea of how RJ Nexus looks and works.
 
 | | | |
 |:-:|---|---|

@@ -10,7 +10,7 @@
 
 ![Status](https://img.shields.io/badge/Status-Stable-brightgreen)
 ![Release](https://img.shields.io/badge/Release-RJ%20CORE%201-10b981)
-![Version](https://img.shields.io/badge/Version-v1.11.1-blue)
+![Version](https://img.shields.io/badge/Version-v1.11.2-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Laravel](https://img.shields.io/badge/Laravel-12-red)
 ![PHP](https://img.shields.io/badge/PHP-8.2-purple)
@@ -35,7 +35,7 @@
 
 <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/divider.svg" alt="" width="100%"/>
 
-## v1.11.1의 새로운 기능
+## v1.11.2의 새로운 기능
 
 이번 릴리스는 RJBuilder를 **80개 이상의 위젯**으로 확장하며, 새로운 문화 및 공휴일 달력, 계산기, 연령 확인, 비디오 스토리 캐러셀, Bento 그리드, Markdown 텍스트, 페이지 내 PDF 리더를 추가합니다. 미디어 선택기는 이제 PDF 업로드와 더 많은 파일 형식을 지원하며, 언어 카탈로그는 47개에서 **51개**로 확장되어 **번체 중국어**, **말레이어**, **타밀어**, **덴마크어**가 추가되었습니다. 전체 변경 사항 목록은 [변경 로그](https://github.com/rj-nexus/rj-nexus/blob/main/CHANGELOG.md)에서 확인할 수 있습니다.
 
@@ -150,7 +150,7 @@ RJ CMS는 단 한 줄의 코드도 수정하지 않고 모든 공유 호스팅 �
 
 아래 데모에서 RJ Nexus를 사용해 볼 수 있습니다.
 
-> **참고:** 데모 사이트는 현재 최신 버전(v1.11.1)을 실행하지 않을 수 있습니다. RJ Nexus의 모양과 작동 방식을 보여주기 위한 목적으로만 제공됩니다.
+> **참고:** 데모 사이트는 현재 최신 버전(v1.11.2)을 실행하지 않을 수 있습니다. RJ Nexus의 모양과 작동 방식을 보여주기 위한 목적으로만 제공됩니다.
 
 | | | |
 |:-:|---|---|

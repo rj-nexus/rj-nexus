@@ -10,7 +10,7 @@
 
 ![Status](https://img.shields.io/badge/Status-Stable-brightgreen)
 ![Release](https://img.shields.io/badge/Release-RJ%20CORE%201-10b981)
-![Version](https://img.shields.io/badge/Version-v1.11.1-blue)
+![Version](https://img.shields.io/badge/Version-v1.11.2-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Laravel](https://img.shields.io/badge/Laravel-12-red)
 ![PHP](https://img.shields.io/badge/PHP-8.2-purple)
@@ -35,7 +35,7 @@
 
 <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/divider.svg" alt="" width="100%"/>
 
-## v1.11.1 新功能
+## v1.11.2 新功能
 
 本次版本将 RJBuilder 扩展至 **80 多个小部件**，新增文化与节日日历、计算器、年龄验证、视频故事轮播、Bento 网格、Markdown 文本以及页面内 PDF 阅读器。媒体选择器现在支持上传 PDF 以及更多文件类型，语言目录从 47 种增加到 **51 种**，新增**繁体中文**、**马来语**、**泰米尔语**和**丹麦语**。完整的变更列表请参见[更新日志](https://github.com/rj-nexus/rj-nexus/blob/main/CHANGELOG.md)。
 
@@ -150,7 +150,7 @@ RJ CMS 可安装在任何共享主机或 VPS 上，无需改动任何代码。
 
 您可以在下方演示中试用 RJ Nexus。
 
-> **注意：** 演示站点目前可能未运行最新版本（v1.11.1）。它仅用于让您了解 RJ Nexus 的外观和工作方式。
+> **注意：** 演示站点目前可能未运行最新版本。它仅用于让您了解 RJ Nexus 的外观和工作方式。
 
 | | | |
 |:-:|---|---|
