@@ -36,19 +36,23 @@
     }
 }">
 
+    {{-- YUXARI HİSSƏ: Başlıq və Yeni "Create Post" Düyməsi --}}
     <div class="flex items-center justify-between gap-4 flex-wrap">
         <div>
-            <h2 class="text-base font-semibold text-gray-900">{{ $type === 'page' ? __('Pages') : __('Posts') }}</h2>
+            <h2 class="text-2xl font-bold text-gray-900">{{ $type === 'page' ? __('Pages') : __('Posts') }}</h2>
             <p class="text-sm text-gray-500 mt-1">{{ __('Manage your content, drafts, and scheduled items.') }}</p>
         </div>
 
-        <a href="{{ route('admin.posts.create', ['type' => $type]) }}"
-           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-rj-purple to-rj-pink text-white text-sm font-medium hover:opacity-90 transition">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-            {{ __('Add New') }}
-        </a>
+        <div class="flex items-center gap-3">
+            <a href="{{ route('admin.posts.create', ['type' => $type]) }}"
+               class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-rj-purple to-rj-pink text-white text-sm font-bold hover:opacity-90 transition shadow-md shadow-rj-purple/30">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                {{ $type === 'page' ? __('Create Page') : __('Create Post') }}
+            </a>
+        </div>
     </div>
 
+    {{-- Status Kartları --}}
     <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
         @php
             $statusCards = [
@@ -127,7 +131,7 @@
                 <a href="{{ route('admin.posts.create', ['type' => $type]) }}"
                    class="inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-lg bg-gradient-to-r from-rj-purple to-rj-pink text-white text-sm font-medium hover:opacity-90 transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                    {{ __('Create First Post') }}
+                    {{ $type === 'page' ? __('Create First Page') : __('Create First Post') }}
                 </a>
             </div>
         @else
@@ -182,7 +186,6 @@
                                            class="rounded border-gray-300 text-rj-purple focus:ring-rj-purple">
                                 </td>
 
-                                {{-- FIX: overflow-hidden + max-w-0 → hüceyrə məzmuna görə genişlənmir, uzun mətn ... ilə kəsilir --}}
                                 <td class="px-4 py-3" style="max-width:0;overflow:hidden;">
                                     <div class="flex items-start gap-3" style="min-width:0;">
                                         @if ($post->featured_image)
@@ -343,7 +346,6 @@
                                                 <span class="text-xs text-gray-500 truncate min-w-0">— {{ $post->title ?: __('(no title)') }}</span>
                                             </div>
 
-                                            {{-- Dil tabları: neçə dil olursa olsun yer tutmur, yalnız seçilmiş dilin sahələri görünür --}}
                                             <div class="flex flex-wrap gap-1.5 mb-3">
                                                 @foreach ($locales as $locale)
                                                     <button type="button"
