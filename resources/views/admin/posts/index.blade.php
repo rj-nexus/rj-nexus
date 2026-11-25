@@ -63,28 +63,35 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
-        @php
-            $statusCards = [
-                ['key' => 'all', 'label' => __('All'), 'value' => $counts['all'], 'color' => 'text-gray-900'],
-                ['key' => 'published', 'label' => __('Published'), 'value' => $counts['published'], 'color' => 'text-green-600'],
-                ['key' => 'draft', 'label' => __('Draft'), 'value' => $counts['draft'], 'color' => 'text-amber-600'],
-                ['key' => 'scheduled', 'label' => __('Scheduled'), 'value' => $counts['scheduled'], 'color' => 'text-blue-600'],
-                ['key' => 'trash', 'label' => __('Trash'), 'value' => $counts['trash'], 'color' => 'text-red-600'],
-            ];
-        @endphp
+    <div class="flex items-center justify-between gap-4 flex-wrap">
+        <div>
+            <h2 class="text-base font-semibold text-gray-900">{{ $type === 'page' ? __('Pages') : __('Posts') }}</h2>
+            <p class="text-sm text-gray-500 mt-1">{{ __('Manage your content, drafts, and scheduled items.') }}</p>
+        </div>
 
-        @foreach ($statusCards as $card)
-            <a href="{{ route('admin.posts.index', array_filter(['type' => $type, 'status' => $card['key'], 'category' => request('category'), 'tag' => request('tag'), 'q' => request('q')])) }}"
-               class="bg-white rounded-lg shadow-sm border {{ $status === $card['key'] ? 'border-rj-purple ring-1 ring-rj-purple/20' : 'border-gray-100' }} p-5 hover:border-rj-purple/50 transition">
-                <div class="text-xs text-gray-500 uppercase tracking-wide">{{ $card['label'] }}</div>
-                <div class="text-2xl font-bold {{ $card['color'] }} mt-1">{{ number_format($card['value']) }}</div>
+        <div class="flex items-center gap-3">
+            @if ($type !== 'page')
+                <a href="{{ route('admin.tools.marketing') }}"
+                   class="group relative inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-rj-purple/10 backdrop-blur-md border border-rj-purple/30 text-sm font-bold text-rj-purple transition-all duration-300 hover:bg-gradient-to-r hover:from-rj-purple hover:to-rj-pink hover:text-white hover:border-transparent hover:shadow-lg hover:shadow-rj-purple/40 overflow-hidden">
+                    
+                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                    
+                    <svg class="w-4 h-4 text-rj-pink group-hover:text-white group-hover:scale-110 group-hover:rotate-12 transition-all duration-300 relative z-10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                    </svg>
+                    <span class="relative z-10">{{ __('Create Marketing Post') }}</span>
+                </a>
+            @endif
+
+            <a href="{{ route('admin.posts.create', ['type' => $type]) }}"
+               class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-rj-purple to-rj-pink text-white text-sm font-medium hover:opacity-90 transition shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                {{ __('Add New') }}
             </a>
-        @endforeach
+        </div>
     </div>
 
     <div class="bg-white rounded-lg shadow-sm border border-gray-100">
-        {{-- ... (BURADAN AŞAĞISI SƏNİN ORİJİNAL KODUNDUR, HEÇ NƏ DƏYİŞMƏYİB) ... --}}
         <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between gap-3 flex-wrap">
             <form method="GET" action="{{ route('admin.posts.index') }}" class="flex items-center gap-3 flex-1 min-w-[200px] flex-wrap">
                 <input type="hidden" name="type" value="{{ $type }}">
