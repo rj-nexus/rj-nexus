@@ -656,14 +656,11 @@
                 'children' => [],
             ],
             [
-             [
-            'label' => __('RJ About'),
-            'icon' => $ic($p('M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z')),
-            'url' => route('admin.about.index'),
-            'active' => request()->routeIs('admin.about.*'),
-            'children' => [],
-            ],
-            ],
+                'label' => __('RJ About'),
+                'icon' => $ic($p('M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z')),
+                'url' => route('admin.about.index'),
+                'active' => request()->routeIs('admin.about.*'),
+                'children' => [],
             ],
         ];
 
