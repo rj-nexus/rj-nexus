@@ -41,6 +41,7 @@ use App\Http\Controllers\Admin\AiToolController;
 use App\Http\Controllers\Admin\AboutController;
 use App\Http\Controllers\Admin\TwoFactorController;
 use App\Http\Controllers\Admin\KycController;
+use App\Http\Controllers\Admin\MarketingController;
 use App\Http\Controllers\Admin\NewsletterController;
 use App\Http\Controllers\Admin\SearchController;
 use App\Http\Controllers\Admin\AiTestController;

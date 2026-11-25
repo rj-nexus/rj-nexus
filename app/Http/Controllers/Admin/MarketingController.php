@@ -17,12 +17,11 @@ class MarketingController extends Controller
             ->take(50)
             ->get(['id', 'title', 'content']);
 
-        // Saytın loqosunu çəkirik (RJ Nexus-da adətən belə saxlanılır)
+        // Saytın loqosunu çəkirik
         $siteLogo = rj_get_option('site_logo') ?? rj_get_option('logo');
         
-        // Əgər loqo yoxdursa, default bir SVG istifadə edə bilərik
         if (empty($siteLogo)) {
-            $siteLogo = 'https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/banner.svg'; // Nümunə
+            $siteLogo = ''; // Loqo yoxdursa boş qalır, JS-də default 'RJ' görünəcək
         }
 
         return view('admin.tools.marketing', compact('posts', 'siteLogo'));
