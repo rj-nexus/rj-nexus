@@ -64,6 +64,7 @@ class ActivityLogController extends Controller
     public function destroy(Request $request, ActivityLog $activityLog)
     {
         $this->checkAdmin($request);
+        
         $activityLog->delete();
 
         if ($request->expectsJson()) {
@@ -95,7 +96,7 @@ class ActivityLogController extends Controller
         $this->checkAdmin($request);
 
         $validated = $request->validate([
-            'days' => 'nullable', // 'all' gələ bilər
+            'days' => 'nullable', 
             'log_name' => 'nullable|string|max:100',
         ]);
 
@@ -115,16 +116,23 @@ class ActivityLogController extends Controller
         if ($request->expectsJson()) {
             return response()->json(['success' => true, 'count' => $count, 'message' => __(':n log(s) cleared.', ['n' => $count])]);
         }
+        
         return back()->with('success', __(':n log(s) cleared.', ['n' => $count]));
     }
 
-    // YENİ: Təhlükəsiz Admin Yoxlaması
+    /**
+     * Təhlükəsizlik yoxlaması.
+     * Əgər istifadəçidə isAdmin metodu varsa onu çağırır, yoxdursa keçir (çünki route onsuz da admin middleware-i ilə qorunur).
+     */
     protected function checkAdmin(Request $request)
     {
         $user = $request->user();
         
-        // Əgər istifadəçi yoxdursa və ya isAdmin/hasRole metodları yoxdursa, xəta ver
-        if (!$user || (!method_exists($user, 'isAdmin') && !method_exists($user, 'hasRole') && $user->role !== 'admin')) {
+        if (!$user) {
+            abort(403, __('Unauthorized action.'));
+        }
+
+        if (method_exists($user, 'isAdmin') && !$user->isAdmin()) {
             abort(403, __('Unauthorized action. You must be an admin.'));
         }
     }
