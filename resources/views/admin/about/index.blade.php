@@ -4,6 +4,8 @@
 
 @section('content')
 @php
+    $version = config('rj.version', '1.0.0');
+    
     $iconPaths = [
         'info'     => 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
         'code'     => 'M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4',
@@ -55,134 +57,141 @@
     }
 @endphp
 
-<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+{{-- ALTair Series - Ümumi Məlumat Paneli --}}
+<div class="relative bg-gray-900 rounded-3xl overflow-hidden shadow-2xl mb-8 border border-gray-800">
+    <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/20 via-purple-500/10 to-transparent pointer-events-none"></div>
+    <div class="absolute -right-20 -top-20 w-64 h-64 bg-rj-purple/20 rounded-full blur-3xl pointer-events-none"></div>
+    
+    <div class="relative p-8 sm:p-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 z-10">
+        <div>
+            <div class="flex items-center gap-3 mb-3">
+                <span class="px-3 py-1 rounded-full bg-white/10 text-white text-xs font-bold tracking-widest uppercase border border-white/20 backdrop-blur-sm">
+                    {{ __('Version') }} {{ $version }}
+                </span>
+                <span class="px-3 py-1 rounded-full bg-rj-purple/20 text-rj-purple text-xs font-bold tracking-widest uppercase border border-rj-purple/30 backdrop-blur-sm">
+                    Altair Series
+                </span>
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-3">RJ Nexus CMS</h1>
+            <p class="text-gray-400 text-sm sm:text-base max-w-2xl leading-relaxed">
+                {{ __('Modern, fast, and fully self-hosted content management system. Build stunning websites with RJBuilder, manage multilingual content, and scale your business globally.') }}
+            </p>
+        </div>
+        <div class="flex-shrink-0 flex gap-3">
+            <a href="https://rjnexus.org" target="_blank" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-gray-900 text-sm font-bold hover:bg-gray-100 transition shadow-lg">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
+                {{ __('Official Website') }}
+            </a>
+        </div>
+    </div>
+</div>
+
+{{-- Sürətli Linklər --}}
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
     <a href="https://rj-nexus.github.io/documents/" target="_blank" rel="noopener" class="group relative bg-white rounded-2xl border border-gray-200 p-5 shadow-sm hover:shadow-md hover:border-rj-purple/40 transition-all overflow-hidden flex items-center gap-4">
-        <div class="absolute -right-4 -top-4 w-20 h-20 bg-rj-purple/5 rounded-full blur-xl group-hover:bg-rj-purple/10 transition-colors"></div>
-        <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform z-10">
+        <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
         </div>
-        <div class="z-10 min-w-0">
-            <h3 class="text-sm font-bold text-gray-900 group-hover:text-rj-purple transition-colors truncate">{{ __('Full Documentation') }}</h3>
+        <div class="min-w-0">
+            <h3 class="text-sm font-bold text-gray-900 group-hover:text-rj-purple transition-colors truncate">{{ __('Documentation') }}</h3>
             <p class="text-xs text-gray-500 mt-0.5 truncate">{{ __('Official RJ Nexus docs') }}</p>
         </div>
-        <svg class="w-4 h-4 text-gray-300 group-hover:text-rj-purple ml-auto flex-shrink-0 z-10 transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
     </a>
 
-    <a href="https://ruhidjavadoff.blogspot.com/search/label/rj%20cms" target="_blank" rel="noopener" class="group relative bg-white rounded-2xl border border-gray-200 p-5 shadow-sm hover:shadow-md hover:border-orange-400/40 transition-all overflow-hidden flex items-center gap-4">
-        <div class="absolute -right-4 -top-4 w-20 h-20 bg-orange-500/5 rounded-full blur-xl group-hover:bg-orange-500/10 transition-colors"></div>
-        <div class="w-12 h-12 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform z-10">
+    <a href="{{ url('/admin/services') }}" class="group relative bg-white rounded-2xl border border-gray-200 p-5 shadow-sm hover:shadow-md hover:border-blue-400/40 transition-all overflow-hidden flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+        </div>
+        <div class="min-w-0">
+            <h3 class="text-sm font-bold text-gray-900 group-hover:text-blue-600 transition-colors truncate">{{ __('Services') }}</h3>
+            <p class="text-xs text-gray-500 mt-0.5 truncate">{{ __('Order custom development') }}</p>
+        </div>
+    </a>
+
+    <a href="https://ruhidjavadoff.blogspot.com" target="_blank" rel="noopener" class="group relative bg-white rounded-2xl border border-gray-200 p-5 shadow-sm hover:shadow-md hover:border-orange-400/40 transition-all overflow-hidden flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l6 6v8a2 2 0 01-2 2z"/><path stroke-linecap="round" stroke-linejoin="round" d="M14 4v6h6M8 13h8M8 17h5"/></svg>
         </div>
-        <div class="z-10 min-w-0">
-            <h3 class="text-sm font-bold text-gray-900 group-hover:text-orange-600 transition-colors truncate">{{ __('RJ CMS Blog') }}</h3>
-            <p class="text-xs text-gray-500 mt-0.5 truncate">{{ __('News & tutorials') }}</p>
+        <div class="min-w-0">
+            <h3 class="text-sm font-bold text-gray-900 group-hover:text-orange-600 transition-colors truncate">{{ __('Personal Blog') }}</h3>
+            <p class="text-xs text-gray-500 mt-0.5 truncate">{{ __('Updates & tutorials') }}</p>
         </div>
-        <svg class="w-4 h-4 text-gray-300 group-hover:text-orange-600 ml-auto flex-shrink-0 z-10 transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
     </a>
 
     <a href="https://ruhidjavadoff.blogspot.com/search/label/rj%20nexus" target="_blank" rel="noopener" class="group relative bg-white rounded-2xl border border-gray-200 p-5 shadow-sm hover:shadow-md hover:border-emerald-400/40 transition-all overflow-hidden flex items-center gap-4">
-        <div class="absolute -right-4 -top-4 w-20 h-20 bg-emerald-500/5 rounded-full blur-xl group-hover:bg-emerald-500/10 transition-colors"></div>
-        <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform z-10">
+        <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l6 6v8a2 2 0 01-2 2z"/><path stroke-linecap="round" stroke-linejoin="round" d="M14 4v6h6M8 13h8M8 17h5"/></svg>
         </div>
-        <div class="z-10 min-w-0">
+        <div class="min-w-0">
             <h3 class="text-sm font-bold text-gray-900 group-hover:text-emerald-600 transition-colors truncate">{{ __('RJ Nexus Blog') }}</h3>
             <p class="text-xs text-gray-500 mt-0.5 truncate">{{ __('Development updates') }}</p>
         </div>
-        <svg class="w-4 h-4 text-gray-300 group-hover:text-emerald-600 ml-auto flex-shrink-0 z-10 transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
     </a>
 </div>
 
-<style>
-    .ra-wrap { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 24px; align-items: start; padding-bottom: 48px; }
-    @media (max-width: 1023px) { .ra-wrap { grid-template-columns: minmax(0, 1fr); } }
+{{-- Dəstək / Donate Bölməsi --}}
+<div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-8 mb-8 relative overflow-hidden">
+    <div class="absolute right-0 top-0 w-64 h-64 bg-gradient-to-br from-pink-500/10 to-orange-500/10 rounded-full blur-3xl -z-10"></div>
+    
+    <div class="flex flex-col lg:flex-row gap-8 items-start">
+        <div class="flex-1">
+            <h2 class="text-2xl font-bold text-gray-900 mb-2">{{ __('Support the Project') }}</h2>
+            <p class="text-gray-500 text-sm leading-relaxed mb-6">
+                {{ __('If this project has been useful to you, consider supporting its continued development and maintenance.') }}
+            </p>
+            
+            <div class="flex flex-wrap gap-4 items-center mb-6">
+                <a href="https://kofe.al/@ruhidjavadoff" target="_blank" class="hover:-translate-y-1 transition-transform">
+                    <img src="https://github.com/mr-ruhid/rare-logos-vault/blob/main/logo/monetization/kofe.al/kofe.al_logo.svg?raw=true" height="40" alt="Support on Kofe.al" style="background-color:#ffffff; padding:6px; border-radius:8px; border: 1px solid #e5e7eb;">
+                </a>
+                <a href="https://cayvoy.com/donate/ruhid4715" target="_blank" class="hover:-translate-y-1 transition-transform">
+                    <img src="https://github.com/mr-ruhid/rare-logos-vault/blob/main/logo/monetization/cayvoy/cayvoy_logo.svg?raw=true" alt="Donate via Çayvoy" height="40">
+                </a>
+                <a href="https://www.paypal.com/paypalme/ruhidjavadoff" target="_blank" class="hover:-translate-y-1 transition-transform">
+                    <img src="https://img.shields.io/badge/Donate-PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white" alt="Donate via PayPal" height="40" class="rounded-lg">
+                </a>
+            </div>
 
-    .ra-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; box-shadow: 0 1px 2px rgba(0,0,0,.05); overflow: hidden; }
-    .ra-side { position: sticky; top: 16px; }
-    @media (max-width: 1023px) { .ra-side { position: static; } }
+            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 overflow-x-auto">
+                <table class="w-full text-sm text-left">
+                    <thead class="text-xs text-gray-500 uppercase bg-gray-100/50">
+                        <tr>
+                            <th class="px-3 py-2 rounded-l-lg">{{ __('Method') }}</th>
+                            <th class="px-3 py-2 rounded-r-lg">{{ __('Details') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        <tr>
+                            <td class="px-3 py-2 font-medium text-gray-900">Kofe.al</td>
+                            <td class="px-3 py-2"><a href="https://kofe.al/@ruhidjavadoff" target="_blank" class="text-indigo-600 hover:underline">@ruhidjavadoff</a></td>
+                        </tr>
+                        <tr>
+                            <td class="px-3 py-2 font-medium text-gray-900">Çayvoy</td>
+                            <td class="px-3 py-2"><a href="https://cayvoy.com/donate/ruhid4715" target="_blank" class="text-indigo-600 hover:underline">ruhid4715</a></td>
+                        </tr>
+                        <tr>
+                            <td class="px-3 py-2 font-medium text-gray-900">PayPal</td>
+                            <td class="px-3 py-2 text-gray-600">ruhidjavadoff@gmail.com</td>
+                        </tr>
+                        <tr>
+                            <td class="px-3 py-2 font-medium text-gray-900 whitespace-nowrap">{{ __('Crypto (USDT, BEP20)') }}</td>
+                            <td class="px-3 py-2 font-mono text-xs break-all text-gray-600">0x9a4AD41762D6B07B8C266b312Cf0dBe31FAd890</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="mt-4 flex items-start gap-2 text-xs text-amber-700 bg-amber-50 p-3 rounded-lg border border-amber-100">
+                <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <div>
+                    <strong>Crypto Warning:</strong> {{ __('Send only USDT on the BNB Smart Chain (BEP20) network. Funds sent on other networks may be lost.') }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-    .ra-side-head { display: flex; align-items: center; gap: 10px; padding: 16px 20px; border-bottom: 1px solid #f3f4f6; font-size: 14px; font-weight: 700; color: #111827; }
-    .ra-side-head svg { width: 18px; height: 18px; }
-
-    .ra-search { position: relative; padding: 12px 12px 4px; }
-    .ra-search svg { position: absolute; left: 24px; top: 50%; margin-top: -2px; transform: translateY(-50%); width: 16px; height: 16px; color: #9ca3af; pointer-events: none; }
-    .ra-search input { width: 100%; box-sizing: border-box; padding: 9px 12px 9px 36px; font-size: 13px; color: #111827; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px; outline: none; transition: border-color .15s, background .15s; }
-    .ra-search input:focus { background: #fff; border-color: #9ca3af; }
-
-    .ra-nav { display: flex; flex-direction: column; gap: 2px; padding: 8px; max-height: calc(100vh - 210px); overflow-y: auto; }
-    @media (max-width: 1023px) { .ra-nav { max-height: 340px; } }
-    .ra-link { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 12px; font-size: 14px; font-weight: 500; color: #4b5563; text-decoration: none; transition: background .15s, color .15s; }
-    .ra-link:hover { background: #f9fafb; color: #111827; }
-    .ra-link svg { width: 18px; height: 18px; flex-shrink: 0; color: #9ca3af; transition: color .15s; }
-    .ra-link span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .ra-link.is-active { font-weight: 600; box-shadow: inset 3px 0 0 currentColor; }
-    .ra-link.is-active svg { color: inherit; }
-    .ra-empty-search { padding: 20px 12px; font-size: 13px; color: #9ca3af; text-align: center; }
-
-    .ra-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding: 28px 40px 24px; border-bottom: 1px solid #f3f4f6; background: #fafafa; }
-    @media (max-width: 640px) { .ra-head { padding: 22px 20px 18px; } }
-    .ra-title { margin: 0; font-size: 28px; line-height: 1.2; font-weight: 800; letter-spacing: -.02em; color: #111827; }
-    @media (max-width: 640px) { .ra-title { font-size: 22px; } }
-    .ra-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-    .ra-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; font-size: 12px; font-weight: 500; color: #6b7280; background: #fff; border: 1px solid #e5e7eb; border-radius: 999px; }
-    .ra-chip svg { width: 14px; height: 14px; color: #9ca3af; }
-    .ra-icon { flex-shrink: 0; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 14px; background: #f3f4f6; background: color-mix(in srgb, currentColor 12%, transparent); }
-    .ra-icon svg { width: 24px; height: 24px; }
-
-    .ra-toc { padding: 16px 40px; border-bottom: 1px solid #f3f4f6; }
-    @media (max-width: 640px) { .ra-toc { padding: 14px 20px; } }
-    .ra-toc-label { margin-bottom: 8px; font-size: 12px; font-weight: 600; color: #9ca3af; }
-    .ra-toc-list { display: flex; flex-wrap: wrap; gap: 8px; }
-    .ra-toc-list a { padding: 5px 12px; font-size: 13px; font-weight: 500; color: #4b5563; background: #f3f4f6; border-radius: 999px; text-decoration: none; transition: background .15s, color .15s; }
-    .ra-toc-list a:hover { background: #e5e7eb; color: #111827; }
-
-    .ra-body { padding: 32px 40px 40px; }
-    @media (max-width: 640px) { .ra-body { padding: 22px 20px 28px; } }
-
-    .rj-doc-content { max-width: 820px; }
-    .rj-doc-content > :first-child { margin-top: 0; }
-    .rj-doc-content h2 { scroll-margin-top: 90px; font-size: 1.5rem; font-weight: 800; letter-spacing: -.01em; color: #111827; margin: 2.25rem 0 1rem; padding-bottom: .5rem; border-bottom: 1px solid #f3f4f6; }
-    .rj-doc-content h3 { scroll-margin-top: 90px; font-size: 1.2rem; font-weight: 700; color: #111827; margin: 2rem 0 .75rem; }
-    .rj-doc-content p { font-size: .9375rem; color: #4b5563; line-height: 1.8; margin: 0 0 1rem; }
-    .rj-doc-content strong { color: #111827; font-weight: 600; }
-    .rj-doc-content a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
-    .rj-doc-content ul { list-style: disc; padding-left: 1.5rem; margin: 0 0 1.25rem; }
-    .rj-doc-content ol { list-style: decimal; padding-left: 1.5rem; margin: 0 0 1.25rem; }
-    .rj-doc-content li { font-size: .9375rem; color: #4b5563; line-height: 1.75; margin-bottom: .4rem; padding-left: .25rem; }
-    .rj-doc-content li::marker { color: #9ca3af; }
-    .rj-doc-content hr { border: 0; border-top: 1px solid #e5e7eb; margin: 2rem 0; }
-    .rj-doc-content blockquote { margin: 0 0 1.25rem; padding: .75rem 1.25rem; border-left: 4px solid #d1d5db; background: #f9fafb; border-radius: 0 12px 12px 0; color: #4b5563; }
-    .rj-doc-content blockquote p:last-child { margin-bottom: 0; }
-    .rj-doc-content img { max-width: 100%; height: auto; border-radius: 12px; border: 1px solid #e5e7eb; margin: 1rem 0; }
-    .rj-doc-content table { width: 100%; border-collapse: collapse; margin: 0 0 1.5rem; font-size: .875rem; display: block; overflow-x: auto; }
-    .rj-doc-content th { text-align: left; font-weight: 600; color: #374151; background: #f9fafb; padding: 10px 14px; border: 1px solid #e5e7eb; white-space: nowrap; }
-    .rj-doc-content td { padding: 10px 14px; color: #4b5563; border: 1px solid #e5e7eb; vertical-align: top; }
-
-    .rj-doc-content code { background: #f3f4f6; color: #be185d; padding: .125rem .4rem; border-radius: .375rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .8125rem; word-break: break-word; }
-    .rj-doc-content pre { background: #111827; color: #e5e7eb; padding: 1.125rem 1.25rem; border-radius: .875rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .8125rem; line-height: 1.7; overflow-x: auto; margin: 0 0 1.25rem; white-space: pre; border: 1px solid #1f2937; }
-    .rj-doc-content pre code { background: transparent; color: inherit; padding: 0; font-size: inherit; word-break: normal; }
-
-    .ra-code { position: relative; margin-bottom: 1.25rem; }
-    .ra-code pre { margin-bottom: 0; padding-right: 5.5rem; }
-    .ra-copy { position: absolute; top: 10px; right: 10px; padding: 4px 10px; font-size: 11px; font-weight: 600; color: #d1d5db; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12); border-radius: 8px; cursor: pointer; transition: background .15s, color .15s; }
-    .ra-copy:hover { background: rgba(255,255,255,.16); color: #fff; }
-
-    .ra-pager { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 20px 40px 32px; border-top: 1px solid #f3f4f6; }
-    @media (max-width: 640px) { .ra-pager { grid-template-columns: 1fr; padding: 16px 20px 24px; } }
-    .ra-pager a { display: block; padding: 14px 18px; border: 1px solid #e5e7eb; border-radius: 14px; text-decoration: none; transition: border-color .15s, background .15s; }
-    .ra-pager a:hover { border-color: #9ca3af; background: #f9fafb; }
-    .ra-pager small { display: block; font-size: 12px; font-weight: 500; color: #9ca3af; margin-bottom: 2px; }
-    .ra-pager strong { display: block; font-size: 14px; font-weight: 600; color: #111827; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .ra-pager .is-next { text-align: right; grid-column: 2; }
-    @media (max-width: 640px) { .ra-pager .is-next { grid-column: 1; } }
-
-    .ra-none { padding: 80px 24px; text-align: center; }
-    .ra-none-icon { width: 80px; height: 80px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; border-radius: 999px; background: #f9fafb; }
-    .ra-none-icon svg { width: 40px; height: 40px; color: #d1d5db; }
-    .ra-none h3 { margin: 0; font-size: 18px; font-weight: 700; color: #111827; }
-    .ra-none p { margin: 8px 0 0; font-size: 14px; color: #6b7280; }
-</style>
-
+{{-- Sənədləşmə Bölməsi --}}
 <div class="ra-wrap">
 
     <aside class="ra-side" x-data="{
@@ -291,6 +300,96 @@
     </main>
 
 </div>
+
+<style>
+    .ra-wrap { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 24px; align-items: start; padding-bottom: 48px; }
+    @media (max-width: 1023px) { .ra-wrap { grid-template-columns: minmax(0, 1fr); } }
+
+    .ra-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; box-shadow: 0 1px 2px rgba(0,0,0,.05); overflow: hidden; }
+    .ra-side { position: sticky; top: 16px; }
+    @media (max-width: 1023px) { .ra-side { position: static; } }
+
+    .ra-side-head { display: flex; align-items: center; gap: 10px; padding: 16px 20px; border-bottom: 1px solid #f3f4f6; font-size: 14px; font-weight: 700; color: #111827; }
+    .ra-side-head svg { width: 18px; height: 18px; }
+
+    .ra-search { position: relative; padding: 12px 12px 4px; }
+    .ra-search svg { position: absolute; left: 24px; top: 50%; margin-top: -2px; transform: translateY(-50%); width: 16px; height: 16px; color: #9ca3af; pointer-events: none; }
+    .ra-search input { width: 100%; box-sizing: border-box; padding: 9px 12px 9px 36px; font-size: 13px; color: #111827; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px; outline: none; transition: border-color .15s, background .15s; }
+    .ra-search input:focus { background: #fff; border-color: #9ca3af; }
+
+    .ra-nav { display: flex; flex-direction: column; gap: 2px; padding: 8px; max-height: calc(100vh - 210px); overflow-y: auto; }
+    @media (max-width: 1023px) { .ra-nav { max-height: 340px; } }
+    .ra-link { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 12px; font-size: 14px; font-weight: 500; color: #4b5563; text-decoration: none; transition: background .15s, color .15s; }
+    .ra-link:hover { background: #f9fafb; color: #111827; }
+    .ra-link svg { width: 18px; height: 18px; flex-shrink: 0; color: #9ca3af; transition: color .15s; }
+    .ra-link span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ra-link.is-active { font-weight: 600; box-shadow: inset 3px 0 0 currentColor; }
+    .ra-link.is-active svg { color: inherit; }
+    .ra-empty-search { padding: 20px 12px; font-size: 13px; color: #9ca3af; text-align: center; }
+
+    .ra-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding: 28px 40px 24px; border-bottom: 1px solid #f3f4f6; background: #fafafa; }
+    @media (max-width: 640px) { .ra-head { padding: 22px 20px 18px; } }
+    .ra-title { margin: 0; font-size: 28px; line-height: 1.2; font-weight: 800; letter-spacing: -.02em; color: #111827; }
+    @media (max-width: 640px) { .ra-title { font-size: 22px; } }
+    .ra-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .ra-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; font-size: 12px; font-weight: 500; color: #6b7280; background: #fff; border: 1px solid #e5e7eb; border-radius: 999px; }
+    .ra-chip svg { width: 14px; height: 14px; color: #9ca3af; }
+    .ra-icon { flex-shrink: 0; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 14px; background: #f3f4f6; background: color-mix(in srgb, currentColor 12%, transparent); }
+    .ra-icon svg { width: 24px; height: 24px; }
+
+    .ra-toc { padding: 16px 40px; border-bottom: 1px solid #f3f4f6; }
+    @media (max-width: 640px) { .ra-toc { padding: 14px 20px; } }
+    .ra-toc-label { margin-bottom: 8px; font-size: 12px; font-weight: 600; color: #9ca3af; }
+    .ra-toc-list { display: flex; flex-wrap: wrap; gap: 8px; }
+    .ra-toc-list a { padding: 5px 12px; font-size: 13px; font-weight: 500; color: #4b5563; background: #f3f4f6; border-radius: 999px; text-decoration: none; transition: background .15s, color .15s; }
+    .ra-toc-list a:hover { background: #e5e7eb; color: #111827; }
+
+    .ra-body { padding: 32px 40px 40px; }
+    @media (max-width: 640px) { .ra-body { padding: 22px 20px 28px; } }
+
+    .rj-doc-content { max-width: 820px; }
+    .rj-doc-content > :first-child { margin-top: 0; }
+    .rj-doc-content h2 { scroll-margin-top: 90px; font-size: 1.5rem; font-weight: 800; letter-spacing: -.01em; color: #111827; margin: 2.25rem 0 1rem; padding-bottom: .5rem; border-bottom: 1px solid #f3f4f6; }
+    .rj-doc-content h3 { scroll-margin-top: 90px; font-size: 1.2rem; font-weight: 700; color: #111827; margin: 2rem 0 .75rem; }
+    .rj-doc-content p { font-size: .9375rem; color: #4b5563; line-height: 1.8; margin: 0 0 1rem; }
+    .rj-doc-content strong { color: #111827; font-weight: 600; }
+    .rj-doc-content a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+    .rj-doc-content ul { list-style: disc; padding-left: 1.5rem; margin: 0 0 1.25rem; }
+    .rj-doc-content ol { list-style: decimal; padding-left: 1.5rem; margin: 0 0 1.25rem; }
+    .rj-doc-content li { font-size: .9375rem; color: #4b5563; line-height: 1.75; margin-bottom: .4rem; padding-left: .25rem; }
+    .rj-doc-content li::marker { color: #9ca3af; }
+    .rj-doc-content hr { border: 0; border-top: 1px solid #e5e7eb; margin: 2rem 0; }
+    .rj-doc-content blockquote { margin: 0 0 1.25rem; padding: .75rem 1.25rem; border-left: 4px solid #d1d5db; background: #f9fafb; border-radius: 0 12px 12px 0; color: #4b5563; }
+    .rj-doc-content blockquote p:last-child { margin-bottom: 0; }
+    .rj-doc-content img { max-width: 100%; height: auto; border-radius: 12px; border: 1px solid #e5e7eb; margin: 1rem 0; }
+    .rj-doc-content table { width: 100%; border-collapse: collapse; margin: 0 0 1.5rem; font-size: .875rem; display: block; overflow-x: auto; }
+    .rj-doc-content th { text-align: left; font-weight: 600; color: #374151; background: #f9fafb; padding: 10px 14px; border: 1px solid #e5e7eb; white-space: nowrap; }
+    .rj-doc-content td { padding: 10px 14px; color: #4b5563; border: 1px solid #e5e7eb; vertical-align: top; }
+
+    .rj-doc-content code { background: #f3f4f6; color: #be185d; padding: .125rem .4rem; border-radius: .375rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .8125rem; word-break: break-word; }
+    .rj-doc-content pre { background: #111827; color: #e5e7eb; padding: 1.125rem 1.25rem; border-radius: .875rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .8125rem; line-height: 1.7; overflow-x: auto; margin: 0 0 1.25rem; white-space: pre; border: 1px solid #1f2937; }
+    .rj-doc-content pre code { background: transparent; color: inherit; padding: 0; font-size: inherit; word-break: normal; }
+
+    .ra-code { position: relative; margin-bottom: 1.25rem; }
+    .ra-code pre { margin-bottom: 0; padding-right: 5.5rem; }
+    .ra-copy { position: absolute; top: 10px; right: 10px; padding: 4px 10px; font-size: 11px; font-weight: 600; color: #d1d5db; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12); border-radius: 8px; cursor: pointer; transition: background .15s, color .15s; }
+    .ra-copy:hover { background: rgba(255,255,255,.16); color: #fff; }
+
+    .ra-pager { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 20px 40px 32px; border-top: 1px solid #f3f4f6; }
+    @media (max-width: 640px) { .ra-pager { grid-template-columns: 1fr; padding: 16px 20px 24px; } }
+    .ra-pager a { display: block; padding: 14px 18px; border: 1px solid #e5e7eb; border-radius: 14px; text-decoration: none; transition: border-color .15s, background .15s; }
+    .ra-pager a:hover { border-color: #9ca3af; background: #f9fafb; }
+    .ra-pager small { display: block; font-size: 12px; font-weight: 500; color: #9ca3af; margin-bottom: 2px; }
+    .ra-pager strong { display: block; font-size: 14px; font-weight: 600; color: #111827; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ra-pager .is-next { text-align: right; grid-column: 2; }
+    @media (max-width: 640px) { .ra-pager .is-next { grid-column: 1; } }
+
+    .ra-none { padding: 80px 24px; text-align: center; }
+    .ra-none-icon { width: 80px; height: 80px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; border-radius: 999px; background: #f9fafb; }
+    .ra-none-icon svg { width: 40px; height: 40px; color: #d1d5db; }
+    .ra-none h3 { margin: 0; font-size: 18px; font-weight: 700; color: #111827; }
+    .ra-none p { margin: 8px 0 0; font-size: 14px; color: #6b7280; }
+</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
