@@ -166,7 +166,7 @@
                                        :checked="selected.length === {{ $posts->count() }} && {{ $posts->count() }} > 0"
                                        class="rounded border-gray-300 text-rj-purple focus:ring-rj-purple">
                             </th>
-                            <th class="text-left font-medium text-gray-600 px-4 py-3">{{ __('Title') }}</th>
+                            <th class="w-auto text-left font-medium text-gray-600 px-4 py-3">{{ __('Title') }}</th>
                             <th class="w-40 text-left font-medium text-gray-600 px-4 py-3 hidden lg:table-cell">{{ __('Author') }}</th>
                             <th class="w-48 text-left font-medium text-gray-600 px-4 py-3 hidden xl:table-cell">{{ __('Categories / Tags') }}</th>
                             <th class="w-24 text-center font-medium text-gray-600 px-4 py-3 hidden md:table-cell">{{ __('Comments') }}</th>
@@ -182,7 +182,8 @@
                                            class="rounded border-gray-300 text-rj-purple focus:ring-rj-purple">
                                 </td>
 
-                                <td class="px-4 py-3">
+                                {{-- FIX: overflow-hidden + max-w-0 → hüceyrə məzmuna görə genişlənmir, uzun mətn ... ilə kəsilir --}}
+                                <td class="px-4 py-3 overflow-hidden max-w-0">
                                     <div class="flex items-start gap-3 min-w-0">
                                         @if ($post->featured_image)
                                             <img src="{{ Str::startsWith($post->featured_image, 'http') ? $post->featured_image : asset($post->featured_image) }}"
@@ -193,7 +194,7 @@
                                             </div>
                                         @endif
 
-                                        <div class="min-w-0 flex-1">
+                                        <div class="min-w-0 flex-1 overflow-hidden">
                                             <div class="flex items-center gap-2 min-w-0">
                                                 @if ($post->is_sticky)
                                                     <span title="{{ __('Sticky') }}" class="text-amber-500 flex-shrink-0">
@@ -202,7 +203,7 @@
                                                 @endif
 
                                                 <a href="{{ route('admin.posts.edit', $post) }}"
-                                                   class="text-sm font-medium text-gray-900 hover:text-rj-purple truncate min-w-0"
+                                                   class="block flex-1 min-w-0 text-sm font-medium text-gray-900 hover:text-rj-purple truncate"
                                                    title="{{ $post->title ?: __('(no title)') }}">
                                                     {{ $post->title ?: __('(no title)') }}
                                                 </a>
@@ -216,8 +217,8 @@
                                                 @endif
                                             </div>
 
-                                            <div class="text-xs text-gray-500 mt-0.5 truncate" title="/{{ $post->slug }}">
-                                                <code class="font-mono">/{{ $post->slug }}</code>
+                                            <div class="text-xs text-gray-500 mt-0.5 min-w-0" title="/{{ $post->slug }}">
+                                                <code class="font-mono block truncate">/{{ $post->slug }}</code>
                                             </div>
                                         </div>
                                     </div>
@@ -338,7 +339,7 @@
                                             <div class="flex items-center gap-2 mb-4">
                                                 <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                                                 <h4 class="text-sm font-bold text-gray-900">{{ __('Quick Edit') }}</h4>
-                                                <span class="text-xs text-gray-500">— {{ $post->title ?: __('(no title)') }}</span>
+                                                <span class="text-xs text-gray-500 truncate min-w-0">— {{ $post->title ?: __('(no title)') }}</span>
                                             </div>
 
                                             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 mb-4">
