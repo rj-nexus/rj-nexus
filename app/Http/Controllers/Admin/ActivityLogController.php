@@ -42,19 +42,8 @@ class ActivityLogController extends Controller
 
         $logs = $query->paginate(50)->withQueryString();
 
-        $logNames = ActivityLog::query()
-            ->select('log_name')
-            ->distinct()
-            ->pluck('log_name')
-            ->filter()
-            ->values();
-
-        $events = ActivityLog::query()
-            ->select('event')
-            ->distinct()
-            ->pluck('event')
-            ->filter()
-            ->values();
+        $logNames = ActivityLog::query()->select('log_name')->distinct()->pluck('log_name')->filter()->values();
+        $events = ActivityLog::query()->select('event')->distinct()->pluck('event')->filter()->values();
 
         $counts = [
             'all' => ActivityLog::count(),
@@ -69,28 +58,23 @@ class ActivityLogController extends Controller
     public function show(ActivityLog $activityLog)
     {
         $activityLog->load(['causer', 'subject']);
-
         return view('admin.activity-log.show', compact('activityLog'));
     }
 
     public function destroy(Request $request, ActivityLog $activityLog)
     {
-        // Təhlükəsizlik yoxlaması əlavə edildi
-        abort_unless($request->user()?->isAdmin(), 403, 'Unauthorized action.');
-
+        $this->checkAdmin($request);
         $activityLog->delete();
 
         if ($request->expectsJson()) {
-            return response()->json(['success' => true]);
+            return response()->json(['success' => true, 'message' => __('Log entry deleted.')]);
         }
-
         return back()->with('success', __('Log entry deleted.'));
     }
 
     public function bulk(Request $request)
     {
-        // Təhlükəsizlik yoxlaması əlavə edildi
-        abort_unless($request->user()?->isAdmin(), 403, 'Unauthorized action.');
+        $this->checkAdmin($request);
 
         $validated = $request->validate([
             'ids' => 'required|array',
@@ -98,20 +82,17 @@ class ActivityLogController extends Controller
             'action' => 'required|in:delete',
         ]);
 
-        // Bug düzəldildi: 'ids' yox, 'id' olmalıdır
         $count = ActivityLog::whereIn('id', $validated['ids'])->delete();
 
         if ($request->expectsJson()) {
-            return response()->json(['success' => true, 'count' => $count]);
+            return response()->json(['success' => true, 'count' => $count, 'message' => __(':n log(s) deleted.', ['n' => $count])]);
         }
-
         return back()->with('success', __(':n log(s) deleted.', ['n' => $count]));
     }
 
     public function clear(Request $request)
     {
-        // Təhlükəsizlik yoxlaması əlavə edildi
-        abort_unless($request->user()?->isAdmin(), 403, 'Unauthorized action.');
+        $this->checkAdmin($request);
 
         $validated = $request->validate([
             'days' => 'nullable|integer|min:1|max:365',
@@ -131,13 +112,19 @@ class ActivityLogController extends Controller
         $count = $query->delete();
 
         if ($request->expectsJson()) {
-            return response()->json([
-                'success' => true,
-                'count' => $count,
-                'message' => __(':n log(s) cleared.', ['n' => $count]),
-            ]);
+            return response()->json(['success' => true, 'count' => $count, 'message' => __(':n log(s) cleared.', ['n' => $count])]);
         }
-
         return back()->with('success', __(':n log(s) cleared.', ['n' => $count]));
+    }
+
+    // YENİ: Təhlükəsiz Admin Yoxlaması
+    protected function checkAdmin(Request $request)
+    {
+        $user = $request->user();
+        
+        // Əgər istifadəçi yoxdursa və ya isAdmin/hasRole metodları yoxdursa, xəta ver
+        if (!$user || (!method_exists($user, 'isAdmin') && !method_exists($user, 'hasRole') && $user->role !== 'admin')) {
+            abort(403, __('Unauthorized action. You must be an admin.'));
+        }
     }
 }

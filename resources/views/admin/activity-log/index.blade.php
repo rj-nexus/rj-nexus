@@ -3,7 +3,7 @@
 @section('title', __('Activity Log'))
 
 @section('content')
-<div class="space-y-6" x-data="{ selected: [], clearOpen: false, clearDays: '30' }">
+<div x-data="activityLog({{ $logs->pluck('id') }})" class="space-y-6">
 
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -18,6 +18,7 @@
         </div>
     </div>
 
+    {{-- Statistikalar --}}
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
             <div class="text-sm font-medium text-gray-500">{{ __('Total Logs') }}</div>
@@ -37,6 +38,7 @@
         </div>
     </div>
 
+    {{-- Filtrlər və Cədvəl --}}
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <form method="GET" action="{{ route('admin.activity-log.index') }}" class="p-4 border-b border-gray-100 bg-gray-50/50 flex flex-wrap gap-3 items-end">
             <div class="flex-1 min-w-[200px]">
@@ -82,13 +84,14 @@
                 <thead class="bg-gray-50 text-xs uppercase text-gray-500 border-b border-gray-100">
                     <tr>
                         <th class="px-4 py-3 w-10">
-                            <input type="checkbox" @change="selected = $event.target.checked ? {{ $logs->pluck('id') }} : []" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                            <input type="checkbox" @change="toggleAll($event.target.checked)" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
                         </th>
                         <th class="px-4 py-3 font-semibold">{{ __('User') }}</th>
                         <th class="px-4 py-3 font-semibold">{{ __('Event') }}</th>
                         <th class="px-4 py-3 font-semibold">{{ __('Description') }}</th>
                         <th class="px-4 py-3 font-semibold">{{ __('IP Address') }}</th>
                         <th class="px-4 py-3 font-semibold text-right">{{ __('Date') }}</th>
+                        <th class="px-4 py-3 w-10"></th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
@@ -124,10 +127,20 @@
                                 <div>{{ $log->created_at->format('M d, Y') }}</div>
                                 <div class="text-[10px] text-gray-400" title="{{ $log->created_at->format('H:i:s') }}">{{ $log->ago() }}</div>
                             </td>
+                            <td class="px-4 py-3 text-right">
+                                {{-- YENİ: Tək-tək silmə düyməsi --}}
+                                <form method="POST" action="{{ route('admin.activity-log.destroy', $log) }}" onsubmit="return confirm('{{ __('Delete this log?') }}')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    </button>
+                                </form>
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-4 py-12 text-center text-gray-500">
+                            <td colspan="7" class="px-4 py-12 text-center text-gray-500">
                                 <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                                 <p>{{ __('No activity logs found.') }}</p>
                             </td>
@@ -144,13 +157,17 @@
         @endif
     </div>
 
+    {{-- Toplu Silmə Paneli --}}
     <div x-show="selected.length > 0" x-cloak x-transition class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-gray-900 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-4">
         <span class="text-sm font-medium"><span x-text="selected.length"></span> {{ __('items selected') }}</span>
         <div class="w-px h-4 bg-gray-700"></div>
-        <button type="button" @click="fetch('{{ route('admin.activity-log.bulk') }}', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }, body: JSON.stringify({ ids: selected, action: 'delete' }) }).then(() => window.location.reload())" class="text-sm font-semibold text-red-400 hover:text-red-300 transition">{{ __('Delete Selected') }}</button>
-        <button type="button" @click="selected = []" class="text-gray-400 hover:text-white transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg></button>
+        <button type="button" @click="bulkDelete()" class="text-sm font-semibold text-red-400 hover:text-red-300 transition">{{ __('Delete Selected') }}</button>
+        <button type="button" @click="selected = []" class="text-gray-400 hover:text-white transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
     </div>
 
+    {{-- Təmizləmə Modalı --}}
     <div x-show="clearOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div x-show="clearOpen" x-transition.opacity @click="clearOpen = false" class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm"></div>
         <div x-show="clearOpen" x-transition class="relative bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
@@ -179,4 +196,46 @@
     </div>
 
 </div>
+
+<script>
+function activityLog(allIds) {
+    return {
+        selected: [],
+        clearOpen: false,
+        clearDays: '30',
+        allIds: allIds,
+
+        toggleAll(checked) {
+            this.selected = checked ? this.allIds : [];
+        },
+
+        async bulkDelete() {
+            if (!confirm('{{ __('Are you sure you want to delete selected logs?') }}')) return;
+
+            try {
+                const res = await fetch('{{ route('admin.activity-log.bulk') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json', // VACİB: Laravel-ə JSON gözlədiyini bildirir
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ ids: this.selected, action: 'delete' })
+                });
+                
+                const data = await res.json();
+                
+                if (res.ok && data.success) {
+                    window.location.reload();
+                } else {
+                    alert(data.message || '{{ __('An error occurred.') }}');
+                }
+            } catch (e) {
+                alert('{{ __('Network error. Check console.') }}');
+                console.error(e);
+            }
+        }
+    };
+}
+</script>
 @endsection
