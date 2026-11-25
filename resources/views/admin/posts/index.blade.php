@@ -157,7 +157,7 @@
                     <input type="hidden" name="action" :value="bulkAction">
                 </div>
 
-                <table class="w-full text-sm table-fixed">
+                <table class="w-full text-sm table-fixed" style="table-layout:fixed;width:100%;">
                     <thead class="bg-gray-50 border-b border-gray-100">
                         <tr>
                             <th class="w-10 px-4 py-3">
@@ -166,7 +166,7 @@
                                        :checked="selected.length === {{ $posts->count() }} && {{ $posts->count() }} > 0"
                                        class="rounded border-gray-300 text-rj-purple focus:ring-rj-purple">
                             </th>
-                            <th class="w-auto text-left font-medium text-gray-600 px-4 py-3">{{ __('Title') }}</th>
+                            <th class="text-left font-medium text-gray-600 px-4 py-3" style="width:auto;">{{ __('Title') }}</th>
                             <th class="w-40 text-left font-medium text-gray-600 px-4 py-3 hidden lg:table-cell">{{ __('Author') }}</th>
                             <th class="w-48 text-left font-medium text-gray-600 px-4 py-3 hidden xl:table-cell">{{ __('Categories / Tags') }}</th>
                             <th class="w-24 text-center font-medium text-gray-600 px-4 py-3 hidden md:table-cell">{{ __('Comments') }}</th>
@@ -183,8 +183,8 @@
                                 </td>
 
                                 {{-- FIX: overflow-hidden + max-w-0 → hüceyrə məzmuna görə genişlənmir, uzun mətn ... ilə kəsilir --}}
-                                <td class="px-4 py-3 overflow-hidden max-w-0">
-                                    <div class="flex items-start gap-3 min-w-0">
+                                <td class="px-4 py-3" style="max-width:0;overflow:hidden;">
+                                    <div class="flex items-start gap-3" style="min-width:0;">
                                         @if ($post->featured_image)
                                             <img src="{{ Str::startsWith($post->featured_image, 'http') ? $post->featured_image : asset($post->featured_image) }}"
                                                  alt="" class="w-12 h-12 rounded-lg object-cover flex-shrink-0 border border-gray-200">
@@ -194,8 +194,8 @@
                                             </div>
                                         @endif
 
-                                        <div class="min-w-0 flex-1 overflow-hidden">
-                                            <div class="flex items-center gap-2 min-w-0">
+                                        <div class="flex-1" style="min-width:0;overflow:hidden;">
+                                            <div class="flex items-center gap-2" style="min-width:0;">
                                                 @if ($post->is_sticky)
                                                     <span title="{{ __('Sticky') }}" class="text-amber-500 flex-shrink-0">
                                                         <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
@@ -203,7 +203,7 @@
                                                 @endif
 
                                                 <a href="{{ route('admin.posts.edit', $post) }}"
-                                                   class="block flex-1 min-w-0 text-sm font-medium text-gray-900 hover:text-rj-purple truncate"
+                                                   class="block flex-1 text-sm font-medium text-gray-900 hover:text-rj-purple" style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
                                                    title="{{ $post->title ?: __('(no title)') }}">
                                                     {{ $post->title ?: __('(no title)') }}
                                                 </a>
@@ -217,8 +217,8 @@
                                                 @endif
                                             </div>
 
-                                            <div class="text-xs text-gray-500 mt-0.5 min-w-0" title="/{{ $post->slug }}">
-                                                <code class="font-mono block truncate">/{{ $post->slug }}</code>
+                                            <div class="text-xs text-gray-500 mt-0.5" style="min-width:0;overflow:hidden;" title="/{{ $post->slug }}">
+                                                <code class="font-mono" style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">/{{ $post->slug }}</code>
                                             </div>
                                         </div>
                                     </div>
