@@ -261,6 +261,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::post('/tools/health/refresh', [ToolsHealthController::class, 'refresh'])->name('tools.health.refresh');
 
         Route::get('/tools/backup', [ToolsBackupController::class, 'index'])->name('tools.backup');
+        Route::get('/tools/backup/progress', [ToolsBackupController::class, 'progress'])->name('tools.backup.progress');
         Route::post('/tools/backup/create', [ToolsBackupController::class, 'create'])->name('tools.backup.create');
         Route::get('/tools/backup/download/{filename}', [ToolsBackupController::class, 'download'])->name('tools.backup.download');
         Route::delete('/tools/backup/{filename}', [ToolsBackupController::class, 'delete'])->name('tools.backup.delete');
@@ -558,6 +559,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/backup', fn() => redirect()->route('admin.tools.backup'))->name('backup');
         Route::put('/backup', fn() => redirect()->route('admin.tools.backup'))->name('backup.update');
         Route::post('/backup/create', fn() => redirect()->route('admin.tools.backup'))->name('backup.create');
+        Route::get('/backup/progress', fn() => redirect()->route('admin.tools.backup.progress'))->name('backup.progress');
         Route::get('/backup/download/{file}', fn($file) => redirect()->route('admin.tools.backup.download', ['filename' => $file]))->name('backup.download');
         Route::delete('/backup/{file}', fn($file) => redirect()->route('admin.tools.backup.delete', ['filename' => $file]))->name('backup.delete');
         Route::post('/backup/restore/{file}', fn($file) => redirect()->route('admin.tools.backup.restore', ['filename' => $file]))->name('backup.restore');
