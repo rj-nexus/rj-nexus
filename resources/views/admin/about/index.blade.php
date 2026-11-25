@@ -233,7 +233,7 @@
 </div>
 
 {{-- Dəstək / Donate bölməsi (standart dizayn) --}}
-<div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-8 mb-8 relative overflow-hidden">
+<div id="support" class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-8 mb-8 relative overflow-hidden" style="scroll-margin-top:90px;">
     <div class="absolute right-0 top-0 w-64 h-64 bg-gradient-to-br from-pink-500/10 to-orange-500/10 rounded-full blur-3xl -z-10"></div>
 
     <div class="flex flex-col lg:flex-row gap-8 items-start">
