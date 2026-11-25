@@ -333,6 +333,7 @@
                                 <tr x-show="quickEditId === {{ $post->id }}" x-cloak>
                                     <td colspan="7" class="px-4 py-5 bg-gradient-to-b from-blue-50/60 to-white border-b border-blue-100">
                                         <form method="POST" action="{{ route('admin.posts.quick-edit', $post) }}"
+                                              x-data="{ lang: '{{ $baseLocale }}' }"
                                               @submit.prevent="quickSave($el)">
                                             @csrf
 
@@ -342,35 +343,48 @@
                                                 <span class="text-xs text-gray-500 truncate min-w-0">— {{ $post->title ?: __('(no title)') }}</span>
                                             </div>
 
-                                            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 mb-4">
+                                            {{-- Dil tabları: neçə dil olursa olsun yer tutmur, yalnız seçilmiş dilin sahələri görünür --}}
+                                            <div class="flex flex-wrap gap-1.5 mb-3">
+                                                @foreach ($locales as $locale)
+                                                    <button type="button"
+                                                            @click="lang = '{{ $locale }}'"
+                                                            :class="lang === '{{ $locale }}' ? 'bg-rj-purple text-white border-rj-purple' : 'bg-white text-gray-600 border-gray-200 hover:border-rj-purple/50'"
+                                                            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-bold uppercase tracking-wide transition">
+                                                        @if (file_exists(public_path("images/flags/{$locale}.svg")))
+                                                            <img src="{{ asset("images/flags/{$locale}.svg") }}" alt="" class="w-3.5 h-2.5 object-cover rounded-sm">
+                                                        @endif
+                                                        {{ strtoupper($locale) }}
+                                                        @if ($locale === $baseLocale)
+                                                            <span class="w-1 h-1 rounded-full bg-rj-pink"></span>
+                                                        @endif
+                                                    </button>
+                                                @endforeach
+                                            </div>
+
+                                            <div class="mb-4">
                                                 @foreach ($locales as $locale)
                                                     @php
                                                         $t = $post->translations->firstWhere('locale', $locale);
                                                         $isBase = $locale === $baseLocale;
                                                     @endphp
-                                                    <div class="bg-white rounded-lg border border-gray-200 p-3">
-                                                        <div class="flex items-center gap-1.5 mb-2">
-                                                            @if (file_exists(public_path("images/flags/{$locale}.svg")))
-                                                                <img src="{{ asset("images/flags/{$locale}.svg") }}" alt="" class="w-3.5 h-2.5 object-cover rounded-sm">
-                                                            @endif
-                                                            <span class="text-[10px] font-bold text-gray-600 uppercase tracking-wide">{{ strtoupper($locale) }}</span>
-                                                            @if ($isBase)
-                                                                <span class="w-1 h-1 rounded-full bg-rj-pink"></span>
-                                                            @endif
-                                                        </div>
-
-                                                        <div class="space-y-2">
+                                                    <div x-show="lang === '{{ $locale }}'" @if (! $isBase) x-cloak @endif
+                                                         class="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-3xl">
+                                                        <div class="min-w-0">
+                                                            <label class="block text-[11px] font-medium text-gray-500 mb-1">{{ __('Title') }}</label>
                                                             <input type="text"
                                                                    name="{{ $isBase ? 'title' : "translations[{$locale}][title]" }}"
                                                                    value="{{ $isBase ? $post->title : ($t?->title) }}"
                                                                    placeholder="{{ __('Title') }}"
                                                                    class="w-full text-sm rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple">
+                                                        </div>
 
+                                                        <div class="min-w-0">
+                                                            <label class="block text-[11px] font-medium text-gray-500 mb-1">{{ __('Slug') }}</label>
                                                             <input type="text"
                                                                    name="{{ $isBase ? 'slug' : "translations[{$locale}][slug]" }}"
                                                                    value="{{ $isBase ? $post->slug : ($t?->slug) }}"
                                                                    placeholder="{{ __('Slug') }}"
-                                                                   class="w-full text-xs font-mono rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple">
+                                                                   class="w-full text-sm font-mono rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple">
                                                         </div>
                                                     </div>
                                                 @endforeach
