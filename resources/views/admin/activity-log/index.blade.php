@@ -5,6 +5,7 @@
 @section('content')
 <div x-data="activityLog({{ $logs->pluck('id') }})" class="space-y-6">
 
+    {{-- Başlıq və Təmizləmə Düyməsi --}}
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
             <h1 class="text-2xl font-bold text-gray-900">{{ __('Activity Log') }}</h1>
@@ -38,7 +39,7 @@
         </div>
     </div>
 
-    {{-- Filtrlər və Cədvəl --}}
+    {{-- Cədvəl və Filtrlər --}}
     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <form method="GET" action="{{ route('admin.activity-log.index') }}" class="p-4 border-b border-gray-100 bg-gray-50/50 flex flex-wrap gap-3 items-end">
             <div class="flex-1 min-w-[200px]">
@@ -84,7 +85,8 @@
                 <thead class="bg-gray-50 text-xs uppercase text-gray-500 border-b border-gray-100">
                     <tr>
                         <th class="px-4 py-3 w-10">
-                            <input type="checkbox" @change="toggleAll($event.target.checked)" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                            {{-- Select All Checkbox --}}
+                            <input type="checkbox" @change="toggleAll($event.target.checked)" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
                         </th>
                         <th class="px-4 py-3 font-semibold">{{ __('User') }}</th>
                         <th class="px-4 py-3 font-semibold">{{ __('Event') }}</th>
@@ -98,7 +100,7 @@
                     @forelse($logs as $log)
                         <tr class="hover:bg-gray-50/50 transition">
                             <td class="px-4 py-3">
-                                <input type="checkbox" value="{{ $log->id }}" x-model="selected" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                                <input type="checkbox" value="{{ $log->id }}" x-model="selected" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
                             </td>
                             <td class="px-4 py-3">
                                 <div class="flex items-center gap-2">
@@ -128,11 +130,11 @@
                                 <div class="text-[10px] text-gray-400" title="{{ $log->created_at->format('H:i:s') }}">{{ $log->ago() }}</div>
                             </td>
                             <td class="px-4 py-3 text-right">
-                                {{-- YENİ: Tək-tək silmə düyməsi --}}
+                                {{-- Tək-tək Silmə Düyməsi --}}
                                 <form method="POST" action="{{ route('admin.activity-log.destroy', $log) }}" onsubmit="return confirm('{{ __('Delete this log?') }}')">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition">
+                                    <button type="submit" class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="{{ __('Delete') }}">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                     </button>
                                 </form>
@@ -157,7 +159,7 @@
         @endif
     </div>
 
-    {{-- Toplu Silmə Paneli --}}
+    {{-- Toplu Silmə Paneli (Yalnız seçim olanda görünür) --}}
     <div x-show="selected.length > 0" x-cloak x-transition class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-gray-900 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-4">
         <span class="text-sm font-medium"><span x-text="selected.length"></span> {{ __('items selected') }}</span>
         <div class="w-px h-4 bg-gray-700"></div>
@@ -167,7 +169,7 @@
         </button>
     </div>
 
-    {{-- Təmizləmə Modalı --}}
+    {{-- Təmizləmə Modalı (Clear Logs) --}}
     <div x-show="clearOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div x-show="clearOpen" x-transition.opacity @click="clearOpen = false" class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm"></div>
         <div x-show="clearOpen" x-transition class="relative bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
@@ -203,13 +205,15 @@ function activityLog(allIds) {
     return {
         selected: [],
         clearOpen: false,
-        clearDays: '30',
+        clearDays: 'all', // Default olaraq hamısını sil seçili gəlir
         allIds: allIds,
 
+        // Başlıqdakı checkbox-a basanda hamısını seçir və ya heç birini seçmir
         toggleAll(checked) {
             this.selected = checked ? this.allIds : [];
         },
 
+        // Toplu silmə funksiyası
         async bulkDelete() {
             if (!confirm('{{ __('Are you sure you want to delete selected logs?') }}')) return;
 
@@ -218,7 +222,7 @@ function activityLog(allIds) {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json', // VACİB: Laravel-ə JSON gözlədiyini bildirir
+                        'Accept': 'application/json', // Laravel-ə JSON gözlədiyini bildirir
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
                     body: JSON.stringify({ ids: this.selected, action: 'delete' })
