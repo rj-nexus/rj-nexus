@@ -5,7 +5,7 @@
 @section('content')
 <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
 
-<div class="max-w-7xl mx-auto space-y-6 pb-12" x-data="marketingTool()">
+<div class="max-w-7xl mx-auto space-y-6 pb-12" x-data="marketingTool(@js($siteLogo))">
     
     <div class="flex items-center justify-between">
         <div>
@@ -40,11 +40,26 @@
                     </div>
                 </div>
 
-                <!-- Background Image -->
+                <!-- Post Seçimi (YENİ) -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-900 mb-2">{{ __('Background Image URL') }}</label>
-                    <input type="url" x-model="bgImage" placeholder="https://..." class="w-full rounded-lg border-gray-300 text-sm focus:ring-rj-purple focus:border-rj-purple">
-                    <p class="text-xs text-gray-500 mt-1">{{ __('Leave empty for default gradient.') }}</p>
+                    <label class="block text-sm font-semibold text-gray-900 mb-2">{{ __('Select Post') }}</label>
+                    <select @change="loadPostData($event)" class="w-full rounded-lg border-gray-300 text-sm focus:ring-rj-purple focus:border-rj-purple">
+                        <option value="">{{ __('-- Custom Text --') }}</option>
+                        @foreach($posts as $post)
+                            <option value="{{ $post->id }}" data-title="{{ $post->title }}" data-content="{{ Str::limit(strip_tags($post->content), 100) }}">
+                                {{ Str::limit($post->title, 50) }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- Şəkil Yükləmə (YENİ) -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-900 mb-2">{{ __('Background Image') }}</label>
+                    <input type="file" accept="image/*" @change="handleImageUpload($event)" 
+                           class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-rj-purple/10 file:text-rj-purple hover:file:bg-rj-purple/20 transition">
+                    <p class="text-xs text-gray-500 mt-1">{{ __('Upload a high-quality image.') }}</p>
+                    <button x-show="bgImage" @click="bgImage = ''" class="text-xs text-red-500 mt-2 hover:underline">{{ __('Remove Image') }}</button>
                 </div>
 
                 <!-- Text Content -->
@@ -82,7 +97,7 @@
                  :class="aspectRatio"
                  :style="`background: ${bgImage ? `url('${bgImage}') center/cover no-repeat` : `linear-gradient(135deg, ${color1}, ${color2})`}`">
                 
-                <!-- Qaralma effekti (şəkil varsa yazılar oxunsun deyə) -->
+                <!-- Qaralma effekti -->
                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none"></div>
 
                 <!-- Məzmun -->
@@ -95,9 +110,12 @@
                        :class="aspectRatio === 'ratio-9-16' ? 'text-xl' : 'text-lg'"
                        x-text="subtitle || 'Your subtitle or description goes here.'"></p>
                     
-                    <!-- Logo / Brand -->
+                    <!-- Dinamik Sayt Loqosu (YENİ) -->
                     <div class="mt-8 flex items-center gap-3">
-                        <div class="w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center text-white font-bold border border-white/30">
+                        <div x-show="logoUrl" class="h-10 px-3 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/30 shadow-sm">
+                            <img :src="logoUrl" alt="Logo" class="h-6 object-contain">
+                        </div>
+                        <div x-show="!logoUrl" class="w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center text-white font-bold border border-white/30">
                             RJ
                         </div>
                         <span class="text-white font-bold tracking-widest uppercase text-sm">RJ Nexus</span>
@@ -127,15 +145,16 @@
 </style>
 
 <script>
-function marketingTool() {
+function marketingTool(siteLogo) {
     return {
-        bgImage: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop',
+        bgImage: '', // Default olaraq boşdur, gradient işləyəcək
         title: 'Create Stunning Posts',
         subtitle: 'Generate beautiful marketing graphics directly from your admin panel in seconds.',
         color1: '#a78bfa',
         color2: '#f472b6',
         aspectRatio: 'ratio-1-1',
         downloading: false,
+        logoUrl: siteLogo, // Bazadan gələn loqo
         ratios: [
             { label: '1:1', value: 'ratio-1-1', class: 'w-6 h-6' },
             { label: '4:3', value: 'ratio-4-3', class: 'w-7 h-5' },
@@ -143,6 +162,33 @@ function marketingTool() {
             { label: '4:5', value: 'ratio-4-5', class: 'w-5 h-6' },
             { label: '9:16', value: 'ratio-9-16', class: 'w-4 h-7' }
         ],
+
+        // Şəkil yükləmə funksiyası
+        handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.bgImage = e.target.result; // Base64 string kimi arxa plana veririk
+                };
+                reader.readAsDataURL(file);
+            }
+        },
+
+        // Məqalə seçildikdə başlıq və mətni dolduran funksiya
+        loadPostData(event) {
+            const select = event.target;
+            const option = select.options[select.selectedIndex];
+            
+            if (option.value) {
+                this.title = option.getAttribute('data-title');
+                this.subtitle = option.getAttribute('data-content');
+                // Yazı seçildikdə default rəngləri dəyişə bilərsiniz (istəyə bağlı)
+            } else {
+                this.title = 'Create Stunning Posts';
+                this.subtitle = 'Generate beautiful marketing graphics directly from your admin panel in seconds.';
+            }
+        },
 
         async downloadImage() {
             this.downloading = true;
@@ -157,7 +203,7 @@ function marketingTool() {
                 
                 // Yükləmə linki yaradırıq
                 const link = document.createElement('a');
-                link.download = `rj-post-${Date.now()}.png`;
+                link.download = `rj-marketing-post-${Date.now()}.png`;
                 link.href = dataUrl;
                 link.click();
             } catch (error) {
