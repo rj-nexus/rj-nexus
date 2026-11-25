@@ -5,7 +5,8 @@
 @section('content')
 <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
 
-<div class="w-full max-w-[1600px] mx-auto space-y-6 pb-12" x-data="marketingTool(@js($siteLogo))">
+{{-- w-full və overflow-hidden əlavə edildi ki, kənara çıxmasın --}}
+<div class="w-full max-w-full space-y-6 pb-12" x-data="marketingTool(@js($siteLogo))">
     
     {{-- Yuxarı Başlıq və Düymələr --}}
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-gray-200 shadow-sm">
@@ -14,12 +15,10 @@
                 <svg class="w-5 h-5 text-rj-purple" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
                 {{ __('Marketing Post Generator') }}
             </h1>
-            <p class="text-sm text-gray-500 mt-1">{{ __('Create beautiful social media graphics directly from your posts.') }}</p>
         </div>
         
         <div class="flex items-center gap-3">
             <button type="button" @click="resetAll()" :disabled="downloading" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 border border-gray-200 text-gray-700 text-sm font-semibold hover:bg-gray-200 transition disabled:opacity-50">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                 {{ __('Reset') }}
             </button>
 
@@ -31,18 +30,18 @@
         </div>
     </div>
 
-    {{-- ƏSAS LAYOUT (GRID İLƏ) --}}
-    <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+    {{-- ƏSAS LAYOUT (MƏCBURİ YAN-YANA) --}}
+    <div class="flex flex-col lg:flex-row gap-6 items-start w-full">
         
-        {{-- SOL PANEL: İdarəetmə (4 Sütun) --}}
-        <div class="xl:col-span-4 space-y-6">
+        {{-- SOL PANEL: İdarəetmə (Sabit en) --}}
+        <div class="w-full lg:w-[380px] lg:shrink-0 space-y-4">
             <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm space-y-5">
                 
-                {{-- 1. Post Seçimi --}}
+                {{-- Post Seçimi (Ən əsas hissə) --}}
                 <div>
-                    <label class="block text-sm font-bold text-gray-900 mb-2">{{ __('1. Select Post') }}</label>
+                    <label class="block text-sm font-bold text-gray-900 mb-2">{{ __('Select Post') }}</label>
                     <select @change="loadPostData($event)" x-model="selectedPostId" class="w-full rounded-xl border-gray-300 text-sm focus:ring-rj-purple focus:border-rj-purple bg-gray-50 cursor-pointer">
-                        <option value="">{{ __('-- Custom Text (No Post) --') }}</option>
+                        <option value="">{{ __('-- Custom Text --') }}</option>
                         @foreach($posts as $post)
                             <option value="{{ $post->id }}" 
                                     data-title="{{ $post->title }}" 
@@ -54,69 +53,63 @@
                     </select>
                 </div>
 
-                <hr class="border-gray-100">
-
-                {{-- 2. Şəkil Yükləmə --}}
+                {{-- Şəkil Yükləmə (Öz şəklini yükləmək istəyənlər üçün) --}}
                 <div>
-                    <label class="block text-sm font-bold text-gray-900 mb-2">{{ __('2. Background Image') }}</label>
+                    <label class="block text-sm font-bold text-gray-900 mb-2">{{ __('Custom Image (Optional)') }}</label>
                     <div class="relative border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:bg-gray-50 transition group">
                         <input type="file" accept="image/*" @change="handleImageUpload($event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-                        <svg class="w-6 h-6 mx-auto text-gray-400 group-hover:text-rj-purple transition-colors mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                        <span class="text-xs text-gray-600 font-semibold">{{ __('Click to upload') }}</span>
+                        <span class="text-xs text-gray-600 font-semibold">{{ __('Upload Image') }}</span>
                     </div>
-                    <button x-show="bgImage" @click="bgImage = ''" class="text-xs text-red-500 mt-2 hover:underline flex items-center gap-1">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                        {{ __('Remove Image') }}
+                    <button x-show="bgImage" @click="bgImage = ''" class="text-xs text-red-500 mt-2 hover:underline">
+                        {{ __('Remove Uploaded Image') }}
                     </button>
                 </div>
 
                 <hr class="border-gray-100">
 
-                {{-- 3. Mətn --}}
+                {{-- Mətn (Avtomatik gəlir, amma dəyişmək olar) --}}
                 <div class="space-y-3">
-                    <label class="block text-sm font-bold text-gray-900 mb-1">{{ __('3. Text Content') }}</label>
                     <div>
-                        <input type="text" x-model="title" placeholder="Title..." class="w-full rounded-xl border-gray-300 text-sm focus:ring-rj-purple focus:border-rj-purple font-bold">
+                        <label class="block text-xs font-bold text-gray-700 mb-1">{{ __('Title') }}</label>
+                        <input type="text" x-model="title" class="w-full rounded-lg border-gray-300 text-sm focus:ring-rj-purple focus:border-rj-purple font-bold">
                     </div>
                     <div>
-                        <textarea x-model="subtitle" rows="3" placeholder="Subtitle..." class="w-full rounded-xl border-gray-300 text-sm focus:ring-rj-purple focus:border-rj-purple"></textarea>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">{{ __('Subtitle') }}</label>
+                        <textarea x-model="subtitle" rows="2" class="w-full rounded-lg border-gray-300 text-sm focus:ring-rj-purple focus:border-rj-purple"></textarea>
                     </div>
                 </div>
 
-                <hr class="border-gray-100">
-
-                {{-- 4. Rənglər --}}
+                {{-- Rənglər --}}
                 <div>
-                    <label class="block text-sm font-bold text-gray-900 mb-2">{{ __('Gradient Colors') }}</label>
-                    <div class="flex gap-3">
-                        <input type="color" x-model="color1" class="w-full h-10 rounded-lg cursor-pointer border border-gray-200 p-1 bg-white">
-                        <input type="color" x-model="color2" class="w-full h-10 rounded-lg cursor-pointer border border-gray-200 p-1 bg-white">
+                    <label class="block text-xs font-bold text-gray-700 mb-1">{{ __('Background Colors (If no image)') }}</label>
+                    <div class="flex gap-2">
+                        <input type="color" x-model="color1" class="w-1/2 h-8 rounded cursor-pointer border border-gray-200 p-1 bg-white">
+                        <input type="color" x-model="color2" class="w-1/2 h-8 rounded cursor-pointer border border-gray-200 p-1 bg-white">
                     </div>
                 </div>
 
             </div>
         </div>
 
-        {{-- SAĞ PANEL: Önizləmə (8 Sütun) --}}
-        <div class="xl:col-span-8 space-y-4">
+        {{-- SAĞ PANEL: Önizləmə (Qalan bütün sahə) --}}
+        <div class="flex-1 w-full min-w-0 space-y-4">
             
-            {{-- Aspect Ratio (Ölçü) Düymələri --}}
+            {{-- Ölçü Düymələri --}}
             <div class="flex flex-wrap items-center gap-2 bg-white p-2 rounded-xl border border-gray-200 w-fit shadow-sm">
                 <span class="text-xs font-bold text-gray-500 uppercase px-2">{{ __('Size') }}:</span>
                 <template x-for="ratio in ratios" :key="ratio.value">
                     <button type="button" @click="aspectRatio = ratio.value" 
                             :class="aspectRatio === ratio.value ? 'bg-rj-purple text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'"
                             class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5">
-                        <div :class="ratio.class" class="border border-current rounded-sm opacity-70"></div>
                         <span x-text="ratio.label"></span>
                     </button>
                 </template>
             </div>
 
-            {{-- Önizləmə Sahəsi --}}
+            {{-- Kətan Sahəsi --}}
             <div class="bg-gray-100 rounded-2xl border border-gray-200 p-4 sm:p-8 flex items-center justify-center overflow-hidden min-h-[600px] shadow-inner relative">
                 
-                {{-- Loader --}}
+                {{-- Yükləmə Loader --}}
                 <div x-show="downloading" x-cloak class="absolute inset-0 z-50 bg-gray-100/80 backdrop-blur-sm flex items-center justify-center rounded-2xl">
                     <div class="text-gray-900 text-center">
                         <svg class="w-10 h-10 animate-spin mx-auto text-rj-purple mb-3" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" opacity=".25"/><path fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z"/></svg>
@@ -124,7 +117,7 @@
                     </div>
                 </div>
 
-                {{-- ŞƏKİL (CANVAS) --}}
+                {{-- ŞƏKİL --}}
                 <div id="post-canvas" 
                      class="relative overflow-hidden flex flex-col justify-end p-6 sm:p-10 shadow-2xl transition-all duration-300 ease-out bg-gray-900 rounded-xl"
                      :class="aspectRatio"
@@ -136,14 +129,14 @@
                     {{-- Məzmun --}}
                     <div class="relative z-10 w-full">
                         <h2 class="text-white font-extrabold leading-tight mb-2 drop-shadow-lg" 
-                            :class="aspectRatio === 'ratio-9-16' ? 'text-4xl' : 'text-2xl sm:text-3xl'"
+                            :class="aspectRatio === 'ratio-9-16' ? 'text-4xl' : 'text-2xl sm:text-4xl'"
                             style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;"
                             x-text="title || 'Your Title Here'"></h2>
                         
                         <p class="text-white/80 font-medium leading-relaxed drop-shadow-md" 
-                           :class="aspectRatio === 'ratio-9-16' ? 'text-lg' : 'text-sm sm:text-base'"
+                           :class="aspectRatio === 'ratio-9-16' ? 'text-lg' : 'text-sm sm:text-lg'"
                            style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;"
-                           x-text="subtitle || 'Your subtitle or description goes here.'"></p>
+                           x-text="subtitle || 'Your subtitle goes here.'"></p>
                         
                         {{-- Logo --}}
                         <div class="mt-6 flex items-center gap-2">
@@ -166,7 +159,7 @@
 </div>
 
 <style>
-    /* Aspect Ratio (Ölçü) Classları */
+    /* Ölçülər (Max-width verərək daşmasının qarşısını alırıq) */
     .ratio-1-1 { width: 100%; max-width: 500px; aspect-ratio: 1/1; }
     .ratio-4-3 { width: 100%; max-width: 533px; aspect-ratio: 4/3; }
     .ratio-16-9 { width: 100%; max-width: 700px; aspect-ratio: 16/9; }
@@ -188,11 +181,11 @@ function marketingTool(siteLogo) {
         logoUrl: siteLogo,
         
         ratios: [
-            { label: '1:1', value: 'ratio-1-1', class: 'w-4 h-4' },
-            { label: '4:3', value: 'ratio-4-3', class: 'w-5 h-4' },
-            { label: '16:9', value: 'ratio-16-9', class: 'w-6 h-3' },
-            { label: '4:5', value: 'ratio-4-5', class: 'w-4 h-5' },
-            { label: '9:16', value: 'ratio-9-16', class: 'w-3 h-5' }
+            { label: '1:1 (Kvadrat)', value: 'ratio-1-1' },
+            { label: '4:3 (Üfüqi)', value: 'ratio-4-3' },
+            { label: '16:9 (Geniş)', value: 'ratio-16-9' },
+            { label: '4:5 (Şaquli)', value: 'ratio-4-5' },
+            { label: '9:16 (Story)', value: 'ratio-9-16' }
         ],
 
         handleImageUpload(event) {
@@ -239,7 +232,7 @@ function marketingTool(siteLogo) {
                 link.click();
             } catch (error) {
                 console.error('Error:', error);
-                alert('Xəta baş verdi. Şəklin xarici linkdən gəlməsindən qaynaqlana bilər.');
+                alert('Şəkil yüklənərkən xəta baş verdi.');
             } finally {
                 this.downloading = false;
             }
