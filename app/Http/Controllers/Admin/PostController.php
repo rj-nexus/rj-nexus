@@ -55,7 +55,7 @@ class PostController extends Controller
     {
         $type = $request->input('type') ?? $request->route()->defaults['type'] ?? 'post';
 
-        $query = Post::with(['author', 'categories', 'tags'])
+        $query = Post::with(['author', 'categories', 'tags', 'translations'])
             ->where('type', $type)
             ->orderByDesc('created_at');
 
@@ -96,7 +96,10 @@ class PostController extends Controller
         $tags = Tag::with('translations')->ordered()->get()->sortBy('name')->values();
         $postTypes = PostType::active()->ordered()->get();
 
-        return view('admin.posts.index', compact('posts', 'counts', 'categories', 'tags', 'type', 'status', 'postTypes'));
+        $locales = rj_frontend_locales();
+        $baseLocale = config('app.base_locale');
+
+        return view('admin.posts.index', compact('posts', 'counts', 'categories', 'tags', 'type', 'status', 'postTypes', 'locales', 'baseLocale'));
     }
 
     public function create(Request $request)
