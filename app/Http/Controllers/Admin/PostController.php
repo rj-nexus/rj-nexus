@@ -13,6 +13,7 @@ use App\Services\AiAgentService;
 use App\Services\PostService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 
 class PostController extends Controller
 {
@@ -189,6 +190,48 @@ class PostController extends Controller
         }
 
         return back()->with('success', __('Post saved.'));
+    }
+
+    public function quickEdit(Request $request, Post $post)
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:draft,published,scheduled',
+            'title' => 'nullable|string|max:255',
+            'slug' => 'nullable|string|max:255',
+            'translations' => 'nullable|array',
+            'translations.*.title' => 'nullable|string|max:255',
+            'translations.*.slug' => 'nullable|string|max:255',
+        ]);
+
+        $baseLocale = config('app.base_locale', 'en');
+
+        if (isset($validated['title'])) {
+            $post->title = $validated['title'];
+        }
+        if (!empty($validated['slug'])) {
+            $post->slug = Str::slug($validated['slug']);
+        }
+        $post->status = $validated['status'];
+        $post->save();
+
+        foreach ($validated['translations'] ?? [] as $locale => $trans) {
+            if ($locale === $baseLocale) {
+                continue;
+            }
+
+            $post->translations()->updateOrCreate(
+                ['locale' => $locale],
+                [
+                    'title' => $trans['title'] ?? null,
+                    'slug' => !empty($trans['slug']) ? Str::slug($trans['slug']) : null,
+                ]
+            );
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => __('Post updated.'),
+        ]);
     }
 
     public function destroy(Post $post)
