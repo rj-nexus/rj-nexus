@@ -40,13 +40,16 @@
                     </div>
                 </div>
 
-                <!-- Post Seçimi (YENİ) -->
+                <!-- Post Seçimi (Şəkillə birlikdə) -->
                 <div>
                     <label class="block text-sm font-semibold text-gray-900 mb-2">{{ __('Select Post') }}</label>
                     <select @change="loadPostData($event)" class="w-full rounded-lg border-gray-300 text-sm focus:ring-rj-purple focus:border-rj-purple">
                         <option value="">{{ __('-- Custom Text --') }}</option>
                         @foreach($posts as $post)
-                            <option value="{{ $post->id }}" data-title="{{ $post->title }}" data-content="{{ Str::limit(strip_tags($post->content), 100) }}">
+                            <option value="{{ $post->id }}" 
+                                    data-title="{{ $post->title }}" 
+                                    data-content="{{ Str::limit(strip_tags($post->content), 100) }}"
+                                    data-image="{{ $post->featured_image ? (Str::startsWith($post->featured_image, 'http') ? $post->featured_image : asset($post->featured_image)) : '' }}">
                                 {{ Str::limit($post->title, 50) }}
                             </option>
                         @endforeach
