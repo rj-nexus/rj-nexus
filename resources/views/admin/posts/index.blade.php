@@ -3,7 +3,38 @@
 @section('title', $type === 'page' ? __('Pages') : __('Posts'))
 
 @section('content')
-<div class="space-y-6" x-data="{ selected: [], bulkAction: '' }">
+<div class="space-y-6" x-data="{
+    selected: [],
+    bulkAction: '',
+    quickEditId: null,
+    quickSaving: false,
+
+    async quickSave(formEl) {
+        if (this.quickSaving) return;
+        this.quickSaving = true;
+        try {
+            const res = await fetch(formEl.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: new FormData(formEl)
+            });
+            const data = await res.json();
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert(data.message || '{{ __('Failed to save.') }}');
+            }
+        } catch (e) {
+            alert('{{ __('Network error.') }}');
+        } finally {
+            this.quickSaving = false;
+        }
+    }
+}">
 
     <div class="flex items-center justify-between gap-4 flex-wrap">
         <div>
@@ -145,7 +176,7 @@
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         @foreach ($posts as $post)
-                            <tr class="hover:bg-gray-50/50 transition">
+                            <tr class="hover:bg-gray-50/50 transition" :class="quickEditId === {{ $post->id }} ? 'bg-blue-50/40' : ''">
                                 <td class="px-4 py-3">
                                     <input type="checkbox" :value="{{ $post->id }}" x-model.number="selected"
                                            class="rounded border-gray-300 text-rj-purple focus:ring-rj-purple">
@@ -162,29 +193,30 @@
                                             </div>
                                         @endif
 
-                                        <div class="min-w-0">
-                                            <div class="flex items-center gap-2 flex-wrap">
+                                        <div class="min-w-0 flex-1 max-w-md">
+                                            <div class="flex items-center gap-2 min-w-0">
                                                 @if ($post->is_sticky)
-                                                    <span title="{{ __('Sticky') }}" class="text-amber-500">
+                                                    <span title="{{ __('Sticky') }}" class="text-amber-500 flex-shrink-0">
                                                         <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                                                     </span>
                                                 @endif
 
                                                 <a href="{{ route('admin.posts.edit', $post) }}"
-                                                   class="text-sm font-medium text-gray-900 hover:text-rj-purple truncate">
+                                                   class="text-sm font-medium text-gray-900 hover:text-rj-purple truncate min-w-0"
+                                                   title="{{ $post->title ?: __('(no title)') }}">
                                                     {{ $post->title ?: __('(no title)') }}
                                                 </a>
 
                                                 @if ($post->status === 'draft')
-                                                    <span class="px-1.5 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700">{{ __('Draft') }}</span>
+                                                    <span class="px-1.5 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700 flex-shrink-0">{{ __('Draft') }}</span>
                                                 @elseif ($post->status === 'scheduled')
-                                                    <span class="px-1.5 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700">{{ __('Scheduled') }}</span>
+                                                    <span class="px-1.5 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700 flex-shrink-0">{{ __('Scheduled') }}</span>
                                                 @elseif ($post->status === 'trash')
-                                                    <span class="px-1.5 py-0.5 rounded text-xs font-medium bg-red-50 text-red-700">{{ __('Trash') }}</span>
+                                                    <span class="px-1.5 py-0.5 rounded text-xs font-medium bg-red-50 text-red-700 flex-shrink-0">{{ __('Trash') }}</span>
                                                 @endif
                                             </div>
 
-                                            <div class="text-xs text-gray-500 mt-0.5 truncate">
+                                            <div class="text-xs text-gray-500 mt-0.5 truncate" title="/{{ $post->slug }}">
                                                 <code class="font-mono">/{{ $post->slug }}</code>
                                             </div>
                                         </div>
@@ -259,6 +291,14 @@
                                                 </button>
                                             </form>
                                         @else
+                                            <button type="button"
+                                                    @click="quickEditId = (quickEditId === {{ $post->id }} ? null : {{ $post->id }})"
+                                                    class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-gray-500 hover:bg-blue-50 hover:text-blue-600 transition"
+                                                    :class="quickEditId === {{ $post->id }} ? 'bg-blue-100 text-blue-600' : ''"
+                                                    title="{{ __('Quick Edit') }}">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                            </button>
+
                                             <a href="{{ route('admin.posts.edit', $post) }}"
                                                class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-gray-500 hover:bg-rj-purple/10 hover:text-rj-purple transition" title="{{ __('Edit') }}">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
@@ -287,6 +327,83 @@
                                     </div>
                                 </td>
                             </tr>
+
+                            @if ($post->status !== 'trash')
+                                <tr x-show="quickEditId === {{ $post->id }}" x-cloak>
+                                    <td colspan="7" class="px-4 py-5 bg-gradient-to-b from-blue-50/60 to-white border-b border-blue-100">
+                                        <form method="POST" action="{{ route('admin.posts.quick-edit', $post) }}"
+                                              @submit.prevent="quickSave($el)">
+                                            @csrf
+
+                                            <div class="flex items-center gap-2 mb-4">
+                                                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                                <h4 class="text-sm font-bold text-gray-900">{{ __('Quick Edit') }}</h4>
+                                                <span class="text-xs text-gray-500">— {{ $post->title ?: __('(no title)') }}</span>
+                                            </div>
+
+                                            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 mb-4">
+                                                @foreach ($locales as $locale)
+                                                    @php
+                                                        $t = $post->translations->firstWhere('locale', $locale);
+                                                        $isBase = $locale === $baseLocale;
+                                                    @endphp
+                                                    <div class="bg-white rounded-lg border border-gray-200 p-3">
+                                                        <div class="flex items-center gap-1.5 mb-2">
+                                                            @if (file_exists(public_path("images/flags/{$locale}.svg")))
+                                                                <img src="{{ asset("images/flags/{$locale}.svg") }}" alt="" class="w-3.5 h-2.5 object-cover rounded-sm">
+                                                            @endif
+                                                            <span class="text-[10px] font-bold text-gray-600 uppercase tracking-wide">{{ strtoupper($locale) }}</span>
+                                                            @if ($isBase)
+                                                                <span class="w-1 h-1 rounded-full bg-rj-pink"></span>
+                                                            @endif
+                                                        </div>
+
+                                                        <div class="space-y-2">
+                                                            <input type="text"
+                                                                   name="{{ $isBase ? 'title' : "translations[{$locale}][title]" }}"
+                                                                   value="{{ $isBase ? $post->title : ($t?->title) }}"
+                                                                   placeholder="{{ __('Title') }}"
+                                                                   class="w-full text-sm rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple">
+
+                                                            <input type="text"
+                                                                   name="{{ $isBase ? 'slug' : "translations[{$locale}][slug]" }}"
+                                                                   value="{{ $isBase ? $post->slug : ($t?->slug) }}"
+                                                                   placeholder="{{ __('Slug') }}"
+                                                                   class="w-full text-xs font-mono rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple">
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+
+                                            <div class="flex items-center justify-between gap-3 flex-wrap">
+                                                <div class="flex items-center gap-2">
+                                                    <label class="text-xs font-medium text-gray-700">{{ __('Status') }}:</label>
+                                                    <select name="status" class="text-sm rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple">
+                                                        <option value="draft" {{ $post->status === 'draft' ? 'selected' : '' }}>{{ __('Draft') }}</option>
+                                                        <option value="published" {{ $post->status === 'published' ? 'selected' : '' }}>{{ __('Published') }}</option>
+                                                        <option value="scheduled" {{ $post->status === 'scheduled' ? 'selected' : '' }}>{{ __('Scheduled') }}</option>
+                                                    </select>
+                                                </div>
+
+                                                <div class="flex items-center gap-2">
+                                                    <button type="button"
+                                                            @click="quickEditId = null"
+                                                            class="px-4 py-1.5 rounded-lg bg-white border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition">
+                                                        {{ __('Cancel') }}
+                                                    </button>
+                                                    <button type="submit"
+                                                            :disabled="quickSaving"
+                                                            class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-gradient-to-r from-rj-purple to-rj-pink text-white text-sm font-medium hover:opacity-90 transition disabled:opacity-60">
+                                                        <svg x-show="!quickSaving" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                                        <svg x-show="quickSaving" x-cloak class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" opacity=".25"/><path fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z"/></svg>
+                                                        <span x-text="quickSaving ? '{{ __('Saving...') }}' : '{{ __('Update') }}'"></span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endif
                         @endforeach
                     </tbody>
                 </table>
