@@ -247,6 +247,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     });
 
     Route::view('/tools', 'admin.coming-soon')->name('tools.index');
+    
+    // YENİ: MARKETING POST GENERATOR ROUTE
+    Route::view('/tools/marketing', 'admin.tools.marketing')->name('tools.marketing');
 
     Route::middleware('throttle:60,1')->group(function () {
         Route::get('/tools/import', [ToolsImportController::class, 'index'])->name('tools.import');
