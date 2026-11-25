@@ -252,6 +252,10 @@
                     <img src="https://github.com/mr-ruhid/rare-logos-vault/blob/main/logo/monetization/cayvoy/cayvoy_logo.svg?raw=true" alt="Donate via Çayvoy"
                          style="height:40px; width:auto; max-width:100%;">
                 </a>
+                <a href="https://www.paypal.com/paypalme/ruhidjavadoff" target="_blank" rel="noopener" class="hover:-translate-y-1 transition-transform">
+                    <img src="https://img.shields.io/badge/Donate-PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white" alt="Donate via PayPal"
+                         style="height:40px; width:auto; max-width:100%; border-radius:8px;">
+                </a>
                 @if ($patreonUrl)
                     <a href="{{ $patreonUrl }}" target="_blank" rel="noopener" class="hover:-translate-y-1 transition-transform">
                         <img src="https://img.shields.io/badge/Support-Patreon-F96854?style=for-the-badge&logo=patreon&logoColor=white" alt="Support on Patreon"
@@ -280,6 +284,10 @@
                         <tr>
                             <td class="px-3 py-2 font-medium text-gray-900">Çayvoy</td>
                             <td class="px-3 py-2"><a href="https://cayvoy.com/donate/ruhid4715" target="_blank" rel="noopener" class="text-indigo-600 hover:underline">ruhid4715</a></td>
+                        </tr>
+                        <tr>
+                            <td class="px-3 py-2 font-medium text-gray-900">PayPal</td>
+                            <td class="px-3 py-2 text-gray-600">ruhidjavadoff@gmail.com</td>
                         </tr>
                         <tr>
                             <td class="px-3 py-2 font-medium text-gray-900">Patreon</td>
