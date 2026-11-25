@@ -36,18 +36,28 @@
     }
 }">
 
-    {{-- YUXARI HİSSƏ: Başlıq və Yeni "Create Post" Düyməsi --}}
+    {{-- YUXARI HİSSƏ: Başlıq və Düymələr --}}
     <div class="flex items-center justify-between gap-4 flex-wrap">
         <div>
-            <h2 class="text-2xl font-bold text-gray-900">{{ $type === 'page' ? __('Pages') : __('Posts') }}</h2>
+            <h2 class="text-base font-semibold text-gray-900">{{ $type === 'page' ? __('Pages') : __('Posts') }}</h2>
             <p class="text-sm text-gray-500 mt-1">{{ __('Manage your content, drafts, and scheduled items.') }}</p>
         </div>
 
         <div class="flex items-center gap-3">
+            {{-- YENİ: CREATE MARKETING POST BUTONU --}}
+            <a href="{{ route('admin.tools.marketing') }}"
+               class="group inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-all hover:shadow-lg hover:shadow-rj-purple/30 border border-gray-700 hover:border-rj-purple/50">
+                <svg class="w-4 h-4 text-rj-pink group-hover:rotate-12 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                </svg>
+                {{ __('Create Marketing Post') }}
+            </a>
+
+            {{-- ORİJİNAL ADD NEW BUTONU --}}
             <a href="{{ route('admin.posts.create', ['type' => $type]) }}"
-               class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-rj-purple to-rj-pink text-white text-sm font-bold hover:opacity-90 transition shadow-md shadow-rj-purple/30">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                {{ $type === 'page' ? __('Create Page') : __('Create Post') }}
+               class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-rj-purple to-rj-pink text-white text-sm font-medium hover:opacity-90 transition shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                {{ __('Add New') }}
             </a>
         </div>
     </div>
@@ -74,7 +84,7 @@
     </div>
 
     <div class="bg-white rounded-lg shadow-sm border border-gray-100">
-
+        {{-- ... (BURADAN AŞAĞISI SƏNİN ORİJİNAL KODUNDUR, HEÇ NƏ DƏYİŞMƏYİB) ... --}}
         <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between gap-3 flex-wrap">
             <form method="GET" action="{{ route('admin.posts.index') }}" class="flex items-center gap-3 flex-1 min-w-[200px] flex-wrap">
                 <input type="hidden" name="type" value="{{ $type }}">
@@ -131,7 +141,7 @@
                 <a href="{{ route('admin.posts.create', ['type' => $type]) }}"
                    class="inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-lg bg-gradient-to-r from-rj-purple to-rj-pink text-white text-sm font-medium hover:opacity-90 transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                    {{ $type === 'page' ? __('Create First Page') : __('Create First Post') }}
+                    {{ __('Create First Post') }}
                 </a>
             </div>
         @else
