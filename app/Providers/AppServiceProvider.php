@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\URL;
 
 use App\Observers\ActivityLogObserver;
 use App\Observers\ResponseCacheObserver;
+use App\Observers\CommentObserver; // YENİ ƏLAVƏ EDİLDİ
 use App\Models\Post;
 use App\Models\Media;
 use App\Models\User;
@@ -100,6 +101,9 @@ class AppServiceProvider extends ServiceProvider
         Tag::observe(ActivityLogObserver::class);
         Menu::observe(ActivityLogObserver::class);
         Role::observe(ActivityLogObserver::class);
+        
+        // YENİ: Şərh Observer-i qeydiyyatdan keçiririk
+        Comment::observe(CommentObserver::class);
 
         if (class_exists(\Spatie\ResponseCache\Facades\ResponseCache::class)) {
             Post::observe(ResponseCacheObserver::class);
