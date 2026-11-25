@@ -157,7 +157,7 @@
                     <input type="hidden" name="action" :value="bulkAction">
                 </div>
 
-                <table class="w-full text-sm">
+                <table class="w-full text-sm table-fixed">
                     <thead class="bg-gray-50 border-b border-gray-100">
                         <tr>
                             <th class="w-10 px-4 py-3">
@@ -167,11 +167,11 @@
                                        class="rounded border-gray-300 text-rj-purple focus:ring-rj-purple">
                             </th>
                             <th class="text-left font-medium text-gray-600 px-4 py-3">{{ __('Title') }}</th>
-                            <th class="text-left font-medium text-gray-600 px-4 py-3 hidden lg:table-cell">{{ __('Author') }}</th>
-                            <th class="text-left font-medium text-gray-600 px-4 py-3 hidden xl:table-cell">{{ __('Categories / Tags') }}</th>
-                            <th class="text-center font-medium text-gray-600 px-4 py-3 hidden md:table-cell">{{ __('Comments') }}</th>
-                            <th class="text-left font-medium text-gray-600 px-4 py-3 hidden md:table-cell">{{ __('Date') }}</th>
-                            <th class="text-right font-medium text-gray-600 px-4 py-3">{{ __('Actions') }}</th>
+                            <th class="w-40 text-left font-medium text-gray-600 px-4 py-3 hidden lg:table-cell">{{ __('Author') }}</th>
+                            <th class="w-48 text-left font-medium text-gray-600 px-4 py-3 hidden xl:table-cell">{{ __('Categories / Tags') }}</th>
+                            <th class="w-24 text-center font-medium text-gray-600 px-4 py-3 hidden md:table-cell">{{ __('Comments') }}</th>
+                            <th class="w-32 text-left font-medium text-gray-600 px-4 py-3 hidden md:table-cell">{{ __('Date') }}</th>
+                            <th class="w-48 text-right font-medium text-gray-600 px-4 py-3">{{ __('Actions') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
@@ -193,7 +193,7 @@
                                             </div>
                                         @endif
 
-                                        <div class="min-w-0 flex-1 max-w-md">
+                                        <div class="min-w-0 flex-1">
                                             <div class="flex items-center gap-2 min-w-0">
                                                 @if ($post->is_sticky)
                                                     <span title="{{ __('Sticky') }}" class="text-amber-500 flex-shrink-0">
@@ -225,17 +225,17 @@
 
                                 <td class="px-4 py-3 hidden lg:table-cell">
                                     <div class="flex items-center gap-2">
-                                        <div class="w-7 h-7 rounded-full bg-gradient-to-br from-rj-purple to-rj-pink flex items-center justify-center text-white text-xs font-semibold">
+                                        <div class="w-7 h-7 rounded-full bg-gradient-to-br from-rj-purple to-rj-pink flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
                                             {{ strtoupper(substr($post->author->name ?? '?', 0, 1)) }}
                                         </div>
-                                        <span class="text-sm text-gray-700">{{ $post->author->name ?? '—' }}</span>
+                                        <span class="text-sm text-gray-700 truncate">{{ $post->author->name ?? '—' }}</span>
                                     </div>
                                 </td>
 
                                 <td class="px-4 py-3 hidden xl:table-cell">
                                     <div class="flex flex-wrap gap-1">
                                         @foreach ($post->categories->take(2) as $cat)
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-rj-purple/10 text-rj-purple text-xs font-medium">
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-rj-purple/10 text-rj-purple text-xs font-medium truncate max-w-[80px]">
                                                 {{ $cat->name }}
                                             </span>
                                         @endforeach
@@ -258,7 +258,7 @@
                                 </td>
 
                                 <td class="px-4 py-3 hidden md:table-cell">
-                                    <div class="text-xs text-gray-600">
+                                    <div class="text-xs text-gray-600 whitespace-nowrap">
                                         @if ($post->status === 'scheduled' && $post->published_at)
                                             <div class="text-blue-600 font-medium">{{ __('Scheduled') }}</div>
                                             <div>{{ $post->published_at->format('M d, Y H:i') }}</div>
