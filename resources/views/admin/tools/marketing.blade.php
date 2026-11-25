@@ -33,263 +33,239 @@
 
 <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
 
-<div class="w-full max-w-full space-y-6 pb-12" x-data="marketingTool(@js($config))" x-cloak>
+<div id="mk-root" x-data="marketingTool(@js($config))" x-cloak>
 
-    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-gray-200 shadow-sm">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-rj-purple to-rj-pink flex items-center justify-center text-white shadow-md">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+    <div class="mk-head">
+        <div class="mk-head-left">
+            <div class="mk-badge-icon">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
             </div>
             <div>
-                <h1 class="text-lg font-bold text-gray-900 leading-tight">{{ __('Marketing Post Generator') }}</h1>
-                <p class="text-xs text-gray-500">{{ __('Turn your posts into ready-to-share graphics') }}</p>
+                <h1 class="mk-h1">{{ __('Marketing Post Generator') }}</h1>
+                <p class="mk-sub">{{ __('Turn your posts into ready-to-share graphics') }}</p>
             </div>
         </div>
 
-        <div class="flex flex-wrap items-center gap-2">
-            <button type="button" @click="reset()" :disabled="busy" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 border border-gray-200 text-gray-700 text-sm font-semibold hover:bg-gray-200 transition disabled:opacity-50">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h5M20 20v-5h-5M5.6 15A8 8 0 0018.4 9M18.4 9L20 9M5.6 15L4 15"/></svg>
+        <div class="mk-actions">
+            <button type="button" class="mk-btn" @click="reset()" :disabled="busy">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h5M20 20v-5h-5M5.6 15A8 8 0 0018.4 9"/></svg>
                 {{ __('Reset') }}
             </button>
-            <button type="button" @click="copy()" :disabled="busy" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-gray-300 text-gray-800 text-sm font-semibold hover:bg-gray-50 transition disabled:opacity-50">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+            <button type="button" class="mk-btn" @click="copy()" :disabled="busy">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                 {{ __('Copy') }}
             </button>
-            <button type="button" @click="download('jpeg')" :disabled="busy" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-gray-300 text-gray-800 text-sm font-semibold hover:bg-gray-50 transition disabled:opacity-50">
-                JPG
-            </button>
-            <button type="button" @click="download('png')" :disabled="busy" class="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-rj-purple to-rj-pink text-white text-sm font-bold shadow-md hover:opacity-90 transition disabled:opacity-50">
-                <svg x-show="!busy" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                <svg x-show="busy" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" opacity=".25"/><path fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z"/></svg>
+            <button type="button" class="mk-btn" @click="download('jpeg')" :disabled="busy">JPG</button>
+            <button type="button" class="mk-btn mk-btn-primary" @click="download('png')" :disabled="busy">
+                <svg x-show="!busy" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                <svg x-show="busy" class="mk-spin" width="16" height="16" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" opacity=".25"/><path fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z"/></svg>
                 <span x-text="busy ? '{{ __('Generating...') }}' : '{{ __('Download PNG') }}'"></span>
             </button>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start w-full min-w-0">
+    <div class="mk-layout">
 
-        <div class="lg:col-span-4 w-full min-w-0">
-            <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden lg:sticky lg:top-4">
-
-                <div class="p-3 border-b border-gray-100">
-                    <div class="grid grid-cols-3 gap-1 p-1 bg-gray-100 rounded-xl">
-                        <template x-for="t in tabs" :key="t.id">
-                            <button type="button" @click="tab = t.id"
-                                    :class="tab === t.id ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-800'"
-                                    class="py-2 rounded-lg text-xs font-bold transition" x-text="t.label"></button>
-                        </template>
-                    </div>
-                </div>
-
-                <div class="p-5 space-y-5 lg:max-h-[calc(100vh-14rem)] overflow-y-auto">
-
-                    <div x-show="tab === 'content'" class="space-y-5">
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1.5">{{ __('Pick a post') }}</label>
-                            <input type="text" x-model="search" placeholder="{{ __('Search posts...') }}" class="w-full rounded-xl border-gray-300 text-sm focus:ring-rj-purple focus:border-rj-purple">
-                            <div class="mt-2 max-h-52 overflow-y-auto space-y-1.5 pr-1">
-                                <template x-for="p in filteredPosts" :key="p.id">
-                                    <button type="button" @click="selectPost(p)"
-                                            :class="selectedPostId === p.id ? 'border-rj-purple bg-gray-50' : 'border-gray-200 hover:bg-gray-50'"
-                                            class="w-full flex items-center gap-3 p-2 rounded-xl border text-left transition">
-                                        <div class="w-10 h-10 rounded-lg bg-gray-100 shrink-0 overflow-hidden">
-                                            <img x-show="p.image" :src="p.image" loading="lazy" class="w-full h-full object-cover" x-on:error="$el.style.display = 'none'">
-                                        </div>
-                                        <span class="text-sm font-semibold text-gray-800 line-clamp-2" x-text="p.title"></span>
-                                    </button>
-                                </template>
-                                <p x-show="filteredPosts.length === 0" class="text-xs text-gray-500 py-3 text-center">{{ __('No posts found') }}</p>
-                            </div>
-                        </div>
-
-                        <hr class="border-gray-100">
-
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1.5">{{ __('Badge') }}</label>
-                            <input type="text" x-model="badge" maxlength="30" placeholder="{{ __('e.g. NEW, UPDATE, BLOG') }}" class="w-full rounded-xl border-gray-300 text-sm focus:ring-rj-purple focus:border-rj-purple">
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1.5">{{ __('Title') }}</label>
-                            <textarea x-model="title" rows="2" class="w-full rounded-xl border-gray-300 text-sm font-bold focus:ring-rj-purple focus:border-rj-purple"></textarea>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1.5">{{ __('Subtitle') }}</label>
-                            <textarea x-model="subtitle" rows="3" class="w-full rounded-xl border-gray-300 text-sm focus:ring-rj-purple focus:border-rj-purple"></textarea>
-                        </div>
-                    </div>
-
-                    <div x-show="tab === 'background'" class="space-y-5">
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-2">{{ __('Gradient presets') }}</label>
-                            <div class="grid grid-cols-4 gap-2">
-                                <template x-for="g in gradients" :key="g[0] + g[1]">
-                                    <button type="button" @click="color1 = g[0]; color2 = g[1]"
-                                            :style="`background: linear-gradient(135deg, ${g[0]}, ${g[1]})`"
-                                            :class="color1 === g[0] && color2 === g[1] ? 'ring-2 ring-offset-2 ring-rj-purple' : ''"
-                                            class="h-10 rounded-lg border border-black/10 transition hover:scale-105"></button>
-                                </template>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-xs font-bold text-gray-700 mb-1.5">{{ __('Color 1') }}</label>
-                                <input type="color" x-model="color1" class="w-full h-10 rounded-lg cursor-pointer border border-gray-200 p-1 bg-white">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-gray-700 mb-1.5">{{ __('Color 2') }}</label>
-                                <input type="color" x-model="color2" class="w-full h-10 rounded-lg cursor-pointer border border-gray-200 p-1 bg-white">
-                            </div>
-                        </div>
-
-                        <div>
-                            <div class="flex justify-between text-xs font-bold text-gray-700 mb-1.5">
-                                <span>{{ __('Angle') }}</span>
-                                <span class="text-gray-500" x-text="angle + '°'"></span>
-                            </div>
-                            <input type="range" min="0" max="360" step="5" x-model.number="angle" class="mk-range w-full">
-                        </div>
-
-                        <hr class="border-gray-100">
-
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1.5">{{ __('Background image') }}</label>
-                            <div class="relative border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:bg-gray-50 transition">
-                                <input type="file" accept="image/*" @change="handleUpload($event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-                                <div x-show="!bgImage" class="text-xs text-gray-600 font-semibold">{{ __('Click or drop an image here') }}</div>
-                                <div x-show="bgImage" class="flex items-center gap-3">
-                                    <div class="w-14 h-14 rounded-lg bg-cover bg-center border border-gray-200 shrink-0" :style="`background-image:url('${bgImage}')`"></div>
-                                    <span class="text-xs text-gray-600 font-semibold">{{ __('Click to replace') }}</span>
-                                </div>
-                            </div>
-                            <button type="button" x-show="bgImage" @click="bgImage = ''" class="text-xs text-red-500 mt-2 hover:underline">{{ __('Remove image') }}</button>
-                        </div>
-
-                        <div x-show="bgImage">
-                            <label class="block text-xs font-bold text-gray-700 mb-1.5">{{ __('Image focus') }}</label>
-                            <div class="grid grid-cols-3 gap-1 p-1 bg-gray-100 rounded-xl">
-                                <template x-for="o in imagePosOptions" :key="o.value">
-                                    <button type="button" @click="imagePos = o.value"
-                                            :class="imagePos === o.value ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-800'"
-                                            class="py-1.5 rounded-lg text-xs font-bold transition" x-text="o.label"></button>
-                                </template>
-                            </div>
-                        </div>
-
-                        <div>
-                            <div class="flex justify-between text-xs font-bold text-gray-700 mb-1.5">
-                                <span>{{ __('Overlay darkness') }}</span>
-                                <span class="text-gray-500" x-text="overlay + '%'"></span>
-                            </div>
-                            <input type="range" min="0" max="90" step="5" x-model.number="overlay" class="mk-range w-full">
-                        </div>
-                    </div>
-
-                    <div x-show="tab === 'text'" class="space-y-5">
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1.5">{{ __('Alignment') }}</label>
-                            <div class="grid grid-cols-3 gap-1 p-1 bg-gray-100 rounded-xl">
-                                <template x-for="o in alignOptions" :key="o.value">
-                                    <button type="button" @click="align = o.value"
-                                            :class="align === o.value ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-800'"
-                                            class="py-1.5 rounded-lg text-xs font-bold transition" x-text="o.label"></button>
-                                </template>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1.5">{{ __('Vertical position') }}</label>
-                            <div class="grid grid-cols-3 gap-1 p-1 bg-gray-100 rounded-xl">
-                                <template x-for="o in vAlignOptions" :key="o.value">
-                                    <button type="button" @click="vAlign = o.value"
-                                            :class="vAlign === o.value ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-800'"
-                                            class="py-1.5 rounded-lg text-xs font-bold transition" x-text="o.label"></button>
-                                </template>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1.5">{{ __('Font') }}</label>
-                            <div class="grid grid-cols-3 gap-1 p-1 bg-gray-100 rounded-xl">
-                                <template x-for="o in fontOptions" :key="o.value">
-                                    <button type="button" @click="font = o.value"
-                                            :class="font === o.value ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-800'"
-                                            class="py-1.5 rounded-lg text-xs font-bold transition" x-text="o.label"></button>
-                                </template>
-                            </div>
-                        </div>
-
-                        <div>
-                            <div class="flex justify-between text-xs font-bold text-gray-700 mb-1.5">
-                                <span>{{ __('Text size') }}</span>
-                                <span class="text-gray-500" x-text="textScale + '%'"></span>
-                            </div>
-                            <input type="range" min="60" max="150" step="5" x-model.number="textScale" class="mk-range w-full">
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1.5">{{ __('Text color') }}</label>
-                            <div class="flex items-center gap-2">
-                                <input type="color" x-model="textColor" class="w-12 h-10 rounded-lg cursor-pointer border border-gray-200 p-1 bg-white">
-                                <button type="button" @click="textColor = '#ffffff'" class="w-10 h-10 rounded-lg bg-white border border-gray-300 hover:scale-105 transition"></button>
-                                <button type="button" @click="textColor = '#111827'" class="w-10 h-10 rounded-lg bg-gray-900 border border-gray-300 hover:scale-105 transition"></button>
-                            </div>
-                        </div>
-
-                        <hr class="border-gray-100">
-
-                        <label class="flex items-center justify-between cursor-pointer">
-                            <span class="text-xs font-bold text-gray-700">{{ __('Show logo and brand') }}</span>
-                            <input type="checkbox" x-model="showBrand" class="rounded border-gray-300 text-rj-purple focus:ring-rj-purple">
-                        </label>
-
-                        <div x-show="showBrand" class="space-y-3">
-                            <div>
-                                <label class="block text-xs font-bold text-gray-700 mb-1.5">{{ __('Brand name') }}</label>
-                                <input type="text" x-model="brand" class="w-full rounded-xl border-gray-300 text-sm focus:ring-rj-purple focus:border-rj-purple">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-gray-700 mb-1.5">{{ __('Link or call to action') }}</label>
-                                <input type="text" x-model="linkText" placeholder="example.com" class="w-full rounded-xl border-gray-300 text-sm focus:ring-rj-purple focus:border-rj-purple">
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-
-        <div class="lg:col-span-8 w-full min-w-0 space-y-4">
-
-            <div class="flex flex-wrap items-center justify-between gap-3">
-                <div class="flex flex-wrap items-center gap-1.5 bg-white p-1.5 rounded-xl border border-gray-200 shadow-sm">
-                    <template x-for="f in formats" :key="f.id">
-                        <button type="button" @click="formatId = f.id"
-                                :class="formatId === f.id ? 'bg-rj-purple text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'"
-                                class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition" x-text="f.label"></button>
+        <aside class="mk-panel">
+            <div class="mk-tabs-wrap">
+                <div class="mk-tabs">
+                    <template x-for="t in tabs" :key="t.id">
+                        <button type="button" class="mk-tab" :class="{ 'is-on': tab === t.id }" @click="tab = t.id" x-text="t.label"></button>
                     </template>
                 </div>
-                <span class="text-xs font-semibold text-gray-500" x-text="w + ' × ' + h + ' px'"></span>
             </div>
 
-            <div x-ref="stage"
-                 class="relative bg-gray-100 rounded-2xl border border-gray-200 p-6 flex items-center justify-center shadow-inner w-full overflow-hidden"
-                 :style="`min-height:${stageH + 48}px`">
+            <div class="mk-scroll">
 
-                <div x-show="busy" class="absolute inset-0 z-30 bg-gray-100/80 backdrop-blur-sm flex items-center justify-center">
-                    <div class="text-center text-gray-900">
-                        <svg class="w-9 h-9 animate-spin mx-auto text-rj-purple mb-2" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" opacity=".25"/><path fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z"/></svg>
-                        <p class="font-bold text-sm">{{ __('Generating...') }}</p>
+                <div x-show="tab === 'content'">
+                    <div class="mk-field">
+                        <label class="mk-label">{{ __('Pick a post') }}</label>
+                        <input type="text" class="mk-input" x-model="search" placeholder="{{ __('Search posts...') }}">
+                        <div class="mk-posts">
+                            <template x-for="p in filteredPosts" :key="p.id">
+                                <button type="button" class="mk-post" :class="{ 'is-on': selectedPostId === p.id }" @click="selectPost(p)">
+                                    <span class="mk-thumb">
+                                        <img x-show="p.image" :src="p.image" loading="lazy" alt="" x-on:error="$el.style.display = 'none'">
+                                    </span>
+                                    <span class="mk-post-title" x-text="p.title"></span>
+                                </button>
+                            </template>
+                            <p class="mk-empty" x-show="filteredPosts.length === 0">{{ __('No posts found') }}</p>
+                        </div>
+                    </div>
+
+                    <hr class="mk-hr">
+
+                    <div class="mk-field">
+                        <label class="mk-label">{{ __('Badge') }}</label>
+                        <input type="text" class="mk-input" x-model="badge" maxlength="30" placeholder="{{ __('e.g. NEW, UPDATE, BLOG') }}">
+                    </div>
+
+                    <div class="mk-field">
+                        <label class="mk-label">{{ __('Title') }}</label>
+                        <textarea class="mk-input mk-bold" x-model="title" rows="2"></textarea>
+                    </div>
+
+                    <div class="mk-field">
+                        <label class="mk-label">{{ __('Subtitle') }}</label>
+                        <textarea class="mk-input" x-model="subtitle" rows="3"></textarea>
                     </div>
                 </div>
 
-                <div x-show="notice" x-transition class="absolute top-3 right-3 z-40 px-3 py-2 rounded-lg text-xs font-semibold shadow-lg"
-                     :class="notice && notice.type === 'error' ? 'bg-red-600 text-white' : 'bg-gray-900 text-white'"
-                     x-text="notice ? notice.text : ''"></div>
+                <div x-show="tab === 'background'">
+                    <div class="mk-field">
+                        <label class="mk-label">{{ __('Gradient presets') }}</label>
+                        <div class="mk-gradients">
+                            <template x-for="g in gradients" :key="g[0] + g[1]">
+                                <button type="button" class="mk-grad" :class="{ 'is-on': color1 === g[0] && color2 === g[1] }"
+                                        :style="`background: linear-gradient(135deg, ${g[0]}, ${g[1]})`"
+                                        @click="color1 = g[0]; color2 = g[1]"></button>
+                            </template>
+                        </div>
+                    </div>
 
-                <div class="relative shadow-2xl rounded-lg overflow-hidden ring-1 ring-black/10 shrink-0" :style="`width:${w * scale}px;height:${h * scale}px`">
+                    <div class="mk-field mk-two">
+                        <div>
+                            <label class="mk-label">{{ __('Color 1') }}</label>
+                            <input type="color" class="mk-color" x-model="color1">
+                        </div>
+                        <div>
+                            <label class="mk-label">{{ __('Color 2') }}</label>
+                            <input type="color" class="mk-color" x-model="color2">
+                        </div>
+                    </div>
+
+                    <div class="mk-field">
+                        <div class="mk-row">
+                            <label class="mk-label">{{ __('Angle') }}</label>
+                            <span class="mk-val" x-text="angle + '°'"></span>
+                        </div>
+                        <input type="range" class="mk-range" min="0" max="360" step="5" x-model.number="angle">
+                    </div>
+
+                    <hr class="mk-hr">
+
+                    <div class="mk-field">
+                        <label class="mk-label">{{ __('Background image') }}</label>
+                        <div class="mk-drop">
+                            <input type="file" accept="image/*" @change="handleUpload($event)">
+                            <span x-show="!bgImage">{{ __('Click or drop an image here') }}</span>
+                            <div x-show="bgImage" class="mk-drop-preview">
+                                <span class="mk-drop-thumb" :style="`background-image:url('${bgImage}')`"></span>
+                                <span>{{ __('Click to replace') }}</span>
+                            </div>
+                        </div>
+                        <button type="button" class="mk-link-danger" x-show="bgImage" @click="bgImage = ''">{{ __('Remove image') }}</button>
+                    </div>
+
+                    <div class="mk-field" x-show="bgImage">
+                        <label class="mk-label">{{ __('Image focus') }}</label>
+                        <div class="mk-seg">
+                            <template x-for="o in imagePosOptions" :key="o.value">
+                                <button type="button" :class="{ 'is-on': imagePos === o.value }" @click="imagePos = o.value" x-text="o.label"></button>
+                            </template>
+                        </div>
+                    </div>
+
+                    <div class="mk-field">
+                        <div class="mk-row">
+                            <label class="mk-label">{{ __('Overlay darkness') }}</label>
+                            <span class="mk-val" x-text="overlay + '%'"></span>
+                        </div>
+                        <input type="range" class="mk-range" min="0" max="90" step="5" x-model.number="overlay">
+                    </div>
+                </div>
+
+                <div x-show="tab === 'text'">
+                    <div class="mk-field">
+                        <label class="mk-label">{{ __('Alignment') }}</label>
+                        <div class="mk-seg">
+                            <template x-for="o in alignOptions" :key="o.value">
+                                <button type="button" :class="{ 'is-on': align === o.value }" @click="align = o.value" x-text="o.label"></button>
+                            </template>
+                        </div>
+                    </div>
+
+                    <div class="mk-field">
+                        <label class="mk-label">{{ __('Vertical position') }}</label>
+                        <div class="mk-seg">
+                            <template x-for="o in vAlignOptions" :key="o.value">
+                                <button type="button" :class="{ 'is-on': vAlign === o.value }" @click="vAlign = o.value" x-text="o.label"></button>
+                            </template>
+                        </div>
+                    </div>
+
+                    <div class="mk-field">
+                        <label class="mk-label">{{ __('Font') }}</label>
+                        <div class="mk-seg">
+                            <template x-for="o in fontOptions" :key="o.value">
+                                <button type="button" :class="{ 'is-on': font === o.value }" @click="font = o.value" x-text="o.label"></button>
+                            </template>
+                        </div>
+                    </div>
+
+                    <div class="mk-field">
+                        <div class="mk-row">
+                            <label class="mk-label">{{ __('Text size') }}</label>
+                            <span class="mk-val" x-text="textScale + '%'"></span>
+                        </div>
+                        <input type="range" class="mk-range" min="60" max="150" step="5" x-model.number="textScale">
+                    </div>
+
+                    <div class="mk-field">
+                        <label class="mk-label">{{ __('Text color') }}</label>
+                        <div class="mk-swatches">
+                            <input type="color" class="mk-color mk-color-sm" x-model="textColor">
+                            <button type="button" class="mk-swatch" style="background:#ffffff" @click="textColor = '#ffffff'"></button>
+                            <button type="button" class="mk-swatch" style="background:#111827" @click="textColor = '#111827'"></button>
+                        </div>
+                    </div>
+
+                    <hr class="mk-hr">
+
+                    <label class="mk-check">
+                        <span>{{ __('Show logo and brand') }}</span>
+                        <input type="checkbox" x-model="showBrand">
+                    </label>
+
+                    <div x-show="showBrand">
+                        <div class="mk-field">
+                            <label class="mk-label">{{ __('Brand name') }}</label>
+                            <input type="text" class="mk-input" x-model="brand">
+                        </div>
+                        <div class="mk-field">
+                            <label class="mk-label">{{ __('Link or call to action') }}</label>
+                            <input type="text" class="mk-input" x-model="linkText" placeholder="example.com">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </aside>
+
+        <section class="mk-main">
+
+            <div class="mk-toolbar">
+                <div class="mk-formats">
+                    <template x-for="f in formats" :key="f.id">
+                        <button type="button" class="mk-fmt" :class="{ 'is-on': formatId === f.id }" @click="formatId = f.id" x-text="f.label"></button>
+                    </template>
+                </div>
+                <span class="mk-size" x-text="w + ' × ' + h + ' px'"></span>
+            </div>
+
+            <div class="mk-stage" x-ref="stage" :style="`min-height:${stageH + 48}px`">
+
+                <div class="mk-loader" x-show="busy">
+                    <div>
+                        <svg class="mk-spin" width="34" height="34" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" opacity=".25"/><path fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z"/></svg>
+                        <p>{{ __('Generating...') }}</p>
+                    </div>
+                </div>
+
+                <div class="mk-toast" x-show="notice" x-transition :class="{ 'is-error': notice && notice.type === 'error' }" x-text="notice ? notice.text : ''"></div>
+
+                <div class="mk-frame" :style="`width:${w * scale}px;height:${h * scale}px`">
                     <div id="post-canvas" :style="canvasStyle">
                         <div :style="gradientStyle"></div>
                         <div x-show="bgImage" :style="imageStyle"></div>
@@ -315,13 +291,171 @@
                 </div>
             </div>
 
-        </div>
+        </section>
     </div>
 </div>
 
 <style>
     [x-cloak] { display: none !important; }
-    .mk-range { accent-color: rgb(var(--rj-purple, 124 58 237)); }
+
+    #mk-root {
+        --mk-accent: rgb(var(--rj-purple, 124 58 237));
+        --mk-accent-2: rgb(var(--rj-pink, 236 72 153));
+        --mk-border: #e5e7eb;
+        --mk-muted: #6b7280;
+        --mk-text: #111827;
+        width: 100%;
+        max-width: 100%;
+        padding-bottom: 48px;
+        color: var(--mk-text);
+    }
+    #mk-root * { box-sizing: border-box; }
+
+    #mk-root .mk-head {
+        display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px;
+        background: #fff; border: 1px solid var(--mk-border); border-radius: 16px;
+        padding: 16px; margin-bottom: 24px; box-shadow: 0 1px 2px rgba(0,0,0,.04);
+    }
+    #mk-root .mk-head-left { display: flex; align-items: center; gap: 12px; }
+    #mk-root .mk-badge-icon {
+        width: 40px; height: 40px; border-radius: 12px; color: #fff;
+        display: flex; align-items: center; justify-content: center;
+        background: linear-gradient(135deg, var(--mk-accent), var(--mk-accent-2));
+        box-shadow: 0 4px 12px rgba(0,0,0,.15);
+    }
+    #mk-root .mk-h1 { margin: 0; font-size: 18px; font-weight: 700; line-height: 1.2; }
+    #mk-root .mk-sub { margin: 2px 0 0; font-size: 12px; color: var(--mk-muted); }
+    #mk-root .mk-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+
+    #mk-root .mk-btn {
+        display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+        padding: 9px 16px; border-radius: 12px; font-size: 14px; font-weight: 600;
+        background: #fff; color: #1f2937; border: 1px solid #d1d5db; transition: .15s;
+    }
+    #mk-root .mk-btn:hover { background: #f3f4f6; }
+    #mk-root .mk-btn:disabled { opacity: .5; cursor: not-allowed; }
+    #mk-root .mk-btn-primary {
+        color: #fff; border-color: transparent; font-weight: 700;
+        background: linear-gradient(90deg, var(--mk-accent), var(--mk-accent-2));
+        box-shadow: 0 4px 12px rgba(0,0,0,.15);
+    }
+    #mk-root .mk-btn-primary:hover { opacity: .9; background: linear-gradient(90deg, var(--mk-accent), var(--mk-accent-2)); }
+
+    #mk-root .mk-layout {
+        display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; align-items: start; width: 100%;
+    }
+    @media (min-width: 1024px) {
+        #mk-root .mk-layout { grid-template-columns: 360px minmax(0, 1fr); }
+        #mk-root .mk-panel { position: sticky; top: 16px; }
+        #mk-root .mk-scroll { max-height: calc(100vh - 220px); overflow-y: auto; }
+    }
+
+    #mk-root .mk-panel {
+        background: #fff; border: 1px solid var(--mk-border); border-radius: 16px;
+        overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,.04); min-width: 0;
+    }
+    #mk-root .mk-tabs-wrap { padding: 12px; border-bottom: 1px solid #f3f4f6; }
+    #mk-root .mk-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; background: #f3f4f6; border-radius: 12px; }
+    #mk-root .mk-tab {
+        padding: 8px 4px; border: 0; border-radius: 8px; background: transparent; cursor: pointer;
+        font-size: 12px; font-weight: 700; color: var(--mk-muted); transition: .15s;
+    }
+    #mk-root .mk-tab:hover { color: var(--mk-text); }
+    #mk-root .mk-tab.is-on { background: #fff; color: var(--mk-text); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+
+    #mk-root .mk-scroll { padding: 20px; }
+    #mk-root .mk-field { margin-bottom: 18px; }
+    #mk-root .mk-label { display: block; margin-bottom: 6px; font-size: 12px; font-weight: 700; color: #374151; }
+    #mk-root .mk-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+    #mk-root .mk-row .mk-label { margin: 0; }
+    #mk-root .mk-val { font-size: 12px; color: var(--mk-muted); font-weight: 600; }
+    #mk-root .mk-hr { border: 0; border-top: 1px solid #f3f4f6; margin: 18px 0; }
+
+    #mk-root .mk-input {
+        display: block; width: 100%; padding: 9px 12px; font-size: 14px; font-family: inherit;
+        background: #fff; color: var(--mk-text); border: 1px solid #d1d5db; border-radius: 12px; outline: none; resize: vertical;
+    }
+    #mk-root .mk-input:focus { border-color: var(--mk-accent); box-shadow: 0 0 0 3px rgba(124,58,237,.15); }
+    #mk-root .mk-bold { font-weight: 700; }
+
+    #mk-root .mk-posts { margin-top: 8px; max-height: 210px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding-right: 2px; }
+    #mk-root .mk-post {
+        display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; cursor: pointer;
+        padding: 8px; background: #fff; border: 1px solid var(--mk-border); border-radius: 12px; transition: .15s;
+    }
+    #mk-root .mk-post:hover { background: #f9fafb; }
+    #mk-root .mk-post.is-on { border-color: var(--mk-accent); background: #f5f3ff; }
+    #mk-root .mk-thumb { flex: 0 0 40px; width: 40px; height: 40px; border-radius: 8px; background: #f3f4f6; overflow: hidden; }
+    #mk-root .mk-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    #mk-root .mk-post-title {
+        font-size: 13px; font-weight: 600; color: #1f2937; line-height: 1.3;
+        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    #mk-root .mk-empty { margin: 0; padding: 12px 0; text-align: center; font-size: 12px; color: var(--mk-muted); }
+
+    #mk-root .mk-gradients { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+    #mk-root .mk-grad { height: 40px; border-radius: 10px; border: 1px solid rgba(0,0,0,.1); cursor: pointer; transition: .15s; }
+    #mk-root .mk-grad:hover { transform: scale(1.06); }
+    #mk-root .mk-grad.is-on { outline: 2px solid var(--mk-accent); outline-offset: 2px; }
+
+    #mk-root .mk-two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    #mk-root .mk-color { display: block; width: 100%; height: 40px; padding: 4px; background: #fff; border: 1px solid #d1d5db; border-radius: 10px; cursor: pointer; }
+    #mk-root .mk-color-sm { width: 48px; }
+    #mk-root .mk-swatches { display: flex; align-items: center; gap: 8px; }
+    #mk-root .mk-swatch { width: 40px; height: 40px; border-radius: 10px; border: 1px solid #d1d5db; cursor: pointer; transition: .15s; }
+    #mk-root .mk-swatch:hover { transform: scale(1.06); }
+
+    #mk-root .mk-range { width: 100%; accent-color: var(--mk-accent); }
+
+    #mk-root .mk-seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; background: #f3f4f6; border-radius: 12px; }
+    #mk-root .mk-seg button {
+        padding: 7px 4px; border: 0; border-radius: 8px; background: transparent; cursor: pointer;
+        font-size: 12px; font-weight: 700; color: var(--mk-muted); transition: .15s;
+    }
+    #mk-root .mk-seg button:hover { color: var(--mk-text); }
+    #mk-root .mk-seg button.is-on { background: #fff; color: var(--mk-text); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+
+    #mk-root .mk-drop {
+        position: relative; padding: 16px; text-align: center; font-size: 12px; font-weight: 600; color: #4b5563;
+        border: 2px dashed #d1d5db; border-radius: 12px; transition: .15s;
+    }
+    #mk-root .mk-drop:hover { background: #f9fafb; }
+    #mk-root .mk-drop input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 2; }
+    #mk-root .mk-drop-preview { display: flex; align-items: center; gap: 12px; }
+    #mk-root .mk-drop-thumb { width: 56px; height: 56px; border-radius: 8px; border: 1px solid var(--mk-border); background-size: cover; background-position: center; flex: 0 0 56px; }
+    #mk-root .mk-link-danger { margin-top: 8px; padding: 0; background: none; border: 0; color: #ef4444; font-size: 12px; cursor: pointer; }
+    #mk-root .mk-link-danger:hover { text-decoration: underline; }
+
+    #mk-root .mk-check { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; font-size: 12px; font-weight: 700; color: #374151; cursor: pointer; }
+    #mk-root .mk-check input { width: 16px; height: 16px; accent-color: var(--mk-accent); }
+
+    #mk-root .mk-main { min-width: 0; width: 100%; }
+    #mk-root .mk-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+    #mk-root .mk-formats { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px; background: #fff; border: 1px solid var(--mk-border); border-radius: 12px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+    #mk-root .mk-fmt {
+        padding: 7px 14px; border: 0; border-radius: 8px; background: transparent; cursor: pointer;
+        font-size: 12px; font-weight: 700; color: #4b5563; transition: .15s;
+    }
+    #mk-root .mk-fmt:hover { background: #f3f4f6; }
+    #mk-root .mk-fmt.is-on { background: var(--mk-accent); color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.2); }
+    #mk-root .mk-size { font-size: 12px; font-weight: 600; color: var(--mk-muted); }
+
+    #mk-root .mk-stage {
+        position: relative; display: flex; align-items: center; justify-content: center;
+        width: 100%; padding: 24px; overflow: hidden;
+        background: #f3f4f6; border: 1px solid var(--mk-border); border-radius: 16px;
+        box-shadow: inset 0 2px 6px rgba(0,0,0,.05);
+    }
+    #mk-root .mk-frame { position: relative; flex: 0 0 auto; overflow: hidden; border-radius: 8px; box-shadow: 0 20px 50px rgba(0,0,0,.25); outline: 1px solid rgba(0,0,0,.1); }
+
+    #mk-root .mk-loader { position: absolute; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center; background: rgba(243,244,246,.85); backdrop-filter: blur(4px); text-align: center; color: var(--mk-text); }
+    #mk-root .mk-loader svg { color: var(--mk-accent); margin: 0 auto 8px; display: block; }
+    #mk-root .mk-loader p { margin: 0; font-size: 14px; font-weight: 700; }
+    #mk-root .mk-toast { position: absolute; top: 12px; right: 12px; z-index: 40; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; color: #fff; background: #111827; box-shadow: 0 8px 20px rgba(0,0,0,.25); }
+    #mk-root .mk-toast.is-error { background: #dc2626; }
+
+    #mk-root .mk-spin { animation: mk-spin 1s linear infinite; }
+    @keyframes mk-spin { to { transform: rotate(360deg); } }
 </style>
 
 <script>
