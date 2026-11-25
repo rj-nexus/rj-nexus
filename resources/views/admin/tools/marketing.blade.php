@@ -93,7 +93,7 @@
                                             :class="selectedPostId === p.id ? 'border-rj-purple bg-gray-50' : 'border-gray-200 hover:bg-gray-50'"
                                             class="w-full flex items-center gap-3 p-2 rounded-xl border text-left transition">
                                         <div class="w-10 h-10 rounded-lg bg-gray-100 shrink-0 overflow-hidden">
-                                            <img x-show="p.image" :src="p.image" loading="lazy" class="w-full h-full object-cover" @error="$el.style.display = 'none'">
+                                            <img x-show="p.image" :src="p.image" loading="lazy" class="w-full h-full object-cover" x-on:error="$el.style.display = 'none'">
                                         </div>
                                         <span class="text-sm font-semibold text-gray-800 line-clamp-2" x-text="p.title"></span>
                                     </button>
