@@ -95,13 +95,14 @@ class ActivityLogController extends Controller
         $this->checkAdmin($request);
 
         $validated = $request->validate([
-            'days' => 'nullable|integer|min:1|max:365',
+            'days' => 'nullable', // 'all' gələ bilər
             'log_name' => 'nullable|string|max:100',
         ]);
 
         $query = ActivityLog::query();
 
-        if (!empty($validated['days'])) {
+        // Əgər 'all' seçilməyibsə, günə görə filtr edirik
+        if (!empty($validated['days']) && $validated['days'] !== 'all') {
             $query->where('created_at', '<', now()->subDays((int) $validated['days']));
         }
 

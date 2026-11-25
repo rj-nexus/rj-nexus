@@ -180,6 +180,7 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('Delete logs older than') }}</label>
                         <select name="days" x-model="clearDays" class="w-full rounded-lg border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                            <option value="all">{{ __('All Logs (Delete Everything)') }}</option>
                             <option value="7">{{ __('1 Week') }}</option>
                             <option value="30">{{ __('1 Month') }}</option>
                             <option value="90">{{ __('3 Months') }}</option>
