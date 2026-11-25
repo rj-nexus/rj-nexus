@@ -656,21 +656,14 @@
                 'children' => [],
             ],
             [
-                'label' => __('RJ About'),
-                'icon' => $ic($p('M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z')),
-                'active' => request()->routeIs('admin.about.*'),
-                'children' => [
-                    ['label' => __('Info'), 'url' => route('admin.about.index'), 'route' => 'admin.about.index'],
-                    ['label' => __('API Document'), 'url' => route('admin.about.api'), 'route' => 'admin.about.api'],
-                    ['label' => __('Theme Document'), 'url' => route('admin.about.theme'), 'route' => 'admin.about.theme'],
-                    ['label' => __('Admin Document'), 'url' => route('admin.about.admin'), 'route' => 'admin.about.admin'],
-                    ['label' => __('Plugin Document'), 'url' => route('admin.about.plugin'), 'route' => 'admin.about.plugin'],
-                    ['label' => __('Developer Guide'), 'url' => route('admin.about.developer'), 'route' => 'admin.about.developer'],
-                    ['label' => __('Hooks Reference'), 'url' => route('admin.about.hooks'), 'route' => 'admin.about.hooks'],
-                    ['label' => __('Other Documents'), 'url' => route('admin.about.other'), 'route' => 'admin.about.other'],
-                    ['label' => __('Credits'), 'url' => route('admin.about.credits'), 'route' => 'admin.about.credits'],
-                    ['label' => __('License'), 'url' => route('admin.about.license'), 'route' => 'admin.about.license'],
-                ],
+             [
+            'label' => __('RJ About'),
+            'icon' => $ic($p('M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z')),
+            'url' => route('admin.about.index'),
+            'active' => request()->routeIs('admin.about.*'),
+            'children' => [],
+            ],
+            ],
             ],
         ];
 
