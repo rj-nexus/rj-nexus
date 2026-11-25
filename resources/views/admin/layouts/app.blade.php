@@ -444,10 +444,87 @@
             .rj-sm-foot { justify-content: center; }
         }
         @media (prefers-reduced-motion: reduce) {
-            .rj-sb::before, .rj-sm-box::before, .rj-sm-box::after, .rj-sb-ic svg, .rj-sm-it, .rj-sm-load i, .rj-sm-empty svg { animation: none !important; }
+            .rj-sb::before, .rj-sm-box::before, .rj-sm-box::after, .rj-sb-ic svg, .rj-sm-it, .rj-sm-load i, .rj-sm-empty svg, .rj-toast-ic svg { animation: none !important; }
             .rj-sm-it { opacity: 1; }
             .rj-aside { transition: none; }
+            .rj-toast { animation: none; }
         }
+
+        /* ===== Bildiriş dropdown ===== */
+        .rj-ni { display: grid; place-items: center; width: 100%; height: 100%; }
+        .rj-ni svg { width: 16px; height: 16px; }
+        .rj-notif-item { position: relative; transition: background .15s; }
+        .rj-notif-item.is-unread::before {
+            content: ""; position: absolute; inset-inline-start: 0; top: 18%; bottom: 18%;
+            width: 3px; border-radius: 3px; background: linear-gradient(#8b5cf6, #ec4899);
+        }
+        .rj-perm {
+            display: flex; align-items: center; gap: 10px; margin: 10px 12px 4px; padding: 10px 12px;
+            border: 1px solid #ddd6fe; border-radius: 12px;
+            background: linear-gradient(135deg, rgba(139,92,246,.10), rgba(236,72,153,.06));
+            font-size: 12px; color: #475569;
+        }
+        .rj-perm button {
+            flex-shrink: 0; padding: 6px 10px; border: 0; border-radius: 8px; cursor: pointer;
+            background: linear-gradient(135deg, #8b5cf6, #ec4899); color: #fff; font-size: 11px; font-weight: 700;
+            transition: transform .15s;
+        }
+        .rj-perm button:hover { transform: translateY(-1px); }
+
+        /* ===== Toast (sağ alt künc) ===== */
+        .rj-toasts {
+            position: fixed; inset-block-end: 20px; inset-inline-end: 20px; z-index: 120;
+            display: flex; flex-direction: column-reverse; gap: 12px;
+            width: 360px; max-width: calc(100vw - 24px); pointer-events: none;
+        }
+        .rj-toast {
+            position: relative; isolation: isolate; overflow: hidden; pointer-events: auto;
+            border: 1px solid #f1f5f9; border-radius: 16px;
+            background: rgba(255,255,255,.96);
+            -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+            box-shadow: 0 24px 50px -16px rgba(15,23,42,.35), 0 0 0 1px rgba(139,92,246,.08);
+            animation: rj-toast-in .45s cubic-bezier(.34,1.56,.64,1) both;
+        }
+        .rj-toast.is-leaving { animation: rj-toast-out .22s ease forwards; }
+        .rj-toast-body {
+            display: flex; align-items: flex-start; gap: 12px;
+            padding: 14px 44px 18px 14px; color: inherit; text-decoration: none;
+        }
+        [dir="rtl"] .rj-toast-body { padding: 14px 14px 18px 44px; }
+        .rj-toast-ic {
+            display: grid; place-items: center; flex: 0 0 38px; height: 38px;
+            border-radius: 12px; background: color-mix(in srgb, var(--c) 14%, white); color: var(--c);
+        }
+        .rj-toast-ic svg { width: 19px; height: 19px; animation: rj-spark 2.4s ease-in-out infinite; }
+        .rj-toast-tx { flex: 1; min-width: 0; }
+        .rj-toast-tx b { display: block; font-size: 14px; font-weight: 700; color: #0f172a; }
+        .rj-toast-tx p {
+            margin: 2px 0 0; font-size: 12.5px; line-height: 1.5; color: #64748b;
+            display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+        }
+        .rj-toast-tx small { display: block; margin-top: 6px; font-size: 10.5px; color: #94a3b8; }
+        .rj-toast-x {
+            position: absolute; top: 10px; inset-inline-end: 10px;
+            display: grid; place-items: center; width: 26px; height: 26px; padding: 0;
+            border: 0; border-radius: 50%; background: #f1f5f9; color: #94a3b8; cursor: pointer;
+            transition: background .15s, color .15s, transform .2s;
+        }
+        .rj-toast-x:hover { background: #fee2e2; color: #ef4444; transform: rotate(90deg); }
+        .rj-toast-x svg { width: 12px; height: 12px; }
+        .rj-toast-bar {
+            position: absolute; inset-inline: 0; bottom: 0; height: 3px;
+            background: linear-gradient(90deg, var(--c), #ec4899);
+            transform-origin: left center;
+            animation: rj-toast-bar 10s linear forwards;
+        }
+        [dir="rtl"] .rj-toast-bar { transform-origin: right center; }
+        .rj-toast:hover .rj-toast-bar { animation-play-state: paused; }
+        @media (max-width: 767px) {
+            .rj-toasts { inset-inline: 12px; inset-block-end: 12px; width: auto; }
+        }
+        @keyframes rj-toast-in { from { opacity: 0; transform: translateY(24px) scale(.92); } to { opacity: 1; transform: none; } }
+        @keyframes rj-toast-out { to { opacity: 0; transform: translateX(30px) scale(.95); } }
+        @keyframes rj-toast-bar { from { transform: scaleX(1); } to { transform: scaleX(0); } }
 
         @keyframes rj-ang { to { --rj-a: 360deg; } }
         @keyframes rj-spark { 0%, 100% { transform: scale(1) rotate(0); } 50% { transform: scale(1.18) rotate(14deg); } }
@@ -819,33 +896,41 @@
                             <span x-show="unreadCount > 0" x-cloak class="absolute top-1.5 right-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white ring-2 ring-white" x-text="unreadCount"></span>
                         </button>
 
-                        <div x-show="notifMenu" x-cloak x-transition class="absolute end-0 mt-2 w-80 max-w-[calc(100vw-1.5rem)] bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50">
-                            <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-gray-50">
-                                <h3 class="text-sm font-bold text-gray-900">{{ __('Notifications') }}</h3>
+                        <div x-show="notifMenu" x-cloak x-transition class="absolute end-0 mt-2 w-80 max-w-[calc(100vw-1.5rem)] bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50">
+                            <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-violet-50 to-pink-50">
+                                <div class="flex items-center gap-2">
+                                    <h3 class="text-sm font-bold text-gray-900">{{ __('Notifications') }}</h3>
+                                    <span x-show="unreadCount > 0" x-cloak class="rounded-full bg-rj-purple px-2 py-0.5 text-[10px] font-bold text-white" x-text="unreadCount"></span>
+                                </div>
                                 <button type="button" @click="markAllRead()" class="text-xs font-medium text-rj-purple hover:underline">{{ __('Mark all read') }}</button>
+                            </div>
+
+                            <div class="rj-perm" x-show="notifPerm === 'default'" x-cloak>
+                                <span class="flex-1">{{ __('Get alerts on your device even when this tab is in the background.') }}</span>
+                                <button type="button" @click="askPerm()">{{ __('Enable') }}</button>
                             </div>
 
                             <div class="max-h-80 overflow-y-auto">
                                 <template x-if="notifications.length === 0">
-                                    <div class="p-6 text-center text-sm text-gray-500">{{ __('No notifications yet.') }}</div>
+                                    <div class="p-8 text-center text-sm text-gray-500">{{ __('No notifications yet.') }}</div>
                                 </template>
                                 <template x-for="n in notifications" :key="n.id">
-                                    <a :href="n.action_url || '/admin/notifications'" class="block px-4 py-3 border-b border-gray-50 hover:bg-gray-50 transition" :class="!n.is_read ? 'bg-indigo-50/30' : ''">
+                                    <a :href="n.action_url || '/admin/notifications'" class="rj-notif-item block px-4 py-3 border-b border-gray-50 hover:bg-gray-50" :class="!n.is_read ? 'is-unread bg-violet-50/40' : ''">
                                         <div class="flex items-start gap-3">
-                                            <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" :style="'background:' + (n.color || '#7c3aed') + '15; color:' + (n.color || '#7c3aed')">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                            <div class="w-8 h-8 rounded-full flex-shrink-0" :style="'background:' + (n.color || '#7c3aed') + '15; color:' + (n.color || '#7c3aed')">
+                                                <span class="rj-ni" x-html="notifIcons[n.icon] || notifIcons['bell']"></span>
                                             </div>
                                             <div class="flex-1 min-w-0">
                                                 <p class="text-sm font-semibold text-gray-900 truncate" x-text="n.title"></p>
                                                 <p class="text-xs text-gray-500 line-clamp-2 mt-0.5" x-text="n.message"></p>
                                                 <p class="text-[10px] text-gray-400 mt-1" x-text="n.ago"></p>
                                             </div>
-                                            <div x-show="!n.is_read" class="w-2 h-2 rounded-full bg-rj-purple flex-shrink-0 mt-1"></div>
+                                            <div x-show="!n.is_read" class="w-2 h-2 rounded-full bg-rj-purple flex-shrink-0 mt-1.5"></div>
                                         </div>
                                     </a>
                                 </template>
                             </div>
-                            <a href="{{ route('admin.notifications.index') }}" class="block px-4 py-2 text-center text-xs font-medium text-gray-500 bg-gray-50 hover:text-rj-purple transition border-t border-gray-100">
+                            <a href="{{ route('admin.notifications.index') }}" class="block px-4 py-2.5 text-center text-xs font-medium text-gray-500 bg-gray-50 hover:text-rj-purple transition border-t border-gray-100">
                                 {{ __('View All Notifications') }}
                             </a>
                         </div>
@@ -1055,6 +1140,26 @@
             </div>
         </div>
 
+        {{-- Toast konteyneri (sağ alt künc) --}}
+        <div class="rj-toasts" aria-live="polite" role="region">
+            <template x-for="t in toasts" :key="t.key">
+                <div class="rj-toast" :class="t.leaving ? 'is-leaving' : ''" :style="'--c:' + t.color">
+                    <a :href="t.url" class="rj-toast-body">
+                        <span class="rj-toast-ic" x-html="notifIcons[t.icon] || notifIcons['bell']"></span>
+                        <span class="rj-toast-tx">
+                            <b x-text="t.title"></b>
+                            <p x-text="t.message"></p>
+                            <small x-text="t.ago"></small>
+                        </span>
+                    </a>
+                    <button type="button" class="rj-toast-x" @click="closeToast(t)" aria-label="{{ __('Close') }}">
+                        <svg fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                    </button>
+                    <i class="rj-toast-bar" @animationend="closeToast(t)"></i>
+                </div>
+            </template>
+        </div>
+
     </div>
 
     <script>
@@ -1063,6 +1168,8 @@
                 recent: @js(route('admin.notifications.recent')),
                 markAll: @js(route('admin.notifications.mark-all-read')),
                 search: @js(route('admin.search')),
+                notifPage: @js(route('admin.notifications.index')),
+                favicon: @js(asset('images/favicon.png')),
                 csrf: @js(csrf_token())
             };
             const T = @js($searchTexts);
@@ -1075,6 +1182,20 @@
                 recent: svg('M12 8v4l3 2M21 12a9 9 0 11-18 0 9 9 0 0118 0z'),
                 result: svg('M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'),
                 ai: svg('M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z')
+            };
+
+            const notifIcons = {
+                'bell': svg('M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9'),
+                'check': svg('M5 13l4 4L19 7'),
+                'success': svg('M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'),
+                'user': svg('M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'),
+                'alert-triangle': svg('M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z'),
+                'alert-circle': svg('M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'),
+                'info': svg('M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'),
+                'message': svg('M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z'),
+                'chat': svg('M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z'),
+                'inbox': svg('M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4'),
+                'settings': svg('M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z')
             };
             const norm = function (s) {
                 return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -1110,8 +1231,14 @@
 
                 menuIndex: @js($searchIndex),
                 icons: icons,
+                notifIcons: notifIcons,
+                toasts: [],
+                toastSeq: 0,
+                notifPerm: ('Notification' in window) ? Notification.permission : 'unsupported',
 
                 init() {
+                    document.addEventListener('visibilitychange', () => { if (!document.hidden) this.pushNew(); });
+
                     this.fetchNotifications();
                     setInterval(() => this.fetchNotifications(), 60000);
 
@@ -1186,8 +1313,87 @@
                     .then(data => {
                         this.unreadCount = data.unread;
                         this.notifications = data.notifications;
+                        this.pushNew();
                     })
                     .catch(() => {});
+                },
+
+                /* ---- Bir dəfə göstərmə yaddaşı ---- */
+                getSeen() {
+                    try {
+                        const raw = JSON.parse(localStorage.getItem('rj-notif-seen') || '[]');
+                        return Array.isArray(raw) ? raw.map(String) : [];
+                    } catch (e) { return []; }
+                },
+
+                markSeen(id) {
+                    const list = this.getSeen();
+                    if (list.indexOf(String(id)) === -1) list.push(String(id));
+                    try { localStorage.setItem('rj-notif-seen', JSON.stringify(list.slice(-200))); } catch (e) {}
+                },
+
+                canDevice() {
+                    return this.notifPerm === 'granted';
+                },
+
+                askPerm() {
+                    if (!('Notification' in window)) return;
+                    Notification.requestPermission().then(p => { this.notifPerm = p; });
+                },
+
+                pushNew() {
+                    const seen = this.getSeen();
+                    const fresh = this.notifications
+                        .filter(n => !n.is_read && seen.indexOf(String(n.id)) === -1)
+                        .slice(0, 3);
+
+                    fresh.forEach((n) => {
+                        if (this.canDevice() && document.hidden) {
+                            this.markSeen(n.id);
+                            this.deviceNotify(n);
+                        } else if (!document.hidden) {
+                            this.markSeen(n.id);
+                            this.showToast(n);
+                        }
+                        // Tab gizlidirsə və icazə yoxdursa: gözlə, tab açılanda toast çıxacaq
+                    });
+                },
+
+                deviceNotify(n) {
+                    try {
+                        const note = new Notification(n.title || 'Notification', {
+                            body: n.message || '',
+                            tag: 'rj-' + n.id,
+                            icon: urls.favicon
+                        });
+                        note.onclick = () => {
+                            window.focus();
+                            window.location.href = n.action_url || urls.notifPage;
+                            note.close();
+                        };
+                    } catch (e) {
+                        this.showToast(n);
+                    }
+                },
+
+                showToast(n) {
+                    this.toasts.push({
+                        key: 't' + (++this.toastSeq),
+                        title: n.title || '',
+                        message: n.message || '',
+                        url: n.action_url || urls.notifPage,
+                        color: n.color || '#7c3aed',
+                        icon: n.icon || 'bell',
+                        ago: n.ago || '',
+                        leaving: false
+                    });
+                    if (this.toasts.length > 4) this.toasts.shift();
+                },
+
+                closeToast(t) {
+                    if (t.leaving) return;
+                    t.leaving = true;
+                    setTimeout(() => { this.toasts = this.toasts.filter(x => x.key !== t.key); }, 230);
                 },
 
                 markAllRead() {
