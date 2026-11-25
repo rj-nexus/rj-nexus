@@ -656,6 +656,13 @@
                 'children' => [],
             ],
             [
+                'label' => __('RJ Apps'),
+                'icon' => $ic($p('M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z')),
+                'url' => route('admin.apps.index'),
+                'active' => request()->routeIs('admin.apps.*'),
+                'children' => [],
+            ],
+            [
                 'label' => __('RJ About'),
                 'icon' => $ic($p('M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z')),
                 'url' => route('admin.about.index'),
