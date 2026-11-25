@@ -10,19 +10,15 @@ class MarketingController extends Controller
 {
     public function index()
     {
-        // Son 50 dərc edilmiş yazını şəkilləri ilə birlikdə çəkirik
-        $posts = Post::where('status', 'published')
+        // YALNIZ POSTLARI ÇƏKİRİK (Səhifələr yox)
+        $posts = Post::where('type', 'post') // Əgər sütun adı fərqlidirsə, buraya diqqət edin
+            ->where('status', 'published')
             ->orderByDesc('created_at')
             ->take(50)
             ->get(['id', 'title', 'content', 'featured_image']);
 
-        // Saytın loqosunu çəkirik
         $siteLogo = rj_get_option('site_logo') ?? rj_get_option('logo');
-        
-        // Əgər loqo yoxdursa, boş string göndəririk ki, JS-də default 'RJ' yazısı görünsün
-        if (empty($siteLogo)) {
-            $siteLogo = '';
-        }
+        if (empty($siteLogo)) { $siteLogo = ''; }
 
         return view('admin.tools.marketing', compact('posts', 'siteLogo'));
     }

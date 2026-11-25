@@ -5,11 +5,10 @@
 @section('content')
 <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
 
-{{-- w-full və overflow-hidden əlavə edildi ki, kənara çıxmasın --}}
 <div class="w-full max-w-full space-y-6 pb-12" x-data="marketingTool(@js($siteLogo))">
     
     {{-- Yuxarı Başlıq və Düymələr --}}
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-gray-200 shadow-sm">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-gray-200 shadow-sm">
         <div>
             <h1 class="text-xl font-bold text-gray-900 flex items-center gap-2">
                 <svg class="w-5 h-5 text-rj-purple" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
@@ -24,20 +23,19 @@
 
             <button type="button" @click="downloadImage()" :disabled="downloading" class="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-rj-purple to-rj-pink text-white text-sm font-bold shadow-md hover:opacity-90 transition disabled:opacity-50">
                 <svg x-show="!downloading" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                <svg x-show="downloading" x-cloak class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" opacity=".25"/><path fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z"/></svg>
                 <span x-text="downloading ? '{{ __('Generating...') }}' : '{{ __('Download') }}'"></span>
             </button>
         </div>
     </div>
 
-    {{-- ƏSAS LAYOUT (MƏCBURİ YAN-YANA) --}}
-    <div class="flex flex-col lg:flex-row gap-6 items-start w-full">
+    {{-- ƏSAS LAYOUT: GRID SİSTEMİ İLƏ MƏCBURİ YAN-YANA --}}
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start w-full min-w-0">
         
-        {{-- SOL PANEL: İdarəetmə (Sabit en) --}}
-        <div class="w-full lg:w-[380px] lg:shrink-0 space-y-4">
+        {{-- SOL PANEL (4 Sütun) --}}
+        <div class="lg:col-span-4 w-full min-w-0 space-y-4">
             <div class="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm space-y-5">
                 
-                {{-- Post Seçimi (Ən əsas hissə) --}}
+                {{-- Yalnız Postlar Görünəcək --}}
                 <div>
                     <label class="block text-sm font-bold text-gray-900 mb-2">{{ __('Select Post') }}</label>
                     <select @change="loadPostData($event)" x-model="selectedPostId" class="w-full rounded-xl border-gray-300 text-sm focus:ring-rj-purple focus:border-rj-purple bg-gray-50 cursor-pointer">
@@ -53,7 +51,7 @@
                     </select>
                 </div>
 
-                {{-- Şəkil Yükləmə (Öz şəklini yükləmək istəyənlər üçün) --}}
+                {{-- Şəkil Yükləmə --}}
                 <div>
                     <label class="block text-sm font-bold text-gray-900 mb-2">{{ __('Custom Image (Optional)') }}</label>
                     <div class="relative border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:bg-gray-50 transition group">
@@ -67,7 +65,7 @@
 
                 <hr class="border-gray-100">
 
-                {{-- Mətn (Avtomatik gəlir, amma dəyişmək olar) --}}
+                {{-- Mətn --}}
                 <div class="space-y-3">
                     <div>
                         <label class="block text-xs font-bold text-gray-700 mb-1">{{ __('Title') }}</label>
@@ -81,7 +79,7 @@
 
                 {{-- Rənglər --}}
                 <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1">{{ __('Background Colors (If no image)') }}</label>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">{{ __('Background Colors') }}</label>
                     <div class="flex gap-2">
                         <input type="color" x-model="color1" class="w-1/2 h-8 rounded cursor-pointer border border-gray-200 p-1 bg-white">
                         <input type="color" x-model="color2" class="w-1/2 h-8 rounded cursor-pointer border border-gray-200 p-1 bg-white">
@@ -91,8 +89,8 @@
             </div>
         </div>
 
-        {{-- SAĞ PANEL: Önizləmə (Qalan bütün sahə) --}}
-        <div class="flex-1 w-full min-w-0 space-y-4">
+        {{-- SAĞ PANEL (8 Sütun) --}}
+        <div class="lg:col-span-8 w-full min-w-0 space-y-4">
             
             {{-- Ölçü Düymələri --}}
             <div class="flex flex-wrap items-center gap-2 bg-white p-2 rounded-xl border border-gray-200 w-fit shadow-sm">
@@ -107,9 +105,9 @@
             </div>
 
             {{-- Kətan Sahəsi --}}
-            <div class="bg-gray-100 rounded-2xl border border-gray-200 p-4 sm:p-8 flex items-center justify-center overflow-hidden min-h-[600px] shadow-inner relative">
+            <div class="bg-gray-100 rounded-2xl border border-gray-200 p-4 sm:p-8 flex items-center justify-center overflow-hidden min-h-[600px] shadow-inner relative w-full">
                 
-                {{-- Yükləmə Loader --}}
+                {{-- Loader --}}
                 <div x-show="downloading" x-cloak class="absolute inset-0 z-50 bg-gray-100/80 backdrop-blur-sm flex items-center justify-center rounded-2xl">
                     <div class="text-gray-900 text-center">
                         <svg class="w-10 h-10 animate-spin mx-auto text-rj-purple mb-3" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" opacity=".25"/><path fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z"/></svg>
@@ -123,10 +121,8 @@
                      :class="aspectRatio"
                      :style="`background: ${bgImage ? `url('${bgImage}') center/cover no-repeat` : `linear-gradient(135deg, ${color1}, ${color2})`}`">
                     
-                    {{-- Qaralma --}}
                     <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent pointer-events-none"></div>
 
-                    {{-- Məzmun --}}
                     <div class="relative z-10 w-full">
                         <h2 class="text-white font-extrabold leading-tight mb-2 drop-shadow-lg" 
                             :class="aspectRatio === 'ratio-9-16' ? 'text-4xl' : 'text-2xl sm:text-4xl'"
@@ -138,7 +134,6 @@
                            style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;"
                            x-text="subtitle || 'Your subtitle goes here.'"></p>
                         
-                        {{-- Logo --}}
                         <div class="mt-6 flex items-center gap-2">
                             <div class="h-8 px-2 bg-white/20 backdrop-blur-md rounded-lg flex items-center justify-center border border-white/30">
                                 <template x-if="logoUrl">
@@ -159,7 +154,6 @@
 </div>
 
 <style>
-    /* Ölçülər (Max-width verərək daşmasının qarşısını alırıq) */
     .ratio-1-1 { width: 100%; max-width: 500px; aspect-ratio: 1/1; }
     .ratio-4-3 { width: 100%; max-width: 533px; aspect-ratio: 4/3; }
     .ratio-16-9 { width: 100%; max-width: 700px; aspect-ratio: 16/9; }
@@ -181,11 +175,11 @@ function marketingTool(siteLogo) {
         logoUrl: siteLogo,
         
         ratios: [
-            { label: '1:1 (Kvadrat)', value: 'ratio-1-1' },
-            { label: '4:3 (Üfüqi)', value: 'ratio-4-3' },
-            { label: '16:9 (Geniş)', value: 'ratio-16-9' },
-            { label: '4:5 (Şaquli)', value: 'ratio-4-5' },
-            { label: '9:16 (Story)', value: 'ratio-9-16' }
+            { label: '1:1', value: 'ratio-1-1' },
+            { label: '4:3', value: 'ratio-4-3' },
+            { label: '16:9', value: 'ratio-16-9' },
+            { label: '4:5', value: 'ratio-4-5' },
+            { label: '9:16', value: 'ratio-9-16' }
         ],
 
         handleImageUpload(event) {
