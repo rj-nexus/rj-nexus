@@ -12,8 +12,11 @@ class CommentObserver
 {
     public function created(Comment $comment): void
     {
-        // Spam və ya zibil şərhlər üçün bildiriş göndərmirik
+        // YENİ: Observer-in işə düşdüyünü yoxlamaq üçün log
+        Log::info("CommentObserver işə düşdü. Şərh ID: " . $comment->id);
+
         if (in_array($comment->status, ['spam', 'trash'])) {
+            Log::info("CommentObserver: Şərh spam və ya zibildir, keçilir.");
             return;
         }
 
@@ -21,17 +24,18 @@ class CommentObserver
         $admins = User::whereIn('role', ['admin', 'super-admin'])->get();
         
         if ($admins->isEmpty()) {
-            Log::warning('CommentObserver: Heç bir admin tapılmadı.');
+            Log::warning('CommentObserver: Heç bir admin tapılmadı. Rolları yoxlayın.');
             return;
         }
 
         foreach ($admins as $admin) {
-            // YENİ: Əgər şərhi yazan özüdürsə, ona bildiriş getməsin
+            // Əgər şərhi yazan özüdürsə, ona bildiriş getməsin
             if ($admin->id === $comment->user_id) {
+                Log::info("CommentObserver: Admin {$admin->id} özünə şərh yazdığı üçün keçilir.");
                 continue;
             }
 
-            // YENİ: İstifadəçinin bu bildirişi istəyib-istəmədiyini yoxlayırıq
+            // İstifadəçinin bu bildirişi istəyib-istəmədiyini yoxlayırıq
             if (class_exists(NotificationSetting::class)) {
                 $isEnabled = NotificationSetting::isEnabled($admin, 'new_comment', 'database');
                 if (!$isEnabled) {
@@ -54,7 +58,7 @@ class CommentObserver
                 'action_label' => __('View Comment'),
             ]);
 
-            Log::info("CommentObserver: Admin {$admin->id} üçün yeni şərh bildirişi yaradıldı.");
+            Log::info("CommentObserver: Admin {$admin->id} üçün yeni şərh bildirişi bazaya yazıldı.");
         }
     }
 }
