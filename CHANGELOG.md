@@ -50,7 +50,7 @@ Open it from the **Posts** page with the new **Create Marketing Post** button.
 
 #### 4 New Languages
 
-RJ Nexus now supports **48 languages**:
+RJ Nexus now supports **55 languages**:
 
 - `no`: Norwegian
 - `fi`: Finnish
