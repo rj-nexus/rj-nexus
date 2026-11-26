@@ -202,12 +202,22 @@ class NotificationController extends Controller
         $channels = NotificationSetting::channels();
         $settings = NotificationSetting::forUser($user);
         
-        // YENİ: Mövcud səslərin siyahısı
         $sounds = $this->availableSounds();
-        // YENİ: İstifadəçinin seçdiyi səs
+        
+        // YENİ: Səsin aktivlik vəziyyəti və səviyyəsi
         $currentSound = rj_get_option('notification_sound_' . $user->id, 'aurora');
+        $soundEnabled = rj_get_option('notification_sound_enabled_' . $user->id, '1') === '1';
+        $soundVolume = (int) rj_get_option('notification_sound_volume_' . $user->id, '50');
 
-        return view('admin.notifications.settings', compact('events', 'channels', 'settings', 'sounds', 'currentSound'));
+        return view('admin.notifications.settings', compact(
+            'events', 
+            'channels', 
+            'settings', 
+            'sounds', 
+            'currentSound',
+            'soundEnabled',
+            'soundVolume'
+        ));
     }
 
     public function updateSettings(Request $request)
@@ -215,6 +225,8 @@ class NotificationController extends Controller
         $validated = $request->validate([
             'settings' => 'nullable|array',
             'sound' => 'nullable|string|max:50',
+            'sound_enabled' => 'nullable|boolean',
+            'sound_volume' => 'nullable|integer|min:0|max:100',
         ]);
 
         $user = auth()->user();
@@ -238,6 +250,15 @@ class NotificationController extends Controller
             }
         }
 
+        // YENİ: Səsin aktiv/deaktiv vəziyyətini yadda saxla
+        $soundEnabled = $request->boolean('sound_enabled') ? '1' : '0';
+        rj_set_option('notification_sound_enabled_' . $user->id, $soundEnabled);
+
+        // YENİ: Səsin səviyyəsini yadda saxla
+        if ($request->has('sound_volume')) {
+            rj_set_option('notification_sound_volume_' . $user->id, (string) $request->input('sound_volume'));
+        }
+
         if ($request->expectsJson()) {
             return response()->json(['success' => true]);
         }
@@ -245,9 +266,6 @@ class NotificationController extends Controller
         return back()->with('success', __('Notification settings saved.'));
     }
 
-    /**
-     * YENİ: public/sounds/notifications qovluğundakı səslərin siyahısı
-     */
     protected function availableSounds(): array
     {
         return [
