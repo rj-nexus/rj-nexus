@@ -3,6 +3,37 @@
 @section('title', $type === 'page' ? __('Pages') : __('Posts'))
 
 @section('content')
+@php
+    $rjFlagUrl = function (string $code) {
+        static $cache = [];
+        if (array_key_exists($code, $cache)) {
+            return $cache[$code];
+        }
+
+        $names = array_values(array_unique(array_filter([
+            $code,
+            strtolower($code),
+            str_replace('_', '-', strtolower($code)),
+            strtolower(preg_split('/[-_]/', $code)[0] ?? ''),
+        ])));
+
+        foreach ($names as $n) {
+            foreach (['svg', 'webp', 'png', 'jpg', 'jpeg', 'gif', 'avif'] as $e) {
+                if (file_exists(public_path("images/flags/{$n}.{$e}"))) {
+                    return $cache[$code] = asset("images/flags/{$n}.{$e}");
+                }
+            }
+        }
+
+        return $cache[$code] = null;
+    };
+@endphp
+
+<style>
+    .rj-qflag { display: inline-block; flex-shrink: 0; width: 18px; height: 18px; border-radius: 50%; object-fit: cover; background: #e2e8f0; box-shadow: 0 0 0 1px rgba(15, 23, 42, .1), 0 1px 3px rgba(15, 23, 42, .18); }
+    .rj-qflag-ph { display: inline-flex; align-items: center; justify-content: center; font-size: 7px; font-weight: 700; text-transform: uppercase; color: #64748b; }
+</style>
+
 <div class="space-y-6" x-data="{
     selected: [],
     bulkAction: '',
@@ -36,7 +67,6 @@
     }
 }">
 
-    {{-- YUXARI HİSSƏ (Yalnız bir dəfə, düzgün düymələrlə) --}}
     <div class="flex items-center justify-between gap-4 flex-wrap">
         <div>
             <h2 class="text-base font-semibold text-gray-900">{{ $type === 'page' ? __('Pages') : __('Posts') }}</h2>
@@ -44,13 +74,12 @@
         </div>
 
         <div class="flex items-center gap-3">
-            {{-- AÇIQ ŞÜŞƏ EFFEKTLİ CREATE MARKETING POST BUTONU --}}
             @if ($type !== 'page')
                 <a href="{{ route('admin.tools.marketing') }}"
                    class="group relative inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-rj-purple/10 backdrop-blur-md border border-rj-purple/30 text-sm font-bold text-rj-purple transition-all duration-300 hover:bg-gradient-to-r hover:from-rj-purple hover:to-rj-pink hover:text-white hover:border-transparent hover:shadow-lg hover:shadow-rj-purple/40 overflow-hidden">
-                    
+
                     <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
-                    
+
                     <svg class="w-4 h-4 text-rj-pink group-hover:text-white group-hover:scale-110 group-hover:rotate-12 transition-all duration-300 relative z-10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
                     </svg>
@@ -58,7 +87,6 @@
                 </a>
             @endif
 
-            {{-- ORİJİNAL ADD NEW BUTONU --}}
             <a href="{{ route('admin.posts.create', ['type' => $type]) }}"
                class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-rj-purple to-rj-pink text-white text-sm font-medium hover:opacity-90 transition shadow-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
@@ -67,7 +95,6 @@
         </div>
     </div>
 
-    {{-- Status Kartları --}}
     <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
         @php
             $statusCards = [
@@ -363,12 +390,15 @@
 
                                             <div class="flex flex-wrap gap-1.5 mb-3">
                                                 @foreach ($locales as $locale)
+                                                    @php $flag = $rjFlagUrl($locale); @endphp
                                                     <button type="button"
                                                             @click="lang = '{{ $locale }}'"
                                                             :class="lang === '{{ $locale }}' ? 'bg-rj-purple text-white border-rj-purple' : 'bg-white text-gray-600 border-gray-200 hover:border-rj-purple/50'"
-                                                            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-bold uppercase tracking-wide transition">
-                                                        @if (file_exists(public_path("images/flags/{$locale}.svg")))
-                                                            <img src="{{ asset("images/flags/{$locale}.svg") }}" alt="" class="w-3.5 h-2.5 object-cover rounded-sm">
+                                                            class="inline-flex items-center gap-1.5 pl-1.5 pr-2.5 py-1 rounded-full border text-[11px] font-bold uppercase tracking-wide transition">
+                                                        @if ($flag)
+                                                            <img src="{{ $flag }}" alt="{{ strtoupper($locale) }}" class="rj-qflag" loading="lazy" draggable="false">
+                                                        @else
+                                                            <span class="rj-qflag rj-qflag-ph">{{ substr($locale, 0, 2) }}</span>
                                                         @endif
                                                         {{ strtoupper($locale) }}
                                                         @if ($locale === $baseLocale)
