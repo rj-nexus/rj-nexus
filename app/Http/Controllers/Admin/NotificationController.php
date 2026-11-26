@@ -204,8 +204,8 @@ class NotificationController extends Controller
         
         $sounds = $this->availableSounds();
         
-        // YENİ: Səsin aktivlik vəziyyəti və səviyyəsi
-        $currentSound = rj_get_option('notification_sound_' . $user->id, 'aurora');
+        // DƏYİŞDİ: Standart səs 'nexus1' olaraq təyin edildi
+        $currentSound = rj_get_option('notification_sound_' . $user->id, 'nexus1');
         $soundEnabled = rj_get_option('notification_sound_enabled_' . $user->id, '1') === '1';
         $soundVolume = (int) rj_get_option('notification_sound_volume_' . $user->id, '50');
 
@@ -231,7 +231,6 @@ class NotificationController extends Controller
 
         $user = auth()->user();
 
-        // Bildiriş kanallarını yadda saxla
         if (!empty($validated['settings'])) {
             foreach ($validated['settings'] as $event => $channels) {
                 if (!is_array($channels)) continue;
@@ -242,7 +241,6 @@ class NotificationController extends Controller
             }
         }
 
-        // Seçilmiş səsi yadda saxla
         if (!empty($validated['sound'])) {
             $availableSounds = array_keys($this->availableSounds());
             if (in_array($validated['sound'], $availableSounds, true)) {
@@ -250,11 +248,9 @@ class NotificationController extends Controller
             }
         }
 
-        // YENİ: Səsin aktiv/deaktiv vəziyyətini yadda saxla
         $soundEnabled = $request->boolean('sound_enabled') ? '1' : '0';
         rj_set_option('notification_sound_enabled_' . $user->id, $soundEnabled);
 
-        // YENİ: Səsin səviyyəsini yadda saxla
         if ($request->has('sound_volume')) {
             rj_set_option('notification_sound_volume_' . $user->id, (string) $request->input('sound_volume'));
         }

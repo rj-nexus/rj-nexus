@@ -1244,7 +1244,7 @@
                 soundPending: false,
                 notifSoundEnabled: @js(rj_get_option('notification_sound_enabled_' . auth()->id(), '1') === '1'),
                 notifSoundVolume: @js(max(0, min(100, (int) rj_get_option('notification_sound_volume_' . auth()->id(), 50))) / 100),
-                notifSoundFile: @js(asset('sounds/notifications/' . rj_get_option('notification_sound_' . auth()->id(), 'aurora') . '.wav')),
+                notifSoundFile: @js(asset('sounds/notifications/' . rj_get_option('notification_sound_' . auth()->id(), 'nexus1') . '.wav')),
                 notifPerm: ('Notification' in window) ? Notification.permission : 'unsupported',
 
                 init() {
