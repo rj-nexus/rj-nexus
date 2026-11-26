@@ -58,6 +58,25 @@
         <p class="text-sm text-gray-500 mt-1">{{ __('Configure critical email alerts for system events and security.') }}</p>
     </div>
 
+    {{-- YENİ: ŞƏXSİ BİLDİRİŞLƏRƏ KEÇİD BANNER-İ --}}
+    <div class="bg-gradient-to-r from-rj-purple/10 to-rj-pink/10 rounded-2xl border border-rj-purple/20 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-xl bg-rj-purple/20 text-rj-purple flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+            </div>
+            <div>
+                <h3 class="text-sm font-bold text-gray-900">{{ __('Looking for personal notification settings?') }}</h3>
+                <p class="text-xs text-gray-600 mt-1 max-w-xl">
+                    {{ __('This page manages global system alerts sent to the admin email. To manage your personal notification sounds, in-app alerts, and event preferences (like new comments or form submissions), visit your personal settings.') }}
+                </p>
+            </div>
+        </div>
+        <a href="{{ route('admin.notifications.settings') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-gray-200 text-sm font-semibold text-gray-800 hover:border-rj-purple hover:text-rj-purple transition whitespace-nowrap shadow-sm">
+            {{ __('Personal Settings') }}
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+        </a>
+    </div>
+
     {{-- SUCCESS --}}
     @if (session('success'))
         <div x-data="{ open: true }" x-init="setTimeout(() => open = false, 5000)"
