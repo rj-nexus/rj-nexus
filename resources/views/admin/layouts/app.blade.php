@@ -1198,6 +1198,11 @@
                 'settings': svg('M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z')
             };
             let audioEl = null;
+            let baseTitle = document.title;
+            let baseFavicon = null;
+            let favImg = null;
+            let blinkTimer = null;
+            const blinkText = '🔔 ' + @js(__('New notification'));
 
             const norm = function (s) {
                 return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -1243,7 +1248,12 @@
                 notifPerm: ('Notification' in window) ? Notification.permission : 'unsupported',
 
                 init() {
-                    document.addEventListener('visibilitychange', () => { if (!document.hidden) this.pushNew(); });
+                    document.addEventListener('visibilitychange', () => {
+                        this.updateTabBadge();
+                        if (!document.hidden) this.pushNew();
+                    });
+
+                    this.$watch('unreadCount', () => this.updateTabBadge());
 
                     const unlockSound = () => {
                         if (this.soundPending) { this.soundPending = false; this.playSound(); }
@@ -1375,6 +1385,68 @@
                     });
 
                     if (shown) this.playSound();
+                },
+
+                /* ---- Tab başlığı və favicon işarəsi ---- */
+                tabTitle() {
+                    const n = this.unreadCount || 0;
+                    return n > 0 ? '(' + (n > 99 ? '99+' : n) + ') ' + baseTitle : baseTitle;
+                },
+
+                updateTabBadge() {
+                    const n = this.unreadCount || 0;
+                    this.drawFavicon(n);
+                    this.toggleBlink(n > 0 && document.hidden);
+                },
+
+                toggleBlink(on) {
+                    if (!on) {
+                        if (blinkTimer) { clearInterval(blinkTimer); blinkTimer = null; }
+                        document.title = this.tabTitle();
+                        return;
+                    }
+                    if (blinkTimer) return;
+                    let flip = false;
+                    blinkTimer = setInterval(() => {
+                        flip = !flip;
+                        document.title = flip ? blinkText : this.tabTitle();
+                    }, 1200);
+                },
+
+                drawFavicon(n) {
+                    const link = document.querySelector('link[rel~="icon"]');
+                    if (!link) return;
+                    if (!baseFavicon) baseFavicon = link.href;
+                    if (n <= 0) { link.href = baseFavicon; return; }
+
+                    if (!favImg) {
+                        favImg = new Image();
+                        favImg.onload = () => this.drawFavicon(this.unreadCount || 0);
+                        favImg.src = baseFavicon;
+                        return;
+                    }
+                    if (!favImg.complete || !favImg.naturalWidth) return;
+
+                    try {
+                        const c = document.createElement('canvas');
+                        c.width = c.height = 64;
+                        const x = c.getContext('2d');
+                        x.drawImage(favImg, 0, 0, 64, 64);
+                        x.beginPath();
+                        x.arc(46, 18, 17, 0, Math.PI * 2);
+                        x.fillStyle = '#ef4444';
+                        x.fill();
+                        x.lineWidth = 3;
+                        x.strokeStyle = '#ffffff';
+                        x.stroke();
+                        x.fillStyle = '#ffffff';
+                        x.font = 'bold 22px sans-serif';
+                        x.textAlign = 'center';
+                        x.textBaseline = 'middle';
+                        x.fillText(n > 9 ? '9+' : String(n), 46, 19);
+                        link.type = 'image/png';
+                        link.href = c.toDataURL('image/png');
+                    } catch (e) {}
                 },
 
                 playSound() {
