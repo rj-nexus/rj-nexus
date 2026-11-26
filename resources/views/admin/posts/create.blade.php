@@ -3,14 +3,62 @@
 @section('title', __('Create Post'))
 
 @section('content')
+@php
+    // Bayraq faylını tapır (svg, webp, png... və zh_TW -> zh-tw kimi variantlar)
+    $rjFlagUrl = function (string $code) {
+        static $cache = [];
+        if (array_key_exists($code, $cache)) {
+            return $cache[$code];
+        }
+
+        $names = array_values(array_unique(array_filter([
+            $code,
+            strtolower($code),
+            str_replace('_', '-', strtolower($code)),
+            strtolower(preg_split('/[-_]/', $code)[0] ?? ''),
+        ])));
+
+        foreach ($names as $n) {
+            foreach (['svg', 'webp', 'png', 'jpg', 'jpeg', 'gif', 'avif'] as $e) {
+                if (file_exists(public_path("images/flags/{$n}.{$e}"))) {
+                    return $cache[$code] = asset("images/flags/{$n}.{$e}");
+                }
+            }
+        }
+
+        return $cache[$code] = null;
+    };
+
+    // Hansı dillərdə xəta var (tabda qırmızı nöqtə üçün)
+    $rjErrLocales = [];
+    foreach ($locales as $l) {
+        $keys = $l === $baseLocale
+            ? ['title', 'slug', 'excerpt', 'seo_title', 'seo_description', 'focus_keyword']
+            : ["translations.{$l}.title", "translations.{$l}.slug"];
+        foreach ($keys as $k) {
+            if ($errors->has($k)) {
+                $rjErrLocales[] = $l;
+                break;
+            }
+        }
+    }
+@endphp
+
+<style>
+    .rj-cflag { display: inline-block; flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%; object-fit: cover; background: #e2e8f0; box-shadow: 0 0 0 1px rgba(15, 23, 42, .08), 0 2px 5px -1px rgba(15, 23, 42, .18); transition: box-shadow .2s, transform .2s; }
+    .rj-cflag-ph { display: inline-flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 700; text-transform: uppercase; color: #64748b; }
+    .rj-ltab.is-on .rj-cflag { box-shadow: 0 0 0 2px #8b5cf6, 0 0 0 4px rgba(139, 92, 246, .2); transform: scale(1.08); }
+</style>
+
 <div class="space-y-6" x-data="{
-    activeLocale: '{{ $baseLocale }}',
-    editMode: '{{ old('edit_mode', $type === 'page' ? 'builder' : 'classic') }}',
-    themeTemplate: '{{ old('theme_template') }}',
+    activeLocale: @js($baseLocale),
+    baseLocale: @js($baseLocale),
+    editMode: @js(old('edit_mode', $type === 'page' ? 'builder' : 'classic')),
+    themeTemplate: @js(old('theme_template', '')),
     seoLoading: false,
 
     async generateSeo() {
-        const isBase = this.activeLocale === '{{ $baseLocale }}';
+        const isBase = this.activeLocale === this.baseLocale;
         const titleName = isBase ? 'title' : 'translations[' + this.activeLocale + '][title]';
         const contentName = isBase ? 'content' : '';
 
@@ -21,18 +69,18 @@
         const content = contentInput ? contentInput.value : '';
 
         if (!title) {
-            alert('{{ __('Please enter a title first.') }}');
+            alert(@js(__('Please enter a title first.')));
             return;
         }
 
         this.seoLoading = true;
 
         try {
-            const res = await fetch('{{ route('admin.posts.ai.generate-seo') }}', {
+            const res = await fetch(@js(route('admin.posts.ai.generate-seo')), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'X-CSRF-TOKEN': @js(csrf_token()),
                     'Accept': 'application/json'
                 },
                 body: JSON.stringify({
@@ -55,10 +103,10 @@
                 setVal('seo_description', data.seo_description);
                 setVal('focus_keyword', data.focus_keyword);
             } else {
-                alert(data.message || '{{ __('AI generation failed.') }}');
+                alert(data.message || @js(__('AI generation failed.')));
             }
         } catch (e) {
-            alert('{{ __('Network error.') }}');
+            alert(@js(__('Network error.')));
         } finally {
             this.seoLoading = false;
         }
@@ -120,60 +168,93 @@
             <div class="lg:col-span-2 space-y-6">
 
                 <div class="bg-white rounded-lg shadow-sm border border-gray-100">
-                    <div class="border-b border-gray-100 relative flex items-center bg-white rounded-t-lg group">
 
-                        <button type="button" @click="$refs.langTabs.scrollLeft -= 200" class="absolute left-1 z-10 w-6 h-6 flex items-center justify-center rounded-full bg-white shadow-sm border border-gray-200 text-gray-500 hover:text-rj-purple transition opacity-0 group-hover:opacity-100 focus:outline-none">
+                    {{-- Dil tabları --}}
+                    <div class="border-b border-gray-100 relative flex items-center bg-white rounded-t-lg group"
+                         x-data="{
+                             isDown: false,
+                             moved: false,
+                             startX: 0,
+                             scrollLeft: 0,
+                             startDrag(e) {
+                                 this.isDown = true;
+                                 this.moved = false;
+                                 this.startX = e.pageX;
+                                 this.scrollLeft = this.$refs.langTabs.scrollLeft;
+                             },
+                             stopDrag() {
+                                 this.isDown = false;
+                                 this.$refs.langTabs.classList.remove('cursor-grabbing', 'select-none');
+                             },
+                             doDrag(e) {
+                                 if (!this.isDown) return;
+                                 const dx = e.pageX - this.startX;
+                                 if (Math.abs(dx) > 5) {
+                                     this.moved = true;
+                                     this.$refs.langTabs.classList.add('cursor-grabbing', 'select-none');
+                                 }
+                                 if (this.moved) {
+                                     e.preventDefault();
+                                     this.$refs.langTabs.scrollLeft = this.scrollLeft - dx;
+                                 }
+                             },
+                             pick(l) {
+                                 if (this.moved) { this.moved = false; return; }
+                                 activeLocale = l;
+                             },
+                             reveal() {
+                                 this.$nextTick(() => {
+                                     const nav = this.$refs.langTabs;
+                                     const el = nav ? nav.querySelector('.rj-ltab.is-on') : null;
+                                     if (!nav || !el) return;
+                                     nav.scrollTo({ left: Math.max(0, el.offsetLeft - nav.clientWidth / 2 + el.offsetWidth / 2), behavior: 'smooth' });
+                                 });
+                             }
+                         }"
+                         x-init="$watch('activeLocale', () => reveal()); reveal()"
+                         @mouseup.window="stopDrag()">
+
+                        <button type="button" @click="$refs.langTabs.scrollBy({ left: -200, behavior: 'smooth' })"
+                                class="absolute left-1 z-10 w-6 h-6 flex items-center justify-center rounded-full bg-white shadow-sm border border-gray-200 text-gray-500 hover:text-rj-purple transition sm:opacity-0 sm:group-hover:opacity-100 focus:outline-none"
+                                aria-label="{{ __('Previous') }}">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
                         </button>
 
-                        <nav class="flex gap-1 overflow-x-auto rj-scrollbar scroll-smooth w-full px-8 pb-px"
+                        <nav class="flex gap-1 overflow-x-auto rj-scrollbar w-full px-8 pb-px"
                              x-ref="langTabs"
-                             x-data="{
-                                 isDown: false,
-                                 startX: 0,
-                                 scrollLeft: 0,
-                                 startDrag(e) {
-                                     this.isDown = true;
-                                     this.startX = e.pageX - this.$refs.langTabs.offsetLeft;
-                                     this.scrollLeft = this.$refs.langTabs.scrollLeft;
-                                     this.$refs.langTabs.classList.add('cursor-grabbing', 'select-none');
-                                 },
-                                 stopDrag() {
-                                     this.isDown = false;
-                                     this.$refs.langTabs.classList.remove('cursor-grabbing', 'select-none');
-                                 },
-                                 doDrag(e) {
-                                     if (!this.isDown) return;
-                                     e.preventDefault();
-                                     const x = e.pageX - this.$refs.langTabs.offsetLeft;
-                                     const walk = (x - this.startX) * 2;
-                                     this.$refs.langTabs.scrollLeft = this.scrollLeft - walk;
-                                 }
-                             }"
                              @mousedown="startDrag($event)"
                              @mouseleave="stopDrag()"
-                             @mouseup="stopDrag()"
                              @mousemove="doDrag($event)"
                              style="scrollbar-width: none; -ms-overflow-style: none; cursor: grab;"
-                        >
+                             role="tablist">
                             @foreach ($locales as $locale)
+                                @php $flag = $rjFlagUrl($locale); @endphp
                                 <button type="button"
-                                        @click="activeLocale = '{{ $locale }}'"
-                                        :class="activeLocale === '{{ $locale }}' ? 'border-rj-purple text-rj-purple bg-rj-purple/5' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50'"
-                                        class="px-4 py-3 border-b-2 text-sm font-medium transition flex items-center gap-2 whitespace-nowrap rounded-t-lg">
-                                    @if (file_exists(public_path("images/flags/{$locale}.svg")))
-                                        <img src="{{ asset("images/flags/{$locale}.svg") }}" alt="{{ strtoupper($locale) }}" class="w-4 h-3 object-cover rounded-sm">
+                                        role="tab"
+                                        @click="pick(@js($locale))"
+                                        :class="activeLocale === @js($locale) ? 'is-on border-rj-purple text-rj-purple bg-rj-purple/5' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50'"
+                                        :aria-selected="activeLocale === @js($locale)"
+                                        class="rj-ltab px-4 py-3 border-b-2 text-sm font-medium transition flex items-center gap-2 whitespace-nowrap rounded-t-lg">
+                                    @if ($flag)
+                                        <img src="{{ $flag }}" alt="{{ strtoupper($locale) }}" class="rj-cflag" loading="lazy" draggable="false">
+                                    @else
+                                        <span class="rj-cflag rj-cflag-ph">{{ substr($locale, 0, 2) }}</span>
                                     @endif
                                     {{ rj_lang_name($locale) }}
                                     <span class="text-xs uppercase opacity-60">{{ $locale }}</span>
                                     @if ($locale === $baseLocale)
-                                        <span class="w-1.5 h-1.5 rounded-full bg-rj-pink"></span>
+                                        <span class="w-1.5 h-1.5 rounded-full bg-rj-pink" title="{{ __('Default language') }}"></span>
+                                    @endif
+                                    @if (in_array($locale, $rjErrLocales, true))
+                                        <span class="w-1.5 h-1.5 rounded-full bg-red-500" title="{{ __('This language has errors.') }}"></span>
                                     @endif
                                 </button>
                             @endforeach
                         </nav>
 
-                        <button type="button" @click="$refs.langTabs.scrollLeft += 200" class="absolute right-1 z-10 w-6 h-6 flex items-center justify-center rounded-full bg-white shadow-sm border border-gray-200 text-gray-500 hover:text-rj-purple transition opacity-0 group-hover:opacity-100 focus:outline-none">
+                        <button type="button" @click="$refs.langTabs.scrollBy({ left: 200, behavior: 'smooth' })"
+                                class="absolute right-1 z-10 w-6 h-6 flex items-center justify-center rounded-full bg-white shadow-sm border border-gray-200 text-gray-500 hover:text-rj-purple transition sm:opacity-0 sm:group-hover:opacity-100 focus:outline-none"
+                                aria-label="{{ __('Next') }}">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                         </button>
 
@@ -181,7 +262,7 @@
 
                     <div class="p-6 space-y-5">
                         @foreach ($locales as $locale)
-                            <div x-show="activeLocale === '{{ $locale }}'" x-cloak class="space-y-5">
+                            <div x-show="activeLocale === @js($locale)" x-cloak class="space-y-5">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1.5">
                                         {{ __('Title') }}
@@ -217,15 +298,17 @@
                                               class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">{{ old($locale === $baseLocale ? 'excerpt' : "translations.{$locale}.excerpt") }}</textarea>
                                 </div>
 
-                                <template x-if="editMode === 'classic' && '{{ $locale }}' === '{{ $baseLocale }}'">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('Content') }}</label>
-                                        <textarea name="content"
-                                                  rows="14"
-                                                  class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm font-mono">{{ old('content') }}</textarea>
-                                        <p class="text-xs text-gray-500 mt-1">{{ __('Supports HTML and RJ shortcodes.') }}</p>
-                                    </div>
-                                </template>
+                                @if ($locale === $baseLocale)
+                                    <template x-if="editMode === 'classic'">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('Content') }}</label>
+                                            <textarea name="content"
+                                                      rows="14"
+                                                      class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm font-mono">{{ old('content') }}</textarea>
+                                            <p class="text-xs text-gray-500 mt-1">{{ __('Supports HTML and RJ shortcodes.') }}</p>
+                                        </div>
+                                    </template>
+                                @endif
                             </div>
                         @endforeach
                     </div>
@@ -264,22 +347,22 @@
                                     <span class="block text-xs text-gray-500 mt-0.5">{{ __('Use a pre-built page layout from your theme.') }}</span>
                                 </span>
                             </label>
-                        @endif
-                        <div x-show="editMode === 'theme'" x-cloak class="pt-3 border-t border-gray-100">
-                            <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('Template') }}</label>
-                            <select x-model="themeTemplate"
-                                    class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">
-                                <option value="">{{ __('— Select template —') }}</option>
+                            <div x-show="editMode === 'theme'" x-cloak class="pt-3 border-t border-gray-100">
+                                <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('Template') }}</label>
+                                <select x-model="themeTemplate"
+                                        class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">
+                                    <option value="">{{ __('— Select template —') }}</option>
+                                    @foreach($themeTemplates as $tpl)
+                                        <option value="{{ $tpl['id'] }}">{{ $tpl['label'] }}</option>
+                                    @endforeach
+                                </select>
                                 @foreach($themeTemplates as $tpl)
-                                    <option value="{{ $tpl['id'] }}">{{ $tpl['label'] }}</option>
+                                    <p x-show="themeTemplate === @js($tpl['id'])" x-cloak class="text-xs text-gray-500 mt-2 leading-relaxed">
+                                        {{ $tpl['description'] ?? '' }}
+                                    </p>
                                 @endforeach
-                            </select>
-                            @foreach($themeTemplates as $tpl)
-                                <p x-show="themeTemplate === '{{ $tpl['id'] }}'" x-cloak class="text-xs text-gray-500 mt-2 leading-relaxed">
-                                    {{ $tpl['description'] ?? '' }}
-                                </p>
-                            @endforeach
-                        </div>
+                            </div>
+                        @endif
                     </div>
                 </div>
 
@@ -298,7 +381,7 @@
 
                     <div class="p-6 space-y-4">
                         @foreach ($locales as $locale)
-                            <div x-show="activeLocale === '{{ $locale }}'" x-cloak class="space-y-4">
+                            <div x-show="activeLocale === @js($locale)" x-cloak class="space-y-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('SEO Title') }}</label>
                                     <input type="text"
@@ -374,7 +457,7 @@
                     <div class="px-6 py-4 border-b border-gray-100">
                         <h3 class="text-base font-semibold text-gray-900">{{ __('Featured Image') }}</h3>
                     </div>
-                    <div class="p-6" x-data="{ imageUrl: '{{ old('featured_image') }}' }"
+                    <div class="p-6" x-data="{ imageUrl: @js(old('featured_image', '')) }"
                          @media-selected.window="if ($event.detail.target === $refs.imageInput) imageUrl = $event.detail.url">
                         <div x-show="imageUrl" class="rounded-lg overflow-hidden border border-gray-200 relative mb-3">
                             <img :src="imageUrl" alt="" class="w-full h-40 object-cover">
@@ -385,10 +468,10 @@
                         </div>
                         <input type="hidden" name="featured_image" x-ref="imageInput" :value="imageUrl">
                         <button type="button"
-                                @click="$dispatch('open-media-picker', { value: $refs.imageInput })"
+                                @click="$dispatch('open-media-picker', { value: $refs.imageInput, type: 'image' })"
                                 class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 border-dashed border-gray-300 text-gray-700 text-sm font-medium hover:border-rj-purple hover:bg-rj-purple/5 transition">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                            <span x-text="imageUrl ? '{{ __('Change Image') }}' : '{{ __('Select Image') }}'"></span>
+                            <span x-text="imageUrl ? @js(__('Change Image')) : @js(__('Select Image'))"></span>
                         </button>
                     </div>
                 </div>
