@@ -1,58 +1,43 @@
 @extends('admin.settings.layout')
 
-@section('title', __('Notifications'))
+@section('title', __('System Notifications'))
 
 @section('settings')
 @php
     $events = [
-        'new_comment' => [
-            'group' => 'content',
-            'title' => __('New Comment'),
-            'desc'  => __('Get an email when someone leaves a comment on your site.'),
-            'icon'  => 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z',
-            'tone'  => 'bg-sky-50 text-sky-600 ring-sky-100',
-        ],
-        'post_published' => [
-            'group' => 'content',
-            'title' => __('Post Published'),
-            'desc'  => __('Get an email when a new post or page is published.'),
-            'icon'  => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
-            'tone'  => 'bg-emerald-50 text-emerald-600 ring-emerald-100',
-        ],
-        'form_submission' => [
-            'group' => 'content',
-            'title' => __('Form Submission'),
-            'desc'  => __('Get an email when a user submits a form on your site.'),
-            'icon'  => 'M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4',
-            'tone'  => 'bg-indigo-50 text-indigo-600 ring-indigo-100',
-        ],
-        'new_user' => [
-            'group' => 'users',
-            'title' => __('New User Registration'),
-            'desc'  => __('Get an email when a new user registers on your site.'),
-            'icon'  => 'M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z',
-            'tone'  => 'bg-violet-50 text-violet-600 ring-violet-100',
-        ],
         'failed_login' => [
-            'group' => 'users',
+            'group' => 'security',
             'title' => __('Failed Login Attempt'),
             'desc'  => __('Get an email when someone fails to log in to the admin panel.'),
             'icon'  => 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z',
             'tone'  => 'bg-red-50 text-red-600 ring-red-100',
+        ],
+        'system_error' => [
+            'group' => 'system',
+            'title' => __('System Error'),
+            'desc'  => __('Get an email when a critical system error occurs on your site.'),
+            'icon'  => 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z',
+            'tone'  => 'bg-amber-50 text-amber-600 ring-amber-100',
+        ],
+        'backup_failed' => [
+            'group' => 'system',
+            'title' => __('Backup Failed'),
+            'desc'  => __('Get an email when an automated backup fails.'),
+            'icon'  => 'M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4',
+            'tone'  => 'bg-rose-50 text-rose-600 ring-rose-100',
         ],
         'update_available' => [
             'group' => 'system',
             'title' => __('Update Available'),
             'desc'  => __('Get an email when RJ CMS, themes, or plugins have updates available.'),
             'icon'  => 'M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15',
-            'tone'  => 'bg-amber-50 text-amber-600 ring-amber-100',
+            'tone'  => 'bg-sky-50 text-sky-600 ring-sky-100',
         ],
     ];
 
     $groupTitles = [
-        'content' => __('Content & Community'),
-        'users'   => __('Users & Security'),
-        'system'  => __('System'),
+        'security' => __('Security'),
+        'system'   => __('System & Maintenance'),
     ];
 
     $groups = collect($events)->groupBy('group', true);
@@ -69,8 +54,8 @@
 
     {{-- HEADER --}}
     <div>
-        <h2 class="text-xl font-bold text-gray-900 tracking-tight">{{ __('Notifications') }}</h2>
-        <p class="text-sm text-gray-500 mt-1">{{ __('Configure email alerts for various events on your site.') }}</p>
+        <h2 class="text-xl font-bold text-gray-900 tracking-tight">{{ __('System Notifications') }}</h2>
+        <p class="text-sm text-gray-500 mt-1">{{ __('Configure critical email alerts for system events and security.') }}</p>
     </div>
 
     {{-- SUCCESS --}}
@@ -141,7 +126,7 @@
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
                         </div>
                         <div>
-                            <h3 class="text-base font-bold text-gray-900">{{ __('Email Notifications') }}</h3>
+                            <h3 class="text-base font-bold text-gray-900">{{ __('System Email Alerts') }}</h3>
                             <p class="text-xs text-gray-500 mt-0.5">{{ __('Toggle the events you want to be notified about.') }}</p>
                         </div>
                     </div>
