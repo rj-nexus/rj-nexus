@@ -201,23 +201,40 @@ class NotificationController extends Controller
         $events = NotificationSetting::events();
         $channels = NotificationSetting::channels();
         $settings = NotificationSetting::forUser($user);
+        
+        // YENİ: Mövcud səslərin siyahısı
+        $sounds = $this->availableSounds();
+        // YENİ: İstifadəçinin seçdiyi səs
+        $currentSound = rj_get_option('notification_sound_' . $user->id, 'aurora');
 
-        return view('admin.notifications.settings', compact('events', 'channels', 'settings'));
+        return view('admin.notifications.settings', compact('events', 'channels', 'settings', 'sounds', 'currentSound'));
     }
 
     public function updateSettings(Request $request)
     {
         $validated = $request->validate([
-            'settings' => 'required|array',
+            'settings' => 'nullable|array',
+            'sound' => 'nullable|string|max:50',
         ]);
 
         $user = auth()->user();
 
-        foreach ($validated['settings'] as $event => $channels) {
-            if (!is_array($channels)) continue;
+        // Bildiriş kanallarını yadda saxla
+        if (!empty($validated['settings'])) {
+            foreach ($validated['settings'] as $event => $channels) {
+                if (!is_array($channels)) continue;
 
-            foreach ($channels as $channel => $enabled) {
-                NotificationSetting::setEnabled($user, (string) $event, (string) $channel, (bool) $enabled);
+                foreach ($channels as $channel => $enabled) {
+                    NotificationSetting::setEnabled($user, (string) $event, (string) $channel, (bool) $enabled);
+                }
+            }
+        }
+
+        // Seçilmiş səsi yadda saxla
+        if (!empty($validated['sound'])) {
+            $availableSounds = array_keys($this->availableSounds());
+            if (in_array($validated['sound'], $availableSounds, true)) {
+                rj_set_option('notification_sound_' . $user->id, $validated['sound']);
             }
         }
 
@@ -226,5 +243,34 @@ class NotificationController extends Controller
         }
 
         return back()->with('success', __('Notification settings saved.'));
+    }
+
+    /**
+     * YENİ: public/sounds/notifications qovluğundakı səslərin siyahısı
+     */
+    protected function availableSounds(): array
+    {
+        return [
+            'aurora'    => 'Aurora',
+            'bing'      => 'Bing',
+            'bling'     => 'Bling',
+            'comet'     => 'Comet',
+            'dodong'    => 'Dodong',
+            'dong'      => 'Dong',
+            'eclipse'   => 'Eclipse',
+            'nebula1'   => 'Nebula 1',
+            'nebula2'   => 'Nebula 2',
+            'nebula3'   => 'Nebula 3',
+            'nebula4'   => 'Nebula 4',
+            'nexus1'    => 'Nexus 1',
+            'nexus2'    => 'Nexus 2',
+            'nova'      => 'Nova',
+            'orbit'     => 'Orbit',
+            'pichilti'  => 'Pıçıltı',
+            'stardust1' => 'Stardust 1',
+            'stardust2' => 'Stardust 2',
+            'stardust3' => 'Stardust 3',
+            'stardust4' => 'Stardust 4',
+        ];
     }
 }
