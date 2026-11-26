@@ -30,8 +30,13 @@
 @endphp
 
 <style>
-    .rj-qflag { display: inline-block; flex-shrink: 0; width: 18px; height: 18px; border-radius: 50%; object-fit: cover; background: #e2e8f0; box-shadow: 0 0 0 1px rgba(15, 23, 42, .1), 0 1px 3px rgba(15, 23, 42, .18); }
-    .rj-qflag-ph { display: inline-flex; align-items: center; justify-content: center; font-size: 7px; font-weight: 700; text-transform: uppercase; color: #64748b; }
+    .rj-qflag { display: inline-block; flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%; object-fit: cover; background: #e2e8f0; box-shadow: 0 0 0 1px rgba(15, 23, 42, .08), 0 2px 5px -1px rgba(15, 23, 42, .18); transition: box-shadow .2s, transform .2s; }
+    .rj-qflag-ph { display: inline-flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 700; text-transform: uppercase; color: #64748b; }
+    .rj-qtab { display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px 4px 4px; border-radius: 999px; border: 1px solid #e5e7eb; background: #fff; color: #4b5563; font-size: 12px; font-weight: 600; letter-spacing: .02em; text-transform: uppercase; cursor: pointer; transition: border-color .2s, background .2s, color .2s; }
+    .rj-qtab:hover { border-color: rgba(139, 92, 246, .5); background: #faf5ff; }
+    .rj-qtab.is-on { border-color: #8b5cf6; background: rgba(139, 92, 246, .08); color: #7c3aed; }
+    .rj-qtab.is-on .rj-qflag { box-shadow: 0 0 0 2px #8b5cf6, 0 0 0 4px rgba(139, 92, 246, .2); transform: scale(1.05); }
+    .rj-qtab-dot { width: 6px; height: 6px; border-radius: 50%; background: #ec4899; }
 </style>
 
 <div class="space-y-6" x-data="{
@@ -388,21 +393,21 @@
                                                 <span class="text-xs text-gray-500 truncate min-w-0">— {{ $post->title ?: __('(no title)') }}</span>
                                             </div>
 
-                                            <div class="flex flex-wrap gap-1.5 mb-3">
+                                            <div class="flex flex-wrap gap-2 mb-4">
                                                 @foreach ($locales as $locale)
                                                     @php $flag = $rjFlagUrl($locale); @endphp
                                                     <button type="button"
                                                             @click="lang = '{{ $locale }}'"
-                                                            :class="lang === '{{ $locale }}' ? 'bg-rj-purple text-white border-rj-purple' : 'bg-white text-gray-600 border-gray-200 hover:border-rj-purple/50'"
-                                                            class="inline-flex items-center gap-1.5 pl-1.5 pr-2.5 py-1 rounded-full border text-[11px] font-bold uppercase tracking-wide transition">
+                                                            :class="lang === '{{ $locale }}' ? 'is-on' : ''"
+                                                            class="rj-qtab">
                                                         @if ($flag)
                                                             <img src="{{ $flag }}" alt="{{ strtoupper($locale) }}" class="rj-qflag" loading="lazy" draggable="false">
                                                         @else
                                                             <span class="rj-qflag rj-qflag-ph">{{ substr($locale, 0, 2) }}</span>
                                                         @endif
-                                                        {{ strtoupper($locale) }}
+                                                        <span>{{ strtoupper($locale) }}</span>
                                                         @if ($locale === $baseLocale)
-                                                            <span class="w-1 h-1 rounded-full bg-rj-pink"></span>
+                                                            <span class="rj-qtab-dot"></span>
                                                         @endif
                                                     </button>
                                                 @endforeach
