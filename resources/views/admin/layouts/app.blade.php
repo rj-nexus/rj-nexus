@@ -1197,6 +1197,8 @@
                 'inbox': svg('M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4'),
                 'settings': svg('M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z')
             };
+            let audioEl = null;
+
             const norm = function (s) {
                 return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
             };
@@ -1234,13 +1236,22 @@
                 notifIcons: notifIcons,
                 toasts: [],
                 toastSeq: 0,
+                soundPending: false,
+                notifSoundEnabled: @js(rj_get_option('notification_sound_enabled_' . auth()->id(), '1') === '1'),
+                notifSoundVolume: @js(max(0, min(100, (int) rj_get_option('notification_sound_volume_' . auth()->id(), 50))) / 100),
+                notifSoundFile: @js(asset('sounds/notifications/' . rj_get_option('notification_sound_' . auth()->id(), 'aurora') . '.wav')),
                 notifPerm: ('Notification' in window) ? Notification.permission : 'unsupported',
 
                 init() {
                     document.addEventListener('visibilitychange', () => { if (!document.hidden) this.pushNew(); });
 
+                    const unlockSound = () => {
+                        if (this.soundPending) { this.soundPending = false; this.playSound(); }
+                    };
+                    ['click', 'keydown', 'touchstart'].forEach(ev => document.addEventListener(ev, unlockSound, { passive: true }));
+
                     this.fetchNotifications();
-                    setInterval(() => this.fetchNotifications(), 60000);
+                    setInterval(() => this.fetchNotifications(), 15000);
 
                     setInterval(() => {
                         this.hintShow = false;
@@ -1311,11 +1322,12 @@
                     })
                     .then(r => r.json())
                     .then(data => {
+                        console.log('Bildiriş məlumatı:', data);
                         this.unreadCount = data.unread;
                         this.notifications = data.notifications;
                         this.pushNew();
                     })
-                    .catch(() => {});
+                    .catch((e) => { console.error('Bildiriş fetch xətası:', e); });
                 },
 
                 /* ---- Bir dəfə göstərmə yaddaşı ---- */
@@ -1347,16 +1359,35 @@
                         .filter(n => !n.is_read && seen.indexOf(String(n.id)) === -1)
                         .slice(0, 3);
 
+                    let shown = false;
+
                     fresh.forEach((n) => {
                         if (this.canDevice() && document.hidden) {
                             this.markSeen(n.id);
                             this.deviceNotify(n);
+                            shown = true;
                         } else if (!document.hidden) {
                             this.markSeen(n.id);
                             this.showToast(n);
+                            shown = true;
                         }
                         // Tab gizlidirsə və icazə yoxdursa: gözlə, tab açılanda toast çıxacaq
                     });
+
+                    if (shown) this.playSound();
+                },
+
+                playSound() {
+                    if (!this.notifSoundEnabled) return;
+                    try {
+                        if (!audioEl) audioEl = new Audio(this.notifSoundFile);
+                        audioEl.volume = this.notifSoundVolume;
+                        audioEl.currentTime = 0;
+                        const p = audioEl.play();
+                        if (p && p.catch) p.catch(() => { this.soundPending = true; });
+                    } catch (e) {
+                        console.error('Audio xətası:', e);
+                    }
                 },
 
                 deviceNotify(n) {
@@ -1364,7 +1395,8 @@
                         const note = new Notification(n.title || 'Notification', {
                             body: n.message || '',
                             tag: 'rj-' + n.id,
-                            icon: urls.favicon
+                            icon: urls.favicon,
+                            silent: true
                         });
                         note.onclick = () => {
                             window.focus();
