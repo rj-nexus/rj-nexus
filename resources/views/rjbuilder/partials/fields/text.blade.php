@@ -1,5 +1,8 @@
 <template x-if="field.type === 'text' || field.type === 'textarea' || field.type === 'rich_text'">
     <div x-data="{
+        quill: null,
+        isUpdating: false,
+        
         initEditor() {
             // Quill.js-in yüklənməsini yoxlayırıq
             if (typeof Quill === 'undefined') {
@@ -16,11 +19,11 @@
                 this.setupQuill();
             }
         },
+        
         setupQuill() {
-            const editorElement = this.$refs.quillEditor;
-            
-            // Quill-i konfiqurasiya edirik
-            const quill = new Quill(editorElement, {
+            if (this.quill) return; // Təkrar yüklənmənin qarşısını alırıq
+
+            const quill = new Quill(this.$refs.quillEditor, {
                 theme: 'snow',
                 placeholder: field.placeholder || 'Write something beautiful...',
                 modules: {
@@ -36,28 +39,52 @@
                 }
             });
 
-            // Köhnə yazılmış mətni (əgər varsa) redaktora yükləyirik
-            let initialContent = currentSettings[field.name] || field.default || '';
+            this.quill = quill;
+
+            // Bazadan gələn köhnə mətni yükləyirik
+            let initialContent = fieldValue(field) || '';
             if (initialContent) {
                 quill.clipboard.dangerouslyPasteHTML(initialContent);
             }
 
-            // Hər dəfə mətn dəyişəndə Alpine.js-ə xəbər veririk
+            // Redaktorda dəyişiklik olanda bazaya (Alpine state) yazırıq
             quill.on('text-change', () => {
+                if (this.isUpdating) return;
+                
                 let html = quill.root.innerHTML;
-                if (html === '<p><br></p>') html = ''; // Əgər boşdursa təmizləyirik
+                if (html === '<p><br></p>') html = ''; 
+                
                 updateSetting(field.name, html);
             });
+        },
+
+        // Əgər xaricdən (AI, Undo və s.) mətn dəyişsə, Quill-i yeniləyirik
+        syncEditor() {
+            if (!this.quill) return;
+            
+            const newValue = fieldValue(field) || '';
+            const currentHtml = this.quill.root.innerHTML;
+            
+            // Yalnız mətn həqiqətən dəyişibsə yeniləyirik (sonsuz döngənin qarşısını alırıq)
+            if (newValue !== currentHtml && newValue !== (currentHtml === '<p><br></p>' ? '' : currentHtml)) {
+                this.isUpdating = true;
+                this.quill.clipboard.dangerouslyPasteHTML(newValue);
+                this.isUpdating = false;
+            }
         }
-    }" x-init="initEditor()">
-        
+    }" 
+    x-init="initEditor()" 
+    x-effect="syncEditor()">
+
         <style>
-            /* Quill Redaktorunun RJBuilder-in tünd temasına uyğunlaşdırılması */
+            /* Quill Redaktorunun RJBuilder tünd temasına tam uyğunlaşdırılması */
             .ql-toolbar.ql-snow { 
                 border-color: var(--line); 
                 background: var(--bg2); 
                 border-radius: 8px 8px 0 0; 
                 padding: 8px;
+                display: flex;
+                flex-wrap: wrap;
             }
             .ql-container.ql-snow { 
                 border-color: var(--line); 
@@ -65,37 +92,31 @@
                 font-family: inherit; 
                 font-size: 14px; 
                 min-height: 200px; 
-                background: #ffffff; /* Ağ fon */
-                color: #111827; /* Tünd yazı */
+                background: #ffffff; /* Ağ fon (yazılar oxunsun deyə) */
+                color: #111827; 
             }
             .ql-editor { 
                 min-height: 200px; 
-                line-height: 1.6;
+                line-height: 1.7;
+                font-size: 15px;
             }
             .ql-editor.ql-blank::before { 
                 color: #9ca3af; 
                 font-style: normal; 
             }
-            /* İkonların rəngi (tünd temada görünməsi üçün) */
             .ql-snow .ql-stroke { stroke: #e5e7eb; }
             .ql-snow .ql-fill { fill: #e5e7eb; }
             .ql-snow .ql-picker { color: #e5e7eb; }
-            
-            /* Dropdown menyuları */
             .ql-snow .ql-picker-options { background-color: var(--bg2); border-color: var(--line); }
             .ql-snow .ql-picker-item { color: var(--text); }
             .ql-snow .ql-picker-item:hover { color: #a78bfa; }
         </style>
 
-        <div class="rj-field" style="margin-bottom: 0;">
-            <div class="rj-lbl">
-                <span x-text="field.label"></span>
-            </div>
-            
-            {{-- Quill-in yerləşəcəyi div --}}
-            <div x-ref="quillEditor"></div>
-            
-            <p class="rj-help" x-show="field.help" x-text="field.help" style="margin-top: 8px;"></p>
-        </div>
+        {{-- BURADA HEÇ BİR LABEL YOXDUR (Çünki yuxarıdakı əsas fayl onu çap edir) --}}
+        
+        {{-- Quill-in yerləşəcəyi div --}}
+        <div x-ref="quillEditor"></div>
+        
+        <p class="rj-help" x-show="field.help" x-text="field.help" style="margin-top: 8px;"></p>
     </div>
 </template>
