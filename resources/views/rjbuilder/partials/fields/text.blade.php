@@ -1,29 +1,38 @@
 <template x-if="field.type === 'text' || field.type === 'textarea' || field.type === 'rich_text'">
-    <div x-data="{
-        quill: null,
-        isUpdating: false,
-        
-        initEditor() {
-            // Quill.js-in yüklənməsini yoxlayırıq
-            if (typeof Quill === 'undefined') {
-                let link = document.createElement('link');
-                link.href = 'https://cdn.quilljs.com/1.3.6/quill.snow.css';
+    <div class="rj-quill" x-data="{
+        editor() {
+            return this.$refs.quillEditor ? this.$refs.quillEditor._rjq : null;
+        },
+
+        loadQuill() {
+            if (window.Quill) return Promise.resolve();
+            if (window.__rjQuillPromise) return window.__rjQuillPromise;
+
+            window.__rjQuillPromise = new Promise((resolve, reject) => {
+                const link = document.createElement('link');
                 link.rel = 'stylesheet';
+                link.href = 'https://cdn.quilljs.com/1.3.6/quill.snow.css';
                 document.head.appendChild(link);
 
-                let script = document.createElement('script');
+                const script = document.createElement('script');
                 script.src = 'https://cdn.quilljs.com/1.3.6/quill.js';
-                script.onload = () => this.setupQuill();
+                script.onload = resolve;
+                script.onerror = reject;
                 document.head.appendChild(script);
-            } else {
-                this.setupQuill();
-            }
-        },
-        
-        setupQuill() {
-            if (this.quill) return; // Təkrar yüklənmənin qarşısını alırıq
+            });
 
-            const quill = new Quill(this.$refs.quillEditor, {
+            return window.__rjQuillPromise;
+        },
+
+        initEditor() {
+            this.loadQuill().then(() => this.setupQuill());
+        },
+
+        setupQuill() {
+            const host = this.$refs.quillEditor;
+            if (!host || host._rjq) return;
+
+            const quill = new Quill(host, {
                 theme: 'snow',
                 placeholder: field.placeholder || 'Write something beautiful...',
                 modules: {
@@ -31,7 +40,7 @@
                         [{ 'header': [1, 2, 3, 4, false] }],
                         ['bold', 'italic', 'underline', 'strike'],
                         [{ 'color': [] }, { 'background': [] }],
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
                         [{ 'align': [] }],
                         ['link', 'image', 'video'],
                         ['clean']
@@ -39,84 +48,81 @@
                 }
             });
 
-            this.quill = quill;
+            host._rjq = quill;
 
-            // Bazadan gələn köhnə mətni yükləyirik
-            let initialContent = fieldValue(field) || '';
-            if (initialContent) {
-                quill.clipboard.dangerouslyPasteHTML(initialContent);
+            const initial = fieldValue(field) || '';
+            if (initial) {
+                quill.setContents(quill.clipboard.convert(initial), 'silent');
             }
 
-            // Redaktorda dəyişiklik olanda bazaya (Alpine state) yazırıq
             quill.on('text-change', () => {
-                if (this.isUpdating) return;
-                
                 let html = quill.root.innerHTML;
-                if (html === '<p><br></p>') html = ''; 
-                
+                if (html === '<p><br></p>') html = '';
                 updateSetting(field.name, html);
             });
         },
 
-        // Əgər xaricdən (AI, Undo və s.) mətn dəyişsə, Quill-i yeniləyirik
         syncEditor() {
-            if (!this.quill) return;
-            
-            const newValue = fieldValue(field) || '';
-            const currentHtml = this.quill.root.innerHTML;
-            
-            // Yalnız mətn həqiqətən dəyişibsə yeniləyirik (sonsuz döngənin qarşısını alırıq)
-            if (newValue !== currentHtml && newValue !== (currentHtml === '<p><br></p>' ? '' : currentHtml)) {
-                this.isUpdating = true;
-                this.quill.clipboard.dangerouslyPasteHTML(newValue);
-                this.isUpdating = false;
+            const next = fieldValue(field) || '';
+            const quill = this.editor();
+            if (!quill) return;
+
+            let current = quill.root.innerHTML;
+            if (current === '<p><br></p>') current = '';
+
+            if (next !== current) {
+                quill.setContents(quill.clipboard.convert(next), 'silent');
             }
         }
-    }" 
-    x-init="initEditor()" 
+    }"
+    x-init="initEditor()"
     x-effect="syncEditor()">
 
         <style>
-            /* Quill Redaktorunun RJBuilder tünd temasına tam uyğunlaşdırılması */
-            .ql-toolbar.ql-snow { 
-                border-color: var(--line); 
-                background: var(--bg2); 
-                border-radius: 8px 8px 0 0; 
-                padding: 8px;
+            .rj-quill .ql-toolbar.ql-snow {
+                position: sticky;
+                top: 0;
+                z-index: 5;
                 display: flex;
                 flex-wrap: wrap;
+                padding: 8px;
+                border-color: var(--line);
+                background: var(--bg2);
+                border-radius: 8px 8px 0 0;
             }
-            .ql-container.ql-snow { 
-                border-color: var(--line); 
-                border-radius: 0 0 8px 8px; 
-                font-family: inherit; 
-                font-size: 14px; 
-                min-height: 200px; 
-                background: #ffffff; /* Ağ fon (yazılar oxunsun deyə) */
-                color: #111827; 
+            .rj-quill .ql-container.ql-snow {
+                height: 320px;
+                border-color: var(--line);
+                border-radius: 0 0 8px 8px;
+                background: #ffffff;
+                color: #111827;
+                font-family: inherit;
+                font-size: 14px;
             }
-            .ql-editor { 
-                min-height: 200px; 
+            .rj-quill .ql-editor {
+                height: 100%;
+                overflow-y: auto;
                 line-height: 1.7;
                 font-size: 15px;
             }
-            .ql-editor.ql-blank::before { 
-                color: #9ca3af; 
-                font-style: normal; 
+            .rj-quill .ql-editor.ql-blank::before {
+                color: #9ca3af;
+                font-style: normal;
             }
-            .ql-snow .ql-stroke { stroke: #e5e7eb; }
-            .ql-snow .ql-fill { fill: #e5e7eb; }
-            .ql-snow .ql-picker { color: #e5e7eb; }
-            .ql-snow .ql-picker-options { background-color: var(--bg2); border-color: var(--line); }
-            .ql-snow .ql-picker-item { color: var(--text); }
-            .ql-snow .ql-picker-item:hover { color: #a78bfa; }
+            .rj-quill .ql-snow .ql-stroke { stroke: #e5e7eb; }
+            .rj-quill .ql-snow .ql-fill { fill: #e5e7eb; }
+            .rj-quill .ql-snow .ql-picker { color: #e5e7eb; }
+            .rj-quill .ql-snow .ql-picker-options { background-color: var(--bg2); border-color: var(--line); }
+            .rj-quill .ql-snow .ql-picker-item { color: var(--text); }
+            .rj-quill .ql-snow .ql-picker-item:hover { color: #a78bfa; }
+            .rj-quill .ql-snow.ql-toolbar button:hover .ql-stroke,
+            .rj-quill .ql-snow.ql-toolbar button.ql-active .ql-stroke { stroke: #a78bfa; }
+            .rj-quill .ql-snow.ql-toolbar button:hover .ql-fill,
+            .rj-quill .ql-snow.ql-toolbar button.ql-active .ql-fill { fill: #a78bfa; }
         </style>
 
-        {{-- BURADA HEÇ BİR LABEL YOXDUR (Çünki yuxarıdakı əsas fayl onu çap edir) --}}
-        
-        {{-- Quill-in yerləşəcəyi div --}}
         <div x-ref="quillEditor"></div>
-        
+
         <p class="rj-help" x-show="field.help" x-text="field.help" style="margin-top: 8px;"></p>
     </div>
 </template>

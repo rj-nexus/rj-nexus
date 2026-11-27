@@ -17,7 +17,7 @@ class TextWidget extends BaseWidget
         return [
             [
                 'name' => 'content',
-                'type' => 'rich_text', // Xüsusi vizual redaktor tipi
+                'type' => 'rich_text',
                 'label' => __('Content'),
                 'default' => '<p>Write something beautiful here...</p>',
                 'tab' => 'content',
@@ -42,8 +42,7 @@ class TextWidget extends BaseWidget
     {
         $html = $settings['content'] ?? '';
         $align = $settings['align'] ?? 'left';
-        
-        // Təmizləmə funksiyası (XSS təhlükəsizliyi üçün)
+
         $safeHtml = strip_tags($html, '<p><a><strong><b><em><i><u><ul><ol><li><h1><h2><h3><h4><blockquote><img><br><span>');
 
         return '<div class="rj-text-content" style="text-align:'.e($align).'; line-height: 1.6;">' . $safeHtml . '</div>';
