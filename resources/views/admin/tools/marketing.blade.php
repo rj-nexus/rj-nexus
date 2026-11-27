@@ -1612,12 +1612,59 @@ function marketingTool(config) {
             if (typeof htmlToImage === 'undefined') {
                 throw new Error('html-to-image library did not load (CDN blocked, ad blocker or CSP)');
             }
-            const node = document.getElementById('post-canvas');
             const mime = type === 'jpg' ? 'image/jpeg' : (type === 'webp' ? 'image/webp' : 'image/png');
-            const canvas = await htmlToImage.toCanvas(node, this.renderOptions(type));
-            return await new Promise((resolve, reject) => {
-                canvas.toBlob(b => (b ? resolve(b) : reject(new Error('toBlob returned null'))), mime, this.jpgQuality / 100);
+            const { node, holder } = this.buildExportNode();
+            try {
+                const canvas = await htmlToImage.toCanvas(node, this.renderOptions(type));
+                return await new Promise((resolve, reject) => {
+                    canvas.toBlob(b => (b ? resolve(b) : reject(new Error('toBlob returned null'))), mime, this.jpgQuality / 100);
+                });
+            } catch (e) {
+                console.error('[marketing] export failed', {
+                    size: this.w + 'x' + this.h,
+                    scale: this.exportScale,
+                    layout: this.layout,
+                    bgImageKB: Math.round((this.bgImage || '').length / 1024),
+                    bgImageIsData: (this.bgImage || '').startsWith('data:'),
+                    logoIsData: (this.logoData || '').startsWith('data:'),
+                    htmlKB: Math.round(node.outerHTML.length / 1024)
+                });
+                throw e;
+            } finally {
+                holder.remove();
+            }
+        },
+
+        // Builds a clean offscreen copy of the canvas for export.
+        // Alpine attributes (:style, @click, x-*) and <template> tags are not valid XML,
+        // so they break the SVG that html-to-image creates. Inline styles already hold all styling.
+        buildExportNode() {
+            const src = document.getElementById('post-canvas');
+            const clone = src.cloneNode(true);
+
+            clone.querySelectorAll('template').forEach(t => t.remove());
+
+            [clone, ...clone.querySelectorAll('*')].forEach(el => {
+                Array.from(el.attributes).forEach(a => {
+                    const n = a.name;
+                    if (n.startsWith(':') || n.startsWith('@') || n.startsWith('x-')) {
+                        el.removeAttribute(n);
+                    }
+                });
             });
+
+            clone.removeAttribute('id');
+            clone.style.transform = 'none';
+            clone.style.top = '0';
+            clone.style.left = '0';
+
+            const holder = document.createElement('div');
+            holder.setAttribute('aria-hidden', 'true');
+            holder.style.cssText = `position:fixed;left:-99999px;top:0;width:${this.w}px;height:${this.h}px;overflow:hidden;pointer-events:none;`;
+            holder.appendChild(clone);
+            document.body.appendChild(holder);
+
+            return { node: clone, holder };
         },
 
         saveBlob(blob, name) {
