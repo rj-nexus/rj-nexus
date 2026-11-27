@@ -3,6 +3,23 @@ function builderRender() {
     return {
         cssv(v) { return String(v == null ? '' : v).replace(/[^#\w(),.%\s-]/g, ''); },
 
+        // TextWidget::render() ilə eyni icazə siyahısı ilə HTML-i təmizləyir
+        safeHtml(html) {
+            const allowed = new Set(['P','A','STRONG','B','EM','I','U','S','UL','OL','LI','H1','H2','H3','H4','BLOCKQUOTE','IMG','BR','SPAN']);
+            const doc = new DOMParser().parseFromString('<div>' + (html || '') + '</div>', 'text/html');
+            const walk = (node) => {
+                [...node.children].forEach(el => {
+                    walk(el);
+                    if (!allowed.has(el.tagName)) { el.replaceWith(...el.childNodes); return; }
+                    [...el.attributes].forEach(a => {
+                        if (a.name.toLowerCase().startsWith('on') || /^\s*javascript:/i.test(a.value)) el.removeAttribute(a.name);
+                    });
+                });
+            };
+            walk(doc.body.firstChild);
+            return doc.body.firstChild.innerHTML;
+        },
+
         ico(name, size) {
             const s = size || 14;
             const paths = {
@@ -502,12 +519,10 @@ function builderRender() {
 
             if (block.type === 'text') {
                 const aligns = { left: 'left', center: 'center', right: 'right', justify: 'justify' };
-                const sizes = { sm: '0.875rem', base: '1rem', lg: '1.125rem', xl: '1.25rem' };
                 const align = this.resp(settings, 'align', 'left');
                 const pad = padAttr || 'padding:0.75rem 1rem;';
-                const sizeOverride = settings.font_size ? '' : `font-size:${sizes[settings.size] || '1rem'};`;
-                const textVal = this.getLoc(settings, 'text', 'Text');
-                return `<p class="${inlineCls.trim()}" ${inlineAttr} style="${sizeOverride} text-align:${aligns[align] || 'left'}; color:${this.cssv(settings.color || '#374151')}; ${pad} ${marAttr} ${bgCss} ${shadow} line-height:1.6; white-space:pre-wrap; margin:0; ${typo}">${esc(textVal)}</p>`;
+                const raw = this.getLoc(settings, 'content', '') || esc(this.getLoc(settings, 'text', ''));
+                return `<div class="rj-text-content" style="text-align:${aligns[align] || 'left'}; color:${this.cssv(settings.color || '#374151')}; ${pad} ${marAttr} ${bgCss} ${shadow} line-height:1.6; ${typo}">${this.safeHtml(raw)}</div>`;
             }
 
             if (block.type === 'image') {
