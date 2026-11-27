@@ -4,6 +4,10 @@
 
 @section('content')
 @php
+    // Limitlər (controller validasiyası ilə eyni olmalıdır)
+    $rjTitleMax = 120;
+    $rjSlugMax = 100;
+
     // Bayraq faylını tapır (svg, webp, png... və zh_TW -> zh-tw kimi variantlar)
     $rjFlagUrl = function (string $code) {
         static $cache = [];
@@ -29,17 +33,17 @@
         return $cache[$code] = null;
     };
 
-    // Hansı dillərdə xəta var (tabda qırmızı nöqtə üçün)
+    // Xətası olan dillər (tabda qırmızı nöqtə və avtomatik açılış üçün)
     $rjErrLocales = [];
     foreach ($locales as $l) {
-        $keys = $l === $baseLocale
-            ? ['title', 'slug', 'excerpt', 'seo_title', 'seo_description', 'focus_keyword']
-            : ["translations.{$l}.title", "translations.{$l}.slug"];
-        foreach ($keys as $k) {
-            if ($errors->has($k)) {
-                $rjErrLocales[] = $l;
-                break;
-            }
+        $isB = $l === $baseLocale;
+        $keys = $isB
+            ? ['title', 'slug', 'excerpt', 'content', 'seo_title', 'seo_description', 'focus_keyword']
+            : ["translations.{$l}.title", "translations.{$l}.slug", "translations.{$l}.excerpt",
+               "translations.{$l}.seo_title", "translations.{$l}.seo_description", "translations.{$l}.focus_keyword"];
+
+        if ($errors->hasAny($keys)) {
+            $rjErrLocales[] = $l;
         }
     }
 @endphp
@@ -50,70 +54,9 @@
     .rj-ltab.is-on .rj-cflag { box-shadow: 0 0 0 2px #8b5cf6, 0 0 0 4px rgba(139, 92, 246, .2); transform: scale(1.08); }
 </style>
 
-<div class="space-y-6" x-data="{
-    activeLocale: @js($baseLocale),
-    baseLocale: @js($baseLocale),
-    editMode: @js(old('edit_mode', $type === 'page' ? 'builder' : 'classic')),
-    themeTemplate: @js(old('theme_template', '')),
-    seoLoading: false,
+<div class="space-y-6" x-data="postCreator()" @pageshow.window="publishing = false">
 
-    async generateSeo() {
-        const isBase = this.activeLocale === this.baseLocale;
-        const titleName = isBase ? 'title' : 'translations[' + this.activeLocale + '][title]';
-        const contentName = isBase ? 'content' : '';
-
-        const titleInput = document.querySelector(`[name='${titleName}']`);
-        const contentInput = contentName ? document.querySelector(`[name='${contentName}']`) : null;
-
-        const title = titleInput ? titleInput.value : '';
-        const content = contentInput ? contentInput.value : '';
-
-        if (!title) {
-            alert(@js(__('Please enter a title first.')));
-            return;
-        }
-
-        this.seoLoading = true;
-
-        try {
-            const res = await fetch(@js(route('admin.posts.ai.generate-seo')), {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': @js(csrf_token()),
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({
-                    title: title,
-                    content: content,
-                    locale: this.activeLocale
-                })
-            });
-            const data = await res.json();
-
-            if (data.success) {
-                const prefix = isBase ? '' : `translations[${this.activeLocale}]`;
-
-                const setVal = (name, val) => {
-                    const el = document.querySelector(`[name='${prefix ? prefix + '[' + name + ']' : name}']`);
-                    if (el) el.value = val;
-                };
-
-                setVal('seo_title', data.seo_title);
-                setVal('seo_description', data.seo_description);
-                setVal('focus_keyword', data.focus_keyword);
-            } else {
-                alert(data.message || @js(__('AI generation failed.')));
-            }
-        } catch (e) {
-            alert(@js(__('Network error.')));
-        } finally {
-            this.seoLoading = false;
-        }
-    }
-}">
-
-    <form method="POST" action="{{ route('admin.posts.store') }}" class="space-y-6" x-data="{ publishing: false }" @submit="publishing = true">
+    <form method="POST" action="{{ route('admin.posts.store') }}" class="space-y-6" @submit="publishing = true">
         @csrf
         <input type="hidden" name="type" value="{{ $type }}">
         <input type="hidden" name="edit_mode" :value="editMode">
@@ -122,7 +65,7 @@
 
         <div class="flex items-center justify-between gap-4 flex-wrap">
             <div class="flex items-center gap-3">
-                <a href="{{ route('admin.posts.index', ['type' => $type]) }}" class="text-gray-400 hover:text-gray-600 transition">
+                <a href="{{ route('admin.posts.index', ['type' => $type]) }}" class="text-gray-400 hover:text-gray-600 transition" aria-label="{{ __('Back') }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                 </a>
                 <div>
@@ -137,16 +80,18 @@
                 </a>
 
                 <template x-if="editMode !== 'builder'">
-                    <button type="submit" name="status" value="draft" @click="$refs.openBuilder.value = '0'"
-                            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition">
+                    <button type="submit" :disabled="publishing" @click="saveAsDraft(false)"
+                            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition disabled:opacity-60 disabled:cursor-not-allowed">
+                        <svg x-show="publishing" x-cloak class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                         {{ __('Save Draft') }}
                     </button>
                 </template>
 
                 <template x-if="editMode === 'builder'">
-                    <button type="submit" name="status" value="draft" @click="$refs.openBuilder.value = '1'"
-                            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-rj-purple to-rj-pink text-white text-sm font-medium hover:opacity-90 transition">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/></svg>
+                    <button type="submit" :disabled="publishing" @click="saveAsDraft(true)"
+                            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-rj-purple to-rj-pink text-white text-sm font-medium hover:opacity-90 transition disabled:opacity-60 disabled:cursor-not-allowed">
+                        <svg x-show="!publishing" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/></svg>
+                        <svg x-show="publishing" x-cloak class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                         {{ __('Save & Open Builder') }}
                     </button>
                 </template>
@@ -154,7 +99,7 @@
         </div>
 
         @if ($errors->any())
-            <div class="bg-red-50 border-l-4 border-red-500 text-red-800 px-4 py-3 rounded-r-lg">
+            <div class="bg-red-50 border-l-4 border-red-500 text-red-800 px-4 py-3 rounded-r-lg" role="alert">
                 <ul class="text-sm space-y-1">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
@@ -215,7 +160,7 @@
                          @mouseup.window="stopDrag()">
 
                         <button type="button" @click="$refs.langTabs.scrollBy({ left: -200, behavior: 'smooth' })"
-                                class="absolute left-1 z-10 w-6 h-6 flex items-center justify-center rounded-full bg-white shadow-sm border border-gray-200 text-gray-500 hover:text-rj-purple transition sm:opacity-0 sm:group-hover:opacity-100 focus:outline-none"
+                                class="absolute left-1 z-10 w-6 h-6 flex items-center justify-center rounded-full bg-white shadow-sm border border-gray-200 text-gray-500 hover:text-rj-purple transition sm:opacity-0 sm:group-hover:opacity-100 focus:outline-none focus-visible:opacity-100"
                                 aria-label="{{ __('Previous') }}">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
                         </button>
@@ -231,14 +176,15 @@
                                 @php $flag = $rjFlagUrl($locale); @endphp
                                 <button type="button"
                                         role="tab"
+                                        title="{{ rj_lang_name($locale) }}"
                                         @click="pick(@js($locale))"
                                         :class="activeLocale === @js($locale) ? 'is-on border-rj-purple text-rj-purple bg-rj-purple/5' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50'"
                                         :aria-selected="activeLocale === @js($locale)"
                                         class="rj-ltab px-4 py-3 border-b-2 text-sm font-medium transition flex items-center gap-2 whitespace-nowrap rounded-t-lg">
                                     @if ($flag)
-                                        <img src="{{ $flag }}" alt="{{ strtoupper($locale) }}" class="rj-cflag" loading="lazy" draggable="false">
+                                        <img src="{{ $flag }}" alt="" class="rj-cflag" loading="lazy" draggable="false">
                                     @else
-                                        <span class="rj-cflag rj-cflag-ph">{{ substr($locale, 0, 2) }}</span>
+                                        <span class="rj-cflag rj-cflag-ph" aria-hidden="true">{{ substr($locale, 0, 2) }}</span>
                                     @endif
                                     {{ rj_lang_name($locale) }}
                                     <span class="text-xs uppercase opacity-60">{{ $locale }}</span>
@@ -253,7 +199,7 @@
                         </nav>
 
                         <button type="button" @click="$refs.langTabs.scrollBy({ left: 200, behavior: 'smooth' })"
-                                class="absolute right-1 z-10 w-6 h-6 flex items-center justify-center rounded-full bg-white shadow-sm border border-gray-200 text-gray-500 hover:text-rj-purple transition sm:opacity-0 sm:group-hover:opacity-100 focus:outline-none"
+                                class="absolute right-1 z-10 w-6 h-6 flex items-center justify-center rounded-full bg-white shadow-sm border border-gray-200 text-gray-500 hover:text-rj-purple transition sm:opacity-0 sm:group-hover:opacity-100 focus:outline-none focus-visible:opacity-100"
                                 aria-label="{{ __('Next') }}">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                         </button>
@@ -262,43 +208,83 @@
 
                     <div class="p-6 space-y-5">
                         @foreach ($locales as $locale)
+                            @php
+                                $isBase = $locale === $baseLocale;
+                                $titleKey = $isBase ? 'title' : "translations.{$locale}.title";
+                                $slugKey = $isBase ? 'slug' : "translations.{$locale}.slug";
+                                $titleCur = (string) old($titleKey, '');
+                                $slugCur = (string) old($slugKey, '');
+                            @endphp
+
                             <div x-show="activeLocale === @js($locale)" x-cloak class="space-y-5">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">
+
+                                {{-- Title (maks. {{ $rjTitleMax }}) --}}
+                                <div x-data="{ len: {{ mb_strlen($titleCur) }}, max: {{ $rjTitleMax }} }">
+                                    <label for="title-{{ $locale }}" class="block text-sm font-medium text-gray-700 mb-1.5">
                                         {{ __('Title') }}
                                     </label>
                                     <input type="text"
-                                           name="{{ $locale === $baseLocale ? 'title' : "translations[{$locale}][title]" }}"
-                                           value="{{ old($locale === $baseLocale ? 'title' : "translations.{$locale}.title") }}"
+                                           id="title-{{ $locale }}"
+                                           name="{{ $isBase ? 'title' : "translations[{$locale}][title]" }}"
+                                           value="{{ $titleCur }}"
+                                           maxlength="{{ $rjTitleMax }}"
+                                           autocomplete="off"
                                            placeholder="{{ __('Enter title...') }}"
+                                           aria-describedby="title-hint-{{ $locale }}"
+                                           @input="len = $event.target.value.length"
+                                           :class="len > max ? 'ring-2 ring-red-300 border-red-400' : ''"
                                            class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-base font-medium">
-                                    @error($locale === $baseLocale ? 'title' : "translations.{$locale}.title")
-                                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
-                                    @enderror
+                                    <div id="title-hint-{{ $locale }}" class="flex items-start justify-between gap-3 mt-1 text-xs">
+                                        @error($titleKey)
+                                            <span class="text-red-500">{{ $message }}</span>
+                                        @else
+                                            <span class="text-gray-500">{{ __('Short and clear titles work best.') }}</span>
+                                        @enderror
+                                        <span class="flex-shrink-0 tabular-nums"
+                                              :class="len > max ? 'text-red-600 font-semibold' : (len >= Math.floor(max * 0.9) ? 'text-amber-600 font-medium' : 'text-gray-500')">
+                                            <span x-text="len"></span> / {{ $rjTitleMax }}
+                                        </span>
+                                    </div>
                                 </div>
 
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('Slug') }}</label>
+                                {{-- Slug (maks. {{ $rjSlugMax }}) --}}
+                                <div x-data="{ len: {{ mb_strlen($slugCur) }}, max: {{ $rjSlugMax }} }">
+                                    <label for="slug-{{ $locale }}" class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('Slug') }}</label>
                                     <input type="text"
-                                           name="{{ $locale === $baseLocale ? 'slug' : "translations[{$locale}][slug]" }}"
-                                           value="{{ old($locale === $baseLocale ? 'slug' : "translations.{$locale}.slug") }}"
+                                           id="slug-{{ $locale }}"
+                                           name="{{ $isBase ? 'slug' : "translations[{$locale}][slug]" }}"
+                                           value="{{ $slugCur }}"
+                                           maxlength="{{ $rjSlugMax }}"
+                                           autocomplete="off"
+                                           spellcheck="false"
                                            placeholder="{{ __('auto-generated from title') }}"
-                                           onblur="this.value = this.value.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^\p{L}\p{N}\-_]+/gu, '').replace(/-+/g, '-').replace(/^-|-$/g, '')"
+                                           aria-describedby="slug-hint-{{ $locale }}"
+                                           @input="len = $event.target.value.length"
+                                           @blur="$el.value = slugify($el.value, max); len = $el.value.length"
+                                           :class="len > max ? 'ring-2 ring-red-300 border-red-400' : ''"
                                            class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm font-mono lowercase">
-                                    @error($locale === $baseLocale ? 'slug' : "translations.{$locale}.slug")
-                                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
-                                    @enderror
+                                    <div id="slug-hint-{{ $locale }}" class="flex items-start justify-between gap-3 mt-1 text-xs">
+                                        @error($slugKey)
+                                            <span class="text-red-500">{{ $message }}</span>
+                                        @else
+                                            <span class="text-gray-500">{{ __('Lowercase letters, numbers and hyphens.') }}</span>
+                                        @enderror
+                                        <span class="flex-shrink-0 tabular-nums"
+                                              :class="len > max ? 'text-red-600 font-semibold' : (len >= Math.floor(max * 0.9) ? 'text-amber-600 font-medium' : 'text-gray-500')">
+                                            <span x-text="len"></span> / {{ $rjSlugMax }}
+                                        </span>
+                                    </div>
                                 </div>
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('Excerpt') }}</label>
-                                    <textarea name="{{ $locale === $baseLocale ? 'excerpt' : "translations[{$locale}][excerpt]" }}"
+                                    <textarea name="{{ $isBase ? 'excerpt' : "translations[{$locale}][excerpt]" }}"
                                               rows="3"
                                               placeholder="{{ __('Short summary.') }}"
-                                              class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">{{ old($locale === $baseLocale ? 'excerpt' : "translations.{$locale}.excerpt") }}</textarea>
+                                              class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">{{ old($isBase ? 'excerpt' : "translations.{$locale}.excerpt") }}</textarea>
                                 </div>
 
-                                @if ($locale === $baseLocale)
+                                @if ($isBase)
                                     <template x-if="editMode === 'classic'">
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('Content') }}</label>
@@ -374,7 +360,7 @@
                         </div>
                         <button type="button" @click="generateSeo()" :disabled="seoLoading" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-50 text-purple-700 text-xs font-bold border border-purple-200 hover:bg-purple-100 transition disabled:opacity-50">
                             <svg x-show="!seoLoading" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
-                            <svg x-show="seoLoading" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                            <svg x-show="seoLoading" x-cloak class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                             {{ __('Auto SEO') }}
                         </button>
                     </div>
@@ -419,7 +405,7 @@
                     <div class="p-6 space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('Status') }}</label>
-                            <select name="status" class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">
+                            <select name="status" x-ref="status" class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">
                                 <option value="draft" {{ old('status', 'draft') === 'draft' ? 'selected' : '' }}>{{ __('Draft') }}</option>
                                 <option value="published" {{ old('status') === 'published' ? 'selected' : '' }}>{{ __('Published') }}</option>
                                 <option value="scheduled" {{ old('status') === 'scheduled' ? 'selected' : '' }}>{{ __('Scheduled') }}</option>
@@ -459,9 +445,10 @@
                     </div>
                     <div class="p-6" x-data="{ imageUrl: @js(old('featured_image', '')) }"
                          @media-selected.window="if ($event.detail.target === $refs.imageInput) imageUrl = $event.detail.url">
-                        <div x-show="imageUrl" class="rounded-lg overflow-hidden border border-gray-200 relative mb-3">
+                        <div x-show="imageUrl" x-cloak class="rounded-lg overflow-hidden border border-gray-200 relative mb-3">
                             <img :src="imageUrl" alt="" class="w-full h-40 object-cover">
                             <button type="button" @click="imageUrl = ''; $refs.imageInput.value = ''"
+                                    aria-label="{{ __('Remove image') }}" title="{{ __('Remove image') }}"
                                     class="absolute top-2 right-2 w-7 h-7 rounded-full bg-red-600 text-white flex items-center justify-center hover:bg-red-700 transition">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                             </button>
@@ -484,7 +471,7 @@
                         <div class="p-6">
                             @if ($categories->isEmpty())
                                 <p class="text-sm text-gray-500">{{ __('No categories yet.') }}
-                                    <a href="{{ route('admin.posts.categories.create') }}" target="_blank" class="text-rj-purple hover:underline">{{ __('Create one →') }}</a>
+                                    <a href="{{ route('admin.posts.categories.create') }}" target="_blank" rel="noopener" class="text-rj-purple hover:underline">{{ __('Create one →') }}</a>
                                 </p>
                             @else
                                 <div class="max-h-64 overflow-y-auto rj-scrollbar space-y-1.5 pr-1">
@@ -508,7 +495,7 @@
                         <div class="p-6">
                             @if ($tags->isEmpty())
                                 <p class="text-sm text-gray-500">{{ __('No tags yet.') }}
-                                    <a href="{{ route('admin.posts.tags') }}" target="_blank" class="text-rj-purple hover:underline">{{ __('Create one →') }}</a>
+                                    <a href="{{ route('admin.posts.tags') }}" target="_blank" rel="noopener" class="text-rj-purple hover:underline">{{ __('Create one →') }}</a>
                                 </p>
                             @else
                                 <div class="max-h-48 overflow-y-auto rj-scrollbar space-y-1.5 pr-1">
@@ -533,4 +520,97 @@
     </form>
 
 </div>
+
+<script>
+function postCreator() {
+    const baseLocale = @js($baseLocale);
+    const errLocales = @js($rjErrLocales);
+
+    return {
+        // Xəta olan dil varsa, ilk onu aç
+        activeLocale: errLocales.length ? errLocales[0] : baseLocale,
+        baseLocale: baseLocale,
+        editMode: @js(old('edit_mode', $type === 'page' ? 'builder' : 'classic')),
+        themeTemplate: @js(old('theme_template', '')),
+        publishing: false,
+        seoLoading: false,
+
+        // "Save Draft" / "Save & Open Builder": status select-i də Draft olur
+        // (əks halda sağdakı select dəyəri düymənin dəyərini əvəz edirdi)
+        saveAsDraft(openBuilder) {
+            this.$refs.openBuilder.value = openBuilder ? '1' : '0';
+            if (this.$refs.status) { this.$refs.status.value = 'draft'; }
+        },
+
+        // Slug-ı təmizləyir və limitə kəsir
+        slugify(value, max) {
+            return String(value || '')
+                .trim()
+                .toLowerCase()
+                .replace(/\s+/g, '-')
+                .replace(/[^\p{L}\p{N}\-_]+/gu, '')
+                .replace(/-+/g, '-')
+                .replace(/^-|-$/g, '')
+                .slice(0, max)
+                .replace(/-$/, '');
+        },
+
+        async generateSeo() {
+            const isBase = this.activeLocale === this.baseLocale;
+            const titleName = isBase ? 'title' : 'translations[' + this.activeLocale + '][title]';
+
+            const titleInput = document.querySelector('[name="' + titleName + '"]');
+            const contentInput = isBase ? document.querySelector('[name="content"]') : null;
+
+            const title = titleInput ? titleInput.value : '';
+            const content = contentInput ? contentInput.value : '';
+
+            if (!title) {
+                alert(@js(__('Please enter a title first.')));
+                return;
+            }
+
+            this.seoLoading = true;
+
+            try {
+                const res = await fetch(@js(route('admin.posts.ai.generate-seo')), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': @js(csrf_token()),
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title: title,
+                        content: content,
+                        locale: this.activeLocale
+                    })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    const n = (f) => isBase ? f : 'translations[' + this.activeLocale + '][' + f + ']';
+                    const setVal = (field, val) => {
+                        const el = document.querySelector('[name="' + n(field) + '"]');
+                        if (el) {
+                            el.value = val;
+                            el.dispatchEvent(new Event('input'));
+                        }
+                    };
+
+                    setVal('seo_title', data.seo_title);
+                    setVal('seo_description', data.seo_description);
+                    setVal('focus_keyword', data.focus_keyword);
+                } else {
+                    alert(data.message || @js(__('AI generation failed.')));
+                }
+            } catch (e) {
+                alert(@js(__('Network error.')));
+            } finally {
+                this.seoLoading = false;
+            }
+        }
+    };
+}
+</script>
 @endsection
