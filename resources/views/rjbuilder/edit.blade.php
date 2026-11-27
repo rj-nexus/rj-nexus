@@ -116,6 +116,59 @@
             color: #9ca3af !important;
         }
     @endif
+
+    /* ------------------------------------------------------------------
+       Top bar layout
+       Three columns: [tools] [title + devices, takes the free space] [actions].
+       The middle column can shrink, so nothing overlaps any more.
+       (No !important on display: Alpine's x-show sets an inline display:none.)
+    ------------------------------------------------------------------- */
+    .rj-top.rj-top-grid {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        align-items: center;
+        column-gap: 12px;
+    }
+
+    .rj-top .rj-top-left,
+    .rj-top .rj-top-center,
+    .rj-top .rj-top-right {
+        display: flex;
+        align-items: center;
+        min-width: 0;
+    }
+
+    .rj-top .rj-top-left { flex: none; }
+    .rj-top .rj-top-right { flex: none; justify-content: flex-end; gap: 6px; }
+    .rj-top .rj-top-center { justify-content: center; gap: 14px; overflow: hidden; }
+
+    /* Title can shrink and is cut with "..." instead of pushing other items */
+    .rj-top .rj-title {
+        flex: 0 1 auto;
+        min-width: 0;
+        max-width: 260px;
+    }
+    .rj-top .rj-title b,
+    .rj-top .rj-title small {
+        display: block;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .rj-top .rj-seg { flex: none; }
+
+    /* Narrower screens: labels disappear first, icons and tooltips stay */
+    @media (max-width: 1600px) {
+        .rj-top .rj-btn-label { display: none; }
+    }
+    @media (max-width: 1400px) {
+        .rj-top .rj-badge-text { display: none; }
+    }
+    @media (max-width: 1250px) {
+        .rj-top .rj-title { display: none; }
+    }
 </style>
 
 <div x-data="builder()" x-init="init()" class="rj-app" dir="ltr"
@@ -123,8 +176,10 @@
      @keydown.window="onKey($event)"
      @beforeunload.window="if (!saved) { $event.preventDefault(); $event.returnValue = ''; }">
 
-    <header class="rj-top" x-show="!preview">
-        <div class="rj-grp" style="flex:1;">
+    <header class="rj-top rj-top-grid" x-show="!preview">
+
+        {{-- Left: navigation and tools, split into small groups --}}
+        <div class="rj-grp rj-top-left">
             <a href="{{ $builder['backUrl'] }}" class="rj-ib" :title="t('Back')">
                 <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
             </a>
@@ -139,6 +194,8 @@
             <button type="button" class="rj-ib" :data-active="shownPanel === 'globals' && panelOpen" @click="openPanel('globals')" :title="t('Global Widgets')">
                 <svg fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/><path d="M3 18l9 5 9-5"/></svg>
             </button>
+            <div class="rj-sep"></div>
+
             <button type="button" class="rj-ib" :data-active="shownPanel === 'navigator' && panelOpen" @click="openPanel('navigator')" :title="t('Navigator')">
                 <svg fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg>
             </button>
@@ -148,6 +205,8 @@
             <button type="button" class="rj-ib" :data-active="shownPanel === 'settings' && panelOpen" @click="openPanel('settings')" :title="t('Settings')">
                 <svg fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg>
             </button>
+            <div class="rj-sep"></div>
+
             <button type="button" class="rj-ib rj-ai-btn" @click="openAiPanel('generate')" :title="t('AI Assistant')" :disabled="!ai.enabled">
                 <svg fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 2l1.09 3.26L16 6.27l-2.91.97L12 10.5l-1.09-3.26L8 6.27l2.91-1.01L12 2z"/><path d="M19 15l.71 2.13L22 17.7l-2.29.71L19 20.5l-.71-2.09L16 17.7l2.29-.57L19 15z"/><path d="M5 14l.71 2.13L8 16.7l-2.29.71L5 19.5l-.71-2.09L2 16.7l2.29-.57L5 14z"/></svg>
             </button>
@@ -155,8 +214,9 @@
             @include('rjbuilder.partials.lang-switch', ['align' => 'left'])
         </div>
 
-        <div class="rj-grp" style="justify-content:center; gap:14px;">
-            <div class="rj-title">
+        {{-- Center: page title (shrinks / hides when space is tight) + device switcher --}}
+        <div class="rj-grp rj-top-center">
+            <div class="rj-title" title="{{ $builder['name'] }}">
                 <b>{{ $builder['name'] }}</b>
                 <small>{{ $builder['subtitle'] }}</small>
             </div>
@@ -167,7 +227,8 @@
             </div>
         </div>
 
-        <div class="rj-grp" style="flex:1; justify-content:flex-end; gap:6px;">
+        {{-- Right: history, status and actions --}}
+        <div class="rj-grp rj-top-right">
 
             <button type="button" class="rj-ib" @click="undo()" :disabled="!canUndo" :title="t('Undo') + ' (Ctrl+Z)'">
                 <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
@@ -177,19 +238,19 @@
             </button>
             <div class="rj-sep"></div>
 
-            <span class="rj-badge" :data-saved="saved"><i></i><span x-text="saved ? t('Saved') : t('Unsaved')"></span></span>
+            <span class="rj-badge" :data-saved="saved" :title="saved ? t('Saved') : t('Unsaved')"><i></i><span class="rj-badge-text" x-text="saved ? t('Saved') : t('Unsaved')"></span></span>
 
             @if(!empty($builder['viewUrl']))
                 <a href="{{ $builder['viewUrl'] }}" target="_blank" class="rj-btn" title="{{ __('View Live Page') }}">
                     <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                    <span>{{ __('View Page') }}</span>
+                    <span class="rj-btn-label">{{ __('View Page') }}</span>
                 </a>
             @endif
 
             @if(!empty($builder['previewUrl']))
                 <a href="{{ $builder['previewUrl'] }}" target="_blank" class="rj-btn" title="{{ __('Real Preview') }}">
                     <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.46 12C3.73 7.94 7.52 5 12 5s8.27 2.94 9.54 7c-1.27 4.06-5.06 7-9.54 7S3.73 16.06 2.46 12z"/></svg>
-                    <span>{{ __('Live Preview') }}</span>
+                    <span class="rj-btn-label">{{ __('Live Preview') }}</span>
                 </a>
             @endif
 
