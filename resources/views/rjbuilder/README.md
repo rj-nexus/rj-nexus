@@ -11,7 +11,7 @@ Design pages, headers, footers and popups visually, without writing code.
 
 <br/>
 
-![Version](https://img.shields.io/badge/Version-v1.10.1-blue)
+![Version](https://img.shields.io/badge/Version-v1.10.2-blue)
 ![Widgets](https://img.shields.io/badge/Widgets-80%2B-10b981)
 ![AI](https://img.shields.io/badge/AI-Built--in-8b5cf6)
 ![Responsive](https://img.shields.io/badge/Responsive-Desktop%20%7C%20Tablet%20%7C%20Mobile-orange)
