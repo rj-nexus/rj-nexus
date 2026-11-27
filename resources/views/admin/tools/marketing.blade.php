@@ -816,7 +816,7 @@
     #mk-root .mk-loader { position: absolute; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center; background: rgba(243,244,246,.85); backdrop-filter: blur(4px); text-align: center; color: var(--mk-text); }
     #mk-root .mk-loader svg { color: var(--mk-accent); margin: 0 auto 8px; display: block; }
     #mk-root .mk-loader p { margin: 0; font-size: 14px; font-weight: 700; }
-    #mk-root .mk-toast { position: absolute; top: 12px; right: 12px; z-index: 40; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; color: #fff; background: #111827; box-shadow: 0 8px 20px rgba(0,0,0,.25); }
+    #mk-root .mk-toast { position: absolute; top: 12px; right: 12px; z-index: 40; max-width: 80%; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; color: #fff; background: #111827; box-shadow: 0 8px 20px rgba(0,0,0,.25); }
     #mk-root .mk-toast.is-error { background: #dc2626; }
 
     #mk-root .mk-spin { animation: mk-spin 1s linear infinite; }
@@ -842,6 +842,9 @@ function lum(hex) {
 function clampSize(v) {
     return Math.min(4000, Math.max(200, parseInt(v, 10) || 1080));
 }
+
+// 1x1 transparent GIF used when a remote image cannot be loaded during export
+const EMPTY_IMAGE = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
 function marketingTool(config) {
     const i18n = config.i18n;
@@ -1506,7 +1509,15 @@ function marketingTool(config) {
         notify(text, type = 'success') {
             this.notice = { text, type };
             clearTimeout(this.noticeTimer);
-            this.noticeTimer = setTimeout(() => { this.notice = null; }, 2800);
+            this.noticeTimer = setTimeout(() => { this.notice = null; }, type === 'error' ? 6000 : 2800);
+        },
+
+        // Turns any thrown value (including DOM Event objects) into readable text
+        describeError(e) {
+            if (!e) return 'unknown error';
+            if (e.message) return e.message;
+            if (e.type === 'error') return 'image failed to load while rendering (too large, blocked or invalid)';
+            return String(e);
         },
 
         async toDataUrl(url) {
@@ -1526,18 +1537,41 @@ function marketingTool(config) {
             }
         },
 
+        // Downscales large images so the exported SVG stays within browser limits
+        async shrink(src, max = 1600) {
+            if (!src) return src;
+            return await new Promise(resolve => {
+                const img = new Image();
+                img.onload = () => {
+                    try {
+                        const k = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+                        if (k === 1 && src.length < 800000) return resolve(src);
+                        const c = document.createElement('canvas');
+                        c.width = Math.max(1, Math.round(img.naturalWidth * k));
+                        c.height = Math.max(1, Math.round(img.naturalHeight * k));
+                        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+                        resolve(c.toDataURL('image/jpeg', 0.85));
+                    } catch (e) {
+                        resolve(src);
+                    }
+                };
+                img.onerror = () => resolve(src);
+                img.src = src;
+            });
+        },
+
         async selectPost(post) {
             this.selectedPostId = post.id;
             this.title = post.title || '';
             this.subtitle = post.excerpt || '';
-            this.bgImage = post.image ? await this.toDataUrl(post.image) : '';
+            this.bgImage = post.image ? await this.shrink(await this.toDataUrl(post.image)) : '';
         },
 
         handleUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = (e) => { this.bgImage = e.target.result; };
+            reader.onload = async (e) => { this.bgImage = await this.shrink(e.target.result); };
             reader.readAsDataURL(file);
             event.target.value = '';
         },
@@ -1567,17 +1601,22 @@ function marketingTool(config) {
                 height: this.h,
                 pixelRatio: this.exportScale,
                 cacheBust: false,
+                skipFonts: true,
+                imagePlaceholder: EMPTY_IMAGE,
                 backgroundColor: bg,
                 style: { transform: 'none', top: '0', left: '0' }
             };
         },
 
         async renderBlob(type) {
+            if (typeof htmlToImage === 'undefined') {
+                throw new Error('html-to-image library did not load (CDN blocked, ad blocker or CSP)');
+            }
             const node = document.getElementById('post-canvas');
             const mime = type === 'jpg' ? 'image/jpeg' : (type === 'webp' ? 'image/webp' : 'image/png');
             const canvas = await htmlToImage.toCanvas(node, this.renderOptions(type));
             return await new Promise((resolve, reject) => {
-                canvas.toBlob(b => (b ? resolve(b) : reject(new Error('blob'))), mime, this.jpgQuality / 100);
+                canvas.toBlob(b => (b ? resolve(b) : reject(new Error('toBlob returned null'))), mime, this.jpgQuality / 100);
             });
         },
 
@@ -1600,7 +1639,7 @@ function marketingTool(config) {
                 this.saveBlob(blob, `${this.slug()}-${this.w}x${this.h}.${this.ext}`);
             } catch (e) {
                 console.error(e);
-                this.notify(i18n.renderFailed, 'error');
+                this.notify(i18n.renderFailed + ': ' + this.describeError(e), 'error');
             } finally {
                 this.busy = false;
             }
@@ -1627,7 +1666,7 @@ function marketingTool(config) {
                 this.saveBlob(out, `${this.slug()}-all-sizes.zip`);
             } catch (e) {
                 console.error(e);
-                this.notify(i18n.renderFailed, 'error');
+                this.notify(i18n.renderFailed + ': ' + this.describeError(e), 'error');
             } finally {
                 this.formatId = keep;
                 this.busy = false;
@@ -1647,7 +1686,7 @@ function marketingTool(config) {
                 this.notify(i18n.copied);
             } catch (e) {
                 console.error(e);
-                this.notify(i18n.renderFailed, 'error');
+                this.notify(i18n.renderFailed + ': ' + this.describeError(e), 'error');
             } finally {
                 this.busy = false;
             }
