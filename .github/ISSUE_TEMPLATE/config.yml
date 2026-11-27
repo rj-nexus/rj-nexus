@@ -6,3 +6,9 @@ contact_links:
   - name: Question or idea
     url: https://github.com/orgs/rj-nexus/discussions
     about: Ask questions and share ideas in Discussions.
+  - name: Support the project (Patreon)
+    url: https://www.patreon.com/c/mr_ruhid/membership
+    about: Supporters get extra features, priority help and a place in the supporter list.
+  - name: Private or big custom request
+    url: https://t.me/veb_developher_az
+    about: Contact the maintainer directly on Telegram, or by email at rjnexus@hotmail.com.
