@@ -4,6 +4,10 @@
 
 @section('content')
 @php
+    // Limitlər (controller validasiyası ilə eyni olmalıdır)
+    $rjTitleMax = 120;
+    $rjSlugMax = 100;
+
     // Bayraq faylını tapır (svg, webp, png... və zh_TW -> zh-tw kimi variantlar)
     $rjFlagUrl = function (string $code) {
         static $cache = [];
@@ -29,19 +33,29 @@
         return $cache[$code] = null;
     };
 
-    // Hansı dillərdə xəta var (tabda qırmızı nöqtə üçün)
+    // Xətası olan dillər və xətanın hansı tabda olduğu
     $rjErrLocales = [];
+    $rjContentErr = false;
+    $rjSeoErr = false;
+
     foreach ($locales as $l) {
-        $keys = $l === $baseLocale
-            ? ['title', 'slug', 'excerpt', 'seo_title', 'seo_description', 'focus_keyword']
-            : ["translations.{$l}.title", "translations.{$l}.slug"];
-        foreach ($keys as $k) {
-            if ($errors->has($k)) {
-                $rjErrLocales[] = $l;
-                break;
-            }
-        }
+        $isB = $l === $baseLocale;
+        $contentKeys = $isB
+            ? ['title', 'slug', 'excerpt', 'content']
+            : ["translations.{$l}.title", "translations.{$l}.slug", "translations.{$l}.excerpt"];
+        $seoKeys = $isB
+            ? ['seo_title', 'seo_description', 'focus_keyword', 'canonical_url']
+            : ["translations.{$l}.seo_title", "translations.{$l}.seo_description", "translations.{$l}.focus_keyword", "translations.{$l}.canonical_url"];
+
+        $hasContent = $errors->hasAny($contentKeys);
+        $hasSeo = $errors->hasAny($seoKeys);
+
+        if ($hasContent) { $rjContentErr = true; }
+        if ($hasSeo) { $rjSeoErr = true; }
+        if ($hasContent || $hasSeo) { $rjErrLocales[] = $l; }
     }
+
+    $rjErrTab = $rjContentErr ? 'content' : ($rjSeoErr ? 'seo' : null);
 @endphp
 
 <style>
@@ -50,7 +64,7 @@
     .rj-ltab.is-on .rj-cflag { box-shadow: 0 0 0 2px #8b5cf6, 0 0 0 4px rgba(139, 92, 246, .2); transform: scale(1.08); }
 </style>
 
-<div class="space-y-6" x-data="postEditor()" x-init="init()">
+<div class="space-y-6" x-data="postEditor()" x-init="init()" @pageshow.window="publishing = false">
 
     <form method="POST" action="{{ route('admin.posts.update', $post) }}" class="space-y-6" @submit="publishing = true">
         @csrf
@@ -61,7 +75,7 @@
 
         <div class="flex items-center justify-between gap-4 flex-wrap">
             <div class="flex items-center gap-3 min-w-0">
-                <a href="{{ route('admin.posts.index', ['type' => $post->type]) }}" class="text-gray-400 hover:text-gray-600 transition flex-shrink-0">
+                <a href="{{ route('admin.posts.index', ['type' => $post->type]) }}" class="text-gray-400 hover:text-gray-600 transition flex-shrink-0" aria-label="{{ __('Back') }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                 </a>
                 <div class="min-w-0">
@@ -72,7 +86,7 @@
 
             <div class="flex items-center gap-3 flex-wrap">
                 @if ($post->status === 'published')
-                    <a href="{{ $post->public_url }}" target="_blank"
+                    <a href="{{ $post->public_url }}" target="_blank" rel="noopener"
                        class="inline-flex items-center gap-1.5 text-sm text-gray-600 hover:text-rj-purple transition">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                         {{ __('View') }}
@@ -83,8 +97,9 @@
                     {{ __('Cancel') }}
                 </a>
 
-                <button type="submit"
-                        class="inline-flex items-center px-4 py-2 rounded-lg bg-white border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition">
+                <button type="submit" :disabled="publishing"
+                        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition disabled:opacity-60 disabled:cursor-not-allowed">
+                    <svg x-show="publishing" x-cloak class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                     {{ __('Save') }}
                 </button>
 
@@ -99,7 +114,7 @@
         </div>
 
         @if ($errors->any())
-            <div class="bg-red-50 border-l-4 border-red-500 text-red-800 px-4 py-3 rounded-r-lg">
+            <div class="bg-red-50 border-l-4 border-red-500 text-red-800 px-4 py-3 rounded-r-lg" role="alert">
                 <ul class="text-sm space-y-1">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
@@ -202,7 +217,7 @@
                              @mouseup.window="stopDrag()">
 
                             <button type="button" @click="$refs.langTabs.scrollBy({ left: -200, behavior: 'smooth' })"
-                                    class="absolute left-1 z-10 w-6 h-6 flex items-center justify-center rounded-full bg-white shadow-sm border border-gray-200 text-gray-500 hover:text-rj-purple transition sm:opacity-0 sm:group-hover:opacity-100 focus:outline-none"
+                                    class="absolute left-1 z-10 w-6 h-6 flex items-center justify-center rounded-full bg-white shadow-sm border border-gray-200 text-gray-500 hover:text-rj-purple transition sm:opacity-0 sm:group-hover:opacity-100 focus:outline-none focus-visible:opacity-100"
                                     aria-label="{{ __('Previous') }}">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
                             </button>
@@ -222,14 +237,15 @@
                                     @endphp
                                     <button type="button"
                                             role="tab"
+                                            title="{{ rj_lang_name($locale) }}"
                                             @click="pick(@js($locale))"
                                             :class="activeLocale === @js($locale) ? 'is-on border-rj-purple text-rj-purple bg-rj-purple/5' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50'"
                                             :aria-selected="activeLocale === @js($locale)"
                                             class="rj-ltab px-3 py-2.5 border-b-2 text-xs font-medium transition flex items-center gap-2 whitespace-nowrap rounded-t-lg">
                                         @if ($flag)
-                                            <img src="{{ $flag }}" alt="{{ strtoupper($locale) }}" class="rj-cflag" loading="lazy" draggable="false">
+                                            <img src="{{ $flag }}" alt="" class="rj-cflag" loading="lazy" draggable="false">
                                         @else
-                                            <span class="rj-cflag rj-cflag-ph">{{ substr($locale, 0, 2) }}</span>
+                                            <span class="rj-cflag rj-cflag-ph" aria-hidden="true">{{ substr($locale, 0, 2) }}</span>
                                         @endif
                                         {{ rj_lang_name($locale) }}
                                         <span class="uppercase opacity-60">{{ $locale }}</span>
@@ -246,7 +262,7 @@
                             </nav>
 
                             <button type="button" @click="$refs.langTabs.scrollBy({ left: 200, behavior: 'smooth' })"
-                                    class="absolute right-1 z-10 w-6 h-6 flex items-center justify-center rounded-full bg-white shadow-sm border border-gray-200 text-gray-500 hover:text-rj-purple transition sm:opacity-0 sm:group-hover:opacity-100 focus:outline-none"
+                                    class="absolute right-1 z-10 w-6 h-6 flex items-center justify-center rounded-full bg-white shadow-sm border border-gray-200 text-gray-500 hover:text-rj-purple transition sm:opacity-0 sm:group-hover:opacity-100 focus:outline-none focus-visible:opacity-100"
                                     aria-label="{{ __('Next') }}">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                             </button>
@@ -254,7 +270,7 @@
                         </div>
                     </template>
 
-                    <div x-show="activeTab === 'content'" class="p-6 space-y-5">
+                    <div x-show="activeTab === 'content'" x-cloak class="p-6 space-y-5">
                         @foreach ($locales as $locale)
                             @php
                                 $t = $post->translations->firstWhere('locale', $locale);
@@ -263,34 +279,70 @@
                                 $excerptValue = $isBase ? $post->getRawOriginal('excerpt') : ($t?->excerpt);
                                 $contentValue = $isBase ? $post->getRawOriginal('content') : ($t?->content);
                                 $slugValue = $isBase ? $post->getRawOriginal('slug') : ($t?->slug);
+
+                                $titleKey = $isBase ? 'title' : "translations.{$locale}.title";
+                                $slugKey = $isBase ? 'slug' : "translations.{$locale}.slug";
+                                $titleCur = (string) old($titleKey, $titleValue);
+                                $slugCur = (string) old($slugKey, $slugValue);
                             @endphp
 
                             <div x-show="activeLocale === @js($locale)" x-cloak class="space-y-5">
 
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">
+                                {{-- Title (maks. {{ $rjTitleMax }}) --}}
+                                <div x-data="{ len: {{ mb_strlen($titleCur) }}, max: {{ $rjTitleMax }} }">
+                                    <label for="title-{{ $locale }}" class="block text-sm font-medium text-gray-700 mb-1.5">
                                         {{ __('Title') }}
                                     </label>
                                     <input type="text"
+                                           id="title-{{ $locale }}"
                                            name="{{ $isBase ? 'title' : "translations[{$locale}][title]" }}"
-                                           value="{{ old($isBase ? 'title' : "translations.{$locale}.title", $titleValue) }}"
+                                           value="{{ $titleCur }}"
+                                           maxlength="{{ $rjTitleMax }}"
+                                           autocomplete="off"
+                                           aria-describedby="title-hint-{{ $locale }}"
+                                           @input="len = $event.target.value.length"
+                                           :class="len > max ? 'ring-2 ring-red-300 border-red-400' : ''"
                                            class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-base font-medium">
-                                    @error($isBase ? 'title' : "translations.{$locale}.title")
-                                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
-                                    @enderror
+                                    <div id="title-hint-{{ $locale }}" class="flex items-start justify-between gap-3 mt-1 text-xs">
+                                        @error($titleKey)
+                                            <span class="text-red-500">{{ $message }}</span>
+                                        @else
+                                            <span class="text-gray-500">{{ __('Short and clear titles work best.') }}</span>
+                                        @enderror
+                                        <span class="flex-shrink-0 tabular-nums"
+                                              :class="len > max ? 'text-red-600 font-semibold' : (len >= Math.floor(max * 0.9) ? 'text-amber-600 font-medium' : 'text-gray-500')">
+                                            <span x-text="len"></span> / {{ $rjTitleMax }}
+                                        </span>
+                                    </div>
                                 </div>
 
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('Slug') }}</label>
+                                {{-- Slug (maks. {{ $rjSlugMax }}) --}}
+                                <div x-data="{ len: {{ mb_strlen($slugCur) }}, max: {{ $rjSlugMax }} }">
+                                    <label for="slug-{{ $locale }}" class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('Slug') }}</label>
                                     <input type="text"
+                                           id="slug-{{ $locale }}"
                                            name="{{ $isBase ? 'slug' : "translations[{$locale}][slug]" }}"
-                                           value="{{ old($isBase ? 'slug' : "translations.{$locale}.slug", $slugValue) }}"
+                                           value="{{ $slugCur }}"
+                                           maxlength="{{ $rjSlugMax }}"
+                                           autocomplete="off"
+                                           spellcheck="false"
                                            placeholder="{{ __('auto-generated from title') }}"
-                                           onblur="this.value = this.value.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^\p{L}\p{N}\-_]+/gu, '').replace(/-+/g, '-').replace(/^-|-$/g, '')"
+                                           aria-describedby="slug-hint-{{ $locale }}"
+                                           @input="len = $event.target.value.length"
+                                           @blur="$el.value = slugify($el.value, max); len = $el.value.length"
+                                           :class="len > max ? 'ring-2 ring-red-300 border-red-400' : ''"
                                            class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm font-mono lowercase">
-                                    @error($isBase ? 'slug' : "translations.{$locale}.slug")
-                                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
-                                    @enderror
+                                    <div id="slug-hint-{{ $locale }}" class="flex items-start justify-between gap-3 mt-1 text-xs">
+                                        @error($slugKey)
+                                            <span class="text-red-500">{{ $message }}</span>
+                                        @else
+                                            <span class="text-gray-500">{{ __('Lowercase letters, numbers and hyphens.') }}</span>
+                                        @enderror
+                                        <span class="flex-shrink-0 tabular-nums"
+                                              :class="len > max ? 'text-red-600 font-semibold' : (len >= Math.floor(max * 0.9) ? 'text-amber-600 font-medium' : 'text-gray-500')">
+                                            <span x-text="len"></span> / {{ $rjSlugMax }}
+                                        </span>
+                                    </div>
                                 </div>
 
                                 <div>
@@ -340,14 +392,14 @@
                                 <button type="button" @click="generateSeo()" :disabled="seoLoading"
                                         class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-50 text-purple-700 text-xs font-bold border border-purple-200 hover:bg-purple-100 transition disabled:opacity-50">
                                     <svg x-show="!seoLoading" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
-                                    <svg x-show="seoLoading" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                    <svg x-show="seoLoading" x-cloak class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                                     {{ __('Auto SEO') }}
                                 </button>
 
                                 <button type="button" @click="analyzeSeo()" :disabled="analyzing"
                                         class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-rj-purple to-rj-pink text-white text-xs font-medium hover:opacity-90 transition disabled:opacity-60">
                                     <svg x-show="!analyzing" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
-                                    <svg x-show="analyzing" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" opacity=".25"/><path fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z"/></svg>
+                                    <svg x-show="analyzing" x-cloak class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" opacity=".25"/><path fill="currentColor" d="M4 12a8 8 0 018-8v3a5 5 0 00-5 5H4z"/></svg>
                                     <span x-text="analyzing ? @js(__('Analyzing...')) : @js(__('Analyze'))"></span>
                                 </button>
                             </div>
@@ -395,7 +447,7 @@
                                            class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">
                                     <div class="flex items-center justify-between mt-1 text-xs">
                                         <span class="text-gray-500">{{ __('Recommended: 50-60 chars') }}</span>
-                                        <span :class="len >= 40 && len <= 65 ? 'text-green-600 font-medium' : (len > 65 ? 'text-amber-600' : 'text-gray-400')">
+                                        <span class="tabular-nums" :class="len >= 40 && len <= 65 ? 'text-green-600 font-medium' : (len > 65 ? 'text-amber-600' : 'text-gray-500')">
                                             <span x-text="len"></span> / 60
                                         </span>
                                     </div>
@@ -411,7 +463,7 @@
                                               class="w-full rounded-lg border-gray-300 focus:border-rj-purple focus:ring-rj-purple text-sm">{{ old($fOld('seo_description'), $t?->seo_description) }}</textarea>
                                     <div class="flex items-center justify-between mt-1 text-xs">
                                         <span class="text-gray-500">{{ __('Recommended: 150-160 chars') }}</span>
-                                        <span :class="len >= 140 && len <= 165 ? 'text-green-600 font-medium' : (len > 165 ? 'text-amber-600' : 'text-gray-400')">
+                                        <span class="tabular-nums" :class="len >= 140 && len <= 165 ? 'text-green-600 font-medium' : (len > 165 ? 'text-amber-600' : 'text-gray-500')">
                                             <span x-text="len"></span> / 160
                                         </span>
                                     </div>
@@ -422,9 +474,10 @@
                                     <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('SEO Image') }}</label>
                                     <p class="text-xs text-gray-500 mb-2">{{ __('Used for Open Graph and Twitter previews.') }}</p>
 
-                                    <div x-show="image" class="rounded-lg overflow-hidden border border-gray-200 relative mb-2">
+                                    <div x-show="image" x-cloak class="rounded-lg overflow-hidden border border-gray-200 relative mb-2">
                                         <img :src="image" alt="" class="w-full h-32 object-cover">
                                         <button type="button" @click="image = ''; $refs.imgInput.value = ''"
+                                                aria-label="{{ __('Remove image') }}" title="{{ __('Remove image') }}"
                                                 class="absolute top-2 right-2 w-7 h-7 rounded-full bg-red-600 text-white flex items-center justify-center hover:bg-red-700 transition">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                                         </button>
@@ -516,10 +569,11 @@
                                         <div x-data="{ image: @js(old($fOld('og_image'), $t?->og_image ?? '')) }"
                                              @media-selected.window="if ($event.detail.target === $refs.ogInput) image = $event.detail.url">
                                             <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('OG Image') }}</label>
-                                            <div x-show="image" class="rounded-lg overflow-hidden border border-gray-200 relative mb-2">
+                                            <div x-show="image" x-cloak class="rounded-lg overflow-hidden border border-gray-200 relative mb-2">
                                                 <img :src="image" alt="" class="w-full h-32 object-cover">
                                                 <button type="button" @click="image = ''; $refs.ogInput.value = ''"
-                                                        class="absolute top-2 right-2 w-7 h-7 rounded-full bg-red-600 text-white flex items-center justify-center">
+                                                        aria-label="{{ __('Remove image') }}" title="{{ __('Remove image') }}"
+                                                        class="absolute top-2 right-2 w-7 h-7 rounded-full bg-red-600 text-white flex items-center justify-center hover:bg-red-700 transition">
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                                                 </button>
                                             </div>
@@ -564,10 +618,11 @@
                                         <div x-data="{ image: @js(old($fOld('twitter_image'), $t?->twitter_image ?? '')) }"
                                              @media-selected.window="if ($event.detail.target === $refs.twInput) image = $event.detail.url">
                                             <label class="block text-sm font-medium text-gray-700 mb-1.5">{{ __('Twitter Image') }}</label>
-                                            <div x-show="image" class="rounded-lg overflow-hidden border border-gray-200 relative mb-2">
+                                            <div x-show="image" x-cloak class="rounded-lg overflow-hidden border border-gray-200 relative mb-2">
                                                 <img :src="image" alt="" class="w-full h-32 object-cover">
                                                 <button type="button" @click="image = ''; $refs.twInput.value = ''"
-                                                        class="absolute top-2 right-2 w-7 h-7 rounded-full bg-red-600 text-white flex items-center justify-center">
+                                                        aria-label="{{ __('Remove image') }}" title="{{ __('Remove image') }}"
+                                                        class="absolute top-2 right-2 w-7 h-7 rounded-full bg-red-600 text-white flex items-center justify-center hover:bg-red-700 transition">
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                                                 </button>
                                             </div>
@@ -633,6 +688,7 @@
                         <div class="border-t border-gray-100 pt-5">
                             <h4 class="text-xs font-bold text-gray-700 uppercase tracking-wide mb-3">{{ __('Danger Zone') }}</h4>
 
+                            {{-- Düymələr əsas formun içindədir, amma "form" atributu ilə kənardakı formları göndərir (iç-içə form olmur) --}}
                             @if($post->status === 'trash')
                                 <div class="flex items-center gap-2">
                                     <button type="submit" form="restoreForm" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-green-300 text-green-700 text-xs font-medium hover:bg-green-50 transition">
@@ -645,14 +701,12 @@
                                     </button>
                                 </div>
                             @else
-                                <form method="POST" action="{{ route('admin.posts.trash-action', $post) }}"
-                                      onsubmit="return confirm(@js(__('Move to trash?')))">
-                                    @csrf
-                                    <button type="submit" class="inline-flex items-center gap-1.5 text-sm text-red-600 hover:text-red-700 transition">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"/></svg>
-                                        {{ __('Move to Trash') }}
-                                    </button>
-                                </form>
+                                <button type="submit" form="trashForm"
+                                        onclick="return confirm(@js(__('Move to trash?')))"
+                                        class="inline-flex items-center gap-1.5 text-sm text-red-600 hover:text-red-700 transition">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"/></svg>
+                                    {{ __('Move to Trash') }}
+                                </button>
                             @endif
                         </div>
 
@@ -796,9 +850,10 @@
                     </div>
                     <div class="p-6" x-data="{ imageUrl: @js(old('featured_image', $post->featured_image ?? '')) }"
                          @media-selected.window="if ($event.detail.target === $refs.imageInput) imageUrl = $event.detail.url">
-                        <div x-show="imageUrl" class="rounded-lg overflow-hidden border border-gray-200 relative mb-3">
+                        <div x-show="imageUrl" x-cloak class="rounded-lg overflow-hidden border border-gray-200 relative mb-3">
                             <img :src="imageUrl" alt="" class="w-full h-40 object-cover">
                             <button type="button" @click="imageUrl = ''; $refs.imageInput.value = ''"
+                                    aria-label="{{ __('Remove image') }}" title="{{ __('Remove image') }}"
                                     class="absolute top-2 right-2 w-7 h-7 rounded-full bg-red-600 text-white flex items-center justify-center hover:bg-red-700 transition">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                             </button>
@@ -867,6 +922,7 @@
 
     </form>
 
+    {{-- Kənar formlar (iç-içə form yoxdur) --}}
     @if ($post->status === 'trash')
         <form id="restoreForm" method="POST" action="{{ route('admin.posts.restore', $post) }}" class="hidden">
             @csrf
@@ -874,6 +930,10 @@
         <form id="deleteForm" method="POST" action="{{ route('admin.posts.destroy', $post) }}" class="hidden">
             @csrf
             @method('DELETE')
+        </form>
+    @else
+        <form id="trashForm" method="POST" action="{{ route('admin.posts.trash-action', $post) }}" class="hidden">
+            @csrf
         </form>
     @endif
 
@@ -883,6 +943,7 @@
 function postEditor() {
     const baseLocale = @js($baseLocale);
     const errLocales = @js($rjErrLocales);
+    const errTab = @js($rjErrTab);
     const tabKey = 'rj_post_editor_tab_' + @js($post->id);
 
     return {
@@ -906,9 +967,25 @@ function postEditor() {
                 if (saved) this.activeTab = saved;
             } catch (e) {}
 
+            // Xəta varsa, yadda qalmış tabdan asılı olmayaraq xətalı tabı aç
+            if (errTab) this.activeTab = errTab;
+
             this.$watch('activeTab', (val) => {
                 try { sessionStorage.setItem(tabKey, val); } catch (e) {}
             });
+        },
+
+        // Slug-ı təmizləyir və limitə kəsir
+        slugify(value, max) {
+            return String(value || '')
+                .trim()
+                .toLowerCase()
+                .replace(/\s+/g, '-')
+                .replace(/[^\p{L}\p{N}\-_]+/gu, '')
+                .replace(/-+/g, '-')
+                .replace(/^-|-$/g, '')
+                .slice(0, max)
+                .replace(/-$/, '');
         },
 
         async generateSeo() {
