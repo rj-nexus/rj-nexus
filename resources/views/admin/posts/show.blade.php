@@ -5,50 +5,62 @@
 @section('content')
 <div class="space-y-6">
 
-    <div class="flex items-center justify-between gap-4 flex-wrap">
-        <div class="flex items-center gap-3 min-w-0">
+    <div class="flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3 flex-1 min-w-0">
             <a href="{{ route('admin.posts.index', ['type' => $post->type]) }}" class="text-gray-400 hover:text-gray-600 transition flex-shrink-0">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
             </a>
-            <div class="min-w-0">
-                <h2 class="text-base font-semibold text-gray-900 truncate">{{ $post->title ?: __('(no title)') }}</h2>
-                <div class="flex items-center gap-2 mt-1 flex-wrap">
+            <div class="flex-1 min-w-0">
+                <h2 class="text-base font-semibold text-gray-900 overflow-hidden whitespace-nowrap"
+                    title="{{ $post->title }}"
+                    x-data="{ shift: 0, over: false }"
+                    x-init="$nextTick(() => over = $refs.t.scrollWidth > $el.clientWidth)"
+                    @mouseenter="shift = Math.max(0, $refs.t.scrollWidth - $el.clientWidth)"
+                    @mouseleave="shift = 0"
+                    :style="over && !shift ? '-webkit-mask-image:linear-gradient(to right,#000 88%,transparent);mask-image:linear-gradient(to right,#000 88%,transparent)' : ''">
+                    <span x-ref="t" class="inline-block"
+                          :style="`transform: translateX(-${shift}px); transition: transform ${shift ? shift * 20 : 300}ms linear`">
+                        {{ $post->title ?: __('(no title)') }}
+                    </span>
+                </h2>
+
+                <div class="flex items-center gap-2 mt-1 min-w-0">
                     @if ($post->status === 'published')
-                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-50 text-green-700 text-xs font-medium">
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-50 text-green-700 text-xs font-medium flex-shrink-0">
                             <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
                             {{ __('Published') }}
                         </span>
                     @elseif ($post->status === 'draft')
-                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-xs font-medium">
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-xs font-medium flex-shrink-0">
                             <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
                             {{ __('Draft') }}
                         </span>
                     @elseif ($post->status === 'scheduled')
-                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-xs font-medium">
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-xs font-medium flex-shrink-0">
                             <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
                             {{ __('Scheduled') }}
                         </span>
                     @elseif ($post->status === 'trash')
-                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-50 text-red-700 text-xs font-medium">
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-50 text-red-700 text-xs font-medium flex-shrink-0">
                             <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
                             {{ __('Trash') }}
                         </span>
                     @endif
 
                     @if ($post->is_sticky)
-                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-xs font-medium">
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-xs font-medium flex-shrink-0">
                             <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                             {{ __('Sticky') }}
                         </span>
                     @endif
 
-                    <span class="text-xs text-gray-500">·</span>
-                    <code class="text-xs text-gray-500 font-mono">/{{ $post->slug }}</code>
+                    <span class="text-xs text-gray-500 flex-shrink-0">·</span>
+                    <code class="text-xs text-gray-500 font-mono truncate min-w-0">/{{ $post->slug }}</code>
                 </div>
             </div>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 flex-shrink-0">
             @if ($post->status === 'published' && $post->public_url)
                 <a href="{{ $post->public_url }}" target="_blank"
                    class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition">
@@ -118,7 +130,7 @@
                             <div x-show="activeLocale === '{{ $t->locale }}'" x-cloak class="space-y-4">
                                 <div>
                                     <div class="text-xs text-gray-500 uppercase tracking-wide mb-1">{{ __('Title') }}</div>
-                                    <div class="text-sm font-medium text-gray-900">{{ $t->title ?: '—' }}</div>
+                                    <div class="text-sm font-medium text-gray-900 break-words">{{ $t->title ?: '—' }}</div>
                                 </div>
 
                                 @if ($t->excerpt)
