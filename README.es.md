@@ -10,7 +10,7 @@
 
 ![Status](https://img.shields.io/badge/Status-Stable-brightgreen)
 ![Release](https://img.shields.io/badge/Release-RJ%20CORE%201-10b981)
-![Version](https://img.shields.io/badge/Version-v1.12.1-blue)
+![Version](https://img.shields.io/badge/Version-v1.12.2-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Laravel](https://img.shields.io/badge/Laravel-12-red)
 ![PHP](https://img.shields.io/badge/PHP-8.2-purple)
@@ -35,7 +35,7 @@ Sitio web oficial: **[rjnexus.org](https://rjnexus.org)**
 
 <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/divider.svg" alt="" width="100%"/>
 
-## Novedades de la v1.12.1
+## Novedades de la v1.12.2
 
 Esta versión presenta el **Generador de publicaciones de marketing**, un estudio de diseño integrado que convierte tus entradas en gráficos listos para compartir. También añade la **Edición rápida** para entradas y páginas, **notificaciones del navegador** con más de 20 sonidos y cuatro idiomas nuevos, con lo que el total llega a **55**. La lista completa de cambios está disponible en el [Registro de cambios](https://github.com/rj-nexus/rj-nexus/blob/main/CHANGELOG.md).
 

@@ -10,7 +10,7 @@
 
 ![Status](https://img.shields.io/badge/Status-Stable-brightgreen)
 ![Release](https://img.shields.io/badge/Release-RJ%20CORE%201-10b981)
-![Version](https://img.shields.io/badge/Version-v1.12.1-blue)
+![Version](https://img.shields.io/badge/Version-v1.12.2-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Laravel](https://img.shields.io/badge/Laravel-12-red)
 ![PHP](https://img.shields.io/badge/PHP-8.2-purple)
@@ -35,7 +35,7 @@
 
 <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/divider.svg" alt="" width="100%"/>
 
-## Что нового в v1.12.1
+## Что нового в v1.12.2
 
 В этом релизе появился **генератор маркетинговых постов** — встроенная дизайн-студия, превращающая ваши записи в готовую к публикации графику. Также добавлено **быстрое редактирование** записей и страниц, **уведомления в браузере** с более чем 20 звуками и четыре новых языка, благодаря чему общее число языков достигло **55**. Полный список изменений доступен в [истории изменений](https://github.com/rj-nexus/rj-nexus/blob/main/CHANGELOG.md).
 

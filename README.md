@@ -10,7 +10,7 @@
 
 ![Status](https://img.shields.io/badge/Status-Stable-brightgreen)
 ![Release](https://img.shields.io/badge/Release-RJ%20CORE%201-10b981)
-![Version](https://img.shields.io/badge/Version-v1.12.1-blue)
+![Version](https://img.shields.io/badge/Version-v1.12.2-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Laravel](https://img.shields.io/badge/Laravel-12-red)
 ![PHP](https://img.shields.io/badge/PHP-8.2-purple)
@@ -35,7 +35,7 @@ Official website: **[rjnexus.org](https://rjnexus.org)**
 
 <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/divider.svg" alt="" width="100%"/>
 
-## What's New in v1.12.1
+## What's New in v1.12.2
 
 This release introduces the **Marketing Post Generator**, a built-in design studio that turns your posts into ready-to-share graphics. It also adds **Quick Edit** for posts and pages, **browser notifications** with 20+ sounds, and four new languages, bringing the total to **55**. The complete list of changes is available in the [Changelog](https://github.com/rj-nexus/rj-nexus/blob/main/CHANGELOG.md).
 

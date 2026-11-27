@@ -10,7 +10,7 @@
 
 ![Status](https://img.shields.io/badge/Status-Stable-brightgreen)
 ![Release](https://img.shields.io/badge/Release-RJ%20CORE%201-10b981)
-![Version](https://img.shields.io/badge/Version-v1.12.1-blue)
+![Version](https://img.shields.io/badge/Version-v1.12.2-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Laravel](https://img.shields.io/badge/Laravel-12-red)
 ![PHP](https://img.shields.io/badge/PHP-8.2-purple)
@@ -35,7 +35,7 @@
 
 <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/divider.svg" alt="" width="100%"/>
 
-## v1.12.1 の新機能
+## v1.12.2 の新機能
 
 このリリースでは、投稿をそのまま共有できる画像に変えるデザインスタジオ、**マーケティング投稿ジェネレーター**を搭載しました。さらに、投稿とページの**クイック編集**、20 種類以上のサウンドに対応した**ブラウザ通知**、4 つの新しい言語を追加し、対応言語は合計 **55 言語**になりました。変更内容の全一覧は[変更履歴](https://github.com/rj-nexus/rj-nexus/blob/main/CHANGELOG.md)をご覧ください。
 

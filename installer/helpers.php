@@ -512,7 +512,7 @@ function rj_install_run(?string $sqlContent = null): array
 
         file_put_contents(RJ_LOCK, json_encode([
             'installed_at' => date('c'),
-            'version' => '1.12.1',
+            'version' => '1.12.2',
             'lang' => $lang,
         ], JSON_PRETTY_PRINT));
 

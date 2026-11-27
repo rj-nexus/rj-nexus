@@ -10,7 +10,7 @@
 
 ![Status](https://img.shields.io/badge/Status-Stable-brightgreen)
 ![Release](https://img.shields.io/badge/Release-RJ%20CORE%201-10b981)
-![Version](https://img.shields.io/badge/Version-v1.12.1-blue)
+![Version](https://img.shields.io/badge/Version-v1.12.2-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Laravel](https://img.shields.io/badge/Laravel-12-red)
 ![PHP](https://img.shields.io/badge/PHP-8.2-purple)
@@ -35,7 +35,7 @@
 
 <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/divider.svg" alt="" width="100%"/>
 
-## v1.12.1 의 새로운 기능
+## v1.12.2 의 새로운 기능
 
 이번 릴리스에는 게시글을 바로 공유할 수 있는 그래픽으로 만들어 주는 내장 디자인 스튜디오 **마케팅 포스트 생성기**가 추가되었습니다. 또한 게시글과 페이지용 **빠른 편집**, 20가지 이상의 소리를 지원하는 **브라우저 알림**, 4개의 새로운 언어가 추가되어 총 **55개 언어**를 지원합니다. 전체 변경 사항은 [변경 내역](https://github.com/rj-nexus/rj-nexus/blob/main/CHANGELOG.md)에서 확인할 수 있습니다.
 
