@@ -10,7 +10,7 @@
 
 ![Status](https://img.shields.io/badge/Status-Stable-brightgreen)
 ![Release](https://img.shields.io/badge/Release-RJ%20CORE%201-10b981)
-![Version](https://img.shields.io/badge/Version-v1.12.0-blue)
+![Version](https://img.shields.io/badge/Version-v1.12.1-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Laravel](https://img.shields.io/badge/Laravel-12-red)
 ![PHP](https://img.shields.io/badge/PHP-8.2-purple)
@@ -35,7 +35,7 @@
 
 <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/divider.svg" alt="" width="100%"/>
 
-## v1.12.0 新特性
+## v1.12.1 新特性
 
 此版本推出了**营销帖子生成器**，这是一个内置的设计工作室，可将您的文章转换为可直接分享的图片。此外还新增了文章和页面的**快速编辑**、带有 20 多种提示音的**浏览器通知**，以及四种新语言，使语言总数达到 **55** 种。完整的变更列表请查看[更新日志](https://github.com/rj-nexus/rj-nexus/blob/main/CHANGELOG.md)。
 

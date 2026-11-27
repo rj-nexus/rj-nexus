@@ -10,7 +10,7 @@
 
 ![Status](https://img.shields.io/badge/Status-Stable-brightgreen)
 ![Release](https://img.shields.io/badge/Release-RJ%20CORE%201-10b981)
-![Version](https://img.shields.io/badge/Version-v1.12.0-blue)
+![Version](https://img.shields.io/badge/Version-v1.12.1-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Laravel](https://img.shields.io/badge/Laravel-12-red)
 ![PHP](https://img.shields.io/badge/PHP-8.2-purple)
@@ -35,7 +35,7 @@ Site oficial: **[rjnexus.org](https://rjnexus.org)**
 
 <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/svg/divider.svg" alt="" width="100%"/>
 
-## Novidades da v1.12.0
+## Novidades da v1.12.1
 
 Esta versão traz o **Gerador de postagens de marketing**, um estúdio de design integrado que transforma suas postagens em imagens prontas para compartilhar. Ela também adiciona a **Edição rápida** para postagens e páginas, **notificações do navegador** com mais de 20 sons e quatro novos idiomas, chegando a um total de **55**. A lista completa de alterações está disponível no [Histórico de alterações](https://github.com/rj-nexus/rj-nexus/blob/main/CHANGELOG.md).
 
