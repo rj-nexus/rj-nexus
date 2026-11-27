@@ -222,7 +222,7 @@
                             <th class="w-48 text-left font-medium text-gray-600 px-4 py-3 hidden xl:table-cell">{{ __('Categories / Tags') }}</th>
                             <th class="w-24 text-center font-medium text-gray-600 px-4 py-3 hidden md:table-cell">{{ __('Comments') }}</th>
                             <th class="w-32 text-left font-medium text-gray-600 px-4 py-3 hidden md:table-cell">{{ __('Date') }}</th>
-                            <th class="w-48 text-right font-medium text-gray-600 px-4 py-3">{{ __('Actions') }}</th>
+                            <th class="w-52 text-right font-medium text-gray-600 px-3 py-3">{{ __('Actions') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
@@ -323,12 +323,12 @@
                                     </div>
                                 </td>
 
-                                <td class="px-4 py-3">
-                                    <div class="flex items-center justify-end gap-1">
+                                <td class="px-3 py-3">
+                                    <div class="flex items-center justify-end gap-0.5">
                                         @if ($post->status === 'trash')
                                             <form method="POST" action="{{ route('admin.posts.restore', $post) }}" class="inline">
                                                 @csrf
-                                                <button type="submit" class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-gray-500 hover:bg-green-50 hover:text-green-600 transition" title="{{ __('Restore') }}">
+                                                <button type="submit" class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-gray-500 hover:bg-green-50 hover:text-green-600 transition" title="{{ __('Restore') }}">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                                                 </button>
                                             </form>
@@ -337,32 +337,39 @@
                                                   onsubmit="return confirm('{{ __('Permanently delete this post?') }}')" class="inline">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-gray-500 hover:bg-red-50 hover:text-red-600 transition" title="{{ __('Delete Permanently') }}">
+                                                <button type="submit" class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-gray-500 hover:bg-red-50 hover:text-red-600 transition" title="{{ __('Delete Permanently') }}">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"/></svg>
                                                 </button>
                                             </form>
                                         @else
                                             <button type="button"
                                                     @click="quickEditId = (quickEditId === {{ $post->id }} ? null : {{ $post->id }})"
-                                                    class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-gray-500 hover:bg-blue-50 hover:text-blue-600 transition"
+                                                    class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-gray-500 hover:bg-blue-50 hover:text-blue-600 transition"
                                                     :class="quickEditId === {{ $post->id }} ? 'bg-blue-100 text-blue-600' : ''"
                                                     title="{{ __('Quick Edit') }}">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                                             </button>
 
                                             <a href="{{ route('admin.posts.edit', $post) }}"
-                                               class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-gray-500 hover:bg-rj-purple/10 hover:text-rj-purple transition" title="{{ __('Edit') }}">
+                                               class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-gray-500 hover:bg-rj-purple/10 hover:text-rj-purple transition" title="{{ __('Edit') }}">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                                             </a>
 
                                             <a href="{{ route('admin.posts.show', $post) }}"
-                                               class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition" title="{{ __('View') }}">
+                                               class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition" title="{{ __('View') }}">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.46 12C3.73 7.94 7.52 5 12 5s8.27 2.94 9.54 7c-1.27 4.06-5.06 7-9.54 7S3.73 16.06 2.46 12z"/></svg>
                                             </a>
 
+                                            @if ($post->status === 'published' && $post->public_url)
+                                                <a href="{{ $post->public_url }}" target="_blank" rel="noopener"
+                                                   class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-gray-500 hover:bg-emerald-50 hover:text-emerald-600 transition" title="{{ __('View Site') }}">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                                </a>
+                                            @endif
+
                                             <form method="POST" action="{{ route('admin.posts.duplicate', $post) }}" class="inline">
                                                 @csrf
-                                                <button type="submit" class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition" title="{{ __('Duplicate') }}">
+                                                <button type="submit" class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition" title="{{ __('Duplicate') }}">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                                                 </button>
                                             </form>
@@ -370,7 +377,7 @@
                                             <form method="POST" action="{{ route('admin.posts.trash-action', $post) }}"
                                                   onsubmit="return confirm('{{ __('Move this post to trash?') }}')" class="inline">
                                                 @csrf
-                                                <button type="submit" class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-gray-500 hover:bg-red-50 hover:text-red-600 transition" title="{{ __('Move to Trash') }}">
+                                                <button type="submit" class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-gray-500 hover:bg-red-50 hover:text-red-600 transition" title="{{ __('Move to Trash') }}">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"/></svg>
                                                 </button>
                                             </form>
