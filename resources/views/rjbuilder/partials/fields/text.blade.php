@@ -80,9 +80,7 @@
 
         <style>
             .rj-quill .ql-toolbar.ql-snow {
-                position: sticky;
-                top: 0;
-                z-index: 5;
+                position: static;
                 display: flex;
                 flex-wrap: wrap;
                 padding: 8px;
