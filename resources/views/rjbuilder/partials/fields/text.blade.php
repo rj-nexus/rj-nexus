@@ -34,6 +34,7 @@
 
             const quill = new Quill(host, {
                 theme: 'snow',
+                bounds: host,
                 placeholder: field.placeholder || 'Write something beautiful...',
                 modules: {
                     toolbar: [
@@ -79,6 +80,7 @@
     x-effect="syncEditor()">
 
         <style>
+            /* Toolbar: sabit (sticky yoxdur) */
             .rj-quill .ql-toolbar.ql-snow {
                 position: static;
                 display: flex;
@@ -117,6 +119,24 @@
             .rj-quill .ql-snow.ql-toolbar button.ql-active .ql-stroke { stroke: #a78bfa; }
             .rj-quill .ql-snow.ql-toolbar button:hover .ql-fill,
             .rj-quill .ql-snow.ql-toolbar button.ql-active .ql-fill { fill: #a78bfa; }
+
+            /* Link tooltip: panelin içində qalsın */
+            .rj-quill .ql-snow .ql-tooltip {
+                max-width: 100%;
+                box-sizing: border-box;
+                white-space: normal;
+            }
+            .rj-quill .ql-snow .ql-tooltip a.ql-preview {
+                display: inline-block;
+                max-width: 120px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                vertical-align: middle;
+            }
+            .rj-quill .ql-snow .ql-tooltip input[type=text] {
+                width: 100%;
+                box-sizing: border-box;
+            }
         </style>
 
         <div x-ref="quillEditor"></div>
