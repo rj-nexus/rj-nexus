@@ -1,7 +1,7 @@
 ---
 name: Bug report
 about: Report a problem in RJ Nexus
-title: '[Bug] '
+title: "[Bug] "
 labels: bug
 assignees: ''
 
