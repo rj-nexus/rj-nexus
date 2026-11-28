@@ -288,38 +288,38 @@ Cache behavior is managed from **Admin &rarr; Settings &rarr; Cache**.
 
 <p align="center">
   <b>AI Global Search (Ctrl+K)</b><br/><br/>
-  <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/ai-search.png" alt="AI Global Search" width="80%"/>
+  <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/ai-search.png" alt="Screenshot of the admin panel AI global search dialog" width="80%"/>
 </p>
 
 <table>
   <tr>
     <td width="50%" align="center">
       <b>Dashboard</b><br/><br/>
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/dashboard.png" alt="Dashboard" width="100%"/>
+      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/dashboard.png" alt="Screenshot of the admin panel dashboard" width="100%"/>
     </td>
     <td width="50%" align="center">
       <b>AI Center</b><br/><br/>
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/ai-center.png" alt="AI Center" width="100%"/>
+      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/ai-center.png" alt="Screenshot of the admin panel AI Center" width="100%"/>
     </td>
   </tr>
   <tr>
     <td width="50%" align="center">
       <b>RJBuilder (80+ Widgets)</b><br/><br/>
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/02.png" alt="RJBuilder" width="100%"/>
+      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/02.png" alt="Screenshot of the RJBuilder page builder" width="100%"/>
     </td>
     <td width="50%" align="center">
       <b>Posts</b><br/><br/>
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot-26-11/yeni_post_sehifesi.png" alt="Posts" width="100%"/>
+      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot-26-11/yeni_post_sehifesi.png" alt="Screenshot of the admin posts page" width="100%"/>
     </td>
   </tr>
   <tr>
     <td width="50%" align="center">
       <b>Media Library</b><br/><br/>
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/media-library-page.png" alt="Media Library" width="100%"/>
+      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/media-library-page.png" alt="Screenshot of the admin media library" width="100%"/>
     </td>
     <td width="50%" align="center">
       <b>KYC Management</b><br/><br/>
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/kyc-management-page.png" alt="KYC Management" width="100%"/>
+      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/kyc-management-page.png" alt="Screenshot of the admin KYC management page" width="100%"/>
     </td>
   </tr>
 </table>
@@ -330,11 +330,11 @@ Cache behavior is managed from **Admin &rarr; Settings &rarr; Cache**.
   <tr>
     <td width="50%" align="center">
       <b>Marketing Post Generator</b><br/><br/>
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot-26-11/marketin-sehifesi.png" alt="Marketing Post Generator" width="100%"/>
+      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot-26-11/marketin-sehifesi.png" alt="Screenshot of the marketing post generator" width="100%"/>
     </td>
     <td width="50%" align="center">
       <b>Tools &rarr; Backup</b><br/><br/>
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot-26-11/backup_page_new.png" alt="Tools - Backup" width="100%"/>
+      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot-26-11/backup_page_new.png" alt="Screenshot of the backup tool" width="100%"/>
     </td>
   </tr>
 </table>
@@ -345,21 +345,21 @@ Cache behavior is managed from **Admin &rarr; Settings &rarr; Cache**.
   <tr>
     <td width="50%" align="center">
       <b>Settings &rarr; AI</b><br/><br/>
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/07.png" alt="Settings - AI" width="100%"/>
+      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/07.png" alt="Screenshot of the AI settings page" width="100%"/>
     </td>
     <td width="50%" align="center">
       <b>Settings &rarr; Colors</b><br/><br/>
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot-19-11/new-color-page.png" alt="Settings - Colors" width="100%"/>
+      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot-19-11/new-color-page.png" alt="Screenshot of the color settings page" width="100%"/>
     </td>
   </tr>
   <tr>
     <td width="50%" align="center">
       <b>Notification Settings</b><br/><br/>
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot-26-11/bildiris_ayarlari_sehifesi.png" alt="Notification Settings" width="100%"/>
+      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot-26-11/bildiris_ayarlari_sehifesi.png" alt="Screenshot of the notification settings" width="100%"/>
     </td>
     <td width="50%" align="center">
       <b>Settings &rarr; Updates</b><br/><br/>
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/update-page.png" alt="Settings - Updates" width="100%"/>
+      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/update-page.png" alt="Screenshot of the updates settings page" width="100%"/>
     </td>
   </tr>
 </table>
@@ -368,18 +368,18 @@ Cache behavior is managed from **Admin &rarr; Settings &rarr; Cache**.
 
 <table>
   <tr>
-    <td width="50%" align="center"><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/front1.png" alt="Frontend 1" width="100%"/></td>
-    <td width="50%" align="center"><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/front2.png" alt="Frontend 2" width="100%"/></td>
+    <td width="50%" align="center"><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/front1.png" alt="Screenshot of the public frontend, view 1" width="100%"/></td>
+    <td width="50%" align="center"><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/front2.png" alt="Screenshot of the public frontend, view 2" width="100%"/></td>
   </tr>
   <tr>
-    <td width="50%" align="center"><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/front3.png" alt="Frontend 3" width="100%"/></td>
-    <td width="50%" align="center"><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/front4.png" alt="Frontend 4" width="100%"/></td>
+    <td width="50%" align="center"><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/front3.png" alt="Screenshot of the public frontend, view 3" width="100%"/></td>
+    <td width="50%" align="center"><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/front4.png" alt="Screenshot of the public frontend, view 4" width="100%"/></td>
   </tr>
   <tr>
-    <td width="50%" align="center"><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/front5.png" alt="Frontend 5" width="100%"/></td>
+    <td width="50%" align="center"><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/front5.png" alt="Screenshot of the public frontend, view 5" width="100%"/></td>
     <td width="50%" align="center">
       <b>User Account</b><br/><br/>
-      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/accout-page.png" alt="User Account" width="100%"/>
+      <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/accout-page.png" alt="Screenshot of the frontend user account page" width="100%"/>
     </td>
   </tr>
 </table>
@@ -388,48 +388,48 @@ Cache behavior is managed from **Admin &rarr; Settings &rarr; Cache**.
 
 <p align="center">
   <b>Login & Register</b><br/><br/>
-  <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/gif/auth/01.gif" alt="Login & Register" width="100%"/>
+  <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/gif/auth/01.gif" alt="Recording of the login and registration flow" width="100%"/>
 </p>
 
 <p align="center">
   <b>Reset Password</b><br/><br/>
-  <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/gif/auth/02.gif" alt="Reset Password" width="100%"/>
+  <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/gif/auth/02.gif" alt="Recording of the reset password flow" width="100%"/>
 </p>
 
 <p align="center">
   <b>Email Verification</b><br/><br/>
-  <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/gif/auth/03.gif" alt="Email Verification" width="100%"/>
+  <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/gif/auth/03.gif" alt="Recording of the email verification flow" width="100%"/>
 </p>
 
 <p align="center">
   <b>Forgot Password</b><br/><br/>
-  <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/gif/auth/04.gif" alt="Forgot Password" width="100%"/>
+  <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/gif/auth/04.gif" alt="Recording of the forgot password flow" width="100%"/>
 </p>
 
 <p align="center">
   <b>Confirm Password</b><br/><br/>
-  <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/gif/auth/05.gif" alt="Confirm Password" width="100%"/>
+  <img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/gif/auth/05.gif" alt="Recording of the confirm password flow" width="100%"/>
 </p>
 
 ### Error Pages
 
 <table>
   <tr>
-    <td width="33%" align="center"><b>400 Bad Request</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/400-error.png" alt="400" width="100%"/></td>
-    <td width="33%" align="center"><b>401 Authentication Required</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/12.png" alt="401" width="100%"/></td>
-    <td width="33%" align="center"><b>403 Forbidden</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/09.png" alt="403" width="100%"/></td>
+    <td width="33%" align="center"><b>400 Bad Request</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/400-error.png" alt="Screenshot of the 400 Bad Request error page" width="100%"/></td>
+    <td width="33%" align="center"><b>401 Authentication Required</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/12.png" alt="Screenshot of the 401 Authentication Required error page" width="100%"/></td>
+    <td width="33%" align="center"><b>403 Forbidden</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/09.png" alt="Screenshot of the 403 Forbidden error page" width="100%"/></td>
   </tr>
   <tr>
-    <td width="33%" align="center"><b>404 Not Found</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/10.png" alt="404" width="100%"/></td>
-    <td width="33%" align="center"><b>405 Invalid Request Method</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/11.png" alt="405" width="100%"/></td>
-    <td width="33%" align="center"><b>429 Rate Limit Exceeded</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/13.png" alt="429" width="100%"/></td>
+    <td width="33%" align="center"><b>404 Not Found</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/10.png" alt="Screenshot of the 404 Not Found error page" width="100%"/></td>
+    <td width="33%" align="center"><b>405 Invalid Request Method</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/11.png" alt="Screenshot of the 405 Invalid Request Method error page" width="100%"/></td>
+    <td width="33%" align="center"><b>429 Rate Limit Exceeded</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screensholt/13.png" alt="Screenshot of the 429 Rate Limit Exceeded error page" width="100%"/></td>
   </tr>
 </table>
 
 <table>
   <tr>
-    <td width="50%" align="center"><b>500 Server Error (Debug Mode)</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/500-error-debug.png" alt="500 Debug" width="100%"/></td>
-    <td width="50%" align="center"><b>504 Gateway Timeout</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot-19-11/504-error.png" alt="504" width="100%"/></td>
+    <td width="50%" align="center"><b>500 Server Error (Debug Mode)</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot/500-error-debug.png" alt="Screenshot of the 500 Server Error page in debug mode" width="100%"/></td>
+    <td width="50%" align="center"><b>504 Gateway Timeout</b><br/><br/><img src="https://raw.githubusercontent.com/rj-nexus/rj-nexus.github.io/main/assets/image/screenshot-19-11/504-error.png" alt="Screenshot of the 504 Gateway Timeout error page" width="100%"/></td>
   </tr>
 </table>
 
